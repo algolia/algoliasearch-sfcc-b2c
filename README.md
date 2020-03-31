@@ -2,8 +2,8 @@
 
 ## Online documentation:
 
-[Algolia Overview - TODO](#)
+Algolia Overview - TODO
 
-[Algolia Integration Guide – SFRA - TODO](#)
+Algolia Integration Guide – SFRA - TODO
 
-[Algolia Integration Guide – controllers - TODO](#)
+Algolia Integration Guide – controllers - TODO
