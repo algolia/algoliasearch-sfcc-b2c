@@ -15,7 +15,7 @@ var Transaction = require('dw/system/Transaction');
  *   InStockThreshold       | Stock Threshold                                   | Double
  *   LastCategorySyncDate   | Timestamp of the last Category index sync job run | Datetime
  *   LastProductSyncDate    | Timestamp of the last product index sync job run  | Datetime
- *   SearchApiKeyLimit      | Authorization key for Algolia                     | String
+ *   SearchApiKey           | Authorization key for Algolia                     | String
    -----------------------------------------------------------------------------------------------
  */
  //   Example:
