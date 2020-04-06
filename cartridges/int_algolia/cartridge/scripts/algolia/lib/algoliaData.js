@@ -21,7 +21,7 @@ var Transaction = require('dw/system/Transaction');
  //   Example:
  //    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
  //    algoliaData.getPreference('Enable');
- //	   algoliaData.setPreference('Enable', true);
+ //    algoliaData.setPreference('Enable', true);
  //   -----------------------------------------------------------------------------------------------
  
 
