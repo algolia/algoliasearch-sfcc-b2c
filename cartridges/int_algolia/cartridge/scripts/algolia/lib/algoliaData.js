@@ -31,11 +31,7 @@ var Transaction = require('dw/system/Transaction');
  * @returns {*} - value of preference
  */
 function getPreference(id) {
-    var value = currentSite.getCustomPreferenceValue('Algolia_' + id);
-    if (value !== null) {
-        return value;
-    }
-    return false;
+    return currentSite.getCustomPreferenceValue('Algolia_' + id);
 }
 
  /**
