@@ -3,7 +3,7 @@
 var currentSite = require('dw/system/Site').getCurrent();
 
 /*
- * Function for getting preferences for Sift
+ * Function for getting preferences for Algolia
  *
  *   id                     | Description                                       |type of preference
  *   -----------------------------------------------------------------------------------------------
