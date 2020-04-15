@@ -50,11 +50,6 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
  */
 function writeObjectToXMLStream(xmlStreamWriter, obj) {
     var jobHelper = require('*/cartridge/scripts/helper/jobHelper');
-    /*
-    if (obj.id >= '11736753M') {
-        obj.id = obj.id + '-1';
-    }
-    */
 
     var productModelXML = <product></product>; 
     jobHelper.appendObjToXML(productModelXML, obj);
@@ -127,8 +122,10 @@ function runProductExport() {
     var jobHelper = require('*/cartridge/scripts/helper/jobHelper');
 
     var snapshotFile = new File(SNAPSHOT_PRODUCTS_FILE_NAME);
+    var updateFile = new File(UPDATE_PRODUCTS_FILE_NAME);
     if (!snapshotFile.exists()) {
         createProductSnapshotFile(snapshotFile);
+        snapshotFile.copyTo(updateFile);
         return true;
     };
 
@@ -146,13 +143,12 @@ function runProductExport() {
     snapshotXmlWriter.writeStartElement('products');
 
     // Open XML Update for Algolia file to write
-    var updateFile = new File(UPDATE_PRODUCTS_FILE_NAME);
     var updateFileWriter = new FileWriter(updateFile, "UTF-8");
     var updateXmlWriter = new XMLStreamWriter(updateFileWriter); 
     updateXmlWriter.writeStartDocument();
     updateXmlWriter.writeStartElement('products');
 
-    var productsIterator = ProductMgr.queryAllSiteProductsSorted(); // queryAllSiteProducts/queryAllSiteProductsSorted
+    var productsIterator = ProductMgr.queryAllSiteProductsSorted();
     var productSnapshotXML = readXMLObjectFromStream(snapshotXmlReader, 'product');
     
     while(productsIterator.hasNext()) {
