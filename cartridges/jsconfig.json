@@ -1,0 +1,23 @@
+{
+    // git clone https://ast_rfentsyk@bitbucket.org/astoundcommerce/dw-api-types.git
+    "compilerOptions": {
+        "noLib": true,
+        "target": "es5",
+        "module": "commonjs",
+        "checkJs": true,
+        "baseUrl": "./",
+        "paths": {
+            //"dw/*" : ["/home/rfentsyk/projects/dw-api-types/dw/*.d.ts"],
+            //"int_sheerid/cartridge/scripts/*" : ["/home/rfentsyk/projects/sheerid/type-definitions/*.d.ts"]
+            "*" : ["./*", "/home/rfentsyk/projects/dw-api-types/*"]
+        }
+    },
+    "typeAcquisition": {
+        "enable": true
+    },
+    "include": [
+        "/home/rfentsyk/projects/dw-api-types/dw/**/*.d.ts",
+        "./*/cartridge/scripts/**/*.js",
+        "./*/cartridge/controllers/**/*.js"
+    ]
+}
