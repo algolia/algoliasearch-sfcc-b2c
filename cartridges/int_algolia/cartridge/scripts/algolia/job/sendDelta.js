@@ -1,3 +1,5 @@
+"use strict";
+
 // initialize
 var QUOTA_API_JS_JSON_STRING_LENGTH = 600000; // The maximum allowed length of a JavaScript string created by JSON.stringify().
 var MAX_FAILED_CHUNKS = 3;
@@ -24,9 +26,10 @@ function sendFailedChunks() {
 }
 
 exports.sendDelta = function (parameters, stepExecution) {
-    var deltaList = require('~/scripts/helper/productDeltaIterator');
+    var productDeltaIterator = require('*/scripts/helper/algolia/productDeltaIterator');
     var entries = [];
     var maxNumberOfEntries;
+    var deltaList = productDeltaIterator.create();
 
     if (deltaList.getSize() === 0) {
         logger.info('Delta is empty, no syncronization is needed');
@@ -58,6 +61,9 @@ exports.sendDelta = function (parameters, stepExecution) {
             entries.push(deltaList.next());
         }
     }
+
+    deltaList.close();
+    
     // send the chunks left
     sendChunk(entries);
 
