@@ -42,7 +42,8 @@ ProductDeltaIterator.create = function() {
     
     // Read first object to buffer
     var productDeltaXML = jobHelper.readXMLObjectFromStream(newProductDeltaIterator.deltaXmlReader, 'product');
-    newProductDeltaIterator.dataBuffer = jobHelper.xmlToObject(productDeltaXML);
+    var product = jobHelper.xmlToObject(productDeltaXML);
+    newProductDeltaIterator.dataBuffer = product ? product.product : null;
 
     return newProductDeltaIterator;
 };
@@ -66,7 +67,8 @@ ProductDeltaIterator.prototype.next = function() {
     
     result = this.dataBuffer;
     var productDeltaXML = jobHelper.readXMLObjectFromStream(this.deltaXmlReader, 'product');
-    this.dataBuffer = jobHelper.xmlToObject(productDeltaXML);
+    var product = jobHelper.xmlToObject(productDeltaXML);
+    this.dataBuffer = product ? product.product : null;
 
     return result;
 }

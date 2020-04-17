@@ -1,5 +1,9 @@
-var serviceHelper = require('./service/serviceHelper');
+"use strict";
+
+var serviceHelper = require('*/cartridge/scripts/service/serviceHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+var serviceDefinition = require('*/cartridge/scripts/service/serviceDefinition');
+
 
 var Status = require('dw/system/Status');
 var tenantToken = null;
@@ -27,39 +31,47 @@ function getTenantID() {
     return algoliaData.getPreference('ApplicationID') + '-' + currentSite.getID() + '-' + instanceHostname;
 }
 
+/**
+ * Create request config Object for get TenantToken
+ * @returns {Object} - request config Object
+ */
 function createHandshakeRequest() {
     var config = {
-        algolia_app_id: algoliaData.getPreference('ApplicationID'),
-        algolia_api_key: algoliaData.getPreference('AdminApiKey'),
-        algolia_search_api_key: algoliaData.getPreference('SearchApiKey')
+        algolia_app_id         : algoliaData.getPreference('ApplicationID'),
+        algolia_api_key        : algoliaData.getPreference('AdminApiKey'),
+        algolia_search_api_key : algoliaData.getPreference('SearchApiKey')
     };
 
     var metadata = {
-        https_hostname: dwSystem.getInstanceHostname(),
-        site_id: currentSite.getID(),
-        site_name: currentSite.getName(),
-        locales: currentSite.getAllowedLocales().toArray(),
-        client_id: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
-        client_password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        index_prefix: 'custom-prefix--', // @TODO replace with environment?
+        https_hostname  : dwSystem.getInstanceHostname(),
+        site_id         : currentSite.getID(),
+        site_name       : currentSite.getName(),
+        locales         : currentSite.getAllowedLocales().toArray(),
+        client_id       : 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
+        client_password : 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        index_prefix    : 'astound', // @TODO replace with environment?
         // @TODO replace from config
-        fields: {
-            product: ['resource_id', 'name', 'description', 'categories', 'image_urls', 'price', 'adjusted_price', 'in_stock', 'url'],
-            category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subcategory', 'url']
+        fields          : {
+            product  : ['resource_id', 'name', 'description', 'categories', 'image_urls', 'price', 'adjusted_price', 'in_stock', 'url'],
+            category : ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subcategory', 'url']
         }
     };
 
     return {
-        config: config,
-        metadata: metadata
+        config   : config,
+        metadata : metadata
     };
 }
 
+/**
+ * Get TenantToken from Alglia
+ * @returns {string} - TenantToken
+ */
 function requestTenantToken() {
     var callStatus;
     var token = null;
     var body = createHandshakeRequest();
-    var service = require('./service/serviceDefinition');
+    var service = serviceDefinition.init();
     var baseURL = service.getConfiguration().getCredential().getURL();
 
     service.setRequestMethod('POST');
@@ -75,12 +87,17 @@ function requestTenantToken() {
     */
 
     if (callStatus.status === Status.OK) {
-        token = callStatus.getDetail('object');
+        var tokenObj = callStatus.getDetail('object');
+        token = tokenObj.body.token;
     }
 
     return token;
 }
 
+/**
+ * Get TenantToken for sending data to Alglia API
+ * @returns {string} - TenantToken
+ */
 function getTenantToken() {
     if (tenantToken === null) {
         tenantToken = requestTenantToken();
@@ -88,24 +105,32 @@ function getTenantToken() {
     return tenantToken;
 }
 
+/*
 function getEnvironmentId() {
     return 'RefArch';
 }
+*/
 
+/**
+ * Send array of objects to Algolia API
+ * @param {Array} itemsArray - array of objects for send to Algolia
+ * @returns {boolean} - successful to send
+ */
 function sendDelta(itemsArray) {
-    var service = require('./service/serviceDefinition');
+    var service = serviceDefinition.init();
     var baseURL = service.getConfiguration().getCredential().getURL();
 
     service.setRequestMethod('POST');
-    service.setURL(baseURL + ' /sfcc/webhooks/' + getTenantID() + '/incremental_operations');
+    service.setURL(baseURL + '/sfcc/webhooks/' + getTenantID() + '/incremental_operations');
     service.setAuthentication('NONE');
-    service.addHeader('Authorization', 'Bearer ' + getTenantToken());
+    service.addHeader('Authorization', 'Basic ' + getTenantToken());
 
     var operationsObj = Object.create(null);
     operationsObj.operations = itemsArray;
-    serviceHelper.callJsonService();
 
+    callStatus = serviceHelper.callJsonService('Send Delta', service, operationsObj);
 
+    return callStatus;
 }
 
 module.exports.sendDelta = sendDelta;

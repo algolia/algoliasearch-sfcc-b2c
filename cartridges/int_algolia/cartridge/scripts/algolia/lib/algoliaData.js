@@ -16,13 +16,14 @@ var Transaction = require('dw/system/Transaction');
  *   LastCategorySyncDate   | Timestamp of the last Category index sync job run | Datetime
  *   LastProductSyncDate    | Timestamp of the last product index sync job run  | Datetime
  *   SearchApiKey           | Authorization key for Algolia                     | String
-   -----------------------------------------------------------------------------------------------
+ *   AdminApiKey            | Authorization Admin key for Algolia               | String
+ * -----------------------------------------------------------------------------------------------
  */
- //   Example:
- //    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
- //    algoliaData.getPreference('Enable');
- //    algoliaData.setPreference('Enable', true);
- //   -----------------------------------------------------------------------------------------------
+//   Example:
+//    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+//    algoliaData.getPreference('Enable');
+//    algoliaData.setPreference('Enable', true);
+//   -----------------------------------------------------------------------------------------------
 
 /**
  * @description Getting preference for Algolia
@@ -33,12 +34,12 @@ function getPreference(id) {
     return currentSite.getCustomPreferenceValue('Algolia_' + id);
 }
 
- /**
-  * @description Set preference for Algolia
-  * @param {string} id - name of preference
-  * @param {string} value - value to save
-  * @returns {void}
-  */
+/**
+ * @description Set preference for Algolia
+ * @param {string} id - name of preference
+ * @param {string} value - value to save
+ * @returns {void}
+ */
 function setPreference(id, value) {
     Transaction.wrap(function(){
         currentSite.setCustomPreferenceValue('Algolia_' + id, value);
@@ -70,8 +71,8 @@ function setSetOfStrings(id, value) {
 }
 
 module.exports = {
-    getPreference: getPreference,
-    setPreference: setPreference,
-    getSetOfStrings: getSetOfStrings,
-    setSetOfStrings: setSetOfStrings
+    getPreference   : getPreference,
+    setPreference   : setPreference,
+    getSetOfStrings : getSetOfStrings,
+    setSetOfStrings : setSetOfStrings
 }

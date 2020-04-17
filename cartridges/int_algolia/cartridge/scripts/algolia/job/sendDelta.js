@@ -7,7 +7,13 @@ var MAX_FAILED_CHUNKS = 3;
 var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
 var failedChunks = [];
 
+/**
+ * Send array of objects to Algolia API
+ * @param {Array} entriesArray - array of objects for send to Algolia
+ * @returns {null} - successful to send
+ */
 function sendChunk(entriesArray) {
+    var algoliaApi = require('*/cartridge/scripts/algoliaApi');
     var result = algoliaApi.sendDelta(entriesArray);
     if (result.error) {
         // save chunks for retry
@@ -25,8 +31,8 @@ function sendFailedChunks() {
     });
 }
 
-exports.sendDelta = function (parameters, stepExecution) {
-    var productDeltaIterator = require('*/scripts/helper/algolia/productDeltaIterator');
+module.exports.execute = function (parameters, stepExecution) {
+    var productDeltaIterator = require('*/cartridge/scripts/algolia/helper/productDeltaIterator');
     var entries = [];
     var maxNumberOfEntries;
     var deltaList = productDeltaIterator.create();
@@ -69,5 +75,6 @@ exports.sendDelta = function (parameters, stepExecution) {
 
     // send failed chunks
 
-    sendFailedChunks();
+    //sendFailedChunks();
+    return true;
 };

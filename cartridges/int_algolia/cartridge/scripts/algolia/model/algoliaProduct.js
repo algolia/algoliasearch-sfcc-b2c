@@ -27,9 +27,9 @@ function getImagesGroup(product, viewtype) {
         var imageItem = imagesList[i];
         var image = {
             _type         : 'image',
-            alt           : { locales:{} },
-            dis_base_link : { locales:{} },
-            title         : { locales:{} }
+            alt           : { locales: {} },
+            dis_base_link : { locales: {} },
+            title         : { locales: {} }
         }
         
         var siteLocales = currentSites.getAllowedLocales();
@@ -68,10 +68,10 @@ function algoliaProduct(product) {
     this.rating = '0';  // TODO: get rating
    
     // Get Localized properties
-    this.name = { locales:{} };
-    this.url = { locales:{} };
-    this.long_description = { locales:{} };
-    this.short_description = { locales:{} };
+    this.name = { locales: {} };
+    this.url = { locales: {} };
+    this.long_description = { locales: {} };
+    this.short_description = { locales: {} };
 
     var siteLocales = currentSites.getAllowedLocales();
     var siteLocalesSize = siteLocales.size();
