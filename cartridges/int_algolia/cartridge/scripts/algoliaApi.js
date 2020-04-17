@@ -42,6 +42,7 @@ function createHandshakeRequest() {
         client_id: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
         client_password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         index_prefix: 'custom-prefix--', // @TODO replace with environment?
+        // @TODO replace from config
         fields: {
             product: ['resource_id', 'name', 'description', 'categories', 'image_urls', 'price', 'adjusted_price', 'in_stock', 'url'],
             category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subcategory', 'url']
@@ -65,6 +66,13 @@ function requestTenantToken() {
     service.setURL(baseURL + '/sfcc/api/algolia_config/' + getTenantID());
 
     callStatus = serviceHelper.callJsonService('Create Tenant', service, body);
+    /*
+    {
+        "body": {
+            "token": "xxx"
+        }
+    }
+    */
 
     if (callStatus.status === Status.OK) {
         token = callStatus.getDetail('object');
@@ -81,7 +89,7 @@ function getTenantToken() {
 }
 
 function getEnvironmentId() {
-    return 'RefArch'
+    return 'RefArch';
 }
 
 function sendDelta(itemsArray) {
@@ -89,12 +97,14 @@ function sendDelta(itemsArray) {
     var baseURL = service.getConfiguration().getCredential().getURL();
 
     service.setRequestMethod('POST');
-    service.setURL(baseURL + ' /webhooks/sfcc/' + getTenantID() + '/' + getEnvironmentId() + '/incremental_operations');
+    service.setURL(baseURL + ' /sfcc/webhooks/' + getTenantID() + '/incremental_operations');
     service.setAuthentication('NONE');
     service.addHeader('Authorization', 'Bearer ' + getTenantToken());
 
     var operationsObj = Object.create(null);
     operationsObj.operations = itemsArray;
+    serviceHelper.callJsonService();
+
 
 }
 
