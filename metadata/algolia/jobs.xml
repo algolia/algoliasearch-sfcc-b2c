@@ -13,6 +13,14 @@
                     <parameter name="ExecuteScriptModule.Transactional">false</parameter>
                 </parameters>
             </step>
+            <step step-id="SendDelta" type="ExecuteScriptModule" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/sendDelta.js</parameter>
+                    <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
+                    <parameter name="ExecuteScriptModule.Transactional">false</parameter>
+                </parameters>
+            </step>
         </flow>
         <rules/>
         <triggers>
