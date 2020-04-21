@@ -56,7 +56,7 @@ function getImageUrl(image) {
 function writeObjectToXMLStream(xmlStreamWriter, obj) {
     var jobHelper = require('*/cartridge/scripts/helper/jobHelper');
     var categoryModelXML = <category></category>;
-    
+
     jobHelper.appendObjToXML(categoryModelXML, obj);
 
     xmlStreamWriter.writeCharacters('\n');
@@ -76,33 +76,33 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, parent
     }
     var categoryId = category.ID;
     var result = {
-    	id: categoryId,
-    	url: {locales: {}},
-    	name: {locales: {}},
-    	description: {locales: {}}
+        id: categoryId,
+        url: {locales: {}},
+        name: {locales: {}},
+        description: {locales: {}}
     };
     for (var loc in siteLocales) {
         var localeName = siteLocales[loc];
         request.setLocale(localeName);    
 
         result.url.locales[localeName] = getCategoryUrl(category);
-		result.name.locales[localeName] = category.getDisplayName();
-		if (category.getDescription()) {
-			result.description.locales[localeName] = category.getDescription();
-		}
+        result.name.locales[localeName] = category.getDisplayName();
+        if (category.getDescription()) {
+            result.description.locales[localeName] = category.getDescription();
+        }
     }
-	if (parentId) {
-		result.parent_category_id = parentId;
-	}
-	var image = getImageUrl(category.getImage());
-	if (image) {
-		result.image = image;
-	}
-	var thumbnail = getImageUrl(category.getThumbnail());
-	if (thumbnail) {
-		result.thumbnail = getImageUrl(category.getThumbnail());
-	}
-    
+    if (parentId) {
+        result.parent_category_id = parentId;
+    }
+    var image = getImageUrl(category.getImage());
+    if (image) {
+        result.image = image;
+    }
+    var thumbnail = getImageUrl(category.getThumbnail());
+    if (thumbnail) {
+        result.thumbnail = getImageUrl(category.getThumbnail());
+    }
+
     var subCategories = category.hasOnlineSubCategories() ?
         category.getOnlineSubCategories() : null;
 
@@ -160,9 +160,9 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
 
     xlsw.writeStartDocument();
     xlsw.writeStartElement('categories');
-    
+
     for (var i in listOfCategories) {
-    	 writeObjectToXMLStream(xlsw, listOfCategories[i]);
+        writeObjectToXMLStream(xlsw, listOfCategories[i]);
     }
 
     // Close XML Reindex file
@@ -170,7 +170,7 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
     xlsw.writeEndDocument();
     xlsw.close();
     snapshotFileWriter.close();
-    
+
     //TODO: error handler
     return true;
 }
@@ -181,12 +181,12 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
  * @returns {boolean} - successful Job run
  */
 function runCategoryExport() {
-	var siteRootCategory = catalogMgr.getSiteCatalog().getRoot();
-	var currentSite = Site.getCurrent();
-	siteLocales = currentSite.getAllowedLocales();
-	var topLevelCategories = siteRootCategory.hasOnlineSubCategories() ?
-	        siteRootCategory.getOnlineSubCategories().iterator() : null;
-	var listOfCategories = [];
+    var siteRootCategory = catalogMgr.getSiteCatalog().getRoot();
+    var currentSite = Site.getCurrent();
+    siteLocales = currentSite.getAllowedLocales();
+    var topLevelCategories = siteRootCategory.hasOnlineSubCategories() ?
+            siteRootCategory.getOnlineSubCategories().iterator() : null;
+    var listOfCategories = [];
     const SNAPSHOT_CATEGORIES_FILE_NAME = '/TEMP/categories.xml';
     const TMP_SNAPSHOT_CATEGORIES_FILE_NAME = '/TEMP/categories_tmp.xml';
     const UPDATE_CATEGORIES_FILE_NAME = '/TEMP/categories_update.xml';
@@ -198,10 +198,10 @@ function runCategoryExport() {
     var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter'); // XMLStreamWriter/XMLIndentingStreamWriter
 
     var jobHelper = require('*/cartridge/scripts/helper/jobHelper');
-    
+
     while(topLevelCategories.hasNext()) {
-    	var category = topLevelCategories.next();
-    	prepareListOfCategories(siteLocales, listOfCategories, category);
+        var category = topLevelCategories.next();
+        prepareListOfCategories(siteLocales, listOfCategories, category);
     }
 
     var snapshotFile = new File(SNAPSHOT_CATEGORIES_FILE_NAME);
@@ -214,10 +214,10 @@ function runCategoryExport() {
         snapshotFile.copyTo(updateFile);
         return true;
     };
-    
+
     var snapshotFileReader = new FileReader(snapshotFile, "UTF-8");
     var snapshotXmlReader = new XMLStreamReader(snapshotFileReader);
-    
+
     // Open XML Update for Algolia file to write
     var updateFileWriter = new FileWriter(updateFile, "UTF-8");
     var updateXmlWriter = new XMLStreamWriter(updateFileWriter); 
@@ -225,39 +225,39 @@ function runCategoryExport() {
     updateXmlWriter.writeStartElement('categories');
 
     while (snapshotXmlReader.hasNext()) {
-    	var categorySnapshotXML = readXMLObjectFromStream(snapshotXmlReader, 'category');
-    	if (categorySnapshotXML) {
-	    	var categorySnapshot = jobHelper.xmlToObject(categorySnapshotXML).category;
-	    	var categoryUpdate;
-	    	var indexOfcategoryFromList = listOfCategories.map(function(e) { return e.id; }).indexOf(categorySnapshot.id);
-	    	
-	    	if (indexOfcategoryFromList > -1) {
-	    		// compare if was updated
-	    		if (typeof categorySnapshot.description.locales == 'string') {
-	    			categorySnapshot.description.locales = {};
-	    		}
-	    		if (JSON.stringify(categorySnapshot) != JSON.stringify(listOfCategories[indexOfcategoryFromList])) {
-		    		categoryUpdate = listOfCategories[indexOfcategoryFromList];
-		    	}
-	    	} else {	// save to updateXmlWriter that product is deleted
-	    		categoryUpdate = {
-	                topic : 'categories/delete',
-	                resource_type : 'category',
-	                resource_id : categorySnapshot.id
-	            }
-	    	}
-	    	
-	    	if (categoryUpdate) {
-	    		writeObjectToXMLStream(updateXmlWriter, categoryUpdate);
-	    		categoryUpdate = false;
-	    	}
-	    	// mark as checked after added to file
-	    	if (indexOfcategoryFromList > -1) {
-	    		listOfCategories[indexOfcategoryFromList].checked = true;
-    		}
-    	}
+        var categorySnapshotXML = readXMLObjectFromStream(snapshotXmlReader, 'category');
+        if (categorySnapshotXML) {
+            var categorySnapshot = jobHelper.xmlToObject(categorySnapshotXML).category;
+            var categoryUpdate;
+            var indexOfcategoryFromList = listOfCategories.map(function(e) { return e.id; }).indexOf(categorySnapshot.id);
+
+            if (indexOfcategoryFromList > -1) {
+                // compare if was updated
+                if (typeof categorySnapshot.description.locales == 'string') {
+                    categorySnapshot.description.locales = {};
+                }
+                if (JSON.stringify(categorySnapshot) != JSON.stringify(listOfCategories[indexOfcategoryFromList])) {
+                    categoryUpdate = listOfCategories[indexOfcategoryFromList];
+                }
+            } else {	// save to updateXmlWriter that product is deleted
+                categoryUpdate = {
+                    topic : 'categories/delete',
+                    resource_type : 'category',
+                    resource_id : categorySnapshot.id
+                }
+            }
+
+            if (categoryUpdate) {
+                writeObjectToXMLStream(updateXmlWriter, categoryUpdate);
+                categoryUpdate = false;
+            }
+            // mark as checked after added to file
+            if (indexOfcategoryFromList > -1) {
+                listOfCategories[indexOfcategoryFromList].checked = true;
+            }
+        }
     }
-    
+
     // render new snapshot and add new products to updates
 
     // Open XML New temporary Snapshot file to write
@@ -266,14 +266,14 @@ function runCategoryExport() {
     var snapshotXmlWriter = new XMLStreamWriter(snapshotFileWriter); 
     snapshotXmlWriter.writeStartDocument();
     snapshotXmlWriter.writeStartElement('categories');
-    
+
     for (var i in listOfCategories) {
-    	if (listOfCategories[i].hasOwnProperty('checked') && listOfCategories[i].checked) {
-    		delete listOfCategories[i].checked;
-    	} else {
-    		writeObjectToXMLStream(updateXmlWriter, listOfCategories[i]);
-    	}
-    	writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[i]);
+        if (listOfCategories[i].hasOwnProperty('checked') && listOfCategories[i].checked) {
+            delete listOfCategories[i].checked;
+        } else {
+            writeObjectToXMLStream(updateXmlWriter, listOfCategories[i]);
+        }
+        writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[i]);
     }
 
     // Close XML Update file
@@ -281,22 +281,22 @@ function runCategoryExport() {
     updateXmlWriter.writeEndDocument();
     updateXmlWriter.close();
     updateFileWriter.close();
-    
+
     // Close XML new Snapshot file
     snapshotXmlWriter.writeEndElement();
     snapshotXmlWriter.writeEndDocument();
     snapshotXmlWriter.close();
     snapshotFileWriter.close();
-    
+
     // Close XML Snapshot file
     snapshotXmlReader.close();
     snapshotFileReader.close();
-    
+
     // Delete old snapshot file and rename a new one
     snapshotFile.remove();
     newSnapshotFile.renameTo(snapshotFile);
 
-  //TODO: Send data to Algilia endpoint
+    //TODO: Send data to Algilia endpoint
     return true;
 }
 
