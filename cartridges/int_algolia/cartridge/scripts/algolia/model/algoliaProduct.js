@@ -27,9 +27,9 @@ function getImagesGroup(product, viewtype) {
         var imageItem = imagesList[i];
         var image = {
             _type         : 'image',
-            alt           : { locales: {} },
-            dis_base_link : { locales: {} },
-            title         : { locales: {} }
+            alt           : {},
+            dis_base_link : {},
+            title         : {}
         }
         
         var siteLocales = currentSites.getAllowedLocales();
@@ -38,9 +38,9 @@ function getImagesGroup(product, viewtype) {
         for (var loc = 0; loc < siteLocalesSize; loc++) {
             var localeName = siteLocales[loc];
             request.setLocale(localeName);    
-            image.alt.locales[localeName] = stringUtils.trim(imageItem.alt);
-            image.dis_base_link.locales[localeName] = stringUtils.trim(imageItem.absURL.toString());
-            image.title.locales[localeName] = stringUtils.trim(imageItem.title);
+            image.alt[localeName] = stringUtils.trim(imageItem.alt);
+            image.dis_base_link[localeName] = stringUtils.trim(imageItem.absURL.toString());
+            image.title[localeName] = stringUtils.trim(imageItem.title);
         }
     
         result.images.push(image);
@@ -68,10 +68,10 @@ function algoliaProduct(product) {
     this.rating = '0';  // TODO: get rating
    
     // Get Localized properties
-    this.name = { locales: {} };
-    this.url = { locales: {} };
-    this.long_description = { locales: {} };
-    this.short_description = { locales: {} };
+    this.name = {};
+    this.url = {};
+    this.long_description = {};
+    this.short_description = {};
 
     var siteLocales = currentSites.getAllowedLocales();
     var siteLocalesSize = siteLocales.size();
@@ -80,10 +80,10 @@ function algoliaProduct(product) {
         var localeName = siteLocales[i];
         request.setLocale(localeName);
 
-        this.name.locales[localeName] = product.name ? stringUtils.trim(product.name) : '';
-        this.url.locales[localeName] = product.pageURL ? stringUtils.trim(product.pageURL.toString()) : '';
-        this.long_description.locales[localeName] = product.longDescription ? stringUtils.trim(product.longDescription.toString()) : '';
-        this.short_description.locales[localeName] = product.shortDescription ? stringUtils.trim(product.shortDescription.toString()) : '';
+        this.name[localeName] = product.name ? stringUtils.trim(product.name) : '';
+        this.url[localeName] = product.pageURL ? stringUtils.trim(product.pageURL.toString()) : '';
+        this.long_description[localeName] = product.longDescription ? stringUtils.trim(product.longDescription.toString()) : '';
+        this.short_description[localeName] = product.shortDescription ? stringUtils.trim(product.shortDescription.toString()) : '';
     }
 
     // Get price for all currencies

@@ -25,6 +25,10 @@ function sendChunk(entriesArray) {
     return null;
 }
 
+/**
+ * Resending unsent objects to Algolia API
+ * @param {Array} entriesArray - array of objects for send to Algolia
+ */
 function sendFailedChunks() {
     failedChunks.forEach(function (elements) {
         sendChunk(elements);
@@ -73,8 +77,7 @@ module.exports.execute = function (parameters, stepExecution) {
     // send the chunks left
     sendChunk(entries);
 
-    // send failed chunks
-
-    //sendFailedChunks();
+    //Resending failed chunks
+    sendFailedChunks();
     return true;
 };
