@@ -10,25 +10,30 @@ var tenantToken = null;
 
 var dwSystem = require('dw/system/System');
 var currentSite = require('dw/system/Site').getCurrent();
-
 /**
- * Create tenant id in the form
- * tenant_id = {Algolia_ApplicationID} + '-' + SiteID + '-' + instanceHostname
- * @returns {string} tenant ID
+ * Get instance hostname replacing dots with dashes and skipping
+ * the general parts from the sandbox hostnames.
+ * @returns {string} hostname
  */
-function getTenantID() {
-    var instanceHostname;
+function getInstanceHostName() {
+    var instanceHostname = dwSystem.getInstanceHostname();
 
-    instanceHostname = dwSystem.getInstanceHostname();
     // remove the sandbox host
     if (dwSystem.instanceType === dwSystem.DEVELOPMENT_SYSTEM) {
         instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
         instanceHostname = instanceHostname.replace('.demandware.net', '');
     }
     // replace dots
-    instanceHostname = instanceHostname.replace('.', '-');
+    return instanceHostname.replace('.', '-');
+}
 
-    return algoliaData.getPreference('ApplicationID') + '-' + currentSite.getID() + '-' + instanceHostname;
+/**
+ * Create tenant id in the form
+ * tenant_id = {Algolia_ApplicationID} + '-' + SiteID + '-' + instanceHostname
+ * @returns {string} tenant ID
+ */
+function calculateTenantID() {
+    return algoliaData.getPreference('ApplicationID') + '-' + currentSite.getID() + '-' + getInstanceHostName();
 }
 
 /**
@@ -49,7 +54,7 @@ function createHandshakeRequest() {
         locales         : currentSite.getAllowedLocales().toArray(),
         client_id       : 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
         client_password : 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        index_prefix    : 'astound', // @TODO replace with environment?
+        index_prefix    : getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
         // @TODO replace from config
         fields          : {
             product  : ['resource_id', 'name', 'description', 'categories', 'image_urls', 'price', 'adjusted_price', 'in_stock', 'url'],
@@ -75,7 +80,7 @@ function requestTenantToken() {
     var baseURL = service.getConfiguration().getCredential().getURL();
 
     service.setRequestMethod('POST');
-    service.setURL(baseURL + '/sfcc/api/algolia_config/' + getTenantID());
+    service.setURL(baseURL + '/sfcc/api/algolia_config/' + calculateTenantID());
 
     callStatus = serviceHelper.callJsonService('Create Tenant', service, body);
     /*
@@ -121,7 +126,7 @@ function sendDelta(itemsArray) {
     var baseURL = service.getConfiguration().getCredential().getURL();
 
     service.setRequestMethod('POST');
-    service.setURL(baseURL + '/sfcc/webhooks/' + getTenantID() + '/incremental_operations');
+    service.setURL(baseURL + '/sfcc/webhooks/' + calculateTenantID() + '/incremental_operations');
     service.setAuthentication('NONE');
     service.addHeader('Authorization', 'Basic ' + getTenantToken());
 
