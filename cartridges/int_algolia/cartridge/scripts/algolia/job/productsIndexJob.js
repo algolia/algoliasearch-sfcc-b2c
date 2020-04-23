@@ -1,5 +1,7 @@
 "use strict";
 
+const PROCESSING_PRODUCT_LIMIT = 2; // TODO: Remove from production
+
 /**
  * UpdateProductModel class that represents an Algolia ProductModel
  * for update product properties
@@ -7,7 +9,7 @@
  * @constructor
  */
 function UpdateProductModel(algoliaProduct) {
-    this.topic = 'products/update';
+    this.topic = 'products/index';
     this.resource_type = 'product';
     this.resource_id = algoliaProduct.id;
     this.options = {
@@ -57,7 +59,8 @@ function runProductExport() {
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
     var isInitAlgolia = true;
-    var counterProducts = 0;
+
+    var counterProducts = 0; // TODO: remove from productiond
     
     // Open XML Snapshot file to read
     var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
@@ -124,7 +127,9 @@ function runProductExport() {
         // Write product to new snapshot file
         writeObjectToXMLStream(snapshotXmlWriter, newProductModel);
 
-        //if (++counterProducts > 10) break; // TODO: remove from productiond
+        // TODO: remove from productiond
+        counterProducts += 1;
+        if (PROCESSING_PRODUCT_LIMIT > 0 && counterProducts >= PROCESSING_PRODUCT_LIMIT) break;
     }
 
     // Close XML Update file
