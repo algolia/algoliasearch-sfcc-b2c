@@ -24,16 +24,16 @@ function getInstanceHostName() {
         instanceHostname = instanceHostname.replace('.demandware.net', '');
     }
     // replace dots
-    return instanceHostname.replace('.', '-');
+    return instanceHostname.replace(/\./g, '_');
 }
 
 /**
  * Create tenant id in the form
- * tenant_id = {Algolia_ApplicationID} + '-' + SiteID + '-' + instanceHostname
+ * tenant_id = {Algolia_ApplicationID} + '_' + SiteID + '_' + instanceHostname
  * @returns {string} tenant ID
  */
 function calculateTenantID() {
-    return algoliaData.getPreference('ApplicationID') + '-' + currentSite.getID() + '-' + getInstanceHostName();
+    return algoliaData.getPreference('ApplicationID') + '_' + currentSite.getID() + '_' + getInstanceHostName();
 }
 
 /**
@@ -57,7 +57,7 @@ function createHandshakeRequest() {
         index_prefix    : getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
         // @TODO replace from config
         fields          : {
-            product  : ['resource_id', 'name', 'description', 'categories', 'image_urls', 'price', 'adjusted_price', 'in_stock', 'url'],
+            product  : ['name', 'short_description', 'long_description', 'primary_category_id', 'image_groups', 'price', 'in_stock', 'url'],
             category : ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subcategory', 'url']
         }
     };

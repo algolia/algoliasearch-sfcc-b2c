@@ -129,7 +129,8 @@ function callJsonService(title, service, params) {
                 logger.error('JSON.parse error. Method: {0}. String:{1}', title, result.object.response);
             }
         } else {
-            statusItem.setStatus(Status.ERROR);
+            //statusItem.setStatus(Status.ERROR);
+            statusItem.addDetail('object', {});
             logger.warn('Response is not JSON. Method: {0}. Result:{1}', title, result.object.response);
         }
     } else {

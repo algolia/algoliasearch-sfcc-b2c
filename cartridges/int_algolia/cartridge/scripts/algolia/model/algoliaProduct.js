@@ -61,11 +61,9 @@ function algoliaProduct(product) {
     var currentSites = Site.getCurrent();
 
     // GET none Localized properties
-    this._type = "product";
     this.id = product.ID;
     this.primary_category_id = product.getPrimaryCategory() ? product.primaryCategory.ID : '';
     this.in_stock = product.availabilityModel.inStock.toString();
-    this.rating = '0';  // TODO: get rating
    
     // Get Localized properties
     this.name = {};
