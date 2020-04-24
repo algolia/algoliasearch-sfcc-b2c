@@ -1,8 +1,8 @@
+'use strict';
+
 /**
  * Call Bluesnap REST service and handle common errors
  */
-
-"use strict";
 
 var logger = require('dw/system/Logger').getLogger('algolia');
 var stringUtils = require('dw/util/StringUtils');
@@ -22,8 +22,7 @@ function standardErrorMessage(title, url, error, errorMessage) {
         title || 'Algolia Service',
         url,
         error,
-        errorMessage
-    );
+        errorMessage);
 }
 
 /**
@@ -90,7 +89,7 @@ function callService(title, service, params) {
  */
 function isResponseJSON(service) {
     var contentTypeHeader = service.getClient().getResponseHeader('Content-Type');
-    return contentTypeHeader && contentTypeHeader.split(';')[0].toLowerCase() == 'application/json';
+    return contentTypeHeader && contentTypeHeader.split(';')[0].toLowerCase() === 'application/json';
 }
 
 
@@ -129,7 +128,7 @@ function callJsonService(title, service, params) {
                 logger.error('JSON.parse error. Method: {0}. String:{1}', title, result.object.response);
             }
         } else {
-            //statusItem.setStatus(Status.ERROR);
+            // statusItem.setStatus(Status.ERROR);
             statusItem.addDetail('object', {});
             logger.warn('Response is not JSON. Method: {0}. Result:{1}', title, result.object.response);
         }

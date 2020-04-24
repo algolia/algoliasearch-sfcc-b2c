@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var serviceHelper = require('*/cartridge/scripts/service/serviceHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
@@ -42,29 +42,29 @@ function calculateTenantID() {
  */
 function createHandshakeRequest() {
     var config = {
-        algolia_app_id         : algoliaData.getPreference('ApplicationID'),
-        algolia_api_key        : algoliaData.getPreference('AdminApiKey'),
-        algolia_search_api_key : algoliaData.getPreference('SearchApiKey')
+        algolia_app_id: algoliaData.getPreference('ApplicationID'),
+        algolia_api_key: algoliaData.getPreference('AdminApiKey'),
+        algolia_search_api_key: algoliaData.getPreference('SearchApiKey')
     };
 
     var metadata = {
-        https_hostname  : dwSystem.getInstanceHostname(),
-        site_id         : currentSite.getID(),
-        site_name       : currentSite.getName(),
-        locales         : currentSite.getAllowedLocales().toArray(),
-        client_id       : 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
-        client_password : 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        index_prefix    : getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
+        https_hostname: dwSystem.getInstanceHostname(),
+        site_id: currentSite.getID(),
+        site_name: currentSite.getName(),
+        locales: currentSite.getAllowedLocales().toArray(),
+        client_id: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
+        client_password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
+        index_prefix: getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
         // @TODO replace from config
-        fields          : {
-            product  : algoliaProduct.getFields(),
-            category : ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subcategory', 'url']
+        fields: {
+            product: algoliaProduct.getFields(),
+            category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subcategory', 'url']
         }
     };
 
     return {
-        config   : config,
-        metadata : metadata
+        config: config,
+        metadata: metadata
     };
 }
 
@@ -133,7 +133,7 @@ function sendDelta(itemsArray) {
     var operationsObj = Object.create(null);
     operationsObj.operations = itemsArray;
 
-    callStatus = serviceHelper.callJsonService('Send Delta', service, operationsObj);
+    var callStatus = serviceHelper.callJsonService('Send Delta', service, operationsObj);
 
     return callStatus;
 }

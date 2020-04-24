@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 /**
  * Algolia API Service definition file
@@ -19,9 +19,9 @@ function init() {
         */
         parseResponse: function (service, client) {
             return {
-                response   : client.text,
-                headers    : client.responseHeaders,
-                statusCode : client.statusCode
+                response: client.text,
+                headers: client.responseHeaders,
+                statusCode: client.statusCode
             };
         },
         filterLogMessage: function (msg) {
@@ -29,6 +29,6 @@ function init() {
         }
     });
     return initService;
-};
+}
 
 module.exports.init = init;

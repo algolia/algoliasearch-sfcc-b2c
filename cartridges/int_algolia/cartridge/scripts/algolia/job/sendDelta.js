@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 // initialize
 var QUOTA_API_JS_JSON_STRING_LENGTH = 600000; // The maximum allowed length of a JavaScript string created by JSON.stringify().
@@ -23,18 +23,18 @@ function sendChunk(entriesArray) {
  * @returns {boolean} - successful
  */
 function sendFailedChunks(failedChunks) {
-    if (failedChunks.length == 0) {
+    if (failedChunks.length === 0) {
         return true;
     }
 
     var chunkLength = Math.floor(failedChunks.length / MAX_FAILED_CHUNKS) + 1;
 
-    for(var startIndex = 0; startIndex < failedChunks.length; startIndex += chunkLength ) {
+    for (var startIndex = 0; startIndex < failedChunks.length; startIndex += chunkLength) {
         var elements = failedChunks.slice(startIndex, startIndex + chunkLength);
         if (!sendChunk(elements)) {
             return false;
-        };
-    };
+        }
+    }
 
     return true;
 }
@@ -72,18 +72,19 @@ module.exports.execute = function (parameters) {
             // send the chunks
             if (!sendChunk(entries)) {
                 failedChunks = failedChunks.concat(entries);
-                if (++countFailedShunks > MAX_FAILED_CHUNKS) {
+                countFailedShunks += 1;
+                if (countFailedShunks > MAX_FAILED_CHUNKS) {
                     throw new Error('Too many failed chunks. Service might be down. Aborting the job.');
-                    break;
+                    // break;
                 }
-            };
-            entries.length = 0; // crear the array            
+            }
+            entries.length = 0; // crear the array
         }
     }
 
     deltaList.close();
-    
-    //Resending failed chunks
+
+    // Resending failed chunks
     sendFailedChunks(failedChunks);
     return true;
 };

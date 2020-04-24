@@ -132,19 +132,18 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
 
 /**
  * Parse error message and write it to log
- * @param {string}        title  - Error title, place or function name
- * @param {string}        url    - Url of the service endpoint
- * @param {dw.svc.Result} result - result
+ * @param {string}  file  - File name where the IOError
+ * @param {string}  errorMessage - Error message
+ * @param {Error}   error - IOError
  * @returns {null} - Null
  */
 function logFileError(file, errorMessage, error) {
     var logger = require('dw/system/Logger').getLogger('algolia');
-    var stringUtils = require('dw/util/StringUtils');
-    var logMessage = stringUtils.format('\nFile: {0},\nError: {1},\nError: {2},',
+    logger.error('\nFile: {0},\nError: {1},\nError: {2},',
         file,
         errorMessage,
         error.message);
-    logger.error(logMessage);
+
     return null;
 }
 

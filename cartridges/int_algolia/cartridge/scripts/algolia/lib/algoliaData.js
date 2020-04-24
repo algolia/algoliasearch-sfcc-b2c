@@ -41,7 +41,7 @@ function getPreference(id) {
  * @returns {void}
  */
 function setPreference(id, value) {
-    Transaction.wrap(function(){
+    Transaction.wrap(function () {
         currentSite.setCustomPreferenceValue('Algolia_' + id, value);
     });
 }
@@ -63,16 +63,16 @@ function getSetOfStrings(id) {
  * @returns {void}
  */
 function setSetOfStrings(id, value) {
-    Transaction.wrap(function(){
-        var toSave = value.replace(/ /g, '');   // remove white spaces 
-        var toSave = toSave.split(',');         // create array
+    Transaction.wrap(function () {
+        var toSave = value.replace(/ /g, ''); // remove white spaces
+        toSave = toSave.split(','); // create array
         currentSite.setCustomPreferenceValue('Algolia_' + id, toSave);
     });
 }
 
 module.exports = {
-    getPreference   : getPreference,
-    setPreference   : setPreference,
-    getSetOfStrings : getSetOfStrings,
-    setSetOfStrings : setSetOfStrings
-}
+    getPreference: getPreference,
+    setPreference: setPreference,
+    getSetOfStrings: getSetOfStrings,
+    setSetOfStrings: setSetOfStrings
+};

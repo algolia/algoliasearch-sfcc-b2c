@@ -1,6 +1,6 @@
 {
     "root": true,
-    "extends": "@jenssimon/sfcc/sfra",
+    "extends": "airbnb-base/legacy",
     "parserOptions": {
         "ecmaVersion": 2015
     },
@@ -12,15 +12,12 @@
         "valid-jsdoc": ["error", { "preferType": { "Boolean": "boolean", "Number": "number", "object": "Object", "String": "string" }, "requireReturn": false}],
         "vars-on-top": "off",
         "global-require": "off",
-        "no-shadow": ["error", { "allow": ["err", "callback", "req", "res"]}],
-        "max-len": "off",
-        "key-spacing": ["warn", {
-            "align": {
-                "beforeColon": true,
-                "afterColon": true,
-                "on": "colon"
-            }
-        }],
-        "strict": ["error", "global"]
+        "no-shadow": ["error", { "allow": ["err", "callback"]}],
+        "max-len": "off"
+    },
+    "globals": {
+        "empty": true,
+        "request": true,
+        "dw": true
     }
 }

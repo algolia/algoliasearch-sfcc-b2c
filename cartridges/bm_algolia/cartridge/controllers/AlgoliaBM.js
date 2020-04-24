@@ -16,7 +16,7 @@ function renderIndex() {
         reindexUrl: URLUtils.https('AlgoliaBM-HandleReindex'),
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData
-    }
+    };
 
     ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
 }
@@ -53,22 +53,21 @@ function handleReindex() {
 function handleSettings() {
     var params = request.httpParameterMap;
     try {
-        var algoliaEnable = ('Enable' in params) && (params.Enable.submitted == true) ? true : false;
-        algoliaData.setPreference("Enable", algoliaEnable);
-        algoliaData.setPreference("ApplicationID", params.ApplicationID.value);
-        algoliaData.setSetOfStrings("CustomFields", params.CustomFields.value);
-        algoliaData.setPreference("HostBase", params.HostBase.value);
-        algoliaData.setPreference("InStockThreshold", params.InStockThreshold.value * 1);
-        algoliaData.setPreference("LastCategorySyncDate", new Date(params.LastCategorySyncDate.value));
-        algoliaData.setPreference("LastProductSyncDate", new Date(params.LastProductSyncDate.value));
-        algoliaData.setPreference("SearchApiKey", params.SearchApiKey.value);
-    } catch(error) {
-    	Logger.error(error);
+        var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
+        algoliaData.setPreference('Enable', algoliaEnable);
+        algoliaData.setPreference('ApplicationID', params.ApplicationID.value);
+        algoliaData.setSetOfStrings('CustomFields', params.CustomFields.value);
+        algoliaData.setPreference('HostBase', params.HostBase.value);
+        algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
+        algoliaData.setPreference('LastCategorySyncDate', new Date(params.LastCategorySyncDate.value));
+        algoliaData.setPreference('LastProductSyncDate', new Date(params.LastProductSyncDate.value));
+        algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
+    } catch (error) {
+        Logger.error(error);
     }
 
     renderIndex();
 }
-
 
 exports.Start = start;
 exports.Start.public = true;
