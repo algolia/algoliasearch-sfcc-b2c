@@ -1,6 +1,6 @@
 "use strict";
 
-const PROCESSING_PRODUCT_LIMIT = 2; // TODO: Remove from production
+const PROCESSING_PRODUCT_LIMIT = 10; // TODO: Remove from production
 
 /**
  * UpdateProductModel class that represents an Algolia ProductModel
