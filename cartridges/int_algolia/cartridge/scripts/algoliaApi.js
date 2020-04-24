@@ -24,7 +24,7 @@ function getInstanceHostName() {
         instanceHostname = instanceHostname.replace('.demandware.net', '');
     }
     // replace dots
-    return instanceHostname.replace(/[\.|-]/g, '_');
+    return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
 }
 
 /**
