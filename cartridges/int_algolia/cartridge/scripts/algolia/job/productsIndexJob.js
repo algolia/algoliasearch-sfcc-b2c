@@ -46,46 +46,70 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
  * file for update Algolia Product Index
  * @returns {boolean} - successful Job run
  */
-function runProductExport() {
+function runProductExport(parametrs) {
     var ProductMgr = require('dw/catalog/ProductMgr');
     var File = require('dw/io/File');
     var FileReader = require('dw/io/FileReader');
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var FileWriter = require('dw/io/FileWriter');
-    var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter'); // XMLStreamWriter/XMLIndentingStreamWriter
+    var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter');
 
     var AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
-    var isInitAlgolia = true;
-
     var counterProducts = 0; // TODO: remove from productiond
     
-    // Open XML Snapshot file to read
-    var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
-    if (snapshotFile.exists()) {
-        isInitAlgolia = false;
-        var snapshotFileReader = new FileReader(snapshotFile, "UTF-8");
-        var snapshotXmlReader = new XMLStreamReader(snapshotFileReader);
-    };
-    
     // Open XML New temporary Snapshot file to write
-    var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_PRODUCTS_FILE_NAME);
-    var snapshotFileWriter = new FileWriter(newSnapshotFile, "UTF-8");
-    var snapshotXmlWriter = new XMLStreamWriter(snapshotFileWriter); 
-    snapshotXmlWriter.writeStartDocument();
-    snapshotXmlWriter.writeStartElement('products');
+    try {
+        var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_PRODUCTS_FILE_NAME);
+        var snapshotFileWriter = new FileWriter(newSnapshotFile, "UTF-8");
+        var snapshotXmlWriter = new XMLStreamWriter(snapshotFileWriter); 
+        snapshotXmlWriter.writeStartDocument();
+        snapshotXmlWriter.writeStartElement('products');
+    } catch (error) {
+        jobHelper.logFileError(newSnapshotFile.fullPath, 'Error open file or write', error);
+        return false;
+    }
 
     // Open XML Update for Algolia file to write
-    var updateFile = new File(algoliaConstants.UPDATE_PRODUCTS_FILE_NAME);
-    var updateFileWriter = new FileWriter(updateFile, "UTF-8");
-    var updateXmlWriter = new XMLStreamWriter(updateFileWriter); 
-    updateXmlWriter.writeStartDocument();
-    updateXmlWriter.writeStartElement('products');
+    try {
+        var updateFile = new File(algoliaConstants.UPDATE_PRODUCTS_FILE_NAME);
+        var updateFileWriter = new FileWriter(updateFile, "UTF-8");
+        var updateXmlWriter = new XMLStreamWriter(updateFileWriter); 
+        updateXmlWriter.writeStartDocument();
+        updateXmlWriter.writeStartElement('products');
+    } catch (error) {
+        jobHelper.logFileError(updateFile.fullPath, 'Error open file or write', error);
+        return false;
+    }
 
+    // Open XML Snapshot file to read
+    var isInitAlgolia = true;
+    var productSnapshotXML = null;
+    var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
+    if (snapshotFile.exists()) {
+        if (!empty(parametrs.init) && parametrs.init.toLowerCase() == 'true') {
+            try {
+                snapshotFile.remove();
+            } catch (error) {
+                jobHelper.logFileError(snapshotFile.fullPath, 'Error remove file', error);
+                return false;
+            };
+        } else {
+            try {
+                isInitAlgolia = false;
+                var snapshotFileReader = new FileReader(snapshotFile, "UTF-8");
+                var snapshotXmlReader = new XMLStreamReader(snapshotFileReader);
+                productSnapshotXML = isInitAlgolia ? null : jobHelper.readXMLObjectFromStream(snapshotXmlReader, 'product');
+            } catch (error) {
+                jobHelper.logFileError(snapshotFile.fullPath, 'Error open file or read', error);
+                return false;
+            };
+        }
+    }
+    
     var productsIterator = ProductMgr.queryAllSiteProductsSorted();
-    var productSnapshotXML = isInitAlgolia ? null : jobHelper.readXMLObjectFromStream(snapshotXmlReader, 'product');
     
     while(productsIterator.hasNext()) {
         var product = productsIterator.next();
@@ -101,8 +125,15 @@ function runProductExport() {
                 if (deltaObject) {
                     deltaObject.id = newProductModel.id;
                     productUpdate = new UpdateProductModel(deltaObject);
-                }
-                productSnapshotXML = jobHelper.readXMLObjectFromStream(snapshotXmlReader, 'product');
+                };
+
+                try {
+                    productSnapshotXML = jobHelper.readXMLObjectFromStream(snapshotXmlReader, 'product');
+                } catch (error) {
+                    jobHelper.logFileError(snapshotFile.fullPath, 'Error read from file', error);
+                    return false;
+                };
+
             } else if (product.ID < productSnapshot.product.id) {
                 // Add product to delta
                 productUpdate = new UpdateProductModel(newProductModel);
@@ -121,11 +152,21 @@ function runProductExport() {
 
         // Write to Update XML file
         if (productUpdate) {
-            writeObjectToXMLStream(updateXmlWriter, productUpdate);
+            try {
+                writeObjectToXMLStream(updateXmlWriter, productUpdate);
+            } catch (error) {
+                jobHelper.logFileError(updateFile.fullPath, 'Error write to file', error);
+                return false;
+            };
         }
 
         // Write product to new snapshot file
-        writeObjectToXMLStream(snapshotXmlWriter, newProductModel);
+        try {
+            writeObjectToXMLStream(snapshotXmlWriter, newProductModel);
+        } catch (error) {
+            jobHelper.logFileError(newSnapshotFile.fullPath, 'Error write to file', error);
+            return false;
+        };
 
         // TODO: remove from productiond
         counterProducts += 1;
@@ -153,12 +194,14 @@ function runProductExport() {
     productsIterator.close();
 
     // Delete old snapshot file and rename a new one
-    snapshotFile.remove();
-    newSnapshotFile.renameTo(snapshotFile);
+    try {
+        snapshotFile.remove();
+        newSnapshotFile.renameTo(snapshotFile);
+    } catch (error) {
+        jobHelper.logFileError(snapshotFile.fullPath, 'Error rewrite file', error);
+        return false;
+    };
 
-    //TODO: Send data to Algilia endpoint
-
-    //TODO: error handler 
     return true;
 }
 

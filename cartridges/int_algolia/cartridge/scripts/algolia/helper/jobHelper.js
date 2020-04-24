@@ -130,7 +130,26 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
     return result;
 }
 
+/**
+ * Parse error message and write it to log
+ * @param {string}        title  - Error title, place or function name
+ * @param {string}        url    - Url of the service endpoint
+ * @param {dw.svc.Result} result - result
+ * @returns {null} - Null
+ */
+function logFileError(file, errorMessage, error) {
+    var logger = require('dw/system/Logger').getLogger('algolia');
+    var stringUtils = require('dw/util/StringUtils');
+    var logMessage = stringUtils.format('\nFile: {0},\nError: {1},\nError: {2},',
+        file,
+        errorMessage,
+        error.message);
+    logger.error(logMessage);
+    return null;
+}
+
 module.exports.appendObjToXML = appendObjToXML;
 module.exports.xmlToObject = xmlToObject;
 module.exports.objectCompare = objectCompare;
 module.exports.readXMLObjectFromStream = readXMLObjectFromStream;
+module.exports.logFileError = logFileError;

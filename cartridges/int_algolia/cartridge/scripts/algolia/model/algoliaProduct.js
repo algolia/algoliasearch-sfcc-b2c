@@ -54,7 +54,7 @@ function getImagesGroup(product, viewtype) {
  * @param {dw.order.Product} product - Product
  * @constructor
  */
-function algoliaProduct(product) {
+var algoliaProduct = function (product) {
     var Site = require('dw/system/Site');
     var Currency = require('dw/util/Currency');
     var stringUtils = require('dw/util/StringUtils');
@@ -111,6 +111,10 @@ function algoliaProduct(product) {
     }
     
     this.image_groups = imageGroupsArr.length > 0 ? imageGroupsArr : '';
+};
+
+algoliaProduct.getFields = function() {
+    return ['name', 'short_description', 'long_description', 'primary_category_id', 'image_groups', 'price', 'in_stock', 'url'];
 }
 
 module.exports = algoliaProduct;
