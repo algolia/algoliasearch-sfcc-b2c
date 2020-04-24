@@ -27,12 +27,16 @@ function renderImage(hit) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-	var appId = $('#suggestions-wrapper').data('appid');
-	var searchApiKey = $('#suggestions-wrapper').data('searchapikey');
+	var $suggestionsWrapper = $('#suggestions-wrapper'); 
+	var appId = $suggestionsWrapper.data('appid');
+	var searchApiKey = $suggestionsWrapper.data('searchapikey');
+	var category = $suggestionsWrapper.data('category');
+	var client = algoliasearch(appId, searchApiKey);
+	var cateogryIndex = client.initIndex(category);
 	
 	var search = instantsearch({
 	  indexName: 'staging__RefArch__products__en-US',
-	  searchClient: algoliasearch(appId, searchApiKey)
+	  searchClient: client
 	});
 	
 	search.addWidget(

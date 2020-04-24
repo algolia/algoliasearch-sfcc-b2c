@@ -3,15 +3,15 @@
 </isif>
 
 <!--- Search Results Banner --->
-<isif condition="${pdict.productSearch.isCategorySearch}">
+<isif condition="${pdict.category}">
     <div class="hero slant-down search-banner"
         <!--- If no image, default is specified in search.scss > .search-banner --->
-        <isif condition="${pdict.productSearch.bannerImageUrl}">
-            style="background-image: url(${pdict.productSearch.bannerImageUrl})"
+        <isif condition="${pdict.categoryBannerUrl}">
+            style="background-image: url(${pdict.categoryBannerUrl})"
         </isif>
     >
         <h1 class="header page-title">
-            ${pdict.productSearch.category.name}
+            ${pdict.category.displayName}
         </h1>
     </div>
 <iselse>
@@ -19,72 +19,28 @@
 </isif>
 
 <div class="container search-results">
-    <div class="row search-nav">
-        <isif condition="${!pdict.productSearch.isCategorySearch}">
-            <div class="nav-tabs-wrapper">
-                <ul class="nav nav-tabs nav-fill" role="tablist">
-
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link active product-search" href="#product-search-results" aria-controls="product-search-results" data-toggle="tab" role="tab" aria-selected="true" tabindex="0" id="product-tab">
-                            ${Resource.msg('tab.nav.search.productsresults', 'search', null)}
-                        </a>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <a class="nav-link content-search" href="#content-search-results-pane" aria-controls="content-search-results-pane" data-toggle="tab" role="tab" aria-selected="false" tabindex="-1" id="articles-tab"
-                            data-url="${URLUtils.url('Search-Content', 'q', pdict.productSearch.searchKeywords, 'startingPage', 0)}">
-                            ${Resource.msg('tab.nav.search.artclesresults', 'search', null)}
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </isif>
-    </div>
     <div class="row">
         <div class="tab-content col-12">
             <div class="tab-pane container active" id="product-search-results" role="tabpanel" aria-labelledby="product-tab">
 
-                    <isif condition="${pdict.productSearch.productIds.length > 0}">
-                        <div class="row grid-header">
-                            <div class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2">
-                    <iselse>
-                        <div class="row grid-header justify-content-center">
-                            <div class="result-count col">
-                    </isif>
-                        <isinclude template="search/resultsCount" />
+                <!--- Refinement bar --->
+                <div class="row">
+                    <div class="refinement-bar col-md-3" id="clear-refinements">
+                        
                     </div>
-                    <isif condition="${pdict.productSearch.productIds.length > 0}">
-                        <div class="col-6 col-sm-3 order-sm-1">
-                            <isinclude template="search/sortOrderMenu" />
-                        </div>
 
-                        <div class="col-6 col-sm-3 text-right d-md-none order-sm-3">
-                            <button type="button" class="btn btn-primary filter-results col-12">
-                                ${Resource.msg('button.filter', 'search', null)}
-                            </button>
-                        </div>
-                    </isif>
+                    <div class="col-sm-12 col-md-9">
+                         <!--- Selected filters bar --->
+                         <div class="row filter-bar d-md-none">
+                             
+                         </div>
+
+                         <!--- Product Grid --->
+                         <div class="row product-grid" itemtype="http://schema.org/SomeProducts" itemid="#product" id="algolia-products">
+                             
+                         </div>
+                    </div>
                 </div>
-
-                <isif condition="${pdict.productSearch.productIds.length > 0}">
-                    <!--- Refinement bar --->
-                    <div class="row">
-                        <div class="refinement-bar col-md-3" id="clear-refinements">
-                            
-                        </div>
-
-                        <div class="col-sm-12 col-md-9">
-                             <!--- Selected filters bar --->
-                             <div class="row filter-bar d-md-none">
-                                 
-                             </div>
-
-                             <!--- Product Grid --->
-                             <div class="row product-grid" itemtype="http://schema.org/SomeProducts" itemid="#product" id="algolia-products">
-                                 
-                             </div>
-                        </div>
-                    </div>
-                </isif>
             </div>
             <!--- Content Grid --->
             <div class="tab-pane container" id="content-search-results-pane" role="tabpanel" aria-labelledby="articles-tab">

@@ -1,5 +1,4 @@
 <isdecorate template="common/layout/page">
-<isset name="algoliaData" value="${require('*/cartridge/scripts/algolia/lib/algoliaData')}" scope="page" />
 
     <isscript>
         var assets = require('*/cartridge/scripts/assets');
@@ -7,7 +6,7 @@
         assets.addCss('/css/search.css');
     </isscript>
 
-<isif condition="${algoliaData.getPreference('Enable')}">
+<isif condition="${pdict.algoliaEnable}">
     <isinclude template="algolia/search/searchResultsNoDecorator" />
 <iselse>
 	<isinclude template="search/searchResultsNoDecorator" />
