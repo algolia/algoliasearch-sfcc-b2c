@@ -3,7 +3,6 @@
 var catalogMgr = require('dw/catalog/CatalogMgr');
 var URLUtils = require('dw/web/URLUtils');
 var Site = require('dw/system/Site');
-var siteLocales;
 
 /**
  * forEach method for dw.util.Collection subclass instances
@@ -77,18 +76,18 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, parent
     var categoryId = category.ID;
     var result = {
         id: categoryId,
-        url: {locales: {}},
-        name: {locales: {}},
-        description: {locales: {}}
+        url: {},
+        name: {},
+        description: {}
     };
     for (var loc in siteLocales) {
         var localeName = siteLocales[loc];
         request.setLocale(localeName);    
 
-        result.url.locales[localeName] = getCategoryUrl(category);
-        result.name.locales[localeName] = category.getDisplayName();
+        result.url[localeName] = getCategoryUrl(category);
+        result.name[localeName] = category.getDisplayName();
         if (category.getDescription()) {
-            result.description.locales[localeName] = category.getDescription();
+            result.description[localeName] = category.getDescription();
         }
     }
     if (parentId) {
@@ -183,13 +182,10 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
 function runCategoryExport() {
     var siteRootCategory = catalogMgr.getSiteCatalog().getRoot();
     var currentSite = Site.getCurrent();
-    siteLocales = currentSite.getAllowedLocales();
+    var siteLocales = currentSite.getAllowedLocales();
     var topLevelCategories = siteRootCategory.hasOnlineSubCategories() ?
             siteRootCategory.getOnlineSubCategories().iterator() : null;
     var listOfCategories = [];
-    const SNAPSHOT_CATEGORIES_FILE_NAME = '/TEMP/categories.xml';
-    const TMP_SNAPSHOT_CATEGORIES_FILE_NAME = '/TEMP/categories_tmp.xml';
-    const UPDATE_CATEGORIES_FILE_NAME = '/TEMP/categories_update.xml';
 
     var File = require('dw/io/File');
     var FileReader = require('dw/io/FileReader');
@@ -197,15 +193,16 @@ function runCategoryExport() {
     var FileWriter = require('dw/io/FileWriter');
     var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter'); // XMLStreamWriter/XMLIndentingStreamWriter
 
-    var jobHelper = require('*/cartridge/scripts/helper/jobHelper');
+    var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+    var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
     while(topLevelCategories.hasNext()) {
         var category = topLevelCategories.next();
         prepareListOfCategories(siteLocales, listOfCategories, category);
     }
 
-    var snapshotFile = new File(SNAPSHOT_CATEGORIES_FILE_NAME);
-    var updateFile = new File(UPDATE_CATEGORIES_FILE_NAME);
+    var snapshotFile = new File(algoliaConstants.SNAPSHOT_CATEGORIES_FILE_NAME);
+    var updateFile = new File(algoliaConstants.UPDATE_CATEGORIES_FILE_NAME);
     if (!snapshotFile.exists()) {
         createCategoriesSnapshotFile(snapshotFile, listOfCategories);
         if(updateFile.exists()) {
@@ -233,7 +230,7 @@ function runCategoryExport() {
 
             if (indexOfcategoryFromList > -1) {
                 // compare if was updated
-                if (typeof categorySnapshot.description.locales == 'string') {
+                if (typeof categorySnapshot.description.locales == 'string') {	// TODO: recheck the code for locale checking
                     categorySnapshot.description.locales = {};
                 }
                 if (JSON.stringify(categorySnapshot) != JSON.stringify(listOfCategories[indexOfcategoryFromList])) {
@@ -261,7 +258,7 @@ function runCategoryExport() {
     // render new snapshot and add new products to updates
 
     // Open XML New temporary Snapshot file to write
-    var newSnapshotFile = new File(TMP_SNAPSHOT_CATEGORIES_FILE_NAME);
+    var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_CATEGORIES_FILE_NAME);
     var snapshotFileWriter = new FileWriter(newSnapshotFile, "UTF-8");
     var snapshotXmlWriter = new XMLStreamWriter(snapshotFileWriter); 
     snapshotXmlWriter.writeStartDocument();
@@ -293,10 +290,13 @@ function runCategoryExport() {
     snapshotFileReader.close();
 
     // Delete old snapshot file and rename a new one
-    snapshotFile.remove();
-    newSnapshotFile.renameTo(snapshotFile);
-
-    //TODO: Send data to Algilia endpoint
+    try {
+        snapshotFile.remove();
+        newSnapshotFile.renameTo(snapshotFile);
+    } catch (error) {
+        jobHelper.logFileError(snapshotFile.fullPath, 'Error rewrite file', error);
+        return false;
+    };
     return true;
 }
 
