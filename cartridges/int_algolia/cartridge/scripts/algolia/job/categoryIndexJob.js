@@ -53,7 +53,7 @@ function getImageUrl(image) {
  * @returns {null} - XML Object or null
  */
 function writeObjectToXMLStream(xmlStreamWriter, obj) {
-    var jobHelper = require('*/cartridge/scripts/helper/jobHelper');
+    var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var categoryModelXML = <category></category>;
 
     jobHelper.appendObjToXML(categoryModelXML, obj);
@@ -229,12 +229,15 @@ function runCategoryExport() {
             var indexOfcategoryFromList = listOfCategories.map(function(e) { return e.id; }).indexOf(categorySnapshot.id);
 
             if (indexOfcategoryFromList > -1) {
-                // compare if was updated
-                if (typeof categorySnapshot.description.locales == 'string') {	// TODO: recheck the code for locale checking
-                    categorySnapshot.description.locales = {};
+                // check empty attributes
+                if (!('description' in categorySnapshot)) {
+                    categorySnapshot.description = {};
                 }
-                if (JSON.stringify(categorySnapshot) != JSON.stringify(listOfCategories[indexOfcategoryFromList])) {
-                    categoryUpdate = listOfCategories[indexOfcategoryFromList];
+                // compare if was updated
+                var categoryFromList = listOfCategories[indexOfcategoryFromList];
+                var deltaObject = jobHelper.objectCompare(categorySnapshot, categoryFromList);
+                if (deltaObject) {
+                    categoryUpdate = categoryFromList;
                 }
             } else {	// save to updateXmlWriter that product is deleted
                 categoryUpdate = {

@@ -31,4 +31,27 @@
             </run-once>
         </triggers>
     </job>
+
+	<job job-id="Algolia_categories_reindex" priority="0">
+        <description/>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="categoryIndexJob" type="ExecuteScriptModule" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/categoryIndexJob.js</parameter>
+                    <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
+                    <parameter name="ExecuteScriptModule.Transactional">false</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers>
+            <run-once enabled="false">
+                <date>2020-04-15Z</date>
+                <time>07:48:46.000Z</time>
+            </run-once>
+        </triggers>
+    </job>
 </jobs>
