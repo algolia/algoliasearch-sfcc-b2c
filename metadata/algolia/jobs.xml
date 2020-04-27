@@ -32,7 +32,7 @@
         </triggers>
     </job>
 
-	<job job-id="Algolia_categories_reindex" priority="0">
+    <job job-id="Algolia_categories_reindex" priority="0">
         <description/>
         <parameters/>
         <flow>
