@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
+    <job job-id="AlgoliaProductsIdx" priority="0">
+        <description>Export products to Algolia service for update search index files</description>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="productIndexJob" type="ExecuteScriptModule" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/productsIndexJob.js</parameter>
+                    <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
+                    <parameter name="ExecuteScriptModule.Transactional">false</parameter>
+                    <parameter name="init">true</parameter>
+                </parameters>
+            </step>
+            <step step-id="SendDelta" type="ExecuteScriptModule" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/sendDelta.js</parameter>
+                    <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
+                    <parameter name="ExecuteScriptModule.Transactional">false</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers>
+            <run-once enabled="false">
+                <date>2020-04-03Z</date>
+                <time>11:58:28.000Z</time>
+            </run-once>
+        </triggers>
+    </job>
+</jobs>

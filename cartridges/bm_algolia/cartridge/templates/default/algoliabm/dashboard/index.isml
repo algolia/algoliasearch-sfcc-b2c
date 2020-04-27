@@ -1,0 +1,99 @@
+<isdecorate template="application/MenuFrame">
+    <iscontent type="text/html" charset="UTF-8" />
+    <isinclude template="inc/Modules" />
+    <isbreadcrumb name1="Merchant Tools" name2="Algolia" />
+    <table border="0" cellpadding="0" cellspacing="0" width="100%"><tbody>
+        <tr>
+            <td width="100%" class="table_title aldi">Algolia</td>
+        </tr>
+        <tr>
+            <td class="w s e"></td>
+        </tr>
+        <tr>
+            <td class="table_title_description w e s">
+                <p>Algolia settings page.</p>
+                <p><a href="https://www.algolia.com/users/sign_in" target="_blank" rel="noreferrer">Algolia dashboard</a></p>
+            </td>
+        </tr>
+    </tbody></table>
+    <div class="algolia-bm-settings">
+        <form action="${pdict.setttingsUpdateUrl}" class="form-horizontal" method="post">
+        <input type="hidden" name="csrf_token" />
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+                <tr>
+                    <td class="table_header w s" nowrap="nowrap" width="70%" colspan="1" style="padding: 6px;">Preference Name</td>
+                    <td class="table_header w e s center">Value</td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Enable Algolia</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="checkbox" ${pdict.algoliaData.getPreference('Enable') ? "checked": ""} id="Enable" name="Enable" /></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Search API key</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey')}" id="SearchApiKey" name="SearchApiKey" /></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Application ID</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('ApplicationID')}" id="ApplicationID" name="ApplicationID" /></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Read Host Base Url</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('HostBase')}" id="HostBase" name="HostBase" /></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">InStock Threshold</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="number" value="${pdict.algoliaData.getPreference('InStockThreshold')}" id="InStockThreshold" name="InStockThreshold" /></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Last Product Sync Date</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('LastProductSyncDate')}" id="LastProductSyncDate" name="LastProductSyncDate" /></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Last Category Sync Date</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('LastCategorySyncDate')}" id="LastCategorySyncDate" name="LastCategorySyncDate" /></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Custom Fields</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getSetOfStrings('CustomFields')}" id="CustomFields" name="CustomFields" /></td>
+                </tr>
+                <tr>
+                    <td class="w e s buttonspacing" align="right" colspan="2">
+                        <button type="submit" name="updateCustomPreferences" class="button">Apply</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        </form>
+    </div>
+    <p></p>
+    <div class="algolia-bm-indexes">
+        <form action="${pdict.reindexUrl}" class="form-horizontal" method="post">
+        <input type="hidden" name="csrf_token" />
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+                <tr>
+                    <td class="table_header w s" nowrap="nowrap" width="100%" colspan="1" style="padding: 6px;">Index Type</td>
+                    <td class="table_header w e s center">Last update</td>
+                    <td class="table_header e s center">Rebuild</td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Clear and resynchronize all indices</td>
+                    <td class="table_detail w e s" nowrap="nowrap">3/30/20&nbsp;10:19:43 am</td>
+                    <td class="table_detail e s center"><button class="button" name="reindexAll" type="submit">Run</button></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Clear and resynchronize a product index</td>
+                    <td class="table_detail w e s" nowrap="nowrap">3/30/20&nbsp;10:19:43 am</td>
+                    <td class="table_detail e s center"><button class="button" name="reindexProducts" type="submit">Run</button></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Clear and resynchronize a category index</td>
+                    <td class="table_detail w e s" nowrap="nowrap">3/30/20&nbsp;10:19:43 am</td>
+                    <td class="table_detail e s center"><button class="button" name="reindexCategories" type="submit">Run</button></td>
+                </tr>
+            </tbody>
+        </table>
+        </form>
+    </div>
+</isdecorate>
