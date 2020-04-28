@@ -3,7 +3,7 @@
 // TODO: Remove from production
 // Limit number of products processling
 // 0 - no limit
-var PROCESSING_PRODUCT_LIMIT = 5;
+var PROCESSING_PRODUCT_LIMIT = 0;
 
 /**
  * UpdateProductModel class that represents an Algolia ProductModel
