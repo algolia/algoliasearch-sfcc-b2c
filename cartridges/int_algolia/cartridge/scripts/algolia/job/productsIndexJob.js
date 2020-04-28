@@ -1,6 +1,9 @@
 "use strict";
 
-var PROCESSING_PRODUCT_LIMIT = 10; // TODO: Remove from production
+// TODO: Remove from production
+// Limit number of products processling
+// 0 - no limit
+var PROCESSING_PRODUCT_LIMIT = 5;
 
 /**
  * UpdateProductModel class that represents an Algolia ProductModel
@@ -57,8 +60,17 @@ function runProductExport(parametrs) {
     var AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
-    var counterProducts = 0; // TODO: remove from productiond
+    var counterProductsTotal = 0;
+    var counterProductsForUpdate = 0;
+    var date = new Date();
+    var productLogData = algoliaData.getLogData('LastProductSyncLog');
+    productLogData.processedDate = date.toISOString();
+    productLogData.processedError = true;
+    productLogData.processedErrorMessage = '';
+    productLogData.processedRecords = 0;
+    productLogData.processedToUpdateRecords = 0;
     
     // Open XML New temporary Snapshot file to write
     try {
@@ -81,6 +93,8 @@ function runProductExport(parametrs) {
         updateXmlWriter.writeStartElement('products');
     } catch (error) {
         jobHelper.logFileError(updateFile.fullPath, 'Error open file or write', error);
+        productLogData.processedErrorMessage = 'Error open file or write';
+        algoliaData.setLogData('LastProductSyncLog', productLogData);
         return false;
     }
 
@@ -94,6 +108,8 @@ function runProductExport(parametrs) {
                 snapshotFile.remove();
             } catch (error) {
                 jobHelper.logFileError(snapshotFile.fullPath, 'Error remove file', error);
+                productLogData.processedErrorMessage = 'Error remove file';
+                algoliaData.setLogData('LastProductSyncLog', productLogData);        
                 return false;
             };
         } else {
@@ -104,6 +120,8 @@ function runProductExport(parametrs) {
                 productSnapshotXML = isInitAlgolia ? null : jobHelper.readXMLObjectFromStream(snapshotXmlReader, 'product');
             } catch (error) {
                 jobHelper.logFileError(snapshotFile.fullPath, 'Error open file or read', error);
+                productLogData.processedErrorMessage = 'Error open file or read';
+                algoliaData.setLogData('LastProductSyncLog', productLogData);        
                 return false;
             };
         }
@@ -131,6 +149,8 @@ function runProductExport(parametrs) {
                     productSnapshotXML = jobHelper.readXMLObjectFromStream(snapshotXmlReader, 'product');
                 } catch (error) {
                     jobHelper.logFileError(snapshotFile.fullPath, 'Error read from file', error);
+                    productLogData.processedErrorMessage = 'Error read from file';
+                    algoliaData.setLogData('LastProductSyncLog', productLogData);        
                     return false;
                 };
 
@@ -156,8 +176,11 @@ function runProductExport(parametrs) {
                 writeObjectToXMLStream(updateXmlWriter, productUpdate);
             } catch (error) {
                 jobHelper.logFileError(updateFile.fullPath, 'Error write to file', error);
-                return false;
+                productLogData.processedErrorMessage = 'Error write to file';
+                algoliaData.setLogData('LastProductSyncLog', productLogData);        
+            return false;
             };
+            counterProductsForUpdate += 1;
         }
 
         // Write product to new snapshot file
@@ -165,12 +188,14 @@ function runProductExport(parametrs) {
             writeObjectToXMLStream(snapshotXmlWriter, newProductModel);
         } catch (error) {
             jobHelper.logFileError(newSnapshotFile.fullPath, 'Error write to file', error);
-            return false;
+            productLogData.processedErrorMessage = 'Error write to file';
+            algoliaData.setLogData('LastProductSyncLog', productLogData);        
+        return false;
         };
 
         // TODO: remove from productiond
-        counterProducts += 1;
-        if (PROCESSING_PRODUCT_LIMIT > 0 && counterProducts >= PROCESSING_PRODUCT_LIMIT) break;
+        counterProductsTotal += 1;
+        if (PROCESSING_PRODUCT_LIMIT > 0 && counterProductsTotal >= PROCESSING_PRODUCT_LIMIT) break;
     }
 
     // Close XML Update file
@@ -193,6 +218,7 @@ function runProductExport(parametrs) {
 
     productsIterator.close();
 
+    /*
     // Delete old snapshot file and rename a new one
     try {
         snapshotFile.remove();
@@ -201,6 +227,18 @@ function runProductExport(parametrs) {
         jobHelper.logFileError(snapshotFile.fullPath, 'Error rewrite file', error);
         return false;
     };
+    */
+
+    jobHelper.logFileInfo(snapshotFile.fullPath, 'Processed ' + counterProductsTotal + ' records');
+    jobHelper.logFileInfo(updateFile.fullPath, 'Records for update' + counterProductsForUpdate + 'records');
+
+    var date = new Date();
+    productLogData.processedDate = date.toISOString(),
+    productLogData.processedError = false,
+    productLogData.processedErrorMessage = '',
+    productLogData.processedRecords = counterProductsTotal,
+    productLogData.processedToUpdateRecords = counterProductsForUpdate
+    algoliaData.setLogData('LastProductSyncLog', productLogData);        
 
     return true;
 }
