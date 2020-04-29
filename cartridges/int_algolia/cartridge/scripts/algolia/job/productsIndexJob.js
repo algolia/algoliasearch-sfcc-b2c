@@ -47,9 +47,10 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
 /**
  * Job for create Product Snapshot file and 
  * file for update Algolia Product Index
+ * @param {Object} parameters
  * @returns {boolean} - successful Job run
  */
-function runProductExport(parametrs) {
+function runProductExport(parameters) {
     var ProductMgr = require('dw/catalog/ProductMgr');
     var File = require('dw/io/File');
     var FileReader = require('dw/io/FileReader');
@@ -103,7 +104,7 @@ function runProductExport(parametrs) {
     var productSnapshotXML = null;
     var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
     if (snapshotFile.exists()) {
-        if (!empty(parametrs.init) && parametrs.init.toLowerCase() == 'true') {
+        if (!empty(parameters.init) && parameters.init.toLowerCase() == 'true') {
             try {
                 snapshotFile.remove();
             } catch (error) {
