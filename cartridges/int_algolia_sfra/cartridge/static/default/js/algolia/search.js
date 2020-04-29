@@ -18,7 +18,7 @@ function renderImage(hit) {
 	return `<div class="image-container">
 			    <a href="${hit.url}">
 			        <img class="tile-image"
-			             src="${hit.image_groups[0].images[0].link}"
+			             src="${hit.image_groups[0].images[0].dis_base_link}"
 			             alt="${hit.name}"
 			             title="${hit.image_groups[0].images[0].title}"
 			             />
@@ -30,12 +30,15 @@ document.addEventListener('DOMContentLoaded', function () {
 	var $suggestionsWrapper = $('#suggestions-wrapper'); 
 	var appId = $suggestionsWrapper.data('appid');
 	var searchApiKey = $suggestionsWrapper.data('searchapikey');
-	var category = $suggestionsWrapper.data('category');
+	var category = $suggestionsWrapper.data('category');	// category ID - for category page
+	var searchQuery = $suggestionsWrapper.data('q');		// onload search query - for search page 
 	var client = algoliasearch(appId, searchApiKey);
-	var cateogryIndex = client.initIndex(category);
+	
+	var productsIndexId = $suggestionsWrapper.data('productsindexid');	// site index for products
+	var algoliaIndex = client.initIndex(productsIndexId);
 	
 	var search = instantsearch({
-	  indexName: 'staging__RefArch__products__en-US',
+	  indexName: productsIndexId,
 	  searchClient: client
 	});
 	
@@ -72,7 +75,72 @@ document.addEventListener('DOMContentLoaded', function () {
 		container: '#clear-refinements',
 	  })
 	);
+	
+	
+	
+	
+	
+	
+	// Helper for the render function
+	var renderIndexListItem = ({ indexId, hits }) => `
+	  <li>
+	    Index: ${indexId}
+	    <ol>
+	      ${hits
+	        .map(
+	          hit =>
+	            `<li>${instantsearch.highlight({ attribute: 'name', hit })}</li>`
+	        )
+	        .join('')}
+	    </ol>
+	  </li>
+	`;
+
+	// Create the render function
+	var renderAutocomplete = (renderOptions, isFirstRender) => {
+	  var { indices, currentRefinement, refine, widgetParams } = renderOptions;
+
+	  if (isFirstRender) {
+	    var input = document.createElement('input');
+	    var ul = document.createElement('ul');
+
+	    input.addEventListener('input', event => {
+	      refine(event.currentTarget.value);
+	    });
+
+	    widgetParams.container.appendChild(input);
+	    widgetParams.container.appendChild(ul);
+	  }
+
+	  widgetParams.container.querySelector('input').value = currentRefinement;
+	  widgetParams.container.querySelector('ul').innerHTML = indices
+	    .map(renderIndexListItem)
+	    .join('');
+	};
+
+	// Create the custom widget
+	var customAutocomplete = instantsearch.connectors.connectAutocomplete(
+	  renderAutocomplete
+	);
+
+	// Instantiate the custom widget
+	search.addWidgets([
+	  customAutocomplete({
+	    container: document.querySelector('#suggestions-wrapper'),
+	  })
+	]);
+	
+	
+	
+	
+	
+	
+	
+	
+	
 
 	search.start();
+	
+	
 	
 });

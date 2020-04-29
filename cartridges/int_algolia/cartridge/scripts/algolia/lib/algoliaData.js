@@ -2,6 +2,7 @@
 
 var currentSite = require('dw/system/Site').getCurrent();
 var Transaction = require('dw/system/Transaction');
+var dwSystem = require('dw/system/System');
 
 /*
  * Function for getting preferences for Algolia
@@ -70,9 +71,37 @@ function setSetOfStrings(id, value) {
     });
 }
 
+/**
+ * Get instance hostname replacing dots with dashes and skipping
+ * the general parts from the sandbox hostnames.
+ * @returns {string} hostname
+ */
+function getInstanceHostName() {
+    var instanceHostname = dwSystem.getInstanceHostname();
+
+    // remove the sandbox host
+    if (dwSystem.instanceType === dwSystem.DEVELOPMENT_SYSTEM) {
+        instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
+        instanceHostname = instanceHostname.replace('.demandware.net', '');
+    }
+    // replace dots
+    return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
+}
+
+/**
+ * Create index id for search results request
+ * @param {string} type - type of indices: products | categories
+ * @returns {string} indexId
+ */
+function calculateIndexId(type) {
+    return getInstanceHostName() + '__' + currentSite.getID() + '__' + type + '__' + request.getLocale();
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
     getSetOfStrings: getSetOfStrings,
-    setSetOfStrings: setSetOfStrings
+    setSetOfStrings: setSetOfStrings,
+    getInstanceHostName: getInstanceHostName,
+    calculateIndexId: calculateIndexId
 };

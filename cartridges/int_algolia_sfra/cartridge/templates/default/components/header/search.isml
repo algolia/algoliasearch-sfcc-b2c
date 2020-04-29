@@ -1,7 +1,7 @@
 <isif condition="${pdict.algoliaEnable}">
 	<div class="site-search">
 		<div id="searchbox"></div>
-		<div id="suggestions-wrapper" data-appid="${pdict.applicationID}" data-searchapikey="${pdict.searchApiKey}" data-category="${pdict.cgid}" data-q="${pdict.q}"></div>
+		<div id="suggestions-wrapper" data-appid="${pdict.applicationID}" data-searchapikey="${pdict.searchApiKey}" data-category="${pdict.cgid}" data-q="${pdict.q}" data-productsindexid="${pdict.productsIndex}"></div>
 	</div>
 <iselse>
 <div class="site-search">

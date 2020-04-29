@@ -44,6 +44,8 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
 				applicationID: algoliaData.getPreference('ApplicationID'),
 				category: category,
 				categoryBannerUrl: categoryBannerUrl,
+				productsIndex: algoliaData.calculateIndexId('products'),
+				categoriesIndex: algoliaData.calculateIndexId('categories'),
 				// TODO: sqlinjection ?
 				cgid: req.querystring.cgid,
 				q: req.querystring.q
