@@ -68,7 +68,9 @@ module.exports.execute = function (parameters) {
     if (deltaList.getSize() === 0) {
         logger.info('Delta is empty, no syncronization is needed');
         deltaList.close();
-        return true;
+        sendLogData.sendError = false;
+        algoliaData.setLogData('LastProductSyncLog', sendLogData);
+        return new Status(Status.OK);
     }
 
     // check if merchant set his preferred number

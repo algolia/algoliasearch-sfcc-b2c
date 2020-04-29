@@ -81,8 +81,8 @@ var algoliaProduct = function (product) {
         this.name[localeName] = product.name ? stringUtils.trim(product.name) : '';
         var productPageUrl = URLUtils.https('Product-Show', 'pid', product.ID);
         this.url[localeName] = productPageUrl ? productPageUrl.toString() : '';
-        this.long_description[localeName] = product.longDescription ? stringUtils.trim(product.longDescription.toString()) : '';
-        this.short_description[localeName] = product.shortDescription ? stringUtils.trim(product.shortDescription.toString()) : '';
+        this.long_description[localeName] = product.longDescription ? stringUtils.trim(product.longDescription.toString()) : 'No descriptoion';
+        this.short_description[localeName] = product.shortDescription ? stringUtils.trim(product.shortDescription.toString()) : 'No descriptoion';
     }
 
     // Get price for all currencies
