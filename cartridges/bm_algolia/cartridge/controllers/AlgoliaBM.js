@@ -59,9 +59,8 @@ function handleSettings() {
         algoliaData.setSetOfStrings('CustomFields', params.CustomFields.value);
         algoliaData.setPreference('HostBase', params.HostBase.value);
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
-        algoliaData.setPreference('LastCategorySyncDate', new Date(params.LastCategorySyncDate.value));
-        algoliaData.setPreference('LastProductSyncDate', new Date(params.LastProductSyncDate.value));
         algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
+        algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
     } catch (error) {
         Logger.error(error);
     }

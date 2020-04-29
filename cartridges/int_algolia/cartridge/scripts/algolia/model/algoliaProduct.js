@@ -3,6 +3,7 @@
 var Site = require('dw/system/Site');
 var Currency = require('dw/util/Currency');
 var stringUtils = require('dw/util/StringUtils');
+var URLUtils = require('dw/web/URLUtils');
 
 /**
  * Function get Algolia Image Group of Images attributes of Product
@@ -78,9 +79,10 @@ var algoliaProduct = function (product) {
         request.setLocale(localeName);
 
         this.name[localeName] = product.name ? stringUtils.trim(product.name) : '';
-        this.url[localeName] = product.pageURL ? stringUtils.trim(product.pageURL.toString()) : '';
-        this.long_description[localeName] = product.longDescription ? stringUtils.trim(product.longDescription.toString()) : '';
-        this.short_description[localeName] = product.shortDescription ? stringUtils.trim(product.shortDescription.toString()) : '';
+        var productPageUrl = URLUtils.https('Product-Show', 'pid', product.ID);
+        this.url[localeName] = productPageUrl ? productPageUrl.toString() : '';
+        this.long_description[localeName] = product.longDescription ? stringUtils.trim(product.longDescription.toString()) : 'No descriptoion';
+        this.short_description[localeName] = product.shortDescription ? stringUtils.trim(product.shortDescription.toString()) : 'No descriptoion';
     }
 
     // Get price for all currencies
