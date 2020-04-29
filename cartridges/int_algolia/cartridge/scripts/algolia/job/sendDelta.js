@@ -103,7 +103,7 @@ module.exports.execute = function (parameters) {
                 }
             } else {
                 sendLogData.sendError = true;
-                sendLogData.sendErrorMessage = 'Error sending chunk. See the log file for details.';
+                sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
                 algoliaData.setLogData('LastProductSyncLog', sendLogData);
                 deltaList.close();
                 return status;
