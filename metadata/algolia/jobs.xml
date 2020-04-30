@@ -43,6 +43,15 @@
                     <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/categoryIndexJob.js</parameter>
                     <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
                     <parameter name="ExecuteScriptModule.Transactional">false</parameter>
+                    <parameter name="init">true</parameter>
+                </parameters>
+            </step>
+            <step step-id="sendCategoriesDelta" type="ExecuteScriptModule" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/sendCategoriesDelta.js</parameter>
+                    <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
+                    <parameter name="ExecuteScriptModule.Transactional">false</parameter>
                 </parameters>
             </step>
         </flow>
