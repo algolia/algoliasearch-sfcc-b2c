@@ -173,10 +173,10 @@ function updateProductSnapshotFile() {
     var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_PRODUCTS_FILE_NAME);
 
     try {
-        if (snapshotFile.exists()) {
-            snapshotFile.remove();
-        }
         if (newSnapshotFile.exists()) {
+            if (snapshotFile.exists()) {
+                snapshotFile.remove();
+            }
             newSnapshotFile.renameTo(snapshotFile);
         }
     } catch (error) {
