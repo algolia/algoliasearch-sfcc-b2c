@@ -164,32 +164,9 @@ function logFileInfo(file, infoMessage) {
     return null;
 }
 
-/**
- * Delete old snapshot file and rename a new one
- */
-function updateProductSnapshotFile() {
-    var File = require('dw/io/File');
-    var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
-    var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_PRODUCTS_FILE_NAME);
-
-    try {
-        if (newSnapshotFile.exists()) {
-            if (snapshotFile.exists()) {
-                snapshotFile.remove();
-            }
-            newSnapshotFile.renameTo(snapshotFile);
-        }
-    } catch (error) {
-        jobHelper.logFileError(snapshotFile.fullPath, 'Error rewrite file', error);
-        return false;
-    }
-    return true;
-}
-
 module.exports.appendObjToXML = appendObjToXML;
 module.exports.xmlToObject = xmlToObject;
 module.exports.objectCompare = objectCompare;
 module.exports.readXMLObjectFromStream = readXMLObjectFromStream;
 module.exports.logFileError = logFileError;
 module.exports.logFileInfo = logFileInfo;
-module.exports.updateProductSnapshotFile = updateProductSnapshotFile;

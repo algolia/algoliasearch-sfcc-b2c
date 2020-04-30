@@ -50,7 +50,6 @@ function sendFailedChunks(failedChunks) {
  */
 function sendDelta(deltaList, logID, parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 
     var date = new Date();
     var sendLogData = algoliaData.getLogData(logID);
@@ -123,7 +122,6 @@ function sendDelta(deltaList, logID, parameters) {
         sendLogData.sendError = true;
         sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
     } else {
-        jobHelper.updateProductSnapshotFile();
         algoliaData.setPreference(logID, date);
         sendLogData.sendError = false;
         sendLogData.sendedChunk += sendLogData.failedChunk;

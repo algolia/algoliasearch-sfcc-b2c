@@ -196,7 +196,7 @@ function runProductExport(parameters) {
             }
         }
 
-        // Write delta to file_update
+        // Write delta to file
         if (productUpdate) {
             try {
                 writeObjectToXMLStream(updateXmlWriter, productUpdate);
