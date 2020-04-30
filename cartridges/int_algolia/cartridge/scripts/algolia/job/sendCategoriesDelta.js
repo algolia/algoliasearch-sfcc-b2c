@@ -44,7 +44,8 @@ function sendFailedChunks(failedChunks) {
 module.exports.execute = function (parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    var categoryDeltaIterator = require('*/cartridge/scripts/algolia/helper/categoryDeltaIterator');
+    var deltaIterator = require('*/cartridge/scripts/algolia/helper/deltaIterator');
+    var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
     var date = new Date();
     var sendLogData = algoliaData.getLogData('LastCategorySyncLog');
@@ -63,7 +64,7 @@ module.exports.execute = function (parameters) {
 
     var status = null;
 
-    var deltaList = categoryDeltaIterator.create();
+    var deltaList = deltaIterator.create(algoliaConstants.UPDATE_CATEGORIES_FILE_NAME, 'category');
 
     if (deltaList.getSize() === 0) {
         logger.info('Delta is empty, no syncronization is needed');
