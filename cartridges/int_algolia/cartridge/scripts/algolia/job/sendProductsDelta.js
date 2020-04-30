@@ -5,6 +5,6 @@ module.exports.execute = function (parameters) {
     var deltaIterator = require('*/cartridge/scripts/algolia/helper/deltaIterator');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
-    var deltaList = deltaIterator.create(algoliaConstants.UPDATE_CATEGORIES_FILE_NAME, 'category');
-    return sendDelta(deltaList, 'LastCategorySyncLog', parameters);
+    var deltaList = deltaIterator.create(algoliaConstants.UPDATE_PRODUCTS_FILE_NAME, 'product');
+    return sendDelta(deltaList, 'LastProductSyncLog', parameters);
 };
