@@ -5,6 +5,7 @@ var QUOTA_API_JS_JSON_STRING_LENGTH = 600000; // The maximum allowed length of a
 var MAX_FAILED_CHUNKS = 3;
 
 var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+var Status = require('dw/system/Status');
 
 /**
  * Send array of objects to Algolia API
@@ -14,7 +15,7 @@ var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
 function sendChunk(entriesArray) {
     var algoliaApi = require('*/cartridge/scripts/algoliaApi');
     var result = algoliaApi.sendDelta(entriesArray);
-    return !result.error;
+    return result;
 }
 
 /**
@@ -23,35 +24,53 @@ function sendChunk(entriesArray) {
  * @returns {boolean} - successful
  */
 function sendFailedChunks(failedChunks) {
+    var status = new Status(Status.OK);
+
     if (failedChunks.length === 0) {
-        return true;
+        return status;
     }
 
     var chunkLength = Math.floor(failedChunks.length / MAX_FAILED_CHUNKS) + 1;
 
     for (var startIndex = 0; startIndex < failedChunks.length; startIndex += chunkLength) {
         var elements = failedChunks.slice(startIndex, startIndex + chunkLength);
-        if (!sendChunk(elements)) {
-            return false;
-        }
+        status = sendChunk(elements);
+        if (status.error) { break; }
     }
 
-    return true;
+    return status;
 }
 
 module.exports.execute = function (parameters) {
+    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+    var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var productDeltaIterator = require('*/cartridge/scripts/algolia/helper/productDeltaIterator');
+
+    var date = new Date();
+    var sendLogData = algoliaData.getLogData('LastProductSyncLog');
+    sendLogData.sendDate = date.toISOString();
+    sendLogData.sendError = true;
+    sendLogData.sendErrorMessage = '';
+    sendLogData.sendedChunk = 0;
+    sendLogData.sendedRecords = 0;
+    sendLogData.failedChunk = 0;
+    sendLogData.failedRecords = 0;
+
     var entries = [];
     var maxNumberOfEntries;
     var failedChunks = [];
     var countFailedShunks = 0;
+
+    var status = null;
 
     var deltaList = productDeltaIterator.create();
 
     if (deltaList.getSize() === 0) {
         logger.info('Delta is empty, no syncronization is needed');
         deltaList.close();
-        return true;
+        sendLogData.sendError = false;
+        algoliaData.setLogData('LastProductSyncLog', sendLogData);
+        return new Status(Status.OK);
     }
 
     // check if merchant set his preferred number
@@ -70,13 +89,24 @@ module.exports.execute = function (parameters) {
 
         if (entries.length >= maxNumberOfEntries || !deltaList.hasNext()) {
             // send the chunks
-            if (!sendChunk(entries)) {
+            status = sendChunk(entries);
+            if (status.error) {
                 failedChunks = failedChunks.concat(entries);
                 countFailedShunks += 1;
+                sendLogData.failedChunk += 1;
+                sendLogData.failedRecords += entries.length;
+                sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
+
                 if (countFailedShunks > MAX_FAILED_CHUNKS) {
-                    throw new Error('Too many failed chunks. Service might be down. Aborting the job.');
-                    // break;
+                    sendLogData.sendError = true;
+                    sendLogData.sendErrorMessage = 'Too many failed chunks. Service might be down. Aborting the job.';
+                    algoliaData.setLogData('LastProductSyncLog', sendLogData);
+                    deltaList.close();
+                    return new Status(Status.ERROR);
                 }
+            } else {
+                sendLogData.sendedChunk += 1;
+                sendLogData.sendedRecords += entries.length;
             }
             entries.length = 0; // crear the array
         }
@@ -85,6 +115,27 @@ module.exports.execute = function (parameters) {
     deltaList.close();
 
     // Resending failed chunks
-    sendFailedChunks(failedChunks);
-    return true;
+    status = sendFailedChunks(failedChunks);
+
+    if (status.error) {
+        sendLogData.sendError = true;
+        sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
+    } else {
+        jobHelper.updateProductSnapshotFile();
+        algoliaData.setPreference('LastProductSyncDate', date);
+        sendLogData.sendError = false;
+        sendLogData.sendedChunk += sendLogData.failedChunk;
+        sendLogData.sendedRecords += sendLogData.failedRecords;
+        sendLogData.failedChunk = 0;
+        sendLogData.failedRecords = 0;
+    }
+
+    date = new Date();
+    sendLogData.sendDate = date.toISOString();
+    algoliaData.setLogData('LastProductSyncLog', sendLogData);
+
+    logger.info('Sended chunk: {0}; Failed chunk: {1}\nSended records: {2}; Failed records: {3}',
+        sendLogData.sendedChunk, sendLogData.failedChunk, sendLogData.sendedRecords, sendLogData.failedRecords);
+
+    return status;
 };

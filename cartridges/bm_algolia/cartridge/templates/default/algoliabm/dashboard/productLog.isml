@@ -1,0 +1,105 @@
+<isset name="productLog" value="${pdict.algoliaData.getLogData('LastProductSyncLog')}" scope="page"/>
+<div class="algolia-bm-log-product">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+            <td class="table_header w s" nowrap="nowrap" width="100%" colspan="1" style="padding: 6px;">Log of the last processed Products data</td>
+                <td class="table_header w e s center">Date</td>
+                <td class="table_header e s center">Result</td>
+            </tr>
+            <tr>
+                <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Last processed Date</td>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${productLog.processedDate}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail e s center">
+                    <isif condition="${productLog.processedError}">
+                        Error
+                    <iselse/>
+                        Succes
+                    </isif>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <isif condition="${productLog.processedError}">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+                <tr>
+                    <td class="table_detail w s" nowrap="nowrap" colspan="1">Error Message: </td>
+                    <td class="table_detail w e s" width="100%">
+                        <isprint value="${productLog.processedErrorMessage}" encoding="htmlcontent" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </isif>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td class="table_detail w e s" nowrap="nowrap">Products processed</td>
+                <td class="table_detail e s"  width="100%">
+                    <isprint value="${productLog.processedRecords + ' records'}" encoding="htmlcontent" />
+                </td>
+            </tr>
+            <tr>
+                <td class="table_detail w e s" nowrap="nowrap">Products for updated</td>
+                <td class="table_detail e s"  width="100%">
+                    <isprint value="${productLog.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="algolia-bm-log-product-send">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td class="table_header w s" nowrap="nowrap" width="100%" colspan="1" style="padding: 6px;">Log of the last sent Product data</td>
+                <td class="table_header w e s center">Date</td>
+                <td class="table_header e s center">Result</td>
+            </tr>
+            <tr>
+                <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Last sent Date</td>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${productLog.sendDate}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail e s center">
+                    <isif condition="${productLog.sendError}">
+                        Error
+                    <iselse/>
+                        Succes
+                    </isif>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <isif condition="${productLog.sendError}">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+                <tr>
+                    <td class="table_detail w s" nowrap="nowrap" colspan="1">Error Message: </td>
+                    <td class="table_detail w e s" width="100%">
+                        <isprint value="${productLog.sendErrorMessage}" encoding="htmlcontent" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </isif>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td class="table_detail w e s" nowrap="nowrap">Data sent successfully</td>
+                <td class="table_detail e s"  width="100%">
+                    <isprint value="${productLog.sendedChunk + ' chunk (' + productLog.sendedRecords + ' records)'}" encoding="htmlcontent" />
+                </td>
+            </tr>
+            <tr>
+                <td class="table_detail w e s" nowrap="nowrap">Failed to send data</td>
+                <td class="table_detail e s"  width="100%">
+                    <isprint value="${productLog.failedChunk + ' chunk (' + productLog.failedRecords + ' records)'}" encoding="htmlcontent" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

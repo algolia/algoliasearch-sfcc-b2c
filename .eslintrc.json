@@ -18,6 +18,7 @@
     "globals": {
         "empty": true,
         "request": true,
-        "dw": true
+        "dw": true,
+        "XML": true
     }
 }

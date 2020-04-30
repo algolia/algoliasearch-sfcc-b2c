@@ -8,6 +8,26 @@ var XMLStreamConstants = require('dw/io/XMLStreamConstants');
 var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 
+/**
+ * Read JS object from XML file
+ * @param {dw.io.XMLStreamReader} xmlStreamReader - XML Stream Reader
+ * @param {string} nodeName - name of node XML object
+ * @returns {Object} - JS object
+ */
+function readObject(xmlStreamReader, nodeName) {
+    var result = null;
+    var objXML = jobHelper.readXMLObjectFromStream(xmlStreamReader, nodeName);
+    var obj = jobHelper.xmlToObject(objXML);
+    if (obj) {
+        result = obj[nodeName];
+        if (Object.prototype.hasOwnProperty.call(result, 'options')
+        && Object.prototype.hasOwnProperty.call(result.options, 'partial')) {
+            result.options.partial = result.options.partial.toLowerCase() === 'true';
+        }
+    }
+    return result;
+}
+
 var ProductDeltaIterator = function () {
     this.deltaFile = null;
     this.deltaFileReader = null;
@@ -41,9 +61,7 @@ ProductDeltaIterator.create = function () {
     newProductDeltaIterator.deltaXmlReader = new XMLStreamReader(newProductDeltaIterator.deltaFileReader);
 
     // Read first object to buffer
-    var productDeltaXML = jobHelper.readXMLObjectFromStream(newProductDeltaIterator.deltaXmlReader, 'product');
-    var product = jobHelper.xmlToObject(productDeltaXML);
-    newProductDeltaIterator.dataBuffer = product ? product.product : null;
+    newProductDeltaIterator.dataBuffer = readObject(newProductDeltaIterator.deltaXmlReader, 'product');
 
     return newProductDeltaIterator;
 };
@@ -67,9 +85,7 @@ ProductDeltaIterator.prototype.next = function () {
     if (empty(this.deltaXmlReader) || empty(this.dataBuffer)) { return result; }
 
     result = this.dataBuffer;
-    var productDeltaXML = jobHelper.readXMLObjectFromStream(this.deltaXmlReader, 'product');
-    var product = jobHelper.xmlToObject(productDeltaXML);
-    this.dataBuffer = product ? product.product : null;
+    this.dataBuffer = readObject(this.deltaXmlReader, 'product');
 
     return result;
 };

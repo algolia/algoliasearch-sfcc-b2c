@@ -3,6 +3,25 @@
 var currentSite = require('dw/system/Site').getCurrent();
 var Transaction = require('dw/system/Transaction');
 
+/**
+ * Log Data Object
+ */
+function LogJob() {
+    var date = new Date();
+    this.processedDate = date.toISOString();
+    this.processedError = false;
+    this.processedErrorMessage = '';
+    this.processedRecords = 0;
+    this.processedToUpdateRecords = 0;
+    this.sendDate = date.toISOString();
+    this.sendError = false;
+    this.sendErrorMessage = '';
+    this.sendedChunk = 0;
+    this.sendedRecords = 0;
+    this.failedChunk = 0;
+    this.failedRecords = 0;
+}
+
 /*
  * Function for getting preferences for Algolia
  *
@@ -17,6 +36,8 @@ var Transaction = require('dw/system/Transaction');
  *   LastProductSyncDate    | Timestamp of the last product index sync job run  | Datetime
  *   SearchApiKey           | Authorization key for Algolia                     | String
  *   AdminApiKey            | Authorization Admin key for Algolia               | String
+ *   LastProductSyncLog     | Last product sync job log                         | String
+ *   LastCategorySyncLog    | Last category sync job log                        | String
  * -----------------------------------------------------------------------------------------------
  */
 //   Example:
@@ -70,9 +91,47 @@ function setSetOfStrings(id, value) {
     });
 }
 
+/**
+ * @description Get product log data from preference
+ * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @returns {Object} - log data
+ */
+function getLogData(id) {
+    var productLogAsString = getPreference(id);
+    var productLog = new LogJob();
+
+    if (!empty(productLogAsString)) {
+        try {
+            productLog = JSON.parse(productLogAsString);
+        } catch (error) {
+            productLog = new LogJob();
+        }
+    }
+    return productLog;
+}
+
+/**
+ * @description Set product log data from preference
+ * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @param {Object} productLog - ploduct log Object
+ * @returns {null} - log data
+ */
+function setLogData(id, productLog) {
+    var productLogAsString;
+    try {
+        productLogAsString = JSON.stringify(productLog);
+    } catch (error) {
+        productLogAsString = JSON.stringify(new LogJob());
+    }
+    setPreference(id, productLogAsString);
+    return null;
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
     getSetOfStrings: getSetOfStrings,
-    setSetOfStrings: setSetOfStrings
+    setSetOfStrings: setSetOfStrings,
+    getLogData: getLogData,
+    setLogData: setLogData
 };

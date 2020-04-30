@@ -1,5 +1,7 @@
 "use strict";
 
+var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+
 /**
  * Convert JS Object to XML Object and append to baseXML Object
  * @param {XML} baseXML - XML Object for update
@@ -147,8 +149,47 @@ function logFileError(file, errorMessage, error) {
     return null;
 }
 
+/**
+ * Parse error message and write it to log
+ * @param {string}  file  - File name where the IOError
+ * @param {string}  infoMessage - Info message
+ * @returns {null} - Null
+ */
+function logFileInfo(file, infoMessage) {
+    var logger = require('dw/system/Logger').getLogger('algolia');
+    logger.info('\nFile: {0},\nMassage: {1}',
+        file,
+        infoMessage);
+
+    return null;
+}
+
+/**
+ * Delete old snapshot file and rename a new one
+ */
+function updateProductSnapshotFile() {
+    var File = require('dw/io/File');
+    var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
+    var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_PRODUCTS_FILE_NAME);
+
+    try {
+        if (newSnapshotFile.exists()) {
+            if (snapshotFile.exists()) {
+                snapshotFile.remove();
+            }
+            newSnapshotFile.renameTo(snapshotFile);
+        }
+    } catch (error) {
+        jobHelper.logFileError(snapshotFile.fullPath, 'Error rewrite file', error);
+        return false;
+    }
+    return true;
+}
+
 module.exports.appendObjToXML = appendObjToXML;
 module.exports.xmlToObject = xmlToObject;
 module.exports.objectCompare = objectCompare;
 module.exports.readXMLObjectFromStream = readXMLObjectFromStream;
 module.exports.logFileError = logFileError;
+module.exports.logFileInfo = logFileInfo;
+module.exports.updateProductSnapshotFile = updateProductSnapshotFile;
