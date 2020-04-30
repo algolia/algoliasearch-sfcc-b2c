@@ -237,7 +237,7 @@ function runProductExport(parameters) {
     jobHelper.logFileInfo(updateFile.fullPath, 'Records for update' + counterProductsForUpdate + 'records');
 
     date = new Date();
-    productLogData.processedDate = date.toISOString();
+    productLogData.processedDate = date.toLocaleDateString();
     productLogData.processedError = false;
     productLogData.processedErrorMessage = '';
     productLogData.processedRecords = counterProductsTotal;

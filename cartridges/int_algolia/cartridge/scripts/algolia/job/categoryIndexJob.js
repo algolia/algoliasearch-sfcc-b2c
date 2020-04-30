@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 var catalogMgr = require('dw/catalog/CatalogMgr');
 var URLUtils = require('dw/web/URLUtils');
@@ -74,7 +74,7 @@ function getImageUrl(image) {
  */
 function writeObjectToXMLStream(xmlStreamWriter, obj) {
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    var categoryModelXML = <category></category>;
+    var categoryModelXML = new XML('<category></category>');
 
     jobHelper.appendObjToXML(categoryModelXML, obj);
 
@@ -170,7 +170,7 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
 }
 
 /**
- * Create new Product Snapshot file
+ * Create new Category Snapshot file
  * @param {dw.io.File} snapshotFile - Snapshot file object
  * @param {Array} listOfCategories - array of categories
  * @returns {boolean} - successful of create file
@@ -287,7 +287,7 @@ function runCategoryExport(parameters) {
                 if (deltaObject || initCall) {
                     categoryUpdate = new UpdateCategoryModel(categoryFromList);
                 }
-            } else {	// save to updateXmlWriter that product is deleted
+            } else {	// save to updateXmlWriter that category is deleted
                 categoryUpdate = {
                     topic: 'categories/delete',
                     resource_type: 'category',
@@ -306,7 +306,7 @@ function runCategoryExport(parameters) {
         }
     }
 
-    // render new snapshot and add new products to updates
+    // render new snapshot and add new categories to updates
 
     // Open XML New temporary Snapshot file to write
     var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_CATEGORIES_FILE_NAME);
