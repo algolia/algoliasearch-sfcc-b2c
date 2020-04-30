@@ -27,6 +27,26 @@ function forEach(collection, callback, scope) {
 }
 
 /**
+ * UpdateCategoryModel class that represents an object for Algolia index request
+ * @param {Object} algoliaCategory - Algolia Category Object
+ * @constructor
+ */
+function UpdateCategoryModel(algoliaCategory) {
+    this.topic = 'categories/index';
+    this.resource_type = 'category';
+    this.resource_id = algoliaCategory.id;
+    this.options = {
+        data : {}
+    }
+
+    for (var property in algoliaCategory) {
+        if (property !== 'id') {
+            this.options.data[property] = algoliaCategory[property];
+        };
+    }
+};
+
+/**
  * Get category url
  * @param {dw.catalog.Category} category - Current category
  * @returns {string} - Url of the category
@@ -69,11 +89,11 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
  * @param {dw.catalog.Category} category - A single category
  * @returns {string} category ID
  */
-function prepareListOfCategories(siteLocales, listOfCategories, category, parentId) {
+function prepareListOfCategories(siteLocales, listOfCategories, category, catalogId, parentId) {
     if (!category.custom || !category.custom.showInMenu) {
         return null;
     }
-    var categoryId = category.ID;
+    var categoryId = catalogId + '/' + category.ID;
     var result = {
         id: categoryId,
         url: {},
@@ -109,7 +129,7 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, parent
         forEach(subCategories, function (subcategory) {
             var converted = null;
             if (subcategory.hasOnlineProducts() || subcategory.hasOnlineSubCategories()) {
-                converted = prepareListOfCategories(siteLocales, listOfCategories, subcategory, categoryId);
+                converted = prepareListOfCategories(siteLocales, listOfCategories, subcategory, catalogId, categoryId);
             }
             if (converted) {
                 if (!result.subCategories) {
@@ -179,8 +199,10 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
  * file for update Algolia Category Index
  * @returns {boolean} - successful Job run
  */
-function runCategoryExport() {
-    var siteRootCategory = catalogMgr.getSiteCatalog().getRoot();
+function runCategoryExport(parameters) {
+	var siteCatalog = catalogMgr.getSiteCatalog();
+	var siteCatalogId = siteCatalog.getID();
+    var siteRootCategory = siteCatalog.getRoot();
     var currentSite = Site.getCurrent();
     var siteLocales = currentSite.getAllowedLocales();
     var topLevelCategories = siteRootCategory.hasOnlineSubCategories() ?
@@ -195,21 +217,41 @@ function runCategoryExport() {
 
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
     while(topLevelCategories.hasNext()) {
         var category = topLevelCategories.next();
-        prepareListOfCategories(siteLocales, listOfCategories, category);
+        prepareListOfCategories(siteLocales, listOfCategories, category, siteCatalogId);
     }
 
     var snapshotFile = new File(algoliaConstants.SNAPSHOT_CATEGORIES_FILE_NAME);
     var updateFile = new File(algoliaConstants.UPDATE_CATEGORIES_FILE_NAME);
+    
+    var date = new Date();
+    var categoryLogData = algoliaData.getLogData('LastCategorySyncLog');
+    categoryLogData.processedDate = date.toISOString();
+    categoryLogData.processedError = true;
+    categoryLogData.processedErrorMessage = '';
+    categoryLogData.processedRecords = 0;
+    categoryLogData.processedToUpdateRecords = 0;
+    
+    var initCall = false;
+    if (!empty(parameters.init) && parameters.init.toLowerCase() == 'true') {
+    	initCall = true;
+    	try {
+            snapshotFile.remove();
+        } catch (error) {
+            jobHelper.logFileError(snapshotFile.fullPath, 'Error remove snapshot file', error);
+            categoryLogData.processedErrorMessage = 'Error remove shapnshot file';
+            algoliaData.setLogData('LastCategorySyncLog', cateogryLogData);        
+            return false;
+        };
+    }
     if (!snapshotFile.exists()) {
         createCategoriesSnapshotFile(snapshotFile, listOfCategories);
         if(updateFile.exists()) {
             updateFile.remove();
         }
-        snapshotFile.copyTo(updateFile);
-        return true;
     };
 
     var snapshotFileReader = new FileReader(snapshotFile, "UTF-8");
@@ -236,8 +278,8 @@ function runCategoryExport() {
                 // compare if was updated
                 var categoryFromList = listOfCategories[indexOfcategoryFromList];
                 var deltaObject = jobHelper.objectCompare(categorySnapshot, categoryFromList);
-                if (deltaObject) {
-                    categoryUpdate = categoryFromList;
+                if (deltaObject || initCall) {
+                    categoryUpdate = new UpdateCategoryModel(categoryFromList);
                 }
             } else {	// save to updateXmlWriter that product is deleted
                 categoryUpdate = {
