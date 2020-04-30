@@ -36,15 +36,15 @@ function UpdateCategoryModel(algoliaCategory) {
     this.resource_type = 'category';
     this.resource_id = algoliaCategory.id;
     this.options = {
-        data : {}
-    }
+        data: {}
+    };
 
     for (var property in algoliaCategory) {
         if (property !== 'id') {
             this.options.data[property] = algoliaCategory[property];
-        };
+        }
     }
-};
+}
 
 /**
  * Get category url
@@ -59,7 +59,7 @@ function getCategoryUrl(category) {
 
 /**
  * Get image url
- * @param {dw.content.MediaFile} MediaFile - image
+ * @param {dw.content.MediaFile} image - MediaFile
  * @returns {string} - Url of the image
  */
 function getImageUrl(image) {
@@ -68,7 +68,7 @@ function getImageUrl(image) {
 
 /**
  * Write Object to XMlStreamWriter
- * @param {dw.io.XMLStreamWriter} xmlStreamWriter - XML Stream Writer 
+ * @param {dw.io.XMLStreamWriter} xmlStreamWriter - XML Stream Writer
  * @param {Object} obj - name of node XML object
  * @returns {null} - XML Object or null
  */
@@ -86,7 +86,11 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
 
 /**
  * Converts a given category from dw.catalog.Category to plain object
+ * @param {Array} siteLocales - array of available locales
+ * @param {Array} listOfCategories - array of categories
  * @param {dw.catalog.Category} category - A single category
+ * @param {string} catalogId - ID of site catalog
+ * @param {string} parentId - ID of parent category
  * @returns {string} category ID
  */
 function prepareListOfCategories(siteLocales, listOfCategories, category, catalogId, parentId) {
@@ -102,7 +106,7 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, catalo
     };
     for (var loc in siteLocales) {
         var localeName = siteLocales[loc];
-        request.setLocale(localeName);    
+        request.setLocale(localeName);
 
         result.url[localeName] = getCategoryUrl(category);
         result.name[localeName] = category.getDisplayName();
@@ -146,7 +150,7 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, catalo
 
 /**
  * Read XML object from StreamReader
- * @param {dw.io.XMLStreamReader} xmlStreamReader - XML Stream Reader 
+ * @param {dw.io.XMLStreamReader} xmlStreamReader - XML Stream Reader
  * @param {string} modeName - name of node XML object
  * @returns {Object|null} - XML Object or null
  */
@@ -166,16 +170,17 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
 }
 
 /**
- * Create new Product Snapshot file 
+ * Create new Product Snapshot file
  * @param {dw.io.File} snapshotFile - Snapshot file object
+ * @param {Array} listOfCategories - array of categories
  * @returns {boolean} - successful of create file
  */
 function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
     var FileWriter = require('dw/io/FileWriter');
     var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter');
 
-    var snapshotFileWriter = new FileWriter(snapshotFile, "UTF-8");
-    var xlsw = new XMLStreamWriter(snapshotFileWriter); 
+    var snapshotFileWriter = new FileWriter(snapshotFile, 'UTF-8');
+    var xlsw = new XMLStreamWriter(snapshotFileWriter);
 
     xlsw.writeStartDocument();
     xlsw.writeStartElement('categories');
@@ -190,18 +195,19 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
     xlsw.close();
     snapshotFileWriter.close();
 
-    //TODO: error handler
+    // TODO: error handler
     return true;
 }
 
 /**
- * Job for create Categories Snapshot file and 
+ * Job for create Categories Snapshot file and
  * file for update Algolia Category Index
+ * @param {Object} parameters - job parameters
  * @returns {boolean} - successful Job run
  */
 function runCategoryExport(parameters) {
-	var siteCatalog = catalogMgr.getSiteCatalog();
-	var siteCatalogId = siteCatalog.getID();
+    var siteCatalog = catalogMgr.getSiteCatalog();
+    var siteCatalogId = siteCatalog.getID();
     var siteRootCategory = siteCatalog.getRoot();
     var currentSite = Site.getCurrent();
     var siteLocales = currentSite.getAllowedLocales();
@@ -219,14 +225,14 @@ function runCategoryExport(parameters) {
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
-    while(topLevelCategories.hasNext()) {
+    while (topLevelCategories.hasNext()) {
         var category = topLevelCategories.next();
         prepareListOfCategories(siteLocales, listOfCategories, category, siteCatalogId);
     }
 
     var snapshotFile = new File(algoliaConstants.SNAPSHOT_CATEGORIES_FILE_NAME);
     var updateFile = new File(algoliaConstants.UPDATE_CATEGORIES_FILE_NAME);
-    
+
     var date = new Date();
     var categoryLogData = algoliaData.getLogData('LastCategorySyncLog');
     categoryLogData.processedDate = date.toISOString();
@@ -234,32 +240,32 @@ function runCategoryExport(parameters) {
     categoryLogData.processedErrorMessage = '';
     categoryLogData.processedRecords = 0;
     categoryLogData.processedToUpdateRecords = 0;
-    
+
     var initCall = false;
     if (!empty(parameters.init) && parameters.init.toLowerCase() == 'true') {
-    	initCall = true;
-    	try {
+        initCall = true;
+        try {
             snapshotFile.remove();
         } catch (error) {
             jobHelper.logFileError(snapshotFile.fullPath, 'Error remove snapshot file', error);
             categoryLogData.processedErrorMessage = 'Error remove shapnshot file';
-            algoliaData.setLogData('LastCategorySyncLog', cateogryLogData);        
+            algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
             return false;
-        };
+        }
     }
     if (!snapshotFile.exists()) {
         createCategoriesSnapshotFile(snapshotFile, listOfCategories);
-        if(updateFile.exists()) {
+        if (updateFile.exists()) {
             updateFile.remove();
         }
-    };
+    }
 
-    var snapshotFileReader = new FileReader(snapshotFile, "UTF-8");
+    var snapshotFileReader = new FileReader(snapshotFile, 'UTF-8');
     var snapshotXmlReader = new XMLStreamReader(snapshotFileReader);
 
     // Open XML Update for Algolia file to write
-    var updateFileWriter = new FileWriter(updateFile, "UTF-8");
-    var updateXmlWriter = new XMLStreamWriter(updateFileWriter); 
+    var updateFileWriter = new FileWriter(updateFile, 'UTF-8');
+    var updateXmlWriter = new XMLStreamWriter(updateFileWriter);
     updateXmlWriter.writeStartDocument();
     updateXmlWriter.writeStartElement('categories');
 
@@ -268,7 +274,7 @@ function runCategoryExport(parameters) {
         if (categorySnapshotXML) {
             var categorySnapshot = jobHelper.xmlToObject(categorySnapshotXML).category;
             var categoryUpdate;
-            var indexOfcategoryFromList = listOfCategories.map(function(e) { return e.id; }).indexOf(categorySnapshot.id);
+            var indexOfcategoryFromList = listOfCategories.map(function (e) { return e.id; }).indexOf(categorySnapshot.id);
 
             if (indexOfcategoryFromList > -1) {
                 // check empty attributes
@@ -283,10 +289,10 @@ function runCategoryExport(parameters) {
                 }
             } else {	// save to updateXmlWriter that product is deleted
                 categoryUpdate = {
-                    topic : 'categories/delete',
-                    resource_type : 'category',
-                    resource_id : categorySnapshot.id
-                }
+                    topic: 'categories/delete',
+                    resource_type: 'category',
+                    resource_id: categorySnapshot.id
+                };
             }
 
             if (categoryUpdate) {
@@ -304,8 +310,8 @@ function runCategoryExport(parameters) {
 
     // Open XML New temporary Snapshot file to write
     var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_CATEGORIES_FILE_NAME);
-    var snapshotFileWriter = new FileWriter(newSnapshotFile, "UTF-8");
-    var snapshotXmlWriter = new XMLStreamWriter(snapshotFileWriter); 
+    var snapshotFileWriter = new FileWriter(newSnapshotFile, 'UTF-8');
+    var snapshotXmlWriter = new XMLStreamWriter(snapshotFileWriter);
     snapshotXmlWriter.writeStartDocument();
     snapshotXmlWriter.writeStartElement('categories');
 
@@ -341,7 +347,7 @@ function runCategoryExport(parameters) {
     } catch (error) {
         jobHelper.logFileError(snapshotFile.fullPath, 'Error rewrite file', error);
         return false;
-    };
+    }
     return true;
 }
 

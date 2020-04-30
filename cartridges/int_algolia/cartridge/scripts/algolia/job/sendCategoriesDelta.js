@@ -24,21 +24,21 @@ function sendChunk(entriesArray) {
  * @returns {boolean} - successful
  */
 function sendFailedChunks(failedChunks) {
+    var status = new Status(Status.OK);
+
     if (failedChunks.length === 0) {
-        return new Status(Status.OK);
+        return status;
     }
 
     var chunkLength = Math.floor(failedChunks.length / MAX_FAILED_CHUNKS) + 1;
 
     for (var startIndex = 0; startIndex < failedChunks.length; startIndex += chunkLength) {
         var elements = failedChunks.slice(startIndex, startIndex + chunkLength);
-        var status = sendChunk(elements);
-        if (!status.error) {
-            return status;
-        }
+        status = sendChunk(elements);
+        if (status.error) { break; }
     }
 
-    return true;
+    return status;
 }
 
 module.exports.execute = function (parameters) {
@@ -90,28 +90,24 @@ module.exports.execute = function (parameters) {
         if (entries.length >= maxNumberOfEntries || !deltaList.hasNext()) {
             // send the chunks
             status = sendChunk(entries);
-            if (!status.error) {
+            if (status.error) {
                 failedChunks = failedChunks.concat(entries);
                 countFailedShunks += 1;
                 sendLogData.failedChunk += 1;
                 sendLogData.failedRecords += entries.length;
+                sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
+
                 if (countFailedShunks > MAX_FAILED_CHUNKS) {
                     sendLogData.sendError = true;
                     sendLogData.sendErrorMessage = 'Too many failed chunks. Service might be down. Aborting the job.';
                     algoliaData.setLogData('LastCategorySyncLog', sendLogData);
                     deltaList.close();
                     return new Status(Status.ERROR);
-                    // throw new Error('Too many failed chunks. Service might be down. Aborting the job.');
                 }
             } else {
-                sendLogData.sendError = true;
-                sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
-                algoliaData.setLogData('LastCategorySyncLog', sendLogData);
-                deltaList.close();
-                return status;
+                sendLogData.sendedChunk += 1;
+                sendLogData.sendedRecords += entries.length;
             }
-            sendLogData.sendedChunk += 1;
-            sendLogData.sendedRecords += entries.length;
             entries.length = 0; // crear the array
         }
     }
@@ -120,14 +116,22 @@ module.exports.execute = function (parameters) {
 
     // Resending failed chunks
     status = sendFailedChunks(failedChunks);
-    date = new Date();
-    if (!status.error) {
-        //jobHelper.updateCategorySnapshotFile();
-        algoliaData.setPreference('LastCategorySyncLog', date);
+
+    if (status.error) {
+        sendLogData.sendError = true;
+        sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
+    } else {
+        jobHelper.updateProductSnapshotFile();
+        algoliaData.setPreference('LastCategorySyncDate', date);
+        sendLogData.sendError = false;
+        sendLogData.sendedChunk += sendLogData.failedChunk;
+        sendLogData.sendedRecords += sendLogData.failedRecords;
+        sendLogData.failedChunk = 0;
+        sendLogData.failedRecords = 0;
     }
 
+    date = new Date();
     sendLogData.sendDate = date.toISOString();
-    sendLogData.sendError = false;
     algoliaData.setLogData('LastCategorySyncLog', sendLogData);
 
     logger.info('Sended chunk: {0}; Failed chunk: {1}\nSended records: {2}; Failed records: {3}',
