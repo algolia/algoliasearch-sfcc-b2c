@@ -74,6 +74,7 @@
         </table>
         </form>
     </div>
+    <iscomment>
     <p></p>
     <div class="algolia-bm-indexes">
         <form action="${pdict.reindexUrl}" class="form-horizontal" method="post">
@@ -104,6 +105,9 @@
         </table>
         </form>
     </div>
+    </iscomment>
     <p></p>
     <isinclude template="algoliabm/dashboard/productLog" />
+    <p></p>
+    <isinclude template="algoliabm/dashboard/categoryLog" />
 </isdecorate>
