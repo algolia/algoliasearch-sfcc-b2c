@@ -8,12 +8,12 @@ var Transaction = require('dw/system/Transaction');
  */
 function LogJob() {
     var date = new Date();
-    this.processedDate = date.toISOString();
+    this.processedDate = date.toLocaleDateString();
     this.processedError = false;
     this.processedErrorMessage = '';
     this.processedRecords = 0;
     this.processedToUpdateRecords = 0;
-    this.sendDate = date.toISOString();
+    this.sendDate = date.toLocaleDateString();
     this.sendError = false;
     this.sendErrorMessage = '';
     this.sendedChunk = 0;
@@ -71,6 +71,16 @@ function setPreference(id, value) {
  * @description Getting preference (as set of strings) for Algolia
  * @param {string} id - name of preference
  * @returns {array} - value of preference
+ */
+function getSetOfArray(id) {
+    var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return values.length ? values.map(function (element) { return element; }) : [];
+}
+
+/**
+ * @description Getting preference (as set of strings) for Algolia
+ * @param {string} id - name of preference
+ * @returns {string} - value of preference
  */
 function getSetOfStrings(id) {
     var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
@@ -130,6 +140,7 @@ function setLogData(id, productLog) {
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
+    getSetOfArray: getSetOfArray,
     getSetOfStrings: getSetOfStrings,
     setSetOfStrings: setSetOfStrings,
     getLogData: getLogData,

@@ -14,10 +14,10 @@
                     <parameter name="init">true</parameter>
                 </parameters>
             </step>
-            <step step-id="SendDelta" type="ExecuteScriptModule" enforce-restart="false">
+            <step step-id="sendProductsDelta" type="ExecuteScriptModule" enforce-restart="false">
                 <description/>
                 <parameters>
-                    <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/sendDelta.js</parameter>
+                    <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/sendProductsDelta.js</parameter>
                     <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
                     <parameter name="ExecuteScriptModule.Transactional">false</parameter>
                 </parameters>
@@ -33,7 +33,7 @@
     </job>
 
     <job job-id="Algolia_categories_reindex" priority="0">
-        <description/>
+        <description>Export categories to Algolia service for update search index files</description>
         <parameters/>
         <flow>
             <context site-id="RefArch"/>

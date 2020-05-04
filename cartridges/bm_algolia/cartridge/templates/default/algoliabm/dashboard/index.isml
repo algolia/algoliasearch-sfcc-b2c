@@ -52,13 +52,13 @@
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Last Product Sync Date</td>
                     <td class="table_detail w e s" nowrap="nowrap">
-                        <isprint value="${pdict.algoliaData.getPreference('LastProductSyncDate') ? pdict.algoliaData.getPreference('LastProductSyncDate').toISOString() : '---'}" encoding="htmlcontent" />
+                        <isprint value="${pdict.algoliaData.getPreference('LastProductSyncDate') ? pdict.algoliaData.getPreference('LastProductSyncDate').toLocaleDateString() : '---'}" encoding="htmlcontent" />
                     </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Last Category Sync Date</td>
                     <td class="table_detail w e s" nowrap="nowrap">
-                        <isprint value="${pdict.algoliaData.getPreference('LastCategorySyncDate') ? pdict.algoliaData.getPreference('LastCategorySyncDate').toISOString() : '---'}" encoding="htmlcontent" />
+                        <isprint value="${pdict.algoliaData.getPreference('LastCategorySyncDate') ? pdict.algoliaData.getPreference('LastCategorySyncDate').toLocaleDateString() : '---'}" encoding="htmlcontent" />
                     </td>
                 </tr>
                 <tr>
@@ -74,6 +74,7 @@
         </table>
         </form>
     </div>
+    <iscomment>
     <p></p>
     <div class="algolia-bm-indexes">
         <form action="${pdict.reindexUrl}" class="form-horizontal" method="post">
@@ -104,6 +105,9 @@
         </table>
         </form>
     </div>
+    </iscomment>
     <p></p>
     <isinclude template="algoliabm/dashboard/productLog" />
+    <p></p>
+    <isinclude template="algoliabm/dashboard/categoryLog" />
 </isdecorate>

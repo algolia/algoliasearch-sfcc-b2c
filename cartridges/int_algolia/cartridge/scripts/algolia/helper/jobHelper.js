@@ -1,6 +1,4 @@
-"use strict";
-
-var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+'use strict';
 
 /**
  * Convert JS Object to XML Object and append to baseXML Object
@@ -27,7 +25,7 @@ function appendObjToXML(baseXML, obj) {
             baseXML[property] = obj[property];
         }
     }
-};
+}
 
 /**
  * Convert XML Object to JS Object
@@ -35,11 +33,11 @@ function appendObjToXML(baseXML, obj) {
  * @returns {Object} - JS Object
  */
 function xmlToObject(xmlObj) {
-    if (empty(xmlObj)) { return null; };
+    if (empty(xmlObj)) { return null; }
     var result = {};
     var lengthChildren = xmlObj.length();
 
-    for (var i = 0; i < lengthChildren; i++) {
+    for (var i = 0; i < lengthChildren; i += 1) {
         var property = xmlObj[i].name().localName;
         if (xmlObj[i].hasSimpleContent()) {
             result[property] = xmlObj[i].toString();
@@ -48,18 +46,17 @@ function xmlToObject(xmlObj) {
             var child = xmlObj[i].elements();
             var childProperty = child[0].name().localName;
             var childAttribute = child[0].attribute('id');
-            if (childProperty == 'value' && childAttribute.length() > 0) {
+            if (childProperty === 'value' && childAttribute.length() > 0) {
                 result[property] = [];
                 var len = xmlObj[i][childProperty].length();
-                for (var k = 0; k < len; k++) {
+                for (var k = 0; k < len; k += 1) {
                     if (child[k].hasSimpleContent()) {
                         result[property].push(child[k].toString());
                     } else {
                         result[property].push(xmlToObject(child[k].elements()));
                     }
                 }
-            }
-            else {
+            } else {
                 result[property] = xmlToObject(xmlObj[i].elements());
             }
         }
@@ -68,52 +65,103 @@ function xmlToObject(xmlObj) {
 }
 
 /**
- * Compares two objects and creates a new one with properties whose values differ.
- * Values of vompareObj are written to the new object
- * @param {Object} baseObj - first Object 
+ * Check object for empty
+ * @param {Object} obj - any Object
+ * @returns {boolean} - is empty Object
+ */
+function isEmptyObject(obj) {
+    if (obj instanceof Object) {
+        for(var prop in obj) {
+            if(obj.hasOwnProperty(prop))
+                return false;
+        }
+        return true;
+    } else {
+        return empty(obj);
+    }
+}
+
+/**
+ * Function returns true if the baseObj Object contains properties of the compareObj Object
+ * @param {Object} compareObj - second Object
+ * @param {Object} baseObj - first Object
+ * @returns {boolean} - success
+ */
+function hasSameProperties(compareObj, baseObj) {
+    for (var property in compareObj) {
+        if ( ! baseObj.hasOwnProperty(property)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+/**
+ * Function creates a new object that contains the properties
+ * of the compareObj that are not in the baseObj
+ * If objects are equals, returns empty Object
+ * @param {Object} baseObj - first Object
  * @param {Object} compareObj - second Object
  * @returns {Object} - object of differents
  */
-function objectCompare(baseObj, compareObj) {
-    var result = null;
+function subtractObject(baseObj, compareObj) {
+    var result = {};
+
+    // if both x and y are null or undefined and exactly the same
+    if (baseObj === compareObj) return result;
+
+    // if they are not strictly equal, they both need to be Objects
+    if (!(baseObj instanceof Object) && (compareObj instanceof Object)) {
+        return compareObj;
+    }
+
     for (var property in compareObj) {
+        // if base Object don't have property add to result one.
         if (compareObj[property] instanceof Array) {
             // Compare Arrays            
             var arrBaseObj = baseObj[property];
             var arrCompareObj = compareObj[property];
             if ((arrBaseObj instanceof Array) && arrBaseObj.length === arrCompareObj.length) {
                 for (var i = 0; i < arrCompareObj.length; i++) {
-                    if (!empty(objectCompare({ value: arrBaseObj[i] }, { value: arrCompareObj[i] }))) {
-                        if (!result) { result = {} };
+                    if (!isEmptyObject(subtractObject({ value: arrBaseObj[i] }, { value: arrCompareObj[i] }))) {
                         result[property] = arrCompareObj.slice();
                         break;
                     }
                 }
             } else {
-                if (!result) { result = {} };
                 result[property] = arrCompareObj.slice();
             }
         } else if (compareObj[property] instanceof Object) {
             // Compare Objects
-            var obj = objectCompare(baseObj[property], compareObj[property]);
-            if (obj) {
-                if (!result) { result = {} };
+            var obj = subtractObject(baseObj[property], compareObj[property]);
+            if (!isEmptyObject(obj)) {
                 result[property] = obj;
             }
         } else {
             // Compare primitives
             if (baseObj[property] !== compareObj[property]) {
-                if (!result) { result = {} };
                 result[property] = compareObj[property];
             }
         }
     }
     return result;
-};
+}
+
+/**
+ * Compares two objects and creates a new one with properties whose values differ.
+ * Values of compareObj are written to the new object
+ * @param {Object} compareObj - second Object
+ * @param {Object} baseObj - first Object
+ * @returns {Object} - object of differents
+ */
+function objectCompare(compareObj, baseObj) {
+    var result = subtractObject(compareObj, baseObj);
+    return isEmptyObject(result) ? null : result;
+}
 
 /**
  * Read XML object from StreamReader
- * @param {dw.io.XMLStreamReader} xmlStreamReader - XML Stream Reader 
+ * @param {dw.io.XMLStreamReader} xmlStreamReader - XML Stream Reader
  * @param {string} modeName - name of node XML object
  * @returns {Object|null} - XML Object or null
  */
@@ -121,9 +169,9 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var result = null;
     while (xmlStreamReader.hasNext()) {
-        if (xmlStreamReader.next() == XMLStreamConstants.START_ELEMENT) {
+        if (xmlStreamReader.next() === XMLStreamConstants.START_ELEMENT) {
             var localElementName = xmlStreamReader.getLocalName();
-            if (localElementName == modeName) {
+            if (localElementName === modeName) {
                 result = xmlStreamReader.readXMLObject();
                 break;
             }
@@ -164,32 +212,10 @@ function logFileInfo(file, infoMessage) {
     return null;
 }
 
-/**
- * Delete old snapshot file and rename a new one
- */
-function updateProductSnapshotFile() {
-    var File = require('dw/io/File');
-    var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
-    var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_PRODUCTS_FILE_NAME);
-
-    try {
-        if (newSnapshotFile.exists()) {
-            if (snapshotFile.exists()) {
-                snapshotFile.remove();
-            }
-            newSnapshotFile.renameTo(snapshotFile);
-        }
-    } catch (error) {
-        jobHelper.logFileError(snapshotFile.fullPath, 'Error rewrite file', error);
-        return false;
-    }
-    return true;
-}
-
 module.exports.appendObjToXML = appendObjToXML;
 module.exports.xmlToObject = xmlToObject;
 module.exports.objectCompare = objectCompare;
+module.exports.hasSameProperties = hasSameProperties;
 module.exports.readXMLObjectFromStream = readXMLObjectFromStream;
 module.exports.logFileError = logFileError;
 module.exports.logFileInfo = logFileInfo;
-module.exports.updateProductSnapshotFile = updateProductSnapshotFile;

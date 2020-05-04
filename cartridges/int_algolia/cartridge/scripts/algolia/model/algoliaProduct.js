@@ -5,6 +5,8 @@ var Currency = require('dw/util/Currency');
 var stringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 
+var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+
 /**
  * Function get Algolia Image Group of Images attributes of Product
  * @param {dw.order.Product} product - product
@@ -57,65 +59,82 @@ function getImagesGroup(product, viewtype) {
  * @param {dw.order.Product} product - Product
  * @constructor
  */
-var algoliaProduct = function (product) {
-    var currentSites = Site.getCurrent();
+function algoliaProduct(product) {
+    var customFields = algoliaData.getSetOfArray('CustomFields');
+    if (empty(product)) {
+        this.id = null;
+    } else {
+        var currentSites = Site.getCurrent();
 
-    // GET none Localized properties
-    this.id = product.ID;
-    this.primary_category_id = product.getPrimaryCategory() ? product.primaryCategory.ID : '';
-    this.in_stock = product.availabilityModel.inStock.toString();
+        // GET none Localized properties
+        this.id = product.ID;
 
-    // Get Localized properties
-    this.name = {};
-    this.url = {};
-    this.long_description = {};
-    this.short_description = {};
+        if (customFields.indexOf('primary_category_id') > -1) {
+            this.primary_category_id = product.getPrimaryCategory() ? product.primaryCategory.ID : '';
+        }
 
-    var siteLocales = currentSites.getAllowedLocales();
-    var siteLocalesSize = siteLocales.size();
+        if (customFields.indexOf('in_stock') > -1) {
+            this.in_stock = product.availabilityModel.inStock.toString();
+        }
 
-    for (var i = 0; i < siteLocalesSize; i += 1) {
-        var localeName = siteLocales[i];
-        request.setLocale(localeName);
+        // Get Localized properties
+        var productName = {};
+        var productUrl = {};
+        var productLongDescription = {};
+        var productShortDescription = {};
 
-        this.name[localeName] = product.name ? stringUtils.trim(product.name) : '';
-        var productPageUrl = URLUtils.https('Product-Show', 'pid', product.ID);
-        this.url[localeName] = productPageUrl ? productPageUrl.toString() : '';
-        this.long_description[localeName] = product.longDescription ? stringUtils.trim(product.longDescription.toString()) : 'No descriptoion';
-        this.short_description[localeName] = product.shortDescription ? stringUtils.trim(product.shortDescription.toString()) : 'No descriptoion';
-    }
+        var siteLocales = currentSites.getAllowedLocales();
+        var siteLocalesSize = siteLocales.size();
 
-    // Get price for all currencies
-    this.price = {};
-    var currentSession = request.getSession();
-    var siteCurrencies = currentSites.getAllowedCurrencies();
-    var siteCurrenciesSize = siteCurrencies.size();
+        for (var i = 0; i < siteLocalesSize; i += 1) {
+            var localeName = siteLocales[i];
+            request.setLocale(localeName);
 
-    for (var k = 0; k < siteCurrenciesSize; k += 1) {
-        var currency = Currency.getCurrency(siteCurrencies[k]);
-        currentSession.setCurrency(currency);
-        var price = product.priceModel.price;
-        if (price.available) {
-            this.price[price.currencyCode] = price.value.toString();
+            productName[localeName] = product.name ? stringUtils.trim(product.name) : '';
+            var productPageUrl = URLUtils.https('Product-Show', 'pid', product.ID);
+            productUrl[localeName] = productPageUrl ? productPageUrl.toString() : '';
+            productLongDescription[localeName] = product.longDescription ? stringUtils.trim(product.longDescription.toString()) : 'No descriptoion';
+            productShortDescription[localeName] = product.shortDescription ? stringUtils.trim(product.shortDescription.toString()) : 'No descriptoion';
+        }
+
+        if (customFields.indexOf('name') > -1) { this.name = productName; }
+        if (customFields.indexOf('url') > -1) { this.url = productUrl; }
+        if (customFields.indexOf('long_description') > -1) { this.long_description = productLongDescription; }
+        if (customFields.indexOf('short_description') > -1) { this.short_description = productShortDescription; }
+
+
+        // Get price for all currencies
+        var productPrice = {};
+        var currentSession = request.getSession();
+        var siteCurrencies = currentSites.getAllowedCurrencies();
+        var siteCurrenciesSize = siteCurrencies.size();
+
+        for (var k = 0; k < siteCurrenciesSize; k += 1) {
+            var currency = Currency.getCurrency(siteCurrencies[k]);
+            currentSession.setCurrency(currency);
+            var price = product.priceModel.price;
+            if (price.available) {
+                productPrice[price.currencyCode] = price.value.toString();
+            }
+        }
+
+        if (customFields.indexOf('price') > -1) { this.price = productPrice; }
+
+        var imageGroupsArr = [];
+        var imageGroup = getImagesGroup(product, 'large');
+        if (!empty(imageGroup)) {
+            imageGroupsArr.push(imageGroup);
+        }
+
+        imageGroup = getImagesGroup(product, 'small');
+        if (!empty(imageGroup)) {
+            imageGroupsArr.push(imageGroup);
+        }
+
+        if (customFields.indexOf('image_groups') > -1) {
+            this.image_groups = imageGroupsArr.length > 0 ? imageGroupsArr : '';
         }
     }
-
-    var imageGroupsArr = [];
-    var imageGroup = getImagesGroup(product, 'large');
-    if (!empty(imageGroup)) {
-        imageGroupsArr.push(imageGroup);
-    }
-
-    imageGroup = getImagesGroup(product, 'small');
-    if (!empty(imageGroup)) {
-        imageGroupsArr.push(imageGroup);
-    }
-
-    this.image_groups = imageGroupsArr.length > 0 ? imageGroupsArr : '';
-};
-
-algoliaProduct.getFields = function () {
-    return ['name', 'short_description', 'long_description', 'primary_category_id', 'image_groups', 'price', 'in_stock', 'url'];
-};
+}
 
 module.exports = algoliaProduct;

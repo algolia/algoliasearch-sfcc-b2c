@@ -9,20 +9,15 @@ var PROCESSING_PRODUCT_LIMIT = 0;
  * UpdateProductModel class that represents an Algolia ProductModel
  * for update product properties
  * @param {Object} algoliaProduct - Algolia Product Model
- * @param {boolean} partialUpdate - Update part of product
  * @constructor
  */
-function UpdateProductModel(algoliaProduct, partialUpdate) {
+function UpdateProductModel(algoliaProduct) {
     this.topic = 'products/index';
     this.resource_type = 'product';
     this.resource_id = algoliaProduct.id;
     this.options = {
         data: {}
     };
-
-    if (partialUpdate) {
-        this.options.partial = true;
-    }
 
     for (var property in algoliaProduct) {
         if (property !== 'id') {
@@ -71,7 +66,7 @@ function runProductExport(parameters) {
     var counterProductsForUpdate = 0;
     var date = new Date();
     var productLogData = algoliaData.getLogData('LastProductSyncLog');
-    productLogData.processedDate = date.toISOString();
+    productLogData.processedDate = date.toLocaleDateString();
     productLogData.processedError = true;
     productLogData.processedErrorMessage = '';
     productLogData.processedRecords = 0;
@@ -135,6 +130,7 @@ function runProductExport(parameters) {
 
     var productsIterator = ProductMgr.queryAllSiteProductsSorted();
     var newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+    var snapshotToUpdate = true;
     var productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
 
     var limitCounter = 0;
@@ -142,8 +138,8 @@ function runProductExport(parameters) {
     while (newProductModel || productSnapshot) {
         var productUpdate = null;
 
-        if (newProductModel) {
-            // Write product to new snapshot file
+        // Write product to Snapshot file
+        if (snapshotToUpdate && newProductModel) {
             try {
                 writeObjectToXMLStream(snapshotXmlWriter, newProductModel);
             } catch (error) {
@@ -152,13 +148,15 @@ function runProductExport(parameters) {
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
                 return false;
             }
+            snapshotToUpdate = false;
             counterProductsTotal += 1;
         }
 
         if (newProductModel && !productSnapshot) {
             // Add product to delta
-            productUpdate = new UpdateProductModel(newProductModel, false);
+            productUpdate = new UpdateProductModel(newProductModel);
             newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+            snapshotToUpdate = true;
         }
 
         if (!newProductModel && productSnapshot) {
@@ -174,17 +172,26 @@ function runProductExport(parameters) {
         if (newProductModel && productSnapshot) {
             if (newProductModel.id === productSnapshot.id) {
                 // Update product to delta
-                var deltaObject = jobHelper.objectCompare(productSnapshot, newProductModel);
-                if (deltaObject) {
-                    deltaObject.id = newProductModel.id;
-                    productUpdate = new UpdateProductModel(deltaObject, true);
+                if (jobHelper.hasSameProperties(productSnapshot, newProductModel)) {
+                    var deltaObject = jobHelper.objectCompare(productSnapshot, newProductModel);
+                    // Partial product update
+                    if (deltaObject) {
+                        deltaObject.id = newProductModel.id;
+                        productUpdate = new UpdateProductModel(deltaObject);
+                        productUpdate.options.partial = true;
+                    }
+                } else {
+                    // Rewrite product сompletely
+                    productUpdate = new UpdateProductModel(newProductModel);
                 }
-                newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
                 productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
+                newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+                snapshotToUpdate = true;
             } else if (newProductModel.id < productSnapshot.id) {
                 // Add product to delta
-                productUpdate = new UpdateProductModel(newProductModel, false);
+                productUpdate = new UpdateProductModel(newProductModel);
                 newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+                snapshotToUpdate = true;
             } else {
                 // Remove product from delta
                 productUpdate = {
@@ -196,7 +203,7 @@ function runProductExport(parameters) {
             }
         }
 
-        // Write delta to file_update
+        // Write delta to file
         if (productUpdate) {
             try {
                 writeObjectToXMLStream(updateXmlWriter, productUpdate);

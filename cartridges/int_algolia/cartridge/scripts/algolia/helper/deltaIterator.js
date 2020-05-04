@@ -5,7 +5,6 @@ var FileReader = require('dw/io/FileReader');
 var XMLStreamReader = require('dw/io/XMLStreamReader');
 var XMLStreamConstants = require('dw/io/XMLStreamConstants');
 
-var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 
 /**
@@ -28,45 +27,53 @@ function readObject(xmlStreamReader, nodeName) {
     return result;
 }
 
-var ProductDeltaIterator = function () {
+var DeltaIterator = function () {
     this.deltaFile = null;
     this.deltaFileReader = null;
     this.deltaXmlReader = null;
     this.dataBuffer = null;
     this.size = null;
+    this.nodeName = null;
 };
 
-ProductDeltaIterator.create = function () {
-    var newProductDeltaIterator = new ProductDeltaIterator();
-
-    var fileName = algoliaConstants.UPDATE_PRODUCTS_FILE_NAME;
-    newProductDeltaIterator.deltaFile = new File(fileName);
-
-    // Scan file and calculate number of ProductObjects
-    var deltaFileReader = new FileReader(newProductDeltaIterator.deltaFile, 'UTF-8');
-    var xmlStreamReader = new XMLStreamReader(deltaFileReader);
+DeltaIterator.create = function (fileName, nodeName) {
+    var newDeltaIterator = new DeltaIterator();
+    newDeltaIterator.deltaFile = new File(fileName);
+    newDeltaIterator.nodeName = nodeName;
+    var deltaFileReader = null;
     var counter = 0;
-    while (xmlStreamReader.hasNext()) {
-        if (xmlStreamReader.next() === XMLStreamConstants.START_ELEMENT) {
-            var localElementName = xmlStreamReader.getLocalName();
-            if (localElementName === 'product') { counter += 1; }
+
+    try {
+        // Scan file and calculate number of ProductObjects
+        deltaFileReader = new FileReader(newDeltaIterator.deltaFile, 'UTF-8');
+        var xmlStreamReader = new XMLStreamReader(deltaFileReader);
+        while (xmlStreamReader.hasNext()) {
+            if (xmlStreamReader.next() === XMLStreamConstants.START_ELEMENT) {
+                var localElementName = xmlStreamReader.getLocalName();
+                if (localElementName === nodeName) { counter += 1; }
+            }
         }
+        xmlStreamReader.close();
+    } catch (error) {
+        jobHelper.logFileError(fileName, 'Error open file to read', error);
+        newDeltaIterator.close();
+        return null;
     }
-    xmlStreamReader.close();
-    xmlStreamReader.close();
 
     // Re-open XML Delta file to read
-    newProductDeltaIterator.size = counter;
-    newProductDeltaIterator.deltaFileReader = new FileReader(newProductDeltaIterator.deltaFile, 'UTF-8');
-    newProductDeltaIterator.deltaXmlReader = new XMLStreamReader(newProductDeltaIterator.deltaFileReader);
+    newDeltaIterator.size = counter;
+    newDeltaIterator.deltaFileReader = new FileReader(newDeltaIterator.deltaFile, 'UTF-8');
+    newDeltaIterator.deltaXmlReader = new XMLStreamReader(newDeltaIterator.deltaFileReader);
 
     // Read first object to buffer
-    newProductDeltaIterator.dataBuffer = readObject(newProductDeltaIterator.deltaXmlReader, 'product');
+    if (counter > 0) {
+        newDeltaIterator.dataBuffer = readObject(newDeltaIterator.deltaXmlReader, nodeName);
+    }
 
-    return newProductDeltaIterator;
+    return newDeltaIterator;
 };
 
-ProductDeltaIterator.prototype.close = function () {
+DeltaIterator.prototype.close = function () {
     if (empty(this.deltaXmlReader)) { return false; }
     // Close XML Delta file
     this.deltaXmlReader.close();
@@ -75,30 +82,37 @@ ProductDeltaIterator.prototype.close = function () {
     this.deltaFileReader = null;
     this.dataBuffer = null;
     this.size = null;
+    this.nodeName = null;
 
     return true;
 };
 
-ProductDeltaIterator.prototype.next = function () {
+DeltaIterator.prototype.next = function () {
     var result = null;
 
     if (empty(this.deltaXmlReader) || empty(this.dataBuffer)) { return result; }
 
     result = this.dataBuffer;
-    this.dataBuffer = readObject(this.deltaXmlReader, 'product');
+    try {
+        this.dataBuffer = readObject(this.deltaXmlReader, this.nodeName);
+    } catch (error) {
+        jobHelper.logFileError(this.deltaFile.fullPath, 'Error read from file', error);
+        this.close();
+        return null;
+    }
 
     return result;
 };
 
-ProductDeltaIterator.prototype.hasNext = function () {
+DeltaIterator.prototype.hasNext = function () {
     return !empty(this.dataBuffer);
 };
 
-ProductDeltaIterator.prototype.getSize = function () {
+DeltaIterator.prototype.getSize = function () {
     return this.size;
 };
 
-ProductDeltaIterator.prototype.getRecordSize = function () {
+DeltaIterator.prototype.getRecordSize = function () {
     // calculate size of object in buffer
     var recordSize = 0;
     if (this.dataBuffer) {
@@ -112,4 +126,4 @@ ProductDeltaIterator.prototype.getRecordSize = function () {
     return recordSize;
 };
 
-module.exports = ProductDeltaIterator;
+module.exports = DeltaIterator;
