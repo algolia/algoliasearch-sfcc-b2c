@@ -117,17 +117,13 @@ function subtractObject(baseObj, compareObj) {
 
     for (var property in compareObj) {
         // if base Object don't have property add to result one.
-        if ( ! baseObj.hasOwnProperty(property)) {
-            result[property] = null;
-        }
-
         if (compareObj[property] instanceof Array) {
             // Compare Arrays            
             var arrBaseObj = baseObj[property];
             var arrCompareObj = compareObj[property];
             if ((arrBaseObj instanceof Array) && arrBaseObj.length === arrCompareObj.length) {
                 for (var i = 0; i < arrCompareObj.length; i++) {
-                    if (!empty(subtractObject({ value: arrBaseObj[i] }, { value: arrCompareObj[i] }))) {
+                    if (!isEmptyObject(subtractObject({ value: arrBaseObj[i] }, { value: arrCompareObj[i] }))) {
                         result[property] = arrCompareObj.slice();
                         break;
                     }
