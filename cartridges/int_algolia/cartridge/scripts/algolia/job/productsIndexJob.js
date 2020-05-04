@@ -130,6 +130,7 @@ function runProductExport(parameters) {
 
     var productsIterator = ProductMgr.queryAllSiteProductsSorted();
     var newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+    var snapshotToUpdate = true;
     var productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
 
     var limitCounter = 0;
@@ -137,8 +138,8 @@ function runProductExport(parameters) {
     while (newProductModel || productSnapshot) {
         var productUpdate = null;
 
-        if (newProductModel) {
-            // Write product to new snapshot file
+        // Write product to Snapshot file
+        if (snapshotToUpdate && newProductModel) {
             try {
                 writeObjectToXMLStream(snapshotXmlWriter, newProductModel);
             } catch (error) {
@@ -147,6 +148,7 @@ function runProductExport(parameters) {
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
                 return false;
             }
+            snapshotToUpdate = false;
             counterProductsTotal += 1;
         }
 
@@ -154,6 +156,7 @@ function runProductExport(parameters) {
             // Add product to delta
             productUpdate = new UpdateProductModel(newProductModel);
             newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+            snapshotToUpdate = true;
         }
 
         if (!newProductModel && productSnapshot) {
@@ -181,12 +184,14 @@ function runProductExport(parameters) {
                     // Rewrite product сompletely
                     productUpdate = new UpdateProductModel(newProductModel);
                 }
-                newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
                 productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
+                newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+                snapshotToUpdate = true;
             } else if (newProductModel.id < productSnapshot.id) {
                 // Add product to delta
                 productUpdate = new UpdateProductModel(newProductModel);
                 newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+                snapshotToUpdate = true;
             } else {
                 // Remove product from delta
                 productUpdate = {
