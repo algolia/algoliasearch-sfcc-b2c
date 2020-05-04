@@ -53,7 +53,7 @@ function sendDelta(deltaList, logID, parameters) {
 
     var date = new Date();
     var sendLogData = algoliaData.getLogData(logID);
-    sendLogData.sendDate = date.toISOString();
+    sendLogData.sendDate = date.toLocaleDateString();
     sendLogData.sendError = true;
     sendLogData.sendErrorMessage = '';
     sendLogData.sendedChunk = 0;
@@ -131,7 +131,7 @@ function sendDelta(deltaList, logID, parameters) {
     }
 
     date = new Date();
-    sendLogData.sendDate = date.toISOString();
+    sendLogData.sendDate = date.toLocaleDateString();
     algoliaData.setLogData(logID, sendLogData);
 
     logger.info('Sended chunk: {0}; Failed chunk: {1}\nSended records: {2}; Failed records: {3}',

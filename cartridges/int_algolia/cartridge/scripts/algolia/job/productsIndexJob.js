@@ -66,7 +66,7 @@ function runProductExport(parameters) {
     var counterProductsForUpdate = 0;
     var date = new Date();
     var productLogData = algoliaData.getLogData('LastProductSyncLog');
-    productLogData.processedDate = date.toISOString();
+    productLogData.processedDate = date.toLocaleDateString();
     productLogData.processedError = true;
     productLogData.processedErrorMessage = '';
     productLogData.processedRecords = 0;
