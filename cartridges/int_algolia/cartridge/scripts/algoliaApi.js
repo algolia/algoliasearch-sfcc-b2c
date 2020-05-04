@@ -3,7 +3,6 @@
 var serviceHelper = require('*/cartridge/scripts/service/serviceHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var serviceDefinition = require('*/cartridge/scripts/service/serviceDefinition');
-var algoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
 
 var Status = require('dw/system/Status');
 var tenantToken = null;
@@ -57,7 +56,7 @@ function createHandshakeRequest() {
         index_prefix: getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
         // @TODO replace from config
         fields: {
-            product: algoliaProduct.getFields(),
+            product: algoliaData.getSetOfArray('CustomFields'),
             category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subCategories', 'url']
         }
     };

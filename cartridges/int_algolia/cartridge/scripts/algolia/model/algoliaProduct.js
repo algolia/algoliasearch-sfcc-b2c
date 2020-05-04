@@ -57,7 +57,7 @@ function getImagesGroup(product, viewtype) {
  * @param {dw.order.Product} product - Product
  * @constructor
  */
-var algoliaProduct = function (product) {
+function algoliaProduct(product) {
     if (empty(product)) {
         this.id = null;
         this.primary_category_id = null;
@@ -124,10 +124,6 @@ var algoliaProduct = function (product) {
 
         this.image_groups = imageGroupsArr.length > 0 ? imageGroupsArr : '';
     }
-};
-
-algoliaProduct.getFields = function () {
-    return ['name', 'short_description', 'long_description', 'primary_category_id', 'image_groups', 'price', 'in_stock', 'url'];
-};
+}
 
 module.exports = algoliaProduct;
