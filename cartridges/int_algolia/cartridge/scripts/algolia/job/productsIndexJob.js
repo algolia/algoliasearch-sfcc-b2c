@@ -9,20 +9,15 @@ var PROCESSING_PRODUCT_LIMIT = 0;
  * UpdateProductModel class that represents an Algolia ProductModel
  * for update product properties
  * @param {Object} algoliaProduct - Algolia Product Model
- * @param {boolean} partialUpdate - Update part of product
  * @constructor
  */
-function UpdateProductModel(algoliaProduct, partialUpdate) {
+function UpdateProductModel(algoliaProduct) {
     this.topic = 'products/index';
     this.resource_type = 'product';
     this.resource_id = algoliaProduct.id;
     this.options = {
         data: {}
     };
-
-    if (partialUpdate) {
-        this.options.partial = true;
-    }
 
     for (var property in algoliaProduct) {
         if (property !== 'id') {
@@ -157,7 +152,7 @@ function runProductExport(parameters) {
 
         if (newProductModel && !productSnapshot) {
             // Add product to delta
-            productUpdate = new UpdateProductModel(newProductModel, false);
+            productUpdate = new UpdateProductModel(newProductModel);
             newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
         }
 
@@ -174,16 +169,23 @@ function runProductExport(parameters) {
         if (newProductModel && productSnapshot) {
             if (newProductModel.id === productSnapshot.id) {
                 // Update product to delta
-                var deltaObject = jobHelper.objectCompare(productSnapshot, newProductModel);
-                if (deltaObject) {
-                    deltaObject.id = newProductModel.id;
-                    productUpdate = new UpdateProductModel(deltaObject, true);
+                if (jobHelper.hasSameProperties(productSnapshot, newProductModel)) {
+                    var deltaObject = jobHelper.objectCompare(productSnapshot, newProductModel);
+                    // Partial product update
+                    if (deltaObject) {
+                        deltaObject.id = newProductModel.id;
+                        productUpdate = new UpdateProductModel(deltaObject);
+                        productUpdate.options.partial = true;
+                    }
+                } else {
+                    // Rewrite product сompletely
+                    productUpdate = new UpdateProductModel(newProductModel);
                 }
                 newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
                 productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
             } else if (newProductModel.id < productSnapshot.id) {
                 // Add product to delta
-                productUpdate = new UpdateProductModel(newProductModel, false);
+                productUpdate = new UpdateProductModel(newProductModel);
                 newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
             } else {
                 // Remove product from delta
