@@ -2,7 +2,25 @@
 
 var currentSite = require('dw/system/Site').getCurrent();
 var Transaction = require('dw/system/Transaction');
-var dwSystem = require('dw/system/System');
+
+/**
+ * Log Data Object
+ */
+function LogJob() {
+    var date = new Date();
+    this.processedDate = date.toISOString();
+    this.processedError = false;
+    this.processedErrorMessage = '';
+    this.processedRecords = 0;
+    this.processedToUpdateRecords = 0;
+    this.sendDate = date.toISOString();
+    this.sendError = false;
+    this.sendErrorMessage = '';
+    this.sendedChunk = 0;
+    this.sendedRecords = 0;
+    this.failedChunk = 0;
+    this.failedRecords = 0;
+}
 
 /*
  * Function for getting preferences for Algolia
@@ -18,6 +36,8 @@ var dwSystem = require('dw/system/System');
  *   LastProductSyncDate    | Timestamp of the last product index sync job run  | Datetime
  *   SearchApiKey           | Authorization key for Algolia                     | String
  *   AdminApiKey            | Authorization Admin key for Algolia               | String
+ *   LastProductSyncLog     | Last product sync job log                         | String
+ *   LastCategorySyncLog    | Last category sync job log                        | String
  * -----------------------------------------------------------------------------------------------
  */
 //   Example:
@@ -72,29 +92,39 @@ function setSetOfStrings(id, value) {
 }
 
 /**
- * Get instance hostname replacing dots with dashes and skipping
- * the general parts from the sandbox hostnames.
- * @returns {string} hostname
+ * @description Get product log data from preference
+ * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @returns {Object} - log data
  */
-function getInstanceHostName() {
-    var instanceHostname = dwSystem.getInstanceHostname();
+function getLogData(id) {
+    var productLogAsString = getPreference(id);
+    var productLog = new LogJob();
 
-    // remove the sandbox host
-    if (dwSystem.instanceType === dwSystem.DEVELOPMENT_SYSTEM) {
-        instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
-        instanceHostname = instanceHostname.replace('.demandware.net', '');
+    if (!empty(productLogAsString)) {
+        try {
+            productLog = JSON.parse(productLogAsString);
+        } catch (error) {
+            productLog = new LogJob();
+        }
     }
-    // replace dots
-    return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
+    return productLog;
 }
 
 /**
- * Create index id for search results request
- * @param {string} type - type of indices: products | categories
- * @returns {string} indexId
+ * @description Set product log data from preference
+ * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @param {Object} productLog - ploduct log Object
+ * @returns {null} - log data
  */
-function calculateIndexId(type) {
-    return getInstanceHostName() + '__' + currentSite.getID() + '__' + type + '__' + request.getLocale();
+function setLogData(id, productLog) {
+    var productLogAsString;
+    try {
+        productLogAsString = JSON.stringify(productLog);
+    } catch (error) {
+        productLogAsString = JSON.stringify(new LogJob());
+    }
+    setPreference(id, productLogAsString);
+    return null;
 }
 
 module.exports = {
@@ -102,6 +132,6 @@ module.exports = {
     setPreference: setPreference,
     getSetOfStrings: getSetOfStrings,
     setSetOfStrings: setSetOfStrings,
-    getInstanceHostName: getInstanceHostName,
-    calculateIndexId: calculateIndexId
+    getLogData: getLogData,
+    setLogData: setLogData
 };
