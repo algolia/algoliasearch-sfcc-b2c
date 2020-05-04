@@ -58,7 +58,7 @@ function createHandshakeRequest() {
         // @TODO replace from config
         fields: {
             product: algoliaProduct.getFields(),
-            category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subcategory', 'url']
+            category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subCategories', 'url']
         }
     };
 
