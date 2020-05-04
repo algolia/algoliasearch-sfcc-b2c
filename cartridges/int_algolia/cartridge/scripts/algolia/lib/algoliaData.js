@@ -7,13 +7,12 @@ var Transaction = require('dw/system/Transaction');
  * Log Data Object
  */
 function LogJob() {
-    var date = new Date();
-    this.processedDate = date.toLocaleDateString();
+    this.processedDate = '---';
     this.processedError = false;
     this.processedErrorMessage = '';
     this.processedRecords = 0;
     this.processedToUpdateRecords = 0;
-    this.sendDate = date.toLocaleDateString();
+    this.sendDate = '---';
     this.sendError = false;
     this.sendErrorMessage = '';
     this.sendedChunk = 0;

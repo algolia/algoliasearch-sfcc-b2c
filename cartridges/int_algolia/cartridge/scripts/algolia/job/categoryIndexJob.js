@@ -235,7 +235,7 @@ function runCategoryExport(parameters) {
 
     var date = new Date();
     var categoryLogData = algoliaData.getLogData('LastCategorySyncLog');
-    categoryLogData.processedDate = date.toLocaleDateString();
+    categoryLogData.processedDate = date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
     categoryLogData.processedError = true;
     categoryLogData.processedErrorMessage = '';
     categoryLogData.processedRecords = 0;
