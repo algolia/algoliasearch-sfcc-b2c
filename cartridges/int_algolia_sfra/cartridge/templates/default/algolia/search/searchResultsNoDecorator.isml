@@ -21,32 +21,36 @@
 <div class="container search-results">
     <div class="row">
         <div class="tab-content col-12">
-            <div class="tab-pane container active" id="product-search-results" role="tabpanel" aria-labelledby="product-tab">
+            <div class="aa-input-container" id="aa-input-container">
+                <input
+                    type="search"
+                    id="aa-search-input"
+                    class="aa-input-search"
+                    placeholder="Search for product or a cateogry"
+                    name="search"
+                    autocomplete="off"
+                />
+            </div>
+            <div class="ais-InstantSearch">
+                <div class="left-panel">
+                    <div id="sort-by"></div>
 
-                <!--- Refinement bar --->
-                <div class="row">
-                    <div class="refinement-bar col-md-3" id="clear-refinements">
-                        
-                    </div>
+                    <div id="clear-refinements"></div>
 
-                    <div class="col-sm-12 col-md-9">
-                         <!--- Selected filters bar --->
-                         <div class="row filter-bar d-md-none">
-                             
-                         </div>
+                    <h3>Categories</h3>
 
-                         <!--- Product Grid --->
-                         <div class="row product-grid" itemtype="http://schema.org/SomeProducts" itemid="#product" id="algolia-products">
-                             
-                         </div>
-                    </div>
+                    <div id="categories-list"></div>
+
+                    <h3>Price</h3>
+                    <div id="price-filter"></div>
+                </div>
+
+                <div class="right-panel">
+                    <div id="searchbox" class="ais-SearchBox"></div>
+                    <div id="hits"></div>
+                    <div id="pagination"></div>
                 </div>
             </div>
-            <!--- Content Grid --->
-            <div class="tab-pane container" id="content-search-results-pane" role="tabpanel" aria-labelledby="articles-tab">
-                <div id="content-search-results" class="content-grid-header"></div>
-            </div>
-
         </div>
     </div>
 </div>

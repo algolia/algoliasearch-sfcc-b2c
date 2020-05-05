@@ -1,146 +1,138 @@
-function renderPrice(hit) {
-	return `<div class="price">
-				<span>
-					<span class="sales">
-						<span class="value" content="${hit.price.USD}">${hit.price.USD}</span>
-					</span>
-				</span>
-			</div>`;
-}
-
-function renderTitle(hit) {
-	return `<div class="pdp-link">
-				<a class="link hit-name" href="${hit.url}">${hit.name}</a>
-			</div>`;
-}
-
-function renderImage(hit) {
-	return `<div class="image-container">
-			    <a href="${hit.url}">
-			        <img class="tile-image"
-			             src="${hit.image_groups[0].images[0].dis_base_link}"
-			             alt="${hit.name}"
-			             title="${hit.image_groups[0].images[0].title}"
-			             />
-			    </a>
-	  		</div>`;
-}
 
 document.addEventListener('DOMContentLoaded', function () {
-	var $suggestionsWrapper = $('#suggestions-wrapper'); 
+	/* global instantsearch algoliasearch autocomplete  */
+    var $suggestionsWrapper = $('#suggestions-wrapper');
+	var locale = 'default';
+	var userCurrency = 'USD';
+	var urlCategoryId = $suggestionsWrapper.data('category');  // category ID - for category page
+	var urlQuery = $suggestionsWrapper.data('q');        // onload search query - for search page 
+
+	var productsIndex = $suggestionsWrapper.data('productsindexid'); // site index for products
+	var categoriesIndex = 'zzrk_008_sandbox_us01_dx__Algolia-SFRA__categories__default';
+
 	var appId = $suggestionsWrapper.data('appid');
 	var searchApiKey = $suggestionsWrapper.data('searchapikey');
-	var category = $suggestionsWrapper.data('category');	// category ID - for category page
-	var searchQuery = $suggestionsWrapper.data('q');		// onload search query - for search page 
-	var client = algoliasearch(appId, searchApiKey);
-	
-	var productsIndexId = $suggestionsWrapper.data('productsindexid');	// site index for products
-	var algoliaIndex = client.initIndex(productsIndexId);
-	
-	var search = instantsearch({
-	  indexName: productsIndexId,
-	  searchClient: client
-	});
-	
-	search.addWidget(
-	  instantsearch.widgets.searchBox({
-		container: '#searchbox',
-	  })
-	);
-	
-	search.addWidget(
-	  instantsearch.widgets.hits({
-		container: '#algolia-products',
-		templates: {
-	  	item: function(hit) {
-	  		return `<div class="col-6 col-sm-4">
-		    	<div class="product" data-pid="${hit.objectID}">
-			    	<div class="product-tile">`
-				    	+ renderImage(hit) +
-				  		`<div class="tile-body">`
-				  			+ renderTitle(hit)
-	  						+ renderPrice(hit) +
-				  		`</div>
-				  	</div>
-				</div>
-			</div>
-	  	`},
-		},
-	  })
-	);
-	
+	var searchClient = algoliasearch(appId, searchApiKey);
 
-	search.addWidget(
-	  instantsearch.widgets.clearRefinements({
-		container: '#clear-refinements',
-	  })
-	);
-	
-	
-	
-	
-	
-	
-	// Helper for the render function
-	var renderIndexListItem = ({ indexId, hits }) => `
-	  <li>
-	    Index: ${indexId}
-	    <ol>
-	      ${hits
-	        .map(
-	          hit =>
-	            `<li>${instantsearch.highlight({ attribute: 'name', hit })}</li>`
-	        )
-	        .join('')}
-	    </ol>
-	  </li>
-	`;
-
-	// Create the render function
-	var renderAutocomplete = (renderOptions, isFirstRender) => {
-	  var { indices, currentRefinement, refine, widgetParams } = renderOptions;
-
-	  if (isFirstRender) {
-	    var input = document.createElement('input');
-	    var ul = document.createElement('ul');
-
-	    input.addEventListener('input', event => {
-	      refine(event.currentTarget.value);
-	    });
-
-	    widgetParams.container.appendChild(input);
-	    widgetParams.container.appendChild(ul);
-	  }
-
-	  widgetParams.container.querySelector('input').value = currentRefinement;
-	  widgetParams.container.querySelector('ul').innerHTML = indices
-	    .map(renderIndexListItem)
-	    .join('');
-	};
-
-	// Create the custom widget
-	var customAutocomplete = instantsearch.connectors.connectAutocomplete(
-	  renderAutocomplete
-	);
-
-	// Instantiate the custom widget
-	search.addWidgets([
-	  customAutocomplete({
-	    container: document.querySelector('#suggestions-wrapper'),
-	  })
+	// autocomplete
+	autocomplete('#aa-search-input', {}, [
+	  {
+	    source: autocomplete.sources.hits(searchClient.initIndex(productsIndex), {
+	      hitsPerPage: 3,
+	      distinct: true,
+	    }),
+	    displayKey: 'products',
+	    name: 'products',
+	    templates: {
+	      header: '<div class="aa-suggestions-category">Products</div>',
+	      suggestion({ url, _highlightResult }) {
+	        return `<a href="${url}">${_highlightResult.name.value}</a>`;
+	      },
+	    },
+	  },
+	  {
+	    source: autocomplete.sources.hits(searchClient.initIndex(categoriesIndex), {
+	      hitsPerPage: 3,
+	      distinct: true,
+	    }),
+	    displayKey: 'categories',
+	    name: 'categories',
+	    templates: {
+	      header: '<div class="aa-suggestions-category">Categories</div>',
+	      suggestion({ url, _highlightResult }) {
+	        return `<a href="${url}">${_highlightResult.name.value}</a>`;
+	      },
+	    },
+	  },
 	]);
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
+	// search page
+	var search = instantsearch({
+	  indexName: productsIndex,
+	  searchClient,
+	  routing: routing(),
+	});
+	search.addWidgets([
+	  instantsearch.widgets.configure({
+	    distinct: true,
+	  }),
+	  instantsearch.widgets.searchBox({
+	    container: '#searchbox',
+	  }),
+	  instantsearch.widgets.clearRefinements({
+	    container: '#clear-refinements',
+	  }),
+	  instantsearch.widgets.menu({
+	    container: '#categories-list',
+	    attribute: 'primary_category_id',
+	  }),
+	  instantsearch.widgets.rangeInput({
+	    container: '#price-filter',
+	    attribute: `price.${userCurrency}`,
+	  }),
+	  instantsearch.widgets.hits({
+	    container: '#hits',
+	    templates: {
+	      item: item => `
+	        <div>
+	          <div class="hit-name">${item.name}</div>
+	      
+	          <div class="hit-price">${
+	            item.price ? item.price[userCurrency] : ''
+	          }</div>
+	        </div>
+	      `,
+	    },
+	  }),
+	  instantsearch.widgets.pagination({
+	    container: '#pagination',
+	  }),
+	]);
 
 	search.start();
-	
-	
-	
+
+	function routing() {
+	  /*
+	  function getCategoryName(categoryId) {
+	    return categoryId;
+	  }
+	  function getCategorySlug(categoryId) {
+	    return categoryId;
+	  }
+	  */
+
+	  return {
+	    stateMapping: {
+	      stateToRoute(uiState) {
+	        var indexUiState = uiState[productsIndex] || {};
+
+	        return {
+	          query: indexUiState.query,
+	          page: indexUiState.page,
+	          brands:
+	            indexUiState.refinementList && indexUiState.refinementList.brand,
+	          category: indexUiState.menu && indexUiState.menu.primary_category_id,
+	        };
+	      },
+
+	      routeToState(routeState) {
+	        return {
+	          [productsIndex]: {
+	            query: urlQuery ? urlQuery : routeState.query,
+	            page: routeState.page,
+	            menu: {
+	              primary_category_id: urlCategoryId
+	                ? urlCategoryId
+	                : routeState.categories,
+	            },
+	            refinementList: {
+	              brand: routeState.brands,
+	            },
+	          },
+	        };
+	      },
+	    },
+	  };
+	}
+
 });
