@@ -64,9 +64,8 @@ function runProductExport(parameters) {
 
     var counterProductsTotal = 0;
     var counterProductsForUpdate = 0;
-    var date = new Date();
     var productLogData = algoliaData.getLogData('LastProductSyncLog');
-    productLogData.processedDate = date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
+    productLogData.processedDate = algoliaData.dateToLocalTimeStamp(new Date());
     productLogData.processedError = true;
     productLogData.processedErrorMessage = '';
     productLogData.processedRecords = 0;
@@ -243,8 +242,7 @@ function runProductExport(parameters) {
     jobHelper.logFileInfo(snapshotFile.fullPath, 'Processed ' + counterProductsTotal + ' records');
     jobHelper.logFileInfo(updateFile.fullPath, 'Records for update' + counterProductsForUpdate + 'records');
 
-    date = new Date();
-    productLogData.processedDate = date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
+    productLogData.processedDate = algoliaData.dateToLocalTimeStamp(new Date());
     productLogData.processedError = false;
     productLogData.processedErrorMessage = '';
     productLogData.processedRecords = counterProductsTotal;
