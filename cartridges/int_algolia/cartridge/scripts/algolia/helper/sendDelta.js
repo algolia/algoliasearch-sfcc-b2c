@@ -2,6 +2,7 @@
 
 // initialize
 var QUOTA_API_JS_JSON_STRING_LENGTH = 600000; // The maximum allowed length of a JavaScript string created by JSON.stringify().
+var MAX_CHUNKS_SIZE = 1000; // Maximum chunk size
 var MAX_FAILED_CHUNKS = 3;
 
 var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
@@ -61,7 +62,6 @@ function sendDelta(deltaList, logID, parameters) {
     sendLogData.failedChunk = 0;
     sendLogData.failedRecords = 0;
 
-    var maxNumberOfEntries;
     var entries = [];
     var failedChunks = [];
     var countFailedShunks = 0;
@@ -77,13 +77,13 @@ function sendDelta(deltaList, logID, parameters) {
     }
 
     // check if merchant set his preferred number
-    if (parameters.maxNumberOfEntries === '') {
-        maxNumberOfEntries = parameters.maxNumberOfEntries;
-    } else {
-        // calculate it
-        maxNumberOfEntries = Math.floor(QUOTA_API_JS_JSON_STRING_LENGTH / deltaList.getRecordSize()); // number of objects to fit the quota
-        maxNumberOfEntries -= Math.floor(maxNumberOfEntries / 5); // reduce by 20%
-    }
+    var inputMaxNumberOfEntries = Object.hasOwnProperty.call(parameters, 'maxNumberOfEntries') ? parseInt(parameters.maxNumberOfEntries, 10) : MAX_CHUNKS_SIZE;
+
+    // calculate it
+    var calkMaxNumberOfEntries = Math.floor(QUOTA_API_JS_JSON_STRING_LENGTH / deltaList.getRecordSize()); // number of objects to fit the quota
+    calkMaxNumberOfEntries -= Math.floor(calkMaxNumberOfEntries / 5); // reduce by 20%
+
+    var maxNumberOfEntries = Math.min(inputMaxNumberOfEntries, calkMaxNumberOfEntries);
 
     while (deltaList.hasNext()) {
         entries.push(deltaList.next());
