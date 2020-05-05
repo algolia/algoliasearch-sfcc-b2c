@@ -52,7 +52,7 @@ function sendDelta(deltaList, logID, parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
     var sendLogData = algoliaData.getLogData(logID);
-    sendLogData.sendDate = algoliaData.dateToLocalTimeStamp(new Date());
+    sendLogData.sendDate = algoliaData.getLocalDataTime(new Date());
     sendLogData.sendError = true;
     sendLogData.sendErrorMessage = '';
     sendLogData.sendedChunk = 0;
@@ -129,7 +129,7 @@ function sendDelta(deltaList, logID, parameters) {
         sendLogData.failedRecords = 0;
     }
 
-    sendLogData.sendDate = algoliaData.dateToLocalTimeStamp(new Date());
+    sendLogData.sendDate = algoliaData.getLocalDataTime(new Date());
     algoliaData.setLogData(logID, sendLogData);
 
     logger.info('Sended chunk: {0}; Failed chunk: {1}\nSended records: {2}; Failed records: {3}',

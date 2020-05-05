@@ -141,7 +141,7 @@ function setLogData(id, productLog) {
  * @param {Date} date - Date
  * @returns {string} - local formated DateTime
  */
-function dateToLocalTimeStamp(date) {
+function getLocalDataTime(date) {
     return empty(date) ? '---' : date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
 }
 
@@ -150,8 +150,8 @@ function dateToLocalTimeStamp(date) {
  * @param {string} id - name of Date preference [LastCategorySyncDate, LastProductSyncDate]
  * @returns {string} - local formated DateTime
  */
-function getLogDataTimeStamp(id) {
-    return dateToLocalTimeStamp(getPreference(id));
+function getSyncLocalDataTime(id) {
+    return getLocalDataTime(getPreference(id));
 }
 
 module.exports = {
@@ -162,6 +162,6 @@ module.exports = {
     setSetOfStrings: setSetOfStrings,
     getLogData: getLogData,
     setLogData: setLogData,
-    dateToLocalTimeStamp: dateToLocalTimeStamp,
-    getLogDataTimeStamp: getLogDataTimeStamp
+    getLocalDataTime: getLocalDataTime,
+    getSyncLocalDataTime: getSyncLocalDataTime
 };
