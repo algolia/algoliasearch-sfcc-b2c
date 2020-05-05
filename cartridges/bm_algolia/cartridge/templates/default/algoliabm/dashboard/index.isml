@@ -34,6 +34,10 @@
                     <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey')}" id="SearchApiKey" name="SearchApiKey" /></td>
                 </tr>
                 <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Admin API key</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey')}" id="AdminApiKey" name="AdminApiKey" /></td>
+                </tr>
+                <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Application ID</td>
                     <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('ApplicationID')}" id="ApplicationID" name="ApplicationID" /></td>
                 </tr>
@@ -47,11 +51,15 @@
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Last Product Sync Date</td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('LastProductSyncDate')}" id="LastProductSyncDate" name="LastProductSyncDate" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <isprint value="${pdict.algoliaData.getPreference('LastProductSyncDate') ? pdict.algoliaData.getPreference('LastProductSyncDate').toLocaleDateString() : '---'}" encoding="htmlcontent" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Last Category Sync Date</td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('LastCategorySyncDate')}" id="LastCategorySyncDate" name="LastCategorySyncDate" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <isprint value="${pdict.algoliaData.getPreference('LastCategorySyncDate') ? pdict.algoliaData.getPreference('LastCategorySyncDate').toLocaleDateString() : '---'}" encoding="htmlcontent" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Custom Fields</td>
@@ -66,6 +74,7 @@
         </table>
         </form>
     </div>
+    <iscomment>
     <p></p>
     <div class="algolia-bm-indexes">
         <form action="${pdict.reindexUrl}" class="form-horizontal" method="post">
@@ -96,4 +105,9 @@
         </table>
         </form>
     </div>
+    </iscomment>
+    <p></p>
+    <isinclude template="algoliabm/dashboard/productLog" />
+    <p></p>
+    <isinclude template="algoliabm/dashboard/categoryLog" />
 </isdecorate>

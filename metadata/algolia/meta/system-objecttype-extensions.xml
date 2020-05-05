@@ -53,6 +53,22 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+            <attribute-definition attribute-id="Algolia_LastProductSyncLog">
+                <display-name xml:lang="x-default">Last Product Sync Log</display-name>
+                <description xml:lang="x-default">Log of the last product index sync job run</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_LastCategorySyncLog">
+                <display-name xml:lang="x-default">Last Category Sync Log</display-name>
+                <description xml:lang="x-default">Log of the last category index sync job run</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
             <attribute-definition attribute-id="Algolia_SearchApiKey">
                 <display-name xml:lang="x-default">Search API key</display-name>
                 <description xml:lang="x-default">Authorization key for Algolia</description>
@@ -82,6 +98,8 @@
                 <attribute attribute-id="Algolia_LastProductSyncDate"/>
                 <attribute attribute-id="Algolia_LastCategorySyncDate"/>
                 <attribute attribute-id="Algolia_CustomFields"/>
+                <attribute attribute-id="Algolia_LastProductSyncLog"/>
+                <attribute attribute-id="Algolia_LastCategorySyncLog"/>
             </attribute-group>
         </group-definitions>
     </type-extension>
