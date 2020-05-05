@@ -2,19 +2,18 @@
 
 var currentSite = require('dw/system/Site').getCurrent();
 var Transaction = require('dw/system/Transaction');
-var dwSystem = require('dw/system/System');
 
 /**
  * Log Data Object
  */
 function LogJob() {
     var date = new Date();
-    this.processedDate = date.toISOString();
+    this.processedDate = date.toLocaleDateString();
     this.processedError = false;
     this.processedErrorMessage = '';
     this.processedRecords = 0;
     this.processedToUpdateRecords = 0;
-    this.sendDate = date.toISOString();
+    this.sendDate = date.toLocaleDateString();
     this.sendError = false;
     this.sendErrorMessage = '';
     this.sendedChunk = 0;
@@ -73,6 +72,16 @@ function setPreference(id, value) {
  * @param {string} id - name of preference
  * @returns {array} - value of preference
  */
+function getSetOfArray(id) {
+    var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return values.length ? values.map(function (element) { return element; }) : [];
+}
+
+/**
+ * @description Getting preference (as set of strings) for Algolia
+ * @param {string} id - name of preference
+ * @returns {string} - value of preference
+ */
 function getSetOfStrings(id) {
     var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
     return values.length ? values.join() : ', ';
@@ -128,39 +137,12 @@ function setLogData(id, productLog) {
     return null;
 }
 
-/**
- * Get instance hostname replacing dots with dashes and skipping
- * the general parts from the sandbox hostnames.
- * @returns {string} hostname
- */
-function getInstanceHostName() {
-    var instanceHostname = dwSystem.getInstanceHostname();
-
-    // remove the sandbox host
-    if (dwSystem.instanceType === dwSystem.DEVELOPMENT_SYSTEM) {
-        instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
-        instanceHostname = instanceHostname.replace('.demandware.net', '');
-    }
-    // replace dots
-    return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
-}
-
-/**
- * Create index id for search results request
- * @param {string} type - type of indices: products | categories
- * @returns {string} indexId
- */
-function calculateIndexId(type) {
-    return getInstanceHostName() + '__' + currentSite.getID() + '__' + type + '__' + request.getLocale();
-}
-
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
+    getSetOfArray: getSetOfArray,
     getSetOfStrings: getSetOfStrings,
     setSetOfStrings: setSetOfStrings,
     getLogData: getLogData,
-    setLogData: setLogData,
-    getInstanceHostName: getInstanceHostName,
-    calculateIndexId: calculateIndexId
+    setLogData: setLogData
 };
