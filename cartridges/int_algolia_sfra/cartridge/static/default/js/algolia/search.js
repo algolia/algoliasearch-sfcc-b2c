@@ -2,13 +2,13 @@
 document.addEventListener('DOMContentLoaded', function () {
 	/* global instantsearch algoliasearch autocomplete  */
     var $suggestionsWrapper = $('#suggestions-wrapper');
-	var locale = 'default';
-	var userCurrency = 'USD';
-	var urlCategoryId = $suggestionsWrapper.data('category');  // category ID - for category page
-	var urlQuery = $suggestionsWrapper.data('q');        // onload search query - for search page 
+	var locale = $suggestionsWrapper.data('locale');   // en_US
+	var userCurrency = $suggestionsWrapper.data('currencycode');   // USD
+	var urlCategoryId = $suggestionsWrapper.data('category');  // category ID - for category page - URL param: cgid
+	var urlQuery = $suggestionsWrapper.data('q');        // onload search query - for search page - URL param: q
 
-	var productsIndex = $suggestionsWrapper.data('productsindexid'); // site index for products
-	var categoriesIndex = 'zzrk_008_sandbox_us01_dx__Algolia-SFRA__categories__default';
+	var productsIndex = 'zzrk_018_sandbox_us01_dx__Algolia_SFRA__products__default'; // $suggestionsWrapper.data('categoriesindexid');
+	var categoriesIndex = 'zzrk_008_sandbox_us01_dx__Algolia-SFRA__categories__default'; // $suggestionsWrapper.data('productsindexid');
 
 	var appId = $suggestionsWrapper.data('appid');
 	var searchApiKey = $suggestionsWrapper.data('searchapikey');
@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', function () {
 	  }),
 	  instantsearch.widgets.clearRefinements({
 	    container: '#clear-refinements',
+	    includedAttributes: ['query']
 	  }),
 	  instantsearch.widgets.menu({
 	    container: '#categories-list',

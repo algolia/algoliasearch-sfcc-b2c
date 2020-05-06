@@ -46,6 +46,8 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 categoryBannerUrl: categoryBannerUrl,
                 productsIndex: algoliaData.calculateIndexId('products'),
                 categoriesIndex: algoliaData.calculateIndexId('categories'),
+                locale: request.getLocale(),
+                currencyCode: req.session.currency.currencyCode,
                 // TODO: sqlinjection ?
                 cgid: req.querystring.cgid,
                 q: req.querystring.q
