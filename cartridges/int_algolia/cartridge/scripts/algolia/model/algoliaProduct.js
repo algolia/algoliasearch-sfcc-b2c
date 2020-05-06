@@ -74,7 +74,7 @@ function algoliaProduct(product) {
         }
 
         if (customFields.indexOf('in_stock') > -1) {
-            this.in_stock = product.availabilityModel.inStock.toString();
+            this.in_stock = product.availabilityModel.inStock;
         }
 
         // Get Localized properties
@@ -104,7 +104,7 @@ function algoliaProduct(product) {
 
 
         // Get price for all currencies
-        var productPrice = {};
+        var productPrice = null;
         var currentSession = request.getSession();
         var siteCurrencies = currentSites.getAllowedCurrencies();
         var siteCurrenciesSize = siteCurrencies.size();
@@ -114,11 +114,12 @@ function algoliaProduct(product) {
             currentSession.setCurrency(currency);
             var price = product.priceModel.price;
             if (price.available) {
-                productPrice[price.currencyCode] = price.value.toString();
+                if (!productPrice) { productPrice = {}; }
+                productPrice[price.currencyCode] = price.value;
             }
         }
 
-        if (customFields.indexOf('price') > -1) { this.price = productPrice; }
+        if (productPrice && customFields.indexOf('price') > -1) { this.price = productPrice; }
 
         var imageGroupsArr = [];
         var imageGroup = getImagesGroup(product, 'large');

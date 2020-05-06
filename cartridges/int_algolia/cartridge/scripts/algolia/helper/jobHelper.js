@@ -23,6 +23,9 @@ function appendObjToXML(baseXML, obj) {
             appendObjToXML(baseXML[property], obj[property]);
         } else {
             baseXML[property] = obj[property];
+            // Store value type to XML attribute
+            if (typeof obj[property] === 'number') { baseXML[property].@type = 'number'; }
+            if (typeof obj[property] === 'boolean') { baseXML[property].@type = 'boolean'; }
         }
     }
 }
@@ -41,6 +44,14 @@ function xmlToObject(xmlObj) {
         var property = xmlObj[i].name().localName;
         if (xmlObj[i].hasSimpleContent()) {
             result[property] = xmlObj[i].toString();
+            if (result[property].toLowerCase() === 'null') {
+                result[property] = null;
+            } else {
+                // Restore value type from XML attribute
+                var attribute = xmlObj[i].@type.toString();
+                if (attribute === 'number') { result[property] = parseFloat(result[property]); }
+                if (attribute === 'boolean') { result[property] = result[property].toLowerCase() === 'true'; }
+            }
         } else {
             // Convert to Array
             var child = xmlObj[i].elements();
@@ -148,6 +159,75 @@ function subtractObject(baseObj, compareObj) {
 }
 
 /**
+ * Function to create a clone object
+ * @param {Object} obj - object to clone
+ * @returns {Object} - clobe of Obj
+ */
+function cloneObject(obj) {
+    // Handle the simple types, and null or undefined
+    if (empty(obj) || !(obj instanceof Object)) {
+        return obj;
+    }
+    
+    // Handle Array
+    if (obj instanceof Array) {
+        var copy = [];
+        for (var i = 0, len = obj.length; i < len; i++) {
+            copy[i] = cloneObject(obj[i]);
+        }
+        return copy;
+    }
+    
+    // Handle Object
+    if (obj instanceof Object) {
+        var copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = cloneObject(obj[attr]);
+        }
+        return copy;
+    }
+    
+    return null;
+}
+
+/**
+ * Function creates a new object that contains the top level properties of the compareObj
+ * that are not in the baseObj. If objects are equals, returns empty Object
+ * @param {Object} baseObj - first Object
+ * @param {Object} compareObj - second Object
+ * @returns {Object} - object of differents
+ */
+function compareTopLevelProperties(compareObj, baseObj) {
+    var result = {};
+
+    // if both x and y are null or undefined and exactly the same
+    if (baseObj === compareObj) return result;
+
+    // if they are not strictly equal, they both need to be Objects
+    if (!(baseObj instanceof Object) && (compareObj instanceof Object)) {
+        return compareObj;
+    }
+
+    for (var property in baseObj) {
+        var baseObjString = null;
+        var compareObjString = null;
+        
+        try {
+            baseObjString = JSON.stringify({ obj: baseObj[property] });
+            compareObjString = JSON.stringify({ obj: compareObj[property] });                
+        } catch (error) {
+            result[property] = cloneObject(baseObj[property]);
+            return result;
+        }
+
+        if (baseObjString !== compareObjString) {
+            result[property] = cloneObject(baseObj[property]);
+        }
+    }
+    return result;
+}
+
+/**
  * Compares two objects and creates a new one with properties whose values differ.
  * Values of compareObj are written to the new object
  * @param {Object} compareObj - second Object
@@ -155,7 +235,8 @@ function subtractObject(baseObj, compareObj) {
  * @returns {Object} - object of differents
  */
 function objectCompare(compareObj, baseObj) {
-    var result = subtractObject(compareObj, baseObj);
+    //var result = subtractObject(compareObj, baseObj);
+    var result = compareTopLevelProperties(compareObj, baseObj);
     return isEmptyObject(result) ? null : result;
 }
 
@@ -212,10 +293,12 @@ function logFileInfo(file, infoMessage) {
     return null;
 }
 
-module.exports.appendObjToXML = appendObjToXML;
-module.exports.xmlToObject = xmlToObject;
-module.exports.objectCompare = objectCompare;
-module.exports.hasSameProperties = hasSameProperties;
-module.exports.readXMLObjectFromStream = readXMLObjectFromStream;
-module.exports.logFileError = logFileError;
-module.exports.logFileInfo = logFileInfo;
+module.exports = {
+    appendObjToXML: appendObjToXML,
+    xmlToObject: xmlToObject,
+    objectCompare: objectCompare,
+    hasSameProperties: hasSameProperties,
+    readXMLObjectFromStream: readXMLObjectFromStream,
+    logFileError: logFileError,
+    logFileInfo: logFileInfo
+};
