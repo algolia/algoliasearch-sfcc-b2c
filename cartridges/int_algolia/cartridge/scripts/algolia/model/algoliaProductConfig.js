@@ -108,8 +108,10 @@ var attributeConfig = {
     },
     size: {
         localized: true
+    },
+    categories: {
+        localized: false
     }
-// ['categories']
 };
 
 module.exports = {

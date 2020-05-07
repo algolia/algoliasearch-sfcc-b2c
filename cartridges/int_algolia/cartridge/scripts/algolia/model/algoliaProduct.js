@@ -106,18 +106,59 @@ function getAttributeValue(product, productAttributeName) {
 }
 
 /**
+ * Create category tree of Product
+ * @param {dw.catalog.Category} category - category
+ * @returns {Object} - category tree
+ */
+function getCategoryFlatTree(category) {
+    if (empty(category)) return [];
+
+    var categoryTree = [];
+    var currentCategory = category;
+    categoryTree.push({
+        id: currentCategory.ID,
+        name: currentCategory.displayName
+    });
+
+    while (!currentCategory.topLevel && !currentCategory.root) {
+        currentCategory = currentCategory.parent;
+        categoryTree.push({
+            id: currentCategory.ID,
+            name: currentCategory.displayName
+        });
+    }
+
+    return categoryTree;
+}
+
+/**
  * Handler complex and calculated Product attributes
  */
 var agregatedValueHanlders = {
+    categories: function categories(product) {
+        var productCategories = product.isVariant()
+            ? product.masterProduct.getOnlineCategories()
+            : product.getOnlineCategories();
+
+        return productCategories
+            .toArray()
+            .map(function (category) {
+                return getCategoryFlatTree(category);
+            });
+    },
     color: function (product) {
         var variationModel = product.getVariationModel();
         var colorAttribute = variationModel.getProductVariationAttribute('color');
-        return empty(colorAttribute) ? null : variationModel.getSelectedValue(colorAttribute).displayValue;
+        return (colorAttribute && variationModel.getSelectedValue(colorAttribute))
+            ? variationModel.getSelectedValue(colorAttribute).displayValue
+            : null;
     },
     size: function (product) {
         var variationModel = product.getVariationModel();
         var sizeAttribute = variationModel.getProductVariationAttribute('size');
-        return empty(sizeAttribute) ? null : variationModel.getSelectedValue(sizeAttribute).displayValue;
+        return (sizeAttribute && variationModel.getSelectedValue(sizeAttribute))
+            ? variationModel.getSelectedValue(sizeAttribute).displayValue
+            : null;
     },
     price: function (product) {
         // Get price for all currencies
@@ -182,14 +223,15 @@ var agregatedValueHanlders = {
  * @constructor
  */
 function algoliaProduct(product) {
-    var customFields = algoliaData.getSetOfArray('CustomFields');
-    // var customFields = ['color', 'size'];
-    /*
+    //var customFields = algoliaData.getSetOfArray('CustomFields');
+    //var customFields = ['color', 'size'];
+    
     var customFields = ['brand', 'EAN', 'image_groups', 'long_description', 'manufacturerName', 'manufacturerSKU',
         'master', 'name', 'online', 'optionProduct', 'pageDescription', 'pageKeywords', 'pageTitle', 'productSet',
-        'productSetProduct', 'searchable', 'short_description', 'url', 'unit', 'UPC', 'variant', 'promotionalPrice'];
-    */
+        'productSetProduct', 'searchable', 'short_description', 'url', 'unit', 'UPC', 'variant', 'promotionalPrice', 'color', 'size'];
+    
     var algoliaFields = algoliaProductConfig.defaultAttributes.concat(customFields);
+    //algoliaFields = ['id', 'categories'];
 
     if (empty(product)) {
         this.id = null;
