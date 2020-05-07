@@ -109,6 +109,16 @@ function getAttributeValue(product, productAttributeName) {
  * Handler complex and calculated Product attributes
  */
 var agregatedValueHanlders = {
+    color: function (product) {
+        var variationModel = product.getVariationModel();
+        var colorAttribute = variationModel.getProductVariationAttribute('color');
+        return empty(colorAttribute) ? null : variationModel.getSelectedValue(colorAttribute).displayValue;
+    },
+    size: function (product) {
+        var variationModel = product.getVariationModel();
+        var sizeAttribute = variationModel.getProductVariationAttribute('size');
+        return empty(sizeAttribute) ? null : variationModel.getSelectedValue(sizeAttribute).displayValue;
+    },
     price: function (product) {
         // Get price for all currencies
         var productPrice = null;
@@ -172,12 +182,13 @@ var agregatedValueHanlders = {
  * @constructor
  */
 function algoliaProduct(product) {
+    var customFields = algoliaData.getSetOfArray('CustomFields');
+    // var customFields = ['color', 'size'];
     /*
     var customFields = ['brand', 'EAN', 'image_groups', 'long_description', 'manufacturerName', 'manufacturerSKU',
         'master', 'name', 'online', 'optionProduct', 'pageDescription', 'pageKeywords', 'pageTitle', 'productSet',
         'productSetProduct', 'searchable', 'short_description', 'url', 'unit', 'UPC', 'variant', 'promotionalPrice'];
     */
-    var customFields = algoliaData.getSetOfArray('CustomFields');
     var algoliaFields = algoliaProductConfig.defaultAttributes.concat(customFields);
 
     if (empty(product)) {

@@ -102,8 +102,13 @@ var attributeConfig = {
     },
     url: {
         localized: true
+    },
+    color: {
+        localized: true
+    },
+    size: {
+        localized: true
     }
-
 // ['categories']
 };
 
