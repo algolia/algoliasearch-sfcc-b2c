@@ -319,7 +319,8 @@ function runCategoryExport(parameters) {
         if (listOfCategories[i].hasOwnProperty('checked') && listOfCategories[i].checked) {
             delete listOfCategories[i].checked;
         } else {
-            writeObjectToXMLStream(updateXmlWriter, listOfCategories[i]);
+            var categoryUpdate = new UpdateCategoryModel(listOfCategories[i]);
+            writeObjectToXMLStream(updateXmlWriter, categoryUpdate);
         }
         writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[i]);
     }
