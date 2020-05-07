@@ -223,15 +223,8 @@ var agregatedValueHanlders = {
  * @constructor
  */
 function algoliaProduct(product) {
-    //var customFields = algoliaData.getSetOfArray('CustomFields');
-    //var customFields = ['color', 'size'];
-    
-    var customFields = ['brand', 'EAN', 'image_groups', 'long_description', 'manufacturerName', 'manufacturerSKU',
-        'master', 'name', 'online', 'optionProduct', 'pageDescription', 'pageKeywords', 'pageTitle', 'productSet',
-        'productSetProduct', 'searchable', 'short_description', 'url', 'unit', 'UPC', 'variant', 'promotionalPrice', 'color', 'size'];
-    
+    var customFields = algoliaData.getSetOfArray('CustomFields');
     var algoliaFields = algoliaProductConfig.defaultAttributes.concat(customFields);
-    //algoliaFields = ['id', 'categories'];
 
     if (empty(product)) {
         this.id = null;
