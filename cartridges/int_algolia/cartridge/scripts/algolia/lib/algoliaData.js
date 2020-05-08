@@ -2,6 +2,7 @@
 
 var currentSite = require('dw/system/Site').getCurrent();
 var Transaction = require('dw/system/Transaction');
+var dwSystem = require('dw/system/System');
 
 /**
  * Log Data Object
@@ -137,11 +138,37 @@ function setLogData(id, productLog) {
 }
 
 /**
+ * Get instance hostname replacing dots with dashes and skipping
+ * the general parts from the sandbox hostnames.
+ * @returns {string} hostname
+ */
+function getInstanceHostName() {
+    var instanceHostname = dwSystem.getInstanceHostname();
+
+    // remove the sandbox host
+    if (dwSystem.instanceType === dwSystem.DEVELOPMENT_SYSTEM) {
+        instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
+        instanceHostname = instanceHostname.replace('.demandware.net', '');
+    }
+    // replace dots
+    return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
+}
+
+/**
+ * Create index id for search results request
+ * @param {string} type - type of indices: products | categories
+ * @returns {string} indexId
+ */
+function calculateIndexId(type) {
+    return getInstanceHostName() + '__' + currentSite.getID() + '__' + type + '__' + request.getLocale();
+}
+
+/**
  * @description Convert Date to local DateTime format string
  * @param {Date} date - Date
  * @returns {string} - local formated DateTime
  */
-function getLocalDataTime(date) {
+function getLocalDateTime(date) {
     return empty(date) ? '---' : date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
 }
 
@@ -150,8 +177,8 @@ function getLocalDataTime(date) {
  * @param {string} id - name of Date preference [LastCategorySyncDate, LastProductSyncDate]
  * @returns {string} - local formated DateTime
  */
-function getSyncLocalDataTime(id) {
-    return getLocalDataTime(getPreference(id));
+function getSyncLocalDateTime(id) {
+    return getLocalDateTime(getPreference(id));
 }
 
 module.exports = {
@@ -162,6 +189,8 @@ module.exports = {
     setSetOfStrings: setSetOfStrings,
     getLogData: getLogData,
     setLogData: setLogData,
-    getLocalDataTime: getLocalDataTime,
-    getSyncLocalDataTime: getSyncLocalDataTime
+    getInstanceHostName: getInstanceHostName,
+    calculateIndexId: calculateIndexId,
+    getLocalDateTime: getLocalDateTime,
+    getSyncLocalDateTime: getSyncLocalDateTime
 };

@@ -9,22 +9,6 @@ var tenantToken = null;
 
 var dwSystem = require('dw/system/System');
 var currentSite = require('dw/system/Site').getCurrent();
-/**
- * Get instance hostname replacing dots with dashes and skipping
- * the general parts from the sandbox hostnames.
- * @returns {string} hostname
- */
-function getInstanceHostName() {
-    var instanceHostname = dwSystem.getInstanceHostname();
-
-    // remove the sandbox host
-    if (dwSystem.instanceType === dwSystem.DEVELOPMENT_SYSTEM) {
-        instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
-        instanceHostname = instanceHostname.replace('.demandware.net', '');
-    }
-    // replace dots
-    return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
-}
 
 /**
  * Create tenant id in the form
@@ -32,7 +16,7 @@ function getInstanceHostName() {
  * @returns {string} tenant ID
  */
 function calculateTenantID() {
-    return algoliaData.getPreference('ApplicationID') + '_' + currentSite.getID() + '_' + getInstanceHostName();
+    return algoliaData.getPreference('ApplicationID') + '_' + currentSite.getID() + '_' + algoliaData.getInstanceHostName();
 }
 
 /**
@@ -53,7 +37,7 @@ function createHandshakeRequest() {
         locales: currentSite.getAllowedLocales().toArray(),
         client_id: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
         client_password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        index_prefix: getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
+        index_prefix: algoliaData.getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
         // @TODO replace from config
         fields: {
             product: algoliaData.getSetOfArray('CustomFields'),
