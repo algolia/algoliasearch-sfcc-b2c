@@ -1,0 +1,55 @@
+<isif condition="${pdict.reportingURLs && pdict.reportingURLs.length}">
+    <isinclude template="reporting/reportingUrls" />
+</isif>
+
+<!--- Search Results Banner --->
+<isif condition="${pdict.category}">
+    <div class="hero slant-down search-banner"
+        <!--- If no image, default is specified in search.scss > .search-banner --->
+        <isif condition="${pdict.categoryBannerUrl}">
+            style="background-image: url(${pdict.categoryBannerUrl})"
+        </isif>
+    >
+        <h1 class="header page-title">
+            ${pdict.category.displayName}
+        </h1>
+    </div>
+<iselse>
+    <isslot id="search-result-banner-m" description="Banner for search results" context="global" />
+</isif>
+
+<div class="container search-results">
+    <div class="row">
+        <div class="tab-content col-12">
+            <div class="aa-input-container" id="aa-input-container">
+                <input
+                    type="search"
+                    id="aa-search-input"
+                    class="aa-input-search"
+                    placeholder="Search for product or a cateogry"
+                    name="search"
+                    autocomplete="off"
+                />
+            </div>
+            <div class="ais-InstantSearch">
+                <div class="left-panel">
+                    <div id="sort-by"></div>
+
+                    <div id="clear-refinements"></div>
+
+                    <h3>Categories</h3>
+
+                    <div id="categories-list"></div>
+
+                    <h3>Price</h3>
+                    <div id="price-filter"></div>
+                </div>
+
+                <div class="right-panel">
+                    <div id="hits"></div>
+                    <div id="pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

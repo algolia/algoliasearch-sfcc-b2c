@@ -2,18 +2,18 @@
 
 var currentSite = require('dw/system/Site').getCurrent();
 var Transaction = require('dw/system/Transaction');
+var dwSystem = require('dw/system/System');
 
 /**
  * Log Data Object
  */
 function LogJob() {
-    var date = new Date();
-    this.processedDate = date.toLocaleDateString();
+    this.processedDate = '---';
     this.processedError = false;
     this.processedErrorMessage = '';
     this.processedRecords = 0;
     this.processedToUpdateRecords = 0;
-    this.sendDate = date.toLocaleDateString();
+    this.sendDate = '---';
     this.sendError = false;
     this.sendErrorMessage = '';
     this.sendedChunk = 0;
@@ -137,6 +137,50 @@ function setLogData(id, productLog) {
     return null;
 }
 
+/**
+ * Get instance hostname replacing dots with dashes and skipping
+ * the general parts from the sandbox hostnames.
+ * @returns {string} hostname
+ */
+function getInstanceHostName() {
+    var instanceHostname = dwSystem.getInstanceHostname();
+
+    // remove the sandbox host
+    if (dwSystem.instanceType === dwSystem.DEVELOPMENT_SYSTEM) {
+        instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
+        instanceHostname = instanceHostname.replace('.demandware.net', '');
+    }
+    // replace dots
+    return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
+}
+
+/**
+ * Create index id for search results request
+ * @param {string} type - type of indices: products | categories
+ * @returns {string} indexId
+ */
+function calculateIndexId(type) {
+    return getInstanceHostName() + '__' + currentSite.getID() + '__' + type + '__' + request.getLocale();
+}
+
+/**
+ * @description Convert Date to local DateTime format string
+ * @param {Date} date - Date
+ * @returns {string} - local formated DateTime
+ */
+function getLocalDateTime(date) {
+    return empty(date) ? '---' : date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
+}
+
+/**
+ * @description Get Date preference to local DateTime format string
+ * @param {string} id - name of Date preference [LastCategorySyncDate, LastProductSyncDate]
+ * @returns {string} - local formated DateTime
+ */
+function getSyncLocalDateTime(id) {
+    return getLocalDateTime(getPreference(id));
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
@@ -144,5 +188,9 @@ module.exports = {
     getSetOfStrings: getSetOfStrings,
     setSetOfStrings: setSetOfStrings,
     getLogData: getLogData,
-    setLogData: setLogData
+    setLogData: setLogData,
+    getInstanceHostName: getInstanceHostName,
+    calculateIndexId: calculateIndexId,
+    getLocalDateTime: getLocalDateTime,
+    getSyncLocalDateTime: getSyncLocalDateTime
 };

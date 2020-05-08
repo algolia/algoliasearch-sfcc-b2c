@@ -2,6 +2,7 @@
 
 // initialize
 var QUOTA_API_JS_JSON_STRING_LENGTH = 600000; // The maximum allowed length of a JavaScript string created by JSON.stringify().
+var MAX_CHUNKS_SIZE = 1000; // Maximum chunk size
 var MAX_FAILED_CHUNKS = 3;
 
 var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
@@ -51,9 +52,8 @@ function sendFailedChunks(failedChunks) {
 function sendDelta(deltaList, logID, parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
-    var date = new Date();
     var sendLogData = algoliaData.getLogData(logID);
-    sendLogData.sendDate = date.toLocaleDateString();
+    sendLogData.sendDate = algoliaData.getLocalDateTime(new Date());
     sendLogData.sendError = true;
     sendLogData.sendErrorMessage = '';
     sendLogData.sendedChunk = 0;
@@ -61,7 +61,6 @@ function sendDelta(deltaList, logID, parameters) {
     sendLogData.failedChunk = 0;
     sendLogData.failedRecords = 0;
 
-    var maxNumberOfEntries;
     var entries = [];
     var failedChunks = [];
     var countFailedShunks = 0;
@@ -77,13 +76,13 @@ function sendDelta(deltaList, logID, parameters) {
     }
 
     // check if merchant set his preferred number
-    if (parameters.maxNumberOfEntries === '') {
-        maxNumberOfEntries = parameters.maxNumberOfEntries;
-    } else {
-        // calculate it
-        maxNumberOfEntries = Math.floor(QUOTA_API_JS_JSON_STRING_LENGTH / deltaList.getRecordSize()); // number of objects to fit the quota
-        maxNumberOfEntries -= Math.floor(maxNumberOfEntries / 5); // reduce by 20%
-    }
+    var inputMaxNumberOfEntries = Object.hasOwnProperty.call(parameters, 'maxNumberOfEntries') ? parseInt(parameters.maxNumberOfEntries, 10) : MAX_CHUNKS_SIZE;
+
+    // calculate it
+    var calkMaxNumberOfEntries = Math.floor(QUOTA_API_JS_JSON_STRING_LENGTH / deltaList.getRecordSize()); // number of objects to fit the quota
+    calkMaxNumberOfEntries -= Math.floor(calkMaxNumberOfEntries / 5); // reduce by 20%
+
+    var maxNumberOfEntries = Math.min(inputMaxNumberOfEntries, calkMaxNumberOfEntries);
 
     while (deltaList.hasNext()) {
         entries.push(deltaList.next());
@@ -122,7 +121,7 @@ function sendDelta(deltaList, logID, parameters) {
         sendLogData.sendError = true;
         sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
     } else {
-        algoliaData.setPreference(logID, date);
+        algoliaData.setPreference(logID, new Date());
         sendLogData.sendError = false;
         sendLogData.sendedChunk += sendLogData.failedChunk;
         sendLogData.sendedRecords += sendLogData.failedRecords;
@@ -130,8 +129,7 @@ function sendDelta(deltaList, logID, parameters) {
         sendLogData.failedRecords = 0;
     }
 
-    date = new Date();
-    sendLogData.sendDate = date.toLocaleDateString();
+    sendLogData.sendDate = algoliaData.getLocalDateTime(new Date());
     algoliaData.setLogData(logID, sendLogData);
 
     logger.info('Sended chunk: {0}; Failed chunk: {1}\nSended records: {2}; Failed records: {3}',

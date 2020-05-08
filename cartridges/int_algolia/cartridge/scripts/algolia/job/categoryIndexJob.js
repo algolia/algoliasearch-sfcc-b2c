@@ -219,7 +219,7 @@ function runCategoryExport(parameters) {
     var FileReader = require('dw/io/FileReader');
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var FileWriter = require('dw/io/FileWriter');
-    var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter'); // XMLStreamWriter/XMLIndentingStreamWriter
+    var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter');
 
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
@@ -233,9 +233,8 @@ function runCategoryExport(parameters) {
     var snapshotFile = new File(algoliaConstants.SNAPSHOT_CATEGORIES_FILE_NAME);
     var updateFile = new File(algoliaConstants.UPDATE_CATEGORIES_FILE_NAME);
 
-    var date = new Date();
     var categoryLogData = algoliaData.getLogData('LastCategorySyncLog');
-    categoryLogData.processedDate = date.toLocaleDateString();
+    categoryLogData.processedDate = algoliaData.getLocalDateTime(new Date());
     categoryLogData.processedError = true;
     categoryLogData.processedErrorMessage = '';
     categoryLogData.processedRecords = 0;
@@ -287,7 +286,7 @@ function runCategoryExport(parameters) {
                 if (deltaObject || initCall) {
                     categoryUpdate = new UpdateCategoryModel(categoryFromList);
                 }
-            } else {	// save to updateXmlWriter that category is deleted
+            } else { // save to updateXmlWriter that category is deleted
                 categoryUpdate = {
                     topic: 'categories/delete',
                     resource_type: 'category',
@@ -319,7 +318,8 @@ function runCategoryExport(parameters) {
         if (listOfCategories[i].hasOwnProperty('checked') && listOfCategories[i].checked) {
             delete listOfCategories[i].checked;
         } else {
-            writeObjectToXMLStream(updateXmlWriter, listOfCategories[i]);
+            var categoryUpdate = new UpdateCategoryModel(listOfCategories[i]);
+            writeObjectToXMLStream(updateXmlWriter, categoryUpdate);
         }
         writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[i]);
     }
