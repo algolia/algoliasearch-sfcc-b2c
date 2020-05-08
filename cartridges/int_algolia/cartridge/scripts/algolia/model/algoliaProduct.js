@@ -191,6 +191,7 @@ var agregatedValueHanlders = {
         var currentSession = request.getSession();
         var siteCurrencies = Site.getCurrent().getAllowedCurrencies();
         var siteCurrenciesSize = siteCurrencies.size();
+        var currentCurrency = currentSession.getCurrency();
 
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
             var currency = Currency.getCurrency(siteCurrencies[k]);
@@ -201,6 +202,7 @@ var agregatedValueHanlders = {
                 productPrice[price.currencyCode] = price.value;
             }
         }
+        currentSession.setCurrency(currentCurrency);
         return productPrice;
     },
     in_stock: function (product) {
@@ -233,6 +235,7 @@ var agregatedValueHanlders = {
         var currentSession = request.getSession();
         var siteCurrencies = Site.getCurrent().getAllowedCurrencies();
         var siteCurrenciesSize = siteCurrencies.size();
+        var currentCurrency = currentSession.getCurrency();
 
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
             var currency = Currency.getCurrency(siteCurrencies[k]);
@@ -243,6 +246,7 @@ var agregatedValueHanlders = {
                 promotionalPrice[price.currencyCode] = price.value;
             }
         }
+        currentSession.setCurrency(currentCurrency);
         return promotionalPrice;
     }
 };
