@@ -8,13 +8,12 @@ var dwSystem = require('dw/system/System');
  * Log Data Object
  */
 function LogJob() {
-    var date = new Date();
-    this.processedDate = date.toLocaleDateString();
+    this.processedDate = '---';
     this.processedError = false;
     this.processedErrorMessage = '';
     this.processedRecords = 0;
     this.processedToUpdateRecords = 0;
-    this.sendDate = date.toLocaleDateString();
+    this.sendDate = '---';
     this.sendError = false;
     this.sendErrorMessage = '';
     this.sendedChunk = 0;
@@ -164,6 +163,24 @@ function calculateIndexId(type) {
     return getInstanceHostName() + '__' + currentSite.getID() + '__' + type + '__' + request.getLocale();
 }
 
+/**
+ * @description Convert Date to local DateTime format string
+ * @param {Date} date - Date
+ * @returns {string} - local formated DateTime
+ */
+function getLocalDataTime(date) {
+    return empty(date) ? '---' : date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
+}
+
+/**
+ * @description Get Date preference to local DateTime format string
+ * @param {string} id - name of Date preference [LastCategorySyncDate, LastProductSyncDate]
+ * @returns {string} - local formated DateTime
+ */
+function getSyncLocalDataTime(id) {
+    return getLocalDataTime(getPreference(id));
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
@@ -173,5 +190,7 @@ module.exports = {
     getLogData: getLogData,
     setLogData: setLogData,
     getInstanceHostName: getInstanceHostName,
-    calculateIndexId: calculateIndexId
+    calculateIndexId: calculateIndexId,
+    getLocalDataTime: getLocalDataTime,
+    getSyncLocalDataTime: getSyncLocalDataTime
 };
