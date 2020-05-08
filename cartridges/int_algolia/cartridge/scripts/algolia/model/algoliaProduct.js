@@ -203,6 +203,11 @@ var agregatedValueHanlders = {
         }
         return productPrice;
     },
+    in_stock: function (product) {
+        return product.availabilityModel.inStock
+            ? product.availabilityModel.availability >= algoliaData.getPreference('InStockThreshold')
+            : false;
+    },
     image_groups: function (product) {
         // Get all image Groups of product for all locales
         var imageGroupsArr = [];
@@ -281,7 +286,7 @@ function algoliaProduct(product) {
                         : getAttributeValue(product, config.attribute);
                 }
 
-                if (value) { this[attributeName] = value; }
+                if (!empty(value)) { this[attributeName] = value; }
             }
         }
     }
