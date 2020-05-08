@@ -62,7 +62,7 @@ function xmlToArray(xmlArray) {
  * @returns {Object} - JS Object
  */
 function xmlToObject(xmlObj) {
-    if (empty(xmlObj)) { return result; }
+    if (empty(xmlObj)) { return null; }
 
     var lengthChildren = xmlObj.length();
 
