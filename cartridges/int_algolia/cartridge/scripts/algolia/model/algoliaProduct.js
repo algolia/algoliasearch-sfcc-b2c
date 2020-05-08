@@ -264,6 +264,7 @@ function algoliaProduct(product) {
                     var currentSites = Site.getCurrent();
                     var siteLocales = currentSites.getAllowedLocales();
                     var siteLocalesSize = siteLocales.size();
+                    var currenrLocale = request.getLocale();
 
                     value = {};
                     for (var l = 0; l < siteLocalesSize; l += 1) {
@@ -273,6 +274,7 @@ function algoliaProduct(product) {
                             ? agregatedValueHanlders[attributeName](product)
                             : getAttributeValue(product, config.attribute);
                     }
+                    request.setLocale(currenrLocale);
                 } else {
                     value = agregatedValueHanlders[attributeName]
                         ? agregatedValueHanlders[attributeName](product)
