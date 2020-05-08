@@ -118,6 +118,7 @@ function getAttributeLocalizedValues(product, productAttributeName) {
     var currentSites = Site.getCurrent();
     var siteLocales = currentSites.getAllowedLocales();
     var siteLocalesSize = siteLocales.size();
+    var currenrLocale = request.getLocale();
 
     var value = {};
     for (var l = 0; l < siteLocalesSize; l += 1) {
@@ -125,6 +126,7 @@ function getAttributeLocalizedValues(product, productAttributeName) {
         request.setLocale(localeName);
         value[localeName] = getAttributeValue(product, productAttributeName);
     }
+    request.setLocale(currenrLocale);
     return value;
 }
 
