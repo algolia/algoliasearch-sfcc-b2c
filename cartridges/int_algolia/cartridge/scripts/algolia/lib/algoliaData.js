@@ -168,7 +168,7 @@ function calculateIndexId(type) {
  * @param {Date} date - Date
  * @returns {string} - local formated DateTime
  */
-function getLocalDataTime(date) {
+function getLocalDateTime(date) {
     return empty(date) ? '---' : date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
 }
 
@@ -177,8 +177,8 @@ function getLocalDataTime(date) {
  * @param {string} id - name of Date preference [LastCategorySyncDate, LastProductSyncDate]
  * @returns {string} - local formated DateTime
  */
-function getSyncLocalDataTime(id) {
-    return getLocalDataTime(getPreference(id));
+function getSyncLocalDateTime(id) {
+    return getLocalDateTime(getPreference(id));
 }
 
 module.exports = {
@@ -191,6 +191,6 @@ module.exports = {
     setLogData: setLogData,
     getInstanceHostName: getInstanceHostName,
     calculateIndexId: calculateIndexId,
-    getLocalDataTime: getLocalDataTime,
-    getSyncLocalDataTime: getSyncLocalDataTime
+    getLocalDateTime: getLocalDateTime,
+    getSyncLocalDateTime: getSyncLocalDateTime
 };
