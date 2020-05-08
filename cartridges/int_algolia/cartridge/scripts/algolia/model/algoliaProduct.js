@@ -106,6 +106,29 @@ function getAttributeValue(product, productAttributeName) {
 }
 
 /**
+ * Function get localazed value of product property by attribute name.
+ * An attribute name can be complex and consist of several levels.
+ * Attribute names must be separated by dots.
+ * Examle: primaryCategory.ID
+ * @param {dw.catalog.Product} product - product
+ * @param {string} productAttributeName - product attribute name
+ * @returns {Object} - value
+ */
+function getAttributeLocalizedValues(product, productAttributeName) {
+    var currentSites = Site.getCurrent();
+    var siteLocales = currentSites.getAllowedLocales();
+    var siteLocalesSize = siteLocales.size();
+
+    var value = {};
+    for (var l = 0; l < siteLocalesSize; l += 1) {
+        var localeName = siteLocales[l];
+        request.setLocale(localeName);
+        value[localeName] = getAttributeValue(product, productAttributeName);
+    }
+    return value;
+}
+
+/**
  * Create category tree of Product
  * @param {dw.catalog.Category} category - category
  * @returns {Object} - category tree
@@ -117,14 +140,14 @@ function getCategoryFlatTree(category) {
     var currentCategory = category;
     categoryTree.push({
         id: currentCategory.ID,
-        name: currentCategory.displayName
+        name: getAttributeLocalizedValues(currentCategory, 'displayName')
     });
 
     while (!currentCategory.topLevel && !currentCategory.root) {
         currentCategory = currentCategory.parent;
         categoryTree.push({
             id: currentCategory.ID,
-            name: currentCategory.displayName
+            name: getAttributeLocalizedValues(currentCategory, 'displayName')
         });
     }
 
