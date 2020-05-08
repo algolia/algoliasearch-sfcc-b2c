@@ -7,13 +7,12 @@ var Transaction = require('dw/system/Transaction');
  * Log Data Object
  */
 function LogJob() {
-    var date = new Date();
-    this.processedDate = date.toLocaleDateString();
+    this.processedDate = '---';
     this.processedError = false;
     this.processedErrorMessage = '';
     this.processedRecords = 0;
     this.processedToUpdateRecords = 0;
-    this.sendDate = date.toLocaleDateString();
+    this.sendDate = '---';
     this.sendError = false;
     this.sendErrorMessage = '';
     this.sendedChunk = 0;
@@ -137,6 +136,24 @@ function setLogData(id, productLog) {
     return null;
 }
 
+/**
+ * @description Convert Date to local DateTime format string
+ * @param {Date} date - Date
+ * @returns {string} - local formated DateTime
+ */
+function getLocalDataTime(date) {
+    return empty(date) ? '---' : date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
+}
+
+/**
+ * @description Get Date preference to local DateTime format string
+ * @param {string} id - name of Date preference [LastCategorySyncDate, LastProductSyncDate]
+ * @returns {string} - local formated DateTime
+ */
+function getSyncLocalDataTime(id) {
+    return getLocalDataTime(getPreference(id));
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
@@ -144,5 +161,7 @@ module.exports = {
     getSetOfStrings: getSetOfStrings,
     setSetOfStrings: setSetOfStrings,
     getLogData: getLogData,
-    setLogData: setLogData
+    setLogData: setLogData,
+    getLocalDataTime: getLocalDataTime,
+    getSyncLocalDataTime: getSyncLocalDataTime
 };

@@ -52,9 +52,8 @@ function sendFailedChunks(failedChunks) {
 function sendDelta(deltaList, logID, parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
-    var date = new Date();
     var sendLogData = algoliaData.getLogData(logID);
-    sendLogData.sendDate = date.toLocaleDateString();
+    sendLogData.sendDate = algoliaData.getLocalDataTime(new Date());
     sendLogData.sendError = true;
     sendLogData.sendErrorMessage = '';
     sendLogData.sendedChunk = 0;
@@ -122,7 +121,7 @@ function sendDelta(deltaList, logID, parameters) {
         sendLogData.sendError = true;
         sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
     } else {
-        algoliaData.setPreference(logID, date);
+        algoliaData.setPreference(logID, new Date());
         sendLogData.sendError = false;
         sendLogData.sendedChunk += sendLogData.failedChunk;
         sendLogData.sendedRecords += sendLogData.failedRecords;
@@ -130,8 +129,7 @@ function sendDelta(deltaList, logID, parameters) {
         sendLogData.failedRecords = 0;
     }
 
-    date = new Date();
-    sendLogData.sendDate = date.toLocaleDateString();
+    sendLogData.sendDate = algoliaData.getLocalDataTime(new Date());
     algoliaData.setLogData(logID, sendLogData);
 
     logger.info('Sended chunk: {0}; Failed chunk: {1}\nSended records: {2}; Failed records: {3}',
