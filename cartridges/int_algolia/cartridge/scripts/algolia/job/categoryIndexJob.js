@@ -94,9 +94,6 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
  * @returns {string} category ID
  */
 function prepareListOfCategories(siteLocales, listOfCategories, category, catalogId, parentId) {
-    if (!category.custom || !category.custom.showInMenu) {
-        return null;
-    }
     var categoryId = catalogId + '/' + category.ID;
     var result = {
         id: categoryId,
@@ -132,7 +129,8 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, catalo
     if (subCategories) {
         forEach(subCategories, function (subcategory) {
             var converted = null;
-            if (subcategory.hasOnlineProducts() || subcategory.hasOnlineSubCategories()) {
+            if (subcategory.custom && subcategory.custom.showInMenu &&
+                    (subcategory.hasOnlineProducts() || subcategory.hasOnlineSubCategories())) {
                 converted = prepareListOfCategories(siteLocales, listOfCategories, subcategory, catalogId, categoryId);
             }
             if (converted) {
@@ -227,7 +225,10 @@ function runCategoryExport(parameters) {
 
     while (topLevelCategories.hasNext()) {
         var category = topLevelCategories.next();
-        prepareListOfCategories(siteLocales, listOfCategories, category, siteCatalogId);
+        if (category.custom && category.custom.showInMenu &&
+                (category.hasOnlineProducts() || category.hasOnlineSubCategories())) {
+            prepareListOfCategories(siteLocales, listOfCategories, category, siteCatalogId);
+        }
     }
 
     var snapshotFile = new File(algoliaConstants.SNAPSHOT_CATEGORIES_FILE_NAME);
