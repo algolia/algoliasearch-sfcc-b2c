@@ -341,14 +341,6 @@ function runCategoryExport(parameters) {
     snapshotXmlReader.close();
     snapshotFileReader.close();
 
-    // Delete old snapshot file and rename a new one
-    try {
-        snapshotFile.remove();
-        newSnapshotFile.renameTo(snapshotFile);
-    } catch (error) {
-        jobHelper.logFileError(snapshotFile.fullPath, 'Error rewrite file', error);
-        return false;
-    }
     return true;
 }
 
