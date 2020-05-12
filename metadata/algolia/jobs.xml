@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
-    <job job-id="AlgoliaProductsIdx" priority="0">
+    <job job-id="Algolia_products_reindex" priority="0">
         <description>Export products to Algolia service for update search index files</description>
         <parameters/>
         <flow>
