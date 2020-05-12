@@ -1,30 +1,59 @@
 'use strict';
 
+function arrayToXML(arr) {
+    var result = <array></array>;
+    
+    arr.forEach(function (element, index) {
+        var childXML = null;
+        if (element instanceof Object) {
+            childXML = <value id={index}></value>;
+            appendObjToXML(childXML, element);
+        } else {
+            childXML = <value id={index}>{element}</value>;
+        }
+        result.appendChild(childXML);
+    });
+    
+    return result;
+}
+
 /**
  * Convert JS Object to XML Object and append to baseXML Object
  * @param {XML} baseXML - XML Object for update
  * @param {Object} obj - JS Object
  */
 function appendObjToXML(baseXML, obj) {
-    for (var property in obj) {
-        if (obj[property] instanceof Array) {
-            var arr = obj[property];
-            baseXML[property] = '';
-            for (var i = 0; i < arr.length; i++) {
-                if (arr[i] instanceof Object) {
-                    var childXML = <value id={i}></value>;
-                    appendObjToXML(childXML, arr[i]);
-                } else {
-                    var childXML = <value id={i}>{arr[i]}</value>;
-                }
-                baseXML[property].appendChild(childXML);
+    if (obj instanceof Array) {
+        baseXML.append = arrayToXML(obj);
+    } else {
+        for (var property in obj) {
+            if (obj[property] instanceof Array) {
+                baseXML[property] = '';
+                baseXML[property].appendChild(arrayToXML(obj[property]));
+            } else if (obj[property] instanceof Object) {
+                appendObjToXML(baseXML[property], obj[property]);
+            } else {
+                baseXML[property] = obj[property];
+                // Store value type to XML attribute
+                if (typeof obj[property] === 'number') { baseXML[property].@type = 'number'; }
+                if (typeof obj[property] === 'boolean') { baseXML[property].@type = 'boolean'; }
             }
-        } else if (obj[property] instanceof Object) {
-            appendObjToXML(baseXML[property], obj[property]);
-        } else {
-            baseXML[property] = obj[property];
         }
     }
+}
+
+function xmlToArray(xmlArray) {
+    var child = xmlArray.elements();
+    var result = [];
+    var len = child.length();
+    for (var i = 0; i < len; i += 1) {
+        if (child[i].hasSimpleContent()) {
+            result.push(child[i].toString());
+        } else {
+            result.push(xmlToObject(child[i].elements())); 
+        }
+    }
+    return result;
 }
 
 /**
@@ -34,31 +63,30 @@ function appendObjToXML(baseXML, obj) {
  */
 function xmlToObject(xmlObj) {
     if (empty(xmlObj)) { return null; }
-    var result = {};
+
     var lengthChildren = xmlObj.length();
+
+    // Convert XML Array to JS Array 
+    if (lengthChildren === 1 && xmlObj.name().localName === 'array') {
+        return  xmlToArray(xmlObj);
+    }
+
+    var result = {};
 
     for (var i = 0; i < lengthChildren; i += 1) {
         var property = xmlObj[i].name().localName;
         if (xmlObj[i].hasSimpleContent()) {
             result[property] = xmlObj[i].toString();
-        } else {
-            // Convert to Array
-            var child = xmlObj[i].elements();
-            var childProperty = child[0].name().localName;
-            var childAttribute = child[0].attribute('id');
-            if (childProperty === 'value' && childAttribute.length() > 0) {
-                result[property] = [];
-                var len = xmlObj[i][childProperty].length();
-                for (var k = 0; k < len; k += 1) {
-                    if (child[k].hasSimpleContent()) {
-                        result[property].push(child[k].toString());
-                    } else {
-                        result[property].push(xmlToObject(child[k].elements()));
-                    }
-                }
+            if (result[property].toLowerCase() === 'null') {
+                result[property] = null;
             } else {
-                result[property] = xmlToObject(xmlObj[i].elements());
+                // Restore value type from XML attribute
+                var attribute = xmlObj[i].@type.toString();
+                if (attribute === 'number') { result[property] = parseFloat(result[property]); }
+                if (attribute === 'boolean') { result[property] = result[property].toLowerCase() === 'true'; }
             }
+        } else {
+            result[property] = xmlToObject(xmlObj[i].elements());
         }
     }
     return result;
@@ -148,6 +176,75 @@ function subtractObject(baseObj, compareObj) {
 }
 
 /**
+ * Function to create a clone object
+ * @param {Object} obj - object to clone
+ * @returns {Object} - clobe of Obj
+ */
+function cloneObject(obj) {
+    // Handle the simple types, and null or undefined
+    if (empty(obj) || !(obj instanceof Object)) {
+        return obj;
+    }
+    
+    // Handle Array
+    if (obj instanceof Array) {
+        var copy = [];
+        for (var i = 0, len = obj.length; i < len; i++) {
+            copy[i] = cloneObject(obj[i]);
+        }
+        return copy;
+    }
+    
+    // Handle Object
+    if (obj instanceof Object) {
+        var copy = {};
+        for (var attr in obj) {
+            if (obj.hasOwnProperty(attr)) copy[attr] = cloneObject(obj[attr]);
+        }
+        return copy;
+    }
+    
+    return null;
+}
+
+/**
+ * Function creates a new object that contains the top level properties of the compareObj
+ * that are not in the baseObj. If objects are equals, returns empty Object
+ * @param {Object} baseObj - first Object
+ * @param {Object} compareObj - second Object
+ * @returns {Object} - object of differents
+ */
+function compareTopLevelProperties(compareObj, baseObj) {
+    var result = {};
+
+    // if both x and y are null or undefined and exactly the same
+    if (baseObj === compareObj) return result;
+
+    // if they are not strictly equal, they both need to be Objects
+    if (!(baseObj instanceof Object) && (compareObj instanceof Object)) {
+        return compareObj;
+    }
+
+    for (var property in baseObj) {
+        var baseObjString = null;
+        var compareObjString = null;
+        
+        try {
+            baseObjString = JSON.stringify({ obj: baseObj[property] });
+            compareObjString = JSON.stringify({ obj: compareObj[property] });                
+        } catch (error) {
+            result[property] = cloneObject(baseObj[property]);
+            return result;
+        }
+
+        if (baseObjString !== compareObjString) {
+            result[property] = cloneObject(baseObj[property]);
+        }
+    }
+    return result;
+}
+
+/**
  * Compares two objects and creates a new one with properties whose values differ.
  * Values of compareObj are written to the new object
  * @param {Object} compareObj - second Object
@@ -155,7 +252,8 @@ function subtractObject(baseObj, compareObj) {
  * @returns {Object} - object of differents
  */
 function objectCompare(compareObj, baseObj) {
-    var result = subtractObject(compareObj, baseObj);
+    //var result = subtractObject(compareObj, baseObj);
+    var result = compareTopLevelProperties(compareObj, baseObj);
     return isEmptyObject(result) ? null : result;
 }
 
@@ -212,10 +310,12 @@ function logFileInfo(file, infoMessage) {
     return null;
 }
 
-module.exports.appendObjToXML = appendObjToXML;
-module.exports.xmlToObject = xmlToObject;
-module.exports.objectCompare = objectCompare;
-module.exports.hasSameProperties = hasSameProperties;
-module.exports.readXMLObjectFromStream = readXMLObjectFromStream;
-module.exports.logFileError = logFileError;
-module.exports.logFileInfo = logFileInfo;
+module.exports = {
+    appendObjToXML: appendObjToXML,
+    xmlToObject: xmlToObject,
+    objectCompare: objectCompare,
+    hasSameProperties: hasSameProperties,
+    readXMLObjectFromStream: readXMLObjectFromStream,
+    logFileError: logFileError,
+    logFileInfo: logFileInfo
+};

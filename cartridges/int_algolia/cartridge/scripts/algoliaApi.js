@@ -2,6 +2,7 @@
 
 var serviceHelper = require('*/cartridge/scripts/service/serviceHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+var algoliaProductConfig = require('*/cartridge/scripts/algolia/model/algoliaProductConfig');
 var serviceDefinition = require('*/cartridge/scripts/service/serviceDefinition');
 
 var Status = require('dw/system/Status');
@@ -40,7 +41,7 @@ function createHandshakeRequest() {
         index_prefix: algoliaData.getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
         // @TODO replace from config
         fields: {
-            product: algoliaData.getSetOfArray('CustomFields'),
+            product: algoliaProductConfig.defaultAttributes.concat(algoliaData.getSetOfArray('CustomFields')),
             category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subCategories', 'url']
         }
     };

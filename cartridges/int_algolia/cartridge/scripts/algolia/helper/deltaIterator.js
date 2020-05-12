@@ -14,17 +14,9 @@ var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
  * @returns {Object} - JS object
  */
 function readObject(xmlStreamReader, nodeName) {
-    var result = null;
     var objXML = jobHelper.readXMLObjectFromStream(xmlStreamReader, nodeName);
     var obj = jobHelper.xmlToObject(objXML);
-    if (obj) {
-        result = obj[nodeName];
-        if (Object.prototype.hasOwnProperty.call(result, 'options')
-        && Object.prototype.hasOwnProperty.call(result.options, 'partial')) {
-            result.options.partial = result.options.partial.toLowerCase() === 'true';
-        }
-    }
-    return result;
+    return obj ? obj[nodeName] : null;
 }
 
 var DeltaIterator = function () {
