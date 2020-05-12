@@ -43,7 +43,7 @@
                 </td>
             </tr>
             <tr>
-                <td class="table_detail w e s" nowrap="nowrap">Categories for updated</td>
+                <td class="table_detail w e s" nowrap="nowrap">Categories ready for update</td>
                 <td class="table_detail e s"  width="100%">
                     <isprint value="${categoryLog.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
                 </td>
