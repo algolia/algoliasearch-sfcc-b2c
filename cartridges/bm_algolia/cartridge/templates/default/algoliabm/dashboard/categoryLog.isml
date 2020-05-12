@@ -16,7 +16,7 @@
                     <isif condition="${categoryLog.processedError}">
                         Error
                     <iselse/>
-                        Succes
+                        Success
                     </isif>
                 </td>
             </tr>
@@ -68,7 +68,7 @@
                     <isif condition="${categoryLog.sendError}">
                         Error
                     <iselse/>
-                        Succes
+                        Success
                     </isif>
                 </td>
             </tr>
