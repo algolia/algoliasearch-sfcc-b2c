@@ -16,7 +16,7 @@
                     <isif condition="${productLog.processedError}">
                         Error
                     <iselse/>
-                        Succes
+                        Success
                     </isif>
                 </td>
             </tr>
@@ -43,7 +43,7 @@
                 </td>
             </tr>
             <tr>
-                <td class="table_detail w e s" nowrap="nowrap">Products for updated</td>
+                <td class="table_detail w e s" nowrap="nowrap">Products ready for update</td>
                 <td class="table_detail e s"  width="100%">
                     <isprint value="${productLog.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
                 </td>
@@ -68,7 +68,7 @@
                     <isif condition="${productLog.sendError}">
                         Error
                     <iselse/>
-                        Succes
+                        Success
                     </isif>
                 </td>
             </tr>
