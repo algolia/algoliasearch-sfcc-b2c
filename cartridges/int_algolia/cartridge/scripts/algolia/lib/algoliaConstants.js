@@ -1,6 +1,6 @@
 'use strict';
 
-var ALGOLIA_FILES_FOLDER = '/Impex/src/Algolia/';
+var ALGOLIA_FILES_FOLDER = dw.io.File.IMPEX + '/src/Algolia/';
 var SNAPSHOT_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + 'product.xml';
 var TMP_SNAPSHOT_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + 'product_tmp.xml';
 var UPDATE_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + 'product_update.xml';

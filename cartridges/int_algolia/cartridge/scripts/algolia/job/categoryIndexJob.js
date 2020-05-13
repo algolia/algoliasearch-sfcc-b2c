@@ -262,6 +262,7 @@ function runCategoryExport(parameters) {
         }
     }
     if (!snapshotFile.exists()) {
+        initCall = true;
         createCategoriesSnapshotFile(snapshotFile, listOfCategories);
         if (updateFile.exists()) {
             updateFile.remove();
