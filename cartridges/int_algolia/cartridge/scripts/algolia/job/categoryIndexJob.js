@@ -241,6 +241,9 @@ function runCategoryExport(parameters) {
     categoryLogData.processedRecords = 0;
     categoryLogData.processedToUpdateRecords = 0;
 
+    var counterCategoriesTotal = listOfCategories.length;
+    var counterCategoriesForUpdate = 0;
+
     var initCall = false;
     if (!empty(parameters.init) && parameters.init.toLowerCase() == 'true') {
         initCall = true;
@@ -296,6 +299,7 @@ function runCategoryExport(parameters) {
             }
 
             if (categoryUpdate) {
+                counterCategoriesForUpdate += 1;
                 writeObjectToXMLStream(updateXmlWriter, categoryUpdate);
                 categoryUpdate = false;
             }
@@ -320,6 +324,7 @@ function runCategoryExport(parameters) {
             delete listOfCategories[i].checked;
         } else {
             var categoryUpdate = new UpdateCategoryModel(listOfCategories[i]);
+            counterCategoriesForUpdate += 1;
             writeObjectToXMLStream(updateXmlWriter, categoryUpdate);
         }
         writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[i]);
@@ -340,6 +345,16 @@ function runCategoryExport(parameters) {
     // Close XML Snapshot file
     snapshotXmlReader.close();
     snapshotFileReader.close();
+
+    jobHelper.logFileInfo(snapshotFile.fullPath, 'Processed ' + counterCategoriesTotal + ' records');
+    jobHelper.logFileInfo(updateFile.fullPath, 'Records for update' + counterCategoriesForUpdate + 'records');
+
+    categoryLogData.processedDate = algoliaData.getLocalDateTime(new Date());
+    categoryLogData.processedError = false;
+    categoryLogData.processedErrorMessage = '';
+    categoryLogData.processedRecords = counterCategoriesTotal;
+    categoryLogData.processedToUpdateRecords = counterCategoriesForUpdate;
+    algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
 
     return true;
 }
