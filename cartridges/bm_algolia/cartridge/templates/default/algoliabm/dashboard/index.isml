@@ -74,38 +74,6 @@
         </table>
         </form>
     </div>
-    <iscomment>
-    <p></p>
-    <div class="algolia-bm-indexes">
-        <form action="${pdict.reindexUrl}" class="form-horizontal" method="post">
-        <input type="hidden" name="csrf_token" />
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
-            <tbody>
-                <tr>
-                    <td class="table_header w s" nowrap="nowrap" width="100%" colspan="1" style="padding: 6px;">Index Type</td>
-                    <td class="table_header w e s center">Last update</td>
-                    <td class="table_header e s center">Rebuild</td>
-                </tr>
-                <tr>
-                    <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Clear and resynchronize all indices</td>
-                    <td class="table_detail w e s" nowrap="nowrap">3/30/20&nbsp;10:19:43 am</td>
-                    <td class="table_detail e s center"><button class="button" name="reindexAll" type="submit">Run</button></td>
-                </tr>
-                <tr>
-                    <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Clear and resynchronize a product index</td>
-                    <td class="table_detail w e s" nowrap="nowrap">3/30/20&nbsp;10:19:43 am</td>
-                    <td class="table_detail e s center"><button class="button" name="reindexProducts" type="submit">Run</button></td>
-                </tr>
-                <tr>
-                    <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Clear and resynchronize a category index</td>
-                    <td class="table_detail w e s" nowrap="nowrap">3/30/20&nbsp;10:19:43 am</td>
-                    <td class="table_detail e s center"><button class="button" name="reindexCategories" type="submit">Run</button></td>
-                </tr>
-            </tbody>
-        </table>
-        </form>
-    </div>
-    </iscomment>
     <p></p>
     <isinclude template="algoliabm/dashboard/productLog" />
     <p></p>

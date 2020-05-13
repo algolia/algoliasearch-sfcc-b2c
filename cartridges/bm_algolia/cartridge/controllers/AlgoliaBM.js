@@ -13,7 +13,6 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
  */
 function renderIndex() {
     var pdictValues = {
-        reindexUrl: URLUtils.https('AlgoliaBM-HandleReindex'),
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData
     };
@@ -26,23 +25,6 @@ function renderIndex() {
  * @returns {void} - renderIndex
  */
 function start() {
-    renderIndex();
-}
-
-/**
- * @description Handle form for reindex
- * @returns {void} - renderIndex
- */
-function handleReindex() {
-    var params = request.httpParameterMap;
-
-    if (params.reindexAll.submitted) {
-    // TODO: reindex
-    } else if (params.reindexProducts.submitted) {
-    // TODO: reindex
-    } else if (params.reindexCategories.submitted) {
-        // TODO: reindex
-    }
     renderIndex();
 }
 
@@ -70,7 +52,5 @@ function handleSettings() {
 
 exports.Start = start;
 exports.Start.public = true;
-exports.HandleReindex = handleReindex;
-exports.HandleReindex.public = true;
 exports.HandleSettings = handleSettings;
 exports.HandleSettings.public = true;
