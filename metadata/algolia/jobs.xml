@@ -11,7 +11,7 @@
                     <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/productsIndexJob.js</parameter>
                     <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
                     <parameter name="ExecuteScriptModule.Transactional">false</parameter>
-                    <parameter name="init">true</parameter>
+                    <parameter name="clearAndRebuild">true</parameter>
                 </parameters>
             </step>
             <step step-id="sendProductsDelta" type="ExecuteScriptModule" enforce-restart="false">
@@ -43,7 +43,7 @@
                     <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/categoryIndexJob.js</parameter>
                     <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
                     <parameter name="ExecuteScriptModule.Transactional">false</parameter>
-                    <parameter name="init">true</parameter>
+                    <parameter name="clearAndRebuild">true</parameter>
                 </parameters>
             </step>
             <step step-id="sendCategoriesDelta" type="ExecuteScriptModule" enforce-restart="false">

@@ -48,9 +48,10 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
  * Job for create Product Snapshot file and
  * file for update Algolia Product Index
  * @param {Object} parameters - job paraneters
- * @returns {boolean} - successful Job run
+ * @returns {dw.system.Status} - successful Job run
  */
 function runProductExport(parameters) {
+    var Status = require('dw/system/Status');
     var ProductMgr = require('dw/catalog/ProductMgr');
     var File = require('dw/io/File');
     var FileWriter = require('dw/io/FileWriter');
@@ -71,6 +72,10 @@ function runProductExport(parameters) {
     productLogData.processedRecords = 0;
     productLogData.processedToUpdateRecords = 0;
 
+    if (!jobHelper.checkAlgoliaFolder()) {
+        return new Status(Status.ERROR);
+    }
+
     // Open XML New temporary Snapshot file to write
     var newSnapshotFile = null;
     var snapshotFileWriter = null;
@@ -84,7 +89,7 @@ function runProductExport(parameters) {
         snapshotXmlWriter.writeStartElement('products');
     } catch (error) {
         jobHelper.logFileError(newSnapshotFile.fullPath, 'Error open Snapshot file to write', error);
-        return false;
+        return new Status(Status.ERROR);
     }
 
     // Open Delta XML file to write
@@ -101,28 +106,28 @@ function runProductExport(parameters) {
         jobHelper.logFileError(updateFile.fullPath, 'Error open Delta file to write', error);
         productLogData.processedErrorMessage = 'Error open Delta file to write';
         algoliaData.setLogData('LastProductSyncLog', productLogData);
-        return false;
+        return new Status(Status.ERROR);
     }
 
     // Open XML Snapshot file to read
     var snapshotReadIterator = null;
     var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
     if (snapshotFile.exists()) {
-        if (!empty(parameters.init) && parameters.init.toLowerCase() === 'true') {
+        if (!empty(parameters.clearAndRebuild) && parameters.clearAndRebuild.toLowerCase() === 'true') {
             try {
                 snapshotFile.remove();
             } catch (error) {
                 jobHelper.logFileError(snapshotFile.fullPath, 'Error remove file', error);
                 productLogData.processedErrorMessage = 'Error remove file';
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
-                return false;
+                return new Status(Status.ERROR);
             }
         } else {
             snapshotReadIterator = fileReadIterator.create(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME, 'product');
             if (empty(snapshotReadIterator)) {
                 productLogData.processedErrorMessage = 'Error open Snapshot file or read';
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
-                return false;
+                return new Status(Status.ERROR);
             }
         }
     }
@@ -145,7 +150,7 @@ function runProductExport(parameters) {
                 jobHelper.logFileError(newSnapshotFile.fullPath, 'Error write to file', error);
                 productLogData.processedErrorMessage = 'Error write to file';
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
-                return false;
+                return new Status(Status.ERROR);
             }
             snapshotToUpdate = false;
             counterProductsTotal += 1;
@@ -210,7 +215,7 @@ function runProductExport(parameters) {
                 jobHelper.logFileError(updateFile.fullPath, 'Error write to file', error);
                 productLogData.processedErrorMessage = 'Error write to file';
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
-                return false;
+                return new Status(Status.ERROR);
             }
             counterProductsForUpdate += 1;
         }
@@ -249,7 +254,7 @@ function runProductExport(parameters) {
     productLogData.processedToUpdateRecords = counterProductsForUpdate;
     algoliaData.setLogData('LastProductSyncLog', productLogData);
 
-    return true;
+    return new Status(Status.OK);
 }
 
 module.exports.execute = runProductExport;
