@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
-    <job job-id="Algolia_products_reindex" priority="0">
+    <job job-id="AlgoliaProductsIndex" priority="0">
         <description>Export products to Algolia service for update search index files</description>
         <parameters/>
         <flow>
             <context site-id="RefArch"/>
-            <step step-id="productIndexJob" type="ExecuteScriptModule" enforce-restart="false">
+            <step step-id="calculateProductsDelta" type="ExecuteScriptModule" enforce-restart="false">
                 <description/>
                 <parameters>
                     <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/productsIndexJob.js</parameter>
                     <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
                     <parameter name="ExecuteScriptModule.Transactional">false</parameter>
-                    <parameter name="clearAndRebuild">true</parameter>
+                    <parameter name="clearAndRebuild">false</parameter>
                 </parameters>
             </step>
             <step step-id="sendProductsDelta" type="ExecuteScriptModule" enforce-restart="false">
@@ -32,18 +32,18 @@
         </triggers>
     </job>
 
-    <job job-id="Algolia_categories_reindex" priority="0">
+    <job job-id="AlgoliaCategoriesIndex" priority="0">
         <description>Export categories to Algolia service for update search index files</description>
         <parameters/>
         <flow>
             <context site-id="RefArch"/>
-            <step step-id="categoryIndexJob" type="ExecuteScriptModule" enforce-restart="false">
+            <step step-id="calculateСategoriesDelta" type="ExecuteScriptModule" enforce-restart="false">
                 <description/>
                 <parameters>
                     <parameter name="ExecuteScriptModule.Module">int_algolia/cartridge/scripts/algolia/job/categoryIndexJob.js</parameter>
                     <parameter name="ExecuteScriptModule.FunctionName">execute</parameter>
                     <parameter name="ExecuteScriptModule.Transactional">false</parameter>
-                    <parameter name="clearAndRebuild">true</parameter>
+                    <parameter name="clearAndRebuild">false</parameter>
                 </parameters>
             </step>
             <step step-id="sendCategoriesDelta" type="ExecuteScriptModule" enforce-restart="false">
