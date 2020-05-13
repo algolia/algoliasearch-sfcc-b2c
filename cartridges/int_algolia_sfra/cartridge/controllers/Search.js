@@ -20,21 +20,19 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         var cgid = req.querystring.cgid;
         var category = null;
         var categoryBannerUrl;
-        if (cgid) {    // get category - need image, name and if root
+        if (cgid) { // get category - need image, name and if root
             category = CatalogMgr.getCategory(cgid);
             if (category) {
                 if (category && category.parent.ID === 'root') {
-                    useAlgolia = false;    // main categories have specific template
-                } else {
-                    if (category.custom && 'slotBannerImage' in category.custom &&
-                        category.custom.slotBannerImage) {
-                        categoryBannerUrl = category.custom.slotBannerImage.getURL();
-                    } else if (category.image) {
-                        categoryBannerUrl = category.image.getURL();
-                    }
+                    useAlgolia = false; // main categories have specific template
+                } else if (category.custom && 'slotBannerImage' in category.custom
+                            && category.custom.slotBannerImage) {
+                    categoryBannerUrl = category.custom.slotBannerImage.getURL();
+                } else if (category.image) {
+                    categoryBannerUrl = category.image.getURL();
                 }
             } else {
-                useAlgolia = false;    // if category does not exist use default error
+                useAlgolia = false; // if category does not exist use default error
             }
         }
         if (useAlgolia) {
@@ -54,7 +52,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             });
         }
     }
-    if (!useAlgolia) {    // deafult Search-Show
+    if (!useAlgolia) { // deafult Search-Show
         var ProductSearchModel = require('dw/catalog/ProductSearchModel');
         var searchHelper = require('*/cartridge/scripts/helpers/searchHelpers');
         var template = 'search/searchResults';

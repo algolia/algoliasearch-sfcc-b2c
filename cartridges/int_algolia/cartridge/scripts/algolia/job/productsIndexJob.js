@@ -19,11 +19,18 @@ function UpdateProductModel(algoliaProduct) {
         data: {}
     };
 
+    Object.keys(algoliaProduct).forEach(function (key) {
+        if (key !== 'id') {
+            this.options.data[key] = algoliaProduct[key];
+        }
+    });
+    /* TODO: remove this code in production
     for (var property in algoliaProduct) {
         if (property !== 'id') {
             this.options.data[property] = algoliaProduct[property];
-        };
+        }
     }
+    */
 }
 
 /**
@@ -185,7 +192,7 @@ function runProductExport(parameters) {
                         productUpdate.options.partial = true;
                     }
                 } else {
-                    // Rewrite product сompletely
+                    // Rewrite product completely
                     productUpdate = new UpdateProductModel(newProductModel);
                 }
                 productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;

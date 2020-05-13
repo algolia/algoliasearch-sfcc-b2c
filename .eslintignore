@@ -11,4 +11,4 @@ cartridges/bm_app_storefront_base/cartridge/
 cartridges/app_storefront_base/cartridge/
 cartridges/modules
 cartridges/int_algolia_sfra/cartridge/static/
-cartridges/sg_changes/cartridge/
+cartridges/algolia_sg_changes/cartridge/

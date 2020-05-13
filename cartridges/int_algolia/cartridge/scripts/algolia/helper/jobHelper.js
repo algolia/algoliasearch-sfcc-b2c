@@ -318,7 +318,7 @@ function checkAlgoliaFolder() {
         algoliaFolder = new File(algoliaFolderName);
         result = algoliaFolder.exists() ? true : algoliaFolder.mkdirs();
     } catch (error) {
-        logFileError(newSnapshotFile.fullPath, 'Error creatu directory path', error);
+        logFileError(newSnapshotFile.fullPath, 'Error create directory path', error);
         result = false;
     }
     return result;
