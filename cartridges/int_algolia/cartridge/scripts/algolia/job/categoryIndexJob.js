@@ -201,7 +201,7 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
  * Job for create Categories Snapshot file and
  * file for update Algolia Category Index
  * @param {Object} parameters - job parameters
- * @returns {boolean} - successful Job run
+ * @returns {dw.system.Status} - successful Job run
  */
 function runCategoryExport(parameters) {
     var siteCatalog = catalogMgr.getSiteCatalog();
@@ -213,6 +213,7 @@ function runCategoryExport(parameters) {
             siteRootCategory.getOnlineSubCategories().iterator() : null;
     var listOfCategories = [];
 
+    var Status = require('dw/system/Status');
     var File = require('dw/io/File');
     var FileReader = require('dw/io/FileReader');
     var XMLStreamReader = require('dw/io/XMLStreamReader');
@@ -222,6 +223,10 @@ function runCategoryExport(parameters) {
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+
+    if (!jobHelper.checkAlgoliaFolder()) {
+        return new Status(Status.ERROR);
+    }
 
     while (topLevelCategories.hasNext()) {
         var category = topLevelCategories.next();
@@ -245,7 +250,7 @@ function runCategoryExport(parameters) {
     var counterCategoriesForUpdate = 0;
 
     var initCall = false;
-    if (!empty(parameters.init) && parameters.init.toLowerCase() == 'true') {
+    if (!empty(parameters.clearAndRebuild) && parameters.clearAndRebuild.toLowerCase() === 'true') {
         initCall = true;
         try {
             snapshotFile.remove();
@@ -253,10 +258,11 @@ function runCategoryExport(parameters) {
             jobHelper.logFileError(snapshotFile.fullPath, 'Error remove snapshot file', error);
             categoryLogData.processedErrorMessage = 'Error remove shapnshot file';
             algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
-            return false;
+            return new Status(Status.ERROR);
         }
     }
     if (!snapshotFile.exists()) {
+        initCall = true;
         createCategoriesSnapshotFile(snapshotFile, listOfCategories);
         if (updateFile.exists()) {
             updateFile.remove();
@@ -356,7 +362,7 @@ function runCategoryExport(parameters) {
     categoryLogData.processedToUpdateRecords = counterCategoriesForUpdate;
     algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
 
-    return true;
+    return new Status(Status.OK);
 }
 
 module.exports.execute = runCategoryExport;

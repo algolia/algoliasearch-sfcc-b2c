@@ -310,6 +310,20 @@ function logFileInfo(file, infoMessage) {
     return null;
 }
 
+function checkAlgoliaFolder() {
+    var File = require('dw/io/File');
+    var algoliaFolderName = require('*/cartridge/scripts/algolia/lib/algoliaConstants').ALGOLIA_FILES_FOLDER;
+    var result = false;
+    try {
+        algoliaFolder = new File(algoliaFolderName);
+        result = algoliaFolder.exists() ? true : algoliaFolder.mkdirs();
+    } catch (error) {
+        logFileError(newSnapshotFile.fullPath, 'Error creatu directory path', error);
+        result = false;
+    }
+    return result;
+}
+
 module.exports = {
     appendObjToXML: appendObjToXML,
     xmlToObject: xmlToObject,
@@ -317,5 +331,6 @@ module.exports = {
     hasSameProperties: hasSameProperties,
     readXMLObjectFromStream: readXMLObjectFromStream,
     logFileError: logFileError,
-    logFileInfo: logFileInfo
+    logFileInfo: logFileInfo,
+    checkAlgoliaFolder: checkAlgoliaFolder
 };
