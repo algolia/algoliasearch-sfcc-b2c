@@ -1,16 +1,10 @@
 <isif condition="${pdict.algoliaEnable}">
 <div class="site-search">
     <div id="suggestions-wrapper"
-        data-appid="${pdict.applicationID}"
-        data-searchapikey="${pdict.searchApiKey}"
         data-category="${pdict.cgid}"
         data-category-display-name-path="${pdict.categoryDisplayNamePath}"
         data-category-display-name-path-separator="${pdict.categoryDisplayNamePathSeparator}"
         data-q="${pdict.q}"
-        data-productsindexid="${pdict.productsIndex}"
-        data-categoriesindexid="${pdict.categoriesIndex}"
-        data-locale="${pdict.locale}"
-        data-currencycode="${pdict.currencyCode}"
         data-search-page-root="${URLUtils.http('Search-Show')}"></div>
     <input
         type="search"

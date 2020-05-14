@@ -29,7 +29,7 @@
 
                     <div class="col-6 col-sm-3 text-right d-md-none order-sm-3">
                         <button type="button" class="btn btn-primary filter-results col-12">
-                            Filter
+                            <isprint value="${Resource.msg('search.filter','algolia',null)}" encoding="htmlcontent" />
                         </button>
                     </div>
             </div>
@@ -43,9 +43,9 @@
                         <div class="card collapsible-sm refinement refinement-category">
                             <div class="card-header col-sm-12">
                                 <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-category" aria-expanded="false">
-                                    <span>Category</span>
+                                    <span><isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" /></span>
                                 </button>
-                                <h2 aria-label="Category" class="d-none d-md-block">Category</h2>
+                                <h2 aria-label="<isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" /></h2>
                             </div>
                             <div class="card-body content value" id="refinement-category">
                                 <div id="algolia-categories-list-placeholder"></div>
@@ -56,9 +56,9 @@
                         <div class="card collapsible-sm refinement refinement-brand">
                             <div class="card-header col-sm-12">
                                 <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-brand" aria-expanded="false">
-                                    <span>Brand</span>
+                                    <span><isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" /></span>
                                 </button>
-                                <h2 aria-label="Brand" class="d-none d-md-block">Brand</h2>
+                                <h2 aria-label="<isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" /></h2>
                             </div>
                             <div class="card-body content value" id="refinement-brand">
                                 <div id="algolia-brand-list-placeholder"></div>
@@ -69,9 +69,9 @@
                         <div class="card collapsible-sm refinement refinement-price">
                             <div class="card-header col-sm-12">
                                 <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-price" aria-expanded="false">
-                                    <span>Price</span>
+                                    <span><isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" /></span>
                                 </button>
-                                <h2 aria-label="Price" class="d-none d-md-block">Price</h2>
+                                <h2 aria-label="<isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" /></h2>
                             </div>
                             <div class="card-body content value" id="refinement-price">
                                 <div id="algolia-price-filter-placeholder"></div>

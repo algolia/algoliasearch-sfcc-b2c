@@ -1,0 +1,45 @@
+<!-- Start of Algolia dependencies -->
+<isset name="algoliaData" value="${require('*/cartridge/scripts/algolia/lib/algoliaData')}" scope="page" />
+
+<isif condition="${algoliaData.getPreference('Enable')}">
+    <script>
+        var algoliaData = {
+            "enable": ${algoliaData.getPreference('Enable')},
+            "applicationID": "${algoliaData.getPreference('ApplicationID')}",
+            "searchApiKey": "${algoliaData.getPreference('SearchApiKey')}",
+            "locale": "${request.getLocale()}",
+            "currencyCode": "${request.getSession().getCurrency()}",
+            "currencySymbol": "${request.getSession().getSymbol()}",
+            "productsIndex": "${algoliaData.calculateIndexId('products')}",
+            "categoriesIndex": "${algoliaData.calculateIndexId('categories')}"
+        }
+    </script>
+
+    <!-- Algolia Insights (Click Analytics & Personalization) -->
+    <script>
+      var ALGOLIA_INSIGHTS_SRC = "https://cdn.jsdelivr.net/npm/search-insights@1.3.1";
+
+      !function(e,a,t,n,s,i,c){e.AlgoliaAnalyticsObject=s,e[s]=e[s]||function(){
+      (e[s].queue=e[s].queue||[]).push(arguments)},i=a.createElement(t),c=a.getElementsByTagName(t)[0],
+      i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
+      }(window,document,"script",ALGOLIA_INSIGHTS_SRC,"aa");
+    </script>
+    <script src="${URLUtils.staticURL('/js/algolia/insights-config.js')}"></script>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default%2CArray.prototype.find%2CArray.prototype.includes%2CPromise%2CObject.assign%2CObject.entries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/algoliasearch@3/dist/algoliasearchLite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hogan.js@1.0.2"></script>
+
+    <!-- Algolia Autocomplete.js -->
+    <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.min.js"></script>
+    <script src="${URLUtils.staticURL('/js/algolia/autocomplete-config.js')}"></script>
+
+    <!-- Algolia InstantSearch.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7/themes/reset-min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+    <script src="${URLUtils.staticURL('/js/algolia/instantsearch-config.js')}"></script>
+
+    <link rel="stylesheet" href="${URLUtils.staticURL('/css/algolia/index.css')}" />
+    <script src="${URLUtils.staticURL('/js/algolia/index.js')}"></script>
+</isif>
+<!-- End of Algolia dependencies -->

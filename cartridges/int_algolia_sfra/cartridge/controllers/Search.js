@@ -9,19 +9,9 @@ var cache = require('*/cartridge/scripts/middleware/cache');
 var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
 var pageMetaData = require('*/cartridge/scripts/middleware/pageMetaData');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 
 server.extend(module.superModule);
-
-function getCategoryDisplayNamePath(category) {
-    if (category.ID === 'root') return [];
-
-    var output = [category.displayName];
-    if (category.parent) {
-        output = getCategoryDisplayNamePath(category.parent).concat(output)
-    }
-    return output;
-}
-
 
 /* overwrite Search-Show */
 server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.consent, function (req, res, next) {
@@ -49,7 +39,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 }
 
                 // category path
-                categoryDisplayNamePath = getCategoryDisplayNamePath(category).join(categoryDisplayNamePathSeparator);
+                categoryDisplayNamePath = algoliaUtils.getCategoryDisplayNamePath(category).join(categoryDisplayNamePathSeparator);
 
             } else {
                 useAlgolia = false;    // if category does not exist use default error
@@ -58,16 +48,10 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         if (useAlgolia) {
             res.render('search/searchResults', {
                 algoliaEnable: true,
-                // searchApiKey: algoliaData.getPreference('SearchApiKey'),
-                // applicationID: algoliaData.getPreference('ApplicationID'),
                 category: category,
                 categoryDisplayNamePath: categoryDisplayNamePath,
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
-                // productsIndex: algoliaData.calculateIndexId('products'),
-                // categoriesIndex: algoliaData.calculateIndexId('categories'),
-                // locale: request.getLocale(),
-                // currencyCode: req.session.currency.currencyCode,
                 // TODO: sqlinjection ?
                 cgid: req.querystring.cgid,
                 q: req.querystring.q
