@@ -8,8 +8,8 @@
             "applicationID": "${algoliaData.getPreference('ApplicationID')}",
             "searchApiKey": "${algoliaData.getPreference('SearchApiKey')}",
             "locale": "${request.getLocale()}",
-            "currencyCode": "${request.getSession().getCurrency()}",
-            "currencySymbol": "${request.getSession().getSymbol()}",
+            "currencyCode": "${request.getSession().getCurrency().getCurrencyCode()}",
+            "currencySymbol": "${request.getSession().getCurrency().getSymbol()}",
             "productsIndex": "${algoliaData.calculateIndexId('products')}",
             "categoriesIndex": "${algoliaData.calculateIndexId('categories')}"
         }
