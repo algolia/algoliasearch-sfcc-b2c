@@ -3,10 +3,12 @@
 var assert = require('chai').assert;
 var proxyquire = require('proxyquire').noCallThru().noPreserveCache();
 
-var ProductMock = require('../../../../../mocks/dw/catalog/Product');
 var GlobalMock = require('../../../../../mocks/global');
+var ProductMock = require('../../../../../mocks/dw/catalog/Product');
+var StringUtils = require('../../../../../mocks/dw/util/StringUtils');
 
 global.empty = GlobalMock.empty;
+global.request = GlobalMock.request;
 
 /*
 var GlobalMock = require('../../../../../mocks/global');
@@ -21,29 +23,95 @@ global.request = GlobalMock.request;
 */
 
 var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaProduct', {
-    'dw/system/Site': {},
+    'dw/system/Site': {
+        getCurrent: function () {
+            return {
+                getAllowedLocales: function () {
+                    var arr = ['default', 'fr', 'en'];
+                    arr.size = function () {
+                        return arr.length;
+                    };
+                    return arr;
+                }
+            };
+        }
+    },
     'dw/util/Currency': {},
-    'dw/util/StringUtils': {},
+    'dw/util/StringUtils': StringUtils,
     'dw/web/URLUtils': {},
     '*/cartridge/scripts/algolia/lib/algoliaData': {
-        getSetOfArray: function(property) {
-            switch (property) {
+        getSetOfArray: function (id) {
+            var result = null;
+            switch (id) {
                 case 'CustomFields':
-                    return [];
+                    result = ['UPC', 'searchable', 'variant', 'color', 'size', 'brand'];
+                    break;
                 default:
                     break;
             }
+            return result;
+        },
+        getPreference: function (id) {
+            var result = null;
+            switch (id) {
+                case 'InStockThreshold':
+                    result = 1;
+                    break;
+                default:
+                    break;
+            }
+            return result;
         }
     },
-    '*/cartridge/scripts/algolia/model/algoliaProductConfig': {}
+    '*/cartridge/scripts/algolia/model/algoliaProductConfig': {
+        defaultAttributes: ['id', 'primary_category_id', 'in_stock'],
+        attributeConfig: {
+            brand: {
+                attribute: 'brand',
+                localized: true
+            },
+            id: {
+                attribute: 'ID',
+                localized: false
+            },
+            primary_category_id: {
+                attribute: 'primaryCategory.ID',
+                localized: false
+            },
+            in_stock: {
+                attribute: 'availabilityModel.inStock',
+                localized: false
+            },
+            UPC: {
+                attribute: 'UPC',
+                localized: false
+            },
+            variant: {
+                attribute: 'variant',
+                localized: false
+            },
+            searchable: {
+                attribute: 'searchable',
+                localized: false
+            },
+            color: {
+                localized: true
+            },
+            size: {
+                localized: true
+            }
+        }
+    }
 });
 
 describe('algiliaProduct module - Test Algolia Product model', function () {
     it('Checking Algolia Product model is valid', function () {
+        console.log(request.getLocale());
         let product = new ProductMock();
         let algiliaProductModel = {
             id: '701644031206M',
             in_stock: true,
+            primary_category_id: 'womens',
             price: {
                 USD: 129,
                 EUR: 92.88

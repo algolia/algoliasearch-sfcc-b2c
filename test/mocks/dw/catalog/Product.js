@@ -1,10 +1,21 @@
 // var _super = require('../object/ExtensibleObject');
 
-var Product = function() {};
+var brand = function () {
+    var result = null;
+    switch (request.getLocale()) {
+        case 'default': result = 5; break;
+        case 'fr': result = 5; break;
+        case 'en': result = 5; break;
+        default: break;
+    }
+    return result;
+};
 
-Product.prototype.ID = null;
+var Product = function () {};
+
+Product.prototype.ID = '701644031206M';
 Product.prototype.primaryCategory = {
-    ID: '701644031206M'
+    ID: 'womens'
 };
 Product.prototype.online = true;
 Product.prototype.searchable = true;
@@ -12,7 +23,45 @@ Product.prototype.UPC = '701644031206';
 Product.prototype.unit = 1;
 Product.prototype.EAN = null;
 Product.prototype.searchable = true;
-Product.prototype.variant = false;
+Product.prototype.variant = true;
+Product.prototype.availabilityModel = {
+    inStock: true,
+    availability: 2
+};
+Product.prototype.brand = 5;
+
+
+Product.prototype.getVariationModel = function () {
+    return {
+        getProductVariationAttribute: function (key) {
+            var result = null;
+            switch (key) {
+                case 'color':
+                    switch (request.getLocale()) {
+                        case 'default': result = { displayValue: 'Hot Pink Combo' }; break;
+                        case 'fr': result = { displayValue: 'Hot Pink Combo' }; break;
+                        case 'en': result = { displayValue: 'Hot Pink Combo' }; break;
+                        default: break;
+                    }
+                    break;
+                case 'size':
+                    switch (request.getLocale()) {
+                        case 'default': result = { displayValue: '4' }; break;
+                        case 'fr': result = { displayValue: '4' }; break;
+                        case 'en': result = { displayValue: '4' }; break;
+                        default: break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return result;
+        },
+        getSelectedValue: function (attribute) {
+            return attribute;
+        }
+    };
+};
 
 /*
 'availabilityModel.inStock'
@@ -39,7 +88,7 @@ Product.prototype.getVariants = function(){};
 Product.prototype.__id = function(){};
 
 Product.prototype.getImage = function(){
-	return new require('../content/MediaFile');	
+	return new require('../content/MediaFile');
 };
 
 Product.prototype.getShortDescription = function(){};
