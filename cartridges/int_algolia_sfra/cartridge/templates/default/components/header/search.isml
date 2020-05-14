@@ -1,11 +1,28 @@
 <isif condition="${pdict.algoliaEnable}">
-	<div class="site-search">
-		<div id="searchbox"></div>
-		<div id="suggestions-wrapper" data-appid="${pdict.applicationID}" data-searchapikey="${pdict.searchApiKey}" data-category="${pdict.cgid}" data-q="${pdict.q}" data-productsindexid="${pdict.productsIndex}" data-categoriesindexid="${pdict.categoriesIndex}" data-locale="${pdict.locale}" data-currencycode="${pdict.currencyCode}"></div>
-	</div>
+<div class="site-search">
+    <div id="suggestions-wrapper"
+        data-appid="${pdict.applicationID}"
+        data-searchapikey="${pdict.searchApiKey}"
+        data-category="${pdict.cgid}"
+        data-category-display-name-path="${pdict.categoryDisplayNamePath}"
+        data-category-display-name-path-separator="${pdict.categoryDisplayNamePathSeparator}"
+        data-q="${pdict.q}"
+        data-productsindexid="${pdict.productsIndex}"
+        data-categoriesindexid="${pdict.categoriesIndex}"
+        data-locale="${pdict.locale}"
+        data-currencycode="${pdict.currencyCode}"
+        data-search-page-root="${URLUtils.http('Search-Show')}"></div>
+    <input
+        type="search"
+        id="aa-search-input"
+        class="aa-input-search form-control"
+        placeholder="Search for product or a cateogry"
+        name="search"
+        autocomplete="off" />
+</div>
 <iselse>
 <div class="site-search">
-	<form role="search"
+    <form role="search"
           action="${URLUtils.url('Search-Show')}"
           method="get"
           name="simpleSearch">
@@ -28,6 +45,6 @@
         <button type="submit" name="search-button" class="fa fa-search" aria-label="${Resource.msg('label.header.search.go', 'common', null)}"></button>
         <div class="suggestions-wrapper" data-url="${URLUtils.url('SearchServices-GetSuggestions', 'q')}"></div>
         <input type="hidden" value="${pdict.locale}" name="lang">
-	</form>
+    </form>
 </div>
 </isif>

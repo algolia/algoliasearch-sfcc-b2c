@@ -12,6 +12,17 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 server.extend(module.superModule);
 
+function getCategoryDisplayNamePath(category) {
+    if (category.ID === 'root') return [];
+
+    var output = [category.displayName];
+    if (category.parent) {
+        output = getCategoryDisplayNamePath(category.parent).concat(output)
+    }
+    return output;
+}
+
+
 /* overwrite Search-Show */
 server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.consent, function (req, res, next) {
     var useAlgolia = false;
@@ -20,6 +31,9 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         var cgid = req.querystring.cgid;
         var category = null;
         var categoryBannerUrl;
+        var categoryDisplayNamePath = null;
+        var categoryDisplayNamePathSeparator = '>';
+
         if (cgid) {    // get category - need image, name and if root
             category = CatalogMgr.getCategory(cgid);
             if (category) {
@@ -33,6 +47,10 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                         categoryBannerUrl = category.image.getURL();
                     }
                 }
+
+                // category path
+                categoryDisplayNamePath = getCategoryDisplayNamePath(category).join(categoryDisplayNamePathSeparator);
+
             } else {
                 useAlgolia = false;    // if category does not exist use default error
             }
@@ -40,21 +58,23 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         if (useAlgolia) {
             res.render('search/searchResults', {
                 algoliaEnable: true,
-                searchApiKey: algoliaData.getPreference('SearchApiKey'),
-                applicationID: algoliaData.getPreference('ApplicationID'),
+                // searchApiKey: algoliaData.getPreference('SearchApiKey'),
+                // applicationID: algoliaData.getPreference('ApplicationID'),
                 category: category,
+                categoryDisplayNamePath: categoryDisplayNamePath,
+                categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
-                productsIndex: algoliaData.calculateIndexId('products'),
-                categoriesIndex: algoliaData.calculateIndexId('categories'),
-                locale: request.getLocale(),
-                currencyCode: req.session.currency.currencyCode,
+                // productsIndex: algoliaData.calculateIndexId('products'),
+                // categoriesIndex: algoliaData.calculateIndexId('categories'),
+                // locale: request.getLocale(),
+                // currencyCode: req.session.currency.currencyCode,
                 // TODO: sqlinjection ?
                 cgid: req.querystring.cgid,
                 q: req.querystring.q
             });
         }
     }
-    if (!useAlgolia) {    // deafult Search-Show
+    if (!useAlgolia) {    // default Search-Show
         var ProductSearchModel = require('dw/catalog/ProductSearchModel');
         var searchHelper = require('*/cartridge/scripts/helpers/searchHelpers');
         var template = 'search/searchResults';
