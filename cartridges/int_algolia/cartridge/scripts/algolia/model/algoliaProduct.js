@@ -44,13 +44,13 @@ function getPromotionalPrice(product) {
  * @returns  {Object} - Algolia Image Group Object
  */
 function getImagesGroup(product, viewtype) {
-    var currentSites = Site.getCurrent();
-
     if (empty(product) || empty(viewtype)) { return null; }
 
     var imagesList = product.getImages(viewtype);
     if (empty(imagesList)) { return null; }
 
+    var currentSites = Site.getCurrent();
+    var currentLocale = request.getLocale();
     var result = {
         _type: 'image_group',
         images: [],
@@ -59,7 +59,6 @@ function getImagesGroup(product, viewtype) {
 
     var imagesListSize = imagesList.size();
     for (var i = 0; i < imagesListSize; i += 1) {
-        var imageItem = imagesList[i];
         var image = {
             _type: 'image',
             alt: {},
@@ -73,13 +72,15 @@ function getImagesGroup(product, viewtype) {
         for (var loc = 0; loc < siteLocalesSize; loc += 1) {
             var localeName = siteLocales[loc];
             request.setLocale(localeName);
-            image.alt[localeName] = stringUtils.trim(imageItem.alt);
-            image.dis_base_link[localeName] = stringUtils.trim(imageItem.absURL.toString());
-            image.title[localeName] = stringUtils.trim(imageItem.title);
+            var imageItems = product.getImages(viewtype);
+            image.alt[localeName] = stringUtils.trim(imageItems[i].alt);
+            image.dis_base_link[localeName] = stringUtils.trim(imageItems[i].absURL.toString());
+            image.title[localeName] = stringUtils.trim(imageItems[i].title);
         }
 
         result.images.push(image);
     }
+    request.setLocale(currentLocale);
 
     return result;
 }
