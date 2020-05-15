@@ -5,22 +5,10 @@ var proxyquire = require('proxyquire').noCallThru().noPreserveCache();
 
 var GlobalMock = require('../../../../../mocks/global');
 var ProductMock = require('../../../../../mocks/dw/catalog/Product');
-var StringUtils = require('../../../../../mocks/dw/util/StringUtils');
+var algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaProductConfig');
 
 global.empty = GlobalMock.empty;
-global.request = GlobalMock.request;
-
-/*
-var GlobalMock = require('../../../../../mocks/global');
-var PaymentInstrumentMock = require('../../../../../mocks/dw/order/PaymentInstrument');
-var CustomerMock = require('../../../../../mocks/dw/customer/Customer');
-var TransactionMock = require('../../../../../mocks/dw/system/Transaction');
-var LoggerMock = require('../../../../../mocks/dw/system/Logger');
-var BasketMgrMock = require('../../../../../mocks/dw/order/BasketMgr');
-
-global.session = GlobalMock.session;
-global.request = GlobalMock.request;
-*/
+global.request = new GlobalMock.RequestMock();
 
 var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaProduct', {
     'dw/system/Site': {
@@ -32,81 +20,48 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
                         return arr.length;
                     };
                     return arr;
+                },
+                getAllowedCurrencies: function () {
+                    var arr = [
+                        { currencyCode: 'USD' },
+                        { currencyCode: 'EUR' }
+                    ];
+                    arr.size = function () {
+                        return arr.length;
+                    };
+                    return arr;
                 }
             };
         }
     },
-    'dw/util/Currency': {},
-    'dw/util/StringUtils': StringUtils,
-    'dw/web/URLUtils': {},
-    '*/cartridge/scripts/algolia/lib/algoliaData': {
-        getSetOfArray: function (id) {
-            var result = null;
-            switch (id) {
-                case 'CustomFields':
-                    result = ['UPC', 'searchable', 'variant', 'color', 'size', 'brand'];
-                    break;
-                default:
-                    break;
-            }
-            return result;
-        },
-        getPreference: function (id) {
-            var result = null;
-            switch (id) {
-                case 'InStockThreshold':
-                    result = 1;
-                    break;
-                default:
-                    break;
-            }
-            return result;
+    'dw/util/Currency': {
+        getCurrency: function (currency) { return currency; }
+    },
+    'dw/util/StringUtils': {
+        trim: function (str) { return str; }
+    },
+    'dw/web/URLUtils': {
+        https: function (endpoint, param, id) {
+            var baseUrl = 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/';
+            return baseUrl + request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
         }
     },
-    '*/cartridge/scripts/algolia/model/algoliaProductConfig': {
-        defaultAttributes: ['id', 'primary_category_id', 'in_stock'],
-        attributeConfig: {
-            brand: {
-                attribute: 'brand',
-                localized: true
-            },
-            id: {
-                attribute: 'ID',
-                localized: false
-            },
-            primary_category_id: {
-                attribute: 'primaryCategory.ID',
-                localized: false
-            },
-            in_stock: {
-                attribute: 'availabilityModel.inStock',
-                localized: false
-            },
-            UPC: {
-                attribute: 'UPC',
-                localized: false
-            },
-            variant: {
-                attribute: 'variant',
-                localized: false
-            },
-            searchable: {
-                attribute: 'searchable',
-                localized: false
-            },
-            color: {
-                localized: true
-            },
-            size: {
-                localized: true
-            }
+    '*/cartridge/scripts/algolia/lib/algoliaData': {
+        getSetOfArray: function (id) {
+            return id === 'CustomFields'
+                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'size', 'brand', 'online', 'pageDescription', 'pageKeywords',
+                    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
+                : null;
+        },
+        getPreference: function (id) {
+            return id === 'InStockThreshold' ? 1 : null;
         }
-    }
+    },
+    '*/cartridge/scripts/algolia/model/algoliaProductConfig': algoliaProductConfig
 });
 
 describe('algiliaProduct module - Test Algolia Product model', function () {
     it('Checking Algolia Product model is valid', function () {
-        console.log(request.getLocale());
         let product = new ProductMock();
         let algiliaProductModel = {
             id: '701644031206M',
@@ -116,7 +71,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                 USD: 129,
                 EUR: 92.88
             },
-            сategories: [
+            categories: [
                 [
                     {
                         id: 'newarrivals-womens',
@@ -175,7 +130,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             _type: 'image',
                             alt: {
                                 default: 'Floral Dress, Hot Pink Combo, large',
-                                fr: 'Floral Dress, Hot Pink Combo, large',
+                                fr: 'Freanch Floral Dress, Hot Pink Combo, large',
                                 en: 'Floral Dress, Hot Pink Combo, large'
                             },
                             dis_base_link: {
@@ -185,7 +140,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             },
                             title: {
                                 default: 'Floral Dress, Hot Pink Combo',
-                                fr: 'Floral Dress, Hot Pink Combo',
+                                fr: 'Freanch Floral Dress, Hot Pink Combo',
                                 en: 'Floral Dress, Hot Pink Combo'
                             }
                         },
@@ -193,7 +148,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             _type: 'image',
                             alt: {
                                 default: 'Floral Dress, Hot Pink Combo, large',
-                                fr: 'Floral Dress, Hot Pink Combo, large',
+                                fr: 'Freanch Floral Dress, Hot Pink Combo, large',
                                 en: 'Floral Dress, Hot Pink Combo, large'
                             },
                             dis_base_link: {
@@ -203,7 +158,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             },
                             title: {
                                 default: 'Floral Dress, Hot Pink Combo',
-                                fr: 'Floral Dress, Hot Pink Combo',
+                                fr: 'Freanch Floral Dress, Hot Pink Combo',
                                 en: 'Floral Dress, Hot Pink Combo'
                             }
                         }

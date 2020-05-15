@@ -1,22 +1,106 @@
-// var _super = require('../object/ExtensibleObject');
+var Product = function () {
+};
 
-var brand = function () {
-    var result = null;
-    switch (request.getLocale()) {
-        case 'default': result = 5; break;
-        case 'fr': result = 5; break;
-        case 'en': result = 5; break;
-        default: break;
+Product.prototype = {
+    get brand() {
+        var result = null;
+        switch (request.getLocale()) {
+            case 'default': result = null; break;
+            case 'fr': result = null; break;
+            case 'en': result = null; break;
+            default: break;
+        }
+        return result;
+    },
+    get name() {
+        var result = null;
+        switch (request.getLocale()) {
+            case 'default': result = 'Floral Dress'; break;
+            case 'fr': result = 'Floral Dress'; break;
+            case 'en': result = 'Floral Dress'; break;
+            default: break;
+        }
+        return result;
+    },
+    get pageDescription() {
+        var result = null;
+        switch (request.getLocale()) {
+            case 'default': result = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'fr': result = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'en': result = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            default: break;
+        }
+        return result;
+    },
+    get pageKeywords() {
+        var result = null;
+        switch (request.getLocale()) {
+            case 'default': result = null; break;
+            case 'fr': result = null; break;
+            case 'en': result = null; break;
+            default: break;
+        }
+        return result;
+    },
+    get pageTitle() {
+        var result = null;
+        switch (request.getLocale()) {
+            case 'default': result = 'Floral Dress'; break;
+            case 'fr': result = 'Floral Dress'; break;
+            case 'en': result = 'Floral Dress'; break;
+            default: break;
+        }
+        return result;
+    },
+    get longDescription() {
+        var result = { source: null };
+        switch (request.getLocale()) {
+            case 'default': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'fr': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'en': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            default: break;
+        }
+        return result;
+    },
+    get shortDescription() {
+        var result = { source: null };
+        switch (request.getLocale()) {
+            case 'default': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'fr': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'en': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            default: break;
+        }
+        return result;
+    },
+    get priceModel() {
+        var result = null;
+        var currency = request.getSession().getCurrency();
+        switch (currency.currencyCode) {
+            case 'USD':
+                result = {
+                    price: {
+                        available: true,
+                        currencyCode: 'USD',
+                        value: 129
+                    }
+                };
+                break;
+            case 'EUR':
+                result = {
+                    price: {
+                        available: true,
+                        currencyCode: 'EUR',
+                        value: 92.88
+                    }
+                };
+                break;
+            default: break;
+        }
+        return result;
     }
-    return result;
 };
-
-var Product = function () {};
-
 Product.prototype.ID = '701644031206M';
-Product.prototype.primaryCategory = {
-    ID: 'womens'
-};
+Product.prototype.primaryCategory = { ID: 'womens' };
 Product.prototype.online = true;
 Product.prototype.searchable = true;
 Product.prototype.UPC = '701644031206';
@@ -28,8 +112,91 @@ Product.prototype.availabilityModel = {
     inStock: true,
     availability: 2
 };
-Product.prototype.brand = 5;
-
+Product.prototype.isVariant = function () { return false; };
+Product.prototype.getOnlineCategories = function () {
+    var result = [
+        {
+            ID: 'newarrivals-womens',
+            get displayName() {
+                var name = null;
+                switch (request.getLocale()) {
+                    case 'default': name = 'Womens'; break;
+                    case 'fr': name = 'Womens'; break;
+                    case 'en': name = 'Womens'; break;
+                    default: break;
+                }
+                return name;
+            },
+            root: false,
+            parent: {
+                ID: 'newarrivals',
+                get displayName() {
+                    var name = null;
+                    switch (request.getLocale()) {
+                        case 'default': name = 'New Arrivals'; break;
+                        case 'fr': name = 'New Arrivals'; break;
+                        case 'en': name = 'New Arrivals'; break;
+                        default: break;
+                    }
+                    return name;
+                },
+                root: true,
+                parent: {
+                    ID: 'root',
+                    displayName: 'Storefront Catalog - EN'
+                }
+            }
+        },
+        {
+            ID: 'womens-clothing-bottoms',
+            get displayName() {
+                var name = null;
+                switch (request.getLocale()) {
+                    case 'default': name = 'Bottoms'; break;
+                    case 'fr': name = 'Bottoms'; break;
+                    case 'en': name = 'Bottoms'; break;
+                    default: break;
+                }
+                return name;
+            },
+            root: false,
+            parent: {
+                ID: 'womens-clothing',
+                get displayName() {
+                    var name = null;
+                    switch (request.getLocale()) {
+                        case 'default': name = 'Clothing'; break;
+                        case 'fr': name = 'Clothing'; break;
+                        case 'en': name = 'Clothing'; break;
+                        default: break;
+                    }
+                    return name;
+                },
+                root: false,
+                parent: {
+                    ID: 'womens',
+                    get displayName() {
+                        var name = null;
+                        switch (request.getLocale()) {
+                            case 'default': name = 'Womens'; break;
+                            case 'fr': name = 'Womens'; break;
+                            case 'en': name = 'Womens'; break;
+                            default: break;
+                        }
+                        return name;
+                    },
+                    root: true,
+                    parent: {
+                        ID: 'root',
+                        displayName: 'Storefront Catalog - EN'
+                    }
+                }
+            }
+        }
+    ];
+    result.toArray = function () { return result; };
+    return result;
+};
 
 Product.prototype.getVariationModel = function () {
     return {
@@ -63,172 +230,102 @@ Product.prototype.getVariationModel = function () {
     };
 };
 
-/*
-'availabilityModel.inStock'
-'brand'
-'longDescription.source'
-'manufacturerName'
-'manufacturerSKU'
-'master'
-'name'
-'optionProduct'
-'pageDescription'
-'pageKeywords'
-'pageTitle'
-'productSet'
-'productSetProduct'
-'shortDescription.source'
-*/
+Product.prototype.getImages = function (viewtype) {
+    var arrDefaultLarge = [
+        {
+            alt: 'Floral Dress, Hot Pink Combo, large',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        },
+        {
+            alt: 'Floral Dress, Hot Pink Combo, large',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        }
+    ];
+    var arrFrLarge = [
+        {
+            alt: 'Freanch Floral Dress, Hot Pink Combo, large',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg',
+            title: 'Freanch Floral Dress, Hot Pink Combo'
+        },
+        {
+            alt: 'Freanch Floral Dress, Hot Pink Combo, large',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg',
+            title: 'Freanch Floral Dress, Hot Pink Combo'
+        }
+    ];
+    var arrEnLarge = [
+        {
+            alt: 'Floral Dress, Hot Pink Combo, large',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        },
+        {
+            alt: 'Floral Dress, Hot Pink Combo, large',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        }
+    ];
 
-/*
-Product.prototype = new _super();
-Product.prototype.getName = function() {};
-Product.prototype.getID = function(){};
-Product.prototype.getVariants = function(){};
-Product.prototype.__id = function(){};
+    var arrDefaultSmall = [
+        {
+            alt: 'Floral Dress, Hot Pink Combo, small',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        },
+        {
+            alt: 'Floral Dress, Hot Pink Combo, small',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        }
+    ];
+    var arrFrSmall = [
+        {
+            alt: 'Floral Dress, Hot Pink Combo, small',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        },
+        {
+            alt: 'Floral Dress, Hot Pink Combo, small',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        }
+    ];
+    var arrEnSmall = [
+        {
+            alt: 'Floral Dress, Hot Pink Combo, small',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        },
+        {
+            alt: 'Floral Dress, Hot Pink Combo, small',
+            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg',
+            title: 'Floral Dress, Hot Pink Combo'
+        }
+    ];
 
-Product.prototype.getImage = function(){
-	return new require('../content/MediaFile');
+    var result = null;
+    if (viewtype === 'large') {
+        switch (request.getLocale()) {
+            case 'default': result = arrDefaultLarge; break;
+            case 'fr': result = arrFrLarge; break;
+            case 'en': result = arrEnLarge; break;
+            default: break;
+        }
+    } else {
+        switch (request.getLocale()) {
+            case 'default': result = arrDefaultSmall; break;
+            case 'fr': result = arrFrSmall; break;
+            case 'en': result = arrEnSmall; break;
+            default: break;
+        }
+    }
+
+    result.size = function () {
+        return result.length;
+    };
+    return result;
 };
 
-Product.prototype.getShortDescription = function(){};
-Product.prototype.getThumbnail = function(){};
-Product.prototype.isOnline = function(){};
-Product.prototype.getOnlineFlag = function(){};
-Product.prototype.getOnlineFrom = function(){};
-Product.prototype.getOnlineTo = function(){};
-Product.prototype.getCategoryAssignments = function(){};
-Product.prototype.getSearchPlacement = function(){};
-Product.prototype.getSearchRank = function(){};
-Product.prototype.getSiteMapChangeFrequency = function(){};
-Product.prototype.getSiteMapPriority = function(){};
-Product.prototype.getPageTitle = function(){};
-Product.prototype.getPageDescription = function(){};
-Product.prototype.getPageKeywords = function(){};
-Product.prototype.getPageURL = function(){};
-Product.prototype.getRecommendations = function(){};
-Product.prototype.getTemplate = function(){};
-Product.prototype.getAllCategories = function(){};
-Product.prototype.assignedToCategory = function(){};
-Product.prototype.getCategories = function(){};
-Product.prototype.getLongDescription = function(){};
-Product.prototype.isAssignedToCategory = function(){};
-Product.prototype.getOnlineCategories = function(){};
-Product.prototype.getAllCategoryAssignments = function(){};
-Product.prototype.getCategoryAssignment = function(){};
-Product.prototype.getPrimaryCategoryAssignment = function(){};
-Product.prototype.getPrimaryCategory = function(){};
-Product.prototype.getProductSetProducts = function(){};
-Product.prototype.getProductSets = function(){};
-Product.prototype.isProductSet = function(){};
-Product.prototype.isProductSetProduct = function(){};
-Product.prototype.isProduct = function(){};
-Product.prototype.isSiteProduct = function(){};
-Product.prototype.isAssignedToSiteCatalog = function(){};
-Product.prototype.isCategorized = function(){};
-Product.prototype.isRetailSet = function(){};
-Product.prototype.isSearchable = function(){};
-Product.prototype.getSearchableFlag = function(){};
-Product.prototype.setSearchableFlag_1 = function(){};
-Product.prototype.setSearchableFlag_2 = function(){};
-Product.prototype.setSearchPlacement_1 = function(){};
-Product.prototype.setSearchPlacement_2 = function(){};
-Product.prototype.setSearchRank_1 = function(){};
-Product.prototype.setSearchRank_2 = function(){};
-Product.prototype.getEAN = function(){};
-Product.prototype.getUPC = function(){};
-Product.prototype.getBrand = function() {};
-Product.prototype.isOptionProduct = function(){};
-Product.prototype.getOptionModel = function(){};
-Product.prototype.isMaster = function(){};
-Product.prototype.isBundle = function(){};
-Product.prototype.isBundled = function(){};
-Product.prototype.isVariant = function(){};
-Product.prototype.isVariationGroup = function(){};
-Product.prototype.includedInBundle = function(){};
-Product.prototype.getBundledProductQuantity = function(){};
-Product.prototype.getBundledProducts = function(){};
-Product.prototype.getBundles = function(){};
-Product.prototype.getMinOrderQuantity = function(){};
-Product.prototype.getStepQuantity = function(){};
-Product.prototype.getClassificationCategory = function(){};
-Product.prototype.getManufacturerName = function(){};
-Product.prototype.getManufacturerSKU = function(){};
-Product.prototype.setOnlineFlag_1 = function(){};
-Product.prototype.setOnlineFlag_2 = function(){};
-Product.prototype.getUnit = function(){};
-Product.prototype.getTaxClassID = function(){};
-Product.prototype.isAvailable = function(){};
-Product.prototype.getAvailableFlag = function(){};
-Product.prototype.setAvailableFlag = function(){};
-Product.prototype.getPriceModel = function(){};
-Product.prototype.getVariationModel = function(){};
-Product.prototype.getProductLinks = function(){};
-Product.prototype.getIncomingProductLinks = function(){};
-Product.prototype.getAllProductLinks = function(){};
-Product.prototype.getAllIncomingProductLinks = function(){};
-Product.prototype.getAttributeModel = function(){};
-Product.prototype.getImages = function(){};
-Product.prototype.getOrderableRecommendations = function(){};
-Product.prototype.getAvailabilityModel = function(){};
-Product.prototype.getAllRecommendations = function(){};
-Product.prototype.getActiveData = function(){};
-Product.prototype.name=null;
-Product.prototype.variants=null;
-Product.prototype.image=null;
-Product.prototype.shortDescription=null;
-Product.prototype.thumbnail=null;
-Product.prototype.onlineFlag=null;
-Product.prototype.onlineFrom=null;
-Product.prototype.onlineTo=null;
-Product.prototype.categoryAssignments=null;
-Product.prototype.searchPlacement=null;
-Product.prototype.searchRank=null;
-Product.prototype.siteMapChangeFrequency=null;
-Product.prototype.siteMapPriority=null;
-Product.prototype.pageTitle=null;
-Product.prototype.pageDescription=null;
-Product.prototype.pageKeywords=null;
-Product.prototype.pageURL=null;
-Product.prototype.recommendations=null;
-Product.prototype.template=null;
-Product.prototype.allCategories=null;
-Product.prototype.categories=null;
-Product.prototype.longDescription=null;
-Product.prototype.onlineCategories=null;
-Product.prototype.allCategoryAssignments=null;
-Product.prototype.categoryAssignment=null;
-Product.prototype.primaryCategoryAssignment=null;
-Product.prototype.primaryCategory=null;
-Product.prototype.productSetProducts=null;
-Product.prototype.productSets=null;
-Product.prototype.searchableFlag=null;
-Product.prototype.EAN=null;
-Product.prototype.UPC=null;
-Product.prototype.brand=null;
-Product.prototype.optionModel=null;
-Product.prototype.bundledProductQuantity=null;
-Product.prototype.bundledProducts=null;
-Product.prototype.bundles=null;
-Product.prototype.minOrderQuantity=null;
-Product.prototype.stepQuantity=null;
-Product.prototype.classificationCategory=null;
-Product.prototype.manufacturerName=null;
-Product.prototype.manufacturerSKU=null;
-Product.prototype.unit=null;
-Product.prototype.taxClassID=null;
-Product.prototype.availableFlag=null;
-Product.prototype.priceModel=null;
-Product.prototype.variationModel=null;
-Product.prototype.productLinks=null;
-Product.prototype.incomingProductLinks=null;
-Product.prototype.allProductLinks=null;
-Product.prototype.allIncomingProductLinks=null;
-Product.prototype.attributeModel=null;
-Product.prototype.images=null;
-Product.prototype.orderableRecommendations=null;
-Product.prototype.availabilityModel=null;
-Product.prototype.allRecommendations=null;
-Product.prototype.activeData=null;
-*/
 module.exports = Product;
