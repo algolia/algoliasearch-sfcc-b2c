@@ -19,11 +19,12 @@ function UpdateProductModel(algoliaProduct) {
         data: {}
     };
 
-    Object.keys(algoliaProduct).forEach(function (key) {
-        if (key !== 'id') {
-            this.options.data[key] = algoliaProduct[key];
+    var keys = Object.keys(algoliaProduct);
+    for (var i = 0; i < keys.length; i += 1) {
+        if (keys[i] !== 'id') {
+            this.options.data[keys[i]] = algoliaProduct[keys[i]];
         }
-    });
+    }
     /* TODO: remove this code in production
     for (var property in algoliaProduct) {
         if (property !== 'id') {

@@ -39,11 +39,12 @@ function UpdateCategoryModel(algoliaCategory) {
         data: {}
     };
 
-    Object.keys(algoliaCategory).forEach(function (key) {
-        if (key !== 'id') {
-            this.options.data[key] = algoliaCategory[key];
+    var keys = Object.keys(algoliaCategory);
+    for (var i = 0; i < keys.length; i += 1) {
+        if (keys[i] !== 'id') {
+            this.options.data[keys[i]] = algoliaCategory[keys[i]];
         }
-    });
+    }
     /* TODO: remove this code in production
     for (var property in algoliaCategory) {
         if (property !== 'id') {
