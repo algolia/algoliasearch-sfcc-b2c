@@ -303,7 +303,7 @@ function logFileError(file, errorMessage, error) {
  */
 function logFileInfo(file, infoMessage) {
     var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.info('\nFile: {0},\nMassage: {1}',
+    logger.info('\nFile: {0},\nMessage: {1}',
         file,
         infoMessage);
 
