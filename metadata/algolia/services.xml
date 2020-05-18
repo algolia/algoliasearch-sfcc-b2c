@@ -7,7 +7,7 @@
     </service-credential>
 
     <service-profile service-profile-id="algolia.http.api.profile">
-        <timeout-millis>5000</timeout-millis>
+        <timeout-millis>50000</timeout-millis>
         <rate-limit-enabled>false</rate-limit-enabled>
         <rate-limit-calls>0</rate-limit-calls>
         <rate-limit-millis>0</rate-limit-millis>
@@ -20,7 +20,7 @@
         <service-type>HTTP</service-type>
         <enabled>true</enabled>
         <log-prefix>algolia</log-prefix>
-        <comm-log-enabled>true</comm-log-enabled>
+        <comm-log-enabled>false</comm-log-enabled>
         <force-prd-enabled>true</force-prd-enabled>
         <mock-mode-enabled>false</mock-mode-enabled>
         <profile-id>algolia.http.api.profile</profile-id>
