@@ -12,7 +12,16 @@
             "currencySymbol": '<isprint value="${request.getSession().getCurrency().getSymbol()}" encoding="jshtml" />',
             "productsIndex": "${algoliaData.calculateIndexId('products')}",
             "categoriesIndex": "${algoliaData.calculateIndexId('categories')}",
-            "quickViewUrlBase": "${URLUtils.url('Product-ShowQuickView')}"
+            "quickViewUrlBase": "${URLUtils.url('Product-ShowQuickView')}",
+            "strings": {
+                "moreResults": "${Resource.msg('button.more', 'search', null)}",
+                "noResults": "${Resource.msg('search.noResults','algolia',null)}",
+                "result": "${Resource.msg('search.result','algolia',null)}",
+                "results": "${Resource.msg('search.results','algolia',null)}",
+                "bestMetches": "${Resource.msg('search.bestMetches','algolia',null)}",
+                "priceAsc": "${Resource.msg('search.priceAsc','algolia',null)}",
+                "priceDesc": "${Resource.msg('search.priceDesc','algolia',null)}"
+            }
         }
     </script>
 

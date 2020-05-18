@@ -11,7 +11,7 @@
         type="search"
         id="aa-search-input"
         class="aa-input-search form-control"
-        placeholder="${Resource.msg('searchfieldplaceholder', 'algolia', null)}"
+        placeholder="${Resource.msg('label.header.searchwatermark', 'common', null)}"
         name="search"
         autocomplete="off" />
 </div>

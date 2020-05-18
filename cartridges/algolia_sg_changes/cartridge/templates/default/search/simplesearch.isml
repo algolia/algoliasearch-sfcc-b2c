@@ -12,7 +12,7 @@
         type="search"
         id="aa-search-input"
         class="aa-input-search form-control"
-        placeholder="${Resource.msg('searchfieldplaceholder', 'algolia', null)}"
+        placeholder="${Resource.msg('simplesearch.searchtext', 'search', null)}"
         name="search"
         autocomplete="off" />
 </div>

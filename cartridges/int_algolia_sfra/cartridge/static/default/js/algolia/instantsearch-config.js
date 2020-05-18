@@ -33,9 +33,9 @@ function enableInstantSearch(config) {
                 container: '#algolia-stats-placeholder',
                 templates: {
                     text: ''
-                        + '{{#hasNoResults}} No results {{/hasNoResults}} '
-                        + '{{#hasOneResult}} 1 result {{/hasOneResult}}'
-                        + '{{#hasManyResults}}{{#helpers.formatNumber}}{{nbHits}}{{/helpers.formatNumber}} results {{/hasManyResults}}'
+                        + '{{#hasNoResults}} ' + algoliaData.strings.noResults + ' {{/hasNoResults}} '
+                        + '{{#hasOneResult}} 1 ' + algoliaData.strings.result + ' {{/hasOneResult}}'
+                        + '{{#hasManyResults}}{{#helpers.formatNumber}}{{nbHits}}{{/helpers.formatNumber}} ' + algoliaData.strings.results + ' {{/hasManyResults}}'
                 }
             }),
             instantsearch.widgets.sortBy({
@@ -44,9 +44,9 @@ function enableInstantSearch(config) {
                     select: 'custom-select'
                 },
                 items: [
-                    {label: 'Best Matches', value: config.productsIndex},
-                    {label: 'Price (asc)', value: config.productsIndexPriceAsc},
-                    {label: 'Price (desc)', value: config.productsIndexPriceDesc}
+                    {label: algoliaData.strings.bestMetches, value: config.productsIndex},
+                    {label: algoliaData.strings.priceAsc, value: config.productsIndexPriceAsc},
+                    {label: algoliaData.strings.priceDesc, value: config.productsIndexPriceDesc}
                 ]
             }),
             instantsearch.widgets.clearRefinements({
@@ -114,7 +114,7 @@ function enableInstantSearch(config) {
                     loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto'
                 },
                 templates: {
-                    showMoreText: 'More results',
+                    showMoreText: algoliaData.strings.moreResults,
                     item: ''
                         + '<div class="product" ' +
                         +'     data-pid="{{objectID}}"'
