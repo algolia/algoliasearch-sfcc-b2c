@@ -30,16 +30,16 @@
                     <td class="table_detail w e s" nowrap="nowrap"><input type="checkbox" ${pdict.algoliaData.getPreference('Enable') ? "checked": ""} id="Enable" name="Enable" /></td>
                 </tr>
                 <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Application ID</td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('ApplicationID')}" id="ApplicationID" name="ApplicationID" /></td>
+                </tr>
+                <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Search API key</td>
                     <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey')}" id="SearchApiKey" name="SearchApiKey" /></td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Admin API key</td>
                     <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey')}" id="AdminApiKey" name="AdminApiKey" /></td>
-                </tr>
-                <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Application ID</td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('ApplicationID')}" id="ApplicationID" name="ApplicationID" /></td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">Read Host Base Url</td>

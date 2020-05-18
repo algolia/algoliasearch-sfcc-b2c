@@ -90,16 +90,12 @@
             <attribute-group group-id="Algolia">
                 <display-name xml:lang="x-default">Algolia</display-name>
                 <attribute attribute-id="Algolia_Enable"/>
-                <attribute attribute-id="Algolia_AdminApiKey"/>
-                <attribute attribute-id="Algolia_SearchApiKey"/>
                 <attribute attribute-id="Algolia_ApplicationID"/>
+                <attribute attribute-id="Algolia_SearchApiKey"/>
+                <attribute attribute-id="Algolia_AdminApiKey"/>
                 <attribute attribute-id="Algolia_HostBase"/>
                 <attribute attribute-id="Algolia_InStockThreshold"/>
-                <attribute attribute-id="Algolia_LastProductSyncDate"/>
-                <attribute attribute-id="Algolia_LastCategorySyncDate"/>
                 <attribute attribute-id="Algolia_CustomFields"/>
-                <attribute attribute-id="Algolia_LastProductSyncLog"/>
-                <attribute attribute-id="Algolia_LastCategorySyncLog"/>
             </attribute-group>
         </group-definitions>
     </type-extension>
