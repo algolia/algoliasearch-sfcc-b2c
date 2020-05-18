@@ -1,5 +1,6 @@
 <iscontent type="text/html" charset="UTF-8" compact="true"/>
-<isif condition="${pdict.algoliaEnable}">
+<isset name="algoliaData" value="${require('*/cartridge/scripts/algolia/lib/algoliaData')}" scope="page" />
+<isif condition="${algoliaData.getPreference('Enable')}">
 <div class="site-search">
     <div id="suggestions-wrapper"
         data-category="${pdict.cgid}"
