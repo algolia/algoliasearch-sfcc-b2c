@@ -19,6 +19,7 @@ var meta = require('*/cartridge/scripts/meta');
 
 var CatalogMgr = require('dw/catalog/CatalogMgr');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 
 /**
  * Renders a full-featured product search result page.
@@ -40,14 +41,16 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
  * @see {@link module:controllers/Search~showProductGrid|showProductGrid} function}.
  */
 function show() {
-	var params = request.httpParameterMap;
-	
-	var useAlgolia = false;
+    var params = request.httpParameterMap;
+
+    var useAlgolia = false;
     if (algoliaData.getPreference('Enable')) {
         useAlgolia = true;
         var cgid = params.cgid ? params.cgid.value : null;
         var category = null;
         var categoryBannerUrl;
+        var categoryDisplayNamePath = null;
+        var categoryDisplayNamePathSeparator = '>';
         if (cgid) {    // get category - need image, name and if root
             category = CatalogMgr.getCategory(cgid);
             if (category) {
@@ -61,19 +64,20 @@ function show() {
                         categoryBannerUrl = category.image.getURL();
                     }
                 }
+                // category path
+                categoryDisplayNamePath = algoliaUtils.getCategoryDisplayNamePath(category).join(categoryDisplayNamePathSeparator);
+
             } else {
                 useAlgolia = false;    // if category does not exist use default error
             }
         }
         if (useAlgolia) {
-        	app.getView({
+            app.getView({
         		algoliaEnable: true,
-                searchApiKey: algoliaData.getPreference('SearchApiKey'),
-                applicationID: algoliaData.getPreference('ApplicationID'),
                 category: category,
+                categoryDisplayNamePath: categoryDisplayNamePath,
+                categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
-                productsIndex: algoliaData.calculateIndexId('products'),
-                categoriesIndex: algoliaData.calculateIndexId('categories'),
                 // TODO: sqlinjection ?
                 cgid: cgid,
                 q: params.q ? params.q.value : null
@@ -81,104 +85,104 @@ function show() {
         }
     }
     if (!useAlgolia) {    // deafult Search-Show	
-	    if (params.format.stringValue === 'ajax' || params.format.stringValue === 'page-element') {
-	        // TODO refactor and merge showProductGrid() code into here
-	        showProductGrid();
-	        return;
-	    }
-	
-	    var redirectUrl = SearchModel.getSearchRedirect(params.q.value);
-	
-	    if (redirectUrl){
-	        app.getView({
-	            Location: redirectUrl.location,
-	            CacheTag: true
-	        }).render('util/redirect');
-	        return;
-	    }
-	
-	    // Constructs the search based on the HTTP params and sets the categoryID.
-	    var Search = app.getModel('Search');
-	    var productSearchModel = Search.initializeProductSearchModel(params);
-	    var contentSearchModel = Search.initializeContentSearchModel(params);
-	
-	    // execute the product search
-	    productSearchModel.search();
-	    contentSearchModel.search();
-	
-	    if (productSearchModel.emptyQuery && contentSearchModel.emptyQuery) {
-	        response.redirect(URLUtils.abs('Home-Show'));
-	    } else if (productSearchModel.count > 0) {
-	
-	        if ((productSearchModel.count > 1) || productSearchModel.refinedSearch || (contentSearchModel.count > 0)) {
-	            var productPagingModel = new PagingModel(productSearchModel.productSearchHits, productSearchModel.count);
-	            if (params.start.submitted) {
-	                productPagingModel.setStart(params.start.intValue);
-	            }
-	
-	            if (params.sz.submitted && request.httpParameterMap.sz.intValue <= 60) {
-	                productPagingModel.setPageSize(params.sz.intValue);
-	            } else {
-	                productPagingModel.setPageSize(12);
-	            }
-	
-	            if (productSearchModel.category) {
-	                meta.update(productSearchModel.category);
-	            }
-	            meta.updatePageMetaTags(productSearchModel);
-	
-	            if (productSearchModel.categorySearch && !productSearchModel.refinedCategorySearch && productSearchModel.category.template) {
-	                // Renders a dynamic template.
-	                app.getView({
-	                    ProductSearchResult: productSearchModel,
-	                    ContentSearchResult: contentSearchModel,
-	                    ProductPagingModel: productPagingModel
-	                }).render(productSearchModel.category.template);
-	            } else {
-	
-	                //SearchPromo - for displaying search driven banners above the product grid, provided there is a q parameter in the httpParameterMap
-	                var searchPromo;
-	                if (params.q.value) {
-	                    searchPromo = ContentMgr.getContent('keyword_' + params.q.value.toLowerCase());
-	                }
-	
-	                app.getView({
-	                    ProductSearchResult: productSearchModel,
-	                    ContentSearchResult: contentSearchModel,
-	                    ProductPagingModel: productPagingModel,
-	                    SearchPromo: searchPromo
-	                }).render('rendering/category/categoryproducthits');
-	            }
-	        } else {
-	            var targetProduct = productSearchModel.getProducts().next();
-	            var productID = targetProduct.getID();
-	
-	            // If the target was not a master, simply use the product ID.
-	            if (targetProduct.isMaster()) {
-	
-	                // In the case of a variation master, the master is the representative for
-	                // all its variants. If there is only one variant, return the variant's
-	                // product ID.
-	                var iter = productSearchModel.getProductSearchHits();
-	                if (iter.hasNext()) {
-	                    var productSearchHit = iter.next();
-	                    if (productSearchHit.getRepresentedProducts().size() === 1) {
-	                        productID = productSearchHit.getFirstRepresentedProductID();
-	                    }
-	                }
-	            }
-	
-	            app.getView({
-	                Location: URLUtils.http('Product-Show', 'pid', productID)
-	            }).render('util/redirect');
-	
-	        }
-	    } else {
-	        app.getView({
-	            ProductSearchResult: productSearchModel,
-	            ContentSearchResult: contentSearchModel
-	        }).render('search/nohits');
-	    }
+        if (params.format.stringValue === 'ajax' || params.format.stringValue === 'page-element') {
+            // TODO refactor and merge showProductGrid() code into here
+            showProductGrid();
+            return;
+        }
+    
+        var redirectUrl = SearchModel.getSearchRedirect(params.q.value);
+    
+        if (redirectUrl){
+            app.getView({
+                Location: redirectUrl.location,
+                CacheTag: true
+            }).render('util/redirect');
+            return;
+        }
+
+        // Constructs the search based on the HTTP params and sets the categoryID.
+        var Search = app.getModel('Search');
+        var productSearchModel = Search.initializeProductSearchModel(params);
+        var contentSearchModel = Search.initializeContentSearchModel(params);
+
+        // execute the product search
+        productSearchModel.search();
+        contentSearchModel.search();
+
+        if (productSearchModel.emptyQuery && contentSearchModel.emptyQuery) {
+            response.redirect(URLUtils.abs('Home-Show'));
+        } else if (productSearchModel.count > 0) {
+
+            if ((productSearchModel.count > 1) || productSearchModel.refinedSearch || (contentSearchModel.count > 0)) {
+                var productPagingModel = new PagingModel(productSearchModel.productSearchHits, productSearchModel.count);
+                if (params.start.submitted) {
+                    productPagingModel.setStart(params.start.intValue);
+                }
+
+                if (params.sz.submitted && request.httpParameterMap.sz.intValue <= 60) {
+                    productPagingModel.setPageSize(params.sz.intValue);
+                } else {
+                    productPagingModel.setPageSize(12);
+                }
+
+                if (productSearchModel.category) {
+                    meta.update(productSearchModel.category);
+                }
+                meta.updatePageMetaTags(productSearchModel);
+
+                if (productSearchModel.categorySearch && !productSearchModel.refinedCategorySearch && productSearchModel.category.template) {
+                    // Renders a dynamic template.
+                    app.getView({
+                        ProductSearchResult: productSearchModel,
+                        ContentSearchResult: contentSearchModel,
+                        ProductPagingModel: productPagingModel
+                    }).render(productSearchModel.category.template);
+                } else {
+
+                    //SearchPromo - for displaying search driven banners above the product grid, provided there is a q parameter in the httpParameterMap
+                    var searchPromo;
+                    if (params.q.value) {
+                        searchPromo = ContentMgr.getContent('keyword_' + params.q.value.toLowerCase());
+                    }
+
+                    app.getView({
+                        ProductSearchResult: productSearchModel,
+                        ContentSearchResult: contentSearchModel,
+                        ProductPagingModel: productPagingModel,
+                        SearchPromo: searchPromo
+                    }).render('rendering/category/categoryproducthits');
+                }
+            } else {
+                var targetProduct = productSearchModel.getProducts().next();
+                var productID = targetProduct.getID();
+
+                // If the target was not a master, simply use the product ID.
+                if (targetProduct.isMaster()) {
+
+                    // In the case of a variation master, the master is the representative for
+                    // all its variants. If there is only one variant, return the variant's
+                    // product ID.
+                    var iter = productSearchModel.getProductSearchHits();
+                    if (iter.hasNext()) {
+                        var productSearchHit = iter.next();
+                        if (productSearchHit.getRepresentedProducts().size() === 1) {
+                            productID = productSearchHit.getFirstRepresentedProductID();
+                        }
+                    }
+                }
+
+                app.getView({
+                    Location: URLUtils.http('Product-Show', 'pid', productID)
+                }).render('util/redirect');
+
+            }
+        } else {
+            app.getView({
+                ProductSearchResult: productSearchModel,
+                ContentSearchResult: contentSearchModel
+            }).render('search/nohits');
+        }
     }
 
 }

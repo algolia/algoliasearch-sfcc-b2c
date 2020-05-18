@@ -2,7 +2,7 @@
     <isinclude template="reporting/reportingUrls" />
 </isif>
 
-<!--- Search Results Banner --->
+<!-- Search Results Banner -->
 <isif condition="${pdict.category}">
     <div class="hero slant-down search-banner"
         <!--- If no image, default is specified in search.scss > .search-banner --->
@@ -11,45 +11,79 @@
         </isif>
     >
         <h1 class="header page-title">
-            ${pdict.category.displayName}
+            <span id="algolia-category-title-placeholder"></span>
         </h1>
     </div>
 <iselse>
     <isslot id="search-result-banner-m" description="Banner for search results" context="global" />
 </isif>
 
-<div class="container search-results">
-    <div class="row">
-        <div class="tab-content col-12">
-            <div class="aa-input-container" id="aa-input-container">
-                <input
-                    type="search"
-                    id="aa-search-input"
-                    class="aa-input-search"
-                    placeholder="Search for product or a cateogry"
-                    name="search"
-                    autocomplete="off"
-                />
+
+<div class="row">
+    <div class="tab-content col-12">
+        <div class="ais-InstantSearch tab-pane container active"  id="product-search-results" role="tabpanel" aria-labelledby="product-tab">
+            <div class="row grid-header">
+                    <div id="algolia-searchbox-placeholder" ></div>
+                    <div id="algolia-stats-placeholder" class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2"></div>
+                    <div id="algolia-sort-by-placeholder" class="col-6 col-sm-3 order-sm-1"></div>
+
+                    <div class="col-6 col-sm-3 text-right d-md-none order-sm-3">
+                        <button type="button" class="btn btn-primary filter-results col-12">
+                            <isprint value="${Resource.msg('search.filter','algolia',null)}" encoding="htmlcontent" />
+                        </button>
+                    </div>
             </div>
-            <div class="ais-InstantSearch">
-                <div class="left-panel">
-                    <div id="sort-by"></div>
+            <div class="row">
+                <div class="refinement-bar col-md-3">
 
-                    <div id="clear-refinements"></div>
+                    <div id="algolia-clear-refinements-placeholder"></div>
 
-                    <h3>Categories</h3>
+                    <div class="refinements">
+                        <!-- categories -->
+                        <div class="card collapsible-sm refinement refinement-category">
+                            <div class="card-header col-sm-12">
+                                <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-category" aria-expanded="false">
+                                    <span><isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" /></span>
+                                </button>
+                                <h2 aria-label="<isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" /></h2>
+                            </div>
+                            <div class="card-body content value" id="refinement-category">
+                                <div id="algolia-categories-list-placeholder"></div>
+                            </div>
+                        </div>
 
-                    <div id="categories-list"></div>
+                        <!-- brand -->
+                        <div class="card collapsible-sm refinement refinement-brand">
+                            <div class="card-header col-sm-12">
+                                <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-brand" aria-expanded="false">
+                                    <span><isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" /></span>
+                                </button>
+                                <h2 aria-label="<isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" /></h2>
+                            </div>
+                            <div class="card-body content value" id="refinement-brand">
+                                <div id="algolia-brand-list-placeholder"></div>
+                            </div>
+                        </div>
 
-                    <h3>Price</h3>
-                    <div id="price-filter"></div>
+                        <!-- price -->
+                        <div class="card collapsible-sm refinement refinement-price">
+                            <div class="card-header col-sm-12">
+                                <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-price" aria-expanded="false">
+                                    <span><isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" /></span>
+                                </button>
+                                <h2 aria-label="<isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" /></h2>
+                            </div>
+                            <div class="card-body content value" id="refinement-price">
+                                <div id="algolia-price-filter-placeholder"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
-                <div class="right-panel">
-                    <div id="hits"></div>
-                    <div id="pagination"></div>
+                <div class="col-sm-12 col-md-9">
+                    <div id="algolia-hits-placeholder" class="row product-grid"></div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
