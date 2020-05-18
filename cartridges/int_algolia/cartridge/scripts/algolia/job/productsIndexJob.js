@@ -25,13 +25,6 @@ function UpdateProductModel(algoliaProduct) {
             this.options.data[keys[i]] = algoliaProduct[keys[i]];
         }
     }
-    /* TODO: remove this code in production
-    for (var property in algoliaProduct) {
-        if (property !== 'id') {
-            this.options.data[property] = algoliaProduct[property];
-        }
-    }
-    */
 }
 
 /**

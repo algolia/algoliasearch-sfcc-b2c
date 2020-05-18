@@ -45,13 +45,6 @@ function UpdateCategoryModel(algoliaCategory) {
             this.options.data[keys[i]] = algoliaCategory[keys[i]];
         }
     }
-    /* TODO: remove this code in production
-    for (var property in algoliaCategory) {
-        if (property !== 'id') {
-            this.options.data[property] = algoliaCategory[property];
-        }
-    }
-    */
 }
 
 /**
@@ -119,18 +112,6 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, catalo
             result.description[localeName] = category.getDescription();
         }
     });
-    /* TODO: remove this code in production
-    for (var loc in siteLocales) {
-        var localeName = siteLocales[loc];
-        request.setLocale(localeName);
-
-        result.url[localeName] = getCategoryUrl(category);
-        result.name[localeName] = category.getDisplayName();
-        if (category.getDescription()) {
-            result.description[localeName] = category.getDescription();
-        }
-    }
-    */
     if (parentId) {
         result.parent_category_id = parentId;
     }
@@ -206,10 +187,6 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
     Object.keys(listOfCategories).forEach(function (key) {
         writeObjectToXMLStream(xlsw, listOfCategories[key]);
     });
-    /* TODO: remove this code in production
-    for (var i in listOfCategories) {
-        writeObjectToXMLStream(xlsw, listOfCategories[i]);
-    } */
 
     // Close XML Reindex file
     xlsw.writeEndElement();
@@ -360,17 +337,6 @@ function runCategoryExport(parameters) {
         }
         writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[key]);
     });
-    /* TODO: remove this code in production
-    for (var i in listOfCategories) {
-        if (listOfCategories[i].hasOwnProperty('checked') && listOfCategories[i].checked) {
-            delete listOfCategories[i].checked;
-        } else {
-            categoryUpdate = new UpdateCategoryModel(listOfCategories[i]);
-            counterCategoriesForUpdate += 1;
-            writeObjectToXMLStream(updateXmlWriter, categoryUpdate);
-        }
-        writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[i]);
-    } */
 
     // Close XML Update file
     updateXmlWriter.writeEndElement();
