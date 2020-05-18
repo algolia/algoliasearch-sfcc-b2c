@@ -9,7 +9,7 @@
             "searchApiKey": "${algoliaData.getPreference('SearchApiKey')}",
             "locale": "${request.getLocale()}",
             "currencyCode": "${request.getSession().getCurrency().getCurrencyCode()}",
-            "currencySymbol": "${request.getSession().getCurrency().getSymbol()}",
+            "currencySymbol": '<isprint value="${request.getSession().getCurrency().getSymbol()}" encoding="jshtml" />',
             "productsIndex": "${algoliaData.calculateIndexId('products')}",
             "categoriesIndex": "${algoliaData.calculateIndexId('categories')}",
             "quickViewUrlBase": "${URLUtils.url('Product-ShowQuickView')}"
