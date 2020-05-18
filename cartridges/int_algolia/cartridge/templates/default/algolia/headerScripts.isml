@@ -11,7 +11,8 @@
             "currencyCode": "${request.getSession().getCurrency().getCurrencyCode()}",
             "currencySymbol": "${request.getSession().getCurrency().getSymbol()}",
             "productsIndex": "${algoliaData.calculateIndexId('products')}",
-            "categoriesIndex": "${algoliaData.calculateIndexId('categories')}"
+            "categoriesIndex": "${algoliaData.calculateIndexId('categories')}",
+            "quickViewUrlBase": "${URLUtils.url('Product-ShowQuickView')}"
         }
     </script>
 

@@ -188,7 +188,7 @@ function enableInstantSearch(config) {
                         item.currencySymbol = config.userCurrencySymbol;
     
     
-                        item.quickShowUrl = item.url.replace('Product-Show', 'Product-ShowQuickView');
+                        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + item.id;
     
                         // originating index
                         item.__indexName = config.productsIndex;
