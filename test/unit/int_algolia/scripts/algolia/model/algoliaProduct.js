@@ -63,7 +63,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
 describe('algiliaProduct module - Test Algolia Product model', function () {
     it('Checking Algolia Product model is valid', function () {
         let product = new ProductMock();
-        let algiliaProductModel = {
+        let algoliaProductModel = {
             id: '701644031206M',
             in_stock: true,
             primary_category_id: 'womens',
@@ -130,7 +130,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             _type: 'image',
                             alt: {
                                 default: 'Floral Dress, Hot Pink Combo, large',
-                                fr: 'Freanch Floral Dress, Hot Pink Combo, large',
+                                fr: 'French Floral Dress, Hot Pink Combo, large',
                                 en: 'Floral Dress, Hot Pink Combo, large'
                             },
                             dis_base_link: {
@@ -140,7 +140,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             },
                             title: {
                                 default: 'Floral Dress, Hot Pink Combo',
-                                fr: 'Freanch Floral Dress, Hot Pink Combo',
+                                fr: 'French Floral Dress, Hot Pink Combo',
                                 en: 'Floral Dress, Hot Pink Combo'
                             }
                         },
@@ -148,7 +148,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             _type: 'image',
                             alt: {
                                 default: 'Floral Dress, Hot Pink Combo, large',
-                                fr: 'Freanch Floral Dress, Hot Pink Combo, large',
+                                fr: 'French Floral Dress, Hot Pink Combo, large',
                                 en: 'Floral Dress, Hot Pink Combo, large'
                             },
                             dis_base_link: {
@@ -158,7 +158,7 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             },
                             title: {
                                 default: 'Floral Dress, Hot Pink Combo',
-                                fr: 'Freanch Floral Dress, Hot Pink Combo',
+                                fr: 'French Floral Dress, Hot Pink Combo',
                                 en: 'Floral Dress, Hot Pink Combo'
                             }
                         }
@@ -258,6 +258,6 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                 en: '4'
             }
         };
-        assert.deepEqual(new AlgoliaProduct(product), algiliaProductModel);
+        assert.deepEqual(new AlgoliaProduct(product), algoliaProductModel);
     });
 });

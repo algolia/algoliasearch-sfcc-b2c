@@ -245,14 +245,14 @@ Product.prototype.getImages = function (viewtype) {
     ];
     var arrFrLarge = [
         {
-            alt: 'Freanch Floral Dress, Hot Pink Combo, large',
+            alt: 'French Floral Dress, Hot Pink Combo, large',
             absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg',
-            title: 'Freanch Floral Dress, Hot Pink Combo'
+            title: 'French Floral Dress, Hot Pink Combo'
         },
         {
-            alt: 'Freanch Floral Dress, Hot Pink Combo, large',
+            alt: 'French Floral Dress, Hot Pink Combo, large',
             absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg',
-            title: 'Freanch Floral Dress, Hot Pink Combo'
+            title: 'French Floral Dress, Hot Pink Combo'
         }
     ];
     var arrEnLarge = [
