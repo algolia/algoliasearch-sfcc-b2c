@@ -166,12 +166,16 @@ function enableInstantSearch(config) {
                 transformItems: function (items) {
                     return items.map(function (item) {
                         // assign image
-                        var imageGroup = item.image_groups.find(function (i) {
-                            i.view_type === 'large'
-                        }) || item.image_groups[0];
-                        if (imageGroup) {
-                            var firstImageInGroup = imageGroup.images[0];
-                            item.image = firstImageInGroup
+                        if (typeof(item.image_groups) === "undefined"){
+                            item.image = algoliaData.noImages.large;
+                        } else {
+                            var imageGroup = item.image_groups.find(function (i) {
+                                i.view_type === 'large'
+                            }) || item.image_groups[0];
+                            if (imageGroup) {
+                                var firstImageInGroup = imageGroup.images[0];
+                                item.image = firstImageInGroup
+                            }
                         }
     
                         // adjusted price in user currency

@@ -21,6 +21,11 @@
                 "bestMetches": "${Resource.msg('search.bestMetches','algolia',null)}",
                 "priceAsc": "${Resource.msg('search.priceAsc','algolia',null)}",
                 "priceDesc": "${Resource.msg('search.priceDesc','algolia',null)}"
+            },
+            "noImages": {
+                "large": "${URLUtils.staticURL('/images/noimagelarge.png')}",
+                "medium": "${URLUtils.staticURL('/images/noimagemedium.png')}",
+                "small": "${URLUtils.staticURL('/images/noimagesmall.png')}"
             }
         }
     </script>
