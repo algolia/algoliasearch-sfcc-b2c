@@ -61,7 +61,7 @@ function enableAutocomplete(config) {
                     + '  <div class="col-xs-12 col-sm-10">Categories</div>'
                     + '</div>',
                 suggestion(category) {
-                    categorySuggestionTemplate.render(category)
+                    return categorySuggestionTemplate.render(category)
                 }
             }
         }

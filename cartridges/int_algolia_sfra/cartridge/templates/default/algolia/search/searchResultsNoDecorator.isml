@@ -29,7 +29,7 @@
 
                     <div class="col-6 col-sm-3 text-right d-md-none order-sm-3">
                         <button type="button" class="btn btn-primary filter-results col-12">
-                            <isprint value="${Resource.msg('search.filter','algolia',null)}" encoding="htmlcontent" />
+                            <isprint value="${Resource.msg('button.filter','search',null)}" encoding="htmlcontent" />
                         </button>
                     </div>
             </div>
