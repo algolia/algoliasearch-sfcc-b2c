@@ -19,10 +19,11 @@ function UpdateProductModel(algoliaProduct) {
         data: {}
     };
 
-    for (var property in algoliaProduct) {
-        if (property !== 'id') {
-            this.options.data[property] = algoliaProduct[property];
-        };
+    var keys = Object.keys(algoliaProduct);
+    for (var i = 0; i < keys.length; i += 1) {
+        if (keys[i] !== 'id') {
+            this.options.data[keys[i]] = algoliaProduct[keys[i]];
+        }
     }
 }
 
@@ -185,7 +186,7 @@ function runProductExport(parameters) {
                         productUpdate.options.partial = true;
                     }
                 } else {
-                    // Rewrite product сompletely
+                    // Rewrite product completely
                     productUpdate = new UpdateProductModel(newProductModel);
                 }
                 productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;

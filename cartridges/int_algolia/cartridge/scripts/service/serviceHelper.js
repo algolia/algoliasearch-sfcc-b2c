@@ -106,7 +106,7 @@ function callJsonService(title, service, params) {
     var callStatus = new Status(Status.OK);
     var statusItem = callStatus.items.get(0);
 
-    var result;
+    var result = null;
     var data = null;
 
     try {

@@ -22,7 +22,7 @@ function forEach(collection, callback, scope) {
         } else {
             callback(item, index, collection);
         }
-        index++;
+        index += 1;
     }
 }
 
@@ -39,9 +39,10 @@ function UpdateCategoryModel(algoliaCategory) {
         data: {}
     };
 
-    for (var property in algoliaCategory) {
-        if (property !== 'id') {
-            this.options.data[property] = algoliaCategory[property];
+    var keys = Object.keys(algoliaCategory);
+    for (var i = 0; i < keys.length; i += 1) {
+        if (keys[i] !== 'id') {
+            this.options.data[keys[i]] = algoliaCategory[keys[i]];
         }
     }
 }
@@ -101,7 +102,7 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, catalo
         name: {},
         description: {}
     };
-    for (var loc in siteLocales) {
+    Object.keys(siteLocales).forEach(function (loc) {
         var localeName = siteLocales[loc];
         request.setLocale(localeName);
 
@@ -110,7 +111,7 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, catalo
         if (category.getDescription()) {
             result.description[localeName] = category.getDescription();
         }
-    }
+    });
     if (parentId) {
         result.parent_category_id = parentId;
     }
@@ -123,14 +124,14 @@ function prepareListOfCategories(siteLocales, listOfCategories, category, catalo
         result.thumbnail = getImageUrl(category.getThumbnail());
     }
 
-    var subCategories = category.hasOnlineSubCategories() ?
-        category.getOnlineSubCategories() : null;
+    var subCategories = category.hasOnlineSubCategories()
+        ? category.getOnlineSubCategories() : null;
 
     if (subCategories) {
         forEach(subCategories, function (subcategory) {
             var converted = null;
-            if (subcategory.custom && subcategory.custom.showInMenu &&
-                    (subcategory.hasOnlineProducts() || subcategory.hasOnlineSubCategories())) {
+            if (subcategory.custom && subcategory.custom.showInMenu
+                && (subcategory.hasOnlineProducts() || subcategory.hasOnlineSubCategories())) {
                 converted = prepareListOfCategories(siteLocales, listOfCategories, subcategory, catalogId, categoryId);
             }
             if (converted) {
@@ -156,9 +157,9 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var result = null;
     while (xmlStreamReader.hasNext()) {
-        if (xmlStreamReader.next() == XMLStreamConstants.START_ELEMENT) {
+        if (xmlStreamReader.next() === XMLStreamConstants.START_ELEMENT) {
             var localElementName = xmlStreamReader.getLocalName();
-            if (localElementName == modeName) {
+            if (localElementName === modeName) {
                 result = xmlStreamReader.readXMLObject();
                 break;
             }
@@ -183,9 +184,9 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
     xlsw.writeStartDocument();
     xlsw.writeStartElement('categories');
 
-    for (var i in listOfCategories) {
-        writeObjectToXMLStream(xlsw, listOfCategories[i]);
-    }
+    Object.keys(listOfCategories).forEach(function (key) {
+        writeObjectToXMLStream(xlsw, listOfCategories[key]);
+    });
 
     // Close XML Reindex file
     xlsw.writeEndElement();
@@ -209,8 +210,8 @@ function runCategoryExport(parameters) {
     var siteRootCategory = siteCatalog.getRoot();
     var currentSite = Site.getCurrent();
     var siteLocales = currentSite.getAllowedLocales();
-    var topLevelCategories = siteRootCategory.hasOnlineSubCategories() ?
-            siteRootCategory.getOnlineSubCategories().iterator() : null;
+    var topLevelCategories = siteRootCategory.hasOnlineSubCategories()
+        ? siteRootCategory.getOnlineSubCategories().iterator() : null;
     var listOfCategories = [];
 
     var Status = require('dw/system/Status');
@@ -230,8 +231,8 @@ function runCategoryExport(parameters) {
 
     while (topLevelCategories.hasNext()) {
         var category = topLevelCategories.next();
-        if (category.custom && category.custom.showInMenu &&
-                (category.hasOnlineProducts() || category.hasOnlineSubCategories())) {
+        if (category.custom && category.custom.showInMenu
+            && (category.hasOnlineProducts() || category.hasOnlineSubCategories())) {
             prepareListOfCategories(siteLocales, listOfCategories, category, siteCatalogId);
         }
     }
@@ -277,12 +278,12 @@ function runCategoryExport(parameters) {
     var updateXmlWriter = new XMLStreamWriter(updateFileWriter);
     updateXmlWriter.writeStartDocument();
     updateXmlWriter.writeStartElement('categories');
+    var categoryUpdate;
 
     while (snapshotXmlReader.hasNext()) {
         var categorySnapshotXML = readXMLObjectFromStream(snapshotXmlReader, 'category');
         if (categorySnapshotXML) {
             var categorySnapshot = jobHelper.xmlToObject(categorySnapshotXML).category;
-            var categoryUpdate;
             var indexOfcategoryFromList = listOfCategories.map(function (e) { return e.id; }).indexOf(categorySnapshot.id);
 
             if (indexOfcategoryFromList > -1) {
@@ -325,16 +326,17 @@ function runCategoryExport(parameters) {
     snapshotXmlWriter.writeStartDocument();
     snapshotXmlWriter.writeStartElement('categories');
 
-    for (var i in listOfCategories) {
-        if (listOfCategories[i].hasOwnProperty('checked') && listOfCategories[i].checked) {
-            delete listOfCategories[i].checked;
+    Object.keys(listOfCategories).forEach(function (key) {
+        if (Object.hasOwnProperty.call(listOfCategories[key], 'checked')
+            && listOfCategories[key].checked) {
+            delete listOfCategories[key].checked;
         } else {
-            var categoryUpdate = new UpdateCategoryModel(listOfCategories[i]);
+            categoryUpdate = new UpdateCategoryModel(listOfCategories[key]);
             counterCategoriesForUpdate += 1;
             writeObjectToXMLStream(updateXmlWriter, categoryUpdate);
         }
-        writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[i]);
-    }
+        writeObjectToXMLStream(snapshotXmlWriter, listOfCategories[key]);
+    });
 
     // Close XML Update file
     updateXmlWriter.writeEndElement();
