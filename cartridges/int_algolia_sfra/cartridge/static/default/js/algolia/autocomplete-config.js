@@ -35,10 +35,14 @@ function enableAutocomplete(config) {
                     + '  <div class="col-xs-12 col-sm-10">Products</div>'
                     + '</div>',
                 suggestion(product) {
-                    var smallImageGroup = product.image_groups.find(function (imageGroup) {
-                        return imageGroup.view_type === "small"
-                    });
-                    product.firstImage = smallImageGroup.images[0];
+                    if (typeof(product.image_groups) === "undefined"){
+                        product.firstImage = algoliaData.noImages.small;
+                    } else {
+                        var smallImageGroup = product.image_groups.find(function (imageGroup) {
+                            return imageGroup.view_type === "small"
+                        });
+                        product.firstImage = smallImageGroup.images[0];
+                    }
                     return productSuggestionTemplate.render(product)
                 }
             }
