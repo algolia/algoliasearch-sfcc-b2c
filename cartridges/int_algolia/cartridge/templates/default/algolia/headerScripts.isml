@@ -28,7 +28,7 @@
                 "small": "${URLUtils.staticURL('/images/noimagesmall.png')}"
             }
         }
-    </script>'<isprint value="${Resource.msg('search.priceDesc','algolia',null)}" encoding="jshtml" />'
+    </script>
 
     <!-- Algolia Insights (Click Analytics & Personalization) -->
     <script>
