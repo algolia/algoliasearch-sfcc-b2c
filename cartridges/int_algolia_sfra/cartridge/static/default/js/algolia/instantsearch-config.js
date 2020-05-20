@@ -57,7 +57,7 @@ function enableInstantSearch(config) {
                     disabledButton: 'disabled'
                 },
                 templates: {
-                    resetLabel: 'Reset'
+                    resetLabel: algoliaData.strings.reset
                 }
             }),
             instantsearch.widgets.hierarchicalMenu({
