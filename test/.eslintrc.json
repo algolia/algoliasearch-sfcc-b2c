@@ -1,0 +1,13 @@
+{
+    "env": {
+        "mocha": true
+    },
+    "rules": {
+        "require-jsdoc": "off",
+        "max-len": "off",
+        "quote-props": "off",
+        "no-new": "off",
+        "valid-jsdoc": "off",
+        "indent": ["error", 4, { "SwitchCase": 1, "VariableDeclarator": 1 }]
+    }
+}
