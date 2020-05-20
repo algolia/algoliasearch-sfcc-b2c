@@ -116,51 +116,37 @@ function enableInstantSearch(config) {
                 templates: {
                     showMoreText: 'More results',
                     item: ''
-                        + '<div class="product" ' +
+                        + '<li class="grid-tile"><div class="product-tile" data-itemid="{{objectID}}"' +
                         +'     data-pid="{{objectID}}"'
                         + '     data-query-id="{{__queryID}}"'
                         + '     data-index-name="{{__indexName}}"'
                         + '     {{#helpers.insights}}{ "method": "clickedObjectIDsAfterSearch", "payload": {"eventName": "Click on product"} }{{/helpers.insights}}'
                         + '>'
-                        + '    <div class="product-tile">'
                         + '        {{#image}}'
-                        + '        <div class="image-container">'
-                        + '            <a href="{{url}}">'
+                        + '        <div class="product-image">'
+                        + '            <a class="thumb-link" href="{{url}}">'
                         + '              <img class="tile-image" src="{{image.dis_base_link}}" alt="{{image.alt}}" title="{{name}}"/>'
-                        + '            </a>'
-                        + '            <a class="quickview hidden-sm-down" href="{{quickShowUrl}}"  data-toggle="modal" data-target="#quickViewModal" title="{{name}}" aria-label="{{name}}"  data-query-id="{{__queryID}}" data-object-id="{{objectID}}" data-index-name="{{__indexName}}">'
-                        + '               <span class="fa-stack fa-lg">'
-                        + '                 <i class="fa fa-circle fa-inverse fa-stack-2x"></i>'
-                        + '                 <i class="fa fa-expand fa-stack-1x"></i>'
-                        + '               </span>'
                         + '            </a>'
                         + '        </div>'
                         + '        {{/image}}'
-                        + '        <div class="tile-body">'
-                        + '            <div class="pdp-link">'
-                        + '                <a href="{{url}}">'
-                        + '                   {{#helpers.highlight}}{ "attribute": "name" }{{/helpers.highlight}}'
-                        + '                </a>'
-                        + '            </div>'
-                        + '            <div class="price">'
-                        + '                {{#adjustedPrice}}'
-                        + '                <del>'
-                        + '                    <span class="strike-through list">'
-                        + '                        <span class="value">'
-                        + '                            {{currencySymbol}} {{adjustedPrice}}'
-                        + '                        </span>'
-                        + '                    </span>'
-                        + '                </del>'
-                        + '                {{/adjustedPrice}}'
-                        + '                {{#price}}'
-                        + '                <span class="sales">'
-                        + '                    <span class="value"> {{currencySymbol}} {{price}} </span>'
-                        + '                </span>'
-                        + '                {{/price}}'
-                        + '            </div>'
+                        + '        <div class="product-name">'
+                        + '            <a class="name-link" href="{{url}}" title="{{name}}">'
+                        + '               {{#helpers.highlight}}{ "attribute": "name" }{{/helpers.highlight}}'
+                        + '            </a>'
                         + '        </div>'
-                        + '    </div>'
-                        + '</div>'
+                        + '        <div class="product-pricing">'
+                        + '            {{#adjustedPrice}}'
+                        + '            <span class="product-standard-price">'
+                        + '                {{currencySymbol}} {{adjustedPrice}}'
+                        + '            </span>'
+                        + '            {{/adjustedPrice}}'
+                        + '            {{#price}}'
+                        + '            <span class="product-sales-price">'
+                        + '                {{currencySymbol}} {{price}}'
+                        + '            </span>'
+                        + '            {{/price}}'
+                        + '        </div>'
+                        + '</div></li>'
     
                 },
                 transformItems: function (items) {
@@ -210,10 +196,10 @@ function enableInstantSearch(config) {
         ]);
     }
 
-    if (document.querySelector('#algolia-category-title-placeholder')) {
+    if (document.querySelector('.cat-banner h1')) {
         search.addWidgets([
             instantsearch.widgets.breadcrumb({
-                container: '#algolia-category-title-placeholder',
+                container: '.cat-banner h1',
                 attributes: [
                     '__primary_category.0',
                     '__primary_category.1',
