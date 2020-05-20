@@ -173,8 +173,14 @@ var agregatedValueHanlders = {
             });
     },
     primary_category_id: function (product) {
-        var primaryCategory = product.isVariant() ? product.masterProduct.primaryCategory : product.primaryCategory;
-        return empty(primaryCategory) ? null : primaryCategory.ID;
+        var result = null;
+        if (empty(product.primaryCategory)) {
+            var primaryCategory = product.isVariant() ? product.masterProduct.primaryCategory : null;
+            result = empty(primaryCategory) ? null : primaryCategory.ID;
+        } else {
+            result = product.primaryCategory.ID;
+        }
+        return result;
     },
     color: function (product) {
         var variationModel = product.getVariationModel();
