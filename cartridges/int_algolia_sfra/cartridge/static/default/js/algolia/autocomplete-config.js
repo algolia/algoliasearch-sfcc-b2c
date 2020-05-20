@@ -61,15 +61,17 @@ function enableAutocomplete(config) {
                     + '  <div class="col-xs-12 col-sm-10">Categories</div>'
                     + '</div>',
                 suggestion(category) {
-                    categorySuggestionTemplate.render(category)
+                    return categorySuggestionTemplate.render(category)
                 }
             }
         }
     ]);
 
-    document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
-        if (event.key === 'Enter') {
-            window.location.href = config.searchPageRoot + '&q=' + event.target.value;
-        }
-    });
+    if (document.querySelector('#aa-search-input')) {
+        document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
+            if (event.key === 'Enter') {
+                window.location.href = config.searchPageRoot + '&q=' + event.target.value;
+            }
+        });
+    }
 }

@@ -18,9 +18,9 @@
                 "noResults": "${Resource.msg('search.noResults','algolia',null)}",
                 "result": "${Resource.msg('search.result','algolia',null)}",
                 "results": "${Resource.msg('search.results','algolia',null)}",
-                "bestMetches": "${Resource.msg('search.bestMetches','algolia',null)}",
-                "priceAsc": "${Resource.msg('search.priceAsc','algolia',null)}",
-                "priceDesc": "${Resource.msg('search.priceDesc','algolia',null)}"
+                "bestMetches": '<isprint value="${Resource.msg('search.bestMetches','algolia',null)}" encoding="jshtml" />',
+                "priceAsc": '<isprint value="${Resource.msg('search.priceAsc','algolia',null)}" encoding="jshtml" />',
+                "priceDesc": '<isprint value="${Resource.msg('search.priceDesc','algolia',null)}" encoding="jshtml" />'
             },
             "noImages": {
                 "large": "${URLUtils.staticURL('/images/noimagelarge.png')}",
