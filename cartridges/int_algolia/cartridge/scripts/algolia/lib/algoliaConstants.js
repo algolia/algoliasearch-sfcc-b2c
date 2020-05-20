@@ -1,15 +1,19 @@
 'use strict';
 
+var currentSite = require('dw/system/Site').getCurrent();
+var siteID = currentSite.getID();
+
 var ALGOLIA_FILES_FOLDER = dw.io.File.IMPEX + '/src/Algolia/';
-var SNAPSHOT_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + 'product.xml';
-var TMP_SNAPSHOT_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + 'product_tmp.xml';
-var UPDATE_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + 'product_update.xml';
 
-var SNAPSHOT_CATEGORIES_FILE_NAME = ALGOLIA_FILES_FOLDER + 'categories.xml';
-var TMP_SNAPSHOT_CATEGORIES_FILE_NAME = ALGOLIA_FILES_FOLDER + 'categories_tmp.xml';
-var UPDATE_CATEGORIES_FILE_NAME = ALGOLIA_FILES_FOLDER + 'categories_update.xml';
+var SNAPSHOT_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + siteID + '_product.xml';
+var TMP_SNAPSHOT_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + siteID + '_product_tmp.xml';
+var UPDATE_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + siteID + '_product_update.xml';
 
-var ALGOLIA_LOG_FILE = ALGOLIA_FILES_FOLDER + 'lastUpdateLog.xml';
+var SNAPSHOT_CATEGORIES_FILE_NAME = ALGOLIA_FILES_FOLDER + siteID + '_categories.xml';
+var TMP_SNAPSHOT_CATEGORIES_FILE_NAME = ALGOLIA_FILES_FOLDER + siteID + '_categories_tmp.xml';
+var UPDATE_CATEGORIES_FILE_NAME = ALGOLIA_FILES_FOLDER + siteID + '_categories_update.xml';
+
+var ALGOLIA_LOG_FILE = ALGOLIA_FILES_FOLDER + siteID + '_lastUpdateLog.xml';
 
 module.exports = {
     ALGOLIA_FILES_FOLDER: ALGOLIA_FILES_FOLDER,
