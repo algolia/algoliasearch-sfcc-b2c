@@ -161,7 +161,7 @@ function getCategoryFlatTree(category) {
  * Handler complex and calculated Product attributes
  */
 var agregatedValueHanlders = {
-    categories: function categories(product) {
+    categories: function (product) {
         var productCategories = product.isVariant()
             ? product.masterProduct.getOnlineCategories()
             : product.getOnlineCategories();
@@ -171,6 +171,10 @@ var agregatedValueHanlders = {
             .map(function (category) {
                 return getCategoryFlatTree(category);
             });
+    },
+    primary_category_id: function (product) {
+        var primaryCategory = product.isVariant() ? product.masterProduct.primaryCategory : product.primaryCategory;
+        return empty(primaryCategory) ? null : primaryCategory.ID;
     },
     color: function (product) {
         var variationModel = product.getVariationModel();
