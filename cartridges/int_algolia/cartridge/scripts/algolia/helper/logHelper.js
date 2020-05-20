@@ -42,7 +42,7 @@ function readObject(xmlStreamReader, nodeName) {
 }
 
 /**
- * @description Get category and product log data from log file
+ * @description Get category and product log data from log file for current site
  * @param {string} id - name of preference [category, product]
  * @returns {Object} - log data
  */
@@ -82,7 +82,31 @@ function getLogData(id) {
 }
 
 /**
- * @description Save product and category log data to file
+ * @description Get category and product log data from log file for ALL SITES
+ * @returns {Array} -  array of Sites log data
+ */
+function getLogDataAllSites() {
+    var sites = require('dw/system/Site').getAllSites();
+    var result = [];
+    for (var i = 0; i < sites.size(); i += 1) {
+        var logFile = new File(algoliaConstants.ALGOLIA_FILES_FOLDER + sites[i].getID() + algoliaConstants.ALGOLIA_LOG_FILE_NAME);
+
+        if (logFile.exists()) {
+            var siteLog = {
+                siteID: sites[i].getID(),
+                category: null,
+                product: null
+            };
+            siteLog.category = getLogData('category');
+            siteLog.product = getLogData('product');
+            result.push(siteLog);
+        }
+    }
+    return result;
+}
+
+/**
+ * @description Save product and category log data to file for current site
  * @param {string} id - name of preference [category, product]
  * @param {Object} productLog - product log Object
  * @returns {boolean} - Log data write success
@@ -119,6 +143,7 @@ function setLogData(id, productLog) {
 }
 
 module.exports = {
+    getLogDataAllSites: getLogDataAllSites,
     getLogData: getLogData,
     setLogData: setLogData
 };

@@ -90,7 +90,7 @@ function setSetOfStrings(id, value) {
 }
 
 /**
- * @description Get category and product log data from log file
+ * @description Get category and product log data from log file for current Site
  * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
  * @returns {Object} - log data
  */
@@ -102,7 +102,7 @@ function getLogData(id) {
 }
 
 /**
- * @description Save product and category log data to file
+ * @description Save product and category log data to file for current Site
  * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
  * @param {Object} productLog - ploduct log Object
  * @returns {bullean} - Log data write success
@@ -112,6 +112,14 @@ function setLogData(id, productLog) {
     if (id === 'LastCategorySyncLog') result = logHelper.setLogData('category', productLog);
     else if (id === 'LastProductSyncLog') result = logHelper.setLogData('product', productLog);
     return result;
+}
+
+/**
+ * @description Get category and product log data from log file for all Sites
+ * @returns {Array} - array of Sites log data
+ */
+function getLogDataAllSites() {
+    return logHelper.getLogDataAllSites();
 }
 
 /**
@@ -169,6 +177,7 @@ module.exports = {
     setSetOfStrings: setSetOfStrings,
     getLogData: getLogData,
     setLogData: setLogData,
+    getLogDataAllSites: getLogDataAllSites,
     getInstanceHostName: getInstanceHostName,
     calculateIndexId: calculateIndexId,
     getLocalDateTime: getLocalDateTime,
