@@ -39,44 +39,11 @@
                     <div id="algolia-clear-refinements-placeholder"></div>
 
                     <div class="refinements">
-                        <!-- categories -->
-                        <div class="card collapsible-sm refinement refinement-category">
-                            <div class="card-header col-sm-12">
-                                <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-category" aria-expanded="false">
-                                    <span><isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" /></span>
-                                </button>
-                                <h2 aria-label="<isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.category','algolia',null)}" encoding="htmlcontent" /></h2>
-                            </div>
-                            <div class="card-body content value" id="refinement-category">
-                                <div id="algolia-categories-list-placeholder"></div>
-                            </div>
-                        </div>
-
-                        <!-- brand -->
-                        <div class="card collapsible-sm refinement refinement-brand">
-                            <div class="card-header col-sm-12">
-                                <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-brand" aria-expanded="false">
-                                    <span><isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" /></span>
-                                </button>
-                                <h2 aria-label="<isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="htmlcontent" /></h2>
-                            </div>
-                            <div class="card-body content value" id="refinement-brand">
-                                <div id="algolia-brand-list-placeholder"></div>
-                            </div>
-                        </div>
-
-                        <!-- price -->
-                        <div class="card collapsible-sm refinement refinement-price">
-                            <div class="card-header col-sm-12">
-                                <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-price" aria-expanded="false">
-                                    <span><isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" /></span>
-                                </button>
-                                <h2 aria-label="<isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" />" class="d-none d-md-block"><isprint value="${Resource.msg('search.price','algolia',null)}" encoding="htmlcontent" /></h2>
-                            </div>
-                            <div class="card-body content value" id="refinement-price">
-                                <div id="algolia-price-filter-placeholder"></div>
-                            </div>
-                        </div>
+                        <div id="algolia-categories-list-placeholder"></div>
+                        <div id="algolia-brand-list-placeholder"></div>
+                        <div id="algolia-size-list-placeholder"></div>
+                        <div id="algolia-color-list-placeholder"></div>
+                        <div id="algolia-price-filter-placeholder"></div>
                     </div>
                 </div>
                 <div class="col-sm-12 col-md-9">

@@ -16,6 +16,7 @@ function enableInstantSearch(config) {
         insightsClient: window.aa
     });
 
+
     if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
             instantsearch.widgets.configure({
@@ -60,7 +61,8 @@ function enableInstantSearch(config) {
                     resetLabel: algoliaData.strings.reset
                 }
             }),
-            instantsearch.widgets.hierarchicalMenu({
+
+            hierarchicalMenuWithPanel({
                 container: '#algolia-categories-list-placeholder',
                 attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
                 templates: {
@@ -75,9 +77,10 @@ function enableInstantSearch(config) {
                         + '    <span class="{{cssClasses.label}}">{{label}}</span>'
                         + '</a>',
                 },
+                panelTitle: algoliaData.strings.categoryPanelTitle
             }),
     
-            instantsearch.widgets.refinementList({
+            refinementListWithPanel({
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
                 templates: {
@@ -92,9 +95,10 @@ function enableInstantSearch(config) {
                         + '    <span class="{{cssClasses.label}}">{{label}}</span>'
                         + '</a>',
                 },
+                panelTitle: algoliaData.strings.brandPanelTitle
             }),
     
-            instantsearch.widgets.rangeInput({
+            rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
                 attribute: 'price.' + config.userCurrency,
                 cssClasses: {
@@ -102,9 +106,46 @@ function enableInstantSearch(config) {
                     input: 'form-control form-control-sm',
                     separator: 'mx-1',
                     submit: 'btn',
-                }
-    
+                },
+                panelTitle: algoliaData.strings.pricePanelTitle
             }),
+
+            refinementListWithPanel({
+                container: '#algolia-size-list-placeholder',
+                attribute: 'size',
+                templates: {
+                    item: ''
+                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
+                        + '    {{#isRefined}}'
+                        + '      <i class="fa fa-check-square"></i>'
+                        + '    {{/isRefined}}'
+                        + '    {{^isRefined}}'
+                        + '      <i class="fa fa-square-o"></i>'
+                        + '    {{/isRefined}}'
+                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
+                        + '</a>',
+                },
+                panelTitle: algoliaData.strings.sizePanelTitle
+            }),        
+
+            refinementListWithPanel({
+                container: '#algolia-color-list-placeholder',
+                attribute: 'color',
+                templates: {
+                    item: ''
+                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
+                        + '    {{#isRefined}}'
+                        + '      <i class="fa fa-check-square"></i>'
+                        + '    {{/isRefined}}'
+                        + '    {{^isRefined}}'
+                        + '      <i class="fa fa-square-o"></i>'
+                        + '    {{/isRefined}}'
+                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
+                        + '</a>',
+                },
+                panelTitle: algoliaData.strings.colorPanelTitle
+            }),    
+
             instantsearch.widgets.infiniteHits({
                 container: '#algolia-hits-placeholder',
                 cssClasses: {
@@ -229,5 +270,45 @@ function enableInstantSearch(config) {
             })
         ])
     }
+
     search.start();
+
+    function hierarchicalMenuWithPanel(options) {
+        return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(options)
+    }
+
+    function refinementListWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(options)
+    }
+
+    function rangeInputWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.rangeInput)(options)
+    }
+
+    function withPanel(attribute, panelTitle) {
+        var headerTemplate = Hogan.compile(''
+            + '<button class="title btn text-left btn-block d-md-none" aria-controls="refinement-{{attribute}}" aria-expanded="false">'
+            + '  {{panelTitle}} '
+            + '</button>'
+            + '<h2 aria-label="Brand" class="d-none d-md-block">{{ panelTitle }}</h2>'
+        );
+        return instantsearch.widgets.panel({
+            hidden: function(options) {
+                var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
+                var facet = facets.find(function(facet) { return facet.name === attribute });
+                var facetExists = !!facet;
+                return !facetExists; // hides panel if not facets selectable
+              },
+            templates: {
+                header: headerTemplate.render({ panelTitle: panelTitle, attribute: attribute })
+            },
+            cssClasses: {
+                root: 'card refinement collapsible-sm overflow-hidden',
+                header: 'card-header col-sm-12',
+                body: 'card-body content value',
+                footer: 'card-footer',
+              }
+
+        })
+    }
 }
