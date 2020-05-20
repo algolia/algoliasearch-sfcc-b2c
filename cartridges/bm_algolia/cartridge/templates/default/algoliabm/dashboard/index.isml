@@ -4,7 +4,9 @@
     <isbreadcrumb name1="Merchant Tools" name2="Algolia" />
     <table border="0" cellpadding="0" cellspacing="0" width="100%"><tbody>
         <tr>
-            <td width="100%" class="table_title aldi">Algolia</td>
+            <td width="100%" class="table_title aldi">
+                <isprint value="${Resource.msg('algolia.label.algolia', 'algolia', null)}" encoding="jshtml" />
+            </td>
         </tr>
         <tr>
             <td class="w s e"></td>
