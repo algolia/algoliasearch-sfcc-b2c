@@ -67,9 +67,11 @@ function enableAutocomplete(config) {
         }
     ]);
 
-    document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
-        if (event.key === 'Enter') {
-            window.location.href = config.searchPageRoot + '&q=' + event.target.value;
-        }
-    });
+    if (document.querySelector('#aa-search-input')) {
+        document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
+            if (event.key === 'Enter') {
+                window.location.href = config.searchPageRoot + '&q=' + event.target.value;
+            }
+        });
+    }
 }
