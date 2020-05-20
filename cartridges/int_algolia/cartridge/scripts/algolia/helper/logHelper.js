@@ -44,15 +44,16 @@ function readObject(xmlStreamReader, nodeName) {
 /**
  * @description Get category and product log data from log file for current site
  * @param {string} id - name of preference [category, product]
+ * @param {string} logFileName - full Log file name
  * @returns {Object} - log data
  */
-function getLogData(id) {
+function getLogData(id, logFileName) {
     var logData = {
         category: new LogJob(),
         product: new LogJob()
     };
 
-    var logFile = new File(algoliaConstants.ALGOLIA_LOG_FILE);
+    var logFile = empty(logFileName) ? new File(algoliaConstants.ALGOLIA_LOG_FILE) : new File(logFileName);
 
     if (logFile.exists()) {
         var logFileReader = null;
@@ -89,7 +90,8 @@ function getLogDataAllSites() {
     var sites = require('dw/system/Site').getAllSites();
     var result = [];
     for (var i = 0; i < sites.size(); i += 1) {
-        var logFile = new File(algoliaConstants.ALGOLIA_FILES_FOLDER + sites[i].getID() + algoliaConstants.ALGOLIA_LOG_FILE_NAME);
+        var logFileName = algoliaConstants.ALGOLIA_FILES_FOLDER + sites[i].getID() + algoliaConstants.ALGOLIA_LOG_FILE_NAME;
+        var logFile = new File(logFileName);
 
         if (logFile.exists()) {
             var siteLog = {
@@ -97,8 +99,8 @@ function getLogDataAllSites() {
                 category: null,
                 product: null
             };
-            siteLog.category = getLogData('category');
-            siteLog.product = getLogData('product');
+            siteLog.category = getLogData('category', logFileName);
+            siteLog.product = getLogData('product', logFileName);
             result.push(siteLog);
         }
     }
