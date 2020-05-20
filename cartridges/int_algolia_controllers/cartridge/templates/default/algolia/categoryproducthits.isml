@@ -9,7 +9,7 @@
 	</div>
 
 	<div class="search-result-content">
-	<div id="algolia-hits-placeholder" class="row product-grid"></div>
+	<div id="algolia-hits-placeholder" class="search-result-items tiles-container clearfix "></div>
         <div class="row grid-header">
               <div id="algolia-searchbox-placeholder" ></div>
               <div id="algolia-stats-placeholder" class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2"></div>
