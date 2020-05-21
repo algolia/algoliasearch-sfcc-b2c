@@ -32,7 +32,7 @@ function enableAutocomplete(config) {
             templates: {
                 header: ''
                     + '<div class="header row justify-content-end">'
-                    + '  <div class="col-xs-12 col-sm-10">Products</div>' // @TODO: translate
+                    + '  <div class="col-xs-12 col-sm-10">' + algoliaData.strings.products + '</div>'
                     + '</div>',
                 suggestion: function(product) {
                     if (typeof(product.image_groups) === "undefined"){
@@ -58,7 +58,7 @@ function enableAutocomplete(config) {
             templates: {
                 header: ''
                     + '<div class="header row justify-content-end">'
-                    + '  <div class="col-xs-12 col-sm-10">Categories</div>' // @TODO: translate
+                    + '  <div class="col-xs-12 col-sm-10">' + algoliaData.strings.categories + '</div>'
                     + '</div>',
                 suggestion: function(category) {
                     return categorySuggestionTemplate.render(category)
