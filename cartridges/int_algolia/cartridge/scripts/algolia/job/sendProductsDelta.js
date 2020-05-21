@@ -6,7 +6,6 @@ module.exports.execute = function (parameters) {
     var sendDelta = require('*/cartridge/scripts/algolia/helper/sendDelta');
     var deltaIterator = require('*/cartridge/scripts/algolia/helper/deltaIterator');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
     var deltaList = deltaIterator.create(algoliaConstants.UPDATE_PRODUCTS_FILE_NAME, 'product');
     var status = sendDelta(deltaList, 'LastProductSyncLog', parameters);
@@ -22,7 +21,6 @@ module.exports.execute = function (parameters) {
             jobHelper.logFileError(newSnapshotFile.fullPath, 'Error remove file', error);
         }
     } else {
-        algoliaData.setPreference('LastProductSyncDate', new Date());
         var snapshotFile = new File(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME);
         try {
             if (newSnapshotFile.exists()) {

@@ -32,9 +32,9 @@ function enableAutocomplete(config) {
             templates: {
                 header: ''
                     + '<div class="header row justify-content-end">'
-                    + '  <div class="col-xs-12 col-sm-10">Products</div>'
+                    + '  <div class="col-xs-12 col-sm-10">' + algoliaData.strings.products + '</div>'
                     + '</div>',
-                suggestion(product) {
+                suggestion: function(product) {
                     if (typeof(product.image_groups) === "undefined"){
                         product.firstImage = algoliaData.noImages.small;
                     } else {
@@ -58,18 +58,20 @@ function enableAutocomplete(config) {
             templates: {
                 header: ''
                     + '<div class="header row justify-content-end">'
-                    + '  <div class="col-xs-12 col-sm-10">Categories</div>'
+                    + '  <div class="col-xs-12 col-sm-10">' + algoliaData.strings.categories + '</div>'
                     + '</div>',
-                suggestion(category) {
-                    categorySuggestionTemplate.render(category)
+                suggestion: function(category) {
+                    return categorySuggestionTemplate.render(category)
                 }
             }
         }
     ]);
 
-    document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
-        if (event.key === 'Enter') {
-            window.location.href = config.searchPageRoot + '&q=' + event.target.value;
-        }
-    });
+    if (document.querySelector('#aa-search-input')) {
+        document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
+            if (event.key === 'Enter') {
+                window.location.href = config.searchPageRoot + '&q=' + event.target.value;
+            }
+        });
+    }
 }

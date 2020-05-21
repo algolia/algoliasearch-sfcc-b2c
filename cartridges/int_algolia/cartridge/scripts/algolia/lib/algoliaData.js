@@ -4,23 +4,7 @@ var currentSite = require('dw/system/Site').getCurrent();
 var Transaction = require('dw/system/Transaction');
 var dwSystem = require('dw/system/System');
 
-/**
- * Log Data Object
- */
-function LogJob() {
-    this.processedDate = '---';
-    this.processedError = false;
-    this.processedErrorMessage = '';
-    this.processedRecords = 0;
-    this.processedToUpdateRecords = 0;
-    this.sendDate = '---';
-    this.sendError = false;
-    this.sendErrorMessage = '';
-    this.sendedChunk = 0;
-    this.sendedRecords = 0;
-    this.failedChunk = 0;
-    this.failedRecords = 0;
-}
+var logHelper = require('int_algolia/cartridge/scripts/algolia/helper/logHelper');
 
 /*
  * Function for getting preferences for Algolia
@@ -32,13 +16,17 @@ function LogJob() {
  *   Enable                 | Enable/disable all Algolia                        | Boolean
  *   HostBase               | Host for read operations                          | String
  *   InStockThreshold       | Stock Threshold                                   | Double
- *   LastCategorySyncDate   | Timestamp of the last Category index sync job run | Datetime
- *   LastProductSyncDate    | Timestamp of the last product index sync job run  | Datetime
  *   SearchApiKey           | Authorization key for Algolia                     | String
  *   AdminApiKey            | Authorization Admin key for Algolia               | String
- *   LastProductSyncLog     | Last product sync job log                         | String
- *   LastCategorySyncLog    | Last category sync job log                        | String
- * -----------------------------------------------------------------------------------------------
+ * -------------------------------------------------------------------------------------------------
+ * Preferences stored in the XML file
+ *   id                     | Description                                             |type of preference
+ *   -----------------------------------------------------------------------------------------------
+ *   LastCategorySyncDate   | Date of the last Category index sync job run (read only)| String
+ *   LastProductSyncDate    | Date of the last product index sync job run (read only) | String
+ *   LastProductSyncLog     | Last product sync job log                               | String
+ *   LastCategorySyncLog    | Last category sync job log                              | String
+ * -------------------------------------------------------------------------------------------------
  */
 //   Example:
 //    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
@@ -102,39 +90,36 @@ function setSetOfStrings(id, value) {
 }
 
 /**
- * @description Get product log data from preference
+ * @description Get category and product log data from log file for current Site
  * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
  * @returns {Object} - log data
  */
 function getLogData(id) {
-    var productLogAsString = getPreference(id);
-    var productLog = new LogJob();
-
-    if (!empty(productLogAsString)) {
-        try {
-            productLog = JSON.parse(productLogAsString);
-        } catch (error) {
-            productLog = new LogJob();
-        }
-    }
+    var productLog = null;
+    if (id === 'LastCategorySyncLog') productLog = logHelper.getLogData('category');
+    else if (id === 'LastProductSyncLog') productLog = logHelper.getLogData('product');
     return productLog;
 }
 
 /**
- * @description Set product log data from preference
+ * @description Save product and category log data to file for current Site
  * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
  * @param {Object} productLog - ploduct log Object
- * @returns {null} - log data
+ * @returns {bullean} - Log data write success
  */
 function setLogData(id, productLog) {
-    var productLogAsString;
-    try {
-        productLogAsString = JSON.stringify(productLog);
-    } catch (error) {
-        productLogAsString = JSON.stringify(new LogJob());
-    }
-    setPreference(id, productLogAsString);
-    return null;
+    var result = false;
+    if (id === 'LastCategorySyncLog') result = logHelper.setLogData('category', productLog);
+    else if (id === 'LastProductSyncLog') result = logHelper.setLogData('product', productLog);
+    return result;
+}
+
+/**
+ * @description Get category and product log data from log file for all Sites
+ * @returns {Array} - array of Sites log data
+ */
+function getLogDataAllSites() {
+    return logHelper.getLogDataAllSites();
 }
 
 /**
@@ -178,7 +163,10 @@ function getLocalDateTime(date) {
  * @returns {string} - local formated DateTime
  */
 function getSyncLocalDateTime(id) {
-    return getLocalDateTime(getPreference(id));
+    var productLog = null;
+    if (id === 'LastCategorySyncDate') productLog = logHelper.getLogData('category');
+    else if (id === 'LastProductSyncDate') productLog = logHelper.getLogData('product');
+    return empty(productLog) ? '---' : productLog.sendDate;
 }
 
 module.exports = {
@@ -189,6 +177,7 @@ module.exports = {
     setSetOfStrings: setSetOfStrings,
     getLogData: getLogData,
     setLogData: setLogData,
+    getLogDataAllSites: getLogDataAllSites,
     getInstanceHostName: getInstanceHostName,
     calculateIndexId: calculateIndexId,
     getLocalDateTime: getLocalDateTime,

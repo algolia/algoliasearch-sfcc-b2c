@@ -1,4 +1,3 @@
-<isset name="categoryLog" value="${pdict.algoliaData.getLogData('LastCategorySyncLog')}" scope="page"/>
 <div class="algolia-bm-log-category">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
@@ -10,10 +9,10 @@
             <tr>
                 <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Last processed Date</td>
                 <td class="table_detail w e s" nowrap="nowrap">
-                    <isprint value="${categoryLog.processedDate}" encoding="htmlcontent" />
+                    <isprint value="${logData.category.processedDate}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s center">
-                    <isif condition="${categoryLog.processedError}">
+                    <isif condition="${logData.category.processedError}">
                         Error
                     <iselse/>
                         Success
@@ -22,13 +21,13 @@
             </tr>
         </tbody>
     </table>
-    <isif condition="${categoryLog.processedError}">
+    <isif condition="${logData.category.processedError}">
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody>
                 <tr>
                     <td class="table_detail w s" nowrap="nowrap" colspan="1">Error Message: </td>
                     <td class="table_detail w e s" width="100%">
-                        <isprint value="${categoryLog.processedErrorMessage}" encoding="htmlcontent" />
+                        <isprint value="${logData.category.processedErrorMessage}" encoding="htmlcontent" />
                     </td>
                 </tr>
             </tbody>
@@ -39,13 +38,13 @@
             <tr>
                 <td class="table_detail w e s" nowrap="nowrap">Categories processed</td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${categoryLog.processedRecords + ' records'}" encoding="htmlcontent" />
+                    <isprint value="${logData.category.processedRecords + ' records'}" encoding="htmlcontent" />
                 </td>
             </tr>
             <tr>
                 <td class="table_detail w e s" nowrap="nowrap">Categories ready for update</td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${categoryLog.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
+                    <isprint value="${logData.category.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
                 </td>
             </tr>
         </tbody>
@@ -62,10 +61,10 @@
             <tr>
                 <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Last sent Date</td>
                 <td class="table_detail w e s" nowrap="nowrap">
-                    <isprint value="${categoryLog.sendDate}" encoding="htmlcontent" />
+                    <isprint value="${logData.category.sendDate}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s center">
-                    <isif condition="${categoryLog.sendError}">
+                    <isif condition="${logData.category.sendError}">
                         Error
                     <iselse/>
                         Success
@@ -74,13 +73,13 @@
             </tr>
         </tbody>
     </table>
-    <isif condition="${categoryLog.sendError}">
+    <isif condition="${logData.category.sendError}">
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody>
                 <tr>
                     <td class="table_detail w s" nowrap="nowrap" colspan="1">Error Message: </td>
                     <td class="table_detail w e s" width="100%">
-                        <isprint value="${categoryLog.sendErrorMessage}" encoding="htmlcontent" />
+                        <isprint value="${logData.category.sendErrorMessage}" encoding="htmlcontent" />
                     </td>
                 </tr>
             </tbody>
@@ -91,13 +90,13 @@
             <tr>
                 <td class="table_detail w e s" nowrap="nowrap">Data sent successfully</td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${categoryLog.sendedChunk + ' chunk (' + categoryLog.sendedRecords + ' records)'}" encoding="htmlcontent" />
+                    <isprint value="${logData.category.sendedChunk + ' chunk (' + logData.category.sendedRecords + ' records)'}" encoding="htmlcontent" />
                 </td>
             </tr>
             <tr>
                 <td class="table_detail w e s" nowrap="nowrap">Failed to send data</td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${categoryLog.failedChunk + ' chunk (' + categoryLog.failedRecords + ' records)'}" encoding="htmlcontent" />
+                    <isprint value="${logData.category.failedChunk + ' chunk (' + logData.category.failedRecords + ' records)'}" encoding="htmlcontent" />
                 </td>
             </tr>
         </tbody>

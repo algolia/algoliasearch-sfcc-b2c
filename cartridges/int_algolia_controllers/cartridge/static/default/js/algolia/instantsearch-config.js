@@ -60,7 +60,7 @@ function enableInstantSearch(config) {
                     resetLabel: 'Reset'
                 }
             }),
-            instantsearch.widgets.hierarchicalMenu({
+            hierarchicalMenuWithPanel({
                 container: '#algolia-categories-list-placeholder',
                 attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
                 templates: {
@@ -75,9 +75,10 @@ function enableInstantSearch(config) {
                         + '    <span class="{{cssClasses.label}}">{{label}}</span>'
                         + '</a>',
                 },
+                panelTitle: algoliaData.strings.categoryPanelTitle
             }),
-    
-            instantsearch.widgets.refinementList({
+
+            refinementListWithPanel({
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
                 templates: {
@@ -92,9 +93,10 @@ function enableInstantSearch(config) {
                         + '    <span class="{{cssClasses.label}}">{{label}}</span>'
                         + '</a>',
                 },
+                panelTitle: algoliaData.strings.brandPanelTitle
             }),
-    
-            instantsearch.widgets.rangeInput({
+
+            rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
                 attribute: 'price.' + config.userCurrency,
                 cssClasses: {
@@ -102,9 +104,45 @@ function enableInstantSearch(config) {
                     input: 'form-control form-control-sm',
                     separator: 'mx-1',
                     submit: 'btn',
-                }
-    
+                },
+                panelTitle: algoliaData.strings.pricePanelTitle
             }),
+            refinementListWithPanel({
+                container: '#algolia-size-list-placeholder',
+                attribute: 'size',
+                templates: {
+                    item: ''
+                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
+                        + '    {{#isRefined}}'
+                        + '      <i class="fa fa-check-square"></i>'
+                        + '    {{/isRefined}}'
+                        + '    {{^isRefined}}'
+                        + '      <i class="fa fa-square-o"></i>'
+                        + '    {{/isRefined}}'
+                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
+                        + '</a>',
+                },
+                panelTitle: algoliaData.strings.sizePanelTitle
+            }),
+
+            refinementListWithPanel({
+                container: '#algolia-color-list-placeholder',
+                attribute: 'color',
+                templates: {
+                    item: ''
+                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
+                        + '    {{#isRefined}}'
+                        + '      <i class="fa fa-check-square"></i>'
+                        + '    {{/isRefined}}'
+                        + '    {{^isRefined}}'
+                        + '      <i class="fa fa-square-o"></i>'
+                        + '    {{/isRefined}}'
+                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
+                        + '</a>',
+                },
+                panelTitle: algoliaData.strings.colorPanelTitle
+            }),
+            
             instantsearch.widgets.infiniteHits({
                 container: '#algolia-hits-placeholder',
                 cssClasses: {
@@ -116,51 +154,37 @@ function enableInstantSearch(config) {
                 templates: {
                     showMoreText: 'More results',
                     item: ''
-                        + '<div class="product" ' +
+                        + '<li class="grid-tile"><div class="product-tile" data-itemid="{{objectID}}"' +
                         +'     data-pid="{{objectID}}"'
                         + '     data-query-id="{{__queryID}}"'
                         + '     data-index-name="{{__indexName}}"'
                         + '     {{#helpers.insights}}{ "method": "clickedObjectIDsAfterSearch", "payload": {"eventName": "Click on product"} }{{/helpers.insights}}'
                         + '>'
-                        + '    <div class="product-tile">'
                         + '        {{#image}}'
-                        + '        <div class="image-container">'
-                        + '            <a href="{{url}}">'
+                        + '        <div class="product-image">'
+                        + '            <a class="thumb-link" href="{{url}}">'
                         + '              <img class="tile-image" src="{{image.dis_base_link}}" alt="{{image.alt}}" title="{{name}}"/>'
-                        + '            </a>'
-                        + '            <a class="quickview hidden-sm-down" href="{{quickShowUrl}}"  data-toggle="modal" data-target="#quickViewModal" title="{{name}}" aria-label="{{name}}"  data-query-id="{{__queryID}}" data-object-id="{{objectID}}" data-index-name="{{__indexName}}">'
-                        + '               <span class="fa-stack fa-lg">'
-                        + '                 <i class="fa fa-circle fa-inverse fa-stack-2x"></i>'
-                        + '                 <i class="fa fa-expand fa-stack-1x"></i>'
-                        + '               </span>'
                         + '            </a>'
                         + '        </div>'
                         + '        {{/image}}'
-                        + '        <div class="tile-body">'
-                        + '            <div class="pdp-link">'
-                        + '                <a href="{{url}}">'
-                        + '                   {{#helpers.highlight}}{ "attribute": "name" }{{/helpers.highlight}}'
-                        + '                </a>'
-                        + '            </div>'
-                        + '            <div class="price">'
-                        + '                {{#adjustedPrice}}'
-                        + '                <del>'
-                        + '                    <span class="strike-through list">'
-                        + '                        <span class="value">'
-                        + '                            {{currencySymbol}} {{adjustedPrice}}'
-                        + '                        </span>'
-                        + '                    </span>'
-                        + '                </del>'
-                        + '                {{/adjustedPrice}}'
-                        + '                {{#price}}'
-                        + '                <span class="sales">'
-                        + '                    <span class="value"> {{currencySymbol}} {{price}} </span>'
-                        + '                </span>'
-                        + '                {{/price}}'
-                        + '            </div>'
+                        + '        <div class="product-name">'
+                        + '            <a class="name-link" href="{{url}}" title="{{name}}">'
+                        + '               {{#helpers.highlight}}{ "attribute": "name" }{{/helpers.highlight}}'
+                        + '            </a>'
                         + '        </div>'
-                        + '    </div>'
-                        + '</div>'
+                        + '        <div class="product-pricing">'
+                        + '            {{#adjustedPrice}}'
+                        + '            <span class="product-standard-price">'
+                        + '                {{currencySymbol}} {{adjustedPrice}}'
+                        + '            </span>'
+                        + '            {{/adjustedPrice}}'
+                        + '            {{#price}}'
+                        + '            <span class="product-sales-price">'
+                        + '                {{currencySymbol}} {{price}}'
+                        + '            </span>'
+                        + '            {{/price}}'
+                        + '        </div>'
+                        + '</div></li>'
     
                 },
                 transformItems: function (items) {
@@ -210,10 +234,10 @@ function enableInstantSearch(config) {
         ]);
     }
 
-    if (document.querySelector('#algolia-category-title-placeholder')) {
+    if (document.querySelector('.cat-banner h1')) {
         search.addWidgets([
             instantsearch.widgets.breadcrumb({
-                container: '#algolia-category-title-placeholder',
+                container: '.cat-banner h1',
                 attributes: [
                     '__primary_category.0',
                     '__primary_category.1',
@@ -230,4 +254,43 @@ function enableInstantSearch(config) {
         ])
     }
     search.start();
+
+    function hierarchicalMenuWithPanel(options) {
+        return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(options)
+    }
+
+    function refinementListWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(options)
+    }
+
+    function rangeInputWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.rangeInput)(options)
+    }
+
+    function withPanel(attribute, panelTitle) {
+        var headerTemplate = Hogan.compile(''
+            + '<button class="title btn text-left btn-block d-md-none" aria-controls="refinement-{{attribute}}" aria-expanded="false">'
+            + '  {{panelTitle}} '
+            + '</button>'
+            + '<h2 aria-label="Brand" class="d-none d-md-block">{{ panelTitle }}</h2>'
+        );
+        return instantsearch.widgets.panel({
+            hidden: function(options) {
+                var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
+                var facet = facets.find(function(facet) { return facet.name === attribute });
+                var facetExists = !!facet;
+                return !facetExists; // hides panel if not facets selectable
+              },
+            templates: {
+                header: headerTemplate.render({ panelTitle: panelTitle, attribute: attribute })
+            },
+            cssClasses: {
+                root: 'card refinement collapsible-sm overflow-hidden',
+                header: 'card-header col-sm-12',
+                body: 'card-body content value',
+                footer: 'card-footer',
+              }
+
+        })
+    }
 }
