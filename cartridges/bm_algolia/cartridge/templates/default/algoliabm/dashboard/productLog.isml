@@ -2,20 +2,28 @@
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
             <tr>
-            <td class="table_header w s" nowrap="nowrap" width="100%" colspan="1" style="padding: 6px;">Log of the last processed Products data</td>
-                <td class="table_header w e s center">Date</td>
-                <td class="table_header e s center">Result</td>
+                <td class="table_header w s" nowrap="nowrap" width="100%" colspan="1" style="padding: 6px;">
+                    <isprint value="${Resource.msg('algolia.label.product.title.sent', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_header w e s center">
+                    <isprint value="${Resource.msg('algolia.label.date', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_header e s center">
+                    <isprint value="${Resource.msg('algolia.label.result', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
             </tr>
             <tr>
-                <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Last processed Date</td>
+                <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">
+                    <isprint value="${Resource.msg('algolia.label.lastdate', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
                 <td class="table_detail w e s" nowrap="nowrap">
                     <isprint value="${logData.product.processedDate}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s center">
                     <isif condition="${logData.product.processedError}">
-                        Error
+                        <isprint value="${Resource.msg('algolia.label.error', 'algolia', null)}" encoding="htmlcontent" />
                     <iselse/>
-                        Success
+                        <isprint value="${Resource.msg('algolia.label.success', 'algolia', null)}" encoding="htmlcontent" />
                     </isif>
                 </td>
             </tr>
@@ -25,7 +33,9 @@
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody>
                 <tr>
-                    <td class="table_detail w s" nowrap="nowrap" colspan="1">Error Message: </td>
+                    <td class="table_detail w s" nowrap="nowrap" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.errmessage', 'algolia', null)}" encoding="htmlcontent" />
+                    </td>
                     <td class="table_detail w e s" width="100%">
                         <isprint value="${logData.product.processedErrorMessage}" encoding="htmlcontent" />
                     </td>
@@ -36,13 +46,17 @@
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
             <tr>
-                <td class="table_detail w e s" nowrap="nowrap">Products processed</td>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${Resource.msg('algolia.label.product.processed', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
                 <td class="table_detail e s"  width="100%">
                     <isprint value="${logData.product.processedRecords + ' records'}" encoding="htmlcontent" />
                 </td>
             </tr>
             <tr>
-                <td class="table_detail w e s" nowrap="nowrap">Products ready for update</td>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${Resource.msg('algolia.label.product.toupdate', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
                 <td class="table_detail e s"  width="100%">
                     <isprint value="${logData.product.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
                 </td>
@@ -54,20 +68,28 @@
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
             <tr>
-                <td class="table_header w s" nowrap="nowrap" width="100%" colspan="1" style="padding: 6px;">Log of the last sent Product data</td>
-                <td class="table_header w e s center">Date</td>
-                <td class="table_header e s center">Result</td>
+                <td class="table_header w s" nowrap="nowrap" width="100%" colspan="1" style="padding: 6px;">
+                    <isprint value="${Resource.msg('algolia.label.product.title.sent', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_header w e s center">
+                    <isprint value="${Resource.msg('algolia.label.date', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_header e s center">
+                    <isprint value="${Resource.msg('algolia.label.result', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
             </tr>
             <tr>
-                <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">Last sent Date</td>
+                <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">
+                    <isprint value="${Resource.msg('algolia.label.lastsentdate', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
                 <td class="table_detail w e s" nowrap="nowrap">
                     <isprint value="${logData.product.sendDate}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s center">
                     <isif condition="${logData.product.sendError}">
-                        Error
+                        <isprint value="${Resource.msg('algolia.label.error', 'algolia', null)}" encoding="htmlcontent" />
                     <iselse/>
-                        Success
+                        <isprint value="${Resource.msg('algolia.label.success', 'algolia', null)}" encoding="htmlcontent" />
                     </isif>
                 </td>
             </tr>
@@ -77,7 +99,9 @@
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody>
                 <tr>
-                    <td class="table_detail w s" nowrap="nowrap" colspan="1">Error Message: </td>
+                    <td class="table_detail w s" nowrap="nowrap" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.errmessage', 'algolia', null)}" encoding="htmlcontent" />
+                    </td>
                     <td class="table_detail w e s" width="100%">
                         <isprint value="${logData.product.sendErrorMessage}" encoding="htmlcontent" />
                     </td>
@@ -88,13 +112,17 @@
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
             <tr>
-                <td class="table_detail w e s" nowrap="nowrap">Data sent successfully</td>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${Resource.msg('algolia.label.sentsuccessfully', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
                 <td class="table_detail e s"  width="100%">
                     <isprint value="${logData.product.sendedChunk + ' chunk (' + logData.product.sendedRecords + ' records)'}" encoding="htmlcontent" />
                 </td>
             </tr>
             <tr>
-                <td class="table_detail w e s" nowrap="nowrap">Failed to send data</td>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${Resource.msg('algolia.label.sentfailed', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
                 <td class="table_detail e s"  width="100%">
                     <isprint value="${logData.product.failedChunk + ' chunk (' + logData.product.failedRecords + ' records)'}" encoding="htmlcontent" />
                 </td>
