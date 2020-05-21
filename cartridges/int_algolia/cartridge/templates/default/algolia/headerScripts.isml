@@ -22,11 +22,13 @@
                 "priceAsc": '<isprint value="${Resource.msg('search.priceAsc','algolia',null)}" encoding="jshtml" />',
                 "priceDesc": '<isprint value="${Resource.msg('search.priceDesc','algolia',null)}" encoding="jshtml" />',
                 "reset": '<isprint value="${Resource.msg('link.reset', 'search', null)}" encoding="jshtml" />',
-                "brandPanelTitle": '<isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="jshtml" />', 
-                "sizePanelTitle": '<isprint value="${Resource.msg('search.size','algolia',null)}" encoding="jshtml" />', 
-                "colorPanelTitle": '<isprint value="${Resource.msg('search.color','algolia',null)}" encoding="jshtml" />', 
-                "pricePanelTitle": '<isprint value="${Resource.msg('search.price','algolia',null)}" encoding="jshtml" />', 
-                "categoryPanelTitle": '<isprint value="${Resource.msg('search.category','algolia',null)}" encoding="jshtml" />' 
+                "brandPanelTitle": '<isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="jshtml" />',
+                "sizePanelTitle": '<isprint value="${Resource.msg('search.size','algolia',null)}" encoding="jshtml" />',
+                "colorPanelTitle": '<isprint value="${Resource.msg('label.tile.swatch.colors','product',null)}" encoding="jshtml" />',
+                "pricePanelTitle": '<isprint value="${Resource.msg('search.price','algolia',null)}" encoding="jshtml" />',
+                "categoryPanelTitle": '<isprint value="${Resource.msg('search.category','algolia',null)}" encoding="jshtml" />',
+                "products": '<isprint value="${Resource.msg('label.suggest.products','search',null)}" encoding="jshtml" />',
+                "categories": '<isprint value="${Resource.msg('label.suggest.categories','search',null)}" encoding="jshtml" />'
             },
             "noImages": {
                 "large": "${URLUtils.staticURL('/images/noimagelarge.png')}",
