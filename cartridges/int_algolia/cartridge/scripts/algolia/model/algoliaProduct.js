@@ -162,12 +162,16 @@ function getCategoryFlatTree(category) {
  */
 var agregatedValueHanlders = {
     categories: function (product) {
-        var productCategories = product.isVariant()
-            ? product.masterProduct.getOnlineCategories()
-            : product.getOnlineCategories();
+        var productCategories = product.getOnlineCategories();
+        productCategories = empty(productCategories) ? [] : productCategories.toArray();
+
+        if (product.isVariant()) {
+            var masterProductCategories = product.masterProduct.getOnlineCategories();
+            masterProductCategories = empty(masterProductCategories) ? [] : masterProductCategories.toArray();
+            productCategories = productCategories.concat(masterProductCategories);
+        }
 
         return productCategories
-            .toArray()
             .map(function (category) {
                 return getCategoryFlatTree(category);
             });
