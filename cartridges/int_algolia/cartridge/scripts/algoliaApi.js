@@ -2,7 +2,7 @@
 
 var serviceHelper = require('*/cartridge/scripts/service/serviceHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var algoliaProductConfig = require('*/cartridge/scripts/algolia/model/algoliaProductConfig');
+var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var serviceDefinition = require('*/cartridge/scripts/service/serviceDefinition');
 
 var Status = require('dw/system/Status');
@@ -36,6 +36,7 @@ function createHandshakeRequest() {
         site_id: currentSite.getID(),
         site_name: currentSite.getName(),
         locales: currentSite.getAllowedLocales().toArray(),
+        currencies: currentSite.getAllowedCurrencies().toArray(),
         client_id: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
         client_password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
         index_prefix: algoliaData.getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
