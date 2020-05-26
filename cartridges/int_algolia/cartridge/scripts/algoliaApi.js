@@ -37,10 +37,9 @@ function createHandshakeRequest() {
         site_name: currentSite.getName(),
         locales: currentSite.getAllowedLocales().toArray(),
         currencies: currentSite.getAllowedCurrencies().toArray(),
-        client_id: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', // @TODO replace from configs
-        client_password: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
-        index_prefix: algoliaData.getInstanceHostName() + '__' + currentSite.getID(), // @TODO replace with environment?
-        // @TODO replace from config
+        client_id: algoliaData.getPreference('OCAPIClientID'),
+        client_password: algoliaData.getPreference('OCAPIClientPassword'),
+        index_prefix: algoliaData.getInstanceHostName() + '__' + currentSite.getID(),
         fields: {
             product: algoliaProductConfig.defaultAttributes.concat(algoliaData.getSetOfArray('CustomFields')),
             category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subCategories', 'url']

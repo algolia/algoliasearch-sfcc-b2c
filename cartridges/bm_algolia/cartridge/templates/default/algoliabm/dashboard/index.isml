@@ -75,6 +75,18 @@
                     <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getSetOfStrings('CustomFields')}" id="CustomFields" name="CustomFields" /></td>
                 </tr>
                 <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.clientid', 'algolia', null)}" encoding="jshtml" />
+                    </td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientID')}" id="OCAPIClientID" name="OCAPIClientID" /></td>
+                </tr>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.clientpassword', 'algolia', null)}" encoding="jshtml" />
+                    </td>
+                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientPassword')}" id="OCAPIClientPassword" name="OCAPIClientPassword" /></td>
+                </tr>
+                <tr>
                     <td class="w e s buttonspacing" align="right" colspan="2">
                         <button type="submit" name="updateCustomPreferences" class="button">
                             <isprint value="${Resource.msg('algolia.label.button.apply', 'algolia', null)}" encoding="jshtml" />

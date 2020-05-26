@@ -18,6 +18,8 @@ var logHelper = require('int_algolia/cartridge/scripts/algolia/helper/logHelper'
  *   InStockThreshold       | Stock Threshold                                   | Double
  *   SearchApiKey           | Authorization key for Algolia                     | String
  *   AdminApiKey            | Authorization Admin key for Algolia               | String
+ *   OCAPIClientID          | Authorization OCAPI SFCC Client ID                | String
+ *   OCAPIClientPassword    | Authorization OCAPI SFCC Client passwrd           | String
  * -------------------------------------------------------------------------------------------------
  * Preferences stored in the XML file
  *   id                     | Description                                             |type of preference
