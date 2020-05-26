@@ -6,3 +6,6 @@
     background-color: yellow;
     font-style: normal;
 }
+.d-md-none {
+    display: none;
+}
