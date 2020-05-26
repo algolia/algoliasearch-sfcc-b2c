@@ -173,19 +173,23 @@ function enableInstantSearch(config) {
                         + '            </a>'
                         + '        </div>'
                         + '        <div class="product-pricing">'
-                        + '            {{#adjustedPrice}}'
+                        + '            {{#promotionalPrice}}'
                         + '            <span class="product-standard-price">'
-                        + '                {{currencySymbol}} {{adjustedPrice}}'
+                        + '                {{currencySymbol}} {{promotionalPrice}}'
                         + '            </span>'
-                        + '            {{/adjustedPrice}}'
-                        + '            {{#price}}'
                         + '            <span class="product-sales-price">'
                         + '                {{currencySymbol}} {{price}}'
                         + '            </span>'
-                        + '            {{/price}}'
+                        + '            {{/promotionalPrice}}'
+                        + '            {{^promotionalPrice}}'
+                        + '                {{#price}}'
+                        + '                    <span class="product-sales-price">'
+                        + '                        {{currencySymbol}} {{price}}'
+                        + '                    </span>'
+                        + '                {{/price}}'
+                        + '            {{/promotionalPrice}}'
                         + '        </div>'
                         + '</div></li>'
-    
                 },
                 transformItems: function (items) {
                     return items.map(function (item) {
@@ -203,8 +207,8 @@ function enableInstantSearch(config) {
                         }
     
                         // adjusted price in user currency
-                        if (item.adjustedPrice && item.adjustedPrice[config.userCurrency] !== null) {
-                            item.adjustedPrice = item.adjustedPrice[config.userCurrency]
+                        if (item.promotionalPrice && item.promotionalPrice[config.userCurrency] !== null) {
+                            item.promotionalPrice = item.promotionalPrice[config.userCurrency]
                         }
     
                         // price in user currency

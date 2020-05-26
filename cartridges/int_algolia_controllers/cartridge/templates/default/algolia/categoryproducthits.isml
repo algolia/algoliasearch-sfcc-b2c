@@ -14,12 +14,6 @@
               <div id="algolia-searchbox-placeholder" ></div>
               <div id="algolia-stats-placeholder" class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2"></div>
               <div id="algolia-sort-by-placeholder" class="col-6 col-sm-3 order-sm-1"></div>
-
-              <div class="col-6 col-sm-3 text-right d-md-none order-sm-3">
-                  <button type="button" class="btn btn-primary filter-results col-12">
-                      <isprint value="${Resource.msg('search.filter','algolia',null)}" encoding="htmlcontent" />
-                  </button>
-              </div>
         </div>
 	</div>
 

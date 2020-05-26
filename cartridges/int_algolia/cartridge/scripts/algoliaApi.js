@@ -53,7 +53,7 @@ function createHandshakeRequest() {
 }
 
 /**
- * Get TenantToken from Alglia
+ * Get TenantToken from Algolia
  * @returns {string} - TenantToken
  */
 function requestTenantToken() {
