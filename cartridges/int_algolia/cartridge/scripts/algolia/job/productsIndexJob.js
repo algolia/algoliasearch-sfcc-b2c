@@ -46,6 +46,26 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
 }
 
 /**
+ * The function returns the filtered next product from SeekableIterator
+ * and converted to the Algolia Product Model
+ * @param {dw.util.SeekableIterator} productsIterator - Pdofuct SeekableIterator
+ * @returns {Object} -  Algolia Product Model
+ */
+function getNextProductModel(productsIterator) {
+    var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+    var AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
+    var algoliaProductModel = null;
+    while (productsIterator.hasNext()) {
+        var product = productsIterator.next();
+        if (productFilter.isInclude(product)) {
+            algoliaProductModel = new AlgoliaProduct(product);
+            break;
+        }
+    }
+    return algoliaProductModel;
+}
+
+/**
  * Job for create Product Snapshot file and
  * file for update Algolia Product Index
  * @param {Object} parameters - job paraneters
@@ -58,7 +78,6 @@ function runProductExport(parameters) {
     var FileWriter = require('dw/io/FileWriter');
     var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter');
 
-    var AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
@@ -134,7 +153,7 @@ function runProductExport(parameters) {
     }
 
     var productsIterator = ProductMgr.queryAllSiteProductsSorted();
-    var newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+    var newProductModel = getNextProductModel(productsIterator);
     var snapshotToUpdate = true;
     var productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
 
@@ -160,7 +179,7 @@ function runProductExport(parameters) {
         if (newProductModel && !productSnapshot) {
             // Add product to delta
             productUpdate = new UpdateProductModel(newProductModel);
-            newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+            newProductModel = getNextProductModel(productsIterator);
             snapshotToUpdate = true;
         }
 
@@ -190,12 +209,12 @@ function runProductExport(parameters) {
                     productUpdate = new UpdateProductModel(newProductModel);
                 }
                 productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
-                newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+                newProductModel = getNextProductModel(productsIterator);
                 snapshotToUpdate = true;
             } else if (newProductModel.id < productSnapshot.id) {
                 // Add product to delta
                 productUpdate = new UpdateProductModel(newProductModel);
-                newProductModel = productsIterator.hasNext() ? new AlgoliaProduct(productsIterator.next()) : null;
+                newProductModel = getNextProductModel(productsIterator);
                 snapshotToUpdate = true;
             } else {
                 // Remove product from delta
