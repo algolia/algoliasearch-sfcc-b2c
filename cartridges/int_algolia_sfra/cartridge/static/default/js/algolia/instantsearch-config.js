@@ -184,25 +184,26 @@ function enableInstantSearch(config) {
                         + '                </a>'
                         + '            </div>'
                         + '            <div class="price">'
-                        + '                {{#adjustedPrice}}'
-                        + '                <del>'
+                        + '                {{#promotionalPrice}}'
                         + '                    <span class="strike-through list">'
+                        + '                         <span class="value"> {{currencySymbol}} {{price}} </span>'
+                        + '                    </span>'
+                        + '                    <span class="sales">'
                         + '                        <span class="value">'
-                        + '                            {{currencySymbol}} {{adjustedPrice}}'
+                        + '                            {{currencySymbol}} {{promotionalPrice}}'
                         + '                        </span>'
                         + '                    </span>'
-                        + '                </del>'
-                        + '                {{/adjustedPrice}}'
+                        + '                {{/promotionalPrice}}'
+                        + '                {{^promotionalPrice}}'
                         + '                {{#price}}'
                         + '                <span class="sales">'
                         + '                    <span class="value"> {{currencySymbol}} {{price}} </span>'
                         + '                </span>'
                         + '                {{/price}}'
+                        + '                {{/promotionalPrice}}'
                         + '            </div>'
                         + '        </div>'
                         + '    </div>'
-                        + '</div>'
-    
                 },
                 transformItems: function (items) {
                     return items.map(function (item) {
@@ -220,8 +221,8 @@ function enableInstantSearch(config) {
                         }
     
                         // adjusted price in user currency
-                        if (item.adjustedPrice && item.adjustedPrice[config.userCurrency] !== null) {
-                            item.adjustedPrice = item.adjustedPrice[config.userCurrency]
+                        if (item.promotionalPrice && item.promotionalPrice[config.userCurrency] !== null) {
+                            item.promotionalPrice = item.promotionalPrice[config.userCurrency]
                         }
     
                         // price in user currency
