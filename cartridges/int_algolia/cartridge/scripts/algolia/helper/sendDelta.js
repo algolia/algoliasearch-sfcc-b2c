@@ -121,7 +121,6 @@ function sendDelta(deltaList, logID, parameters) {
         sendLogData.sendError = true;
         sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
     } else {
-        algoliaData.setPreference(logID, new Date());
         sendLogData.sendError = false;
         sendLogData.sendedChunk += sendLogData.failedChunk;
         sendLogData.sendedRecords += sendLogData.failedRecords;
