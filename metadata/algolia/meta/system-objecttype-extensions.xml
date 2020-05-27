@@ -64,8 +64,8 @@
                 <min-length>0</min-length>
             </attribute-definition>
             <attribute-definition attribute-id="Algolia_OCAPIClientPassword">
-                <display-name xml:lang="x-default">OCAPI client ID</display-name>
-                <description xml:lang="x-default">Authorization OCAPI client Password</description>
+                <display-name xml:lang="x-default">OCAPI client password</display-name>
+                <description xml:lang="x-default">Authorization OCAPI client password</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
