@@ -4,7 +4,7 @@
         <custom-attribute-definitions>
             <attribute-definition attribute-id="Algolia_ApplicationID">
                 <display-name xml:lang="x-default">Application ID</display-name>
-                <description xml:lang="x-default">Identifies the application for this site</description>
+                <description xml:lang="x-default">This is your unique application identifier. If you haven't already, please signup to Algolia and create an Algolia application on the Algolia Dashboard.</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -41,7 +41,7 @@
             </attribute-definition>
             <attribute-definition attribute-id="Algolia_SearchApiKey">
                 <display-name xml:lang="x-default">Search API key</display-name>
-                <description xml:lang="x-default">Authorization key for Algolia</description>
+                <description xml:lang="x-default">This is the public API key which can be safely used in your frontend code.This key is usable for search queries and it's also able to list the indices you've got access to.</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -49,7 +49,7 @@
             </attribute-definition>
             <attribute-definition attribute-id="Algolia_AdminApiKey">
                 <display-name xml:lang="x-default">Admin API key</display-name>
-                <description xml:lang="x-default">Authorization Admin key for Algolia</description>
+                <description xml:lang="x-default">This is the ADMIN API key. Please keep it secret and use it ONLY from your backend: this key is used to create, update and DELETE your indices. You can also use it to manage your API keys.</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
