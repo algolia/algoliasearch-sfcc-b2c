@@ -211,7 +211,7 @@ var agregatedValueHanlders = {
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
             var currency = Currency.getCurrency(siteCurrencies[k]);
             currentSession.setCurrency(currency);
-            var price = product.priceModel.price;
+            var price = product.productSet ? product.priceModel.minPrice : product.priceModel.price;
             if (price.available) {
                 if (!productPrice) { productPrice = {}; }
                 productPrice[price.currencyCode] = price.value;
