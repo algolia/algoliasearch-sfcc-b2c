@@ -55,6 +55,22 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+            <attribute-definition attribute-id="Algolia_OCAPIClientID">
+                <display-name xml:lang="x-default">OCAPI client ID</display-name>
+                <description xml:lang="x-default">Authorization OCAPI client ID</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_OCAPIClientPassword">
+                <display-name xml:lang="x-default">OCAPI client ID</display-name>
+                <description xml:lang="x-default">Authorization OCAPI client Password</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="Algolia">
@@ -66,6 +82,8 @@
                 <attribute attribute-id="Algolia_HostBase"/>
                 <attribute attribute-id="Algolia_InStockThreshold"/>
                 <attribute attribute-id="Algolia_CustomFields"/>
+                <attribute attribute-id="Algolia_OCAPIClientID"/>
+                <attribute attribute-id="Algolia_OCAPIClientPassword"/>
             </attribute-group>
         </group-definitions>
     </type-extension>

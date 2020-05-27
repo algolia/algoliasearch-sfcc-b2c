@@ -43,6 +43,8 @@ function handleSettings() {
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
         algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
         algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
+        algoliaData.setPreference('OCAPIClientID', params.OCAPIClientID.value);
+        algoliaData.setPreference('OCAPIClientPassword', params.OCAPIClientPassword.value);
     } catch (error) {
         Logger.error(error);
     }
