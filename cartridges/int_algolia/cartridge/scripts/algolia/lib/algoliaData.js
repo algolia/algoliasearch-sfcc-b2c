@@ -4,7 +4,7 @@ var currentSite = require('dw/system/Site').getCurrent();
 var Transaction = require('dw/system/Transaction');
 var dwSystem = require('dw/system/System');
 
-var logHelper = require('int_algolia/cartridge/scripts/algolia/helper/logHelper');
+var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
 /*
  * Function for getting preferences for Algolia

@@ -30,7 +30,9 @@
                     <td class="table_header w s tab" nowrap="nowrap" width="70%" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.name', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_header w e s center">Value</td>
+                    <td class="table_header w e s center">
+                        <isprint value="${Resource.msg('algolia.label.value', 'algolia', null)}" encoding="jshtml" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
