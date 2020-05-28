@@ -9,7 +9,7 @@ function isInclude(product) {
     // Do not include Master product
     if (product.master) return false;
     // Do not include Option products
-    if (product.optionProduct) return false;
+    // if (product.optionProduct) return false;
     // Do not include bundled product
     if (product.bundled && !(product.priceModel && product.priceModel.price && product.priceModel.price.available)) return false;
     return true;
