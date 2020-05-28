@@ -66,9 +66,10 @@ function getLogData(id, logFileName) {
             logData = readObject(logXMLFileReader, LOG_NODE_NAME);
         } catch (error) {
             jobHelper.logFileError(algoliaConstants.ALGOLIA_LOG_FILE, 'Error open file to read', error);
-            logXMLFileReader.close();
-            logFileReader.close();
         }
+
+        logXMLFileReader.close();
+        logFileReader.close();
     }
 
     var result = null;

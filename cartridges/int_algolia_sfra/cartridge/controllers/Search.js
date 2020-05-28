@@ -49,7 +49,6 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 categoryDisplayNamePath: categoryDisplayNamePath,
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
-                // TODO: sqlinjection ?
                 cgid: req.querystring.cgid,
                 q: req.querystring.q
             });
