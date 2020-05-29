@@ -2,23 +2,26 @@
 
 function enableAutocomplete(config) {
     var productSuggestionTemplate = Hogan.compile(''
-        + '<div class="text-truncate text-nowrap">'
-        + '   <img class="swatch-circle hidden-xs-down" src="{{firstImage.dis_base_link}}" />'
-        + '   <a href="{{url}}">{{&_highlightResult.name.value}}</a>`'
+        + '<div class="product-suggestion">'
+        + '   <a class="product-link" href="{{url}}">'
+        + '       <div class="product-image">'
+        + '           <img src="{{firstImage.dis_base_link}}">'
+        + '       </div>'
+        + '       <div class="product-details">'
+        + '           <div class="product-name">{{&_highlightResult.name.value}}</div>'
+        + '       </div>'
+        + '   </a>'
         + '</div>'
     );
 
     var categorySuggestionTemplate = Hogan.compile(''
-        + '<div class="text-truncate text-nowrap">'
-        + '  <img class="swatch-circle hidden-xs-down" src="{{image}}" />'
-        + '  <a href="{{url}}">{{&_highlightResult.name.value}}</a>'
-        + '</div>'
+        + '<a class="hit" href="{{url}}">{{&_highlightResult.name.value}}</a>'
     );
 
 
     autocomplete('#aa-search-input', {
         cssClasses: {
-            dropdownMenu: "dropdownMenu suggestions p-2"
+            dropdownMenu: "search-suggestion-wrapper full"
         }
     }, [
         {

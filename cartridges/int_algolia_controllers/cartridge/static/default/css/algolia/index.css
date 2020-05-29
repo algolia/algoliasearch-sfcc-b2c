@@ -9,3 +9,7 @@
 .d-md-none {
     display: none;
 }
+
+.aa-search-suggestion-wrapper {
+    background: #fff;
+}

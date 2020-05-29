@@ -28,7 +28,11 @@
                 "pricePanelTitle": '<isprint value="${Resource.msg('search.price','algolia',null)}" encoding="jshtml" />',
                 "categoryPanelTitle": '<isprint value="${Resource.msg('search.category','algolia',null)}" encoding="jshtml" />',
                 "products": '<isprint value="${Resource.msg('search.suggest.products','algolia',null)}" encoding="jshtml" />',
-                "categories": '<isprint value="${Resource.msg('search.suggest.categories','algolia',null)}" encoding="jshtml" />'
+                "categories": '<isprint value="${Resource.msg('search.suggest.categories','algolia',null)}" encoding="jshtml" />',
+                "priceFilter": {
+                    "separator": '<isprint value="${Resource.msg('search.pricefilter.separator','algolia',null)}" encoding="jshtml" />',
+                    "submit": '<isprint value="${Resource.msg('search.pricefilter.submit','algolia',null)}" encoding="jshtml" />',
+                }
             },
             "noImages": {
                 "large": "${URLUtils.staticURL('/images/noimagelarge.png')}",

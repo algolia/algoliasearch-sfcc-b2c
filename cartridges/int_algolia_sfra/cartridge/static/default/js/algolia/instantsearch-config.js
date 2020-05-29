@@ -156,6 +156,7 @@ function enableInstantSearch(config) {
                 },
                 templates: {
                     showMoreText: algoliaData.strings.moreResults,
+                    empty: '',
                     item: ''
                         + '<div class="product" ' +
                         +'     data-pid="{{objectID}}"'
