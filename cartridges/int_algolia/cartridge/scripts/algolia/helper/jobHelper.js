@@ -55,21 +55,23 @@ function appendObjToXML(baseXML, obj) {
         result.append = arrayToXML(obj);
     } else {
         Object.keys(obj).forEach(function (property) {
+            // eslint-disable-next-line no-restricted-globals
+            var xmlPproperty = isNaN(property) ? property : 'number-' + property;
             if (obj[property] instanceof Array) {
-                result[property] = '';
-                result[property].appendChild(arrayToXML(obj[property]));
+                result[xmlPproperty] = '';
+                result[xmlPproperty].appendChild(arrayToXML(obj[property]));
             } else if (obj[property] instanceof Object) {
-                appendObjToXML(baseXML[property], obj[property]);
+                appendObjToXML(baseXML[xmlPproperty], obj[property]);
             } else {
                 switch (typeof obj[property]) {
                     case 'number':
-                        result[property] = new XML('<' + property + ' type="number">' + obj[property] + '</' + property + '>');
+                        result[xmlPproperty] = new XML('<' + property + ' type="number">' + obj[property] + '</' + property + '>');
                         break;
                     case 'boolean':
-                        result[property] = new XML('<' + property + ' type="boolean">' + obj[property] + '</' + property + '>');
+                        result[xmlPproperty] = new XML('<' + property + ' type="boolean">' + obj[property] + '</' + property + '>');
                         break;
                     default:
-                        result[property] = obj[property];
+                        result[xmlPproperty] = obj[property];
                         break;
                 }
             }
@@ -96,7 +98,8 @@ function xmlToObject(xmlObj) {
     var result = {};
 
     for (var i = 0; i < lengthChildren; i += 1) {
-        var property = xmlObj[i].name().localName;
+        var xmlProperty = xmlObj[i].name().localName;
+        var property = xmlProperty.indexOf('number-', 0) < 0 ? xmlProperty : xmlProperty.substring(7);
         if (xmlObj[i].hasSimpleContent()) {
             result[property] = xmlObj[i].toString();
             if (result[property].toLowerCase() === 'null') {
