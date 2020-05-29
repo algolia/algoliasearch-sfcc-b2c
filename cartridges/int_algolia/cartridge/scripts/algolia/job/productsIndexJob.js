@@ -200,6 +200,10 @@ function runProductExport(parameters) {
                     var deltaObject = jobHelper.objectCompare(productSnapshot, newProductModel);
                     // Partial product update
                     if (deltaObject) {
+                        // Update primary category_id if categories has updated
+                        if (Object.hasOwnProperty.call(deltaObject, 'categories')) {
+                            deltaObject.primary_category_id = newProductModel.primary_category_id;
+                        }
                         deltaObject.id = newProductModel.id;
                         productUpdate = new UpdateProductModel(deltaObject);
                         productUpdate.options.partial = true;

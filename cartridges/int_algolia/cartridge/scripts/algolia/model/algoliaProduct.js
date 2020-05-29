@@ -7,6 +7,7 @@ var URLUtils = require('dw/web/URLUtils');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
+var productModelCustomizer = require('*/cartridge/scripts/customization/lib/productModelCustomizer');
 
 /**
  * Get the lowest promotional price for product
@@ -267,42 +268,6 @@ var agregatedValueHanlders = {
 };
 
 /**
- * Create secondary category Algolia object
- * @param {Array} categories - array of catefories
- * @returns {Object} - secondary category Algolia object
- */
-function categoriesToIndex(categories) {
-    var CATEGORIES_SEPARATOR = ' > ';
-    var result = {};
-    for (var i = 0; i < categories.length; i += 1) {
-        result[i] = {};
-        var categoryNames = categories[categories.length - i - 1].name;
-        // eslint-disable-next-line no-loop-func
-        Object.keys(categoryNames).forEach(function (locale) {
-            result[i][locale] = i ? result[i - 1][locale] + CATEGORIES_SEPARATOR + categoryNames[locale] : categoryNames[locale];
-        });
-    }
-    return result;
-}
-
-/**
- * Add secondery catrgoriy to Algolia Product.
- * if no category name is specified, all secondary categories are added
- * @param {string} rootCategoryName - root category name.
- */
-function addSecondaryCategories(rootCategoryName) {
-    if (!empty(this.categories)) {
-        for (var i = 0; i < this.categories.length; i += 1) {
-            var rootCategoryId = this.categories[i][this.categories[i].length - 1].id;
-            if (rootCategoryId !== this.primary_category_id
-                && (empty(rootCategoryName) || rootCategoryId === rootCategoryName)) {
-                this['category_' + rootCategoryId] = categoriesToIndex(this.categories[i]);
-            }
-        }
-    }
-}
-
-/**
  * AlgoliaProduct class that represents an algoliaProduct Object
  * @param {dw.order.Product} product - Product
  * @constructor
@@ -344,7 +309,7 @@ function algoliaProduct(product) {
                 if (!empty(value)) { this[attributeName] = value; }
             }
         }
-        addSecondaryCategories.call(this, 'newarrivals');
+        productModelCustomizer.customizeProductModel(this);
     }
 }
 
