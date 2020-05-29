@@ -267,6 +267,23 @@ var agregatedValueHanlders = {
 };
 
 /**
+ * Add secondery catrgoriy to Algolia Product.
+ * if no category name is specified, all secondary categories are added
+ * @param {string} rootCategoryName - root category name.
+ */
+function addSecondaryCategories(rootCategoryName) {
+    if (!empty(this.categories)) {
+        for (var i = 0; i < this.categories.length; i += 1) {
+            var rootCategoryId = this.categories[i][this.categories[i].length - 1].id;
+            if (rootCategoryId !== this.primary_category_id
+                && (empty(rootCategoryName) || rootCategoryId === rootCategoryName)) {
+                this['category_' + rootCategoryId] = this.categories[i].slice();
+            }
+        }
+    }
+}
+
+/**
  * AlgoliaProduct class that represents an algoliaProduct Object
  * @param {dw.order.Product} product - Product
  * @constructor
@@ -308,6 +325,7 @@ function algoliaProduct(product) {
                 if (!empty(value)) { this[attributeName] = value; }
             }
         }
+        addSecondaryCategories.call(this, 'newarrivals');
     }
 }
 
