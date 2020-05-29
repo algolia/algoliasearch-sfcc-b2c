@@ -73,7 +73,7 @@ function show() {
         }
         if (useAlgolia) {
             app.getView({
-        		algoliaEnable: true,
+                algoliaEnable: true,
                 category: category,
                 categoryDisplayNamePath: categoryDisplayNamePath,
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,

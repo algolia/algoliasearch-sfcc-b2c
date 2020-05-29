@@ -13,3 +13,7 @@
 .aa-search-suggestion-wrapper {
     background: #fff;
 }
+
+.ais-Breadcrumb-list, .ais-Breadcrumb-item {
+    display: block;
+}
