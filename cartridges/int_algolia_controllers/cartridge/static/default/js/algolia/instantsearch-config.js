@@ -255,6 +255,8 @@ function enableInstantSearch(config) {
             })
         ])
     }
+
+    $('.cat-banner h1').empty();
     search.start();
 
     function hierarchicalMenuWithPanel(options) {
