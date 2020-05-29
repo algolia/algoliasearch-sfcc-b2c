@@ -1,8 +1,8 @@
 .tab {
-    padding: 6px;
+    padding: 0.5em;
 }
   
 .tab-title {
-    padding: 10px;
+    padding: 1em;
     font-weight: bold;
 }

@@ -78,7 +78,6 @@ function show() {
                 categoryDisplayNamePath: categoryDisplayNamePath,
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
-                // TODO: sqlinjection ?
                 cgid: cgid,
                 q: params.q ? params.q.value : null
             }).render('algolia/categoryproducthits');
@@ -86,7 +85,6 @@ function show() {
     }
     if (!useAlgolia) {    // deafult Search-Show	
         if (params.format.stringValue === 'ajax' || params.format.stringValue === 'page-element') {
-            // TODO refactor and merge showProductGrid() code into here
             showProductGrid();
             return;
         }
