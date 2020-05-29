@@ -99,13 +99,11 @@ function enableInstantSearch(config) {
             rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
                 attribute: 'price.' + config.userCurrency,
-                cssClasses: {
-                    form: 'form-inline flex-nowrap',
-                    input: 'form-control form-control-sm',
-                    separator: 'mx-1',
-                    submit: 'btn',
-                },
-                panelTitle: algoliaData.strings.pricePanelTitle
+                panelTitle: algoliaData.strings.pricePanelTitle,
+                templates: {
+                    separatorText: algoliaData.strings.priceFilter.separator,
+                    submitText: algoliaData.strings.priceFilter.submit
+                }
             }),
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
@@ -146,15 +144,14 @@ function enableInstantSearch(config) {
             instantsearch.widgets.infiniteHits({
                 container: '#algolia-hits-placeholder',
                 cssClasses: {
-                    root: 'col-12',
-                    list: 'row product-grid',
-                    item: 'col-6 col-sm-4',
-                    loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto'
+                    list: 'search-result-items tiles-container clearfix hide-compare ',
+                    item: 'grid-tile'
                 },
                 templates: {
                     showMoreText: algoliaData.strings.moreResults,
+                    empty: '',
                     item: ''
-                        + '<li class="grid-tile"><div class="product-tile" data-itemid="{{objectID}}"' +
+                        + '<div class="product-tile" data-itemid="{{objectID}}"' +
                         +'     data-pid="{{objectID}}"'
                         + '     data-query-id="{{__queryID}}"'
                         + '     data-index-name="{{__indexName}}"'
@@ -165,6 +162,7 @@ function enableInstantSearch(config) {
                         + '            <a class="thumb-link" href="{{url}}">'
                         + '              <img class="tile-image" src="{{image.dis_base_link}}" alt="{{image.alt}}" title="{{name}}"/>'
                         + '            </a>'
+                        + '            <a id="quickviewbutton" class="quickview" href="{{quickShowUrl}}">Quick View<i class="fa fa-arrows-alt"></i></a>'
                         + '        </div>'
                         + '        {{/image}}'
                         + '        <div class="product-name">'
@@ -189,7 +187,7 @@ function enableInstantSearch(config) {
                         + '                {{/price}}'
                         + '            {{/promotionalPrice}}'
                         + '        </div>'
-                        + '</div></li>'
+                        + '</div>'
                 },
                 transformItems: function (items) {
                     return items.map(function (item) {
