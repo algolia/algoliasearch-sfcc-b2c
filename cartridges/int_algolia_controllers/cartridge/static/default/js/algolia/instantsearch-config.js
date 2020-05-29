@@ -101,9 +101,9 @@ function enableInstantSearch(config) {
                 attribute: 'price.' + config.userCurrency,
                 panelTitle: algoliaData.strings.pricePanelTitle,
                 templates: {
-                    separatorText: 'to',
-                    submitText: 'Go'
-                },
+                    separatorText: algoliaData.strings.priceFilter.separator,
+                    submitText: algoliaData.strings.priceFilter.submit
+                }
             }),
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
