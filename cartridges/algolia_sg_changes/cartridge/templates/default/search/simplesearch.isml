@@ -16,7 +16,7 @@
         name="search"
         autocomplete="off" />
 </div>
-<iselse>
+<iselse/>
 <form role="search" action="${URLUtils.url('Search-Show')}" method="get" name="simpleSearch">
 	<fieldset>
 		<label class="visually-hidden" for="q">${Resource.msg('global.searchcatalog', 'locale', null)}</label>
