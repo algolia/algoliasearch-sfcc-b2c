@@ -7,7 +7,7 @@ var URLUtils = require('dw/web/URLUtils');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
-var productModelCustomizer = require('*/cartridge/scripts/customization/lib/productModelCustomizer');
+var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 
 /**
  * Get the lowest promotional price for product
