@@ -1,26 +1,27 @@
 'use strict';
 
+var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+
 /**
  * Create secondary category Algolia object
- * @param {Array} categories - array of catefories
+ * @param {Array} category - array of catefories tree
  * @returns {Object} - secondary category Algolia object
  */
-function categoriesToIndexTree(categories) {
-    var CATEGORIES_SEPARATOR = ' > ';
+function createAlgoliaCategoryObject(category) {
     var CATEGORIES_LEVEL_PREFIX = 'level_';
     var result = {};
 
-    categories
+    category
         .concat()
         .reverse()
-        .reduce(function (previousCategory, category, index) {
+        .reduce(function (parentCategory, childCategory, index) {
             result[CATEGORIES_LEVEL_PREFIX + index] = {};
-            Object.keys(category.name).forEach(function (locale) {
-                result[CATEGORIES_LEVEL_PREFIX + index][locale] = previousCategory
-                    ? previousCategory.name[locale] + CATEGORIES_SEPARATOR + category.name[locale]
-                    : category.name[locale];
+            Object.keys(childCategory.name).forEach(function (locale) {
+                result[CATEGORIES_LEVEL_PREFIX + index][locale] = parentCategory
+                    ? parentCategory.name[locale] + algoliaData.CATEGORIES_SEPARATOR + childCategory.name[locale]
+                    : childCategory.name[locale];
             });
-            return category;
+            return childCategory;
         }, null);
 
     return result;
@@ -38,15 +39,14 @@ function customizeProductModel(productModel) {
     var CATEGORY_ATTRIBUTE = 'CATEGORIES_NEW_ARRIVALS';
     var CATEGORY_ID = 'newarrivals';
 
-    var result = productModel;
+    var customizedProductModel = productModel;
+    customizedProductModel[CATEGORY_ATTRIBUTE] = null;
 
-    if (empty(result.categories)) {
-        result[CATEGORY_ATTRIBUTE] = null;
-    } else {
-        for (var i = 0; i < result.categories.length; i += 1) {
-            var rootCategoryId = result.categories[i][result.categories[i].length - 1].id;
+    if (!empty(customizedProductModel.categories)) {
+        for (var i = 0; i < customizedProductModel.categories.length; i += 1) {
+            var rootCategoryId = customizedProductModel.categories[i][customizedProductModel.categories[i].length - 1].id;
             if (rootCategoryId === CATEGORY_ID) {
-                result[CATEGORY_ATTRIBUTE] = categoriesToIndexTree(result.categories[i]);
+                customizedProductModel[CATEGORY_ATTRIBUTE] = createAlgoliaCategoryObject(customizedProductModel.categories[i]);
                 break;
             }
         }
