@@ -107,7 +107,11 @@ function enableInstantSearch(config) {
                     separator: 'mx-1',
                     submit: 'btn',
                 },
-                panelTitle: algoliaData.strings.pricePanelTitle
+                panelTitle: algoliaData.strings.pricePanelTitle,
+                templates: {
+                    separatorText: algoliaData.strings.priceFilter.separator,
+                    submitText: algoliaData.strings.priceFilter.submit
+                }
             }),
 
             refinementListWithPanel({
@@ -156,6 +160,7 @@ function enableInstantSearch(config) {
                 },
                 templates: {
                     showMoreText: algoliaData.strings.moreResults,
+                    empty: '',
                     item: ''
                         + '<div class="product" ' +
                         +'     data-pid="{{objectID}}"'

@@ -1,10 +1,5 @@
 'use strict';
 
-// TODO: Remove from production
-// Limit number of products processling
-// 0 - no limit
-var PROCESSING_PRODUCT_LIMIT = 0;
-
 /**
  * UpdateProductModel class that represents an Algolia ProductModel
  * for update product properties
@@ -157,8 +152,6 @@ function runProductExport(parameters) {
     var snapshotToUpdate = true;
     var productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
 
-    var limitCounter = 0;
-
     while (newProductModel || productSnapshot) {
         var productUpdate = null;
 
@@ -243,10 +236,6 @@ function runProductExport(parameters) {
             }
             counterProductsForUpdate += 1;
         }
-
-        // TODO: remove from productiond
-        limitCounter += 1;
-        if (PROCESSING_PRODUCT_LIMIT > 0 && limitCounter >= PROCESSING_PRODUCT_LIMIT) break;
     }
 
     // Close XML Update file

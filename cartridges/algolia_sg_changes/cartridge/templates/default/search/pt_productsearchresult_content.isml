@@ -18,7 +18,7 @@
 	<div id="secondary" class="refinements">
 	<isif condition="${pdict.algoliaEnable}">
 	    <isinclude template="algolia/productsearchrefinebar" />
-	<iselse>
+	<iselse/>
 		<isinclude template="search/components/productsearchrefinebar"/>
 	</isif>
 	</div>

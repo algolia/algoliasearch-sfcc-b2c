@@ -14,7 +14,7 @@
             <span id="algolia-category-title-placeholder"></span>
         </h1>
     </div>
-<iselse>
+<iselse/>
     <isslot id="search-result-banner-m" description="Banner for search results" context="global" />
 </isif>
 

@@ -194,7 +194,6 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
     xlsw.close();
     snapshotFileWriter.close();
 
-    // TODO: error handler
     return true;
 }
 

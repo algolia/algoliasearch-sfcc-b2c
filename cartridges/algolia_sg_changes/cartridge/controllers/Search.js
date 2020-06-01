@@ -54,7 +54,7 @@ function show() {
         if (cgid) {    // get category - need image, name and if root
             category = CatalogMgr.getCategory(cgid);
             if (category) {
-                if (category.topLevel) {
+                if (!empty(category.template) && category.template != 'rendering/category/categoryproducthits') {
                     useAlgolia = false;    // main categories have specific template
                 } else {
                     if (category.custom && 'slotBannerImage' in category.custom &&
@@ -73,12 +73,11 @@ function show() {
         }
         if (useAlgolia) {
             app.getView({
-        		algoliaEnable: true,
+                algoliaEnable: true,
                 category: category,
                 categoryDisplayNamePath: categoryDisplayNamePath,
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
-                // TODO: sqlinjection ?
                 cgid: cgid,
                 q: params.q ? params.q.value : null
             }).render('algolia/categoryproducthits');
@@ -86,7 +85,6 @@ function show() {
     }
     if (!useAlgolia) {    // deafult Search-Show	
         if (params.format.stringValue === 'ajax' || params.format.stringValue === 'page-element') {
-            // TODO refactor and merge showProductGrid() code into here
             showProductGrid();
             return;
         }
