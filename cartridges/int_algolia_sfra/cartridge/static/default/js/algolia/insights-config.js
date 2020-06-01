@@ -14,13 +14,14 @@ function enableInsights(appId, searchApiKey) {
             var queryID = getUrlParameter('queryID');
             var objectID = getUrlParameter('objectID');
             var indexName = getUrlParameter('indexName');
-
-            window.aa('convertedObjectIDsAfterSearch', {
-                eventName: 'Product Add to cart',
-                index: indexName,
-                queryID: queryID,
-                objectIDs: [objectID]
-            });
+            if (queryID && objectID && indexName) {
+                window.aa('convertedObjectIDsAfterSearch', {
+                    eventName: 'Product Add to cart',
+                    index: indexName,
+                    queryID: queryID,
+                    objectIDs: [objectID]
+                });
+            }
         }
     });
 
