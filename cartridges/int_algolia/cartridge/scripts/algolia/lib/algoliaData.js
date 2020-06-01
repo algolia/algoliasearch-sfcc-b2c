@@ -6,6 +6,9 @@ var dwSystem = require('dw/system/System');
 
 var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
+var CATEGORIES_SEPARATOR = ' > ';
+
+
 /*
  * Function for getting preferences for Algolia
  *
@@ -183,5 +186,6 @@ module.exports = {
     getInstanceHostName: getInstanceHostName,
     calculateIndexId: calculateIndexId,
     getLocalDateTime: getLocalDateTime,
-    getSyncLocalDateTime: getSyncLocalDateTime
+    getSyncLocalDateTime: getSyncLocalDateTime,
+    CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR
 };
