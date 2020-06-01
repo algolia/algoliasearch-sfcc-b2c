@@ -7,6 +7,7 @@ var serviceDefinition = require('*/cartridge/scripts/service/serviceDefinition')
 
 var Status = require('dw/system/Status');
 var tenantToken = null;
+var tenantCallStatus = new Status(Status.ERROR);
 
 var dwSystem = require('dw/system/System');
 var currentSite = require('dw/system/Site').getCurrent();
@@ -57,8 +58,6 @@ function createHandshakeRequest() {
  * @returns {string} - TenantToken
  */
 function requestTenantToken() {
-    var callStatus;
-    var token = null;
     var body = createHandshakeRequest();
     var service = serviceDefinition.init();
     var baseURL = service.getConfiguration().getCredential().getURL();
@@ -66,46 +65,42 @@ function requestTenantToken() {
     service.setRequestMethod('POST');
     service.setURL(baseURL + '/sfcc/api/algolia_config/' + calculateTenantID());
 
-    callStatus = serviceHelper.callJsonService('Create Tenant', service, body);
-    /*
-    {
-        "body": {
-            "token": "xxx"
-        }
-    }
-    */
-
-    if (callStatus.status === Status.OK) {
-        var tokenObj = callStatus.getDetail('object');
-        token = tokenObj.body.token;
-    }
-
-    return token;
+    var callStatus = serviceHelper.callJsonService('Create Tenant', service, body);
+    return callStatus;
 }
 
 /**
  * Get TenantToken for sending data to Alglia API
- * @returns {string} - TenantToken
+ * @returns {dw.system.Status} - TenantToken
  */
 function getTenantToken() {
     if (tenantToken === null) {
-        tenantToken = requestTenantToken();
+        tenantCallStatus = requestTenantToken();
+        if (tenantCallStatus.status === Status.OK) {
+            var tokenObj = tenantCallStatus.getDetail('object');
+            tenantToken = tokenObj.body.token;
+            /*
+                {
+                    "body": {
+                        "token": "xxx"
+                    }
+                }
+            */
+        }
     }
     return tenantToken;
 }
 
-/*
-function getEnvironmentId() {
-    return 'RefArch';
-}
-*/
-
 /**
  * Send array of objects to Algolia API
  * @param {Array} itemsArray - array of objects for send to Algolia
- * @returns {boolean} - successful to send
+ * @returns {dw.system.Status} - successful Status to send
  */
 function sendDelta(itemsArray) {
+    if (empty(getTenantToken())) {
+        return tenantCallStatus;
+    }
+
     var service = serviceDefinition.init();
     var baseURL = service.getConfiguration().getCredential().getURL();
 
@@ -123,4 +118,3 @@ function sendDelta(itemsArray) {
 }
 
 module.exports.sendDelta = sendDelta;
-module.exports.getTenantToken = getTenantToken;
