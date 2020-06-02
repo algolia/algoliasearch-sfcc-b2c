@@ -87,8 +87,19 @@ function runProductExport(parameters) {
     productLogData.processedRecords = 0;
     productLogData.processedToUpdateRecords = 0;
 
+    var status = new Status(Status.ERROR);
+    if (!algoliaData.getPreference('Enable')) {
+        jobHelper.logFileError('Disable', 'Algolia Cartridge Disabled', status);
+        productLogData.processedErrorMessage = 'Algolia Cartridge Disabled';
+        algoliaData.setLogData('LastProductSyncLog', productLogData);
+        return status;
+    }
+
     if (!jobHelper.checkAlgoliaFolder()) {
-        return new Status(Status.ERROR);
+        jobHelper.logFileError('No folder', 'Unable to create Algolia folder', status);
+        productLogData.processedErrorMessage = 'Unable to create Algolia folder';
+        algoliaData.setLogData('LastProductSyncLog', productLogData);
+        return status;
     }
 
     // Open XML New temporary Snapshot file to write

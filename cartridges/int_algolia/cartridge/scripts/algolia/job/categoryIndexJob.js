@@ -204,15 +204,6 @@ function createCategoriesSnapshotFile(snapshotFile, listOfCategories) {
  * @returns {dw.system.Status} - successful Job run
  */
 function runCategoryExport(parameters) {
-    var siteCatalog = catalogMgr.getSiteCatalog();
-    var siteCatalogId = siteCatalog.getID();
-    var siteRootCategory = siteCatalog.getRoot();
-    var currentSite = Site.getCurrent();
-    var siteLocales = currentSite.getAllowedLocales();
-    var topLevelCategories = siteRootCategory.hasOnlineSubCategories()
-        ? siteRootCategory.getOnlineSubCategories().iterator() : null;
-    var listOfCategories = [];
-
     var Status = require('dw/system/Status');
     var File = require('dw/io/File');
     var FileReader = require('dw/io/FileReader');
@@ -224,8 +215,35 @@ function runCategoryExport(parameters) {
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
+    var siteCatalog = catalogMgr.getSiteCatalog();
+    var siteCatalogId = siteCatalog.getID();
+    var siteRootCategory = siteCatalog.getRoot();
+    var currentSite = Site.getCurrent();
+    var siteLocales = currentSite.getAllowedLocales();
+    var topLevelCategories = siteRootCategory.hasOnlineSubCategories()
+        ? siteRootCategory.getOnlineSubCategories().iterator() : null;
+    var listOfCategories = [];
+
+    var categoryLogData = algoliaData.getLogData('LastCategorySyncLog');
+    categoryLogData.processedDate = algoliaData.getLocalDateTime(new Date());
+    categoryLogData.processedError = true;
+    categoryLogData.processedErrorMessage = '';
+    categoryLogData.processedRecords = 0;
+    categoryLogData.processedToUpdateRecords = 0;
+
+    var status = new Status(Status.ERROR);
+    if (!algoliaData.getPreference('Enable')) {
+        jobHelper.logFileError('Disable', 'Algolia Cartridge Disabled', status);
+        categoryLogData.processedErrorMessage = 'Algolia Cartridge Disabled';
+        algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
+        return status;
+    }
+
     if (!jobHelper.checkAlgoliaFolder()) {
-        return new Status(Status.ERROR);
+        jobHelper.logFileError('No folder', 'Unable to create Algolia folder', status);
+        categoryLogData.processedErrorMessage = 'Unable to create Algolia folder';
+        algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
+        return status;
     }
 
     while (topLevelCategories.hasNext()) {
@@ -238,13 +256,6 @@ function runCategoryExport(parameters) {
 
     var snapshotFile = new File(algoliaConstants.SNAPSHOT_CATEGORIES_FILE_NAME);
     var updateFile = new File(algoliaConstants.UPDATE_CATEGORIES_FILE_NAME);
-
-    var categoryLogData = algoliaData.getLogData('LastCategorySyncLog');
-    categoryLogData.processedDate = algoliaData.getLocalDateTime(new Date());
-    categoryLogData.processedError = true;
-    categoryLogData.processedErrorMessage = '';
-    categoryLogData.processedRecords = 0;
-    categoryLogData.processedToUpdateRecords = 0;
 
     var counterCategoriesTotal = listOfCategories.length;
     var counterCategoriesForUpdate = 0;
