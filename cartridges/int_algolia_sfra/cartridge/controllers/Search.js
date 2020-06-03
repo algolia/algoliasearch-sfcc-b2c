@@ -27,7 +27,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         if (cgid) { // get category - need image, name and if root
             category = CatalogMgr.getCategory(cgid);
             if (category) {
-                if (!empty(category.template) && category.template != 'rendering/category/categoryproducthits') {
+                if (!empty(category.template) && category.template !== 'rendering/category/categoryproducthits') {
                     useAlgolia = false; // main categories have specific template
                 } else if (category.custom && 'slotBannerImage' in category.custom
                             && category.custom.slotBannerImage) {
