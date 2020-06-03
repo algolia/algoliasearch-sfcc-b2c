@@ -65,14 +65,14 @@ function sendDelta(deltaList, logID, parameters) {
     var failedChunks = [];
     var countFailedShunks = 0;
 
-    var status = null;
+    var status = new Status(Status.OK);
 
     if (deltaList.getSize() === 0) {
         logger.info('Delta is empty, no syncronization is needed');
         deltaList.close();
         sendLogData.sendError = false;
         algoliaData.setLogData(logID, sendLogData);
-        return new Status(Status.OK);
+        return status;
     }
 
     // check if merchant set his preferred number
@@ -102,7 +102,7 @@ function sendDelta(deltaList, logID, parameters) {
                     sendLogData.sendErrorMessage = 'Too many failed chunks. Service might be down. Aborting the job.';
                     algoliaData.setLogData(logID, sendLogData);
                     deltaList.close();
-                    return new Status(Status.ERROR);
+                    return status;
                 }
             } else {
                 sendLogData.sendedChunk += 1;

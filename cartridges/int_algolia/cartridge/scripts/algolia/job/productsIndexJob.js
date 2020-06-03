@@ -88,16 +88,14 @@ function runProductExport(parameters) {
     productLogData.processedToUpdateRecords = 0;
 
     var status = new Status(Status.ERROR);
-    if (!algoliaData.getPreference('Enable')) {
-        jobHelper.logFileError('Disable', 'Algolia Cartridge Disabled', status);
-        productLogData.processedErrorMessage = 'Algolia Cartridge Disabled';
-        algoliaData.setLogData('LastProductSyncLog', productLogData);
+    if (!jobHelper.checkAlgoliaFolder()) {
+        jobHelper.logFileError('No folder', 'Unable to create Algolia folder', status);
         return status;
     }
 
-    if (!jobHelper.checkAlgoliaFolder()) {
-        jobHelper.logFileError('No folder', 'Unable to create Algolia folder', status);
-        productLogData.processedErrorMessage = 'Unable to create Algolia folder';
+    if (!algoliaData.getPreference('Enable')) {
+        jobHelper.logFileError('Disable', 'Algolia Cartridge Disabled', status);
+        productLogData.processedErrorMessage = 'Algolia Cartridge Disabled';
         algoliaData.setLogData('LastProductSyncLog', productLogData);
         return status;
     }
@@ -269,7 +267,7 @@ function runProductExport(parameters) {
     productsIterator.close();
 
     jobHelper.logFileInfo(snapshotFile.fullPath, 'Processed ' + counterProductsTotal + ' records');
-    jobHelper.logFileInfo(updateFile.fullPath, 'Records for update' + counterProductsForUpdate + 'records');
+    jobHelper.logFileInfo(updateFile.fullPath, 'Records for update ' + counterProductsForUpdate + 'records ');
 
     productLogData.processedDate = algoliaData.getLocalDateTime(new Date());
     productLogData.processedError = false;
