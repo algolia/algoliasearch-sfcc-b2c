@@ -7,7 +7,8 @@
 
 	    <div class="refinements">
 	        <div id="algolia-sort-by-placeholder" class="col-6 col-sm-3 order-sm-1"></div>
-	        <div id="algolia-categories-list-placeholder"></div>
+            <div id="algolia-categories-list-placeholder"></div>
+            <div id="algolia-newarrivals-list-placeholder"></div>
 	        <div id="algolia-brand-list-placeholder"></div>
 	        <div id="algolia-size-list-placeholder"></div>
 	        <div id="algolia-color-list-placeholder"></div>

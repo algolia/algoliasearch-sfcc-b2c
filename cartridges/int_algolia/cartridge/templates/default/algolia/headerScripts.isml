@@ -32,7 +32,8 @@
                 "priceFilter": {
                     "separator": '<isprint value="${Resource.msg('search.pricefilter.separator','algolia',null)}" encoding="jshtml" />',
                     "submit": '<isprint value="${Resource.msg('search.pricefilter.submit','algolia',null)}" encoding="jshtml" />',
-                }
+                },
+                "newArrivals": '<isprint value="${Resource.msg('panel.newarrivals','algolia',null)}" encoding="jshtml" />'
             },
             "noImages": {
                 "large": "${URLUtils.staticURL('/images/noimagelarge.png')}",
