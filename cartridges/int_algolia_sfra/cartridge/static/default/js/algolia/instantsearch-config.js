@@ -2,11 +2,19 @@
 
 function enableInstantSearch(config) {
     var initialUiState = {};
+    var hierarchicalMenuValue = {};
+    if (config.categoryDisplayNamePath && config.categoryDisplayNamePath.indexOf('New Arrivals') > -1) {
+        hierarchicalMenuValue = {
+            "CATEGORIES_NEW_ARRIVALS.level_0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
+        }
+    } else {
+        hierarchicalMenuValue = {
+            "__primary_category.0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
+        }
+    }
     initialUiState[config.productsIndex] = {
         query: config.urlQuery,
-        hierarchicalMenu: {
-            "__primary_category.0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
-        },
+        hierarchicalMenu: hierarchicalMenuValue,
     };
 
     var search = instantsearch({
@@ -79,7 +87,25 @@ function enableInstantSearch(config) {
                 },
                 panelTitle: algoliaData.strings.categoryPanelTitle
             }),
-    
+
+            hierarchicalMenuWithPanel({
+                container: '#algolia-newarrivals-list-placeholder',
+                attributes: ['CATEGORIES_NEW_ARRIVALS.level_0', 'CATEGORIES_NEW_ARRIVALS.level_1'],
+                templates: {
+                    item: ''
+                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
+                        + '    {{#isRefined}}'
+                        + '      <i class="fa fa-check-circle"></i>'
+                        + '    {{/isRefined}}'
+                        + '    {{^isRefined}}'
+                        + '      <i class="fa fa-circle-o"></i>'
+                        + '    {{/isRefined}}'
+                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
+                        + '</a>',
+                },
+                panelTitle: algoliaData.strings.newArrivals
+            }),
+
             refinementListWithPanel({
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
