@@ -6,9 +6,9 @@
         assets.addCss('/css/search.css');
     </isscript>
 
-<isif condition="${pdict.algoliaEnable}">
-    <isinclude template="algolia/search/searchResultsNoDecorator" />
-<iselse>
-	<isinclude template="search/searchResultsNoDecorator" />
-</isif>
+    <isif condition="${pdict.algoliaEnable}">
+        <isinclude template="algolia/search/searchResultsNoDecorator" />
+    <iselse/>
+        <isinclude template="search/searchResultsNoDecorator" />
+    </isif>
 </isdecorate>
