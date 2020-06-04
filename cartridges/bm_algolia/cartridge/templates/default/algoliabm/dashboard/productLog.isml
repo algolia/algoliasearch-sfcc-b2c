@@ -3,7 +3,7 @@
         <tbody>
             <tr>
                 <td class="table_header w s tab" nowrap="nowrap" width="100%" colspan="1">
-                    <isprint value="${Resource.msg('algolia.label.product.title.sent', 'algolia', null)}" encoding="htmlcontent" />
+                    <isprint value="${Resource.msg('algolia.label.product.title.processed', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_header w e s center">
                     <isprint value="${Resource.msg('algolia.label.date', 'algolia', null)}" encoding="htmlcontent" />
