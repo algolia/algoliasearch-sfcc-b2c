@@ -1,0 +1,57 @@
+<isif condition="${pdict.reportingURLs && pdict.reportingURLs.length}">
+    <isinclude template="reporting/reportingUrls" />
+</isif>
+
+<!-- Search Results Banner -->
+<isif condition="${pdict.category}">
+    <div class="hero slant-down search-banner"
+        <!--- If no image, default is specified in search.scss > .search-banner --->
+        <isif condition="${pdict.categoryBannerUrl}">
+            style="background-image: url(${pdict.categoryBannerUrl})"
+        </isif>
+    >
+        <h1 class="header page-title">
+            <span id="algolia-category-title-placeholder"></span>
+        </h1>
+    </div>
+<iselse/>
+    <isslot id="search-result-banner-m" description="Banner for search results" context="global" />
+</isif>
+
+
+<div class="row">
+    <div class="tab-content col-12">
+        <div class="ais-InstantSearch tab-pane container active"  id="product-search-results" role="tabpanel" aria-labelledby="product-tab">
+            <div class="row grid-header">
+                    <div id="algolia-searchbox-placeholder" ></div>
+                    <div id="algolia-stats-placeholder" class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2"></div>
+                    <div id="algolia-sort-by-placeholder" class="col-6 col-sm-3 order-sm-1"></div>
+
+                    <div class="col-6 col-sm-3 text-right d-md-none order-sm-3">
+                        <button type="button" class="btn btn-primary filter-results col-12">
+                            <isprint value="${Resource.msg('button.filter','search',null)}" encoding="htmlcontent" />
+                        </button>
+                    </div>
+            </div>
+            <div class="row">
+                <div class="refinement-bar col-md-3">
+
+                    <div id="algolia-clear-refinements-placeholder"></div>
+
+                    <div class="refinements">
+                        <div id="algolia-categories-list-placeholder"></div>
+                        <div id="algolia-newarrivals-list-placeholder"></div>
+                        <div id="algolia-brand-list-placeholder"></div>
+                        <div id="algolia-size-list-placeholder"></div>
+                        <div id="algolia-color-list-placeholder"></div>
+                        <div id="algolia-price-filter-placeholder"></div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-md-9">
+                    <div id="algolia-hits-placeholder" class="row product-grid"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

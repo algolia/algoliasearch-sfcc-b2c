@@ -1,0 +1,11 @@
+node_modules/
+workspace/
+cartridges/app_storefront_core/cartridge/
+cartridges/app_storefront_controllers/cartridge/
+cartridges/app_storefront_base/cartridge/
+cartridges/modules
+cartridges/bm_app_storefront_base/cartridge/
+cartridges/int_algolia/cartridge/static/
+cartridges/int_algolia_controllers/cartridge/static/
+cartridges/int_algolia_sfra/cartridge/static/
+cartridges/sg_changes/cartridge/

@@ -1,0 +1,73 @@
+<!-- Start of Algolia dependencies -->
+<isset name="algoliaData" value="${require('*/cartridge/scripts/algolia/lib/algoliaData')}" scope="page" />
+
+<isif condition="${algoliaData.getPreference('Enable')}">
+    <script>
+        var algoliaData = {
+            "enable": ${algoliaData.getPreference('Enable')},
+            "applicationID": "${algoliaData.getPreference('ApplicationID')}",
+            "searchApiKey": "${algoliaData.getPreference('SearchApiKey')}",
+            "locale": "${request.getLocale()}",
+            "currencyCode": "${request.getSession().getCurrency().getCurrencyCode()}",
+            "currencySymbol": '<isprint value="${request.getSession().getCurrency().getSymbol()}" encoding="jshtml" />',
+            "productsIndex": "${algoliaData.calculateIndexId('products')}",
+            "categoriesIndex": "${algoliaData.calculateIndexId('categories')}",
+            "quickViewUrlBase": "${URLUtils.url('Product-ShowQuickView')}",
+            "strings": {
+                "moreResults": "${Resource.msg('button.more', 'algolia', null)}",
+                "noResults": "${Resource.msg('search.noResults','algolia',null)}",
+                "result": "${Resource.msg('search.result','algolia',null)}",
+                "results": "${Resource.msg('search.results','algolia',null)}",
+                "bestMetches": '<isprint value="${Resource.msg('search.bestMetches','algolia',null)}" encoding="jshtml" />',
+                "priceAsc": '<isprint value="${Resource.msg('search.priceAsc','algolia',null)}" encoding="jshtml" />',
+                "priceDesc": '<isprint value="${Resource.msg('search.priceDesc','algolia',null)}" encoding="jshtml" />',
+                "reset": '<isprint value="${Resource.msg('link.reset', 'algolia', null)}" encoding="jshtml" />',
+                "brandPanelTitle": '<isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="jshtml" />',
+                "sizePanelTitle": '<isprint value="${Resource.msg('link.size_chart','algolia',null)}" encoding="jshtml" />',
+                "colorPanelTitle": '<isprint value="${Resource.msg('label.tile.swatch.colors','algolia',null)}" encoding="jshtml" />',
+                "pricePanelTitle": '<isprint value="${Resource.msg('search.price','algolia',null)}" encoding="jshtml" />',
+                "categoryPanelTitle": '<isprint value="${Resource.msg('search.category','algolia',null)}" encoding="jshtml" />',
+                "products": '<isprint value="${Resource.msg('search.suggest.products','algolia',null)}" encoding="jshtml" />',
+                "categories": '<isprint value="${Resource.msg('search.suggest.categories','algolia',null)}" encoding="jshtml" />',
+                "priceFilter": {
+                    "separator": '<isprint value="${Resource.msg('search.pricefilter.separator','algolia',null)}" encoding="jshtml" />',
+                    "submit": '<isprint value="${Resource.msg('search.pricefilter.submit','algolia',null)}" encoding="jshtml" />',
+                },
+                "newArrivals": '<isprint value="${Resource.msg('panel.newarrivals','algolia',null)}" encoding="jshtml" />'
+            },
+            "noImages": {
+                "large": "${URLUtils.staticURL('/images/noimagelarge.png')}",
+                "medium": "${URLUtils.staticURL('/images/noimagemedium.png')}",
+                "small": "${URLUtils.staticURL('/images/noimagesmall.png')}"
+            }
+        }
+    </script>
+
+    <!-- Algolia Insights (Click Analytics & Personalization) -->
+    <script>
+      var ALGOLIA_INSIGHTS_SRC = "https://cdn.jsdelivr.net/npm/search-insights@1.3.1";
+
+      !function(e,a,t,n,s,i,c){e.AlgoliaAnalyticsObject=s,e[s]=e[s]||function(){
+      (e[s].queue=e[s].queue||[]).push(arguments)},i=a.createElement(t),c=a.getElementsByTagName(t)[0],
+      i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
+      }(window,document,"script",ALGOLIA_INSIGHTS_SRC,"aa");
+    </script>
+    <script src="${URLUtils.staticURL('/js/algolia/insights-config.js')}"></script>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=default%2CArray.prototype.find%2CArray.prototype.includes%2CPromise%2CObject.assign%2CObject.entries"></script>
+    <script src="https://cdn.jsdelivr.net/npm/algoliasearch@3/dist/algoliasearchLite.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hogan.js@1.0.2"></script>
+
+    <!-- Algolia Autocomplete.js -->
+    <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.min.js"></script>
+    <script src="${URLUtils.staticURL('/js/algolia/autocomplete-config.js')}"></script>
+
+    <!-- Algolia InstantSearch.js -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@7/themes/reset-min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4/dist/instantsearch.production.min.js"></script>
+    <script src="${URLUtils.staticURL('/js/algolia/instantsearch-config.js')}"></script>
+
+    <link rel="stylesheet" href="${URLUtils.staticURL('/css/algolia/index.css')}" />
+    <script src="${URLUtils.staticURL('/js/algolia/index.js')}"></script>
+</isif>
+<!-- End of Algolia dependencies -->

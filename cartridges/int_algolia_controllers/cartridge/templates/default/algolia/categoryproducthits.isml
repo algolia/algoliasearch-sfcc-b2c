@@ -1,0 +1,16 @@
+<iscontent type="text/html" charset="UTF-8" compact="true"/>
+<isdecorate template="search/pt_productsearchresult_content">
+	<div class="content-slot slot-grid-header">
+		<isif condition="${!empty(pdict.category)}">
+			<isslot id="cat-banner" context="category" description="Category Banner" context-object="${pdict.category}"/>
+		<iselse/>
+			<isslot id="search-result-banner" description="Promotional Search Result Banner" context="global"/>
+		</isif>
+	</div>
+
+	<div class="search-result-content">
+	<div id="algolia-stats-placeholder" class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2"></div>
+	<div id="algolia-hits-placeholder" class="search-result-items tiles-container clearfix "></div>
+	</div>
+
+</isdecorate>

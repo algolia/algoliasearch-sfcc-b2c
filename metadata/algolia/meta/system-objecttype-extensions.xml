@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    <type-extension type-id="SitePreferences">
+        <custom-attribute-definitions>
+            <attribute-definition attribute-id="Algolia_ApplicationID">
+                <display-name xml:lang="x-default">Application ID</display-name>
+                <description xml:lang="x-default">This is your unique application identifier. If you haven't already, please signup to Algolia and create an Algolia application on the Algolia Dashboard.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_CustomFields">
+                <display-name xml:lang="x-default">Custom Fields</display-name>
+                <description xml:lang="x-default">Any additional attributes of Product Object</description>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_Enable">
+                <display-name xml:lang="x-default">Enable Algolia</display-name>
+                <description xml:lang="x-default">Enable/disable all Algolia</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_HostBase">
+                <display-name xml:lang="x-default">Read Host Base Url</display-name>
+                <description xml:lang="x-default">Host for read operations</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_InStockThreshold">
+                <display-name xml:lang="x-default">InStock Threshold</display-name>
+                <description xml:lang="x-default">Stock Threshold</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_SearchApiKey">
+                <display-name xml:lang="x-default">Search API key</display-name>
+                <description xml:lang="x-default">This is the public API key which can be safely used in your frontend code.This key is usable for search queries and it's also able to list the indices you've got access to.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_AdminApiKey">
+                <display-name xml:lang="x-default">Admin API key</display-name>
+                <description xml:lang="x-default">This is the ADMIN API key. Please keep it secret and use it ONLY from your backend: this key is used to create, update and DELETE your indices. You can also use it to manage your API keys.</description>
+                <type>password</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_OCAPIClientID">
+                <display-name xml:lang="x-default">OCAPI client ID</display-name>
+                <description xml:lang="x-default">Authorization OCAPI client ID</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="Algolia_OCAPIClientPassword">
+                <display-name xml:lang="x-default">OCAPI client password</display-name>
+                <description xml:lang="x-default">Authorization OCAPI client password</description>
+                <type>password</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="Algolia">
+                <display-name xml:lang="x-default">Algolia</display-name>
+                <attribute attribute-id="Algolia_Enable"/>
+                <attribute attribute-id="Algolia_ApplicationID"/>
+                <attribute attribute-id="Algolia_SearchApiKey"/>
+                <attribute attribute-id="Algolia_AdminApiKey"/>
+                <attribute attribute-id="Algolia_HostBase"/>
+                <attribute attribute-id="Algolia_InStockThreshold"/>
+                <attribute attribute-id="Algolia_CustomFields"/>
+                <attribute attribute-id="Algolia_OCAPIClientID"/>
+                <attribute attribute-id="Algolia_OCAPIClientPassword"/>
+            </attribute-group>
+        </group-definitions>
+    </type-extension>
+
+</metadata>
