@@ -44,7 +44,9 @@
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.applicationid', 'algolia', null)}" encoding="jshtml" />
                    </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('ApplicationID')}" id="ApplicationID" name="ApplicationID" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="text" value="${pdict.algoliaData.getPreference('ApplicationID') ? pdict.algoliaData.getPreference('ApplicationID') : ''}" id="ApplicationID" name="ApplicationID" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
@@ -56,7 +58,9 @@
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.adminkey', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey')}" id="AdminApiKey" name="AdminApiKey" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey') ? pdict.algoliaData.getPreference('AdminApiKey') : ''}" id="AdminApiKey" name="AdminApiKey" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
