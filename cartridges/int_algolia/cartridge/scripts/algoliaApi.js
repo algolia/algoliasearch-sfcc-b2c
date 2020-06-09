@@ -4,6 +4,7 @@ var serviceHelper = require('*/cartridge/scripts/service/serviceHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var serviceDefinition = require('*/cartridge/scripts/service/serviceDefinition');
+var encryptHelper = require('*/cartridge/scripts/algolia/helper/encryptHelper');
 
 var Status = require('dw/system/Status');
 var tenantToken = null;
@@ -38,14 +39,24 @@ function createHandshakeRequest() {
         site_name: currentSite.getName(),
         locales: currentSite.getAllowedLocales().toArray(),
         currencies: currentSite.getAllowedCurrencies().toArray(),
-        client_id: algoliaData.getPreference('OCAPIClientID'),
-        client_password: algoliaData.getPreference('OCAPIClientPassword'),
         index_prefix: algoliaData.getInstanceHostName() + '__' + currentSite.getID(),
         fields: {
             product: algoliaProductConfig.defaultAttributes.concat(algoliaData.getSetOfArray('CustomFields')),
             category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subCategories', 'url']
         }
     };
+
+    var ocapiEncrypted = encryptHelper.encryptOcapiCredentials(
+        algoliaData.getPreference('OCAPIClientID'),
+        algoliaData.getPreference('OCAPIClientPassword'),
+        algoliaData.getPreference('AdminApiKey'),
+        algoliaData.getPreference('SearchApiKey')
+    );
+
+    if (ocapiEncrypted) {
+        metadata.client_id = ocapiEncrypted.clientId;
+        metadata.client_password = ocapiEncrypted.clientPassword;
+    }
 
     return {
         config: config,
