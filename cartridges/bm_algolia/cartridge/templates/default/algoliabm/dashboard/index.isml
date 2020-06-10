@@ -52,7 +52,9 @@
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey')}" id="SearchApiKey" name="SearchApiKey" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
@@ -66,7 +68,9 @@
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.baseurl', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('HostBase')}" id="HostBase" name="HostBase" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="text" value="${pdict.algoliaData.getPreference('HostBase') ? pdict.algoliaData.getPreference('HostBase') : ''}" id="HostBase" name="HostBase" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
@@ -78,19 +82,25 @@
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.custom', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getSetOfStrings('CustomFields')}" id="CustomFields" name="CustomFields" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="text" value="${pdict.algoliaData.getSetOfStrings('CustomFields') ? pdict.algoliaData.getSetOfStrings('CustomFields') : ''}" id="CustomFields" name="CustomFields" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.clientid', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientID')}" id="OCAPIClientID" name="OCAPIClientID" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientID') ? pdict.algoliaData.getPreference('OCAPIClientID') : ''}" id="OCAPIClientID" name="OCAPIClientID" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.clientpassword', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientPassword')}" id="OCAPIClientPassword" name="OCAPIClientPassword" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientPassword') ? pdict.algoliaData.getPreference('OCAPIClientPassword') : ''}" id="OCAPIClientPassword" name="OCAPIClientPassword" />
+                    </td>
                 </tr>
                 <tr>
                     <td class="w e s buttonspacing" align="right" colspan="2">
