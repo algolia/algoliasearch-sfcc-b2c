@@ -1,0 +1,132 @@
+<div class="algolia-bm-log-category">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td class="table_header w s tab" nowrap="nowrap" width="100%" colspan="1">
+                    <isprint value="${Resource.msg('algolia.label.category.title.processed', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_header w e s center">
+                    <isprint value="${Resource.msg('algolia.label.date', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_header e s center">
+                    <isprint value="${Resource.msg('algolia.label.result', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+            </tr>
+            <tr>
+                <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">
+                    <isprint value="${Resource.msg('algolia.label.lastdate', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${logData.category.processedDate}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail e s center">
+                    <isif condition="${logData.category.processedError}">
+                        <isprint value="${Resource.msg('algolia.label.error', 'algolia', null)}" encoding="htmlcontent" />
+                    <iselse/>
+                        <isprint value="${Resource.msg('algolia.label.success', 'algolia', null)}" encoding="htmlcontent" />
+                    </isif>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <isif condition="${logData.category.processedError}">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+                <tr>
+                    <td class="table_detail w s" nowrap="nowrap" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.errmessage', 'algolia', null)}" encoding="htmlcontent" />
+                    </td>
+                    <td class="table_detail w e s" width="100%">
+                        <isprint value="${logData.category.processedErrorMessage}" encoding="htmlcontent" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </isif>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${Resource.msg('algolia.label.category.processed', 'algolia', null)}" encoding="htmlcontent" />
+               </td>
+                <td class="table_detail e s"  width="100%">
+                    <isprint value="${logData.category.processedRecords + ' records'}" encoding="htmlcontent" />
+                </td>
+            </tr>
+            <tr>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${Resource.msg('algolia.label.category.toupdate', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail e s"  width="100%">
+                    <isprint value="${logData.category.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="algolia-bm-log-category-send">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td class="table_header w s tab" nowrap="nowrap" width="100%" colspan="1">
+                    <isprint value="${Resource.msg('algolia.label.category.title.sent', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_header w e s center">
+                    <isprint value="${Resource.msg('algolia.label.date', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_header e s center">
+                    <isprint value="${Resource.msg('algolia.label.result', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+            </tr>
+            <tr>
+                <td class="table_detail w s" width="100%" nowrap="nowrap" colspan="1">
+                    <isprint value="${Resource.msg('algolia.label.lastsentdate', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${logData.category.sendDate}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail e s center">
+                    <isif condition="${logData.category.sendError}">
+                        <isprint value="${Resource.msg('algolia.label.error', 'algolia', null)}" encoding="htmlcontent" />
+                    <iselse/>
+                        <isprint value="${Resource.msg('algolia.label.success', 'algolia', null)}" encoding="htmlcontent" />
+                    </isif>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <isif condition="${logData.category.sendError}">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tbody>
+                <tr>
+                    <td class="table_detail w s" nowrap="nowrap" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.errmessage', 'algolia', null)}" encoding="htmlcontent" />
+                    </td>
+                    <td class="table_detail w e s" width="100%">
+                        <isprint value="${logData.category.sendErrorMessage}" encoding="htmlcontent" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </isif>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${Resource.msg('algolia.label.sentsuccessfully', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail e s"  width="100%">
+                    <isprint value="${logData.category.sendedChunk + ' chunk (' + logData.category.sendedRecords + ' records)'}" encoding="htmlcontent" />
+                </td>
+            </tr>
+            <tr>
+                <td class="table_detail w e s" nowrap="nowrap">
+                    <isprint value="${Resource.msg('algolia.label.sentfailed', 'algolia', null)}" encoding="htmlcontent" />
+                </td>
+                <td class="table_detail e s"  width="100%">
+                    <isprint value="${logData.category.failedChunk + ' chunk (' + logData.category.failedRecords + ' records)'}" encoding="htmlcontent" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

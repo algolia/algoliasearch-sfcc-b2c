@@ -1,0 +1,15 @@
+doc/
+./*.js
+bin/
+workspace/
+cartridges/app_storefront_core/cartridge/static/
+cartridges/app_storefront_core/cartridge/js/
+cartridges/app_storefront_core/cartridge/scripts/
+cartridges/app_storefront_controllers/cartridge/scripts/
+cartridges/app_storefront_controllers/cartridge/controllers/
+cartridges/bm_app_storefront_base/cartridge/
+cartridges/app_storefront_base/cartridge/
+cartridges/modules
+cartridges/int_algolia_sfra/cartridge/static/
+cartridges/int_algolia_controllers/cartridge/static/
+cartridges/algolia_sg_changes/cartridge/

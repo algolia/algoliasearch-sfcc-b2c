@@ -1,0 +1,13 @@
+gulpfile.js
+package-lock.json
+node_modules/*
+dw.json
+workspace/
+cartridges/app_storefront_controllers/
+cartridges/app_storefront_core/
+cartridges/app_storefront_base/
+cartridges/modules/
+cartridges/bm_app_storefront_base/
+dw.json
+.vscode/
+bin/*
