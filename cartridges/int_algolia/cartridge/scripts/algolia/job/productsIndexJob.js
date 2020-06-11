@@ -130,6 +130,8 @@ function runProductExport(parameters) {
         jobHelper.logFileError(updateFile.fullPath, 'Error open Delta file to write', error);
         productLogData.processedErrorMessage = 'Error open Delta file to write';
         algoliaData.setLogData('LastProductSyncLog', productLogData);
+        snapshotFileWriter.close();
+        snapshotXmlWriter.close();
         return new Status(Status.ERROR);
     }
 
@@ -144,6 +146,10 @@ function runProductExport(parameters) {
                 jobHelper.logFileError(snapshotFile.fullPath, 'Error remove file', error);
                 productLogData.processedErrorMessage = 'Error remove file';
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
+                snapshotFileWriter.close();
+                snapshotXmlWriter.close();
+                updateFileWriter.close();
+                updateXmlWriter.close();
                 return new Status(Status.ERROR);
             }
         } else {
@@ -151,6 +157,10 @@ function runProductExport(parameters) {
             if (empty(snapshotReadIterator)) {
                 productLogData.processedErrorMessage = 'Error open Snapshot file or read';
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
+                snapshotFileWriter.close();
+                snapshotXmlWriter.close();
+                updateFileWriter.close();
+                updateXmlWriter.close();
                 return new Status(Status.ERROR);
             }
         }
@@ -172,6 +182,14 @@ function runProductExport(parameters) {
                 jobHelper.logFileError(newSnapshotFile.fullPath, 'Error write to file', error);
                 productLogData.processedErrorMessage = 'Error write to file';
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
+                snapshotFileWriter.close();
+                snapshotXmlWriter.close();
+                updateFileWriter.close();
+                updateXmlWriter.close();
+                productsIterator.close();
+                if (snapshotReadIterator) {
+                    snapshotReadIterator.close();
+                }
                 return new Status(Status.ERROR);
             }
             snapshotToUpdate = false;
@@ -241,6 +259,14 @@ function runProductExport(parameters) {
                 jobHelper.logFileError(updateFile.fullPath, 'Error write to file', error);
                 productLogData.processedErrorMessage = 'Error write to file';
                 algoliaData.setLogData('LastProductSyncLog', productLogData);
+                snapshotFileWriter.close();
+                snapshotXmlWriter.close();
+                updateFileWriter.close();
+                updateXmlWriter.close();
+                productsIterator.close();
+                if (snapshotReadIterator) {
+                    snapshotReadIterator.close();
+                }
                 return new Status(Status.ERROR);
             }
             counterProductsForUpdate += 1;
