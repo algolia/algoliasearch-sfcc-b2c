@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns="http://www.demandware.com/xml/impex/services/2014-09-26">
     <service-credential service-credential-id="algolia.http.api.cred">
-        <url>https://shopify-stream-testing.algolia.com</url>
+        <url>https://sfcc-stream.algolia.com</url>
         <user-id>sfcc</user-id>
         <password encrypted="true" encryption-type="common.export">IMilciOGVlkGS2AOFhT2GBpxztf8V4vjnAeys/Yn/54guN5EpLuYQqY7JrF4haB4CpaXaRvjN/71wZXyKzIETg==</password>
     </service-credential>
