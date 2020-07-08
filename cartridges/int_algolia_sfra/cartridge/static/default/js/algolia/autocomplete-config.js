@@ -4,7 +4,7 @@ function enableAutocomplete(config) {
     var productSuggestionTemplate = Hogan.compile(''
         + '<div class="text-truncate text-nowrap">'
         + '   <img class="swatch-circle hidden-xs-down" src="{{firstImage.dis_base_link}}" />'
-        + '   <a href="{{url}}">{{&_highlightResult.name.value}}</a>`'
+        + '   <a href="{{url}}">{{&_highlightResult.name.value}}</a>'
         + '</div>'
     );
 
