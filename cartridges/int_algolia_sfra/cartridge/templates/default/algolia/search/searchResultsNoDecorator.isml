@@ -35,6 +35,18 @@
             </div>
             <div class="row">
                 <div class="refinement-bar col-md-3">
+                
+                    <!--- Close button --->
+                    <div class="filter-header">
+                        <div class="header-bar d-md-none clearfix">
+                            <div class="pull-left d-md-none result-count">
+                            </div>
+                            <button class="pull-right close pr-3">
+                                <span>${Resource.msg('button.close', 'search', null)}</span>
+                                <i class="fa fa-close"></i>
+                            </button>
+                        </div>
+                    </div>
 
                     <div id="algolia-clear-refinements-placeholder"></div>
 
