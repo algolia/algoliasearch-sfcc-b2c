@@ -20,10 +20,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var searchClient = algoliasearch(algoliaData.applicationID, algoliaData.searchApiKey);
 
-    // FIXME: enable insights everywhere
     enableInsights(algoliaData.applicationID, algoliaData.searchApiKey);
 
-    // FIXME: enable autocomplete everywhere
     enableAutocomplete({
         searchClient: searchClient,
         productsIndex: productsIndex,
