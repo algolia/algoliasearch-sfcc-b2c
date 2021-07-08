@@ -43,7 +43,17 @@
 <iscomment>
     hook for Marketing Cloud connector & other integration which need to inject
     logic or markup into the page header
-    IMPORTANT: Note that this hook will be called to cached as well as uncached pages
-               which means you need to put privacy information into another remote include
+        IMPORTANT: Note that this hook will be called to cached as well as uncached pages
+        Refrain from calling processing intensive logic in here 
+        do not include shopper specific information.
 </iscomment>
-${dw.system.HookMgr.callHook('app.template.htmlHead', 'htmlHead') || ''}
+${dw.system.HookMgr.callHook('app.template.htmlHead', 'htmlHead', pdict) || ''}
+<iscomment>
+    Module to overlay skinning css
+    IMPORTANT: Note that this module will be called to cached as well as uncached pages
+        Refrain from calling processing intensive logic in here
+        do not include shopper specific information.
+        This hook will be executed with encoding disabled. Please sanitize output in the hook.
+</iscomment>
+<isprint value="${require('*/cartridge/scripts/theming/skin.js').renderSkin()}" encoding="off">
+<link rel="stylesheet" href="${URLUtils.staticURL('/css/skin/skin.css')}" />

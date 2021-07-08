@@ -1,6 +1,6 @@
 {
     "name": "int_algolia_sfra",
-    "version": "20.1.0",
+    "version": "21.1.0",
     "description": "Algolia SFRA Link Cartridge",
     "scripts": {
         "test": "sgmf-scripts --test test/unit/**/*.js",
@@ -20,6 +20,7 @@
         "type": "git",
         "url": "git+ssh://git@github.com:SalesforceCommerceCloud/link_algolia.git"
     },
+    "license": "ISC",
     "devDependencies": {
         "@babel/core": "^7.6.3",
         "@babel/plugin-proposal-object-rest-spread": "^7.6.2",
