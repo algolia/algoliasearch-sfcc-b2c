@@ -8,7 +8,6 @@ var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
 var CATEGORIES_SEPARATOR = ' > ';
 
-
 /*
  * Function for getting preferences for Algolia
  *

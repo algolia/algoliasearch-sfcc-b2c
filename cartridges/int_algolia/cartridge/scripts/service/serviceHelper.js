@@ -92,7 +92,6 @@ function isResponseJSON(service) {
     return contentTypeHeader && contentTypeHeader.split(';')[0].toLowerCase() === 'application/json';
 }
 
-
 /**
  *
  * @param {string} title - Name of the action or method to describe the action performed
