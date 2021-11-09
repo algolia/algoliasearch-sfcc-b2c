@@ -59,7 +59,11 @@
     <script src="https://cdn.jsdelivr.net/npm/hogan.js@1.0.2"></script>
 
     <!-- Algolia Autocomplete.js -->
-    <script src="https://cdn.jsdelivr.net/autocomplete.js/0/autocomplete.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-theme-classic@1" />
+    <script src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-js@1"></script>
+    <script>
+      const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
+    </script>
     <script src="${URLUtils.staticURL('/js/algolia/autocomplete-config.js')}"></script>
 
     <!-- Algolia InstantSearch.js -->
