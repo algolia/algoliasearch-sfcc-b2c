@@ -64,6 +64,10 @@
     <script>
       const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
     </script>
+    <script type="module">
+        import { html } from 'https://unpkg.com/htm/preact/standalone.module.js'
+        window.html = html;
+    </script>
     <script src="${URLUtils.staticURL('/js/algolia/autocomplete-config.js')}"></script>
 
     <!-- Algolia InstantSearch.js -->

@@ -1,4 +1,4 @@
-/* global autocomplete, getAlgoliaResults  */
+/* global autocomplete, getAlgoliaResults, html  */
 
 function enableAutocomplete(config) {
     autocomplete({
@@ -6,7 +6,6 @@ function enableAutocomplete(config) {
         classNames: {
             panel: "algolia-autocomplete suggestions p-2",
         },
-        debug: true,
         getSources({ query }) {
             return [
                 {
@@ -28,14 +27,12 @@ function enableAutocomplete(config) {
                         });
                     },
                     templates: {
-                        header({ createElement }) {
-                            return createElement("div", { class: "header row justify-content-end" },
-                                createElement("div", { class: "col-xs-12 col-sm-10" },
-                                    algoliaData.strings.products
-                                )
-                            );
+                        header() {
+                            return html`<div class="header row justify-content-end">
+                              <div class="col-xs-12 col-sm-10">${algoliaData.strings.products}</div>
+                            </div>`;
                         },
-                        item({ item, createElement, components }) {
+                        item({ item, components }) {
                             if (typeof(item.image_groups) === "undefined"){
                                 item.firstImage = algoliaData.noImages.small;
                             } else {
@@ -44,10 +41,10 @@ function enableAutocomplete(config) {
                                 });
                                 item.firstImage = smallImageGroup.images[0];
                             }
-                            return createElement("div", { class: "text-truncate text-nowrap" },
-                                createElement("img", { class: "swatch-circle hidden-xs-down", src: item.firstImage.dis_base_link }),
-                                createElement("a", { href: item.url }, components.Highlight({ hit: item, attribute: "name", tagName: "em" }))
-                            );
+                            return html`<div class="text-truncate text-nowrap">
+                              <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
+                              <a href=${item.url}>${components.Highlight({ hit: item, attribute: "name", tagName:"em" })}</a>
+                            </div>`;
                         },
                     },
                 },
@@ -70,24 +67,22 @@ function enableAutocomplete(config) {
                         });
                     },
                     templates: {
-                        header({ createElement }) {
-                            return createElement("div", { class: "header row justify-content-end" },
-                                createElement("div", { class: "col-xs-12 col-sm-10" },
-                                    algoliaData.strings.categories
-                                )
-                            );
+                        header() {
+                            return html`<div class="header row justify-content-end">
+                              <div class="col-xs-12 col-sm-10">${algoliaData.strings.products}</div>
+                            </div>`;
                         },
-                        item({ item, createElement, components }) {
-                            return createElement("div", { class: "text-truncate text-nowrap" },
-                                createElement("img", { class: "swatch-circle hidden-xs-down", src: item.image }),
-                                createElement("a", { href: item.url }, components.Highlight({ hit: item, attribute: "name", tagName: "em" }))
-                            );
+                        item({ item, components }) {
+                            return html`<div class="text-truncate text-nowrap">
+                              <img class="swatch-circle hidden-xs-down" src=${item.image}></img>
+                              <a href=${item.url}>${components.Highlight({ hit: item, attribute: "name", tagName:"em" })}</a>
+                            </div>`;
                         },
                     },
                 },
             ];
         },
-    })
+    });
 
     if (document.querySelector('#aa-search-input')) {
         document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
