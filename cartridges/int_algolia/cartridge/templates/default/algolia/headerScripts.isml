@@ -14,6 +14,7 @@
             "categoriesIndex": "${algoliaData.calculateIndexId('categories')}",
             "quickViewUrlBase": "${URLUtils.url('Product-ShowQuickView')}",
             "strings": {
+                "placeholder": "${Resource.msg('label.header.searchwatermark', 'common', null)}",
                 "moreResults": "${Resource.msg('button.more', 'algolia', null)}",
                 "noResults": "${Resource.msg('search.noResults','algolia',null)}",
                 "result": "${Resource.msg('search.result','algolia',null)}",

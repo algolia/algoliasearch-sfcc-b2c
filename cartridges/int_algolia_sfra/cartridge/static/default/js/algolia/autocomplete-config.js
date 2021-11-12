@@ -1,4 +1,4 @@
-/* global autocomplete, getAlgoliaResults, html  */
+/* global autocomplete, getAlgoliaResults, html, algoliaData  */
 
 function enableAutocomplete(config) {
     autocomplete({
@@ -6,6 +6,7 @@ function enableAutocomplete(config) {
         classNames: {
             panel: "algolia-autocomplete suggestions p-2",
         },
+        placeholder: algoliaData.strings.placeholder,
         getSources({ query }) {
             return [
                 {

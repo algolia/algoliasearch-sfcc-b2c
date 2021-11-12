@@ -1,4 +1,4 @@
-/* global autocomplete, getAlgoliaResults  */
+/* global autocomplete, getAlgoliaResults, algoliaData */
 
 function enableAutocomplete(config) {
     autocomplete({
@@ -6,6 +6,7 @@ function enableAutocomplete(config) {
         classNames: {
             panel: "search-suggestion-wrapper full",
         },
+        placeholder: algoliaData.strings.placeholder,
         getSources({ query }) {
             return [
                 {
