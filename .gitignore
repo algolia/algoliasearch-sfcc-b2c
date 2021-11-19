@@ -1,5 +1,4 @@
 gulpfile.js
-package-lock.json
 node_modules/*
 dw.json
 workspace/
