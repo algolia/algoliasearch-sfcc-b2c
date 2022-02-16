@@ -1,71 +1,89 @@
-/* global autocomplete, Hogan  */
+/* global autocomplete, getAlgoliaResults, html, algoliaData  */
 
 function enableAutocomplete(config) {
-    var productSuggestionTemplate = Hogan.compile(''
-        + '<div class="text-truncate text-nowrap">'
-        + '   <img class="swatch-circle hidden-xs-down" src="{{firstImage.dis_base_link}}" />'
-        + '   <a href="{{url}}">{{&_highlightResult.name.value}}</a>'
-        + '</div>'
-    );
-
-    var categorySuggestionTemplate = Hogan.compile(''
-        + '<div class="text-truncate text-nowrap">'
-        + '  <img class="swatch-circle hidden-xs-down" src="{{image}}" />'
-        + '  <a href="{{url}}">{{&_highlightResult.name.value}}</a>'
-        + '</div>'
-    );
-
-
-    autocomplete('#aa-search-input', {
-        cssClasses: {
-            dropdownMenu: "dropdownMenu suggestions p-2"
-        }
-    }, [
-        {
-            source: autocomplete.sources.hits(config.searchClient.initIndex(config.productsIndex), {
-                hitsPerPage: 3,
-                distinct: true,
-                clickAnalytics: true
-            }),
-            displayKey: 'products',
-            name: 'products',
-            templates: {
-                header: ''
-                    + '<div class="header row justify-content-end">'
-                    + '  <div class="col-xs-12 col-sm-10">' + algoliaData.strings.products + '</div>'
-                    + '</div>',
-                suggestion: function(product) {
-                    if (typeof(product.image_groups) === "undefined"){
-                        product.firstImage = algoliaData.noImages.small;
-                    } else {
-                        var smallImageGroup = product.image_groups.find(function (imageGroup) {
-                            return imageGroup.view_type === "small"
-                        });
-                        product.firstImage = smallImageGroup.images[0];
-                    }
-                    return productSuggestionTemplate.render(product)
-                }
-            }
+    autocomplete({
+        container: '#aa-search-input',
+        classNames: {
+            panel: "algolia-autocomplete suggestions p-2",
         },
-        {
-            source: autocomplete.sources.hits(config.searchClient.initIndex(config.categoriesIndex), {
-                hitsPerPage: 3,
-                distinct: true,
-                clickAnalytics: true
-            }),
-            displayKey: 'categories',
-            name: 'categories',
-            templates: {
-                header: ''
-                    + '<div class="header row justify-content-end">'
-                    + '  <div class="col-xs-12 col-sm-10">' + algoliaData.strings.categories + '</div>'
-                    + '</div>',
-                suggestion: function(category) {
-                    return categorySuggestionTemplate.render(category)
-                }
-            }
-        }
-    ]);
+        placeholder: algoliaData.strings.placeholder,
+        getSources({ query }) {
+            return [
+                {
+                    sourceId: 'products',
+                    getItems({ query }) {
+                        return getAlgoliaResults({
+                            searchClient: config.searchClient,
+                            queries: [
+                                {
+                                    indexName: config.productsIndex,
+                                    query,
+                                    params: {
+                                        hitsPerPage: 3,
+                                        distinct: true,
+                                        clickAnalytics: true,
+                                    },
+                                },
+                            ],
+                        });
+                    },
+                    templates: {
+                        header() {
+                            return html`<div class="header row justify-content-end">
+                              <div class="col-xs-12 col-sm-10">${algoliaData.strings.products}</div>
+                            </div>`;
+                        },
+                        item({ item, components }) {
+                            if (typeof(item.image_groups) === "undefined"){
+                                item.firstImage = algoliaData.noImages.small;
+                            } else {
+                                var smallImageGroup = item.image_groups.find(function (imageGroup) {
+                                    return imageGroup.view_type === "small"
+                                });
+                                item.firstImage = smallImageGroup.images[0];
+                            }
+                            return html`<div class="text-truncate text-nowrap">
+                              <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
+                              <a href=${item.url}>${components.Highlight({ hit: item, attribute: "name", tagName:"em" })}</a>
+                            </div>`;
+                        },
+                    },
+                },
+                {
+                    sourceId: 'categories',
+                    getItems({ query }) {
+                        return getAlgoliaResults({
+                            searchClient: config.searchClient,
+                            queries: [
+                                {
+                                    indexName: config.categoriesIndex,
+                                    query,
+                                    params: {
+                                        hitsPerPage: 3,
+                                        distinct: true,
+                                        clickAnalytics: true,
+                                    },
+                                },
+                            ],
+                        });
+                    },
+                    templates: {
+                        header() {
+                            return html`<div class="header row justify-content-end">
+                              <div class="col-xs-12 col-sm-10">${algoliaData.strings.products}</div>
+                            </div>`;
+                        },
+                        item({ item, components }) {
+                            return html`<div class="text-truncate text-nowrap">
+                              <img class="swatch-circle hidden-xs-down" src=${item.image}></img>
+                              <a href=${item.url}>${components.Highlight({ hit: item, attribute: "name", tagName:"em" })}</a>
+                            </div>`;
+                        },
+                    },
+                },
+            ];
+        },
+    });
 
     if (document.querySelector('#aa-search-input')) {
         document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
