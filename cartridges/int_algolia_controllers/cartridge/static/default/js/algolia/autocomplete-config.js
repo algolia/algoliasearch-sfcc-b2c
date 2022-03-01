@@ -1,81 +1,126 @@
-/* global autocomplete, Hogan  */
+/* global autocomplete, getAlgoliaResults, algoliaData */
 
 function enableAutocomplete(config) {
-    var productSuggestionTemplate = Hogan.compile(''
-        + '<div class="product-suggestion">'
-        + '   <a class="product-link" href="{{url}}">'
-        + '       <div class="product-image">'
-        + '           <img src="{{firstImage.dis_base_link}}">'
-        + '       </div>'
-        + '       <div class="product-details">'
-        + '           <div class="product-name">{{&_highlightResult.name.value}}</div>'
-        + '       </div>'
-        + '   </a>'
-        + '</div>'
-    );
+    const inputElements = document.querySelectorAll('#aa-search-input');
 
-    var categorySuggestionTemplate = Hogan.compile(''
-        + '<a class="hit" href="{{url}}">{{&_highlightResult.name.value}}</a>'
-    );
+    inputElements.forEach(function(inputElement) {
+        autocomplete({
+            container: inputElement,
+            classNames: {
+                panel: "search-suggestion-wrapper full",
+            },
+            placeholder: algoliaData.strings.placeholder,
+            getSources({ query }) {
+                return [
+                    {
+                        sourceId: 'products',
+                        getItems({ query }) {
+                            return getAlgoliaResults({
+                                searchClient: config.searchClient,
+                                queries: [
+                                    {
+                                        indexName: config.productsIndex,
+                                        query,
+                                        params: {
+                                            hitsPerPage: 3,
+                                            distinct: true,
+                                            clickAnalytics: true,
+                                        },
+                                    },
+                                ],
+                            });
+                        },
+                        templates: {
+                            header({ createElement }) {
+                                return createElement("div", { class: "header row justify-content-end" },
+                                    createElement("div", { class: "col-xs-12 col-sm-10" },
+                                        algoliaData.strings.products
+                                    )
+                                );
+                            },
+                            item({
+                                     item,
+                                     createElement,
+                                     components
+                                 }) {
+                                if (typeof (item.image_groups) === "undefined") {
+                                    item.firstImage = algoliaData.noImages.small;
+                                } else {
+                                    var smallImageGroup = item.image_groups.find(function (imageGroup) {
+                                        return imageGroup.view_type === "small"
+                                    });
+                                    item.firstImage = smallImageGroup.images[0];
+                                }
+                                return createElement("div", { class: "product-suggestion" },
+                                    createElement("a", {
+                                            class: "product-link",
+                                            href: item.url
+                                        },
+                                        createElement("div", { class: "product-image" },
+                                            createElement("img", { src: item.firstImage.dis_base_link })
+                                        ),
+                                        createElement("div", { class: "product-details" },
+                                            createElement("div", { class: "product-name" }, components.Highlight({
+                                                hit: item,
+                                                attribute: "name",
+                                                tagName: "em"
+                                            }))
+                                        )
+                                    )
+                                );
+                            },
+                        },
+                    },
+                    {
+                        sourceId: 'categories',
+                        getItems({ query }) {
+                            return getAlgoliaResults({
+                                searchClient: config.searchClient,
+                                queries: [
+                                    {
+                                        indexName: config.categoriesIndex,
+                                        query,
+                                        params: {
+                                            hitsPerPage: 3,
+                                            distinct: true,
+                                            clickAnalytics: true,
+                                        },
+                                    },
+                                ],
+                            });
+                        },
+                        templates: {
+                            header({ createElement }) {
+                                return createElement("div", { class: "header row justify-content-end" },
+                                    createElement("div", { class: "col-xs-12 col-sm-10" },
+                                        algoliaData.strings.categories
+                                    )
+                                );
+                            },
+                            item({
+                                     item,
+                                     createElement,
+                                     components
+                                 }) {
+                                return createElement("a", { href: item.url },
+                                    components.Highlight({
+                                        hit: item,
+                                        attribute: "name",
+                                        tagName: "em"
+                                    })
+                                );
+                            },
+                        },
+                    },
+                ];
+            },
+        });
 
-
-    autocomplete('#aa-search-input', {
-        cssClasses: {
-            dropdownMenu: "search-suggestion-wrapper full"
-        }
-    }, [
-        {
-            source: autocomplete.sources.hits(config.searchClient.initIndex(config.productsIndex), {
-                hitsPerPage: 3,
-                distinct: true,
-                clickAnalytics: true
-            }),
-            displayKey: 'products',
-            name: 'products',
-            templates: {
-                header: ''
-                    + '<div class="header row justify-content-end">'
-                    + '  <div class="col-xs-12 col-sm-10">' + algoliaData.strings.products + '</div>'
-                    + '</div>',
-                suggestion: function(product) {
-                    if (typeof(product.image_groups) === "undefined"){
-                        product.firstImage = algoliaData.noImages.small;
-                    } else {
-                        var smallImageGroup = product.image_groups.find(function (imageGroup) {
-                            return imageGroup.view_type === "small"
-                        });
-                        product.firstImage = smallImageGroup.images[0];
-                    }
-                    return productSuggestionTemplate.render(product)
-                }
-            }
-        },
-        {
-            source: autocomplete.sources.hits(config.searchClient.initIndex(config.categoriesIndex), {
-                hitsPerPage: 3,
-                distinct: true,
-                clickAnalytics: true
-            }),
-            displayKey: 'categories',
-            name: 'categories',
-            templates: {
-                header: ''
-                    + '<div class="header row justify-content-end">'
-                    + '  <div class="col-xs-12 col-sm-10">' + algoliaData.strings.categories + '</div>'
-                    + '</div>',
-                suggestion: function(category) {
-                    return categorySuggestionTemplate.render(category)
-                }
-            }
-        }
-    ]);
-
-    if (document.querySelector('#aa-search-input')) {
-        document.querySelector('#aa-search-input').addEventListener('keypress', function(event){
+        inputElement.addEventListener('keypress', function (event) {
             if (event.key === 'Enter') {
                 var urlParams = config.searchPageRoot.indexOf("?") > -1 ? '&q=' + event.target.value : '?q=' + event.target.value;
                 window.location.href = config.searchPageRoot + urlParams;
             }
         });
-    }
+    });
 }

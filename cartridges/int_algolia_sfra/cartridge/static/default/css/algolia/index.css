@@ -1,8 +1,8 @@
-.algolia-autocomplete {
-    width: 100%;
-}
-
-.algolia-autocomplete .suggestions em {
+.algolia-autocomplete.suggestions em {
     background-color: yellow;
     font-style: normal;
+}
+
+.aa-Autocomplete label {
+    margin-bottom: 0;
 }

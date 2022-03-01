@@ -8,13 +8,7 @@
         data-category-display-name-path-separator="${pdict.categoryDisplayNamePathSeparator}"
         data-q="${pdict.q}"
         data-search-page-root="${URLUtils.http('Search-Show')}"></div>
-    <input
-        type="search"
-        id="aa-search-input"
-        class="aa-input-search form-control"
-        placeholder="${Resource.msg('simplesearch.searchtext', 'search', null)}"
-        name="search"
-        autocomplete="off" />
+    <div id="aa-search-input"></div>
 </div>
 <iselse/>
 <form role="search" action="${URLUtils.url('Search-Show')}" method="get" name="simpleSearch">
