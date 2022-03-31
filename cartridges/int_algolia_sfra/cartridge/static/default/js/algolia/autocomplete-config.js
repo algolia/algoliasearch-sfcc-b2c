@@ -7,7 +7,8 @@ function enableAutocomplete(config) {
         autocomplete({
             container: inputElement,
             classNames: {
-                panel: "algolia-autocomplete suggestions p-2",
+                // d-block permits to force "display: block", because SFCC's main.js script sets our panel to "display: none" when clicking again in the input
+                panel: "algolia-autocomplete suggestions p-2 d-block",
             },
             placeholder: algoliaData.strings.placeholder,
             getSources({ query }) {
@@ -84,7 +85,7 @@ function enableAutocomplete(config) {
                             header() {
                                 return html`
                                   <div class="header row justify-content-end">
-                                    <div class="col-xs-12 col-sm-10">${algoliaData.strings.products}</div>
+                                    <div class="col-xs-12 col-sm-10">${algoliaData.strings.categories}</div>
                                   </div>`;
                             },
                             item({
