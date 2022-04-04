@@ -3,6 +3,10 @@
     font-style: normal;
 }
 
+.aa-Autocomplete {
+    margin-top: -8px;
+}
+
 .aa-Autocomplete label {
     margin-bottom: 0;
 }
