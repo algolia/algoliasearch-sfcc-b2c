@@ -271,10 +271,11 @@ function enableInstantSearch(config) {
                         item.__indexName = config.productsIndex;
     
                         // url with queryID (used for analytics)
-                        item.url = item.url
-                            + '&queryID=' + item.__queryID
-                            + '&objectID=' + item.objectID
-                            + '&indexName=' + item.__indexName;
+                        var url = new URL(item.url);
+                        url.searchParams.append('queryID', item.__queryID);
+                        url.searchParams.append('objectID', item.objectID);
+                        url.searchParams.append('indexName', item.__indexName);
+                        item.url = url.href;
     
                         return item;
                     });
