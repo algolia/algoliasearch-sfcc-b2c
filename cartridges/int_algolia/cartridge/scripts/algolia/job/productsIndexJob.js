@@ -293,7 +293,7 @@ function runProductExport(parameters) {
     productsIterator.close();
 
     jobHelper.logFileInfo(snapshotFile.fullPath, 'Processed ' + counterProductsTotal + ' records');
-    jobHelper.logFileInfo(updateFile.fullPath, 'Records for update ' + counterProductsForUpdate + 'records ');
+    jobHelper.logFileInfo(updateFile.fullPath, 'Records for update ' + counterProductsForUpdate + ' records');
 
     productLogData.processedDate = algoliaData.getLocalDateTime(new Date());
     productLogData.processedError = false;
