@@ -131,7 +131,7 @@ function sendDelta(deltaList, logID, parameters) {
     sendLogData.sendDate = algoliaData.getLocalDateTime(new Date());
     algoliaData.setLogData(logID, sendLogData);
 
-    logger.info('Sended chunk: {0}; Failed chunk: {1}\nSended records: {2}; Failed records: {3}',
+    logger.info('Chunk(s) sent: {0}; Failed chunk(s): {1}\nRecord(s) sent: {2}; Failed record(s): {3}',
         sendLogData.sendedChunk, sendLogData.failedChunk, sendLogData.sendedRecords, sendLogData.failedRecords);
 
     return status;
