@@ -43,7 +43,7 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
 /**
  * The function returns the filtered next product from SeekableIterator
  * and converted to the Algolia Product Model
- * @param {dw.util.SeekableIterator} productsIterator - Pdofuct SeekableIterator
+ * @param {dw.util.SeekableIterator} productsIterator - Product SeekableIterator
  * @returns {Object} -  Algolia Product Model
  */
 function getNextProductModel(productsIterator) {
