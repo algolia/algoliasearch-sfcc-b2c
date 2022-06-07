@@ -6,6 +6,7 @@ var stringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 
@@ -102,7 +103,7 @@ function getAttributeValue(product, productAttributeName) {
     }, product);
 
     if ((typeof result) === 'string') {
-        result = empty(result) ? null : stringUtils.trim(result.toString());
+        result = empty(result) ? null : stringUtils.trim(algoliaUtils.escapeEmoji(result.toString()));
     }
     return result;
 }

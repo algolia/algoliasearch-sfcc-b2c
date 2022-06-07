@@ -11,7 +11,7 @@ var tenantToken = null;
 var tenantCallStatus = new Status(Status.ERROR);
 
 var dwSystem = require('dw/system/System');
-var currentSite = require('dw/system/Site').getCurrent();
+var currentSite = algoliaData.getCurrentSite();
 
 /**
  * Create tenant id in the form
@@ -128,4 +128,37 @@ function sendDelta(itemsArray) {
     return callStatus;
 }
 
+/**
+ * Makes get indexing status/clean queue/resume indexing API calls
+ * @param {string} requestType - request type
+ * @returns {dw.system.Status} - successful Status to send
+ */
+function makeIndexingRequest(requestType) {
+    if (empty(getTenantToken())) {
+        return tenantCallStatus;
+    }
+
+    var requestTypeToUrlparam = {
+        status: 'status',
+        clean: 'clean_queues',
+        resume: 'resume_indexing'
+    };
+
+    var service = serviceDefinition.init();
+    var baseURL = service.getConfiguration().getCredential().getURL();
+
+    if (requestType === 'status') {
+        service.setRequestMethod('GET');
+    }
+
+    service.setURL(baseURL + '/sfcc/api/algolia_config/' + calculateTenantID() + '/' + requestTypeToUrlparam[requestType]);
+    service.setAuthentication('NONE');
+    service.addHeader('Authorization', 'Basic ' + getTenantToken());
+
+    var callStatus = serviceHelper.callJsonService(requestType, service);
+
+    return callStatus;
+}
+
 module.exports.sendDelta = sendDelta;
+module.exports.makeIndexingRequest = makeIndexingRequest;
