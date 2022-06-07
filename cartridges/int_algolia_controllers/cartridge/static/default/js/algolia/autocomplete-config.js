@@ -7,7 +7,8 @@ function enableAutocomplete(config) {
         autocomplete({
             container: inputElement,
             classNames: {
-                panel: "search-suggestion-wrapper full",
+                // d-block permits to force "display: block", because SFCC's main.js script sets our panel to "display: none" when clicking again in the input
+                panel: "search-suggestion-wrapper full d-block",
             },
             placeholder: algoliaData.strings.placeholder,
             getSources({ query }) {
