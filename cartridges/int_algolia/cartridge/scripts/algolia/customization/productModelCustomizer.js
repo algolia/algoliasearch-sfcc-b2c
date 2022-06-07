@@ -4,7 +4,7 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 /**
  * Create secondary category Algolia object
- * @param {Array} category - array of catefories tree
+ * @param {Array} category - array of categories tree
  * @returns {Object} - secondary category Algolia object
  */
 function createAlgoliaCategoryObject(category) {

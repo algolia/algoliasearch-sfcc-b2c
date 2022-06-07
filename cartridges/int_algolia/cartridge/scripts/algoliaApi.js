@@ -81,7 +81,7 @@ function requestTenantToken() {
 }
 
 /**
- * Get TenantToken for sending data to Alglia API
+ * Get TenantToken for sending data to Algolia API
  * @returns {dw.system.Status} - TenantToken
  */
 function getTenantToken() {

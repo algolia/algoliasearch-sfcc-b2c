@@ -2,7 +2,7 @@
 
 /**
  * Product index filter function
- * @param {dw.catalog.Product} product - Prodct
+ * @param {dw.catalog.Product} product - Product
  * @returns {boolean} - True if product should be included in the index, false if not.
  */
 function isInclude(product) {
