@@ -1,5 +1,8 @@
 <isdecorate template="application/MenuFrame">
     <iscontent type="text/html" charset="UTF-8" />
+    <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css" />
+    <script src="${URLUtils.staticURL('/js/algolia.js')}"></script>
     <link rel="stylesheet" href="${dw.web.URLUtils.staticURL('/css/algolia.css')}" />
     <isinclude template="inc/Modules" />
     <isbreadcrumb name1="Merchant Tools" name2="Algolia" />
@@ -113,6 +116,64 @@
         </table>
         </form>
     </div>
+
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td class="table_header w s center tab-title" nowrap="nowrap" width="33%" colspan="1">
+                    ${Resource.msg('algolia.label.site.title', 'algolia', null)}
+                </td>
+                <td class="table_header w s center tab-title" nowrap="nowrap" width="33%" colspan="1">
+                    ${Resource.msg('algolia.label.indexingstatus.title', 'algolia', null)}
+                </td>
+                <td class="table_header w s center tab-title" nowrap="nowrap" width="33%" colspan="1">
+                    ${Resource.msg('algolia.label.actions.title', 'algolia', null)}
+                </td>
+            </tr>
+            <isloop items="${pdict.algoliaData.getAlgoliaSites()}" var="site">
+                <tr class="site-status-row" data-get-status-url="${URLUtils.https('AlgoliaBM-Indexing', 'siteID', site.ID, 'requestType', 'status').toString()}">
+                    <td class="w s center tab-title">
+                        ${Resource.msgf('algolia.msg.indexingstatus', 'algolia', null, site.name, site.ID)}
+                    </td>
+                    <td class="w s center tab-title">
+                        <span
+                            class="status-result"
+                            data-general-error-msg="${Resource.msg('algolia.msg.error', 'algolia', null)}"
+                        >
+                            ${Resource.msg('algolia.msg.loading', 'algolia', null)}
+                        </span>
+                    </td>
+                    <td class="w s center tab-title">
+                        <button
+                            class="clean-queue-btn"
+                            data-success-msg="${Resource.msg('algolia.msg.indexingcleaned', 'algolia', null)}"
+                            data-general-error-msg="${Resource.msg('algolia.msg.error', 'algolia', null)}"
+                            data-confirm-msg="${Resource.msg('algolia.msg.confirmclean', 'algolia', null)}"
+                            data-action-url="${URLUtils.https('AlgoliaBM-Indexing', 'siteID', site.ID, 'requestType', 'clean').toString()}"
+                        >
+                            ${Resource.msg('algolia.label.button.cleanqueue', 'algolia', null)}
+                        </button>
+                        <button
+                            class="resume-indexing-btn"
+                            data-success-msg="${Resource.msg('algolia.msg.indexingresumed', 'algolia', null)}"
+                            data-general-error-msg="${Resource.msg('algolia.msg.error', 'algolia', null)}"
+                            data-action-url="${URLUtils.https('AlgoliaBM-Indexing', 'siteID', site.ID, 'requestType', 'resume').toString()}"
+                        >
+                            ${Resource.msg('algolia.label.button.resumeindexing', 'algolia', null)}
+                        </button>
+                    </td>
+                </tr>
+            </isloop>
+        </tbody>
+    </table>
+
+    <div
+        class="dialog-container"
+        data-confirm-btn-text="${Resource.msg('algolia.label.button.confirm', 'algolia', null)}"
+        data-cancel-btn-text="${Resource.msg('algolia.label.button.cancel', 'algolia', null)}"
+    >
+    </div>
+
     <isloop items="${pdict.algoliaData.getLogDataAllSites()}" var="logData">
         <p></p>
         <table border="0" cellpadding="0" cellspacing="0" width="100%">

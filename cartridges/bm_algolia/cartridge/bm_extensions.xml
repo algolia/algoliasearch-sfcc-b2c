@@ -15,6 +15,7 @@
       	<pipeline name="AlgoliaBM-Start"/>
       	<pipeline name="AlgoliaBM-HandleReindex"/>
       	<pipeline name="AlgoliaBM-HandleSettings"/>
+        <pipeline name="AlgoliaBM-Indexing"/>
       </sub-pipelines>
       <parameters>
          <parameter name="menuname" value="AlgoliaBM"/>

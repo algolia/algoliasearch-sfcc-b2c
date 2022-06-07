@@ -1,11 +1,12 @@
 'use strict';
 
-var currentSite = require('dw/system/Site').getCurrent();
+var Site = require('dw/system/Site');
 var Transaction = require('dw/system/Transaction');
 var dwSystem = require('dw/system/System');
 
 var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
+var currentSite = getCurrentSite(); // eslint-disable-line no-use-before-define
 var CATEGORIES_SEPARATOR = ' > ';
 
 /*
@@ -173,6 +174,39 @@ function getSyncLocalDateTime(id) {
     return empty(productLog) ? '---' : productLog.sendDate;
 }
 
+/**
+ * @description Get sites that have Algolia enabled
+ * @returns {Array} - array of sites that have Algolia enabled
+ */
+function getAlgoliaSites() {
+    return Site.getAllSites().toArray().filter(function (site) {
+        return site.getCustomPreferenceValue('Algolia_Enable');
+    });
+}
+
+/**
+ * @description Get current site depending on request parameter
+ * @returns {dw.system.Site} - current site
+ */
+function getCurrentSite() {
+    if (request.httpParameterMap && request.httpParameterMap.isParameterSubmitted('siteID')) {
+        var result = null;
+        var siteIterator = Site.getAllSites().iterator();
+
+        while (siteIterator.hasNext()) {
+            var site = siteIterator.next();
+            if (site.ID === request.httpParameterMap.siteID.stringValue) {
+                result = site;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    return Site.getCurrent();
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
@@ -186,5 +220,7 @@ module.exports = {
     calculateIndexId: calculateIndexId,
     getLocalDateTime: getLocalDateTime,
     getSyncLocalDateTime: getSyncLocalDateTime,
+    getAlgoliaSites: getAlgoliaSites,
+    getCurrentSite: getCurrentSite,
     CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR
 };
