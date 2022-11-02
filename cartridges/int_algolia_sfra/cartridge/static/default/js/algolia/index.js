@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var userCurrency = algoliaData.currencyCode;
     var userCurrencySymbol = algoliaData.currencySymbol;
-    var categoryDisplayNamePath = $suggestionsWrapper.data('category-display-name-path');  // path of the current category
-    var categoryDisplayNamePathSeparator = $suggestionsWrapper.data('category-display-name-path-separator'); // separator used to serialize the category path (by default: '>')
-    var urlQuery = $suggestionsWrapper.data('q'); // onload search query - for search page - URL param: q
-    var searchPageRoot = $suggestionsWrapper.data('search-page-root'); // onload search query - for search page - URL param: q
+    var categoryDisplayNamePath = $suggestionsWrapper.attr('data-category-display-name-path');  // path of the current category
+    var categoryDisplayNamePathSeparator = $suggestionsWrapper.attr('data-category-display-name-path-separator'); // separator used to serialize the category path (by default: '>')
+    var urlQuery = $suggestionsWrapper.attr('data-q'); // onload search query - for search page - URL param: q
+    var searchPageRoot = $suggestionsWrapper.attr('data-search-page-root'); // onload search query - for search page - URL param: q
 
 
     var productsIndex = algoliaData.productsIndex;
