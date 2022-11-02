@@ -150,10 +150,14 @@ function getCategoryFlatTree(category) {
 
     while (!currentCategory.topLevel && !currentCategory.root) {
         currentCategory = currentCategory.parent;
-        categoryTree.push({
-            id: currentCategory.ID,
-            name: getAttributeLocalizedValues(currentCategory, 'displayName')
-        });
+        if (currentCategory.online) {
+            categoryTree.push({
+                id: currentCategory.ID,
+                name: getAttributeLocalizedValues(currentCategory, 'displayName')
+            });
+        } else {
+            break;
+        }
     }
 
     return categoryTree;
