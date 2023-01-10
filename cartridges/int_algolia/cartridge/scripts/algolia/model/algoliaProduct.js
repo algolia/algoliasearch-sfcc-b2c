@@ -150,6 +150,9 @@ function getCategoryFlatTree(category) {
 
     while (!currentCategory.topLevel && !currentCategory.root) {
         currentCategory = currentCategory.parent;
+        if (!currentCategory.online) {
+            break;
+        }
         categoryTree.push({
             id: currentCategory.ID,
             name: getAttributeLocalizedValues(currentCategory, 'displayName')
