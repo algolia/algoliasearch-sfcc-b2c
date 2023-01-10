@@ -106,6 +106,9 @@ var attributeConfig = {
     color: {
         localized: true
     },
+    refinementColor: {
+        localized: true
+    },
     size: {
         localized: true
     },

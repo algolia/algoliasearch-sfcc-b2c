@@ -198,6 +198,11 @@ var agregatedValueHanlders = {
             ? variationModel.getSelectedValue(colorAttribute).displayValue
             : null;
     },
+    refinementColor: function (product) {
+        return product.custom.refinementColor
+            ? product.custom.refinementColor.displayValue
+            : null;
+    },
     size: function (product) {
         var variationModel = product.getVariationModel();
         var sizeAttribute = variationModel.getProductVariationAttribute('size');

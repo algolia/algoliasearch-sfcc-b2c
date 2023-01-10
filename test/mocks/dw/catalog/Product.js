@@ -113,6 +113,11 @@ Product.prototype.availabilityModel = {
     availability: 2
 };
 Product.prototype.isVariant = function () { return false; };
+Product.prototype.custom = {
+    refinementColor: {
+        displayValue: 'Pink'
+    }
+};
 Product.prototype.getOnlineCategories = function () {
     var result = [
         {
