@@ -49,7 +49,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
     '*/cartridge/scripts/algolia/lib/algoliaData': {
         getSetOfArray: function (id) {
             return id === 'CustomFields'
-                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'size', 'brand', 'online', 'pageDescription', 'pageKeywords',
+                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'brand', 'online', 'pageDescription', 'pageKeywords',
                     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
                 : null;
         },
@@ -259,6 +259,13 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                 default: '4',
                 fr: '4',
                 en: '4'
+            },
+            custom: {
+                refinementColor: {
+                    default: 'Pink',
+                    fr: 'Pink',
+                    en: 'Pink'
+                }
             }
         };
         assert.deepEqual(new AlgoliaProduct(product), algoliaProductModel);
