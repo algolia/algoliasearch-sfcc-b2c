@@ -14,7 +14,9 @@ aliases:
 
 jobs:
   checkout:
-    executor: node/default
+    executor:
+      name: node/default
+      tag: 14
     steps:
       - checkout
       - node/install-packages
@@ -22,7 +24,9 @@ jobs:
       - persist_to_workspace: *persist_work_dir
 
   test:
-    executor: node/default
+    executor:
+      name: node/default
+      tag: 14
     steps:
       - attach_workspace: *attach_work_dir
       - run: npm run test
