@@ -43,7 +43,7 @@ function escapeEmoji(str) {
 
     return str.replace(emojiRegex, function (m, emoji) {
         var unicode = getUnicode(emoji);
-        return unicode ? '&#x' + unicode + ';' : ''; 
+        return unicode ? '&#x' + unicode + ';' : '';
     });
 }
 
