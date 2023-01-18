@@ -1,0 +1,37 @@
+version: 2.1
+
+orbs:
+  node: circleci/node@5.1.0
+
+aliases:
+  # Forward the current folder when using workflows
+  - &persist_work_dir
+    root: .
+    paths:
+      - .
+  - &attach_work_dir
+    at: .
+
+jobs:
+  checkout:
+    executor: node/default
+    steps:
+      - checkout
+      - node/install-packages
+      - run: npm run lint
+      - persist_to_workspace: *persist_work_dir
+
+  test:
+    executor: node/default
+    steps:
+      - attach_workspace: *attach_work_dir
+      - run: npm run test
+      - run: npm run test:integration
+
+workflows:
+  suite:
+    jobs:
+      - checkout
+      - test:
+        requires:
+          - checkout
