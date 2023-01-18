@@ -4,20 +4,19 @@ orbs:
   node: circleci/node@5.1.0
 
 aliases:
-  # Forward the current folder when using workflows
   - &persist_work_dir
     root: .
     paths:
       - .
   - &attach_work_dir
     at: .
-  - &executor
+  - &node_executor
     name: node/default
-    tag: '14.21.2'
+    tag: '14.21'
 
 jobs:
   checkout:
-    executor: *executor
+    executor: *node_executor
     steps:
       - checkout
       - node/install-packages
@@ -25,7 +24,7 @@ jobs:
       - persist_to_workspace: *persist_work_dir
 
   test:
-    executor: *executor
+    executor: *node_executor
     steps:
       - attach_workspace: *attach_work_dir
       - run: npm run test
