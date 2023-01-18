@@ -32,6 +32,3 @@ workflows:
   suite:
     jobs:
       - checkout
-      - test:
-        requires:
-          - checkout
