@@ -32,3 +32,4 @@ workflows:
   suite:
     jobs:
       - checkout
+      - test
