@@ -11,12 +11,13 @@ aliases:
       - .
   - &attach_work_dir
     at: .
+  - &executor
+    name: node/default
+    tag: '14.21.2'
 
 jobs:
   checkout:
-    executor:
-      name: node/default
-      tag: '14'
+    executor: *executor
     steps:
       - checkout
       - node/install-packages
@@ -24,9 +25,7 @@ jobs:
       - persist_to_workspace: *persist_work_dir
 
   test:
-    executor:
-      name: node/default
-      tag: '14'
+    executor: *executor
     steps:
       - attach_workspace: *attach_work_dir
       - run: npm run test
