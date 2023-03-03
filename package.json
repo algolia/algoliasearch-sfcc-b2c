@@ -18,32 +18,23 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@github.com:SalesforceCommerceCloud/link_algolia.git"
+        "url": "https://github.com/algolia/algoliasearch-sfcc-b2c.git"
     },
     "engines": {
-        "node": "14"
+        "node": ">=14"
     },
     "devDependencies": {
-        "chai": "^4.3.4",
         "eslint": "^7.32.0",
-        "eslint-config-airbnb": "^18.2.1",
-        "eslint-config-airbnb-base": "^14.2.1",
-        "eslint-plugin-dollar-sign": "~1.0.2",
-        "eslint-plugin-eslint-comments": "~3.2.0",
-        "eslint-plugin-import": "^2.25.2",
-        "eslint-plugin-jest": "~22.21.0",
-        "eslint-plugin-jquery": "~1.5.1",
-        "eslint-plugin-jsx-a11y": "^6.4.1",
-        "eslint-plugin-promise": "~5.1.1",
-        "eslint-plugin-react": "^7.26.1",
-        "eslint-plugin-react-hooks": "^4.2.0",
-        "eslint-plugin-sitegenesis": "~1.0.0",
-        "eslint-plugin-you-dont-need-lodash-underscore": "~6.12.0",
+        "eslint-config-algolia": "^20.0",
+        "eslint-config-prettier": "^8.5",
+        "eslint-plugin-eslint-comments": "^3.2",
+        "eslint-plugin-import": "^2.26",
+        "eslint-plugin-jsdoc": "^39.3",
+        "eslint-plugin-prettier": "^4.2",
+        "eslint-plugin-jquery": "^1.5.1",
+        "prettier": "^2.7",
         "proxyquire": "2.1.3",
-        "sgmf-scripts": "^2.4.1",
-        "stylelint": "^9.10.1",
-        "stylelint-config-standard": "^18.3.0",
-        "stylelint-scss": "^4.0.0"
+        "sgmf-scripts": "^2.4.2"
     },
     "browserslist": [
         "last 2 versions",
@@ -54,8 +45,5 @@
             "env"
         ]
     },
-    "packageName": "int_algolia_sfra",
-    "paths": {
-        "base": "../storefront-reference-architecture/cartridges/app_storefront_base/"
-    }
+    "packageName": "int_algolia_sfra"
 }

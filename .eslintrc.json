@@ -1,9 +1,10 @@
 {
     "root": true,
-    "extends": "airbnb-base/legacy",
+    "extends": ["algolia"],
     "parserOptions": {
         "ecmaVersion": 2015
     },
+    "plugins": ["jquery"],
     "rules": {
         "import/no-unresolved": "off",
         "indent": ["error", 4, { "SwitchCase": 1, "VariableDeclarator": 1 }],
