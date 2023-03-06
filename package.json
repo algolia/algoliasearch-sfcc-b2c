@@ -8,8 +8,6 @@
         "compile:scss": "sgmf-scripts --compile css",
         "compile:js": "sgmf-scripts --compile js",
         "compile:fonts": "node bin/Makefile compileFonts",
-        "lint": "npm run lint:css && npm run lint:js",
-        "lint:css": "sgmf-scripts --lint css",
         "lint:js": "sgmf-scripts --lint js",
         "upload": "sgmf-scripts --upload",
         "uploadCartridge": "sgmf-scripts --uploadCartridge int_algolia && sgmf-scripts --uploadCartridge int_algolia_controllers && sgmf-scripts --uploadCartridge int_algolia_sfra && sgmf-scripts --uploadCartridge bm_algolia",
@@ -25,13 +23,9 @@
     },
     "devDependencies": {
         "eslint": "^7.32.0",
-        "eslint-config-algolia": "^20.0",
-        "eslint-config-prettier": "^8.5",
-        "eslint-plugin-eslint-comments": "^3.2",
-        "eslint-plugin-import": "^2.26",
-        "eslint-plugin-jsdoc": "^39.3",
-        "eslint-plugin-prettier": "^4.2",
         "eslint-plugin-jquery": "^1.5.1",
+        "eslint-config-prettier": "^8.5",
+        "eslint-plugin-prettier": "^4.2",
         "prettier": "^2.7",
         "proxyquire": "2.1.3",
         "sgmf-scripts": "^2.4.2"
@@ -45,5 +39,8 @@
             "env"
         ]
     },
-    "packageName": "int_algolia_sfra"
+    "packageName": "int_algolia_sfra",
+    "paths": {
+        "base": "../storefront-reference-architecture/cartridges/app_storefront_base/"
+    }
 }

@@ -1,6 +1,5 @@
 {
     "root": true,
-    "extends": ["algolia"],
     "parserOptions": {
         "ecmaVersion": 2015
     },
@@ -20,6 +19,7 @@
         "empty": true,
         "request": true,
         "dw": true,
-        "XML": true
+        "XML": true,
+        "$": true
     }
 }
