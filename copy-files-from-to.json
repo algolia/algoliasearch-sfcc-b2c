@@ -1,15 +1,15 @@
 {
 	"copyFiles": [{
 			"from": "node_modules/search-insights/dist/search-insights.min.js",
-			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/algolia/lib/search-insights.min.js"
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/search-insights.min.js"
 		},
 		{
 			"from": "node_modules/algoliasearch/dist/algoliasearchLite.min.js",
-			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/algolia/lib/algoliasearchLite.min.js"
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/algoliasearchLite.min.js"
 		},
 		{
 			"from": "node_modules/hogan.js/lib/hogan.js",
-			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/algolia/lib/hogan.js"
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/hogan.js"
 		},
 		{
 			"from": "node_modules/@algolia/autocomplete-theme-classic/dist/theme.min.css",
@@ -21,7 +21,7 @@
 		},
 		{
 			"from": "node_modules/instantsearch.js/dist/instantsearch.production.min.js",
-			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/algolia/lib/instantsearch.production.min.js"
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/instantsearch.production.min.js"
 		}
 	],
 	"copyFilesSettings": {
