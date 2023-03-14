@@ -30,7 +30,13 @@
         "eslint-plugin-prettier": "^4.2",
         "prettier": "^2.7",
         "proxyquire": "2.1.3",
-        "sgmf-scripts": "^2.4.2"
+        "sgmf-scripts": "^2.4.2",
+        "@algolia/autocomplete-theme-classic": "1.8.3",
+        "algoliasearch": "3.35.1",
+        "hogan.js": "1.0.2",
+        "instantsearch.css": "7.4.5",
+        "instantsearch.js": "4.52.0",
+        "search-insights": "1.3.1"
     },
     "browserslist": [
         "last 2 versions",
@@ -44,13 +50,5 @@
     "packageName": "int_algolia_sfra",
     "paths": {
         "base": "../storefront-reference-architecture/cartridges/app_storefront_base/"
-    },
-    "dependencies": {
-        "@algolia/autocomplete-theme-classic": "1.8.3",
-        "algoliasearch": "3.35.1",
-        "hogan.js": "1.0.2",
-        "instantsearch.css": "7.4.5",
-        "instantsearch.js": "4.52.0",
-        "search-insights": "1.3.1"
     }
 }
