@@ -31,6 +31,7 @@
         "eslint-plugin-jquery": "^1.5.1",
         "eslint-plugin-prettier": "^4.2",
         "hogan.js": "1.0.2",
+        "htm": "^3.1.1",
         "instantsearch.css": "7.4.5",
         "instantsearch.js": "4.52.0",
         "prettier": "^2.7",
