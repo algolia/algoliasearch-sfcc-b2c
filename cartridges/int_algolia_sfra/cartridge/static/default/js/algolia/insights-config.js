@@ -1,5 +1,9 @@
 /* global aa */
-
+/**
+ * Configures Insights
+ * @param {string} appId Application ID
+ * @param {string} searchApiKey Search API Key
+ */
 function enableInsights(appId, searchApiKey) {
     window.aa('init', {
         appId: appId,
@@ -52,7 +56,12 @@ function enableInsights(appId, searchApiKey) {
         }
     });
 
-
+    /**
+     * Finds Insights target
+     * @param {Object} startElement Element to start from
+     * @param {Object} endElement Element to stop searching at
+     * @returns {Object} Element found or null if not found
+     */
     function findInsightsTarget(startElement, endElement) {
         var element = startElement;
         while (element && !element.hasAttribute('data-query-id')) {
@@ -64,6 +73,11 @@ function enableInsights(appId, searchApiKey) {
         return element;
     };
 
+    /**
+     * Returns the value of an URL parameter
+     * @param {string} parameterName The parameter name whose value should be returned
+     * @returns {string} The value of the parameter
+     */
     function getUrlParameter(parameterName) {
         var queryString = window.location.search.substring(1);
         var sURLVariables = queryString.split('&');
