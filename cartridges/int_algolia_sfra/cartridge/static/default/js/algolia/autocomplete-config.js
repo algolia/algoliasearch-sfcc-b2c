@@ -55,15 +55,10 @@ function enableAutocomplete(config) {
                                     item.firstImage = smallImageGroup.images[0];
                                 }
                                 return html`
-                                  <div class="text-truncate text-nowrap">
-                                    <img class="swatch-circle hidden-xs-down"
-                                         src=${item.firstImage.dis_base_link}></img>
-                                    <a href=${item.url}>${components.Highlight({
-    hit: item,
-    attribute: "name",
-    tagName: "em"
-})}</a>
-                                  </div>`;
+                                    <div class="text-truncate text-nowrap">
+                                        <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
+                                        <a href=${item.url}>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
+                                    </div>`;
                             },
                         },
                     },
