@@ -12,7 +12,7 @@ aliases:
     at: .
   - &node_executor
     name: node/default
-    tag: '14.21'
+    tag: '18.15'
 
 jobs:
   checkout:
@@ -20,7 +20,7 @@ jobs:
     steps:
       - checkout
       - node/install-packages
-      - run: npm run lint
+      - run: npm run lint:js
       - persist_to_workspace: *persist_work_dir
 
   test:
