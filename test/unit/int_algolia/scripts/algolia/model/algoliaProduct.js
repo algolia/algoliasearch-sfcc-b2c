@@ -65,7 +65,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
     }
 });
 
-describe('algiliaProduct module - Test Algolia Product model', function () {
+describe('algoliaProduct module - Test Algolia Product model', function () {
     it('Checking Algolia Product model is valid', function () {
         let product = new ProductMock();
         let algoliaProductModel = {
@@ -85,14 +85,6 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             fr: 'Womens',
                             en: 'Womens'
                         }
-                    },
-                    {
-                        id: 'newarrivals',
-                        name: {
-                            default: 'New Arrivals',
-                            fr: 'New Arrivals',
-                            en: 'New Arrivals'
-                        }
                     }
                 ],
                 [
@@ -102,22 +94,6 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             default: 'Bottoms',
                             fr: 'Bottoms',
                             en: 'Bottoms'
-                        }
-                    },
-                    {
-                        id: 'womens-clothing',
-                        name: {
-                            default: 'Clothing',
-                            fr: 'Clothing',
-                            en: 'Clothing'
-                        }
-                    },
-                    {
-                        id: 'womens',
-                        name: {
-                            default: 'Womens',
-                            fr: 'Womens',
-                            en: 'Womens'
                         }
                     }
                 ]
@@ -262,12 +238,10 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                 fr: '4',
                 en: '4'
             },
-            custom: {
-                refinementColor: {
-                    default: 'Pink',
-                    fr: 'Pink',
-                    en: 'Pink'
-                }
+            refinementColor: {
+                default: 'Pink',
+                fr: 'Pink',
+                en: 'Pink'
             }
         };
         assert.deepEqual(new AlgoliaProduct(product), algoliaProductModel);
