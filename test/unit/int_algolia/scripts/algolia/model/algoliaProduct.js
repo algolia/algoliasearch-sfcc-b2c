@@ -6,6 +6,7 @@ var proxyquire = require('proxyquire').noCallThru().noPreserveCache();
 var GlobalMock = require('../../../../../mocks/global');
 var ProductMock = require('../../../../../mocks/dw/catalog/Product');
 var algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
+var algoliaUtils = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/utils');
 
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
@@ -57,6 +58,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
             return id === 'InStockThreshold' ? 1 : null;
         }
     },
+    '*/cartridge/scripts/algolia/lib/utils': algoliaUtils,
     '*/cartridge/scripts/algolia/lib/algoliaProductConfig': algoliaProductConfig,
     '*/cartridge/scripts/algolia/customization/productModelCustomizer': {
         customizeProductModel: function (productModel) { return productModel; }
