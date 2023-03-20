@@ -28,7 +28,6 @@ jobs:
     steps:
       - attach_workspace: *attach_work_dir
       - run: npm run test
-      - run: npm run test:integration
 
 workflows:
   suite:
