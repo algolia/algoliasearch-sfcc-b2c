@@ -55,7 +55,7 @@
     </script>
     <script src="${URLUtils.staticURL('js/algolia/insights-config.js')}"></script>
 
-    <script src="${URLUtils.staticURL('js/lib/algolia/algoliasearchLite.min.js')}"></script>
+    <script src="${URLUtils.staticURL('js/lib/algolia/algoliasearch-lite.esm.browser.js')}"></script>
     <script src="${URLUtils.staticURL('js/lib/hogan.js')}"></script>
 
     <!-- Algolia Autocomplete.js -->

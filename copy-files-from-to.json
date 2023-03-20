@@ -4,8 +4,8 @@
 			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/search-insights.min.js"
 		},
 		{
-			"from": "node_modules/algoliasearch/dist/algoliasearchLite.min.js",
-			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/algoliasearchLite.min.js"
+			"from": "node_modules/algoliasearch/dist/algoliasearch-lite.esm.browser.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/algoliasearch-lite.esm.browser.js"
 		},
 		{
 			"from": "node_modules/hogan.js/lib/hogan.js",
