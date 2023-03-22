@@ -23,6 +23,7 @@
         "node": ">=14"
     },
     "devDependencies": {
+        "@algolia/autocomplete-js": "1.8.3",
         "@algolia/autocomplete-theme-classic": "1.8.3",
         "algoliasearch": "4.15.0",
         "chai": "^4.3.7",

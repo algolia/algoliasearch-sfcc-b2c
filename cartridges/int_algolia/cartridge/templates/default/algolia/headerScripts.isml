@@ -66,8 +66,9 @@
     <!-- Algolia Autocomplete.js -->
     <link rel="stylesheet" href="${URLUtils.staticURL('css/algolia/autocomplete-theme.min.css')}" />
 
-    <script src="https://cdn.jsdelivr.net/npm/@algolia/autocomplete-js@1"></script>
-    <script>
+    <script src="${URLUtils.staticURL('js/lib/algolia/autocomplete-js/index.production.js')}"></script>
+
+<script>
       const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
     </script>
     <script type="module">

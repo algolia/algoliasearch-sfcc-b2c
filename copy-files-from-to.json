@@ -16,6 +16,14 @@
 			"to": "cartridges/int_algolia_sfra/cartridge/static/default/css/algolia/autocomplete-theme.min.css"
 		},
 		{
+			"from": "node_modules/@algolia/autocomplete-js/dist/umd/index.production.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/autocomplete-js/index.production.js"
+		},
+		{
+			"from": "node_modules/@algolia/autocomplete-js/dist/umd/index.production.js.map",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/autocomplete-js/index.production.js.map"
+		},
+		{
 			"from": "node_modules/instantsearch.css/themes/reset-min.css",
 			"to": "cartridges/int_algolia_sfra/cartridge/static/default/css/algolia/instantsearch-reset-min.css"
 		},
