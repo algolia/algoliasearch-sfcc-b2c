@@ -68,8 +68,8 @@
 
     <script src="${URLUtils.staticURL('js/lib/algolia/autocomplete-js/index.production.js')}"></script>
 
-<script>
-      const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
+    <script>
+        const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
     </script>
     <script type="module">
         import { html } from '${URLUtils.staticURL("js/lib/preact-standalone.module.js")}'
