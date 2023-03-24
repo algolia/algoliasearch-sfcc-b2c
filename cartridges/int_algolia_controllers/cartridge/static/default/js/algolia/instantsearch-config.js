@@ -29,7 +29,7 @@ function enableInstantSearch(config) {
             instantsearch.widgets.configure({
                 distinct: true,
                 hitsPerPage: 3 * 3,
-                clickAnalytics: true
+                clickAnalytics: true,
             }),
             instantsearch.widgets.searchBox({
                 container: '#algolia-searchbox-placeholder',
@@ -166,7 +166,7 @@ function enableInstantSearch(config) {
                 },
                 panelTitle: algoliaData.strings.colorPanelTitle
             }),
-            
+
             instantsearch.widgets.infiniteHits({
                 container: '#algolia-hits-placeholder',
                 cssClasses: {
@@ -229,33 +229,33 @@ function enableInstantSearch(config) {
                                 item.image = firstImageInGroup
                             }
                         }
-    
+
                         // adjusted price in user currency
                         if (item.promotionalPrice && item.promotionalPrice[config.userCurrency] !== null) {
                             item.promotionalPrice = item.promotionalPrice[config.userCurrency]
                         }
-    
+
                         // price in user currency
                         if (item.price && item.price[config.userCurrency] !== null) {
                             item.price = item.price[config.userCurrency]
                         }
-    
+
                         // currency symbol
                         item.currencySymbol = config.userCurrencySymbol;
-    
-    
+
+
                         item.quickShowUrl = item.url;
-    
+
                         // originating index
                         item.__indexName = config.productsIndex;
-    
+
                         // url with queryID (used for analytics)
                         var url = new URL(item.url);
                         url.searchParams.append('queryID', item.__queryID);
                         url.searchParams.append('objectID', item.objectID);
                         url.searchParams.append('indexName', item.__indexName);
                         item.url = url.href;
-    
+
                         return item;
                     });
                 }

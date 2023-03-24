@@ -27,7 +27,6 @@ function enableInstantSearch(config) {
         insightsClient: window.aa
     });
 
-
     if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
             instantsearch.widgets.configure({
