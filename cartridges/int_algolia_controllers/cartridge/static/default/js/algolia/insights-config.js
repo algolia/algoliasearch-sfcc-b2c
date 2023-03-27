@@ -16,7 +16,8 @@ function enableInsights(appId, searchApiKey) {
     });
 
     // Use setUserToken to set a user token explicitly (e.g. for registered customers)
-    // aa('setUserToken', '<userID>')
+    // const userToken = 'desired_user_token';
+    // aa('setUserToken', userToken);
 
     // when on product page
     document.addEventListener('click', function (event) {
@@ -81,7 +82,7 @@ function enableInsights(appId, searchApiKey) {
     };
 
     /**
-     * Returns the value of an URL parameter
+     * Returns the value of a URL parameter
      * @param {string} parameterName The parameter name whose value should be returned
      * @returns {string} The value of the parameter
      */

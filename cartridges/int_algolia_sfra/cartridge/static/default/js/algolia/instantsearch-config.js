@@ -27,12 +27,18 @@ function enableInstantSearch(config) {
         insightsClient: window.aa
     });
 
+    // initialize the Insights middleware -- to set userToken, see insights-config.js
+    const insightsMiddleware = instantsearch.middlewares.createInsightsMiddleware({
+        insightsClient: window.aa,
+    });
+    search.use(insightsMiddleware);
+
     if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
             instantsearch.widgets.configure({
                 distinct: true,
                 hitsPerPage: 3 * 3,
-                clickAnalytics: true
+                clickAnalytics: true,
             }),
             instantsearch.widgets.searchBox({
                 container: '#algolia-searchbox-placeholder',

@@ -1,5 +1,8 @@
 /* global instantsearch */
-
+/**
+ * Initializes InstantSearch
+ * @param {Object} config Configuration object
+ */
 function enableInstantSearch(config) {
     var initialUiState = {};
     var hierarchicalMenuValue = {};
@@ -23,6 +26,12 @@ function enableInstantSearch(config) {
         initialUiState: initialUiState,
         insightsClient: window.aa
     });
+
+    // initialize the Insights middleware -- to set userToken, see insights-config.js
+    const insightsMiddleware = instantsearch.middlewares.createInsightsMiddleware({
+        insightsClient: window.aa,
+    });
+    search.use(insightsMiddleware);
 
     if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
@@ -68,6 +77,7 @@ function enableInstantSearch(config) {
                     resetLabel: algoliaData.strings.reset
                 }
             }),
+
             hierarchicalMenuWithPanel({
                 container: '#algolia-categories-list-placeholder',
                 attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
