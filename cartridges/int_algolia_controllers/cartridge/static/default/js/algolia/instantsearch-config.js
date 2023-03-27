@@ -38,7 +38,6 @@ function enableInstantSearch(config) {
             instantsearch.widgets.configure({
                 distinct: true,
                 hitsPerPage: 3 * 3,
-                clickAnalytics: true,
             }),
             instantsearch.widgets.searchBox({
                 container: '#algolia-searchbox-placeholder',
