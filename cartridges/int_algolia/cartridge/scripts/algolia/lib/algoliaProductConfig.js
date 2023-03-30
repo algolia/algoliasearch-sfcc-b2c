@@ -112,6 +112,9 @@ var attributeConfig = {
     size: {
         localized: true
     },
+    refinementSize: {
+        localized: true
+    },
     categories: {
         localized: false
     }

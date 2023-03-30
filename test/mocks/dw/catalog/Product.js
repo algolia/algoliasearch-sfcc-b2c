@@ -116,7 +116,10 @@ Product.prototype.isVariant = function () { return false; };
 Product.prototype.custom = {
     refinementColor: {
         displayValue: 'Pink'
-    }
+    },
+    refinementSize: {
+        displayValue: '4'
+    },
 };
 Product.prototype.getOnlineCategories = function () {
     var result = [
