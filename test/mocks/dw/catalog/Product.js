@@ -117,9 +117,7 @@ Product.prototype.custom = {
     refinementColor: {
         displayValue: 'Pink'
     },
-    refinementSize: {
-        displayValue: '4'
-    },
+    refinementSize: '4',
 };
 Product.prototype.getOnlineCategories = function () {
     var result = [

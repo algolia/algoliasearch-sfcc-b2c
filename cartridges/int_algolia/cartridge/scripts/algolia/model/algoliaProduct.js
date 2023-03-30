@@ -233,7 +233,7 @@ var aggregatedValueHandlers = {
     },
     refinementSize: function (product) {
         return safelyGetCustomAttribute(product.custom, 'refinementSize')
-            ? product.custom.refinementSize.displayValue
+            ? product.custom.refinementSize
             : null;
     },
     price: function (product) {
