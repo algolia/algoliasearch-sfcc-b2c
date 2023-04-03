@@ -5,7 +5,7 @@
             data-category="${pdict.cgid}"
             data-category-display-name-path="${pdict.categoryDisplayNamePath}"
             data-category-display-name-path-separator="${pdict.categoryDisplayNamePathSeparator}"
-            data-q="${pdict.q}"
+            data-q="${empty(pdict.q) ? '' : pdict.q}"
             data-search-page-root="${URLUtils.http('Search-Show')}"></div>
         <div id="aa-search-input"></div>
     </div>
