@@ -50,7 +50,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
     '*/cartridge/scripts/algolia/lib/algoliaData': {
         getSetOfArray: function (id) {
             return id === 'CustomFields'
-                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'brand', 'online', 'pageDescription', 'pageKeywords',
+                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
                     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
                 : null;
         },
@@ -66,7 +66,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
 });
 
 describe('algoliaProduct module - Test Algolia Product model', function () {
-    it('Checking Algolia Product model is valid', function () {
+    it('Check if the Algolia Product model is valid', function () {
         let product = new ProductMock();
         let algoliaProductModel = {
             id: '701644031206M',
@@ -233,16 +233,21 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                 fr: 'Hot Pink Combo',
                 en: 'Hot Pink Combo'
             },
+            refinementColor: {
+                default: 'Pink',
+                fr: 'Pink',
+                en: 'Pink'
+            },
             size: {
                 default: '4',
                 fr: '4',
                 en: '4'
             },
-            refinementColor: {
-                default: 'Pink',
-                fr: 'Pink',
-                en: 'Pink'
-            }
+            refinementSize: {
+                default: '4',
+                fr: '4',
+                en: '4',
+            },
         };
         assert.deepEqual(new AlgoliaProduct(product), algoliaProductModel);
     });

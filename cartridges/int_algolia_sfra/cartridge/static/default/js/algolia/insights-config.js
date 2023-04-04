@@ -12,6 +12,8 @@ function enableInsights(appId, searchApiKey) {
         // this means that an anonymous user token will no longer be generated and saved for the session automatically
         // this will generate 422 errors in the Algolia Events Debugger if useCookie is false and a user token was not specified explicitly
         // please see the documentation for more details
+        // https://www.npmjs.com/package/search-insights
+        // https://www.algolia.com/doc/api-reference/widgets/insights/js/#widget-param-insightsinitparams)
         useCookie: false,
     });
 

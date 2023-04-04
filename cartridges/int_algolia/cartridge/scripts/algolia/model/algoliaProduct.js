@@ -121,7 +121,7 @@ function getAttributeLocalizedValues(product, productAttributeName) {
     var currentSites = Site.getCurrent();
     var siteLocales = currentSites.getAllowedLocales();
     var siteLocalesSize = siteLocales.size();
-    var currenrLocale = request.getLocale();
+    var currentLocale = request.getLocale();
 
     var value = {};
     for (var l = 0; l < siteLocalesSize; l += 1) {
@@ -129,7 +129,7 @@ function getAttributeLocalizedValues(product, productAttributeName) {
         request.setLocale(localeName);
         value[localeName] = getAttributeValue(product, productAttributeName);
     }
-    request.setLocale(currenrLocale);
+    request.setLocale(currentLocale);
     return value;
 }
 
@@ -163,9 +163,30 @@ function getCategoryFlatTree(category) {
 }
 
 /**
+ * Safely gets a custom attribute from a System Object.
+ * Since attempting to return a nonexistent custom attribute throws an error in SFCC,
+ * this is the safest way to check whether an attribute exists.
+ * @param {dw.object.CustomAttributes} customAttributes The CustomAttributes object, e.g. product.getCustom()
+ * @param {string} caKey The custom attribute's key whose value we want to return
+ * @returns {*} The custom attribute value if exists,
+ *              null if the custom attribute is defined but it has no value for this specific SO,
+ *              undefined if the custom attribute is not defined at all in BM
+ */
+function safelyGetCustomAttribute(customAttributes, caKey) {
+    let customAttributeValue;
+    try {
+        customAttributeValue = customAttributes[caKey];
+    } catch(e) {
+        customAttributeValue = undefined;
+    } finally {
+        return customAttributeValue;
+    }
+};
+
+/**
  * Handler complex and calculated Product attributes
  */
-var agregatedValueHanlders = {
+var aggregatedValueHandlers = {
     categories: function (product) {
         var productCategories = product.getOnlineCategories();
         productCategories = empty(productCategories) ? [] : productCategories.toArray();
@@ -199,7 +220,7 @@ var agregatedValueHanlders = {
             : null;
     },
     refinementColor: function (product) {
-        return product.custom.refinementColor
+        return safelyGetCustomAttribute(product.custom, 'refinementColor')
             ? product.custom.refinementColor.displayValue
             : null;
     },
@@ -208,6 +229,11 @@ var agregatedValueHanlders = {
         var sizeAttribute = variationModel.getProductVariationAttribute('size');
         return (sizeAttribute && variationModel.getSelectedValue(sizeAttribute))
             ? variationModel.getSelectedValue(sizeAttribute).displayValue
+            : null;
+    },
+    refinementSize: function (product) {
+        return safelyGetCustomAttribute(product.custom, 'refinementSize')
+            ? product.custom.refinementSize
             : null;
     },
     price: function (product) {
@@ -298,20 +324,20 @@ function algoliaProduct(product) {
                     var currentSites = Site.getCurrent();
                     var siteLocales = currentSites.getAllowedLocales();
                     var siteLocalesSize = siteLocales.size();
-                    var currenrLocale = request.getLocale();
+                    var currentLocale = request.getLocale();
 
                     value = {};
                     for (var l = 0; l < siteLocalesSize; l += 1) {
                         var localeName = siteLocales[l];
                         request.setLocale(localeName);
-                        value[localeName] = agregatedValueHanlders[attributeName]
-                            ? agregatedValueHanlders[attributeName](product)
+                        value[localeName] = aggregatedValueHandlers[attributeName]
+                            ? aggregatedValueHandlers[attributeName](product)
                             : getAttributeValue(product, config.attribute);
                     }
-                    request.setLocale(currenrLocale);
+                    request.setLocale(currentLocale);
                 } else {
-                    value = agregatedValueHanlders[attributeName]
-                        ? agregatedValueHanlders[attributeName](product)
+                    value = aggregatedValueHandlers[attributeName]
+                        ? aggregatedValueHandlers[attributeName](product)
                         : getAttributeValue(product, config.attribute);
                 }
 
