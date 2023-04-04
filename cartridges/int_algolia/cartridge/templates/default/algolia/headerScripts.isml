@@ -44,17 +44,21 @@
         }
     </script>
 
-    <!-- Algolia Insights (Click Analytics & Personalization) -->
+
+    <iscomment>--- Algolia Insights (Click Analytics & Personalization) ---</iscomment>
+
     <script>
-      var ALGOLIA_INSIGHTS_SRC = "${URLUtils.staticURL('js/lib/algolia/search-insights.min.js')}";
+        var ALGOLIA_INSIGHTS_SRC = "${URLUtils.staticURL('js/lib/algolia/search-insights.min.js')}";
 
-      !function(e,a,t,n,s,i,c){e.AlgoliaAnalyticsObject=s,e[s]=e[s]||function(){
-      (e[s].queue=e[s].queue||[]).push(arguments)},i=a.createElement(t),c=a.getElementsByTagName(t)[0],
-      i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
-      }(window,document,"script",ALGOLIA_INSIGHTS_SRC,"aa");
+        !function(e,a,t,n,s,i,c){e.AlgoliaAnalyticsObject=s,e[s]=e[s]||function(){
+        (e[s].queue=e[s].queue||[]).push(arguments)},i=a.createElement(t),c=a.getElementsByTagName(t)[0],
+        i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
+        }(window,document,"script",ALGOLIA_INSIGHTS_SRC,"aa");
     </script>
-
     <script src="${URLUtils.staticURL('js/algolia/insights-config.js')}"></script>
+
+
+    <iscomment>--- algoliasearch ---</iscomment>
 
     <script type="module">
         import algoliasearch from '${URLUtils.staticURL('js/lib/algolia/algoliasearch-lite.esm.browser.js')}';
@@ -63,26 +67,31 @@
 
     <script src="${URLUtils.staticURL('js/lib/hogan.js')}"></script>
 
-    <!-- Algolia Autocomplete.js -->
-    <link rel="stylesheet" href="${URLUtils.staticURL('css/algolia/autocomplete-theme.min.css')}" />
 
+    <iscomment>--- Algolia autocomplete.js ---</iscomment>
+
+    <link rel="stylesheet" href="${URLUtils.staticURL('css/algolia/autocomplete-theme.min.css')}" />
     <script src="${URLUtils.staticURL('js/lib/algolia/autocomplete-js/index.production.js')}"></script>
 
     <script>
         const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
     </script>
     <script type="module">
-        import { html } from '${URLUtils.staticURL("js/lib/preact-standalone.module.js")}'
+        import { html } from '${URLUtils.staticURL("js/lib/preact-standalone.module.js")}';
         window.html = html;
     </script>
     <script src="${URLUtils.staticURL('js/algolia/autocomplete-config.js')}"></script>
 
-    <!-- Algolia InstantSearch.js -->
+
+    <iscomment>--- Algolia InstantSearch.js ---</iscomment>
+
     <link rel="stylesheet" href="${URLUtils.staticURL('css/algolia/instantsearch-reset-min.css')}" />
     <script src="${URLUtils.staticURL('js/lib/algolia/instantsearch.production.min.js')}"></script>
+
     <script src="${URLUtils.staticURL('js/algolia/instantsearch-config.js')}"></script>
 
     <link rel="stylesheet" href="${URLUtils.staticURL('/css/algolia/index.css')}" />
     <script src="${URLUtils.staticURL('js/algolia/index.js')}"></script>
+
 </isif>
 <!-- End of Algolia dependencies -->

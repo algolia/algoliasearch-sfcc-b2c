@@ -7,9 +7,17 @@
 function enableInsights(appId, searchApiKey) {
     window.aa('init', {
         appId: appId,
-        apiKey: searchApiKey
+        apiKey: searchApiKey,
+        // the default value was changed to false starting with SearchInsights v2
+        // this means that an anonymous user token will no longer be generated and saved for the session automatically
+        // this will generate 422 errors in the Algolia Events Debugger if useCookie is false and a user token was not specified explicitly
+        // please see the documentation for more details
+        useCookie: false,
     });
 
+    // Use setUserToken to set a user token explicitly (e.g. for registered customers)
+    // const userToken = 'desired_user_token';
+    // aa('setUserToken', userToken);
 
     // when on product page
     document.addEventListener('click', function (event) {
@@ -74,7 +82,7 @@ function enableInsights(appId, searchApiKey) {
     };
 
     /**
-     * Returns the value of an URL parameter
+     * Returns the value of a URL parameter
      * @param {string} parameterName The parameter name whose value should be returned
      * @returns {string} The value of the parameter
      */
