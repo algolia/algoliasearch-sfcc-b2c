@@ -2,16 +2,21 @@
     <isinclude template="reporting/reportingUrls" />
 </isif>
 
-<!-- Search Results Banner -->
+<iscomment> Search Results Banner </iscomment>
 <isif condition="${pdict.category}">
     <div class="hero slant-down search-banner"
-        <!--- If no image, default is specified in search.scss > .search-banner --->
+        <iscomment> If no image, default is specified in search.scss > .search-banner </iscomment>
+
         <isif condition="${pdict.categoryBannerUrl}">
             style="background-image: url(${pdict.categoryBannerUrl})"
         </isif>
     >
         <h1 class="header page-title">
-            <span id="algolia-category-title-placeholder"></span>
+            <span id="algolia-category-title-placeholder">
+                <div class="ais-Breadcrumb">
+                    ${pdict.category.getDisplayName()}
+                </div>
+            </span>
         </h1>
     </div>
 <iselse/>
