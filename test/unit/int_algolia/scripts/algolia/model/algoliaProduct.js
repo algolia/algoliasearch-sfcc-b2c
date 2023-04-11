@@ -6,6 +6,7 @@ var proxyquire = require('proxyquire').noCallThru().noPreserveCache();
 var GlobalMock = require('../../../../../mocks/global');
 var ProductMock = require('../../../../../mocks/dw/catalog/Product');
 var algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
+var algoliaUtils = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/utils');
 
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
@@ -49,7 +50,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
     '*/cartridge/scripts/algolia/lib/algoliaData': {
         getSetOfArray: function (id) {
             return id === 'CustomFields'
-                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'brand', 'online', 'pageDescription', 'pageKeywords',
+                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
                     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
                 : null;
         },
@@ -57,14 +58,15 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
             return id === 'InStockThreshold' ? 1 : null;
         }
     },
+    '*/cartridge/scripts/algolia/lib/utils': algoliaUtils,
     '*/cartridge/scripts/algolia/lib/algoliaProductConfig': algoliaProductConfig,
     '*/cartridge/scripts/algolia/customization/productModelCustomizer': {
         customizeProductModel: function (productModel) { return productModel; }
     }
 });
 
-describe('algiliaProduct module - Test Algolia Product model', function () {
-    it('Checking Algolia Product model is valid', function () {
+describe('algoliaProduct module - Test Algolia Product model', function () {
+    it('Check if the Algolia Product model is valid', function () {
         let product = new ProductMock();
         let algoliaProductModel = {
             id: '701644031206M',
@@ -83,14 +85,6 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             fr: 'Womens',
                             en: 'Womens'
                         }
-                    },
-                    {
-                        id: 'newarrivals',
-                        name: {
-                            default: 'New Arrivals',
-                            fr: 'New Arrivals',
-                            en: 'New Arrivals'
-                        }
                     }
                 ],
                 [
@@ -100,22 +94,6 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                             default: 'Bottoms',
                             fr: 'Bottoms',
                             en: 'Bottoms'
-                        }
-                    },
-                    {
-                        id: 'womens-clothing',
-                        name: {
-                            default: 'Clothing',
-                            fr: 'Clothing',
-                            en: 'Clothing'
-                        }
-                    },
-                    {
-                        id: 'womens',
-                        name: {
-                            default: 'Womens',
-                            fr: 'Womens',
-                            en: 'Womens'
                         }
                     }
                 ]
@@ -255,18 +233,21 @@ describe('algiliaProduct module - Test Algolia Product model', function () {
                 fr: 'Hot Pink Combo',
                 en: 'Hot Pink Combo'
             },
+            refinementColor: {
+                default: 'Pink',
+                fr: 'Pink',
+                en: 'Pink'
+            },
             size: {
                 default: '4',
                 fr: '4',
                 en: '4'
             },
-            custom: {
-                refinementColor: {
-                    default: 'Pink',
-                    fr: 'Pink',
-                    en: 'Pink'
-                }
-            }
+            refinementSize: {
+                default: '4',
+                fr: '4',
+                en: '4',
+            },
         };
         assert.deepEqual(new AlgoliaProduct(product), algoliaProductModel);
     });

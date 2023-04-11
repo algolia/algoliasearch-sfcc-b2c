@@ -47,8 +47,8 @@ function createHandshakeRequest() {
     };
 
     var ocapiEncrypted = encryptHelper.encryptOcapiCredentials(
-        algoliaData.getPreference('OCAPIClientID'),
-        algoliaData.getPreference('OCAPIClientPassword'),
+        algoliaData.getPreference('OCAPIClientID') || 'aaaaaaaaaaaaaaaaaaaaaaa',
+        algoliaData.getPreference('OCAPIClientPassword' || 'aaaaaaaaaaaaaaaaaaaaaaa'),
         algoliaData.getPreference('AdminApiKey'),
         algoliaData.getPreference('SearchApiKey')
     );

@@ -1,11 +1,25 @@
 /* global aa */
-
+/**
+ * Configures Insights
+ * @param {string} appId Application ID
+ * @param {string} searchApiKey Search API Key
+ */
 function enableInsights(appId, searchApiKey) {
     window.aa('init', {
         appId: appId,
-        apiKey: searchApiKey
+        apiKey: searchApiKey,
+        // the default value was changed to false starting with SearchInsights v2
+        // this means that an anonymous user token will no longer be generated and saved for the session automatically
+        // this will generate 422 errors in the Algolia Events Debugger if useCookie is false and a user token was not specified explicitly
+        // please see the documentation for more details:
+        // https://www.npmjs.com/package/search-insights
+        // https://www.algolia.com/doc/api-reference/widgets/insights/js/#widget-param-insightsinitparams
+        useCookie: false,
     });
 
+    // Use setUserToken to set a user token explicitly (e.g. for registered customers)
+    // const userToken = 'desired_user_token';
+    // aa('setUserToken', userToken);
 
     // when on product page
     document.addEventListener('click', function (event) {
@@ -52,7 +66,12 @@ function enableInsights(appId, searchApiKey) {
         }
     });
 
-
+    /**
+     * Finds Insights target
+     * @param {Object} startElement Element to start from
+     * @param {Object} endElement Element to stop searching at
+     * @returns {Object} Element found or null if not found
+     */
     function findInsightsTarget(startElement, endElement) {
         var element = startElement;
         while (element && !element.hasAttribute('data-query-id')) {
@@ -64,6 +83,11 @@ function enableInsights(appId, searchApiKey) {
         return element;
     };
 
+    /**
+     * Returns the value of a URL parameter
+     * @param {string} parameterName The parameter name whose value should be returned
+     * @returns {string} The value of the parameter
+     */
     function getUrlParameter(parameterName) {
         var queryString = window.location.search.substring(1);
         var sURLVariables = queryString.split('&');

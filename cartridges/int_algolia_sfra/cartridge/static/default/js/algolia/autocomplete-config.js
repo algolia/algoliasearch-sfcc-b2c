@@ -1,5 +1,9 @@
 /* global autocomplete, getAlgoliaResults, html, algoliaData  */
 
+/**
+ * Enables autocomplete
+ * @param {Object} config configuration object
+ */
 function enableAutocomplete(config) {
     const inputElements = document.querySelectorAll('#aa-search-input');
 
@@ -15,7 +19,7 @@ function enableAutocomplete(config) {
                 return [
                     {
                         sourceId: 'products',
-                        getItems({ query }) {
+                        getItems({ query }) { // eslint-disable-line no-shadow
                             return getAlgoliaResults({
                                 searchClient: config.searchClient,
                                 queries: [
@@ -29,6 +33,14 @@ function enableAutocomplete(config) {
                                         },
                                     },
                                 ],
+                            });
+                        },
+                        onSelect: function(event) {
+                            aa('clickedObjectIDsAfterSearch', {
+                                index: event.item.__autocomplete_indexName,
+                                eventName: 'Clicked on autocomplete product',
+                                queryID: event.item.__autocomplete_queryID,
+                                objectID: event.item.objectID,
                             });
                         },
                         templates: {
@@ -50,22 +62,24 @@ function enableAutocomplete(config) {
                                     });
                                     item.firstImage = smallImageGroup.images[0];
                                 }
+
+                                // add queryID, objectID and indexName to the URL (analytics)
+                                var newURL = new URL(item.url);
+                                newURL.searchParams.append('objectID', item.objectID);
+                                newURL.searchParams.append('queryID', item.__autocomplete_queryID);
+                                newURL.searchParams.append('indexName', item.__autocomplete_indexName);
+
                                 return html`
-                                  <div class="text-truncate text-nowrap">
-                                    <img class="swatch-circle hidden-xs-down"
-                                         src=${item.firstImage.dis_base_link}></img>
-                                    <a href=${item.url}>${components.Highlight({
-                                      hit: item,
-                                      attribute: "name",
-                                      tagName: "em"
-                                    })}</a>
-                                  </div>`;
+                                    <div class="text-truncate text-nowrap">
+                                        <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
+                                        <a href=${item.url}>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
+                                    </div>`;
                             },
                         },
                     },
                     {
                         sourceId: 'categories',
-                        getItems({ query }) {
+                        getItems({ query }) { // eslint-disable-line no-shadow
                             return getAlgoliaResults({
                                 searchClient: config.searchClient,
                                 queries: [
@@ -96,10 +110,10 @@ function enableAutocomplete(config) {
                                   <div class="text-truncate text-nowrap">
                                     <img class="swatch-circle hidden-xs-down" src=${item.image}></img>
                                     <a href=${item.url}>${components.Highlight({
-                                      hit: item,
-                                      attribute: "name",
-                                      tagName: "em"
-                                    })}</a>
+    hit: item,
+    attribute: "name",
+    tagName: "em"
+})}</a>
                                   </div>`;
                             },
                         },

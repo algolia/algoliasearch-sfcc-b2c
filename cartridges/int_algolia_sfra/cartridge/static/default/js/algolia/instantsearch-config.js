@@ -1,5 +1,8 @@
 /* global instantsearch */
-
+/**
+ * Initializes InstantSearch
+ * @param {Object} config Configuration object
+ */
 function enableInstantSearch(config) {
     var initialUiState = {};
     var hierarchicalMenuValue = {};
@@ -24,13 +27,17 @@ function enableInstantSearch(config) {
         insightsClient: window.aa
     });
 
+    // initialize the Insights middleware -- to set userToken, see insights-config.js
+    const insightsMiddleware = instantsearch.middlewares.createInsightsMiddleware({
+        insightsClient: window.aa,
+    });
+    search.use(insightsMiddleware);
 
     if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
             instantsearch.widgets.configure({
                 distinct: true,
                 hitsPerPage: 3 * 3,
-                clickAnalytics: true
             }),
             instantsearch.widgets.searchBox({
                 container: '#algolia-searchbox-placeholder',
@@ -123,7 +130,7 @@ function enableInstantSearch(config) {
                 },
                 panelTitle: algoliaData.strings.brandPanelTitle
             }),
-    
+
             rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
                 attribute: 'price.' + config.userCurrency,
@@ -156,7 +163,7 @@ function enableInstantSearch(config) {
                         + '</a>',
                 },
                 panelTitle: algoliaData.strings.sizePanelTitle
-            }),        
+            }),
 
             refinementListWithPanel({
                 container: '#algolia-color-list-placeholder',
@@ -174,7 +181,7 @@ function enableInstantSearch(config) {
                         + '</a>',
                 },
                 panelTitle: algoliaData.strings.colorPanelTitle
-            }),    
+            }),
 
             instantsearch.widgets.infiniteHits({
                 container: '#algolia-hits-placeholder',
@@ -250,33 +257,33 @@ function enableInstantSearch(config) {
                                 item.image = firstImageInGroup
                             }
                         }
-    
+
                         // adjusted price in user currency
                         if (item.promotionalPrice && item.promotionalPrice[config.userCurrency] !== null) {
                             item.promotionalPrice = item.promotionalPrice[config.userCurrency]
                         }
-    
+
                         // price in user currency
                         if (item.price && item.price[config.userCurrency] !== null) {
                             item.price = item.price[config.userCurrency]
                         }
-    
+
                         // currency symbol
                         item.currencySymbol = config.userCurrencySymbol;
-    
-    
+
+
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + item.id;
-    
+
                         // originating index
                         item.__indexName = config.productsIndex;
-    
+
                         // url with queryID (used for analytics)
                         var url = new URL(item.url);
                         url.searchParams.append('queryID', item.__queryID);
                         url.searchParams.append('objectID', item.objectID);
                         url.searchParams.append('indexName', item.__indexName);
                         item.url = url.href;
-    
+
                         return item;
                     });
                 }
@@ -306,18 +313,39 @@ function enableInstantSearch(config) {
 
     search.start();
 
+    /**
+     * Generates a menu with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
     function hierarchicalMenuWithPanel(options) {
         return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(options)
     }
 
+    /**
+     * Builds a refinement list with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
     function refinementListWithPanel(options) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(options)
     }
 
+    /**
+     * Builds a range input with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
     function rangeInputWithPanel(options) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.rangeInput)(options)
     }
 
+    /**
+     * Builds an InstantSearch Panel widget with the supplied parameters
+     * @param {string} attribute Attribute
+     * @param {string} panelTitle Title of the Panel
+     * @returns {Object} A new InstantSearh Panel
+     */
     function withPanel(attribute, panelTitle) {
         var headerTemplate = Hogan.compile(''
             + '<button class="title btn text-left btn-block d-md-none" aria-controls="refinement-{{attribute}}" aria-expanded="false">'
@@ -328,10 +356,10 @@ function enableInstantSearch(config) {
         return instantsearch.widgets.panel({
             hidden: function(options) {
                 var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
-                var facet = facets.find(function(facet) { return facet.name === attribute });
+                var facet = facets.find(function(facet) { return facet.name === attribute }); // eslint-disable-line no-shadow
                 var facetExists = !!facet;
                 return !facetExists; // hides panel if not facets selectable
-              },
+            },
             templates: {
                 header: headerTemplate.render({ panelTitle: panelTitle, attribute: attribute })
             },
@@ -340,7 +368,7 @@ function enableInstantSearch(config) {
                 header: 'card-header col-sm-12',
                 body: 'card-body content value',
                 footer: 'card-footer',
-              }
+            }
 
         })
     }

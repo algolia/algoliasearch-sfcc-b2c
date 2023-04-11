@@ -13,7 +13,7 @@ function encryptOcapiCredentials(clientId, clientPassword, key, initSalt) {
     var Cipher = require('dw/crypto/Cipher');
     var Bytes = require('dw/util/Bytes');
 
-    if (empty(key) || empty(initSalt)) {
+    if (empty(clientId) || empty(clientPassword) || empty(key) || empty(initSalt)) {
         return null;
     }
 

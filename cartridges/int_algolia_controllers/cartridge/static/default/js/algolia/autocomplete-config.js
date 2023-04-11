@@ -1,5 +1,9 @@
 /* global autocomplete, getAlgoliaResults, algoliaData */
 
+/**
+ * Enables autocomplete
+ * @param {Object} config configuration object
+ */
 function enableAutocomplete(config) {
     const inputElements = document.querySelectorAll('#aa-search-input');
 
@@ -8,14 +12,14 @@ function enableAutocomplete(config) {
             container: inputElement,
             classNames: {
                 // d-block permits to force "display: block", because SFCC's main.js script sets our panel to "display: none" when clicking again in the input
-                panel: "search-suggestion-wrapper full d-block",
+                panel: "algolia-autocomplete search-suggestion-wrapper full d-block",
             },
             placeholder: algoliaData.strings.placeholder,
             getSources({ query }) {
                 return [
                     {
                         sourceId: 'products',
-                        getItems({ query }) {
+                        getItems({ query }) { // eslint-disable-line no-shadow
                             return getAlgoliaResults({
                                 searchClient: config.searchClient,
                                 queries: [
@@ -29,6 +33,14 @@ function enableAutocomplete(config) {
                                         },
                                     },
                                 ],
+                            });
+                        },
+                        onSelect: function(event) {
+                            aa('clickedObjectIDsAfterSearch', {
+                                index: event.item.__autocomplete_indexName,
+                                eventName: 'Clicked on autocomplete product',
+                                queryID: event.item.__autocomplete_queryID,
+                                objectID: event.item.objectID,
                             });
                         },
                         templates: {
@@ -52,10 +64,17 @@ function enableAutocomplete(config) {
                                     });
                                     item.firstImage = smallImageGroup.images[0];
                                 }
+
+                                // add queryID, objectID and indexName to the URL (analytics)
+                                var newURL = new URL(item.url);
+                                newURL.searchParams.append('objectID', item.objectID);
+                                newURL.searchParams.append('queryID', item.__autocomplete_queryID);
+                                newURL.searchParams.append('indexName', item.__autocomplete_indexName);
+
                                 return createElement("div", { class: "product-suggestion" },
                                     createElement("a", {
                                             class: "product-link",
-                                            href: item.url
+                                            href: newURL,
                                         },
                                         createElement("div", { class: "product-image" },
                                             createElement("img", { src: item.firstImage.dis_base_link })
@@ -74,7 +93,7 @@ function enableAutocomplete(config) {
                     },
                     {
                         sourceId: 'categories',
-                        getItems({ query }) {
+                        getItems({ query }) { // eslint-disable-line no-shadow
                             return getAlgoliaResults({
                                 searchClient: config.searchClient,
                                 queries: [

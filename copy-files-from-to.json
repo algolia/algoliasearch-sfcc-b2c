@@ -1,0 +1,46 @@
+{
+	"copyFiles": [{
+			"from": "node_modules/search-insights/dist/search-insights.min.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/search-insights.min.js"
+		},
+		{
+			"from": "node_modules/algoliasearch/dist/algoliasearch-lite.esm.browser.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/algoliasearch-lite.esm.browser.js"
+		},
+		{
+			"from": "node_modules/hogan.js/lib/hogan.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/hogan.js"
+		},
+		{
+			"from": "node_modules/@algolia/autocomplete-theme-classic/dist/theme.min.css",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/css/algolia/autocomplete-theme.min.css"
+		},
+		{
+			"from": "node_modules/@algolia/autocomplete-js/dist/umd/index.production.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/autocomplete-js/index.production.js"
+		},
+		{
+			"from": "node_modules/@algolia/autocomplete-js/dist/umd/index.production.js.map",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/autocomplete-js/index.production.js.map"
+		},
+		{
+			"from": "node_modules/instantsearch.css/themes/reset-min.css",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/css/algolia/instantsearch-reset-min.css"
+		},
+		{
+			"from": "node_modules/instantsearch.js/dist/instantsearch.production.min.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/instantsearch.production.min.js"
+		},
+		{
+			"from": "node_modules/instantsearch.js/dist/instantsearch.production.min.js.map",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/instantsearch.production.min.js.map"
+		},
+		{
+			"from": "node_modules/htm/preact/standalone.module.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/preact-standalone.module.js"
+		}
+	],
+	"copyFilesSettings": {
+		"whenFileExists": "overwrite"
+	}
+}
