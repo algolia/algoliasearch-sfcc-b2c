@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var categoriesIndex = algoliaData.categoriesIndex;
 
     var searchClient = algoliasearch(algoliaData.applicationID, algoliaData.searchApiKey);
+    searchClient.addAlgoliaAgent('Algolia Salesforce B2C', 'SFRA');
 
     enableInsights(algoliaData.applicationID, algoliaData.searchApiKey);
 
