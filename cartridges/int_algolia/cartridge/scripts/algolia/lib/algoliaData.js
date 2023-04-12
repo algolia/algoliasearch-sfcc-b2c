@@ -21,6 +21,7 @@ var CATEGORIES_SEPARATOR = ' > ';
  *   InStockThreshold       | Stock Threshold                                   | Double
  *   SearchApiKey           | Authorization key for Algolia                     | String
  *   AdminApiKey            | Authorization Admin key for Algolia               | String
+ *   IndexIDPrefix          | Optional prefix for the IndexID                   | String
  *   OCAPIClientID          | Authorization OCAPI SFCC Client ID                | String
  *   OCAPIClientPassword    | Authorization OCAPI SFCC Client passwrd           | String
  * -------------------------------------------------------------------------------------------------
@@ -145,12 +146,30 @@ function getInstanceHostName() {
 }
 
 /**
- * Create index id for search results request
+ * Create indexID prefix for search results request
+ * If custom site preference Algolia_IndexIDPrefix is set in BM,
+ * its value will be used as a prefix instead of the first part of the hostname and the siteID
+ * @returns {string} indexID prefix
+ */
+function getIndexIDPrefix() {
+    var indexIDPrefix = getPreference('IndexIDPrefix');
+
+    if (!empty(indexIDPrefix)) {
+        return indexIDPrefix.trim();
+    } else {
+        return getInstanceHostName() + '__' + currentSite.getID();
+    }
+}
+
+/**
+ * Create indexID for search results request
+ * If custom site preference Algolia_IndexIDPrefix is set in BM,
+ * its value will be used as a prefix instead of the first part of the hostname and the siteID
  * @param {string} type - type of indices: products | categories
  * @returns {string} indexId
  */
 function calculateIndexId(type) {
-    return getInstanceHostName() + '__' + currentSite.getID() + '__' + type + '__' + request.getLocale();
+    return getIndexIDPrefix() + '__' + type + '__' + request.getLocale();
 }
 
 /**
@@ -217,6 +236,7 @@ module.exports = {
     setLogData: setLogData,
     getLogDataAllSites: getLogDataAllSites,
     getInstanceHostName: getInstanceHostName,
+    getIndexIDPrefix: getIndexIDPrefix,
     calculateIndexId: calculateIndexId,
     getLocalDateTime: getLocalDateTime,
     getSyncLocalDateTime: getSyncLocalDateTime,
