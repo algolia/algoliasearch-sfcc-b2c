@@ -21,7 +21,7 @@ var CATEGORIES_SEPARATOR = ' > ';
  *   InStockThreshold       | Stock Threshold                                   | Double
  *   SearchApiKey           | Authorization key for Algolia                     | String
  *   AdminApiKey            | Authorization Admin key for Algolia               | String
- *   IndexIDPrefix          | Optional prefix for the IndexID                   | String
+ *   IndexPrefix          | Optional prefix for the IndexID                   | String
  *   OCAPIClientID          | Authorization OCAPI SFCC Client ID                | String
  *   OCAPIClientPassword    | Authorization OCAPI SFCC Client passwrd           | String
  * -------------------------------------------------------------------------------------------------
@@ -147,15 +147,15 @@ function getInstanceHostName() {
 
 /**
  * Create indexID prefix for search results request
- * If custom site preference Algolia_IndexIDPrefix is set in BM,
+ * If custom site preference Algolia_IndexPrefix is set in BM,
  * its value will be used as a prefix instead of the first part of the hostname and the siteID
  * @returns {string} indexID prefix
  */
-function getIndexIDPrefix() {
-    var indexIDPrefix = getPreference('IndexIDPrefix');
+function getIndexPrefix() {
+    var indexPrefix = getPreference('IndexPrefix');
 
-    if (!empty(indexIDPrefix)) {
-        return indexIDPrefix.trim();
+    if (!empty(indexPrefix)) {
+        return indexPrefix.trim();
     } else {
         return getInstanceHostName() + '__' + currentSite.getID();
     }
@@ -163,13 +163,13 @@ function getIndexIDPrefix() {
 
 /**
  * Create indexID for search results request
- * If custom site preference Algolia_IndexIDPrefix is set in BM,
+ * If custom site preference Algolia_IndexPrefix is set in BM,
  * its value will be used as a prefix instead of the first part of the hostname and the siteID
  * @param {string} type - type of indices: products | categories
  * @returns {string} indexId
  */
 function calculateIndexId(type) {
-    return getIndexIDPrefix() + '__' + type + '__' + request.getLocale();
+    return getIndexPrefix() + '__' + type + '__' + request.getLocale();
 }
 
 /**
@@ -236,7 +236,7 @@ module.exports = {
     setLogData: setLogData,
     getLogDataAllSites: getLogDataAllSites,
     getInstanceHostName: getInstanceHostName,
-    getIndexIDPrefix: getIndexIDPrefix,
+    getIndexPrefix: getIndexPrefix,
     calculateIndexId: calculateIndexId,
     getLocalDateTime: getLocalDateTime,
     getSyncLocalDateTime: getSyncLocalDateTime,
