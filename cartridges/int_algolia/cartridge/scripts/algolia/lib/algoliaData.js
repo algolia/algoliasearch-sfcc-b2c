@@ -21,7 +21,7 @@ var CATEGORIES_SEPARATOR = ' > ';
  *   InStockThreshold       | Stock Threshold                                   | Double
  *   SearchApiKey           | Authorization key for Algolia                     | String
  *   AdminApiKey            | Authorization Admin key for Algolia               | String
- *   IndexPrefix          | Optional prefix for the IndexID                   | String
+ *   IndexPrefix            | Optional prefix for the index name                | String
  *   OCAPIClientID          | Authorization OCAPI SFCC Client ID                | String
  *   OCAPIClientPassword    | Authorization OCAPI SFCC Client passwrd           | String
  * -------------------------------------------------------------------------------------------------
@@ -146,10 +146,10 @@ function getInstanceHostName() {
 }
 
 /**
- * Create indexID prefix for search results request
+ * Create index prefix for search results request
  * If custom site preference Algolia_IndexPrefix is set in BM,
  * its value will be used as a prefix instead of the first part of the hostname and the siteID
- * @returns {string} indexID prefix
+ * @returns {string} index prefix
  */
 function getIndexPrefix() {
     var indexPrefix = getPreference('IndexPrefix');
@@ -162,13 +162,13 @@ function getIndexPrefix() {
 }
 
 /**
- * Create indexID for search results request
+ * Create index name for search results request
  * If custom site preference Algolia_IndexPrefix is set in BM,
  * its value will be used as a prefix instead of the first part of the hostname and the siteID
  * @param {string} type - type of indices: products | categories
- * @returns {string} indexId
+ * @returns {string} index name
  */
-function calculateIndexId(type) {
+function calculateIndexName(type) {
     return getIndexPrefix() + '__' + type + '__' + request.getLocale();
 }
 
@@ -237,7 +237,7 @@ module.exports = {
     getLogDataAllSites: getLogDataAllSites,
     getInstanceHostName: getInstanceHostName,
     getIndexPrefix: getIndexPrefix,
-    calculateIndexId: calculateIndexId,
+    calculateIndexName: calculateIndexName,
     getLocalDateTime: getLocalDateTime,
     getSyncLocalDateTime: getSyncLocalDateTime,
     getAlgoliaSites: getAlgoliaSites,
