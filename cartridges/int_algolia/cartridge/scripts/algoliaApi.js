@@ -39,7 +39,7 @@ function createHandshakeRequest() {
         site_name: currentSite.getName(),
         locales: currentSite.getAllowedLocales().toArray(),
         currencies: currentSite.getAllowedCurrencies().toArray(),
-        index_prefix: algoliaData.getInstanceHostName() + '__' + currentSite.getID(),
+        index_prefix: algoliaData.getIndexPrefix(),
         fields: {
             product: algoliaProductConfig.defaultAttributes.concat(algoliaData.getSetOfArray('CustomFields')),
             category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subCategories', 'url']

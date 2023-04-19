@@ -10,8 +10,8 @@
             "locale": "${request.getLocale()}",
             "currencyCode": "${request.getSession().getCurrency().getCurrencyCode()}",
             "currencySymbol": '<isprint value="${request.getSession().getCurrency().getSymbol()}" encoding="jshtml" />',
-            "productsIndex": "${algoliaData.calculateIndexId('products')}",
-            "categoriesIndex": "${algoliaData.calculateIndexId('categories')}",
+            "productsIndex": "${algoliaData.calculateIndexName('products')}",
+            "categoriesIndex": "${algoliaData.calculateIndexName('categories')}",
             "quickViewUrlBase": "${URLUtils.url('Product-ShowQuickView')}",
             "strings": {
                 "placeholder": "${Resource.msg('label.header.searchwatermark', 'common', null)}",
