@@ -1,4 +1,5 @@
 /* global aa */
+
 /**
  * Configures Insights
  * @param {string} appId Application ID
@@ -8,18 +9,24 @@ function enableInsights(appId, searchApiKey) {
     window.aa('init', {
         appId: appId,
         apiKey: searchApiKey,
-        // the default value was changed to false starting with SearchInsights v2
-        // this means that an anonymous user token will no longer be generated and saved for the session automatically
-        // this will generate 422 errors in the Algolia Events Debugger if useCookie is false and a user token was not specified explicitly
-        // please see the documentation for more details:
+        // The default value was changed to false starting with SearchInsights v2.
+        // This means that an anonymous user token will no longer be generated and saved for the session automatically.
+        // Leaving it at false will generate HTTP 422 errors in the Algolia Events Debugger if useCookie is false and a user token is not set explicitly
+        // In order to prevent 422 errors, random userToken is set below which persists throughout the page (regenerated on each page load).
+        // Please see the documentation for more details:
         // https://www.npmjs.com/package/search-insights
         // https://www.algolia.com/doc/api-reference/widgets/insights/js/#widget-param-insightsinitparams
         useCookie: false,
     });
 
-    // Use setUserToken to set a user token explicitly (e.g. for registered customers)
-    // const userToken = 'desired_user_token';
-    // aa('setUserToken', userToken);
+    // Generate a random 20-character userToken - will persist throughout the page
+    const userToken = getRandomUserToken();
+
+    // Use setUserToken to set a user token explicitly.
+    // Set useCookie to true or set this value to the SFCC tracking cookie dwanonymous_* for session-scoped anonymous tracking or
+    // assign the user's customerID for tracking logged-in users based on dw.system.Session.isTrackingAllowed() (must be exposed to the frontend).
+    // Setting a userToken like so prevent HTTP 422 errors in the Events Debugger with useCookie set to false.
+    aa('setUserToken', userToken);
 
     // when on product page
     document.addEventListener('click', function (event) {
@@ -33,7 +40,7 @@ function enableInsights(appId, searchApiKey) {
                     eventName: 'Product Add to cart',
                     index: indexName,
                     queryID: queryID,
-                    objectIDs: [objectID]
+                    objectIDs: [objectID],
                 });
             }
         }
@@ -61,10 +68,18 @@ function enableInsights(appId, searchApiKey) {
                 eventName: 'Global Add to cart',
                 index: lastIndexName,
                 queryID: lastQueryID,
-                objectIDs: [lastObjectID]
+                objectIDs: [lastObjectID],
             });
         }
     });
+
+    /**
+     * Generates a random user token made up of 20 alphanumeric characters
+     * @returns {string} randomly generated userToken
+     */
+    function getRandomUserToken() {
+        return Array.from(Array(20), () => Math.floor(Math.random() * 36).toString(36)).join('');
+    }
 
     /**
      * Finds Insights target
