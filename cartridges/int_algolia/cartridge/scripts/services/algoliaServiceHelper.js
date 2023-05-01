@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Call Bluesnap REST service and handle common errors
+ * Call REST service and handle common errors
  */
 
 var logger = require('dw/system/Logger').getLogger('algolia');

@@ -7,7 +7,9 @@ var Logger = require('dw/system/Logger');
 var Resource = require('dw/web/Resource');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var algoliaApi = require('*/cartridge/scripts/algoliaApi');
+var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
+
+
 
 /**
  * @description Render default template
@@ -61,7 +63,7 @@ function handleSettings() {
 function indexing() {
     var requestType = request.httpParameterMap.requestType.stringValue;
     var responseData = {};
-    var status = algoliaApi.makeIndexingRequest(requestType);
+    var status = algoliaExportAPI.makeIndexingRequest(requestType);
 
     if (status.error) {
         responseData.errorMessage = status.details.errorMessage ? status.details.errorMessage : Resource.msg('algolia.error.service', 'algolia', null);
