@@ -21,8 +21,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var searchClient = algoliasearch(algoliaData.applicationID, algoliaData.searchApiKey);
     searchClient.addAlgoliaAgent('Algolia Salesforce B2C', 'SFRA');
 
-    enableInsights(algoliaData.applicationID, algoliaData.searchApiKey);
-
     enableAutocomplete({
         searchClient: searchClient,
         productsIndex: productsIndex,
@@ -44,4 +42,5 @@ document.addEventListener('DOMContentLoaded', function () {
         userCurrencySymbol: userCurrencySymbol
     });
 
+    enableInsights(algoliaData.applicationID, algoliaData.searchApiKey);
 });

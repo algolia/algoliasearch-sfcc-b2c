@@ -35,14 +35,6 @@ function enableAutocomplete(config) {
                                 ],
                             });
                         },
-                        onSelect: function(event) {
-                            aa('clickedObjectIDsAfterSearch', {
-                                index: event.item.__autocomplete_indexName,
-                                eventName: 'Clicked on autocomplete product',
-                                queryID: event.item.__autocomplete_queryID,
-                                objectID: event.item.objectID,
-                            });
-                        },
                         templates: {
                             header() {
                                 return html`
@@ -72,7 +64,7 @@ function enableAutocomplete(config) {
                                 return html`
                                     <div class="text-truncate text-nowrap">
                                         <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
-                                        <a href=${item.url}>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
+                                        <a href=${newURL}>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
                                     </div>`;
                             },
                         },
@@ -120,6 +112,7 @@ function enableAutocomplete(config) {
                     },
                 ];
             },
+            insights: true,
         });
 
         inputElement.addEventListener('keypress', function (event) {
