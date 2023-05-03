@@ -1,3 +1,6 @@
+// CAN BE REMOVED?
+
+
 var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 
 
@@ -9,50 +12,21 @@ var algoliaSearchService = require('*/cartridge/scripts/services/algoliaSearchSe
 
 
 function testCall() {
-    var service = algoliaSearchService.init();
-
-    // service.setRequestMethod('POST');
-    // service.setAuthentication('NONE');
-    // // service.addParam('facetFilters', '[["__primary_category.1:Mens > Clothing"]]');
-    // service.addParam('{"params":"facetFilters=%5B%5B%22__primary_category.2%3AMens%20%3E%20Clothing%20%3E%20Suits%22%5D%5D&"}')
+    var searchService = algoliaSearchService.createSearchService();
 
     var requestBody = {
-        "params" : "facetFilters=%5B%22__primary_category.2%3AMens%20%3E%20Clothing%20%3E%20Suits%22%5D"
+        params: "facetFilters=" + encodeURIComponent('["__primary_category.2:Mens > Clothing > Suits"]'),
     };
 
-    var result = service.call(requestBody);
+    var result = searchService.setThrowOnError().call(requestBody);
 
 
-    var x = result;
+    if (result.ok) {
+        //res.print(JSON.stringify(result.object.body.hits));
+        return result;
+    }
 
-
-
-
-
-
-
-    // // Call the service with the requestData object
-    // var requestData = {
-    //     "params" : "facetFilters=%5B%22__primary_category.2%3AMens%20%3E%20Clothing%20%3E%20Suits%22%5D"
-    // };
-    // var result = myService.call(requestData);
-
-    // // Handle the service call results
-    // if (result.status === 'OK') {
-    //     var serviceResponse = result.object;
-    //     // Process the serviceResponse object
-    //     Logger.info('Service call successful: {0}', JSON.stringify(serviceResponse));
-    // } else {
-    //     // Handle service call error
-    //     Logger.error('Service call failed: {0}', result.error);
-    // }
-
-
-
-
-
-
-
+    return null;
 
 
 
