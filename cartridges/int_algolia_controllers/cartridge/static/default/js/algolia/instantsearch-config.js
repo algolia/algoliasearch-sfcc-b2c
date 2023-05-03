@@ -24,14 +24,19 @@ function enableInstantSearch(config) {
         indexName: config.productsIndex,
         searchClient: config.searchClient,
         initialUiState: initialUiState,
-        insightsClient: window.aa
+        insights: {
+            insightsInitParams: {
+                // The default value of useCookie was changed to false starting with SearchInsights v2.
+                // This means that the anonymous user token will no longer be saved to a cookie and used throughout the session.
+                // Please see the documentation for more details:
+                // https://www.npmjs.com/package/search-insights
+                // https://www.algolia.com/doc/api-reference/widgets/insights/js/#widget-param-insightsinitparams
+                useCookie: false,
+                // You can set a userToken here explicitly (uncomment and edit):
+                // userToken: 'userToken',
+            }
+        },
     });
-
-    // initialize the Insights middleware -- to set userToken, see insights-config.js
-    const insightsMiddleware = instantsearch.middlewares.createInsightsMiddleware({
-        insightsClient: window.aa,
-    });
-    search.use(insightsMiddleware);
 
     if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
@@ -190,7 +195,6 @@ function enableInstantSearch(config) {
                         +'     data-pid="{{objectID}}"'
                         + '     data-query-id="{{__queryID}}"'
                         + '     data-index-name="{{__indexName}}"'
-                        + '     {{#helpers.insights}}{ "method": "clickedObjectIDsAfterSearch", "payload": {"eventName": "Click on product"} }{{/helpers.insights}}'
                         + '>'
                         + '        {{#image}}'
                         + '        <div class="product-image">'
