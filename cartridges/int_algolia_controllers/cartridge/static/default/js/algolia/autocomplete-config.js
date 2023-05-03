@@ -35,14 +35,6 @@ function enableAutocomplete(config) {
                                 ],
                             });
                         },
-                        onSelect: function(event) {
-                            aa('clickedObjectIDsAfterSearch', {
-                                index: event.item.__autocomplete_indexName,
-                                eventName: 'Clicked on autocomplete product',
-                                queryID: event.item.__autocomplete_queryID,
-                                objectID: event.item.objectID,
-                            });
-                        },
                         templates: {
                             header({ createElement }) {
                                 return createElement("div", { class: "header row justify-content-end" },
@@ -134,6 +126,7 @@ function enableAutocomplete(config) {
                     },
                 ];
             },
+            insights: true,
         });
 
         inputElement.addEventListener('keypress', function (event) {

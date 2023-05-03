@@ -1,9 +1,5 @@
 {
 	"copyFiles": [{
-			"from": "node_modules/search-insights/dist/search-insights.min.js",
-			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/search-insights.min.js"
-		},
-		{
 			"from": "node_modules/algoliasearch/dist/algoliasearch-lite.esm.browser.js",
 			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/algoliasearch-lite.esm.browser.js"
 		},
