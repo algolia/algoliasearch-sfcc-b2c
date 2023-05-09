@@ -218,7 +218,7 @@ function initializeEvents() {
         e.preventDefault();
         consentTracking.show();
     });
-
+    
     // main menu toggle
     $('.menu-toggle').on('click', function () {
         $('#wrapper').toggleClass('menu-active');
@@ -1043,11 +1043,11 @@ var consentTracking = {
         if (consent == null && SitePreferences.CONSENT_TRACKING_HINT) { // eslint-disable-line no-undef
             getConsent();
         }
-
+        
         if (consent != null && SitePreferences.CONSENT_TRACKING_HINT){ // eslint-disable-line no-undef
             showPrivacyDialog();
         }
-
+        
     },
     show: function () {
         getConsent();
@@ -1404,7 +1404,7 @@ var login = {
         $('.oAuthIcon').on('click', function () {
             $('#OAuthProvider').val(this.id);
         });
-
+    
 
         //toggle the value of the rememberme checkbox
         $('#dwfrm_login_rememberme').on('change', function () {
@@ -1414,7 +1414,7 @@ var login = {
                 $('#rememberme').val('false');
             }
         });
-
+        
         $('#password-reset').on('click', function (e) {
             e.preventDefault();
             dialog.open({
@@ -1614,7 +1614,7 @@ function initializeAddressForm() {
             type: 'POST'
         };
         $.ajax(options).done(function (data) {
-            if (typeof data !== 'string') {
+            if (typeof(data) !== 'string') {
                 if (data.success) {
                     dialog.close();
                     page.refresh();
@@ -4628,7 +4628,7 @@ var util = {
             left += el.offsetLeft;
         }
 
-        if (typeof offsetToTop !== 'undefined') {
+        if (typeof(offsetToTop) !== 'undefined') {
             top -= offsetToTop;
         }
 
@@ -23268,7 +23268,7 @@ function denodeifyWithoutCount(fn) {
     'args[argLength] = cb;',
     'res = fn.apply(self, args);',
     '}',
-
+    
     'if (res &&',
     '(typeof res === "object" || typeof res === "function") &&',
     'typeof res.then === "function"',
@@ -25648,10 +25648,10 @@ Url.prototype.parseHost = function() {
 
 module.exports = {
   isString: function(arg) {
-    return (typeof arg  === 'string');
+    return typeof(arg) === 'string';
   },
   isObject: function(arg) {
-    return (typeof arg === 'object' && arg !== null);
+    return typeof(arg) === 'object' && arg !== null;
   },
   isNull: function(arg) {
     return arg === null;
