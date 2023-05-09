@@ -7,7 +7,7 @@ const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
  * Algolia Search Service definition file
  * @returns {dw.svc.HTTPService} - HTTPService object
  */
-function createSearchService() {
+function getService() {
 
     const applicationID = algoliaData.getPreference('ApplicationID');
     const searchAPIKey = algoliaData.getPreference('SearchApiKey');
@@ -47,4 +47,4 @@ function createSearchService() {
     return searchService;
 }
 
-module.exports.createSearchService = createSearchService;
+module.exports.getService = getService;

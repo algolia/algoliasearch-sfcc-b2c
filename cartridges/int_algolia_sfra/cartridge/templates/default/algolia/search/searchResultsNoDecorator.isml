@@ -1,3 +1,5 @@
+<isinclude template="/util/modules" />
+
 <isif condition="${pdict.reportingURLs && pdict.reportingURLs.length}">
     <isinclude template="reporting/reportingUrls" />
 </isif>
@@ -53,7 +55,10 @@
                     </div>
                 </div>
                 <div class="col-sm-12 col-md-9">
-                    <div id="algolia-hits-placeholder" class="row product-grid"></div>
+                    <div id="algolia-hits-placeholder" class="row product-grid">
+                        <iscomment>Server-Side Rendering of CLP search results if algolia.http.search service is enabled</iscomment>
+                        <isalgoliasearchhits hits="${pdict.categoryProductHits}" />
+                    </div>
                 </div>
             </div>
 

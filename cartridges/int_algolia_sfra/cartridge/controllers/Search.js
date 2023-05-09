@@ -42,13 +42,20 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 useAlgolia = false; // if category does not exist use default error
             }
         }
+
         if (useAlgolia) {
+
+            // server-side results rendering for CLPs
+            var categoryProductHits = require('*/cartridge/scripts/algoliaSearchAPI').getCategoryProductHits(cgid);
+            var transformedHits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(categoryProductHits);
+
             res.render('search/searchResults', {
                 algoliaEnable: true,
                 category: category,
                 categoryDisplayNamePath: categoryDisplayNamePath,
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
+                categoryProductHits: transformedHits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q
             });
