@@ -9,8 +9,6 @@ var Resource = require('dw/web/Resource');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
 
-
-
 /**
  * @description Render default template
  * @returns {void} - ISML.renderTemplate

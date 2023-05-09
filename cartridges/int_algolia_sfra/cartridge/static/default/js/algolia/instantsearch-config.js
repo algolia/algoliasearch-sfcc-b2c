@@ -69,7 +69,7 @@ function enableInstantSearch(config) {
                     select: 'custom-select'
                 },
                 items: [
-                    {label: algoliaData.strings.bestMetches, value: productsIndex},
+                    {label: algoliaData.strings.bestMatches, value: productsIndex},
                     {label: algoliaData.strings.priceAsc, value: productsIndexPriceAsc},
                     {label: algoliaData.strings.priceDesc, value: productsIndexPriceDesc}
                 ]

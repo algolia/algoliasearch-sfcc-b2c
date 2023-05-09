@@ -27,7 +27,7 @@ const clientSideData = {
         "noResults": Resource.msg('search.noResults','algolia',null),
         "result": Resource.msg('search.result','algolia',null),
         "results": Resource.msg('search.results','algolia',null),
-        "bestMetches": Resource.msg('search.bestMetches','algolia',null),
+        "bestMatches": Resource.msg('search.bestMatches','algolia',null),
         "priceAsc": Resource.msg('search.priceAsc','algolia',null),
         "priceDesc": Resource.msg('search.priceDesc','algolia',null),
         "reset": Resource.msg('link.reset', 'algolia', null),
