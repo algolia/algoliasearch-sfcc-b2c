@@ -11,7 +11,7 @@ var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
 
 /**
  * @description Render default template
- * @returns {void} - ISML.renderTemplate
+ * @returns {void} ISML.renderTemplate
  */
 function renderIndex() {
     var pdictValues = {
@@ -24,7 +24,7 @@ function renderIndex() {
 
 /**
  * @description Main pipelet
- * @returns {void} - renderIndex
+ * @returns {void} renderIndex
  */
 function start() {
     renderIndex();
@@ -32,7 +32,7 @@ function start() {
 
 /**
  * @description Handle form for settings
- * @returns {void} - renderIndex
+ * @returns {void} renderIndex
  */
 function handleSettings() {
     var params = request.httpParameterMap;
@@ -46,6 +46,7 @@ function handleSettings() {
         algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
         algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
         algoliaData.setPreference('IndexPrefix', params.IndexPrefix.value);
+        algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
         algoliaData.setPreference('OCAPIClientID', params.OCAPIClientID.value);
         algoliaData.setPreference('OCAPIClientPassword', params.OCAPIClientPassword.value);
     } catch (error) {

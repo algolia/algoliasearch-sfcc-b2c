@@ -41,7 +41,7 @@ function getService() {
         },
         filterLogMessage: function (message) {
             return message;
-        }
+        },
     });
 
     return searchService;

@@ -44,10 +44,17 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         }
 
         if (useAlgolia) {
+            var categoryProductHits;
 
-            // server-side results rendering for CLPs
-            var categoryProductHits = require('*/cartridge/scripts/algoliaSearchAPI').getCategoryProductHits(cgid);
-            var transformedHits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(categoryProductHits);
+            // server-side rendering to improve SEO - makes a server-side request to Algolia to return CLP search results
+            if (algoliaData.getPreference('EnableSSR')) {
+                // server-side results rendering for CLPs
+                categoryProductHits = require('*/cartridge/scripts/algoliaSearchAPI').getCategoryProductHits(cgid);
+                // transforms search hit results before rendering them (similarly to InstantSearch's transformItems() method)
+                categoryProductHits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(categoryProductHits);
+            } else {
+                categoryProductHits = null;
+            }
 
             res.render('search/searchResults', {
                 algoliaEnable: true,
@@ -55,7 +62,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 categoryDisplayNamePath: categoryDisplayNamePath,
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
-                categoryProductHits: transformedHits,
+                categoryProductHits: categoryProductHits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q
             });

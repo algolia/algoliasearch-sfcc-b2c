@@ -31,6 +31,7 @@ function getCategoryProductHits(cgid) {
         Logger.error(e.message + ': ' + e.stack);
     }
 
+    // return empty array in case of any error or if the service is disabled
     return [];
 }
 

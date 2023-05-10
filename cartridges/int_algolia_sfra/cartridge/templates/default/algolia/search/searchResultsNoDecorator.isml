@@ -56,8 +56,13 @@
                 </div>
                 <div class="col-sm-12 col-md-9">
                     <div id="algolia-hits-placeholder" class="row product-grid">
-                        <iscomment>Server-Side Rendering of CLP search results if algolia.http.search service is enabled</iscomment>
-                        <isalgoliasearchhits hits="${pdict.categoryProductHits}" />
+
+                        <iscomment> Server-Side Rendering of CLP search results if algolia.http.search service is enabled </iscomment>
+                        <iscomment> If SSR is disabled, pdic.categoryProductHits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
+                        <isif condition="${!empty(pdict.categoryProductHits)}">
+                            <isalgoliasearchhits hits="${pdict.categoryProductHits}" />
+                        </isif>
+
                     </div>
                 </div>
             </div>

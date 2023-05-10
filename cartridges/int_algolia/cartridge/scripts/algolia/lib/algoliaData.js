@@ -55,14 +55,15 @@ const clientSideData = {
 //
 //             ID           ║                    description                    ║ type of preference
 //   ═══════════════════════╬═══════════════════════════════════════════════════╬═══════════════════════════
-//   ApplicationID          ║ Identifies the application for this site          ║ String
-//   CustomFields           ║ Any additional attributes of Product Object       ║ Set-of-string
 //   Enable                 ║ Enable/disable all Algolia                        ║ Boolean
-//   HostBase               ║ Host for read operations                          ║ String
-//   InStockThreshold       ║ Stock Threshold                                   ║ Double
+//   ApplicationID          ║ Identifies the application for this site          ║ String
 //   SearchApiKey           ║ Authorization key for Algolia                     ║ String
 //   AdminApiKey            ║ Authorization Admin key for Algolia               ║ String
+//   HostBase               ║ Host for read operations                          ║ String
+//   CustomFields           ║ Any additional attributes of Product Object       ║ Set-of-string
+//   InStockThreshold       ║ Stock Threshold                                   ║ Double
 //   IndexPrefix            ║ Optional prefix for the index name                ║ String
+//   EnableSSR              ║ Enables server-side rendering of CLP results      ║ Boolean
 //   OCAPIClientID          ║ Authorization OCAPI SFCC Client ID                ║ String
 //   OCAPIClientPassword    ║ Authorization OCAPI SFCC Client passwrd           ║ String
 //  ════════════════════════╩═══════════════════════════════════════════════════╩═══════════════════════════
