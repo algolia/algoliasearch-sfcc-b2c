@@ -13,22 +13,24 @@ function getCategoryProductHits(cgid) {
 
     var searchService = algoliaSearchService.getService();
 
-    var requestBody = {
-        // unencoded example:
-        // params: "facetFilters=" + encodeURIComponent('["__primary_category.2:Mens > Clothing > Suits"]')
-        params: "facetFilters=" + encodeURIComponent(facetFiltersParamValue)
-            + "&hitsPerPage=9",
-    };
+    if (!empty(searchService)) {
+        var requestBody = {
+            // unencoded example:
+            // params: "facetFilters=" + encodeURIComponent('["__primary_category.2:Mens > Clothing > Suits"]')
+            params: "facetFilters=" + encodeURIComponent(facetFiltersParamValue)
+                + "&hitsPerPage=9",
+        };
 
-    // any problems with the request will result in the script simply returning an empty array as server-side rendering
-    // is not vital to the functioning of the site (the results will be replaced by the client-side script anyway)
-    try {
-        var result = searchService.setThrowOnError().call(requestBody);
-        if (result.ok) {
-            return result.object.body.hits;
+        // any problems with the request will result in the script simply returning an empty array as server-side rendering
+        // is not vital to the functioning of the site (the results will be replaced by the client-side script anyway)
+        try {
+            var result = searchService.setThrowOnError().call(requestBody);
+            if (result.ok) {
+                return result.object.body.hits;
+            }
+        } catch(e) {
+            Logger.error(e.message + ': ' + e.stack);
         }
-    } catch(e) {
-        Logger.error(e.message + ': ' + e.stack);
     }
 
     // return empty array in case of any error or if the service is disabled
