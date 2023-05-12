@@ -21,7 +21,7 @@ function getService() {
             // service URL is "https://{{applicationID}}-dsn.algolia.net/1/indexes/{{indexName}}/query"
             service.setURL(service.getURL().replace('{{applicationID}}', applicationID).replace('{{indexName}}', indexName));
 
-            service.addHeader('Content-Type', 'application/json');
+            service.addHeader('Content-Type', 'application/json; charset=UTF-8');
             service.addHeader('X-Algolia-Application-Id', applicationID);
             service.addHeader('X-Algolia-API-Key', searchAPIKey);
             service.addHeader('X-Algolia-Agent', 'Algolia Salesforce B2C (SFRA) SSR');
