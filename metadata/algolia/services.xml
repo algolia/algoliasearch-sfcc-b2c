@@ -3,20 +3,20 @@
     <service-credential service-credential-id="algolia.http.export.cred">
         <url>https://sfcc-stream.algolia.com</url>
         <user-id/>
-        <password encrypted="true" encryption-type="common.export">c4tnZkDfeJLOAfxKh8lBqghDTEgH66lpuSqmwKF2kTU=</password>
+        <password/>
     </service-credential>
 
     <service-credential service-credential-id="algolia.http.search.cred">
         <url>https://{{applicationID}}-dsn.algolia.net/1/indexes/{{indexName}}/query</url>
         <user-id/>
-        <password encrypted="true" encryption-type="common.export">vorZG0AuDUvc1DjhSrlobfqT+NYDlsaOmmSEGFEBxhM=</password>
+        <password/>
     </service-credential>
 
     <!-- DELETING SERVICE CREDENTIAL: renamed to "algolia.http.export.cred" -->
     <service-credential service-credential-id="algolia.http.api.cred" mode="delete">
         <url>https://sfcc-stream.algolia.com</url>
         <user-id>sfcc</user-id>
-        <password encrypted="true" encryption-type="common.export">IMilciOGVlkGS2AOFhT2GBpxztf8V4vjnAeys/Yn/54guN5EpLuYQqY7JrF4haB4CpaXaRvjN/71wZXyKzIETg==</password>
+        <password/>
     </service-credential>
 
     <service-profile service-profile-id="algolia.http.export.profile">
