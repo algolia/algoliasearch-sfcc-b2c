@@ -1,0 +1,4 @@
+<ismodule template="/algolia/components/algoliasearchhits"
+    name="algoliasearchhits"
+    attribute="hits"
+/>

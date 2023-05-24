@@ -24,7 +24,7 @@ function enableAutocomplete(config) {
                                 searchClient: config.searchClient,
                                 queries: [
                                     {
-                                        indexName: config.productsIndex,
+                                        indexName: algoliaData.productsIndex,
                                         query,
                                         params: {
                                             hitsPerPage: 3,
@@ -90,7 +90,7 @@ function enableAutocomplete(config) {
                                 searchClient: config.searchClient,
                                 queries: [
                                     {
-                                        indexName: config.categoriesIndex,
+                                        indexName: algoliaData.categoriesIndex,
                                         query,
                                         params: {
                                             hitsPerPage: 3,

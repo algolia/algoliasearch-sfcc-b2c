@@ -2,48 +2,93 @@
 
 var Site = require('dw/system/Site');
 var Transaction = require('dw/system/Transaction');
-var dwSystem = require('dw/system/System');
-
+var System = require('dw/system/System');
+var URLUtils = require('dw/web/URLUtils');
+var Resource = require('dw/web/Resource');
 var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
 var currentSite = getCurrentSite(); // eslint-disable-line no-use-before-define
-var CATEGORIES_SEPARATOR = ' > ';
 
-/*
- * Function for getting preferences for Algolia
- *
- *   id                     | Description                                       |type of preference
- *   -----------------------------------------------------------------------------------------------
- *   ApplicationID          | Identifies the application for this site          | String
- *   CustomFields           | Any additional attributes of Product Object       | Set-of-string
- *   Enable                 | Enable/disable all Algolia                        | Boolean
- *   HostBase               | Host for read operations                          | String
- *   InStockThreshold       | Stock Threshold                                   | Double
- *   SearchApiKey           | Authorization key for Algolia                     | String
- *   AdminApiKey            | Authorization Admin key for Algolia               | String
- *   IndexPrefix            | Optional prefix for the index name                | String
- *   OCAPIClientID          | Authorization OCAPI SFCC Client ID                | String
- *   OCAPIClientPassword    | Authorization OCAPI SFCC Client passwrd           | String
- * -------------------------------------------------------------------------------------------------
- * Preferences stored in the XML file
- *   id                     | Description                                             |type of preference
- *   -----------------------------------------------------------------------------------------------
- *   LastCategorySyncDate   | Date of the last Category index sync job run (read only)| String
- *   LastProductSyncDate    | Date of the last product index sync job run (read only) | String
- *   LastProductSyncLog     | Last product sync job log                               | String
- *   LastCategorySyncLog    | Last category sync job log                              | String
- * -------------------------------------------------------------------------------------------------
- */
-//   Example:
+// exported properties
+const CATEGORIES_SEPARATOR = ' > ';
+const clientSideData = {
+    "enable": getPreference('Enable'),
+    "applicationID": getPreference('ApplicationID'),
+    "searchApiKey": getPreference('SearchApiKey'),
+    "locale": request.getLocale(),
+    "currencyCode": request.getSession().getCurrency().getCurrencyCode(),
+    "currencySymbol": request.getSession().getCurrency().getSymbol(),
+    "productsIndex": calculateIndexName('products'),
+    "categoriesIndex": calculateIndexName('categories'),
+    "quickViewUrlBase": URLUtils.url('Product-ShowQuickView').toString(),
+    "strings": {
+        "placeholder": Resource.msg('label.header.searchwatermark', 'common', null),
+        "moreResults": Resource.msg('button.more', 'algolia', null),
+        "noResults": Resource.msg('search.noResults','algolia',null),
+        "result": Resource.msg('search.result','algolia',null),
+        "results": Resource.msg('search.results','algolia',null),
+        "bestMatches": Resource.msg('search.bestMatches','algolia',null),
+        "priceAsc": Resource.msg('search.priceAsc','algolia',null),
+        "priceDesc": Resource.msg('search.priceDesc','algolia',null),
+        "reset": Resource.msg('link.reset', 'algolia', null),
+        "brandPanelTitle": Resource.msg('search.brand','algolia',null),
+        "sizePanelTitle": Resource.msg('link.size_chart','algolia',null),
+        "colorPanelTitle": Resource.msg('label.tile.swatch.colors','algolia',null),
+        "pricePanelTitle": Resource.msg('search.price','algolia',null),
+        "categoryPanelTitle": Resource.msg('search.category','algolia',null),
+        "products": Resource.msg('search.suggest.products','algolia',null),
+        "categories": Resource.msg('search.suggest.categories','algolia',null),
+        "priceFilter": {
+            "separator": Resource.msg('search.pricefilter.separator','algolia',null),
+            "submit": Resource.msg('search.pricefilter.submit','algolia',null),
+        },
+        "newArrivals": Resource.msg('panel.newarrivals','algolia',null)
+    },
+    "noImages": {
+        "large": URLUtils.staticURL('/images/noimagelarge.png').toString(),
+        "medium": URLUtils.staticURL('/images/noimagemedium.png').toString(),
+        "small": URLUtils.staticURL('/images/noimagesmall.png').toString()
+    }
+};
+
+//  Script for getting Algolia preferences
+//
+//             ID           ║                    description                    ║ type of preference
+//   ═══════════════════════╬═══════════════════════════════════════════════════╬═══════════════════════════
+//   Enable                 ║ Enable/disable all Algolia                        ║ Boolean
+//   ApplicationID          ║ Identifies the application for this site          ║ String
+//   SearchApiKey           ║ Authorization key for Algolia                     ║ String
+//   AdminApiKey            ║ Authorization Admin key for Algolia               ║ String
+//   HostBase               ║ Host for read operations                          ║ String
+//   CustomFields           ║ Any additional attributes of Product Object       ║ Set-of-string
+//   InStockThreshold       ║ Stock Threshold                                   ║ Double
+//   IndexPrefix            ║ Optional prefix for the index name                ║ String
+//   EnableSSR              ║ Enables server-side rendering of CLP results      ║ Boolean
+//   OCAPIClientID          ║ Authorization OCAPI SFCC Client ID                ║ String
+//   OCAPIClientPassword    ║ Authorization OCAPI SFCC Client passwrd           ║ String
+//  ════════════════════════╩═══════════════════════════════════════════════════╩═══════════════════════════
+//  Preferences stored in the XML file
+//
+//             ID           ║                       description                        ║ type of preference
+//   ═══════════════════════╬══════════════════════════════════════════════════════════╬════════════════════
+//   LastCategorySyncDate   ║ Date of the last Category index sync job run (read only) ║ String
+//   LastProductSyncDate    ║ Date of the last product index sync job run (read only)  ║ String
+//   LastProductSyncLog     ║ Last product sync job log                                ║ String
+//   LastCategorySyncLog    ║ Last category sync job log                               ║ String
+//   ═══════════════════════╩══════════════════════════════════════════════════════════╩════════════════════
+//
+//  Example:
 //    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 //    algoliaData.getPreference('Enable');
 //    algoliaData.setPreference('Enable', true);
-//   -----------------------------------------------------------------------------------------------
+//
+// ═════════════════════════════════════════════════════════════════════════════════════════════════════════
+
 
 /**
  * @description Getting preference for Algolia
- * @param {string} id - name of preference
- * @returns {*} - value of preference
+ * @param {string} id name of preference
+ * @returns {*} value of preference
  */
 function getPreference(id) {
     return currentSite.getCustomPreferenceValue('Algolia_' + id);
@@ -51,8 +96,8 @@ function getPreference(id) {
 
 /**
  * @description Set preference for Algolia
- * @param {string} id - name of preference
- * @param {string} value - value to save
+ * @param {string} id name of preference
+ * @param {string} value value to save
  * @returns {void}
  */
 function setPreference(id, value) {
@@ -63,8 +108,8 @@ function setPreference(id, value) {
 
 /**
  * @description Getting preference (as set of strings) for Algolia
- * @param {string} id - name of preference
- * @returns {array} - value of preference
+ * @param {string} id name of preference
+ * @returns {array} value of preference
  */
 function getSetOfArray(id) {
     var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
@@ -73,8 +118,8 @@ function getSetOfArray(id) {
 
 /**
  * @description Getting preference (as set of strings) for Algolia
- * @param {string} id - name of preference
- * @returns {string} - value of preference
+ * @param {string} id name of preference
+ * @returns {string} value of preference
  */
 function getSetOfStrings(id) {
     var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
@@ -83,8 +128,8 @@ function getSetOfStrings(id) {
 
 /**
  * @description Set preference (as set of strings) for Algolia
- * @param {string} id - name of preference
- * @param {string} value - value to save
+ * @param {string} id name of preference
+ * @param {string} value value to save
  * @returns {void}
  */
 function setSetOfStrings(id, value) {
@@ -97,8 +142,8 @@ function setSetOfStrings(id, value) {
 
 /**
  * @description Get category and product log data from log file for current Site
- * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
- * @returns {Object} - log data
+ * @param {string} id name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @returns {Object} log data
  */
 function getLogData(id) {
     var productLog = null;
@@ -109,9 +154,9 @@ function getLogData(id) {
 
 /**
  * @description Save product and category log data to file for current Site
- * @param {string} id - name of preference [LastProductSyncLog, LastCategorySyncLog]
- * @param {Object} productLog - ploduct log Object
- * @returns {bullean} - Log data write success
+ * @param {string} id name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @param {Object} productLog ploduct log Object
+ * @returns {bullean} Log data write success
  */
 function setLogData(id, productLog) {
     var result = false;
@@ -122,7 +167,7 @@ function setLogData(id, productLog) {
 
 /**
  * @description Get category and product log data from log file for all Sites
- * @returns {Array} - array of Sites log data
+ * @returns {Array} array of Sites log data
  */
 function getLogDataAllSites() {
     return logHelper.getLogDataAllSites();
@@ -134,10 +179,10 @@ function getLogDataAllSites() {
  * @returns {string} hostname
  */
 function getInstanceHostName() {
-    var instanceHostname = dwSystem.getInstanceHostname();
+    var instanceHostname = System.getInstanceHostname();
 
     // remove the sandbox host
-    if (dwSystem.instanceType === dwSystem.DEVELOPMENT_SYSTEM) {
+    if (System.instanceType === System.DEVELOPMENT_SYSTEM) {
         instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
         instanceHostname = instanceHostname.replace('.demandware.net', '');
     }
@@ -165,7 +210,7 @@ function getIndexPrefix() {
  * Create index name for search results request
  * If custom site preference Algolia_IndexPrefix is set in BM,
  * its value will be used as a prefix instead of the first part of the hostname and the siteID
- * @param {string} type - type of indices: products | categories
+ * @param {string} type type of indices: products | categories
  * @returns {string} index name
  */
 function calculateIndexName(type) {
@@ -174,8 +219,8 @@ function calculateIndexName(type) {
 
 /**
  * @description Convert Date to local DateTime format string
- * @param {Date} date - Date
- * @returns {string} - local formated DateTime
+ * @param {Date} date Date
+ * @returns {string} local formated DateTime
  */
 function getLocalDateTime(date) {
     return empty(date) ? '---' : date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
@@ -183,8 +228,8 @@ function getLocalDateTime(date) {
 
 /**
  * @description Get Date preference to local DateTime format string
- * @param {string} id - name of Date preference [LastCategorySyncDate, LastProductSyncDate]
- * @returns {string} - local formated DateTime
+ * @param {string} id name of Date preference [LastCategorySyncDate, LastProductSyncDate]
+ * @returns {string} local formated DateTime
  */
 function getSyncLocalDateTime(id) {
     var productLog = null;
@@ -195,7 +240,7 @@ function getSyncLocalDateTime(id) {
 
 /**
  * @description Get sites that have Algolia enabled
- * @returns {Array} - array of sites that have Algolia enabled
+ * @returns {Array} array of sites that have Algolia enabled
  */
 function getAlgoliaSites() {
     return Site.getAllSites().toArray().filter(function (site) {
@@ -205,7 +250,7 @@ function getAlgoliaSites() {
 
 /**
  * @description Get current site depending on request parameter
- * @returns {dw.system.Site} - current site
+ * @returns {dw.system.Site} current site
  */
 function getCurrentSite() {
     if (request.httpParameterMap && request.httpParameterMap.isParameterSubmitted('siteID')) {
@@ -242,5 +287,6 @@ module.exports = {
     getSyncLocalDateTime: getSyncLocalDateTime,
     getAlgoliaSites: getAlgoliaSites,
     getCurrentSite: getCurrentSite,
-    CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR
+    CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR,
+    clientSideData: clientSideData,
 };

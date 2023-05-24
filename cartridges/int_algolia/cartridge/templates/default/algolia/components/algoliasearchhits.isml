@@ -1,0 +1,68 @@
+<div class="ais-InfiniteHits col-12">
+	<ol class="ais-InfiniteHits-list row product-grid">
+		<isloop items="${pdict.hits}" var="hit">
+			<li class="ais-InfiniteHits-item col-6 col-sm-4">
+
+				<div class="product" data-pid="${hit.objectID}">
+					<div class="product-tile">
+
+						<isif condition="${!empty(hit.image)}">
+							<div class="image-container">
+								<a href="${hit.url}">
+									<img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
+								</a>
+
+								<a class="quickview hidden-sm-down" href="${hit.quickShowUrl}"  data-toggle="modal" data-target="#quickViewModal" title="${hit.name}" aria-label="${hit.name}"  data-query-id="${hit.__queryID}" data-object-id="${hit.objectID}" data-index-name="${hit.__indexName}">
+									<span class="fa-stack fa-lg">
+										<i class="fa fa-circle fa-inverse fa-stack-2x"></i>
+										<i class="fa fa-expand fa-stack-1x"></i>
+									</span>
+								</a>
+							</div>
+						</isif>
+
+						<div class="tile-body">
+							<div class="pdp-link">
+								<a href="${hit.url}">
+									<isprint value="${hit.name}"/>
+								</a>
+							</div>
+							<div class="price">
+
+								<isif condition="${!empty(hit.promotionalPrice)}">
+
+									<span class="strike-through list">
+										<span class="value">
+											<isprint value="${hit.currencySymbol}" encoding="on" />
+											<isprint value="${hit.price}" encoding="on" />
+										</span>
+									</span>
+									<span class="sales">
+										<span class="value">
+											<isprint value="${hit.currencySymbol}" encoding="on" />
+											<isprint value="${hit.promotionalPrice}" encoding="on" />
+										</span>
+									</span>
+
+								<iselse/>
+
+									<isif condition="${!empty(hit.price)}">
+										<span class="sales">
+											<span class="value">
+												<isprint value="${hit.currencySymbol}" encoding="on" />
+												<isprint value="${hit.price}" encoding="on" />
+											</span>
+										</span>
+									</isif>
+
+								</isif>
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</li>
+		</isloop>
+	</ol>
+</div>

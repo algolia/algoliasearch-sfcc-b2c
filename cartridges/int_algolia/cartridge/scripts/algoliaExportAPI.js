@@ -1,9 +1,9 @@
 'use strict';
 
-var serviceHelper = require('*/cartridge/scripts/service/serviceHelper');
+var serviceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
-var serviceDefinition = require('*/cartridge/scripts/service/serviceDefinition');
+var algoliaExportService = require('*/cartridge/scripts/services/algoliaExportService');
 var encryptHelper = require('*/cartridge/scripts/algolia/helper/encryptHelper');
 
 var Status = require('dw/system/Status');
@@ -70,7 +70,7 @@ function createHandshakeRequest() {
  */
 function requestTenantToken() {
     var body = createHandshakeRequest();
-    var service = serviceDefinition.init();
+    var service = algoliaExportService.init();
     var baseURL = service.getConfiguration().getCredential().getURL();
 
     service.setRequestMethod('POST');
@@ -112,7 +112,7 @@ function sendDelta(itemsArray) {
         return tenantCallStatus;
     }
 
-    var service = serviceDefinition.init();
+    var service = algoliaExportService.init();
     var baseURL = service.getConfiguration().getCredential().getURL();
 
     service.setRequestMethod('POST');
@@ -144,7 +144,7 @@ function makeIndexingRequest(requestType) {
         resume: 'resume_indexing'
     };
 
-    var service = serviceDefinition.init();
+    var service = algoliaExportService.init();
     var baseURL = service.getConfiguration().getCredential().getURL();
 
     if (requestType === 'status') {

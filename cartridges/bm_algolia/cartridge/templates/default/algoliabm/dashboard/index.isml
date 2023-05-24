@@ -37,12 +37,18 @@
                         <isprint value="${Resource.msg('algolia.label.value', 'algolia', null)}" encoding="jshtml" />
                     </td>
                 </tr>
+
+                <iscomment> Algolia_Enable </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.enable', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="checkbox" ${pdict.algoliaData.getPreference('Enable') ? "checked": ""} id="Enable" name="Enable" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('Enable') ? "checked": ""} id="Enable" name="Enable" />
+                    </td>
                 </tr>
+
+                <iscomment> Algolia_ApplicationID </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.applicationid', 'algolia', null)}" encoding="jshtml" />
@@ -51,6 +57,8 @@
                         <input type="text" value="${pdict.algoliaData.getPreference('ApplicationID') ? pdict.algoliaData.getPreference('ApplicationID') : ''}" id="ApplicationID" name="ApplicationID" />
                     </td>
                 </tr>
+
+                <iscomment> Algolia_SearchApiKey </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" />
@@ -59,6 +67,8 @@
                         <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" />
                     </td>
                 </tr>
+
+                <iscomment> Algolia_AdminApiKey </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.adminkey', 'algolia', null)}" encoding="jshtml" />
@@ -67,6 +77,8 @@
                         <input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey') ? pdict.algoliaData.getPreference('AdminApiKey') : ''}" id="AdminApiKey" name="AdminApiKey" />
                     </td>
                 </tr>
+
+                <iscomment> Algolia_HostBase </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.baseurl', 'algolia', null)}" encoding="jshtml" />
@@ -75,12 +87,18 @@
                         <input type="text" value="${pdict.algoliaData.getPreference('HostBase') ? pdict.algoliaData.getPreference('HostBase') : ''}" id="HostBase" name="HostBase" />
                     </td>
                 </tr>
+
+                <iscomment> Algolia_InStockThreshold </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap"><input type="number" value="${pdict.algoliaData.getPreference('InStockThreshold')}" id="InStockThreshold" name="InStockThreshold" /></td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="number" value="${pdict.algoliaData.getPreference('InStockThreshold')}" id="InStockThreshold" name="InStockThreshold" />
+                    </td>
                 </tr>
+
+                <iscomment> Algolia_CustomFields </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.custom', 'algolia', null)}" encoding="jshtml" />
@@ -89,6 +107,8 @@
                         <input type="text" value="${pdict.algoliaData.getSetOfStrings('CustomFields') ? pdict.algoliaData.getSetOfStrings('CustomFields') : ''}" id="CustomFields" name="CustomFields" />
                     </td>
                 </tr>
+
+                <iscomment> Algolia_IndexPrefix </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.indexprefix', 'algolia', null)}" encoding="jshtml" />
@@ -97,6 +117,18 @@
                         <input type="text" value="${pdict.algoliaData.getPreference('IndexPrefix') ? pdict.algoliaData.getPreference('IndexPrefix') : ''}" id="IndexPrefix" name="IndexPrefix" />
                     </td>
                 </tr>
+
+                <iscomment> Algolia_EnableSSR </iscomment>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.enablessr', 'algolia', null)}" />
+                    </td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('EnableSSR') ? "checked": ""} id="EnableSSR" name="EnableSSR" />
+                    </td>
+                </tr>
+
+                <iscomment> Algolia_OCAPIClientID </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.clientid', 'algolia', null)}" encoding="jshtml" />
@@ -105,6 +137,8 @@
                         <input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientID') ? pdict.algoliaData.getPreference('OCAPIClientID') : ''}" id="OCAPIClientID" name="OCAPIClientID" />
                     </td>
                 </tr>
+
+                <iscomment> Algolia_OCAPIClientPassword </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.clientpassword', 'algolia', null)}" encoding="jshtml" />
@@ -113,6 +147,8 @@
                         <input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientPassword') ? pdict.algoliaData.getPreference('OCAPIClientPassword') : ''}" id="OCAPIClientPassword" name="OCAPIClientPassword" />
                     </td>
                 </tr>
+
+                <iscomment> Apply button </iscomment>
                 <tr>
                     <td class="w e s buttonspacing" align="right" colspan="2">
                         <button type="submit" name="updateCustomPreferences" class="button">

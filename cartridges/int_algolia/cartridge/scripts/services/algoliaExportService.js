@@ -1,11 +1,11 @@
 'use strict';
 
 /**
- * Algolia API Service definition file
- * @returns {dw.svc.HTTPService} - setvise object
+ * Algolia Export Service definition file
+ * @returns {dw.svc.HTTPService} - HTTPService object
  */
 function init() {
-    var initService = require('dw/svc/LocalServiceRegistry').createService('algolia.http.api', {
+    var exportService = require('dw/svc/LocalServiceRegistry').createService('algolia.http.export', {
         createRequest: function (service, params) {
             service.addHeader('User-Agent', 'INTEGRATION v1; Algolia for Javascript(SitegGenesis + SFRA); PLATFORM: SFCC ' + dw.system.System.compatibilityMode);
             service.addHeader('Content-Type', 'application/json');
@@ -27,7 +27,7 @@ function init() {
             return msg;
         }
     });
-    return initService;
+    return exportService;
 }
 
 module.exports.init = init;

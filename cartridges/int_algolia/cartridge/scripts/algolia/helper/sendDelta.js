@@ -14,8 +14,8 @@ var Status = require('dw/system/Status');
  * @returns {boolean} - successful to send
  */
 function sendChunk(entriesArray) {
-    var algoliaApi = require('*/cartridge/scripts/algoliaApi');
-    var result = algoliaApi.sendDelta(entriesArray);
+    var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
+    var result = algoliaExportAPI.sendDelta(entriesArray);
     return result;
 }
 

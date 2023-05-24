@@ -4,6 +4,10 @@
  * @param {Object} config Configuration object
  */
 function enableInstantSearch(config) {
+    const productsIndex = algoliaData.productsIndex;
+    const productsIndexPriceAsc = productsIndex + '__price_' + algoliaData.currencyCode + '_asc';
+    const productsIndexPriceDesc = productsIndex + '__price_' + algoliaData.currencyCode + '_desc';
+
     var initialUiState = {};
     var hierarchicalMenuValue = {};
     if (config.categoryDisplayNamePath && config.categoryDisplayNamePath.indexOf('New Arrivals') > -1) {
@@ -15,13 +19,13 @@ function enableInstantSearch(config) {
             "__primary_category.0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
         }
     }
-    initialUiState[config.productsIndex] = {
+    initialUiState[productsIndex] = {
         query: config.urlQuery,
         hierarchicalMenu: hierarchicalMenuValue,
     };
 
     var search = instantsearch({
-        indexName: config.productsIndex,
+        indexName: productsIndex,
         searchClient: config.searchClient,
         initialUiState: initialUiState,
         insights: {
@@ -65,9 +69,9 @@ function enableInstantSearch(config) {
                     select: 'custom-select'
                 },
                 items: [
-                    {label: algoliaData.strings.bestMetches, value: config.productsIndex},
-                    {label: algoliaData.strings.priceAsc, value: config.productsIndexPriceAsc},
-                    {label: algoliaData.strings.priceDesc, value: config.productsIndexPriceDesc}
+                    {label: algoliaData.strings.bestMatches, value: productsIndex},
+                    {label: algoliaData.strings.priceAsc, value: productsIndexPriceAsc},
+                    {label: algoliaData.strings.priceDesc, value: productsIndexPriceDesc}
                 ]
             }),
             instantsearch.widgets.clearRefinements({
@@ -138,7 +142,7 @@ function enableInstantSearch(config) {
 
             rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
-                attribute: 'price.' + config.userCurrency,
+                attribute: 'price.' + algoliaData.currencyCode,
                 panelTitle: algoliaData.strings.pricePanelTitle,
                 templates: {
                     separatorText: algoliaData.strings.priceFilter.separator,
@@ -231,9 +235,7 @@ function enableInstantSearch(config) {
                 transformItems: function (items) {
                     return items.map(function (item) {
                         // assign image
-                        if (typeof(item.image_groups) === "undefined"){
-                            item.image = algoliaData.noImages.large;
-                        } else {
+                        if (item.image_groups) {
                             var imageGroup = item.image_groups.find(function (i) {
                                 i.view_type === 'large'
                             }) || item.image_groups[0];
@@ -242,25 +244,31 @@ function enableInstantSearch(config) {
                                 item.image = firstImageInGroup
                             }
                         }
+                        else {
+                            item.image = {
+                                dis_base_link: algoliaData.noImages.large,
+                                alt: item.name + ', large',
+                            }
+                        }
 
                         // adjusted price in user currency
-                        if (item.promotionalPrice && item.promotionalPrice[config.userCurrency] !== null) {
-                            item.promotionalPrice = item.promotionalPrice[config.userCurrency]
+                        if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
+                            item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
                         }
 
                         // price in user currency
-                        if (item.price && item.price[config.userCurrency] !== null) {
-                            item.price = item.price[config.userCurrency]
+                        if (item.price && item.price[algoliaData.currencyCode] !== null) {
+                            item.price = item.price[algoliaData.currencyCode]
                         }
 
                         // currency symbol
-                        item.currencySymbol = config.userCurrencySymbol;
+                        item.currencySymbol = algoliaData.currencySymbol;
 
 
                         item.quickShowUrl = item.url;
 
                         // originating index
-                        item.__indexName = config.productsIndex;
+                        item.__indexName = productsIndex;
 
                         // url with queryID (used for analytics)
                         var url = new URL(item.url);
