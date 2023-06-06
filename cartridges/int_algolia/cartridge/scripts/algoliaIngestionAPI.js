@@ -9,6 +9,8 @@ var Logger = require('dw/system/Logger');
 /**
  * Register a source
  * https://www.algolia.com/doc/rest-api/ingestion/#create-a-source
+ * @param {string} name - name
+ *
  * @returns {string} sourceID - the ID of the created source
  */
 function registerSource(name) {
@@ -38,9 +40,14 @@ function registerSource(name) {
 /**
  * Register an authentication
  * https://www.algolia.com/doc/rest-api/ingestion/#create-a-authentication
+ * @param {Object} authInfo - authentication info object
+ * @param {string} authInfo.name - authentication name
+ * @param {string} authInfo.appId - authentication appId
+ * @param {string} authInfo.apiKey - authentication apiKey
+ *
  * @returns {string} authenticationID - the ID of the created authentication
  */
-function registerAuthentication(name, appId, apiKey) {
+function registerAuthentication(authInfo) {
     var ingestionService = algoliaIngestionService.getService();
     var baseURL = ingestionService.getConfiguration().getCredential().getURL();
 
@@ -49,10 +56,10 @@ function registerAuthentication(name, appId, apiKey) {
 
     var requestBody = {
         type: 'algolia',
-        name: name,
+        name: authInfo.name,
         input: {
-            appID: appId,
-            apiKey: apiKey,
+            appID: authInfo.appId,
+            apiKey: authInfo.apiKey,
         },
     };
 
@@ -71,9 +78,14 @@ function registerAuthentication(name, appId, apiKey) {
 /**
  * Register a destination
  * https://www.algolia.com/doc/rest-api/ingestion/#create-a-destination
+ * @param {Object} destinationInfo - destination info object
+ * @param {string} destinationInfo.name - destination name
+ * @param {string} destinationInfo.indexName - destination index name
+ * @param {string} destinationInfo.authenticationID - authenticationID to use
+ *
  * @returns {string} destinationID - the ID of the created destination
  */
-function registerDestination(name, indexName, authenticationID) {
+function registerDestination(destinationInfo) {
     var ingestionService = algoliaIngestionService.getService();
     var baseURL = ingestionService.getConfiguration().getCredential().getURL();
 
@@ -82,11 +94,11 @@ function registerDestination(name, indexName, authenticationID) {
 
     var requestBody = {
         type: 'search',
-        name: name,
+        name: destinationInfo.name,
         input: {
-            indexName: indexName,
+            indexName: destinationInfo.indexName,
         },
-        authenticationID: authenticationID,
+        authenticationID: destinationInfo.authenticationID,
     };
 
     try {
@@ -104,9 +116,14 @@ function registerDestination(name, indexName, authenticationID) {
 /**
  * Register a task
  * https://www.algolia.com/doc/rest-api/ingestion/#create-a-task
+ * @param {Object} taskInfo - task info object
+ * @param {string} taskInfo.sourceID - sourceID of the task
+ * @param {string} taskInfo.destinationID - destinationID of the task
+ * @param {string} taskInfo.action - action of the task
+ *
  * @returns {string} taskID - the ID of the created task
  */
-function registerTask(sourceID, destinationID, action) {
+function registerTask(taskInfo) {
     var ingestionService = algoliaIngestionService.getService();
     var baseURL = ingestionService.getConfiguration().getCredential().getURL();
 
@@ -114,9 +131,9 @@ function registerTask(sourceID, destinationID, action) {
     ingestionService.setURL(baseURL + '/1/tasks');
 
     var requestBody = {
-        sourceID: sourceID,
-        destinationID: destinationID,
-        action: action,
+        sourceID: taskInfo.sourceID,
+        destinationID: taskInfo.destinationID,
+        action: taskInfo.action,
         trigger: {
             type: 'onDemand'
         },
