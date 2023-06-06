@@ -12,6 +12,12 @@
         <password/>
     </service-credential>
 
+    <service-credential service-credential-id="algolia.http.ingestion.cred">
+        <url>https://data.{{region}}.algolia.com</url>
+        <user-id/>
+        <password/>
+    </service-credential>
+
     <!-- DELETING SERVICE CREDENTIAL: renamed to "algolia.http.export.cred" -->
     <service-credential service-credential-id="algolia.http.api.cred" mode="delete">
         <url>https://sfcc-stream.algolia.com</url>
@@ -30,6 +36,16 @@
     </service-profile>
 
     <service-profile service-profile-id="algolia.http.search.profile">
+        <timeout-millis>1000</timeout-millis>
+        <rate-limit-enabled>false</rate-limit-enabled>
+        <rate-limit-calls>0</rate-limit-calls>
+        <rate-limit-millis>0</rate-limit-millis>
+        <cb-enabled>false</cb-enabled>
+        <cb-calls>0</cb-calls>
+        <cb-millis>0</cb-millis>
+    </service-profile>
+
+    <service-profile service-profile-id="algolia.http.ingestion.profile">
         <timeout-millis>1000</timeout-millis>
         <rate-limit-enabled>false</rate-limit-enabled>
         <rate-limit-calls>0</rate-limit-calls>
@@ -70,6 +86,17 @@
         <mock-mode-enabled>false</mock-mode-enabled>
         <profile-id>algolia.http.search.profile</profile-id>
         <credential-id>algolia.http.search.cred</credential-id>
+    </service>
+
+    <service service-id="algolia.http.ingestion">
+        <service-type>HTTP</service-type>
+        <enabled>true</enabled>
+        <log-prefix>algoliaingestion</log-prefix>
+        <comm-log-enabled>false</comm-log-enabled>
+        <force-prd-enabled>false</force-prd-enabled>
+        <mock-mode-enabled>false</mock-mode-enabled>
+        <profile-id>algolia.http.ingestion.profile</profile-id>
+        <credential-id>algolia.http.ingestion.cred</credential-id>
     </service>
 
     <!-- DELETING SERVICE: renamed to "algolia.http.export" -->
