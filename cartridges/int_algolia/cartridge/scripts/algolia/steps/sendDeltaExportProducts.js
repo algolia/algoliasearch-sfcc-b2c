@@ -33,15 +33,19 @@ function sendDeltaExportProducts(parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    var productLogData = algoliaData.getLogData('LastProductSyncLog');
 
+
+    // ----------------------------- PART 1: Extracting productIDs from the output of the Delta Export -----------------------------
 
 
     const TEST_MODE = true;
 
-
-
     if (!TEST_MODE) {
+
+        if (empty(parameters.consumers) || empty(parameters.exportFile)) {
+            jobHelper.logError('Mandatory job parameters missing!');
+            return new Status(Status.ERROR);
+        }
 
         var paramConsumer = parameters.consumers.split(',')[0].trim(); // comma-separated values, but we only need one copy, so ignoring the rest
         var paramExportFile = parameters.exportFile; // it's actually a folder
@@ -59,21 +63,23 @@ function sendDeltaExportProducts(parameters) {
 
         var l0_deltaExportDir = new File(algoliaConstants.ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramExportFile); // Impex/src/platform/outbox/algolia/productDeltaExport
 
+        // creating temporary "_processing" dir
         var l1_processingDir = new File(l0_deltaExportDir, '_processing');
         l1_processingDir.mkdir();
 
         if (!TEST_MODE) {
+            // creating "_completed" dir
             var l1_completedDir = new File(l0_deltaExportDir, '_completed');
             l1_completedDir.mkdir();
         }
 
-
+        // list all the delta export zips in the folder
         var deltaExportZips = jobHelper.getDeltaExportZipList(l0_deltaExportDir);
 
         // process each export zip one by one
         deltaExportZips.forEach(function(filename) {
             var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip
-            var currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta'));
+            var currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
 
             // this will create a structure like so: "l0_deltaExportDir/processing/000001/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/apparel-catalog/catalog.xml"
             var l2_tempZipDir = new File(l1_processingDir, filename);
@@ -81,15 +87,20 @@ function sendDeltaExportProducts(parameters) {
                 currentZipFile.unzip(l2_tempZipDir);
             }
 
+            // there's a folder with a UUID as a name one level down, we need to open that
             var l3_uuidDir = jobHelper.getFirstChildFolder(l2_tempZipDir); // processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/
+
+            // UUID-named folder has a folder called "catalogs" in it, open that
             var l4_catalogsDir = new File(l3_uuidDir, 'catalogs'); // processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/
 
-            // getting child catalog folders
+            // getting child catalog folders, there can be more than one - folder name is the ID of the catalog
             var l5_catalogDirList = jobHelper.getChildFolders(l4_catalogsDir);
 
-            // processing catalog.xml files
+            // processing catalog.xml files in each
             l5_catalogDirList.forEach(function(l5_catalogDir) {
                 var catalogFile = new File(l5_catalogDir, 'catalog.xml');
+
+                // adding productsIDs from the XML to the list of changed productIDs
                 success = jobHelper.buildChangedProductsObjectFromXML(catalogFile, changedProducts);
                 if (success) {
                     // deleting successfully processed files and their parent folders
@@ -97,7 +108,7 @@ function sendDeltaExportProducts(parameters) {
                 }
             });
 
-            // cleanup
+            // cleanup, removing unzipped files that are already processed
             if (success) {
                 l4_catalogsDir.remove();
                 new File(l3_uuidDir, 'version.txt').remove(); // removing version.txt so that parent folder can be deleted
@@ -106,16 +117,19 @@ function sendDeltaExportProducts(parameters) {
 
                 // move zip to _complete
                 if (!TEST_MODE) { // don't move the files while testing
+                    // moving processed zip files to the "_completed" folder for archival
                     currentZipFile.copyTo(new File(l1_completedDir, currentZipFile.getName())) && currentZipFile.remove();
                     currentMetaFile.copyTo(new File(l1_completedDir, currentMetaFile.getName())) && currentMetaFile.remove();
                 }
             }
-
         });
 
         // cleanup
         l1_processingDir.remove();
     }
+
+
+    // ----------------------------- PART 2: Retrieving and enriching the products, writing them to XML -----------------------------
 
 
     // retrieving and enriching products, writing them to a temporary XML
@@ -138,28 +152,27 @@ function sendDeltaExportProducts(parameters) {
         var updateFile, updateFileWriter, updateXmlWriter;
         try {
             updateFile = new File(l0_deltaExportDir, algoliaConstants.ALGOLIA_DELTA_EXPORT_UPDATE_FILE_NAME);
+
+            // if there's already an update XML there from a previous unsuccessful attempt, remove it
             if (updateFile.exists()) {
                 updateFile.remove();
             }
+
+            // creating file, writing start elements
             updateFileWriter = new FileWriter(updateFile, 'UTF-8');
             updateXmlWriter = new XMLStreamWriter(updateFileWriter);
             updateXmlWriter.writeStartDocument();
             updateXmlWriter.writeStartElement('products');
+
         } catch (error) {
-            var e = error;
-            jobHelper.logFileError(updateFile.fullPath, 'Error open Delta file to write', error);
-            productLogData.processedErrorMessage = 'Error open Delta file to write';
-            algoliaData.setLogData('LastProductSyncLog', productLogData);
+            jobHelper.logFileError(updateFile.fullPath, 'Error opening delta XML for writing', error);
             return new Status(Status.ERROR);
         }
 
-
-
-
-
+        // retrieving products from database and enriching them
         for (var productID in changedProducts) {
-            var isAvailable = changedProducts[productID];
-            var productUpdate;
+            var isAvailable = changedProducts[productID]; // true if added/changed, false if deleted
+            var productUpdateObj;
 
             if (isAvailable) { // <productID>: true - product was either added or modified
 
@@ -171,27 +184,22 @@ function sendDeltaExportProducts(parameters) {
                 var product = ProductMgr.getProduct(productID);
                 var algoliaProduct = new AlgoliaProduct(product);
 
-                productUpdate = new jobHelper.UpdateProductModel(algoliaProduct);
-                var a = 5;
+                productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
 
             } else { // <proudctID>: false - product is to be deleted
-                productUpdate = {
+                productUpdateObj = {
                     topic: 'products/delete',
                     resource_type: 'product',
                     resource_id: productID
                 };
-
-                var b = 4;
             }
 
-            // Write delta to file
-            if (productUpdate) {
+            // writing product data to file
+            if (productUpdateObj) {
                 try {
-                    jobHelper.writeObjectToXMLStream(updateXmlWriter, productUpdate);
+                    jobHelper.writeObjectToXMLStream(updateXmlWriter, productUpdateObj);
                 } catch (error) {
                     jobHelper.logFileError(updateFile.fullPath, 'Error write to file', error);
-                    productLogData.processedErrorMessage = 'Error write to file';
-                    algoliaData.setLogData('LastProductSyncLog', productLogData);
                     updateFileWriter.close();
                     updateXmlWriter.close();
                     return new Status(Status.ERROR);
@@ -201,22 +209,20 @@ function sendDeltaExportProducts(parameters) {
 
         }
 
-        // Close XML Update file
+        // closing XML update file
         updateXmlWriter.writeEndElement();
         updateXmlWriter.writeEndDocument();
         updateXmlWriter.close();
         updateFileWriter.close();
 
-        jobHelper.logFileInfo(updateFile.fullPath, 'Records for update ' + productsWrittenToXML + ' records');
+        // writing success log
+        jobHelper.logFileInfo(updateFile.fullPath, productsWrittenToXML + ' records written to update XML file');
 
-        algoliaData.setLogData('LastProductSyncLog', {
-            processedDate: algoliaData.getLocalDateTime(new Date()),
-            processedError: false,
-            processedErrorMessage: '',
-            processedToUpdateRecords: productsWrittenToXML,
-        });
+    }
 
-    } // END WRITING FILE
+
+    // ----------------------------- PART 3: Sending the contents of the XML -----------------------------
+
 
     if (TEST_MODE) {
         var paramConsumer = 'Algolia';
@@ -225,16 +231,21 @@ function sendDeltaExportProducts(parameters) {
         var updateFile = new File(l0_deltaExportDir, algoliaConstants.ALGOLIA_DELTA_EXPORT_UPDATE_FILE_NAME);
     }
 
+    var status = new Status(Status.ERROR);
 
-    // send the update file
     var sendDelta = require('*/cartridge/scripts/algolia/helper/sendDelta');
     var deltaIterator = require('*/cartridge/scripts/algolia/helper/deltaIterator');
 
+    // opening delta XML and sending contents to Algolia
     var deltaList = deltaIterator.create(updateFile.fullPath, 'product');
-    var status = sendDelta(deltaList, 'LastProductSyncLog', parameters);
+    if (!empty(deltaList)) {
+        status = sendDelta(deltaList, 'LastProductSyncLog', parameters);
+    }
 
-    if (!status.error) {
-        updateFile.remove();
+    if (!TEST_MODE) {
+        if (!status.error) {
+            updateFile.remove();
+        }
     }
 
 

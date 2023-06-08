@@ -67,7 +67,7 @@ function sendDelta(deltaList, logID, parameters) {
 
     var status = new Status(Status.OK);
 
-    if (deltaList.getSize() === 0) {
+    if (!deltaList.exists() || deltaList.getSize() === 0) {
         logger.info('Delta is empty, no syncronization is needed');
         deltaList.close();
         sendLogData.sendError = false;

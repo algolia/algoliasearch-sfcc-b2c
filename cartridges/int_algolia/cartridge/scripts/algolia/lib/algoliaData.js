@@ -147,8 +147,11 @@ function setSetOfStrings(id, value) {
  */
 function getLogData(id) {
     var productLog = null;
-    if (id === 'LastCategorySyncLog') productLog = logHelper.getLogData('category');
-    else if (id === 'LastProductSyncLog') productLog = logHelper.getLogData('product');
+    if (id === 'LastCategorySyncLog') {
+        productLog = logHelper.getLogData('category');
+    } else if (id === 'LastProductSyncLog') {
+        productLog = logHelper.getLogData('product');
+    }
     return productLog;
 }
 

@@ -254,6 +254,21 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
 
 /**
  * Parse error message and write it to log
+ * @param {string}  errorMessage - Error message
+ * @returns {null} - Null
+ */
+function logError(errorMessage, error) {
+    var logger = require('dw/system/Logger').getLogger('algolia');
+    logger.error('\nError: {0}',
+        errorMessage,
+    );
+
+    return null;
+}
+
+
+/**
+ * Parse error message and write it to log
  * @param {string}  file  - File name where the IOError
  * @param {string}  errorMessage - Error message
  * @param {Error}   error - IOError
@@ -483,6 +498,7 @@ module.exports = {
     objectCompare: objectCompare,
     hasSameProperties: hasSameProperties,
     readXMLObjectFromStream: readXMLObjectFromStream,
+    logError: logError,
     logFileError: logFileError,
     logFileInfo: logFileInfo,
     checkAlgoliaFolder: checkAlgoliaFolder,
