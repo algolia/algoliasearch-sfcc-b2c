@@ -257,11 +257,9 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
  * @param {string}  errorMessage - Error message
  * @returns {null} - Null
  */
-function logError(errorMessage, error) {
+function logError(errorMessage) {
     var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.error('\nError: {0}',
-        errorMessage,
-    );
+    logger.error('\nError: {0}', errorMessage);
 
     return null;
 }
