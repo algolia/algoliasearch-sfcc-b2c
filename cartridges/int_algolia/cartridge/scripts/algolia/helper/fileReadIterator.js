@@ -22,7 +22,7 @@ function readObject(xmlStreamReader, nodeName) {
     return result;
 }
 
-var FileReadterator = function () {
+var FileReadIterator = function () {
     this.nodeName = null;
     this.file = null;
     this.fileReader = null;
@@ -30,28 +30,28 @@ var FileReadterator = function () {
     this.dataBuffer = null;
 };
 
-FileReadterator.create = function (xmlFileName, nodeName) {
-    var newFileReadterator = new FileReadterator();
-    newFileReadterator.file = new File(xmlFileName);
+FileReadIterator.create = function (xmlFileName, nodeName) {
+    var newFileReadIterator = new FileReadIterator();
+    newFileReadIterator.file = new File(xmlFileName);
 
     try {
         // Open file
-        newFileReadterator.fileReader = new FileReader(newFileReadterator.file, 'UTF-8');
-        newFileReadterator.xmlReader = new XMLStreamReader(newFileReadterator.fileReader);
+        newFileReadIterator.fileReader = new FileReader(newFileReadIterator.file, 'UTF-8');
+        newFileReadIterator.xmlReader = new XMLStreamReader(newFileReadIterator.fileReader);
 
         // Read first object to buffer
-        newFileReadterator.nodeName = nodeName;
-        newFileReadterator.dataBuffer = readObject(newFileReadterator.xmlReader, nodeName);
+        newFileReadIterator.nodeName = nodeName;
+        newFileReadIterator.dataBuffer = readObject(newFileReadIterator.xmlReader, nodeName);
     } catch (error) {
         jobHelper.logFileError(xmlFileName, 'Error open file or read', error);
-        newFileReadterator.close();
-        newFileReadterator = null;
+        newFileReadIterator.close();
+        newFileReadIterator = null;
     }
 
-    return newFileReadterator;
+    return newFileReadIterator;
 };
 
-FileReadterator.prototype.close = function () {
+FileReadIterator.prototype.close = function () {
     if (empty(this.deltaXmlReader)) { return false; }
     // Close XML Delta file
     this.xmlReader.close();
@@ -62,7 +62,7 @@ FileReadterator.prototype.close = function () {
     return true;
 };
 
-FileReadterator.prototype.next = function () {
+FileReadIterator.prototype.next = function () {
     var result = null;
 
     if (empty(this.xmlReader) || empty(this.dataBuffer)) { return result; }
@@ -73,8 +73,8 @@ FileReadterator.prototype.next = function () {
     return result;
 };
 
-FileReadterator.prototype.hasNext = function () {
+FileReadIterator.prototype.hasNext = function () {
     return !empty(this.dataBuffer);
 };
 
-module.exports = FileReadterator;
+module.exports = FileReadIterator;
