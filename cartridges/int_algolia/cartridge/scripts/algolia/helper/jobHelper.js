@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * Function convert array to XML object
- * @param {Array} arr - array
- * @returns {Object} - XML Object
+ * Function to convert array to XML object
+ * @param {Array} arr Array
+ * @returns {Object} XML Object
  */
 function _arrayToXML(arr) {
     var result = new XML('<array></array>');
@@ -24,9 +24,9 @@ function _arrayToXML(arr) {
 }
 
 /**
- * Convert XML array object to JS array
- * @param {XML} xmlArray - XML Object
- * @returns {Array} - array
+ * Convert XML array object into JS array
+ * @param {XML} xmlArray XML Object
+ * @returns {Array} Array
  */
 function _xmlToArray(xmlArray) {
     var child = xmlArray.elements();
@@ -44,9 +44,9 @@ function _xmlToArray(xmlArray) {
 }
 
 /**
- * Check object for empty
- * @param {Object} obj - any Object
- * @returns {boolean} - is empty Object
+ * Check if object is empty
+ * @param {Object} obj Object
+ * @returns {boolean} Whether object is empty
  */
 function _isEmptyObject(obj) {
     if (obj instanceof Object) {
@@ -60,9 +60,9 @@ function _isEmptyObject(obj) {
 }
 
 /**
- * Function to create a clone object
- * @param {Object} obj - object to clone
- * @returns {Object} - clobe of Obj
+ * Function to clone an object
+ * @param {Object} obj Object to clone
+ * @returns {Object} Clone of object
  */
 function _cloneObject(obj) {
     // Handle the simple types, and null or undefined
@@ -95,9 +95,9 @@ function _cloneObject(obj) {
 /**
  * Function creates a new object that contains the top level properties of the compareObj
  * that are not in the baseObj. If objects are equals, returns empty Object
- * @param {Object} compareObj - compared Щbject
- * @param {Object} baseObj - base Object
-  * @returns {Object} - object of differents
+ * @param {Object} compareObj Object to compare
+ * @param {Object} baseObj Base object
+  * @returns {Object} Object of differences
  */
 function _compareTopLevelProperties(compareObj, baseObj) {
     var result = {};
@@ -134,10 +134,10 @@ function _compareTopLevelProperties(compareObj, baseObj) {
 // ----------------------------- helpers used by productsIndexJob.js & categoryIndexJob.js -----------------------------
 
 /**
- * Convert JS Object to XML Object and append to baseXML Object
- * @param {XML} baseXML - XML Object for update
- * @param {Object} obj - JS Object
- * @returns {XML} - combined XML Object
+ * Convert JS object to XML object and append to baseXML object
+ * @param {XML} baseXML XML object to update
+ * @param {Object} obj JS object
+ * @returns {XML} Combined XML Object
  */
 function appendObjToXML(baseXML, obj) {
     var result = baseXML;
@@ -170,8 +170,8 @@ function appendObjToXML(baseXML, obj) {
 
 /**
  * Convert XML Object to JS Object
- * @param {XML} xmlObj - XML Object
- * @returns {Object} - JS Object
+ * @param {XML} xmlObj XML Object
+ * @returns {Object} JS Object
  */
 function xmlToObject(xmlObj) {
     if (empty(xmlObj)) { return null; }
@@ -206,9 +206,9 @@ function xmlToObject(xmlObj) {
 
 /**
  * Function returns true if the baseObj Object contains properties of the compareObj Object
- * @param {Object} compareObj - second Object
- * @param {Object} baseObj - first Object
- * @returns {boolean} - success
+ * @param {Object} compareObj Object to compare
+ * @param {Object} baseObj Base object
+ * @returns {boolean} Success
  */
 function hasSameProperties(compareObj, baseObj) {
     var keys = Object.keys(compareObj);
@@ -222,9 +222,9 @@ function hasSameProperties(compareObj, baseObj) {
 /**
  * Compares two objects and creates a new one with properties whose values differ.
  * Values of compareObj are written to the new object
- * @param {Object} compareObj - second Object
- * @param {Object} baseObj - first Object
- * @returns {Object} - object of differents
+ * @param {Object} compareObj Second Object
+ * @param {Object} baseObj First Object
+ * @returns {Object} Object of differences
  */
 function objectCompare(compareObj, baseObj) {
     var result = _compareTopLevelProperties(compareObj, baseObj);
@@ -233,9 +233,9 @@ function objectCompare(compareObj, baseObj) {
 
 /**
  * Read XML object from StreamReader
- * @param {dw.io.XMLStreamReader} xmlStreamReader - XML Stream Reader
- * @param {string} modeName - name of node XML object
- * @returns {Object|null} - XML Object or null
+ * @param {dw.io.XMLStreamReader} xmlStreamReader XML Stream Reader
+ * @param {string} modeName Name of node XML object
+ * @returns {Object|null} XML Object or null
  */
 function readXMLObjectFromStream(xmlStreamReader, modeName) {
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
@@ -254,23 +254,19 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
 
 /**
  * Parse error message and write it to log
- * @param {string}  errorMessage - Error message
- * @returns {null} - Null
+ * @param {string} errorMessage Error message
  */
 function logError(errorMessage) {
     var logger = require('dw/system/Logger').getLogger('algolia');
     logger.error('\nError: {0}', errorMessage);
-
-    return null;
 }
 
 
 /**
  * Parse error message and write it to log
- * @param {string}  file  - File name where the IOError
- * @param {string}  errorMessage - Error message
- * @param {Error}   error - IOError
- * @returns {null} - Null
+ * @param {string} file File name where the IOError occurred
+ * @param {string} errorMessage Error message
+ * @param {Error} error IOError
  */
 function logFileError(file, errorMessage, error) {
     var logger = require('dw/system/Logger').getLogger('algolia');
@@ -278,28 +274,23 @@ function logFileError(file, errorMessage, error) {
         file,
         errorMessage,
         error.message);
-
-    return null;
 }
 
 /**
  * Parse error message and write it to log
- * @param {string}  file  - File name where the IOError
- * @param {string}  infoMessage - Info message
- * @returns {null} - Null
+ * @param {string} file File name where the IOError
+ * @param {string} infoMessage Info message
  */
 function logFileInfo(file, infoMessage) {
     var logger = require('dw/system/Logger').getLogger('algolia');
     logger.info('\nFile: {0},\nMessage: {1}',
         file,
         infoMessage);
-
-    return null;
 }
 
 /**
- * Function checks for the exists of the Algolia folder and creates it if the folder is not exists
- * @returns {boolean} - success
+ * Checks if the Algolia folder exists and creates it if not
+ * @returns {boolean} Success Boolean
  */
 function checkAlgoliaFolder() {
     var File = require('dw/io/File');
@@ -318,7 +309,7 @@ function checkAlgoliaFolder() {
 /**
  * UpdateProductModel class that represents an Algolia ProductModel
  * for update product properties
- * @param {Object} algoliaProduct - Algolia Product Model
+ * @param {Object} algoliaProduct Algolia Product Model
  * @constructor
  */
 function UpdateProductModel(algoliaProduct) {
@@ -339,9 +330,9 @@ function UpdateProductModel(algoliaProduct) {
 
 /**
  * Write Object to XMlStreamWriter
- * @param {dw.io.XMLStreamWriter} xmlStreamWriter - XML Stream Writer
- * @param {Object} obj - name of node XML object
- * @returns {null} - XML Object or null
+ * @param {dw.io.XMLStreamWriter} xmlStreamWriter XML Stream Writer
+ * @param {Object} obj Name of node XML object
+ * @returns {null} XML Object or null
  */
 function writeObjectToXMLStream(xmlStreamWriter, obj) {
     var productModelXML = new XML('<product></product>');
@@ -356,8 +347,8 @@ function writeObjectToXMLStream(xmlStreamWriter, obj) {
 /**
  * The function returns the filtered next product from SeekableIterator
  * and converted to the Algolia Product Model
- * @param {dw.util.SeekableIterator} productsIterator - Product SeekableIterator
- * @returns {Object} -  Algolia Product Model
+ * @param {dw.util.SeekableIterator} productsIterator Product SeekableIterator
+ * @returns {Object} Algolia Product Model
  */
 function getNextProductModel(productsIterator) {
     var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -378,7 +369,7 @@ function getNextProductModel(productsIterator) {
 /**
  * Retrieves the first child folder within the specified parent folder path.
  *
- * @param {dw.io.File} folder - The path to the parent folder.
+ * @param {dw.io.File} folder The path to the parent folder.
  * @returns {dw.io.File|null} The first child folder as a `dw.io.File` instance, or `null` if no child folders are found.
  */
 function getFirstChildFolder(folder) {
@@ -398,7 +389,7 @@ function getFirstChildFolder(folder) {
 /**
  * Retrieves the list of delta export zips from the specified folder.
  *
- * @param {dw.io.File} folder - The folder containing the zip files.
+ * @param {dw.io.File} folder The folder containing the zip files.
  * @returns {string[]} An array of zip file names which match the pattern.
  */
 function getDeltaExportZipList(folder) {
@@ -420,7 +411,7 @@ function getDeltaExportZipList(folder) {
 /**
  * Retrieves the child folders of a given folder.
  *
- * @param {dw.io.File} folder - The folder to be searched
+ * @param {dw.io.File} folder The folder to be searched
  * @returns {dw.io.File[]} An array of subfolders
  */
 function getChildFolders(folder) {
@@ -434,26 +425,23 @@ function getChildFolders(folder) {
 }
 
 /**
- * Takes each XML file in sequential order and retrieves the changed products' IDs from it.
- * Adds it to the changedProducts object that is built in memory, which looks like this:
+ * Retrieves the changed products' IDs from the supplied XML file,
+ * then adds them to the changedProducts object which looks like this:
  * changedProducts: {
  *     'productID1': true,
- *     'productID2': false,
+ *     'productID2': true,
  *     'productID3': false,
  *     [...]
  * }
- * If there are multiple delta export files and a certain product had multiple changes applied to it,
- * the newer event will overwrite the older one (e.g. if a product was modified and then deleted or
- * if a product was deleted and then re-added in another XML).
  * The Boolean value of the productID keys indicates whether the product was added/changed (true)
- * or removed with <product mode="delete" product-id=""/> (false).
- * These products will then be retrieved from the database, enriched and then sent to Algolia (or marked for deletion).
+ * or removed with <product mode="delete" product-id="${productID}"/> (false).
+ * These products will be retrieved from the database, enriched and sent to Algolia (or marked for deletion).
  *
- * @param {dw.io.File} xmlFile - The path to the XML file.
- * @param {Object} changedProducts - an object containing the changed products
+ * @param {dw.io.File} xmlFile The path to the XML file.
+ * @param {Object} changedProducts An object containing the changed products
  * @returns {Object} An object with product IDs as keys and their availability status as values.
  */
-function buildChangedProductsObjectFromXML(xmlFile, changedProducts) {
+function updateChangedProductsObjectFromXML(xmlFile, changedProducts) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
@@ -509,5 +497,5 @@ module.exports = {
     getFirstChildFolder: getFirstChildFolder,
     getDeltaExportZipList: getDeltaExportZipList,
     getChildFolders: getChildFolders,
-    buildChangedProductsObjectFromXML: buildChangedProductsObjectFromXML,
+    updateChangedProductsObjectFromXML: updateChangedProductsObjectFromXML,
 };

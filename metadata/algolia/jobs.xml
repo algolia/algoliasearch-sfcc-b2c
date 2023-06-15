@@ -65,9 +65,9 @@
     </job>
 
     <job job-id="AlgoliaProductsDeltaExport" priority="0">
-        <description>This is an alternative to the current delta calculation and sending method which calculates the delta export file by comparing the last full export to the current one, possibly comparing two huge XML files.
-This method relies on SFCC's built-in Delta Exports feature to calculate the delta (omitting the delta calculation phase completely and speeding up the process considerably), then enriches and transforms the products before sending them to Algolia for indexing.
-Make sure to contact SFCC Support to enable delta exports on your instance.</description>
+        <description>This job is a faster alternative to the AlgoliaProductsIndex job's delta export mechanism.
+        It makes use of the SFCC-native Delta Export feature to create, enrich and send a product delta export to Algolia.
+        Warning: the Delta Export feature is not enabled by default; its activation needs to be requested by creating a support ticket with Salesforce.</description>
         <parameters>
             <parameter name="exportFile">productDeltaExport</parameter>
             <parameter name="consumers">algolia</parameter>
