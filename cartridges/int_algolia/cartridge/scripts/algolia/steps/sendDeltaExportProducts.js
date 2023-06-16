@@ -59,14 +59,6 @@ function sendDeltaExportProducts(parameters) {
         return new Status(Status.OK);
     }
 
-    // creating temporary "_processing" dir
-    var l1_processingDir = new File(l0_deltaExportDir, '_processing');
-    l1_processingDir.mkdir();
-
-    // creating "_completed" dir
-    var l1_completedDir = new File(l0_deltaExportDir, '_completed');
-    l1_completedDir.mkdir(); // creating "_completed" folder -- does no harm if already exists
-
     // list all the delta export zips in the folder
     var deltaExportZips = jobHelper.getDeltaExportZipList(l0_deltaExportDir);
 
@@ -74,6 +66,14 @@ function sendDeltaExportProducts(parameters) {
     if (empty(deltaExportZips)) {
         return new Status(Status.OK);
     }
+
+    // creating temporary "_processing" dir
+    var l1_processingDir = new File(l0_deltaExportDir, '_processing');
+    l1_processingDir.mkdir();
+
+    // creating "_completed" dir
+    var l1_completedDir = new File(l0_deltaExportDir, '_completed');
+    l1_completedDir.mkdir(); // creating "_completed" folder -- does no harm if already exists
 
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
