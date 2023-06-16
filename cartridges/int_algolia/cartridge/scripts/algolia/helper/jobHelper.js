@@ -439,7 +439,7 @@ function getChildFolders(folder) {
  *
  * @param {dw.io.File} xmlFile The path to the XML file.
  * @param {Object} changedProducts An object containing the changed products
- * @returns {Object} An object with product IDs as keys and their availability status as values.
+ * @returns {boolean} Success boolean
  */
 function updateChangedProductsObjectFromXML(xmlFile, changedProducts) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');

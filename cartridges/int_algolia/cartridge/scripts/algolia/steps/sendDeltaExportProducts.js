@@ -44,9 +44,8 @@ function sendDeltaExportProducts(parameters) {
 
     // checking if mandatory parameters are present
     if (empty(parameters.consumers) || empty(parameters.exportFile)) {
-        let errorMessage = 'Mandatory job parameters missing!';
-        jobHelper.logError(errorMessage);
-        return new Status(Status.ERROR, 'MissingJobParameters', errorMessage);
+        jobHelper.logError('Mandatory job parameters missing!');
+        return new Status(Status.ERROR);
     }
 
     var paramConsumer = parameters.consumers.split(',')[0].trim(); // comma-separated values, but we only need one copy, so ignoring the rest
@@ -54,7 +53,11 @@ function sendDeltaExportProducts(parameters) {
 
     // creating working folder (same as the delta export output folder) - if there were no previous changes, the delta export job step won't create it
     var l0_deltaExportDir = new File(algoliaConstants.ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramExportFile); // Impex/src/platform/outbox/algolia/productDeltaExport
-    l0_deltaExportDir.mkdirs();
+
+    // return OK if the folder doesn't exist, this means that the CatalogDeltaExport job step finished OK but didn't have any output (there were no changes)
+    if (!l0_deltaExportDir.exists()) {
+        return new Status(Status.OK);
+    }
 
     // creating temporary "_processing" dir
     var l1_processingDir = new File(l0_deltaExportDir, '_processing');
@@ -66,6 +69,11 @@ function sendDeltaExportProducts(parameters) {
 
     // list all the delta export zips in the folder
     var deltaExportZips = jobHelper.getDeltaExportZipList(l0_deltaExportDir);
+
+    // if there are no files to process, there's no point in continuing
+    if (empty(deltaExportZips)) {
+        return new Status(Status.OK);
+    }
 
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
@@ -110,9 +118,8 @@ function sendDeltaExportProducts(parameters) {
             currentZipFile.copyTo(new File(l1_completedDir, currentZipFile.getName())) && currentZipFile.remove();
             currentMetaFile.copyTo(new File(l1_completedDir, currentMetaFile.getName())) && currentMetaFile.remove();
         } else {
-            let errorMessage = 'Error while processing ' + filename;
-            jobHelper.logError(errorMessage);
-            return new Status(Status.ERROR, 'ProcessingError', errorMessage);
+            jobHelper.logError('Error while processing ' + filename);
+            return new Status(Status.ERROR);
         }
     });
 
