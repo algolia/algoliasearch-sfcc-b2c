@@ -1,7 +1,11 @@
 'use strict';
 
 /*
-    The CatalogDeltaExport job step creates the following folder structure with the default configuration:
+    The "AlgoliaProductsDeltaExport" job consists of two job steps:
+    1. CatalogDeltaExport is a built-in SFCC job step which produces a standard-format SFCC delta export (but which lacks certain data needed by Algolia)
+    2. algoliaSendDeltaExportProducts (this script) takes the output of CatalogDeltaExport, enriches it and sends it to Algolia.
+
+    CatalogDeltaExport creates the following folder structure:
 
     path to the delta export zip:
         Impex / src / platform / outbox / <consumer> / <exportFile> / <seqNum>.zip
