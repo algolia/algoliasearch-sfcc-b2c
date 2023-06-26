@@ -300,7 +300,7 @@ function checkAlgoliaFolder() {
         var algoliaFolder = new File(algoliaFolderName);
         result = algoliaFolder.exists() ? true : algoliaFolder.mkdirs();
     } catch (error) {
-        logFileError(algoliaFolderName, 'Error create directory path', error);
+        logFileError(algoliaFolderName, 'Error creating directory path', error);
         result = false;
     }
     return result;
@@ -477,6 +477,35 @@ function updateChangedProductsObjectFromXML(xmlFile, changedProducts) {
     return success;
 }
 
+/**
+ * Removes a folder and its contents recursively.
+ * @param {dw.io.File} folder The folder to remove (of class File)
+ * @returns {boolean} Success Boolean
+ */
+function removeFolderRecursively(folder) {
+    var success = true;
+
+    if (folder.exists() && folder.isDirectory()) {
+        // generate an array of the files and folders
+        var files = folder.listFiles().toArray();
+
+        files.forEach(function(file) {
+            if (file.isDirectory()) {
+                // recursively remove subfolders
+                success = success && removeFolderRecursively(file);
+            } else {
+                // remove files within the folder
+                success = success && file.remove();
+            }
+        });
+
+        // remove the empty folder itself
+        success = success && folder.remove();
+    }
+
+    return success;
+}
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -498,4 +527,5 @@ module.exports = {
     getDeltaExportZipList: getDeltaExportZipList,
     getChildFolders: getChildFolders,
     updateChangedProductsObjectFromXML: updateChangedProductsObjectFromXML,
+    removeFolderRecursively: removeFolderRecursively,
 };

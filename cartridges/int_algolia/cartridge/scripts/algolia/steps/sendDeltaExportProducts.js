@@ -113,10 +113,8 @@ function sendDeltaExportProducts(parameters) {
 
         // cleanup, removing unzipped files that are already processed and their parent dirs
         if (success) {
-            l4_catalogsDir.remove();
-            new File(l3_uuidDir, 'version.txt').remove(); // removing version.txt so that parent folder can be deleted
-            l3_uuidDir.remove();
-            l2_tempZipDir.remove();
+            // this removes `l4_catalogsDir`, `version.txt` from `l3_uuidDir`, `l3_uuidDir` and `l2_tempZipDir` itself
+            jobHelper.removeFolderRecursively(l2_tempZipDir);
 
             // moving processed zip files to the "_completed" folder for archival
             currentZipFile.copyTo(new File(l1_completedDir, currentZipFile.getName())) && currentZipFile.remove();
