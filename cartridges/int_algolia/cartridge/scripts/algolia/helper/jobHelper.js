@@ -97,7 +97,7 @@ function _cloneObject(obj) {
  * that are not in the baseObj. If objects are equals, returns empty Object
  * @param {Object} compareObj Object to compare
  * @param {Object} baseObj Base object
-  * @returns {Object} Object of differences
+ * @returns {Object} Object of differences
  */
 function _compareTopLevelProperties(compareObj, baseObj) {
     var result = {};
@@ -218,7 +218,6 @@ function hasSameProperties(compareObj, baseObj) {
     return true;
 }
 
-
 /**
  * Compares two objects and creates a new one with properties whose values differ.
  * Values of compareObj are written to the new object
@@ -261,7 +260,6 @@ function logError(errorMessage) {
     logger.error('\nError: {0}', errorMessage);
 }
 
-
 /**
  * Parse error message and write it to log
  * @param {string} file File name where the IOError occurred
@@ -273,19 +271,27 @@ function logFileError(file, errorMessage, error) {
     logger.error('\nFile: {0},\nError: {1},\nError: {2},',
         file,
         errorMessage,
-        error.message);
+        error.message
+    );
 }
 
 /**
- * Parse error message and write it to log
+ * Write info to log
+ * @param {string} message Info message
+ */
+function logInfo(message) {
+    var logger = require('dw/system/Logger').getLogger('algolia');
+    logger.info('Message: {0}', message);
+}
+
+/**
+ * Write info to log
  * @param {string} file File name where the IOError
  * @param {string} infoMessage Info message
  */
 function logFileInfo(file, infoMessage) {
     var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.info('\nFile: {0},\nMessage: {1}',
-        file,
-        infoMessage);
+    logger.info('\nFile: {0},\nMessage: {1}', file, infoMessage);
 }
 
 /**
@@ -325,6 +331,20 @@ function UpdateProductModel(algoliaProduct) {
         if (keys[i] !== 'id') {
             this.options.data[keys[i]] = algoliaProduct[keys[i]];
         }
+    }
+}
+
+/**
+ * Constructs a model for products that are to be deleted from the Algolia index
+ * @param {string} productID productID
+ * @returns {Object} The object to be sent to Algolia
+ * @constructor
+ */
+function DeleteProductModel(productID) {
+    return {
+        topic: 'products/delete',
+        resource_type: 'product',
+        resource_id: productID
     }
 }
 
@@ -425,55 +445,112 @@ function getChildFolders(folder) {
 }
 
 /**
+ * Updates or adds a key-value pair to the last object in the array that has less than 2000 properties.
+ * If the key already exists in any object, it updates the value for that key.
+ * If the key doesn't exist, it adds the key-value pair to the last object or
+ * if the last object is full, creates a new object and adds the key-value pair to it.
+ *
+ * @param {Array} objectsArray The array of objects to update or add key-value pairs to.
+ * @param {string} key The key to check or add.
+ * @param {*} value The value to update or add.
+ */
+function _updateOrAddValue(objectsArray, key, value) {
+    const jsObjectSizeQuota = 2000;
+
+    // if there are no objects in the array or if the last object is full, add a new empty object to the array
+    if (objectsArray.length === 0 || Object.keys(objectsArray[objectsArray.length - 1]).length === jsObjectSizeQuota) {
+        objectsArray.push({});
+    }
+
+    var lastObject = objectsArray[objectsArray.length - 1];
+
+    // if key already exists, update it with the new value...
+    for (var i = 0; i < objectsArray.length; i++) {
+        var object = objectsArray[i];
+
+        if (object.hasOwnProperty(key)) {
+            object[key] = value;
+            return; // exit the function after updating the value
+        }
+    }
+
+    // ...otherwise add the key-value pair to the last object
+    lastObject[key] = value;
+}
+
+/**
  * Retrieves the changed products' IDs from the supplied XML file,
- * then adds them to the changedProducts object which looks like this:
- * changedProducts: {
- *     'productID1': true,
- *     'productID2': true,
- *     'productID3': false,
- *     [...]
- * }
+ * then adds them to the changedProducts structure which looks like this:
+ * changedProducts: [
+ *     {
+ *         'productID1': true,
+ *         'productID2': true,
+ *         'productID3': false,
+ *          [...]
+ *     },
+ *     {
+ *         'productID4': true,
+ *          [...]
+ *     },
+ *    [...]
+ * ]
+ * `changedProducts` is an array of objects with each object containing at most 2000 key-value pairs.
+ * _updateOrAddValue() makes sure that the keys are unique across the whole structure.
+ * It was necessary to split the data up into multiple objects due to the SFCC API quota `api.jsObjectSize`
+ * which limits the number of properties in any JS object to 2000.
+ * The quota limit for arrays (`api.jsArraySize`) is 20000, so a total of 40 million products can be stored in changedProducts.
+ *
  * The Boolean value of the productID keys indicates whether the product was added/changed (true)
  * or removed with <product mode="delete" product-id="${productID}"/> (false).
  * These products will be retrieved from the database, enriched and sent to Algolia (or marked for deletion).
  *
  * @param {dw.io.File} xmlFile The path to the XML file.
- * @param {Object} changedProducts An object containing the changed products
- * @returns {boolean} Success boolean
+ * @param {Array} changedProducts An array of objects containing the changed products
+ * @returns {number|boolean} The number of records read if successful, false if not successful
  */
 function updateChangedProductsObjectFromXML(xmlFile, changedProducts) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
     var catalogID;
+    var readRecordsCount = 0;
 
-    if (xmlFile.exists()) {
-        var fileReader = new FileReader(xmlFile);
-        var xmlStreamReader = new XMLStreamReader(fileReader);
-        var success = false;
+    try {
+        if (xmlFile.exists()) {
+            var fileReader = new FileReader(xmlFile);
+            var xmlStreamReader = new XMLStreamReader(fileReader);
+            var success = false;
 
-        while (xmlStreamReader.hasNext()) {
-            var xmlEvent = xmlStreamReader.next();
+            while (xmlStreamReader.hasNext()) {
+                var xmlEvent = xmlStreamReader.next();
 
-            if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
-                if (xmlStreamReader.getLocalName() === 'catalog') { // <catalog> start element
-                    catalogID = xmlStreamReader.getAttributeValue(null, 'catalog-id');
+                if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
+                    if (xmlStreamReader.getLocalName() === 'catalog') { // <catalog> start element
+                        catalogID = xmlStreamReader.getAttributeValue(null, 'catalog-id');
+                    }
+                    if (xmlStreamReader.getLocalName() === 'product') { // <product> start element
+                        var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <product product-id="">
+                        var mode = xmlStreamReader.getAttributeValue(null, 'mode'); // <product mode="delete">
+                        var isAvailable = mode !== 'delete';
+
+                        // adding new productID to structure or updating it if key already exists
+                        _updateOrAddValue(changedProducts, productID, isAvailable);
+
+                        readRecordsCount++;
+                    }
                 }
-                if (xmlStreamReader.getLocalName() === 'product') { // <product> start element
-                    var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <product product-id="">
-                    var mode = xmlStreamReader.getAttributeValue(null, 'mode'); // <product mode="delete">
-                    var isAvailable = mode !== 'delete';
-                    changedProducts[productID] = isAvailable;
+
+                if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'catalog') { // </catalog>
+                    success = readRecordsCount;
                 }
             }
+            xmlStreamReader.close();
+        };
+    } catch (error) {
+        return false;
+    }
 
-            if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'catalog') { // </catalog>
-                success = true;
-            }
-        }
-        xmlStreamReader.close();
-    };
-
+    // the number of successfully processed records or false if there was an error
     return success;
 }
 
@@ -506,6 +583,23 @@ function removeFolderRecursively(folder) {
     return success;
 }
 
+/**
+ * Safely moves a file to another location
+ * @param {dw.io.File} sourceFile File to move
+ * @param {dw.io.File} targetFile Target path
+ * @returns {boolean} whether the move was successful
+ */
+function moveFile(sourceFile, targetFile) {
+    var success = false;
+    if (sourceFile.exists()) {
+        if (targetFile.exists()) {
+            targetFile.remove();
+        }
+        success = sourceFile.copyTo(targetFile) && sourceFile.remove();
+    }
+    return success;
+}
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -515,10 +609,12 @@ module.exports = {
     readXMLObjectFromStream: readXMLObjectFromStream,
     logError: logError,
     logFileError: logFileError,
+    logInfo: logInfo,
     logFileInfo: logFileInfo,
     checkAlgoliaFolder: checkAlgoliaFolder,
 
     UpdateProductModel: UpdateProductModel,
+    DeleteProductModel: DeleteProductModel,
     writeObjectToXMLStream: writeObjectToXMLStream,
     getNextProductModel: getNextProductModel,
 
@@ -528,4 +624,5 @@ module.exports = {
     getChildFolders: getChildFolders,
     updateChangedProductsObjectFromXML: updateChangedProductsObjectFromXML,
     removeFolderRecursively: removeFolderRecursively,
+    moveFile: moveFile,
 };

@@ -18,9 +18,11 @@ function runProductExport(parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     var fileReadIterator = require('*/cartridge/scripts/algolia/helper/fileReadIterator');
 
+    const updateLogType = 'LastProductSyncLog';
+
     var counterProductsTotal = 0;
     var counterProductsForUpdate = 0;
-    var productLogData = algoliaData.getLogData('LastProductSyncLog');
+    var productLogData = algoliaData.getLogData(updateLogType);
     productLogData.processedDate = algoliaData.getLocalDateTime(new Date());
     productLogData.processedError = true;
     productLogData.processedErrorMessage = '';
@@ -36,7 +38,7 @@ function runProductExport(parameters) {
     if (!algoliaData.getPreference('Enable')) {
         jobHelper.logFileError('Disable', 'Algolia Cartridge Disabled', status);
         productLogData.processedErrorMessage = 'Algolia Cartridge Disabled';
-        algoliaData.setLogData('LastProductSyncLog', productLogData);
+        algoliaData.setLogData(updateLogType, productLogData);
         return status;
     }
 
@@ -69,7 +71,7 @@ function runProductExport(parameters) {
     } catch (error) {
         jobHelper.logFileError(updateFile.fullPath, 'Error open Delta file to write', error);
         productLogData.processedErrorMessage = 'Error open Delta file to write';
-        algoliaData.setLogData('LastProductSyncLog', productLogData);
+        algoliaData.setLogData(updateLogType, productLogData);
         snapshotFileWriter.close();
         snapshotXmlWriter.close();
         return new Status(Status.ERROR);
@@ -85,7 +87,7 @@ function runProductExport(parameters) {
             } catch (error) {
                 jobHelper.logFileError(snapshotFile.fullPath, 'Error remove file', error);
                 productLogData.processedErrorMessage = 'Error remove file';
-                algoliaData.setLogData('LastProductSyncLog', productLogData);
+                algoliaData.setLogData(updateLogType, productLogData);
                 snapshotFileWriter.close();
                 snapshotXmlWriter.close();
                 updateFileWriter.close();
@@ -96,7 +98,7 @@ function runProductExport(parameters) {
             snapshotReadIterator = fileReadIterator.create(algoliaConstants.SNAPSHOT_PRODUCTS_FILE_NAME, 'product');
             if (empty(snapshotReadIterator)) {
                 productLogData.processedErrorMessage = 'Error open Snapshot file or read';
-                algoliaData.setLogData('LastProductSyncLog', productLogData);
+                algoliaData.setLogData(updateLogType, productLogData);
                 snapshotFileWriter.close();
                 snapshotXmlWriter.close();
                 updateFileWriter.close();
@@ -121,7 +123,7 @@ function runProductExport(parameters) {
             } catch (error) {
                 jobHelper.logFileError(newSnapshotFile.fullPath, 'Error write to file', error);
                 productLogData.processedErrorMessage = 'Error write to file';
-                algoliaData.setLogData('LastProductSyncLog', productLogData);
+                algoliaData.setLogData(updateLogType, productLogData);
                 snapshotFileWriter.close();
                 snapshotXmlWriter.close();
                 updateFileWriter.close();
@@ -198,7 +200,7 @@ function runProductExport(parameters) {
             } catch (error) {
                 jobHelper.logFileError(updateFile.fullPath, 'Error write to file', error);
                 productLogData.processedErrorMessage = 'Error write to file';
-                algoliaData.setLogData('LastProductSyncLog', productLogData);
+                algoliaData.setLogData(updateLogType, productLogData);
                 snapshotFileWriter.close();
                 snapshotXmlWriter.close();
                 updateFileWriter.close();
@@ -240,7 +242,7 @@ function runProductExport(parameters) {
     productLogData.processedErrorMessage = '';
     productLogData.processedRecords = counterProductsTotal;
     productLogData.processedToUpdateRecords = counterProductsForUpdate;
-    algoliaData.setLogData('LastProductSyncLog', productLogData);
+    algoliaData.setLogData(updateLogType, productLogData);
 
     return new Status(Status.OK);
 }
