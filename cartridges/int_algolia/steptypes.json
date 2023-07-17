@@ -18,12 +18,12 @@
                     "parameter":
                     [
                         {
-                            "@name":"consumers",
+                            "@name":"consumer",
                             "@type":"string",
                             "@required":"true"
                         },
                         {
-                            "@name":"exportFile",
+                            "@name":"deltaExportJobName",
                             "@type":"string",
                             "@required":"true"
                         }

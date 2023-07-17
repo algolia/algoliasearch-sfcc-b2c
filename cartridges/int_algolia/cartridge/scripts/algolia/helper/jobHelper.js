@@ -445,6 +445,21 @@ function getChildFolders(folder) {
 }
 
 /**
+ * Returns an array of all XML files from the given folder
+ * @param {dw.io.File} folder Folder to list files in
+ * @returns {Array} An array of strings
+ */
+function getAllXMLFilesInFolder(folder) {
+    if (empty(folder) || !folder.isDirectory()) {
+        return [];
+    } else {
+        return folder.listFiles(function(file) {
+            return file.isFile() && file.getName().endsWith('.xml');
+        }).toArray().sort();
+    }
+}
+
+/**
  * Updates or adds a key-value pair to the last object in the array that has less than 2000 properties.
  * If the key already exists in any object, it updates the value for that key.
  * If the key doesn't exist, it adds the key-value pair to the last object or
@@ -479,36 +494,15 @@ function _updateOrAddValue(objectsArray, key, value) {
 }
 
 /**
- * Retrieves the changed products' IDs from the supplied XML file,
- * then adds them to the changedProducts structure which looks like this:
- * changedProducts: [
- *     {
- *         'productID1': true,
- *         'productID2': true,
- *         'productID3': false,
- *          [...]
- *     },
- *     {
- *         'productID4': true,
- *          [...]
- *     },
- *    [...]
- * ]
- * `changedProducts` is an array of objects with each object containing at most 2000 key-value pairs.
- * _updateOrAddValue() makes sure that the keys are unique across the whole structure.
- * It was necessary to split the data up into multiple objects due to the SFCC API quota `api.jsObjectSize`
- * which limits the number of properties in any JS object to 2000.
- * The quota limit for arrays (`api.jsArraySize`) is 20000, so a total of 40 million products can be stored in changedProducts.
- *
- * The Boolean value of the productID keys indicates whether the product was added/changed (true)
- * or removed with <product mode="delete" product-id="${productID}"/> (false).
- * These products will be retrieved from the database, enriched and sent to Algolia (or marked for deletion).
- *
+ * Retrieves the IDs of the products which have changed since the last update
+ * (an attribute of the product's, its inventory levels or its price)
+ * from the supplied XML and adds them to the changedProducts structure.
  * @param {dw.io.File} xmlFile The path to the XML file.
  * @param {Array} changedProducts An array of objects containing the changed products
+ * @param {string} resourceType Type of export file: "catalog" | "inventory" | "pricebook"
  * @returns {number|boolean} The number of records read if successful, false if not successful
  */
-function updateChangedProductsObjectFromXML(xmlFile, changedProducts) {
+function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
@@ -521,29 +515,72 @@ function updateChangedProductsObjectFromXML(xmlFile, changedProducts) {
             var xmlStreamReader = new XMLStreamReader(fileReader);
             var success = false;
 
-            while (xmlStreamReader.hasNext()) {
-                var xmlEvent = xmlStreamReader.next();
+            switch (resourceType) {
+                case 'catalog':
+                    while (xmlStreamReader.hasNext()) {
+                        var xmlEvent = xmlStreamReader.next();
 
-                if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
-                    if (xmlStreamReader.getLocalName() === 'catalog') { // <catalog> start element
-                        catalogID = xmlStreamReader.getAttributeValue(null, 'catalog-id');
+                        if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
+                            if (xmlStreamReader.getLocalName() === 'product') { // <product> start element
+                                var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <product product-id="">
+                                var mode = xmlStreamReader.getAttributeValue(null, 'mode'); // <product mode="delete">
+                                var isAvailable = mode !== 'delete';
+
+                                // adding new productID to structure or updating it if key already exists
+                                _updateOrAddValue(changedProducts, productID, isAvailable);
+
+                                readRecordsCount++;
+                            }
+                        }
+
+                        if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'catalog') { // </catalog>
+                            success = readRecordsCount;
+                        }
                     }
-                    if (xmlStreamReader.getLocalName() === 'product') { // <product> start element
-                        var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <product product-id="">
-                        var mode = xmlStreamReader.getAttributeValue(null, 'mode'); // <product mode="delete">
-                        var isAvailable = mode !== 'delete';
+                    break;
+                case 'inventory':
+                    while (xmlStreamReader.hasNext()) {
+                        var xmlEvent = xmlStreamReader.next();
 
-                        // adding new productID to structure or updating it if key already exists
-                        _updateOrAddValue(changedProducts, productID, isAvailable);
+                        if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
 
-                        readRecordsCount++;
+                            if (xmlStreamReader.getLocalName() === 'record') { // <record> start element
+                                var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <record product-id="">
+
+                                // adding new productID to structure or updating it if key already exists, always true
+                                _updateOrAddValue(changedProducts, productID, true);
+
+                                readRecordsCount++;
+                            }
+                        }
+
+                        if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'inventory') { // </inventory>
+                            success = readRecordsCount;
+                        }
                     }
-                }
+                    break;
+                case 'pricebook':
+                    while (xmlStreamReader.hasNext()) {
+                        var xmlEvent = xmlStreamReader.next();
 
-                if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'catalog') { // </catalog>
-                    success = readRecordsCount;
-                }
+                        if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
+                            if (xmlStreamReader.getLocalName() === 'price-table') { // <price-table> start element
+                                var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <price-table product-id="">
+
+                                // adding new productID to structure or updating it if key already exists, always true
+                                _updateOrAddValue(changedProducts, productID, true);
+
+                                readRecordsCount++;
+                            }
+                        }
+
+                        if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'pricebooks') { // </pricebooks>
+                            success = readRecordsCount;
+                        }
+                    }
+                    break;
             }
+
             xmlStreamReader.close();
         };
     } catch (error) {
@@ -622,7 +659,8 @@ module.exports = {
     getFirstChildFolder: getFirstChildFolder,
     getDeltaExportZipList: getDeltaExportZipList,
     getChildFolders: getChildFolders,
-    updateChangedProductsObjectFromXML: updateChangedProductsObjectFromXML,
+    getAllXMLFilesInFolder: getAllXMLFilesInFolder,
+    updateCPObjectFromXML: updateCPObjectFromXML,
     removeFolderRecursively: removeFolderRecursively,
     moveFile: moveFile,
 };
