@@ -250,6 +250,30 @@ function sendDeltaExportProducts(parameters) {
     // ----------------------------- PART 2: Retrieving and enriching the products, writing them to XML -----------------------------
 
 
+    // there were no changes, no need to proceed, return OK
+    if (jobHelper.isObjectsArrayEmpty(changedProducts)) {
+
+        // This is for handling the case where the B2C delta export job creates a zip file with no changed products
+        // (e.g. something about a pricebook has changed, but not any actual prices). In this case the script
+        // doesn't need to proceed, but the zip file should still be moved to "_completed".
+        deltaExportZips.forEach(function(filename) {
+            var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
+            var targetZipFile = new File(l1_completedDir, currentZipFile.getName());
+            jobHelper.moveFile(currentZipFile, targetZipFile);
+
+            var currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
+            var targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
+            jobHelper.moveFile(currentMetaFile, targetMetaFile);
+        });
+
+        productLogData.processedDate = algoliaData.getLocalDateTime(new Date());
+        productLogData.processedError = false;
+        productLogData.processedErrorMessage = '';
+        algoliaData.setLogData(updateLogType, productLogData);
+
+        return new Status(Status.OK);
+    }
+
     // open Delta XML file to write
     var updateFile, updateFileWriter, updateXmlWriter;
     try {

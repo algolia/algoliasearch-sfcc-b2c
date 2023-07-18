@@ -493,6 +493,25 @@ function _updateOrAddValue(objectsArray, key, value) {
 }
 
 /**
+ * Returns whether there are any properties in a dense array of objects
+ * @param {Array} objectsArray The array of objects to check, array is filled up sequentially and densely
+ * @returns {boolean} Whether any object in the array contain any properties
+ */
+function isObjectsArrayEmpty(objectsArray) {
+    if (empty(objectsArray)) {
+        return true;
+    }
+
+    // array has at least one element
+    var lastObject = objectsArray[objectsArray.length - 1];
+    if (empty(lastObject)) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
  * Retrieves the IDs of the products which have changed since the last update
  * (an attribute of the product's, its inventory levels or its price)
  * from the supplied XML and adds them to the changedProducts structure.
@@ -662,6 +681,7 @@ module.exports = {
     getDeltaExportZipList: getDeltaExportZipList,
     getChildFolders: getChildFolders,
     getAllXMLFilesInFolder: getAllXMLFilesInFolder,
+    isObjectsArrayEmpty: isObjectsArrayEmpty,
     updateCPObjectFromXML: updateCPObjectFromXML,
     removeFolderRecursively: removeFolderRecursively,
     moveFile: moveFile,
