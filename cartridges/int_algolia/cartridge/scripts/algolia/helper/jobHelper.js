@@ -499,14 +499,17 @@ function _updateOrAddValue(objectsArray, key, value) {
  * @param {dw.io.File} xmlFile The path to the XML file.
  * @param {Array} changedProducts An array of objects containing the changed products
  * @param {string} resourceType Type of export file: "catalog" | "inventory" | "pricebook"
- * @returns {number|boolean} The number of records read if successful, false if not successful
+ * @returns {Object} The result object containing `success` (boolean) and `nrProductsRead` (number)
  */
 function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
     var catalogID;
-    var readRecordsCount = 0;
+    var resultObj = {
+        nrProductsRead: 0,
+        success: false
+    };
 
     try {
         if (xmlFile.exists()) {
@@ -528,12 +531,12 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
                                 // adding new productID to structure or updating it if key already exists
                                 _updateOrAddValue(changedProducts, productID, isAvailable);
 
-                                readRecordsCount++;
+                                resultObj.nrProductsRead++;
                             }
                         }
 
                         if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'catalog') { // </catalog>
-                            success = readRecordsCount;
+                            resultObj.success = true;
                         }
                     }
                     break;
@@ -549,12 +552,12 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
                                 // adding new productID to structure or updating it if key already exists, always true
                                 _updateOrAddValue(changedProducts, productID, true);
 
-                                readRecordsCount++;
+                                resultObj.nrProductsRead++;
                             }
                         }
 
                         if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'inventory') { // </inventory>
-                            success = readRecordsCount;
+                            resultObj.success = true;
                         }
                     }
                     break;
@@ -569,12 +572,12 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
                                 // adding new productID to structure or updating it if key already exists, always true
                                 _updateOrAddValue(changedProducts, productID, true);
 
-                                readRecordsCount++;
+                                resultObj.nrProductsRead++;
                             }
                         }
 
                         if (xmlEvent === XMLStreamConstants.END_ELEMENT && xmlStreamReader.getLocalName() === 'pricebooks') { // </pricebooks>
-                            success = readRecordsCount;
+                            resultObj.success = true;
                         }
                     }
                     break;
@@ -583,11 +586,11 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
             xmlStreamReader.close();
         };
     } catch (error) {
-        return false;
+        resultObj.success = false;
+        return resultObj;
     }
 
-    // the number of successfully processed records or false if there was an error
-    return success;
+    return resultObj;
 }
 
 /**

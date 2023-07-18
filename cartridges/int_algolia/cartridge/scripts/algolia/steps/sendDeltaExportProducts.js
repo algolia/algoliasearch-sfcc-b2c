@@ -96,8 +96,6 @@ function sendDeltaExportProducts(parameters) {
 
     var changedProducts = [];
 
-    var success = false;
-
 
     // ----------------------------- PART 1: Extracting productIDs from the output of the Delta Export -----------------------------
 
@@ -163,15 +161,13 @@ function sendDeltaExportProducts(parameters) {
 
         if (l4_inventoryListsDir.exists() && l4_inventoryListsDir.isDirectory()) {
 
-            var inventoryFileList = jobHelper.getAllXMLFilesInFolder(l4_inventoryListsDir);
+            let inventoryFileList = jobHelper.getAllXMLFilesInFolder(l4_inventoryListsDir);
 
             inventoryFileList.forEach(function(inventoryFile) {
-                success = jobHelper.updateCPObjectFromXML(inventoryFile, changedProducts, 'inventory');
+                let result = jobHelper.updateCPObjectFromXML(inventoryFile, changedProducts, 'inventory');
 
-                if (success) {
-                    // success contains the number of successfully read records
-                    productLogData.processedRecords += success;
-
+                if (result.success) {
+                    productLogData.processedRecords += result.nrProductsRead;
                 } else {
                     // abort if error reading from any of the delta export zips
                     let errorMessage = 'Error reading from file: ' + inventoryFile;
@@ -189,14 +185,13 @@ function sendDeltaExportProducts(parameters) {
 
         if (l4_pricebooksDir.exists() && l4_pricebooksDir.isDirectory()) {
 
-            var pricebookFileList = jobHelper.getAllXMLFilesInFolder(l4_pricebooksDir);
+            let pricebookFileList = jobHelper.getAllXMLFilesInFolder(l4_pricebooksDir);
 
-            inventoryFileList.forEach(function(pricebookFile) {
-                success = jobHelper.updateCPObjectFromXML(pricebookFile, changedProducts, 'pricebook');
+            pricebookFileList.forEach(function(pricebookFile) {
+                let result = jobHelper.updateCPObjectFromXML(pricebookFile, changedProducts, 'pricebook');
 
-                if (success) {
-                    // success contains the number of successfully read records
-                    productLogData.processedRecords += success;
+                if (result.success) {
+                    productLogData.processedRecords += result.nrProductsRead;
                 } else {
                     // abort if error reading from any of the delta export zips
                     let errorMessage = 'Error reading from file: ' + pricebookFile;
@@ -210,26 +205,24 @@ function sendDeltaExportProducts(parameters) {
 
         // -------------------- processing catalog XML --------------------
 
-        // Need to process catalog last because product deletion trumps everything else
-        // Up until this point all products were added to changedProducts as true,
-        // only this phase can set it to false as only the catalog export shows product deletions.
+        // Need to process catalog last because product deletion trumps everything else.
+        // Up until this point all products were added to changedProducts as true (any change to pricing/inventory).
+        // Only this phase can set it to false as only the catalog export shows product deletions.
         if (l4_catalogsDir.exists() && l4_catalogsDir.isDirectory()) {
 
             // getting child catalog folders, there can be more than one - folder name is the ID of the catalog
-            var l5_catalogDirList = jobHelper.getChildFolders(l4_catalogsDir);
+            let l5_catalogDirList = jobHelper.getChildFolders(l4_catalogsDir);
 
-            // processing catalog.xml files in each
+            // processing catalog.xml files in each folder
             l5_catalogDirList.forEach(function(l5_catalogDir) {
 
-                var catalogFile = new File(l5_catalogDir, 'catalog.xml');
+                let catalogFile = new File(l5_catalogDir, 'catalog.xml');
 
                 // adding productsIDs from the XML to the list of changed productIDs
-                // success contains the number of successfully read records or false if an error occurred
-                success = jobHelper.updateCPObjectFromXML(catalogFile, changedProducts, 'catalog');
+                let result = jobHelper.updateCPObjectFromXML(catalogFile, changedProducts, 'catalog');
 
-                if (success) {
-                    // success contains the number of successfully read records
-                    productLogData.processedRecords += success;
+                if (result.success) {
+                    productLogData.processedRecords += result.nrProductsRead;
                 } else {
                     // abort if error reading from any of the delta export zips
                     let errorMessage = 'Error reading from file: ' + catalogFile;
@@ -307,7 +300,7 @@ function sendDeltaExportProducts(parameters) {
                     productUpdateObj = new jobHelper.DeleteProductModel(productID);
                 }
 
-            } else { // <proudctID>: false - product is to be deleted
+            } else { // <productID>: false - product is to be deleted
                 productUpdateObj = new DeleteProductModel(productID);
             }
 
