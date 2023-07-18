@@ -64,7 +64,7 @@ function enableAutocomplete(config) {
                                 return html`
                                     <div class="text-truncate text-nowrap">
                                         <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
-                                        <a href=${newURL}>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
+                                        <a href="${newURL.href}">${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
                                     </div>`;
                             },
                         },
