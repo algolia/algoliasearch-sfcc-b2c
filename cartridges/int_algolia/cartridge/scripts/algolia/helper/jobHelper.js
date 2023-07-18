@@ -477,8 +477,6 @@ function _updateOrAddValue(objectsArray, key, value) {
         objectsArray.push({});
     }
 
-    var lastObject = objectsArray[objectsArray.length - 1];
-
     // if key already exists, update it with the new value...
     for (var i = 0; i < objectsArray.length; i++) {
         var object = objectsArray[i];
@@ -490,6 +488,7 @@ function _updateOrAddValue(objectsArray, key, value) {
     }
 
     // ...otherwise add the key-value pair to the last object
+    var lastObject = objectsArray[objectsArray.length - 1];
     lastObject[key] = value;
 }
 
