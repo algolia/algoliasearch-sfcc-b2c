@@ -464,7 +464,6 @@ function getAllXMLFilesInFolder(folder) {
  * If the key already exists in any object, it updates the value for that key.
  * If the key doesn't exist, it adds the key-value pair to the last object or
  * if the last object is full, creates a new object and adds the key-value pair to it.
- *
  * @param {Array} objectsArray The array of objects to update or add key-value pairs to.
  * @param {string} key The key to check or add.
  * @param {*} value The value to update or add.
@@ -493,9 +492,11 @@ function _updateOrAddValue(objectsArray, key, value) {
 }
 
 /**
- * Returns whether there are any properties in a dense array of objects
+ * Returns whether the supplied array of objects is empty.
+ * It is considered empty if it contains no objects that contain any key-value pairs,
+ * so if it's either an empty array or an array with one empty object element.
  * @param {Array} objectsArray The array of objects to check, array is filled up sequentially and densely
- * @returns {boolean} Whether any object in the array contain any properties
+ * @returns {boolean} Whether the structure is empty
  */
 function isObjectsArrayEmpty(objectsArray) {
     if (empty(objectsArray)) {
