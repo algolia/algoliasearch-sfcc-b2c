@@ -325,7 +325,7 @@ function sendDeltaExportProducts(parameters) {
                 }
 
             } else { // <productID>: false - product is to be deleted
-                productUpdateObj = new DeleteProductModel(productID);
+                productUpdateObj = new jobHelper.DeleteProductModel(productID);
             }
 
             // writing product data to file
