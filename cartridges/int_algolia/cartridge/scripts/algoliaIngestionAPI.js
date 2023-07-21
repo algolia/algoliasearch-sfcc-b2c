@@ -7,13 +7,14 @@ var algoliaIngestionService = require('*/cartridge/scripts/services/algoliaInges
 var Logger = require('dw/system/Logger');
 
 /**
- * Register a source
+ * Register the source
  * https://www.algolia.com/doc/rest-api/ingestion/#create-a-source
  * @param {string} name - name
+ * @param {string} siteID - SFCC site ID
  *
  * @returns {string} sourceID - the ID of the created source
  */
-function registerSource(name) {
+function registerSource(name, siteID) {
     var ingestionService = algoliaIngestionService.getService();
     var baseURL = ingestionService.getConfiguration().getCredential().getURL();
 
@@ -23,6 +24,9 @@ function registerSource(name) {
     var requestBody = {
         type: 'sfcc',
         name: name,
+        input: {
+            siteID: siteID,
+        }
     };
 
     try {
@@ -33,12 +37,12 @@ function registerSource(name) {
             Logger.error('Error while registering source. Response: ' + result.object.body);
         }
     } catch(e) {
-        Logger.error('Error while registering source: ' + e.message + ': ' + e.stack);
+        Logger.error('Uncaught error while registering source: ' + e.message + ': ' + e.stack);
     }
 }
 
 /**
- * Register an authentication
+ * Register the authentication
  * https://www.algolia.com/doc/rest-api/ingestion/#create-a-authentication
  * @param {Object} authInfo - authentication info object
  * @param {string} authInfo.name - authentication name
@@ -68,15 +72,15 @@ function registerAuthentication(authInfo) {
         if (result.ok) {
             return result.object.body.authenticationID;
         } else {
-            Logger.error('Error while registering authentication for appId + ' + appId + '. Response: ' + result.object.body);
+            Logger.error('Error while registering authentication for appId + ' + authInfo.appId + '. Response: ' + result.object.body);
         }
     } catch(e) {
-        Logger.error('Error while registering authentication for appId + ' + appId + ': ' + e.message + ': ' + e.stack);
+        Logger.error('Uncaught error while registering authentication for appId + ' + authInfo.appId + ': ' + e.message + ': ' + e.stack);
     }
 }
 
 /**
- * Register a destination
+ * Register the destination
  * https://www.algolia.com/doc/rest-api/ingestion/#create-a-destination
  * @param {Object} destinationInfo - destination info object
  * @param {string} destinationInfo.name - destination name
@@ -106,10 +110,10 @@ function registerDestination(destinationInfo) {
         if (result.ok) {
             return result.object.body.destinationID;
         } else {
-            Logger.error('Error while registering destination (indexName=' + indexName + 'authenticationID=' + authenticationID + '). Response: ' + result.object.body);
+            Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '). Response: ' + result.object.body);
         }
     } catch(e) {
-        Logger.error('Error while registering destination (indexName=' + indexName + 'authenticationID=' + authenticationID + '):' + e.message + ': ' + e.stack);
+        Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '):' + e.message + ': ' + e.stack);
     }
 }
 
@@ -135,7 +139,7 @@ function registerTask(taskInfo) {
         destinationID: taskInfo.destinationID,
         action: taskInfo.action,
         trigger: {
-            type: 'onDemand'
+            type: 'subscription'
         },
     };
 
@@ -144,10 +148,10 @@ function registerTask(taskInfo) {
         if (result.ok) {
             return result.object.body.taskID;
         } else {
-            Logger.error('Error while registering task ' + action + '(sourceID=' + sourceID + '; destinationID=' + destinationID + '). Response: ' + result.object.body);
+            Logger.error('Error while registering task ' + taskInfo.action + '(sourceID=' + taskInfo.sourceID + '; destinationID=' + taskInfo.destinationID + '). Response: ' + result.object.body);
         }
     } catch(e) {
-        Logger.error('Error while registering task ' + action + '(sourceID=' + sourceID + '; destinationID=' + destinationID + '): ' + e.message + ': ' + e.stack);
+        Logger.error('Uncaught error while registering task ' + taskInfo.action + '(sourceID=' + taskInfo.sourceID + '; destinationID=' + taskInfo.destinationID + '): ' + e.message + ': ' + e.stack);
     }
 }
 
