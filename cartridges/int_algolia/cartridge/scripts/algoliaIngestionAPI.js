@@ -80,6 +80,45 @@ function registerAuthentication(authInfo) {
 }
 
 /**
+ * Update the authentication
+ * https://www.algolia.com/doc/rest-api/ingestion/#update-a-authentication
+ * @param {string} authenticationID - the id of the registered authentication
+ * @param {Object} authInfo - authentication info object
+ * @param {string} authInfo.name - authentication name
+ * @param {string} authInfo.appId - authentication appId
+ * @param {string} authInfo.apiKey - authentication apiKey
+ *
+ * @returns {string} authenticationID - the ID of the created authentication
+ */
+function updateAuthentication(authenticationID, authInfo) {
+    var ingestionService = algoliaIngestionService.getService();
+    var baseURL = ingestionService.getConfiguration().getCredential().getURL();
+
+    ingestionService.setRequestMethod('PATCH');
+    ingestionService.setURL(baseURL + '/1/authentications/' + authenticationID);
+
+    var requestBody = {
+        name: authInfo.name,
+        input: {
+            appID: authInfo.appId,
+            apiKey: authInfo.apiKey,
+        },
+    };
+
+    try {
+        var result = ingestionService.setThrowOnError().call(requestBody);
+        if (result.ok) {
+            Logger.info(result);
+            return result.object.body.authenticationID;
+        } else {
+            Logger.error('Error while updating authentication for appId + ' + authInfo.appId + ': ' + result.errorMessage);
+        }
+    } catch (e) {
+        Logger.error('Uncaught error while updating authentication for appId + ' + authInfo.appId + ': ' + e.message + ': ' + e.stack);
+    }
+}
+
+/**
  * Register the destination
  * https://www.algolia.com/doc/rest-api/ingestion/#create-a-destination
  * @param {Object} destinationInfo - destination info object
@@ -114,6 +153,46 @@ function registerDestination(destinationInfo) {
         }
     } catch(e) {
         Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '):' + e.message + ': ' + e.stack);
+    }
+}
+
+/**
+ * Update the destination
+ * https://www.algolia.com/doc/rest-api/ingestion/#update-a-destination
+ * @param {string} destinationID - the id of the registered destination
+ * @param {Object} destinationInfo - destination info object
+ * @param {string} destinationInfo.name - destination name
+ * @param {string} destinationInfo.indexName - destination index name
+ * @param {string} destinationInfo.authenticationID - authenticationID to use
+ *
+ * @returns {string} destinationID - the ID of the created destination
+ */
+function updateDestination(destinationID, destinationInfo) {
+    var ingestionService = algoliaIngestionService.getService();
+    var baseURL = ingestionService.getConfiguration().getCredential().getURL();
+
+    ingestionService.setRequestMethod('PATCH');
+    ingestionService.setURL(baseURL + '/1/destinations/' + destinationID);
+
+    Logger.info('destination: ' + baseURL + '/1/destinations/' + destinationID)
+
+    var requestBody = {
+        name: destinationInfo.name,
+        input: {
+            indexName: destinationInfo.indexName,
+        },
+        authenticationID: destinationInfo.authenticationID,
+    };
+
+    try {
+        var result = ingestionService.setThrowOnError().call(requestBody);
+        if (result.ok) {
+            return result.object.body.destinationID;
+        } else {
+            Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '). Response: ' + result.object.body);
+        }
+    } catch(e) {
+        Logger.error('Uncaught error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '):' + e.message + ': ' + e.stack);
     }
 }
 
@@ -157,5 +236,7 @@ function registerTask(taskInfo) {
 
 module.exports.registerSource = registerSource;
 module.exports.registerAuthentication = registerAuthentication;
+module.exports.updateAuthentication = updateAuthentication;
 module.exports.registerDestination = registerDestination;
+module.exports.updateDestination = updateDestination;
 module.exports.registerTask = registerTask;
