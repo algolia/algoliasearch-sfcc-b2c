@@ -29,15 +29,12 @@ function registerSource(name, siteID) {
         }
     };
 
-    try {
-        var result = ingestionService.setThrowOnError().call(requestBody);
-        if (result.ok) {
-            return result.object.body.sourceID;
-        } else {
-            Logger.error('Error while registering source. Response: ' + result.object.body);
-        }
-    } catch(e) {
-        Logger.error('Uncaught error while registering source: ' + e.message + ': ' + e.stack);
+    var result = ingestionService.call(requestBody);
+    if (result.ok) {
+        return result.object.body.sourceID;
+    } else {
+        Logger.error('Error while registering source. Response: ' + result.getErrorMessage());
+        throw new Error(result.getErrorMessage());
     }
 }
 
@@ -67,15 +64,12 @@ function registerAuthentication(authInfo) {
         },
     };
 
-    try {
-        var result = ingestionService.setThrowOnError().call(requestBody);
-        if (result.ok) {
-            return result.object.body.authenticationID;
-        } else {
-            Logger.error('Error while registering authentication for appId + ' + authInfo.appId + '. Response: ' + result.object.body);
-        }
-    } catch(e) {
-        Logger.error('Uncaught error while registering authentication for appId + ' + authInfo.appId + ': ' + e.message + ': ' + e.stack);
+    var result = ingestionService.call(requestBody);
+    if (result.ok) {
+        return result.object.body.authenticationID;
+    } else {
+        Logger.error('Error while registering authentication for appId + ' + authInfo.appId + '. Response: ' + result.getErrorMessage());
+        throw new Error(result.getErrorMessage());
     }
 }
 
@@ -105,16 +99,12 @@ function updateAuthentication(authenticationID, authInfo) {
         },
     };
 
-    try {
-        var result = ingestionService.setThrowOnError().call(requestBody);
-        if (result.ok) {
-            Logger.info(result);
-            return result.object.body.authenticationID;
-        } else {
-            Logger.error('Error while updating authentication for appId + ' + authInfo.appId + ': ' + result.errorMessage);
-        }
-    } catch (e) {
-        Logger.error('Uncaught error while updating authentication for appId + ' + authInfo.appId + ': ' + e.message + ': ' + e.stack);
+    var result = ingestionService.call(requestBody);
+    if (result.ok) {
+        return result.object.body.authenticationID;
+    } else {
+        Logger.error('Error while updating authentication for appId + ' + authInfo.appId + ': ' + result.getErrorMessage());
+        throw new Error(result.getErrorMessage());
     }
 }
 
@@ -144,15 +134,12 @@ function registerDestination(destinationInfo) {
         authenticationID: destinationInfo.authenticationID,
     };
 
-    try {
-        var result = ingestionService.setThrowOnError().call(requestBody);
-        if (result.ok) {
-            return result.object.body.destinationID;
-        } else {
-            Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '). Response: ' + result.object.body);
-        }
-    } catch(e) {
-        Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '):' + e.message + ': ' + e.stack);
+    var result = ingestionService.call(requestBody);
+    if (result.ok) {
+        return result.object.body.destinationID;
+    } else {
+        Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + destinationInfo.authenticationID + '). Response: ' + result.getErrorMessage());
+        throw new Error(result.getErrorMessage());
     }
 }
 
@@ -174,8 +161,6 @@ function updateDestination(destinationID, destinationInfo) {
     ingestionService.setRequestMethod('PATCH');
     ingestionService.setURL(baseURL + '/1/destinations/' + destinationID);
 
-    Logger.info('destination: ' + baseURL + '/1/destinations/' + destinationID)
-
     var requestBody = {
         name: destinationInfo.name,
         input: {
@@ -184,15 +169,12 @@ function updateDestination(destinationID, destinationInfo) {
         authenticationID: destinationInfo.authenticationID,
     };
 
-    try {
-        var result = ingestionService.setThrowOnError().call(requestBody);
-        if (result.ok) {
-            return result.object.body.destinationID;
-        } else {
-            Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '). Response: ' + result.object.body);
-        }
-    } catch(e) {
-        Logger.error('Uncaught error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + authenticationID + '):' + e.message + ': ' + e.stack);
+    var result = ingestionService.call(requestBody);
+    if (result.ok) {
+        return result.object.body.destinationID;
+    } else {
+        Logger.error('Error while registering destination (indexName=' + destinationInfo.indexName + 'authenticationID=' + destinationInfo.authenticationID + '). Response: ' + result.getErrorMessage());
+        throw new Error(result.getErrorMessage());
     }
 }
 
@@ -222,15 +204,12 @@ function registerTask(taskInfo) {
         },
     };
 
-    try {
-        var result = ingestionService.setThrowOnError().call(requestBody);
-        if (result.ok) {
-            return result.object.body.taskID;
-        } else {
-            Logger.error('Error while registering task ' + taskInfo.action + '(sourceID=' + taskInfo.sourceID + '; destinationID=' + taskInfo.destinationID + '). Response: ' + result.object.body);
-        }
-    } catch(e) {
-        Logger.error('Uncaught error while registering task ' + taskInfo.action + '(sourceID=' + taskInfo.sourceID + '; destinationID=' + taskInfo.destinationID + '): ' + e.message + ': ' + e.stack);
+    var result = ingestionService.call(requestBody);
+    if (result.ok) {
+        return result.object.body.taskID;
+    } else {
+        Logger.error('Error while registering task ' + taskInfo.action + '(sourceID=' + taskInfo.sourceID + '; destinationID=' + taskInfo.destinationID + '). Response: ' + result.getErrorMessage());
+        throw new Error(result.getErrorMessage());
     }
 }
 
