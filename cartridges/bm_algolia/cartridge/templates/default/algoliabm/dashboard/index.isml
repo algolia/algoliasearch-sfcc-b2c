@@ -148,9 +148,22 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_Indexing_Config </iscomment>
+                <tr>
+                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.indexingconfig', 'algolia', null)}" encoding="jshtml" />
+                    </td>
+                    <td class="table_detail w e s" nowrap="nowrap">
+                        <textarea type="text" value="${pdict.algoliaData.getPreference('Indexing_Config') ? pdict.algoliaData.getPreference('Indexing_Config') : ''}" id="Indexing_Config" name="Indexing_Config" disabled>
+                            <isprint value="${JSON.stringify(JSON.parse(pdict.algoliaData.getPreference('Indexing_Config')), null, 2)}" />
+                        </textarea>
+                    </td>
+                </tr>
+
                 <iscomment> Apply button </iscomment>
                 <tr>
                     <td class="w e s buttonspacing" align="right" colspan="2">
+                        <span style="color:red"><isprint value="${pdict.error ? pdict.error : ''}" /></span>
                         <button type="submit" name="updateCustomPreferences" class="button">
                             <isprint value="${Resource.msg('algolia.label.button.apply', 'algolia', null)}" encoding="jshtml" />
                         </button>

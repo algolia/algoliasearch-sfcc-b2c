@@ -197,6 +197,14 @@ Setting this preference replaces the first two segments, the final index name be
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
+            <attribute-definition attribute-id="Algolia_Indexing_Config">
+                <display-name xml:lang="x-default">Indexing config</display-name>
+                <description xml:lang="x-default">Algolia indexing configuration. Generated automatically. Please use the "Merchant Tools > Algolia > Algolia" page to update your settings</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>true</externally-managed-flag>
+            </attribute-definition>
+
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="Algolia">
@@ -213,6 +221,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_EnableSSR"/>
                 <attribute attribute-id="Algolia_OCAPIClientID"/>
                 <attribute attribute-id="Algolia_OCAPIClientPassword"/>
+                <attribute attribute-id="Algolia_Indexing_Config"/>
 
             </attribute-group>
         </group-definitions>

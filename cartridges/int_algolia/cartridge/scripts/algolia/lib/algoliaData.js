@@ -97,7 +97,7 @@ function getPreference(id) {
 /**
  * @description Set preference for Algolia
  * @param {string} id name of preference
- * @param {string} value value to save
+ * @param {any} value value to save
  * @returns {void}
  */
 function setPreference(id, value) {
