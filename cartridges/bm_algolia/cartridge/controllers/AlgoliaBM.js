@@ -12,6 +12,7 @@ var algoliaIngestionAPI = require('*/cartridge/scripts/algoliaIngestionAPI');
 
 /**
  * @description Render default template
+ * @param {string} error - the error to render on the Settings page
  * @returns {void} ISML.renderTemplate
  */
 function renderIndex(error) {
@@ -76,6 +77,12 @@ function handleSettings() {
     renderIndex();
 }
 
+/**
+ * Registers or updates the Ingestion objects needed by the Ingestion API,
+ * and save them as stringified JSON in the Indexing_Config custom parameter.
+ * @param {string} appId - Algolia AppID
+ * @param {string} adminApiKey - Algolia Admin API Key
+ */
 function updateIngestionConfig(appId, adminApiKey) {
     var currentSite = algoliaData.getCurrentSite();
     Logger.info("Registering indexing configuration... AppID=" + appId);
