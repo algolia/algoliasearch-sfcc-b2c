@@ -82,7 +82,7 @@ function registerAuthentication(authInfo) {
  * @param {string} authInfo.appId - authentication appId
  * @param {string} authInfo.apiKey - authentication apiKey
  *
- * @returns {string} authenticationID - the ID of the created authentication
+ * @returns {string} authenticationID - the ID of the updated authentication
  */
 function updateAuthentication(authenticationID, authInfo) {
     var ingestionService = algoliaIngestionService.getService();
@@ -152,7 +152,7 @@ function registerDestination(destinationInfo) {
  * @param {string} destinationInfo.indexName - destination index name
  * @param {string} destinationInfo.authenticationID - authenticationID to use
  *
- * @returns {string} destinationID - the ID of the created destination
+ * @returns {string} destinationID - the ID of the updated destination
  */
 function updateDestination(destinationID, destinationInfo) {
     var ingestionService = algoliaIngestionService.getService();
