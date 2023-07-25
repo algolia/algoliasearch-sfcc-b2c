@@ -148,17 +148,29 @@
                     </td>
                 </tr>
 
-                <iscomment> Algolia_Indexing_Config </iscomment>
+                <iscomment> Algolia_EnableDI </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.indexingconfig', 'algolia', null)}" encoding="jshtml" />
+                        <isprint value="${Resource.msg('algolia.label.preference.enabledi', 'algolia', null)}" />
                     </td>
                     <td class="table_detail w e s" nowrap="nowrap">
-                        <textarea type="text" value="${pdict.algoliaData.getPreference('Indexing_Config') ? pdict.algoliaData.getPreference('Indexing_Config') : ''}" id="Indexing_Config" name="Indexing_Config" disabled>
-                            <isprint value="${JSON.stringify(JSON.parse(pdict.algoliaData.getPreference('Indexing_Config')), null, 2)}" />
-                        </textarea>
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('EnableDI') ? "checked": ""} id="EnableDI" name="EnableDI" />
                     </td>
                 </tr>
+
+                <isif condition="${pdict.algoliaData.getPreference('EnableDI')}">
+                    <iscomment> Algolia_Indexing_Config </iscomment>
+                    <tr>
+                        <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                            <isprint value="${Resource.msg('algolia.label.preference.indexingconfig', 'algolia', null)}" encoding="jshtml" />
+                        </td>
+                        <td class="table_detail w e s" nowrap="nowrap">
+                            <textarea type="text" value="${pdict.algoliaData.getPreference('Indexing_Config') ? pdict.algoliaData.getPreference('Indexing_Config') : ''}" id="Indexing_Config" name="Indexing_Config" disabled>
+                                <isprint value="${JSON.stringify(JSON.parse(pdict.algoliaData.getPreference('Indexing_Config')), null, 2)}" />
+                            </textarea>
+                        </td>
+                    </tr>
+                </isif>
 
                 <iscomment> Apply button </iscomment>
                 <tr>
@@ -174,6 +186,7 @@
         </form>
     </div>
 
+    <isif condition="${!pdict.algoliaData.getPreference('EnableDI')}">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
             <tr>
@@ -245,4 +258,5 @@
         <isinclude template="algoliabm/dashboard/productLog" />
         <isinclude template="algoliabm/dashboard/categoryLog" />
     </isloop>
+    </isif>
 </isdecorate>

@@ -197,6 +197,15 @@ Setting this preference replaces the first two segments, the final index name be
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
+            <attribute-definition attribute-id="Algolia_EnableDI">
+                <display-name xml:lang="x-default">Enable Ingestion API</display-name>
+                <description xml:lang="x-default">Enables indexing through the Ingestion API</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_Indexing_Config">
                 <display-name xml:lang="x-default">Indexing config</display-name>
                 <description xml:lang="x-default">Algolia indexing configuration. Generated automatically. Please use the "Merchant Tools > Algolia > Algolia" page to update your settings</description>

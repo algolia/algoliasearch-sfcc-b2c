@@ -41,6 +41,7 @@ function handleSettings() {
     var params = request.httpParameterMap;
     try {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
+        var algoliaEnableDI = ('EnableDI' in params) && (params.EnableDI.submitted === true);
         var formerAppId = algoliaData.getPreference('ApplicationID');
         var formerAdminApiKey = algoliaData.getPreference('AdminApiKey');
         var appId = params.ApplicationID.value;
@@ -50,7 +51,9 @@ function handleSettings() {
         algoliaData.setPreference('AdminApiKey', adminApiKey);
 
         try {
-            updateIngestionConfig(appId, adminApiKey);
+            if (algoliaEnableDI) {
+                updateIngestionConfig(appId, adminApiKey);
+            }
         } catch (e) {
             Logger.error('Error when updating Ingestion config: ' + e);
             algoliaData.setPreference('ApplicationID', formerAppId);
@@ -60,6 +63,7 @@ function handleSettings() {
         }
 
         algoliaData.setPreference('Enable', algoliaEnable);
+        algoliaData.setPreference('EnableDI', algoliaEnableDI);
         algoliaData.setPreference('ApplicationID', appId);
         algoliaData.setSetOfStrings('CustomFields', params.CustomFields.value);
         algoliaData.setPreference('HostBase', params.HostBase.value);
