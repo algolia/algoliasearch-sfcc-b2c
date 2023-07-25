@@ -197,7 +197,7 @@ function updateIngestionConfig(appId, adminApiKey) {
 
 /**
  * Registers or updates the Destination on the Ingestion API.
- * @param {Object} params
+ * @param {Object} params - params
  * @param {string} params.siteID - SFCC Site ID
  * @param {string} params.authenticationID - Algolia AuthenticationID
  * @param {string} params.locale - Targeted locale
@@ -228,12 +228,12 @@ function registerOrUpdateDestination({siteID, authenticationID, locale, type, ex
 
 /**
  * Registers or updates the Destination on the Ingestion API.
- * @param {Object} params
+ * @param {Object} params - params
  * @param {string} params.sourceID - Algolia sourceID
  * @param {string} params.destinationID - Algolia DestinationID
  * @param {string} params.locale - Targeted locale
  * @param {string} params.type - Type: 'products' or 'categories'
- * @param {object?} params.existingTasks - An object containing the registered task IDs
+ * @param {Object?} params.existingTasks - An object containing the registered task IDs
  *
  * @returns {Object} An object containing the registered task IDs
  */
