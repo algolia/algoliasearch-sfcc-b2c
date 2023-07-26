@@ -52,7 +52,7 @@ function handleSettings() {
 
         try {
             if (algoliaEnableDI) {
-                updateIngestionConfig(appId, adminApiKey);
+                updateIngestionConfig(appId, adminApiKey, params.IndexPrefix.value);
             }
         } catch (e) {
             Logger.error('Error when updating Ingestion config: ' + e);
@@ -119,8 +119,9 @@ function handleSettings() {
  *
  * @param {string} appId - Algolia AppID
  * @param {string} adminApiKey - Algolia Admin API Key
+ * @param {string} indexPrefix - Algolia Index Prefix
  */
-function updateIngestionConfig(appId, adminApiKey) {
+function updateIngestionConfig(appId, adminApiKey, indexPrefix) {
     var currentSite = algoliaData.getCurrentSite();
     Logger.info("Updating indexing configuration... AppID=" + appId);
     var indexingConfig = JSON.parse(algoliaData.getPreference("Indexing_Config")) || {
@@ -177,6 +178,7 @@ function updateIngestionConfig(appId, adminApiKey) {
                 authenticationID: authenticationID,
                 locale: locale,
                 type: type,
+                indexPrefix: indexPrefix,
                 existingDestinationID: indexingConfig.locales[locale][type].destinationID,
             });
             indexingConfig.locales[locale][type].destinationID = destinationID;
@@ -202,16 +204,17 @@ function updateIngestionConfig(appId, adminApiKey) {
  * @param {string} params.authenticationID - Algolia AuthenticationID
  * @param {string} params.locale - Targeted locale
  * @param {string} params.type - Type: 'products' or 'categories'
+ * @param {string} params.indexPrefix - Algolia Index Prefix
  * @param {string?} params.existingDestinationID - The destinationID if it has already been registered
  *
  * @returns {string} destinationID
  */
-function registerOrUpdateDestination({siteID, authenticationID, locale, type, existingDestinationID}) {
+function registerOrUpdateDestination({siteID, authenticationID, locale, type, indexPrefix, existingDestinationID}) {
     if (!existingDestinationID) {
         Logger.info('Registering "' + type + '" destination for locale: "' + locale + '"...');
         var destinationID = algoliaIngestionAPI.registerDestination({
             name: siteID + '_' + type + '_' + locale,
-            indexName: algoliaData.getIndexPrefix() + '_' + type + '_' + locale,
+            indexName: indexPrefix + '_' + type + '_' + locale,
             authenticationID: authenticationID
         });
         Logger.info(`Destination "${type}" registered for locale "` + locale + '". DestinationID: ' + destinationID);
@@ -220,7 +223,7 @@ function registerOrUpdateDestination({siteID, authenticationID, locale, type, ex
         Logger.info('Updating "' + type + '" destination for "' + locale + '": ' + locale + '" (' + existingDestinationID + ')...');
         return algoliaIngestionAPI.updateDestination(existingDestinationID, {
             name: siteID + '_' + type + '_' + locale,
-            indexName: algoliaData.getIndexPrefix() + '_' + type + '_' + locale,
+            indexName: indexPrefix + '_' + type + '_' + locale,
             authenticationID: authenticationID
         });
     }
