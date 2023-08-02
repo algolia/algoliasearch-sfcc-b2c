@@ -13,13 +13,23 @@ var tenantCallStatus = new Status(Status.ERROR);
 var dwSystem = require('dw/system/System');
 var currentSite = algoliaData.getCurrentSite();
 
+var resourceType;
+var fieldListOverride;
+
 /**
  * Create tenant id in the form
- * tenant_id = {Algolia_ApplicationID} + '_' + SiteID + '_' + instanceHostname
+ * tenant_id = {Algolia_ApplicationID} + '_' + SiteID + '_' + instanceHostname [+ "-price" | "-inventory"]
  * @returns {string} tenant ID
  */
 function calculateTenantID() {
-    return algoliaData.getPreference('ApplicationID') + '_' + currentSite.getID() + '_' + algoliaData.getInstanceHostName();
+    var tenantID = algoliaData.getPreference('ApplicationID') + '_' + currentSite.getID() + '_' + algoliaData.getInstanceHostName();
+
+    // appending resourceType to the end in case multiple endpoints are targeted
+    if (!empty(resourceType)) {
+        tenantID += '-' + resourceType;
+    }
+
+    return tenantID;
 }
 
 /**
@@ -41,7 +51,10 @@ function createHandshakeRequest() {
         currencies: currentSite.getAllowedCurrencies().toArray(),
         index_prefix: algoliaData.getIndexPrefix(),
         fields: {
-            product: algoliaProductConfig.defaultAttributes.concat(algoliaData.getSetOfArray('CustomFields')),
+            // For product exports the default list of attributes will be used (default + CustomFields).
+            // This can be overridden for price-only or inventory-only jobs by supplying a new, smaller set of attributes.
+            product:
+                !empty(fieldListOverride) ? fieldListOverride : algoliaProductConfig.defaultAttributes.concat(algoliaData.getSetOfArray('CustomFields')),
             category: ['id', 'name', 'description', 'image', 'thumbnail', 'parent_category_id', 'subCategories', 'url']
         }
     };
@@ -105,9 +118,19 @@ function getTenantToken() {
 /**
  * Send array of objects to Algolia API
  * @param {Array} itemsArray - array of objects for send to Algolia
+ * @param {string} [resType] (optional, when using multiple endpoints) "price" | "inventory"
+ * @param {string} [fieldList] (optional) if supplied, it will override the list of fields to be sent in the handshake
  * @returns {dw.system.Status} - successful Status to send
  */
-function sendDelta(itemsArray) {
+function sendProductObjects(itemsArray, resType, fieldList) {
+    if (!empty(resType)) {
+        resourceType = resType;
+    }
+
+    if (!empty(fieldList)) {
+        fieldListOverride = fieldList;
+    }
+
     if (empty(getTenantToken())) {
         return tenantCallStatus;
     }
@@ -131,9 +154,14 @@ function sendDelta(itemsArray) {
 /**
  * Makes get indexing status/clean queue/resume indexing API calls
  * @param {string} requestType - request type
+ * @param {string} [resType] (optional, when using multiple endpoints) "price" | "inventory"
  * @returns {dw.system.Status} - successful Status to send
  */
-function makeIndexingRequest(requestType) {
+function makeIndexingRequest(requestType, resType) {
+    if (!empty(resType)) {
+        resourceType = resType;
+    }
+
     if (empty(getTenantToken())) {
         return tenantCallStatus;
     }
@@ -160,5 +188,5 @@ function makeIndexingRequest(requestType) {
     return callStatus;
 }
 
-module.exports.sendDelta = sendDelta;
+module.exports.sendProductObjects = sendProductObjects;
 module.exports.makeIndexingRequest = makeIndexingRequest;

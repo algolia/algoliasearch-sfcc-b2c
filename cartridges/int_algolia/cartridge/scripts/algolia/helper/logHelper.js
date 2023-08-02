@@ -78,6 +78,8 @@ function getLogData(id, logFileName) {
         case 'category': result = logData.category ? logData.category : null; break;
         case 'product': result = logData.product ? logData.product : null; break;
         case 'productdelta': result = logData.productdelta ? logData.productdelta : null; break;
+        case 'partialproductprice': result = logData.partialproductprice ? logData.partialproductprice : null; break;
+        case 'partialproductinventory': result = logData.partialproductinventory ? logData.partialproductinventory : null; break;
         case LOG_NODE_NAME: result = logData; break;
     }
 

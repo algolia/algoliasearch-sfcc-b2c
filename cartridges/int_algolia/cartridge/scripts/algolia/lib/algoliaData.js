@@ -152,6 +152,8 @@ function getLogData(id) {
         case 'LastCategorySyncLog': productLog = logHelper.getLogData('category'); break;
         case 'LastProductSyncLog': productLog = logHelper.getLogData('product'); break;
         case 'LastProductDeltaSyncLog': productLog = logHelper.getLogData('productdelta'); break;
+        case 'LastPartialPriceSyncLog': productLog = logHelper.getLogData('partialproductprice'); break;
+        case 'LastPartialInventorySyncLog': productLog = logHelper.getLogData('partialproductinventory'); break;
     }
     return productLog;
 }
@@ -168,6 +170,8 @@ function setLogData(id, productLog) {
         case 'LastCategorySyncLog': result = logHelper.setLogData('category', productLog); break;
         case 'LastProductSyncLog': result = logHelper.setLogData('product', productLog); break;
         case 'LastProductDeltaSyncLog': result = logHelper.setLogData('productdelta', productLog); break;
+        case 'LastPartialPriceSyncLog': result = logHelper.setLogData('partialproductprice', productLog); break;
+        case 'LastPartialInventorySyncLog': result = logHelper.setLogData('partialproductinventory', productLog); break;
     }
     return result;
 }
@@ -192,6 +196,15 @@ function getInstanceHostName() {
     if (System.instanceType === System.DEVELOPMENT_SYSTEM) {
         instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
         instanceHostname = instanceHostname.replace('.demandware.net', '');
+    } else { // PRODUCTION_SYSTEM or STAGING_SYSTEM
+
+        // WARNING: This is a breaking change compared to the old index name generation
+        // logic which featured "production" and "staging" in the index name.
+        // The new approach targets the same index by default from both PROD and STG.
+        // If you'd like to configure separate target indices for these instances,
+        // please use the "Algolia_IndexPrefix" site preference.
+        instanceHostname = instanceHostname.replace('production.', '');
+        instanceHostname = instanceHostname.replace('staging.', '');
     }
     // replace dots
     return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
@@ -281,6 +294,22 @@ function getCurrentSite() {
     return Site.getCurrent();
 }
 
+/**
+ * Splits a string by a separator into an array of substrings and trims the values
+ * @param {string} string input string
+ * @param {separator} separator separator to split by
+ */
+
+function csvStringToArray(string, separator) {
+    if (typeof string !== 'string' || empty(string)) {
+        return [];
+    } else {
+        return string.split(separator ? separator : ',').map(function(item) {
+            return item.trim();
+        });
+    }
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
@@ -297,6 +326,7 @@ module.exports = {
     getSyncLocalDateTime: getSyncLocalDateTime,
     getAlgoliaSites: getAlgoliaSites,
     getCurrentSite: getCurrentSite,
+    csvStringToArray: csvStringToArray,
     CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR,
     clientSideData: clientSideData,
 };
