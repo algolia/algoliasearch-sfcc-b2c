@@ -116,7 +116,7 @@
                     <isprint value="${Resource.msg('algolia.label.sentsuccessfully', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${logData.product.sendedChunk + ' chunk (' + logData.product.sendedRecords + ' records)'}" encoding="htmlcontent" />
+                    <isprint value="${logData.product.sentChunks + ' chunks (' + logData.product.sentRecords + ' records)'}" encoding="htmlcontent" />
                 </td>
             </tr>
             <tr>
@@ -124,7 +124,7 @@
                     <isprint value="${Resource.msg('algolia.label.sentfailed', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${logData.product.failedChunk + ' chunk (' + logData.product.failedRecords + ' records)'}" encoding="htmlcontent" />
+                    <isprint value="${logData.product.failedChunks + ' chunks (' + logData.product.failedRecords + ' records)'}" encoding="htmlcontent" />
                 </td>
             </tr>
         </tbody>

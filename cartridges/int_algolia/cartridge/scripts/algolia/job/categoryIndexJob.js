@@ -224,7 +224,9 @@ function runCategoryExport(parameters) {
         ? siteRootCategory.getOnlineSubCategories().iterator() : null;
     var listOfCategories = [];
 
-    var categoryLogData = algoliaData.getLogData('LastCategorySyncLog');
+    const updateLogType = 'LastCategorySyncLog';
+
+    var categoryLogData = algoliaData.getLogData(updateLogType);
     categoryLogData.processedDate = algoliaData.getLocalDateTime(new Date());
     categoryLogData.processedError = true;
     categoryLogData.processedErrorMessage = '';
@@ -240,7 +242,7 @@ function runCategoryExport(parameters) {
     if (!algoliaData.getPreference('Enable')) {
         jobHelper.logFileError('Disable', 'Algolia Cartridge Disabled', status);
         categoryLogData.processedErrorMessage = 'Algolia Cartridge Disabled';
-        algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
+        algoliaData.setLogData(updateLogType, categoryLogData);
         return status;
     }
 
@@ -266,7 +268,7 @@ function runCategoryExport(parameters) {
         } catch (error) {
             jobHelper.logFileError(snapshotFile.fullPath, 'Error remove snapshot file', error);
             categoryLogData.processedErrorMessage = 'Error remove shapnshot file';
-            algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
+            algoliaData.setLogData(updateLogType, categoryLogData);
             return new Status(Status.ERROR);
         }
     }
@@ -370,7 +372,7 @@ function runCategoryExport(parameters) {
     categoryLogData.processedErrorMessage = '';
     categoryLogData.processedRecords = counterCategoriesTotal;
     categoryLogData.processedToUpdateRecords = counterCategoriesForUpdate;
-    algoliaData.setLogData('LastCategorySyncLog', categoryLogData);
+    algoliaData.setLogData(updateLogType, categoryLogData);
 
     return new Status(Status.OK);
 }

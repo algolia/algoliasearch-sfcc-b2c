@@ -23,9 +23,9 @@ function LogJob() {
     this.sendDate = '---';
     this.sendError = false;
     this.sendErrorMessage = '';
-    this.sendedChunk = 0;
-    this.sendedRecords = 0;
-    this.failedChunk = 0;
+    this.sentChunks = 0;
+    this.sentRecords = 0;
+    this.failedChunks = 0;
     this.failedRecords = 0;
 }
 
