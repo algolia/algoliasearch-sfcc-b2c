@@ -246,7 +246,9 @@ function sendDeltaExportProducts(parameters) {
     }
 
     // retrieving products from database and enriching them
-    for (var currentObject of changedProducts) {
+    for (var i = 0; i < changedProducts.length; i++) {
+        var currentObject = changedProducts[i];
+
         for (var productID in currentObject) {
 
             var productUpdateObj;
