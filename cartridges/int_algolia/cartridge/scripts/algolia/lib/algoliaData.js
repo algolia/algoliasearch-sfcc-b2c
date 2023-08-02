@@ -297,9 +297,9 @@ function getCurrentSite() {
 /**
  * Splits a string by a separator into an array of substrings and trims the values
  * @param {string} string input string
- * @param {separator} separator separator to split by
+ * @param {string} [separator] separator to split by
+ * @returns {Array} array of strings the original string is separated into
  */
-
 function csvStringToArray(string, separator) {
     if (typeof string !== 'string' || empty(string)) {
         return [];

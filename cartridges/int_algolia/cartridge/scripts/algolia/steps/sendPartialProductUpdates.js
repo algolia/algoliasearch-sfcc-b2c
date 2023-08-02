@@ -22,59 +22,60 @@ const MAX_TRIES = 5;
  *
  *  counter = 0
  *  beforeStep() - executed before starting the job step, initialization
- *	repeat until counter reaches getTotalCount() {
- * 		create new thread {
- * 		    beforeChunk() - executed before each chunk
- * 			read() - repeat until chunkSize, each run reads one product
- * 			process() - repeat until chunkSize, each run processes one product
- * 			write() - executed one time, sends all products from the chunk at once
- * 			counter += chunkSize
- * 			afterChunk() - executed after each chunk
- * 		}
- * 	}
- * 	afterStep() - executed after the job step finishes
+ *    repeat until counter reaches getTotalCount() {
+ *         create new thread {
+ *             beforeChunk() - executed before each chunk
+ *             read() - repeat until chunkSize, each run reads one product
+ *             process() - repeat until chunkSize, each run processes one product
+ *             write() - executed one time, sends all products from the chunk at once
+ *             counter += chunkSize
+ *             afterChunk() - executed after each chunk
+ *         }
+ *     }
+ *     afterStep() - executed after the job step finishes
  */
 
 /**
  * before-step-function (steptypes.json)
- * @param {dw.util.HashMap} parameters
- * @param {dw.job.JobStepExecution} stepExecution
- * @returns {*} any returns from this function result in skipping to the afterStep() function (omitting read-process-write altogether) with the "success" parameter passed to it set to false
+ * Any returns from this function result in skipping to the afterStep() function (omitting read-process-writealtogether)
+ * with the "success" parameter passed to it set to false.
+ * @param {dw.util.HashMap} parameters job step parameters
+ * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
 exports.beforeStep = function(parameters, stepExecution) {
-	algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-	AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
-	jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-	algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
-	sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
-	logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+    algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+    AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
+    jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+    algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
+    sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
+    logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
 
-	// checking parameters
-	if (empty(parameters.resourceType) || empty(parameters.fieldListOverride)) {
-		let errorMessage = 'Mandatory job step parameters missing!';
-		jobHelper.logError(errorMessage);
-		return;
-	}
+    // checking parameters
+    if (empty(parameters.resourceType) || empty(parameters.fieldListOverride)) {
+        let errorMessage = 'Mandatory job step parameters missing!';
+        jobHelper.logError(errorMessage);
+        return;
+    }
 
-	// parameters
-	resourceType = parameters.resourceType; // resouceType (price | inventory) - pass it along to sendChunk()
-	fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
+    // parameters
+    resourceType = parameters.resourceType; // resouceType (price | inventory) - pass it along to sendChunk()
+    fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
 
-	// configure logging
-	switch (resourceType) {
-		case 'price': updateLogType = 'LastPartialPriceSyncLog'; break;
-		case 'inventory': updateLogType = 'LastPartialInventorySyncLog'; break;
-	}
+    // configure logging
+    switch (resourceType) {
+        case 'price': updateLogType = 'LastPartialPriceSyncLog'; break;
+        case 'inventory': updateLogType = 'LastPartialInventorySyncLog'; break;
+    }
 
-	// initializing logs
-	logData = algoliaData.getLogData(updateLogType) || {};
-	logData.processedDate = algoliaData.getLocalDateTime(new Date());
+    // initializing logs
+    logData = algoliaData.getLogData(updateLogType) || {};
+    logData.processedDate = algoliaData.getLocalDateTime(new Date());
     logData.processedError = true;
     logData.processedErrorMessage = '';
     logData.processedRecords = 0;
     logData.processedToUpdateRecords = 0;
 
-	logData.sendDate = algoliaData.getLocalDateTime(new Date());
+    logData.sendDate = algoliaData.getLocalDateTime(new Date());
     logData.sendError = true;
     logData.sendErrorMessage = '';
     logData.sentChunks = 0;
@@ -82,8 +83,8 @@ exports.beforeStep = function(parameters, stepExecution) {
     logData.failedChunks = 0;
     logData.failedRecords = 0;
 
-	// getting all products assigned to the site
-	products = ProductMgr.queryAllSiteProducts();
+    // getting all products assigned to the site
+    products = ProductMgr.queryAllSiteProducts();
 }
 
 /**
@@ -93,7 +94,7 @@ exports.beforeStep = function(parameters, stepExecution) {
  * @returns {number} total number of products
  */
 exports.getTotalCount = function(parameters, stepExecution) {
-	return products.count;
+    return products.count;
 }
 
 /**
@@ -103,9 +104,9 @@ exports.getTotalCount = function(parameters, stepExecution) {
  * @returns {dw.catalog.Product} B2C Product object
  */
 exports.read = function(parameters, stepExecution) {
-	if (products.hasNext()) {
-		return products.next();
-	}
+    if (products.hasNext()) {
+        return products.next();
+    }
 }
 
 /**
@@ -117,50 +118,50 @@ exports.read = function(parameters, stepExecution) {
  */
 exports.process = function(product, parameters, stepExecution) {
 
-	// enrich product
-	var algoliaProduct = new AlgoliaProduct(product, fieldListOverride);
-	var productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
-	productUpdateObj.options.partial = true;
+    // enrich product
+    var algoliaProduct = new AlgoliaProduct(product, fieldListOverride);
+    var productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
+    productUpdateObj.options.partial = true;
 
-	logData.processedRecords++;
-	logData.processedToUpdateRecords++;
+    logData.processedRecords++;
+    logData.processedToUpdateRecords++;
 
-	return productUpdateObj;
+    return productUpdateObj;
 }
 
 /**
  * write-function (steptypes.json)
+ * Any returns from this function result in the "success" parameter of "afterStep()" to become false.
  * @param {dw.util.List} algoliaProducts a List containing ${chunkSize} UpdateProductModel objects
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
- * @returns {*} any returns from this function result in the "success" parameter of "afterStep()" to become false
  */
 exports.send = function(algoliaProducts, parameters, stepExecution) {
-	var status;
+    var status;
 
-	// algoliaProducts contains all the returned products from process() as a List
-	var algoliaProductsArray = algoliaProducts.toArray();
-	var productCount = algoliaProductsArray.length;
+    // algoliaProducts contains all the returned products from process() as a List
+    var algoliaProductsArray = algoliaProducts.toArray();
+    var productCount = algoliaProductsArray.length;
 
-	// retrying
-	for (var i = 0; i < MAX_TRIES; i++) {
-		status = sendHelper.sendChunk(algoliaProductsArray, resourceType, fieldListOverride);
-		if (!status.error) {
-			// don't retry if managed to send
-			break;
-		}
-	}
+    // retrying
+    for (var i = 0; i < MAX_TRIES; i++) {
+        status = sendHelper.sendChunk(algoliaProductsArray, resourceType, fieldListOverride);
+        if (!status.error) {
+            // don't retry if managed to send
+            break;
+        }
+    }
 
-	// if still couldn't send after MAX_TRIES attempts, return
-	if (status.error) {
-		logData.failedChunks++;
-		logData.failedRecords += productCount;
-		return; // results in `success` in afterStep() becoming false - can't return a Status inside chunks
-	}
+    // if still couldn't send after MAX_TRIES attempts, return
+    if (status.error) {
+        logData.failedChunks++;
+        logData.failedRecords += productCount;
+        return; // results in `success` in afterStep() becoming false - can't return a Status inside chunks
+    }
 
-	// sending was successful
-	logData.sentChunks++;
-	logData.sentRecords += productCount;
+    // sending was successful
+    logData.sentChunks++;
+    logData.sentRecords += productCount;
 }
 
 /**
@@ -170,30 +171,30 @@ exports.send = function(algoliaProducts, parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
 exports.afterStep = function(success, parameters, stepExecution) {
-	// You can't define the exit status for a chunk-oriented script module.
-	// Chunk modules always finish with either OK or ERROR.
-	// "sucess" conveys whether an error occurred in any previous chunks or not.
-	// Any prior return statements will set success to false (even if it returns Status.OK).
+    // You can't define the exit status for a chunk-oriented script module.
+    // Chunk modules always finish with either OK or ERROR.
+    // "sucess" conveys whether an error occurred in any previous chunks or not.
+    // Any prior return statements will set success to false (even if it returns Status.OK).
 
-	products.close();
+    products.close();
 
-	if (success) {
-		logData.processedError = false;
-		logData.processedErrorMessage = '';
-		logData.sendError = false;
-		logData.sendErrorMessage = '';
-	} else {
-		let errorMessage = 'An error occurred during the job. Please see the error log for more details.';
-		logData.processedError = true;
-		logData.processedErrorMessage = errorMessage;
-		logData.sendError = true;
-		logData.sendErrorMessage = errorMessage;
-	}
+    if (success) {
+        logData.processedError = false;
+        logData.processedErrorMessage = '';
+        logData.sendError = false;
+        logData.sendErrorMessage = '';
+    } else {
+        let errorMessage = 'An error occurred during the job. Please see the error log for more details.';
+        logData.processedError = true;
+        logData.processedErrorMessage = errorMessage;
+        logData.sendError = true;
+        logData.sendErrorMessage = errorMessage;
+    }
 
-	logData.processedDate = algoliaData.getLocalDateTime(new Date());
-	logData.sendDate = algoliaData.getLocalDateTime(new Date());
-	algoliaData.setLogData(updateLogType, logData);
+    logData.processedDate = algoliaData.getLocalDateTime(new Date());
+    logData.sendDate = algoliaData.getLocalDateTime(new Date());
+    algoliaData.setLogData(updateLogType, logData);
 
-	logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
+    logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
         logData.sentChunks, logData.failedChunks, logData.sentRecords, logData.failedRecords);
 }

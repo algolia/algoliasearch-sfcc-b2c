@@ -120,10 +120,10 @@ function moveFile(sourceFile, targetFile) {
 }
 
 module.exports = {
-	getFirstChildFolder: getFirstChildFolder,
-	getDeltaExportZipList: getDeltaExportZipList,
-	getChildFolders: getChildFolders,
-	getAllXMLFilesInFolder: getAllXMLFilesInFolder,
-	removeFolderRecursively: removeFolderRecursively,
-	moveFile: moveFile,
+    getFirstChildFolder: getFirstChildFolder,
+    getDeltaExportZipList: getDeltaExportZipList,
+    getChildFolders: getChildFolders,
+    getAllXMLFilesInFolder: getAllXMLFilesInFolder,
+    removeFolderRecursively: removeFolderRecursively,
+    moveFile: moveFile,
 }

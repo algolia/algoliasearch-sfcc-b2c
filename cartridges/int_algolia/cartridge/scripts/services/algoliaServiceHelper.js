@@ -116,7 +116,7 @@ function callJsonService(title, service, params) {
         return callStatus;
     }
 
-     if (result.ok) {
+    if (result.ok) {
         if (isResponseJSON(service)) {
             try {
                 data = JSON.parse(result.object.response);
