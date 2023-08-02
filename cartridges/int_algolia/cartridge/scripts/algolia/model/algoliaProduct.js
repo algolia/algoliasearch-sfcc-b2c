@@ -257,9 +257,9 @@ var aggregatedValueHandlers = {
         return productPrice;
     },
     in_stock: function (product) {
-        // the in_stock property now exports the SFCC attribute product.availabilityModel.inStock,
-        // not whether the threshold defined in Algolia_InStockThreshold value is reached.
-        return product.availabilityModel.inStock;
+        return product.availabilityModel.inStock
+            ? product.availabilityModel.availability >= algoliaData.getPreference('InStockThreshold')
+            : false;
     },
     image_groups: function (product) {
         // Get all image Groups of product for all locales
