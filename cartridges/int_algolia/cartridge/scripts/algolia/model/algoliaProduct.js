@@ -10,6 +10,8 @@ var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 
+const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+
 /**
  * Get the lowest promotional price for product
  * list all the active promotions for the product, then compares the prices and select the lowest.
@@ -257,9 +259,12 @@ var aggregatedValueHandlers = {
         return productPrice;
     },
     in_stock: function (product) {
-        // the in_stock property now exports the SFCC attribute product.availabilityModel.inStock,
-        // not whether the threshold defined in Algolia_InStockThreshold value is reached.
-        return product.availabilityModel.inStock;
+        // the in_stock property now exports a boolean indicating whether the number of products in stock
+        // (ATS or available to sell) is higher than the threshold set in the custom site preference Algolia_InStockThreshold,
+        // as originally intended. The previous logic was flawed in that it compared the sitepref to product.availabilityModel.availability,
+        // which is a number between 0 and 1 and does not represent the number of products in stock.
+        let inventoryRecord = product.getAvailabilityModel().getInventoryRecord(); // can be null
+        return (inventoryRecord ? inventoryRecord.getATS().getValue() > ALGOLIA_IN_STOCK_THRESHOLD : false);
     },
     image_groups: function (product) {
         // Get all image Groups of product for all locales
