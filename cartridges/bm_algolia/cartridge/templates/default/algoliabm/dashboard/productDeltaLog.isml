@@ -3,7 +3,7 @@
         <tbody>
             <tr>
                 <td class="table_header w s tab" nowrap="nowrap" width="100%" colspan="1">
-                    <isprint value="${Resource.msg('algolia.label.product.title.processed', 'algolia', null)}" encoding="htmlcontent" />
+                    <isprint value="${Resource.msg('algolia.label.productdelta.title.processed', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_header w e s center">
                     <isprint value="${Resource.msg('algolia.label.date', 'algolia', null)}" encoding="htmlcontent" />
@@ -17,10 +17,10 @@
                     <isprint value="${Resource.msg('algolia.label.lastdate', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail w e s" nowrap="nowrap">
-                    <isprint value="${logData.product.processedDate}" encoding="htmlcontent" />
+                    <isprint value="${logData.productdelta.processedDate}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s center">
-                    <isif condition="${logData.product.processedError}">
+                    <isif condition="${logData.productdelta.processedError}">
                         <isprint value="${Resource.msg('algolia.label.error', 'algolia', null)}" encoding="htmlcontent" />
                     <iselse/>
                         <isprint value="${Resource.msg('algolia.label.success', 'algolia', null)}" encoding="htmlcontent" />
@@ -29,7 +29,7 @@
             </tr>
         </tbody>
     </table>
-    <isif condition="${logData.product.processedError}">
+    <isif condition="${logData.productdelta.processedError}">
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody>
                 <tr>
@@ -37,7 +37,7 @@
                         <isprint value="${Resource.msg('algolia.label.errmessage', 'algolia', null)}" encoding="htmlcontent" />
                     </td>
                     <td class="table_detail w e s" width="100%">
-                        <isprint value="${logData.product.processedErrorMessage}" encoding="htmlcontent" />
+                        <isprint value="${logData.productdelta.processedErrorMessage}" encoding="htmlcontent" />
                     </td>
                 </tr>
             </tbody>
@@ -50,7 +50,7 @@
                     <isprint value="${Resource.msg('algolia.label.product.processed', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${logData.product.processedRecords + ' records'}" encoding="htmlcontent" />
+                    <isprint value="${logData.productdelta.processedRecords + ' records'}" encoding="htmlcontent" />
                 </td>
             </tr>
             <tr>
@@ -58,7 +58,7 @@
                     <isprint value="${Resource.msg('algolia.label.product.toupdate', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${logData.product.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
+                    <isprint value="${logData.productdelta.processedToUpdateRecords + ' records'}" encoding="htmlcontent" />
                 </td>
             </tr>
         </tbody>
@@ -69,7 +69,7 @@
         <tbody>
             <tr>
                 <td class="table_header w s tab" nowrap="nowrap" width="100%" colspan="1">
-                    <isprint value="${Resource.msg('algolia.label.product.title.sent', 'algolia', null)}" encoding="htmlcontent" />
+                    <isprint value="${Resource.msg('algolia.label.productdelta.title.sent', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_header w e s center">
                     <isprint value="${Resource.msg('algolia.label.date', 'algolia', null)}" encoding="htmlcontent" />
@@ -83,10 +83,10 @@
                     <isprint value="${Resource.msg('algolia.label.lastsentdate', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail w e s" nowrap="nowrap">
-                    <isprint value="${logData.product.sendDate}" encoding="htmlcontent" />
+                    <isprint value="${logData.productdelta.sendDate}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s center">
-                    <isif condition="${logData.product.sendError}">
+                    <isif condition="${logData.productdelta.sendError}">
                         <isprint value="${Resource.msg('algolia.label.error', 'algolia', null)}" encoding="htmlcontent" />
                     <iselse/>
                         <isprint value="${Resource.msg('algolia.label.success', 'algolia', null)}" encoding="htmlcontent" />
@@ -95,7 +95,7 @@
             </tr>
         </tbody>
     </table>
-    <isif condition="${logData.product.sendError}">
+    <isif condition="${logData.productdelta.sendError}">
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody>
                 <tr>
@@ -103,7 +103,7 @@
                         <isprint value="${Resource.msg('algolia.label.errmessage', 'algolia', null)}" encoding="htmlcontent" />
                     </td>
                     <td class="table_detail w e s" width="100%">
-                        <isprint value="${logData.product.sendErrorMessage}" encoding="htmlcontent" />
+                        <isprint value="${logData.productdelta.sendErrorMessage}" encoding="htmlcontent" />
                     </td>
                 </tr>
             </tbody>
@@ -116,7 +116,7 @@
                     <isprint value="${Resource.msg('algolia.label.sentsuccessfully', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${logData.product.sentChunks + ' chunks (' + logData.product.sentRecords + ' records)'}" encoding="htmlcontent" />
+                    <isprint value="${logData.productdelta.sentChunks + ' chunks (' + logData.productdelta.sentRecords + ' records)'}" encoding="htmlcontent" />
                 </td>
             </tr>
             <tr>
@@ -124,7 +124,7 @@
                     <isprint value="${Resource.msg('algolia.label.sentfailed', 'algolia', null)}" encoding="htmlcontent" />
                 </td>
                 <td class="table_detail e s"  width="100%">
-                    <isprint value="${logData.product.failedChunks + ' chunks (' + logData.product.failedRecords + ' records)'}" encoding="htmlcontent" />
+                    <isprint value="${logData.productdelta.failedChunks + ' chunks (' + logData.productdelta.failedRecords + ' records)'}" encoding="htmlcontent" />
                 </td>
             </tr>
         </tbody>

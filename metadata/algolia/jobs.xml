@@ -63,4 +63,36 @@
             </run-once>
         </triggers>
     </job>
+
+    <job job-id="AlgoliaProductsDeltaExport" priority="0">
+        <description>This is an alternative to the current delta calculation and sending method which calculates the delta export file by comparing the last full export to the current one, possibly comparing two huge XML files.
+This method relies on SFCC's built-in Delta Exports feature to calculate the delta (omitting the delta calculation phase completely and speeding up the process considerably), then enriches and transforms the products before sending them to Algolia for indexing.
+Make sure to contact SFCC Support to enable delta exports on your instance.</description>
+        <parameters>
+            <parameter name="deltaExportJobName">ProductDeltaExport</parameter>
+            <parameter name="consumer">algolia</parameter>
+        </parameters>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="sendDeltaExportProducts" type="custom.algoliaSendDeltaExportProducts" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="consumer" job-parameter-ref="consumer"/>
+                    <parameter name="deltaExportJobName" job-parameter-ref="deltaExportJobName"/>
+                </parameters>
+            </step>
+        </flow>
+        <rules>
+            <on-running runtime-threshold="60m" enabled="false">
+                <mark-job-as-hanging/>
+            </on-running>
+        </rules>
+        <triggers>
+            <run-once enabled="false">
+                <date>2023-06-13Z</date>
+                <time>21:00:00.000Z</time>
+            </run-once>
+        </triggers>
+    </job>
+
 </jobs>

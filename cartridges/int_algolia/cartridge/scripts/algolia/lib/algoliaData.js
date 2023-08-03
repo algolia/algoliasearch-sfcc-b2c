@@ -74,6 +74,7 @@ const clientSideData = {
 //   LastCategorySyncDate   ║ Date of the last Category index sync job run (read only) ║ String
 //   LastProductSyncDate    ║ Date of the last product index sync job run (read only)  ║ String
 //   LastProductSyncLog     ║ Last product sync job log                                ║ String
+//   LastProductDeltaSyncLog║ Last product delta sync job log                          ║ String
 //   LastCategorySyncLog    ║ Last category sync job log                               ║ String
 //   ═══════════════════════╩══════════════════════════════════════════════════════════╩════════════════════
 //
@@ -142,26 +143,32 @@ function setSetOfStrings(id, value) {
 
 /**
  * @description Get category and product log data from log file for current Site
- * @param {string} id name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastCategorySyncLog]
  * @returns {Object} log data
  */
 function getLogData(id) {
     var productLog = null;
-    if (id === 'LastCategorySyncLog') productLog = logHelper.getLogData('category');
-    else if (id === 'LastProductSyncLog') productLog = logHelper.getLogData('product');
+    switch (id) {
+        case 'LastCategorySyncLog': productLog = logHelper.getLogData('category'); break;
+        case 'LastProductSyncLog': productLog = logHelper.getLogData('product'); break;
+        case 'LastProductDeltaSyncLog': productLog = logHelper.getLogData('productdelta'); break;
+    }
     return productLog;
 }
 
 /**
  * @description Save product and category log data to file for current Site
- * @param {string} id name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastCategorySyncLog]
  * @param {Object} productLog ploduct log Object
  * @returns {bullean} Log data write success
  */
 function setLogData(id, productLog) {
     var result = false;
-    if (id === 'LastCategorySyncLog') result = logHelper.setLogData('category', productLog);
-    else if (id === 'LastProductSyncLog') result = logHelper.setLogData('product', productLog);
+    switch (id) {
+        case 'LastCategorySyncLog': result = logHelper.setLogData('category', productLog); break;
+        case 'LastProductSyncLog': result = logHelper.setLogData('product', productLog); break;
+        case 'LastProductDeltaSyncLog': result = logHelper.setLogData('productdelta', productLog); break;
+    }
     return result;
 }
 
@@ -233,8 +240,11 @@ function getLocalDateTime(date) {
  */
 function getSyncLocalDateTime(id) {
     var productLog = null;
-    if (id === 'LastCategorySyncDate') productLog = logHelper.getLogData('category');
-    else if (id === 'LastProductSyncDate') productLog = logHelper.getLogData('product');
+    switch (id) {
+        case 'LastCategorySyncDate': productLog = logHelper.getLogData('category'); break;
+        case 'LastProductSyncDate': productLog = logHelper.getLogData('product'); break;
+        case 'LastProductDeltaSyncDate': productLog = logHelper.getLogData('productdelta'); break;
+    }
     return empty(productLog) ? '---' : productLog.sendDate;
 }
 
