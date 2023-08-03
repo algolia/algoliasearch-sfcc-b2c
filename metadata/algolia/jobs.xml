@@ -63,4 +63,50 @@
             </run-once>
         </triggers>
     </job>
+
+    <job job-id="AlgoliaProductsDeltaExport" priority="0">
+        <description>This job is a faster alternative to the AlgoliaProductsIndex job's delta export mechanism.
+        It makes use of the SFCC-native Delta Export feature to create, enrich and send a product delta export to Algolia.
+        Warning: the Delta Export feature is not enabled by default; its activation needs to be requested by creating a support ticket with Salesforce.</description>
+        <parameters>
+            <parameter name="exportFile">productDeltaExport</parameter>
+            <parameter name="consumers">algolia</parameter>
+            <parameter name="catalogIDs">apparel-catalog, apparel-m-catalog</parameter>
+        </parameters>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="catalogDeltaExport" type="CatalogDeltaExport" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="CatalogIDs" job-parameter-ref="catalogIDs"/>
+                    <parameter name="Consumers" job-parameter-ref="consumers"/>
+                    <parameter name="ExportFile" job-parameter-ref="exportFile"/>
+                    <parameter name="MasterProductExport">false</parameter>
+                </parameters>
+                <rules>
+                    <on-exit status="ERROR">
+                        <stop-job/>
+                    </on-exit>
+                </rules>
+            </step>
+            <step step-id="sendDeltaExportProducts" type="custom.algoliaSendDeltaExportProducts" enforce-restart="false">
+                <description/>
+                <parameters>
+                    <parameter name="consumers" job-parameter-ref="consumers"/>
+                    <parameter name="exportFile" job-parameter-ref="exportFile"/>
+                </parameters>
+            </step>
+        </flow>
+        <rules>
+            <on-running runtime-threshold="60m" enabled="false">
+                <mark-job-as-hanging/>
+            </on-running>
+        </rules>
+        <triggers>
+            <run-once enabled="false">
+                <date>2023-06-13Z</date>
+                <time>21:00:00.000Z</time>
+            </run-once>
+        </triggers>
+    </job>
 </jobs>

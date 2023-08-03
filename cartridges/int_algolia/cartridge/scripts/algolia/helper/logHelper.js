@@ -43,14 +43,15 @@ function readObject(xmlStreamReader, nodeName) {
 
 /**
  * @description Get category and product log data from log file for current site
- * @param {string} id - name of preference [category, product]
+ * @param {string} id - name of preference [category | product | productdelta]
  * @param {string} logFileName - full Log file name
  * @returns {Object} - log data
  */
 function getLogData(id, logFileName) {
     var logData = {
         category: new LogJob(),
-        product: new LogJob()
+        product: new LogJob(),
+        productdelta: new LogJob(),
     };
 
     var logFile = empty(logFileName) ? new File(algoliaConstants.ALGOLIA_LOG_FILE) : new File(logFileName);
@@ -76,8 +77,8 @@ function getLogData(id, logFileName) {
     switch (id) {
         case 'category': result = logData.category ? logData.category : null; break;
         case 'product': result = logData.product ? logData.product : null; break;
+        case 'productdelta': result = logData.productdelta ? logData.productdelta : null; break;
         case LOG_NODE_NAME: result = logData; break;
-        default: break;
     }
 
     return result;
@@ -98,10 +99,12 @@ function getLogDataAllSites() {
             var siteLog = {
                 siteID: sites[i].getID(),
                 category: null,
-                product: null
+                product: null,
+                productdelta: null,
             };
             siteLog.category = getLogData('category', logFileName);
             siteLog.product = getLogData('product', logFileName);
+            siteLog.productdelta = getLogData('productdelta', logFileName);
             result.push(siteLog);
         }
     }
@@ -110,7 +113,7 @@ function getLogDataAllSites() {
 
 /**
  * @description Save product and category log data to file for current site
- * @param {string} id - name of preference [category, product]
+ * @param {string} id - name of preference [category | product | productdelta]
  * @param {Object} productLog - product log Object
  * @returns {boolean} - Log data write success
  */

@@ -1,66 +1,6 @@
 'use strict';
 
 /**
- * UpdateProductModel class that represents an Algolia ProductModel
- * for update product properties
- * @param {Object} algoliaProduct - Algolia Product Model
- * @constructor
- */
-function UpdateProductModel(algoliaProduct) {
-    this.topic = 'products/index';
-    this.resource_type = 'product';
-    this.resource_id = algoliaProduct.id;
-    this.options = {
-        data: {}
-    };
-
-    var keys = Object.keys(algoliaProduct);
-    for (var i = 0; i < keys.length; i += 1) {
-        if (keys[i] !== 'id') {
-            this.options.data[keys[i]] = algoliaProduct[keys[i]];
-        }
-    }
-}
-
-/**
- * Write Object to XMlStreamWriter
- * @param {dw.io.XMLStreamWriter} xmlStreamWriter - XML Stream Writer
- * @param {Object} obj - name of node XML object
- * @returns {null} - XML Object or null
- */
-function writeObjectToXMLStream(xmlStreamWriter, obj) {
-    var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-
-    var productModelXML = new XML('<product></product>');
-    jobHelper.appendObjToXML(productModelXML, obj);
-
-    xmlStreamWriter.writeCharacters('\n');
-    xmlStreamWriter.writeRaw(productModelXML.toXMLString());
-    xmlStreamWriter.writeCharacters('\n');
-    return null;
-}
-
-/**
- * The function returns the filtered next product from SeekableIterator
- * and converted to the Algolia Product Model
- * @param {dw.util.SeekableIterator} productsIterator - Product SeekableIterator
- * @returns {Object} -  Algolia Product Model
- */
-function getNextProductModel(productsIterator) {
-    var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
-    var AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
-    var algoliaProductModel = null;
-    while (productsIterator.hasNext()) {
-        var product = productsIterator.next();
-        if (productFilter.isInclude(product)) {
-            algoliaProductModel = new AlgoliaProduct(product);
-            break;
-        }
-    }
-    return algoliaProductModel;
-}
-
-/**
  * Job for create Product Snapshot file and
  * file for update Algolia Product Index
  * @param {Object} parameters - job paraneters
@@ -169,7 +109,7 @@ function runProductExport(parameters) {
     }
 
     var productsIterator = ProductMgr.queryAllSiteProductsSorted();
-    var newProductModel = getNextProductModel(productsIterator);
+    var newProductModel = jobHelper.getNextProductModel(productsIterator);
     var snapshotToUpdate = true;
     var productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
 
@@ -179,7 +119,7 @@ function runProductExport(parameters) {
         // Write product to Snapshot file
         if (snapshotToUpdate && newProductModel) {
             try {
-                writeObjectToXMLStream(snapshotXmlWriter, newProductModel);
+                jobHelper.writeObjectToXMLStream(snapshotXmlWriter, newProductModel);
             } catch (error) {
                 jobHelper.logFileError(newSnapshotFile.fullPath, 'Error write to file', error);
                 productLogData.processedErrorMessage = 'Error write to file';
@@ -200,8 +140,8 @@ function runProductExport(parameters) {
 
         if (newProductModel && !productSnapshot) {
             // Add product to delta
-            productUpdate = new UpdateProductModel(newProductModel);
-            newProductModel = getNextProductModel(productsIterator);
+            productUpdate = new jobHelper.UpdateProductModel(newProductModel);
+            newProductModel = jobHelper.getNextProductModel(productsIterator);
             snapshotToUpdate = true;
         }
 
@@ -227,20 +167,20 @@ function runProductExport(parameters) {
                             deltaObject.primary_category_id = newProductModel.primary_category_id;
                         }
                         deltaObject.id = newProductModel.id;
-                        productUpdate = new UpdateProductModel(deltaObject);
+                        productUpdate = new jobHelper.UpdateProductModel(deltaObject);
                         productUpdate.options.partial = true;
                     }
                 } else {
                     // Rewrite product completely
-                    productUpdate = new UpdateProductModel(newProductModel);
+                    productUpdate = new jobHelper.UpdateProductModel(newProductModel);
                 }
                 productSnapshot = snapshotReadIterator && snapshotReadIterator.hasNext() ? snapshotReadIterator.next() : null;
-                newProductModel = getNextProductModel(productsIterator);
+                newProductModel = jobHelper.getNextProductModel(productsIterator);
                 snapshotToUpdate = true;
             } else if (newProductModel.id < productSnapshot.id) {
                 // Add product to delta
-                productUpdate = new UpdateProductModel(newProductModel);
-                newProductModel = getNextProductModel(productsIterator);
+                productUpdate = new jobHelper.UpdateProductModel(newProductModel);
+                newProductModel = jobHelper.getNextProductModel(productsIterator);
                 snapshotToUpdate = true;
             } else {
                 // Remove product from delta
@@ -256,7 +196,7 @@ function runProductExport(parameters) {
         // Write delta to file
         if (productUpdate) {
             try {
-                writeObjectToXMLStream(updateXmlWriter, productUpdate);
+                jobHelper.writeObjectToXMLStream(updateXmlWriter, productUpdate);
             } catch (error) {
                 jobHelper.logFileError(updateFile.fullPath, 'Error write to file', error);
                 productLogData.processedErrorMessage = 'Error write to file';

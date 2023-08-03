@@ -1,0 +1,54 @@
+{
+    "step-types":
+    {
+        "script-module-step":
+        [
+            {
+                "@type-id":"custom.algoliaSendDeltaExportProducts",
+                "@supports-parallel-execution":"false",
+                "@supports-site-context":"true",
+                "@supports-organization-context":"false",
+                "description":"Takes the product delta export created by SFCC, extracts the PIDs from it, retrieves and enriches the products, then sends them to Algolia",
+                "module":"int_algolia/cartridge/scripts/algolia/steps/sendDeltaExportProducts.js",
+                "function":"sendDeltaExportProducts",
+                "transactional":"false",
+                "timeout-in-seconds":"900",
+                "parameters":
+                {
+                    "parameter":
+                    [
+                        {
+                            "@name":"consumers",
+                            "@type":"string",
+                            "@required":"true"
+                        },
+                        {
+                            "@name":"exportFile",
+                            "@type":"string",
+                            "@required":"true"
+                        }
+
+                    ]
+                },
+                "status-codes":
+                {
+                    "status":
+                    [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "FINISHED",
+                            "description": "Used when the step finished successfully."
+                        },
+                        {
+                            "@code": "FINISHED_WITH_WARNINGS",
+                            "description": "Used when the step finished with warnings."
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
