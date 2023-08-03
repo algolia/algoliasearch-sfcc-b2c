@@ -24,7 +24,7 @@ function enableAutocomplete(config) {
                                 searchClient: config.searchClient,
                                 queries: [
                                     {
-                                        indexName: config.productsIndex,
+                                        indexName: algoliaData.productsIndex,
                                         query,
                                         params: {
                                             hitsPerPage: 3,
@@ -33,14 +33,6 @@ function enableAutocomplete(config) {
                                         },
                                     },
                                 ],
-                            });
-                        },
-                        onSelect: function(event) {
-                            aa('clickedObjectIDsAfterSearch', {
-                                index: event.item.__autocomplete_indexName,
-                                eventName: 'Clicked on autocomplete product',
-                                queryID: event.item.__autocomplete_queryID,
-                                objectID: event.item.objectID,
                             });
                         },
                         templates: {
@@ -64,15 +56,18 @@ function enableAutocomplete(config) {
                                 }
 
                                 // add queryID, objectID and indexName to the URL (analytics)
-                                var newURL = new URL(item.url);
-                                newURL.searchParams.append('objectID', item.objectID);
-                                newURL.searchParams.append('queryID', item.__autocomplete_queryID);
-                                newURL.searchParams.append('indexName', item.__autocomplete_indexName);
+                                let newURL = '';
+                                if (item.url) {
+                                    newURL = new URL(item.url);
+                                    newURL.searchParams.append('objectID', item.objectID);
+                                    newURL.searchParams.append('queryID', item.__autocomplete_queryID);
+                                    newURL.searchParams.append('indexName', item.__autocomplete_indexName);
+                                }
 
                                 return html`
                                     <div class="text-truncate text-nowrap">
                                         <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
-                                        <a href=${item.url}>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
+                                        <a href="${newURL.href}">${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
                                     </div>`;
                             },
                         },
@@ -84,7 +79,7 @@ function enableAutocomplete(config) {
                                 searchClient: config.searchClient,
                                 queries: [
                                     {
-                                        indexName: config.categoriesIndex,
+                                        indexName: algoliaData.categoriesIndex,
                                         query,
                                         params: {
                                             hitsPerPage: 3,
@@ -120,6 +115,7 @@ function enableAutocomplete(config) {
                     },
                 ];
             },
+            insights: true,
         });
 
         inputElement.addEventListener('keypress', function (event) {

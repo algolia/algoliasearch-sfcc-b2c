@@ -1,25 +1,11 @@
 /* global aa */
+
 /**
  * Configures Insights
  * @param {string} appId Application ID
  * @param {string} searchApiKey Search API Key
  */
 function enableInsights(appId, searchApiKey) {
-    window.aa('init', {
-        appId: appId,
-        apiKey: searchApiKey,
-        // the default value was changed to false starting with SearchInsights v2
-        // this means that an anonymous user token will no longer be generated and saved for the session automatically
-        // this will generate 422 errors in the Algolia Events Debugger if useCookie is false and a user token was not specified explicitly
-        // please see the documentation for more details:
-        // https://www.npmjs.com/package/search-insights
-        // https://www.algolia.com/doc/api-reference/widgets/insights/js/#widget-param-insightsinitparams
-        useCookie: false,
-    });
-
-    // Use setUserToken to set a user token explicitly (e.g. for registered customers)
-    // const userToken = 'desired_user_token';
-    // aa('setUserToken', userToken);
 
     // when on product page
     document.addEventListener('click', function (event) {
@@ -33,7 +19,7 @@ function enableInsights(appId, searchApiKey) {
                     eventName: 'Product Add to cart',
                     index: indexName,
                     queryID: queryID,
-                    objectIDs: [objectID]
+                    objectIDs: [objectID],
                 });
             }
         }
@@ -61,7 +47,7 @@ function enableInsights(appId, searchApiKey) {
                 eventName: 'Global Add to cart',
                 index: lastIndexName,
                 queryID: lastQueryID,
-                objectIDs: [lastObjectID]
+                objectIDs: [lastObjectID],
             });
         }
     });

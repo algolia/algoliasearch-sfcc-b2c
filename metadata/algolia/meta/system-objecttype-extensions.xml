@@ -2,6 +2,7 @@
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
     <type-extension type-id="Product">
         <custom-attribute-definitions>
+
             <attribute-definition attribute-id="refinementColor">
                 <display-name xml:lang="x-default">Refinement Color</display-name>
                 <type>enum-of-string</type>
@@ -71,6 +72,7 @@
                     </value-definition>
                 </value-definitions>
             </attribute-definition>
+
             <attribute-definition attribute-id="refinementSize">
                 <display-name xml:lang="x-default">Refinement Size</display-name>
                 <type>string</type>
@@ -84,18 +86,30 @@
                 <min-length>0</min-length>
                 <field-length>6</field-length>
             </attribute-definition>
+
         </custom-attribute-definitions>
         <group-definitions>
+
             <attribute-group group-id="facetBucketing">
                 <display-name xml:lang="x-default">Facet Bucketing</display-name>
                 <attribute attribute-id="refinementColor"/>
                 <attribute attribute-id="refinementSize"/>
             </attribute-group>
+
         </group-definitions>
     </type-extension>
 
     <type-extension type-id="SitePreferences">
         <custom-attribute-definitions>
+
+            <attribute-definition attribute-id="Algolia_Enable">
+                <display-name xml:lang="x-default">Enable Algolia</display-name>
+                <description xml:lang="x-default">Enable/disable all Algolia</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_ApplicationID">
                 <display-name xml:lang="x-default">Application ID</display-name>
                 <description xml:lang="x-default">This is your unique application identifier. If you haven't already, please signup to Algolia and create an Algolia application on the Algolia Dashboard.</description>
@@ -104,35 +118,7 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
-            <attribute-definition attribute-id="Algolia_CustomFields">
-                <display-name xml:lang="x-default">Custom Fields</display-name>
-                <description xml:lang="x-default">Any additional attributes of Product Object</description>
-                <type>set-of-string</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>
-            <attribute-definition attribute-id="Algolia_Enable">
-                <display-name xml:lang="x-default">Enable Algolia</display-name>
-                <description xml:lang="x-default">Enable/disable all Algolia</description>
-                <type>boolean</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>
-            <attribute-definition attribute-id="Algolia_HostBase">
-                <display-name xml:lang="x-default">Read Host Base Url</display-name>
-                <description xml:lang="x-default">Host for read operations</description>
-                <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <min-length>0</min-length>
-            </attribute-definition>
-            <attribute-definition attribute-id="Algolia_InStockThreshold">
-                <display-name xml:lang="x-default">InStock Threshold</display-name>
-                <description xml:lang="x-default">Stock Threshold</description>
-                <type>double</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_SearchApiKey">
                 <display-name xml:lang="x-default">Search API key</display-name>
                 <description xml:lang="x-default">This is the public API key which can be safely used in your frontend code.This key is usable for search queries and it's also able to list the indices you've got access to.</description>
@@ -141,6 +127,7 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_AdminApiKey">
                 <display-name xml:lang="x-default">Admin API key</display-name>
                 <description xml:lang="x-default">This is the ADMIN API key. Please keep it secret and use it ONLY from your backend: this key is used to create, update and DELETE your indices. You can also use it to manage your API keys.</description>
@@ -148,6 +135,51 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_HostBase">
+                <display-name xml:lang="x-default">Read Host Base Url</display-name>
+                <description xml:lang="x-default">Host for read operations</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_InStockThreshold">
+                <display-name xml:lang="x-default">InStock Threshold</display-name>
+                <description xml:lang="x-default">Stock Threshold</description>
+                <type>double</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_CustomFields">
+                <display-name xml:lang="x-default">Custom Fields</display-name>
+                <description xml:lang="x-default">Any additional attributes of Product Object</description>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_IndexPrefix">
+                <display-name xml:lang="x-default">Index prefix</display-name>
+                <description xml:lang="x-default">By default the index name generated by the system looks like this: '&lt;first part of the hostname&gt;__&lt;siteID&gt;__&lt;"product" | "category"&gt;__&lt;locale&gt;'.&#13;
+Setting this preference replaces the first two segments, the final index name becoming '&lt;Algolia_IndexPrefix&gt;__&lt;"product" | "category"&gt;__&lt;locale&gt;'.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_EnableSSR">
+                <display-name xml:lang="x-default">Enable SSR</display-name>
+                <description xml:lang="x-default">Enables server-side rendering for CLP search results. Helps with SEO as CLP pages are no longer rendered with empty containers that are to be filled by client-side code, but increases page load times a tiny bit (which can be countered with page caching).</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_OCAPIClientID">
                 <display-name xml:lang="x-default">OCAPI client ID</display-name>
                 <description xml:lang="x-default">Authorization OCAPI client ID</description>
@@ -156,6 +188,7 @@
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_OCAPIClientPassword">
                 <display-name xml:lang="x-default">OCAPI client password</display-name>
                 <description xml:lang="x-default">Authorization OCAPI client password</description>
@@ -163,9 +196,11 @@
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
+
         </custom-attribute-definitions>
         <group-definitions>
             <attribute-group group-id="Algolia">
+
                 <display-name xml:lang="x-default">Algolia</display-name>
                 <attribute attribute-id="Algolia_Enable"/>
                 <attribute attribute-id="Algolia_ApplicationID"/>
@@ -174,9 +209,13 @@
                 <attribute attribute-id="Algolia_HostBase"/>
                 <attribute attribute-id="Algolia_InStockThreshold"/>
                 <attribute attribute-id="Algolia_CustomFields"/>
+                <attribute attribute-id="Algolia_IndexPrefix"/>
+                <attribute attribute-id="Algolia_EnableSSR"/>
                 <attribute attribute-id="Algolia_OCAPIClientID"/>
                 <attribute attribute-id="Algolia_OCAPIClientPassword"/>
+
             </attribute-group>
         </group-definitions>
+
     </type-extension>
 </metadata>

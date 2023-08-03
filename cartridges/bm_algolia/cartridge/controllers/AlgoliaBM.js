@@ -7,11 +7,11 @@ var Logger = require('dw/system/Logger');
 var Resource = require('dw/web/Resource');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var algoliaApi = require('*/cartridge/scripts/algoliaApi');
+var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
 
 /**
  * @description Render default template
- * @returns {void} - ISML.renderTemplate
+ * @returns {void} ISML.renderTemplate
  */
 function renderIndex() {
     var pdictValues = {
@@ -24,7 +24,7 @@ function renderIndex() {
 
 /**
  * @description Main pipelet
- * @returns {void} - renderIndex
+ * @returns {void} renderIndex
  */
 function start() {
     renderIndex();
@@ -32,7 +32,7 @@ function start() {
 
 /**
  * @description Handle form for settings
- * @returns {void} - renderIndex
+ * @returns {void} renderIndex
  */
 function handleSettings() {
     var params = request.httpParameterMap;
@@ -45,6 +45,8 @@ function handleSettings() {
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
         algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
         algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
+        algoliaData.setPreference('IndexPrefix', params.IndexPrefix.value);
+        algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
         algoliaData.setPreference('OCAPIClientID', params.OCAPIClientID.value);
         algoliaData.setPreference('OCAPIClientPassword', params.OCAPIClientPassword.value);
     } catch (error) {
@@ -60,7 +62,7 @@ function handleSettings() {
 function indexing() {
     var requestType = request.httpParameterMap.requestType.stringValue;
     var responseData = {};
-    var status = algoliaApi.makeIndexingRequest(requestType);
+    var status = algoliaExportAPI.makeIndexingRequest(requestType);
 
     if (status.error) {
         responseData.errorMessage = status.details.errorMessage ? status.details.errorMessage : Resource.msg('algolia.error.service', 'algolia', null);

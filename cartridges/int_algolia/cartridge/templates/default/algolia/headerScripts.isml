@@ -3,63 +3,10 @@
 
 <isif condition="${algoliaData.getPreference('Enable')}">
     <script>
-        var algoliaData = {
-            "enable": ${algoliaData.getPreference('Enable')},
-            "applicationID": "${algoliaData.getPreference('ApplicationID')}",
-            "searchApiKey": "${algoliaData.getPreference('SearchApiKey')}",
-            "locale": "${request.getLocale()}",
-            "currencyCode": "${request.getSession().getCurrency().getCurrencyCode()}",
-            "currencySymbol": '<isprint value="${request.getSession().getCurrency().getSymbol()}" encoding="jshtml" />',
-            "productsIndex": "${algoliaData.calculateIndexId('products')}",
-            "categoriesIndex": "${algoliaData.calculateIndexId('categories')}",
-            "quickViewUrlBase": "${URLUtils.url('Product-ShowQuickView')}",
-            "strings": {
-                "placeholder": "${Resource.msg('label.header.searchwatermark', 'common', null)}",
-                "moreResults": "${Resource.msg('button.more', 'algolia', null)}",
-                "noResults": "${Resource.msg('search.noResults','algolia',null)}",
-                "result": "${Resource.msg('search.result','algolia',null)}",
-                "results": "${Resource.msg('search.results','algolia',null)}",
-                "bestMetches": '<isprint value="${Resource.msg('search.bestMetches','algolia',null)}" encoding="jshtml" />',
-                "priceAsc": '<isprint value="${Resource.msg('search.priceAsc','algolia',null)}" encoding="jshtml" />',
-                "priceDesc": '<isprint value="${Resource.msg('search.priceDesc','algolia',null)}" encoding="jshtml" />',
-                "reset": '<isprint value="${Resource.msg('link.reset', 'algolia', null)}" encoding="jshtml" />',
-                "brandPanelTitle": '<isprint value="${Resource.msg('search.brand','algolia',null)}" encoding="jshtml" />',
-                "sizePanelTitle": '<isprint value="${Resource.msg('link.size_chart','algolia',null)}" encoding="jshtml" />',
-                "colorPanelTitle": '<isprint value="${Resource.msg('label.tile.swatch.colors','algolia',null)}" encoding="jshtml" />',
-                "pricePanelTitle": '<isprint value="${Resource.msg('search.price','algolia',null)}" encoding="jshtml" />',
-                "categoryPanelTitle": '<isprint value="${Resource.msg('search.category','algolia',null)}" encoding="jshtml" />',
-                "products": '<isprint value="${Resource.msg('search.suggest.products','algolia',null)}" encoding="jshtml" />',
-                "categories": '<isprint value="${Resource.msg('search.suggest.categories','algolia',null)}" encoding="jshtml" />',
-                "priceFilter": {
-                    "separator": '<isprint value="${Resource.msg('search.pricefilter.separator','algolia',null)}" encoding="jshtml" />',
-                    "submit": '<isprint value="${Resource.msg('search.pricefilter.submit','algolia',null)}" encoding="jshtml" />',
-                },
-                "newArrivals": '<isprint value="${Resource.msg('panel.newarrivals','algolia',null)}" encoding="jshtml" />'
-            },
-            "noImages": {
-                "large": "${URLUtils.staticURL('/images/noimagelarge.png')}",
-                "medium": "${URLUtils.staticURL('/images/noimagemedium.png')}",
-                "small": "${URLUtils.staticURL('/images/noimagesmall.png')}"
-            }
-        }
+        var algoliaData = <isprint value="${JSON.stringify(algoliaData.clientSideData)}" encoding="off"/>;
     </script>
-
-
-    <iscomment>--- Algolia Insights (Click Analytics & Personalization) ---</iscomment>
-
-    <script>
-        var ALGOLIA_INSIGHTS_SRC = "${URLUtils.staticURL('js/lib/algolia/search-insights.min.js')}";
-
-        !function(e,a,t,n,s,i,c){e.AlgoliaAnalyticsObject=s,e[s]=e[s]||function(){
-        (e[s].queue=e[s].queue||[]).push(arguments)},i=a.createElement(t),c=a.getElementsByTagName(t)[0],
-        i.async=1,i.src=n,c.parentNode.insertBefore(i,c)
-        }(window,document,"script",ALGOLIA_INSIGHTS_SRC,"aa");
-    </script>
-    <script src="${URLUtils.staticURL('js/algolia/insights-config.js')}"></script>
-
 
     <iscomment>--- algoliasearch ---</iscomment>
-
     <script type="module">
         import algoliasearch from '${URLUtils.staticURL('js/lib/algolia/algoliasearch-lite.esm.browser.js')}';
         window.algoliasearch = algoliasearch;
@@ -92,6 +39,11 @@
 
     <link rel="stylesheet" href="${URLUtils.staticURL('/css/algolia/index.css')}" />
     <script src="${URLUtils.staticURL('js/algolia/index.js')}"></script>
+
+
+    <iscomment>--- Algolia Insights (Click Analytics & Personalization) ---</iscomment>
+
+    <script src="${URLUtils.staticURL('js/algolia/insights-config.js')}"></script>
 
 </isif>
 <!-- End of Algolia dependencies -->

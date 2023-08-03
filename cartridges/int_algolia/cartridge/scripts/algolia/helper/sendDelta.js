@@ -14,8 +14,8 @@ var Status = require('dw/system/Status');
  * @returns {boolean} - successful to send
  */
 function sendChunk(entriesArray) {
-    var algoliaApi = require('*/cartridge/scripts/algoliaApi');
-    var result = algoliaApi.sendDelta(entriesArray);
+    var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
+    var result = algoliaExportAPI.sendDelta(entriesArray);
     return result;
 }
 
@@ -56,14 +56,14 @@ function sendDelta(deltaList, logID, parameters) {
     sendLogData.sendDate = algoliaData.getLocalDateTime(new Date());
     sendLogData.sendError = true;
     sendLogData.sendErrorMessage = '';
-    sendLogData.sendedChunk = 0;
-    sendLogData.sendedRecords = 0;
-    sendLogData.failedChunk = 0;
+    sendLogData.sentChunks = 0;
+    sendLogData.sentRecords = 0;
+    sendLogData.failedChunks = 0;
     sendLogData.failedRecords = 0;
 
     var entries = [];
     var failedChunks = [];
-    var countFailedShunks = 0;
+    var countFailedChunks = 0;
 
     var status = new Status(Status.OK);
 
@@ -79,10 +79,10 @@ function sendDelta(deltaList, logID, parameters) {
     var inputMaxNumberOfEntries = Object.hasOwnProperty.call(parameters, 'maxNumberOfEntries') ? parseInt(parameters.maxNumberOfEntries, 10) : MAX_CHUNKS_SIZE;
 
     // calculate it
-    var calkMaxNumberOfEntries = Math.floor(QUOTA_API_JS_JSON_STRING_LENGTH / deltaList.getRecordSize()); // number of objects to fit the quota
-    calkMaxNumberOfEntries -= Math.floor(calkMaxNumberOfEntries / 5); // reduce by 20%
+    var calcMaxNumberOfEntries = Math.floor(QUOTA_API_JS_JSON_STRING_LENGTH / deltaList.getRecordSize()); // number of objects to fit the quota
+    calcMaxNumberOfEntries -= Math.floor(calcMaxNumberOfEntries / 5); // reduce by 20%
 
-    var maxNumberOfEntries = Math.min(inputMaxNumberOfEntries, calkMaxNumberOfEntries);
+    var maxNumberOfEntries = Math.min(inputMaxNumberOfEntries, calcMaxNumberOfEntries);
 
     while (deltaList.hasNext()) {
         entries.push(deltaList.next());
@@ -92,12 +92,12 @@ function sendDelta(deltaList, logID, parameters) {
             status = sendChunk(entries);
             if (status.error) {
                 failedChunks = failedChunks.concat(entries);
-                countFailedShunks += 1;
-                sendLogData.failedChunk += 1;
+                countFailedChunks += 1;
+                sendLogData.failedChunks += 1;
                 sendLogData.failedRecords += entries.length;
                 sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
 
-                if (countFailedShunks > MAX_FAILED_CHUNKS) {
+                if (countFailedChunks > MAX_FAILED_CHUNKS) {
                     sendLogData.sendError = true;
                     sendLogData.sendErrorMessage = 'Too many failed chunks. Service might be down. Aborting the job.';
                     algoliaData.setLogData(logID, sendLogData);
@@ -105,8 +105,8 @@ function sendDelta(deltaList, logID, parameters) {
                     return status;
                 }
             } else {
-                sendLogData.sendedChunk += 1;
-                sendLogData.sendedRecords += entries.length;
+                sendLogData.sentChunks += 1;
+                sendLogData.sentRecords += entries.length;
             }
             entries.length = 0; // crear the array
         }
@@ -122,17 +122,17 @@ function sendDelta(deltaList, logID, parameters) {
         sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
     } else {
         sendLogData.sendError = false;
-        sendLogData.sendedChunk += sendLogData.failedChunk;
-        sendLogData.sendedRecords += sendLogData.failedRecords;
-        sendLogData.failedChunk = 0;
+        sendLogData.sentChunks += sendLogData.failedChunks;
+        sendLogData.sentRecords += sendLogData.failedRecords;
+        sendLogData.failedChunks = 0;
         sendLogData.failedRecords = 0;
     }
 
     sendLogData.sendDate = algoliaData.getLocalDateTime(new Date());
     algoliaData.setLogData(logID, sendLogData);
 
-    logger.info('Chunk(s) sent: {0}; Failed chunk(s): {1}\nRecord(s) sent: {2}; Failed record(s): {3}',
-        sendLogData.sendedChunk, sendLogData.failedChunk, sendLogData.sendedRecords, sendLogData.failedRecords);
+    logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
+        sendLogData.sentChunks, sendLogData.failedChunks, sendLogData.sentRecords, sendLogData.failedRecords);
 
     return status;
 }
