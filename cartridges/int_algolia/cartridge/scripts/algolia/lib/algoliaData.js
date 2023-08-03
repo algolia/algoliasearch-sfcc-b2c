@@ -69,14 +69,16 @@ const clientSideData = {
 //  ════════════════════════╩═══════════════════════════════════════════════════╩═══════════════════════════
 //  Preferences stored in the XML file
 //
-//             ID           ║                       description                        ║ type of preference
-//   ═══════════════════════╬══════════════════════════════════════════════════════════╬════════════════════
-//   LastCategorySyncDate   ║ Date of the last Category index sync job run (read only) ║ String
-//   LastProductSyncDate    ║ Date of the last product index sync job run (read only)  ║ String
-//   LastProductSyncLog     ║ Last product sync job log                                ║ String
-//   LastProductDeltaSyncLog║ Last product delta sync job log                          ║ String
-//   LastCategorySyncLog    ║ Last category sync job log                               ║ String
-//   ═══════════════════════╩══════════════════════════════════════════════════════════╩════════════════════
+//             ID                ║                       description                        ║ type of preference
+//   ════════════════════════════╬══════════════════════════════════════════════════════════╬════════════════════
+//   LastCategorySyncDate        ║ Date of the last Category index sync job run (read only) ║ String
+//   LastProductSyncDate         ║ Date of the last product index sync job run (read only)  ║ String
+//   LastProductSyncLog          ║ Last product sync job log                                ║ String
+//   LastProductDeltaSyncLog     ║ Last product delta sync job log                          ║ String
+//   LastPartialPriceSyncLog     ║ Last partial price sync job log                          ║ String
+//   LastPartialInventorySyncLog ║ Last partial inventory sync job log                      ║ String
+//   LastCategorySyncLog         ║ Last category sync job log                               ║ String
+//   ════════════════════════════╩══════════════════════════════════════════════════════════╩════════════════════
 //
 //  Example:
 //    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
@@ -143,7 +145,7 @@ function setSetOfStrings(id, value) {
 
 /**
  * @description Get category and product log data from log file for current Site
- * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastCategorySyncLog]
+ * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastPartialPriceSyncLog | LastPartialInventorySyncLog | LastCategorySyncLog]
  * @returns {Object} log data
  */
 function getLogData(id) {
@@ -160,7 +162,7 @@ function getLogData(id) {
 
 /**
  * @description Save product and category log data to file for current Site
- * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastCategorySyncLog]
+ * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastPartialPriceSyncLog | LastPartialInventorySyncLog | LastCategorySyncLog]
  * @param {Object} productLog ploduct log Object
  * @returns {bullean} Log data write success
  */
@@ -248,6 +250,8 @@ function getSyncLocalDateTime(id) {
         case 'LastCategorySyncDate': productLog = logHelper.getLogData('category'); break;
         case 'LastProductSyncDate': productLog = logHelper.getLogData('product'); break;
         case 'LastProductDeltaSyncDate': productLog = logHelper.getLogData('productdelta'); break;
+        case 'LastPartialPriceSyncLog': productLog = logHelper.getLogData('partialproductprice'); break;
+        case 'LastPartialInventorySyncLog': productLog = logHelper.getLogData('partialproductinventory'); break;
     }
     return empty(productLog) ? '---' : productLog.sendDate;
 }

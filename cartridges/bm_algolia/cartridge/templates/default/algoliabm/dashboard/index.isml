@@ -231,6 +231,8 @@
         </table>
         <isinclude template="algoliabm/dashboard/productLog" />
         <isinclude template="algoliabm/dashboard/productDeltaLog" />
+        <isinclude template="algoliabm/dashboard/productPriceLog" />
+        <isinclude template="algoliabm/dashboard/productInventoryLog" />
         <isinclude template="algoliabm/dashboard/categoryLog" />
     </isloop>
 </isdecorate>
