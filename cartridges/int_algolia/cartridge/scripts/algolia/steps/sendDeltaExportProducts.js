@@ -246,9 +246,7 @@ function sendDeltaExportProducts(parameters) {
     }
 
     // retrieving products from database and enriching them
-    for (var i = 0; i < changedProducts.length; i++) {
-        var currentObject = changedProducts[i];
-
+    changedProducts.forEach(function(currentObject) {
         for (var productID in currentObject) {
 
             var productUpdateObj;
@@ -288,7 +286,7 @@ function sendDeltaExportProducts(parameters) {
                 productLogData.processedToUpdateRecords++;
             }
         }
-    }
+    });
 
     // closing XML update file
     updateXmlWriter.writeEndElement();
@@ -329,26 +327,19 @@ function sendDeltaExportProducts(parameters) {
         return new Status(Status.ERROR);
     }
 
+    // delta successfully sent, remove update file
+    updateFile.remove();
 
+    // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
+    deltaExportZips.forEach(function(filename) {
+        var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
+        var targetZipFile = new File(l1_completedDir, currentZipFile.getName());
+        fileHelper.moveFile(currentZipFile, targetZipFile);
 
-
-
-    // // delta successfully sent, remove update file
-    // updateFile.remove();
-
-    // // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
-    // deltaExportZips.forEach(function(filename) {
-    //     var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
-    //     var targetZipFile = new File(l1_completedDir, currentZipFile.getName());
-    //     fileHelper.moveFile(currentZipFile, targetZipFile);
-
-    //     var currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
-    //     var targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
-    //     fileHelper.moveFile(currentMetaFile, targetMetaFile);
-    // });
-
-
-
+        var currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
+        var targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
+        fileHelper.moveFile(currentMetaFile, targetMetaFile);
+    });
 
     return status;
 }

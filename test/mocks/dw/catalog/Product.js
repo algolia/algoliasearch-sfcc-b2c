@@ -108,9 +108,20 @@ Product.prototype.unit = 1;
 Product.prototype.EAN = null;
 Product.prototype.searchable = true;
 Product.prototype.variant = true;
-Product.prototype.availabilityModel = {
-    inStock: true,
-    availability: 2
+Product.prototype.getAvailabilityModel = function() {
+    return {
+        getInventoryRecord: function() {
+            return {
+                getATS: function() {
+                    return {
+                        getValue: function() {
+                            return 6;
+                        }
+                    }
+                }
+            }
+        }
+    }
 };
 Product.prototype.isVariant = function () { return false; };
 Product.prototype.custom = {
