@@ -196,15 +196,6 @@ function getInstanceHostName() {
     if (System.instanceType === System.DEVELOPMENT_SYSTEM) {
         instanceHostname = instanceHostname.replace('.commercecloud.salesforce.com', '');
         instanceHostname = instanceHostname.replace('.demandware.net', '');
-    } else { // PRODUCTION_SYSTEM or STAGING_SYSTEM
-
-        // WARNING: This is a breaking change compared to the old index name generation
-        // logic which featured "production" and "staging" in the index name.
-        // The new approach targets the same index by default from both PROD and STG.
-        // If you'd like to configure separate target indices for these instances,
-        // please use the "Algolia_IndexPrefix" site preference.
-        instanceHostname = instanceHostname.replace('production.', '');
-        instanceHostname = instanceHostname.replace('staging.', '');
     }
     // replace dots
     return instanceHostname.replace(/[\.|-]/g, '_'); /* eslint-disable-line */
