@@ -58,10 +58,13 @@ function enableAutocomplete(config) {
                                 }
 
                                 // add queryID, objectID and indexName to the URL (analytics)
-                                var newURL = new URL(item.url);
-                                newURL.searchParams.append('objectID', item.objectID);
-                                newURL.searchParams.append('queryID', item.__autocomplete_queryID);
-                                newURL.searchParams.append('indexName', item.__autocomplete_indexName);
+                                let newURL = '';
+                                if (item.url) {
+                                    newURL = new URL(item.url);
+                                    newURL.searchParams.append('objectID', item.objectID);
+                                    newURL.searchParams.append('queryID', item.__autocomplete_queryID);
+                                    newURL.searchParams.append('indexName', item.__autocomplete_indexName);
+                                }
 
                                 return createElement("div", { class: "product-suggestion" },
                                     createElement("a", {
