@@ -188,7 +188,6 @@ function sendDeltaExportProducts(parameters) {
     // writing number of records read from the B2C delta zips
     jobHelper.logInfo(productLogData.processedRecords + ' records read from B2C delta zips');
 
-
     // cleanup - removing "_processing" dir
     fileHelper.removeFolderRecursively(l1_processingDir);
 
@@ -245,7 +244,9 @@ function sendDeltaExportProducts(parameters) {
     }
 
     // retrieving products from database and enriching them
-    changedProducts.forEach(function(currentObject) {
+    for (let i = 0; i < changedProducts.length; i++) {
+        let currentObject = changedProducts[i];
+
         for (var productID in currentObject) {
 
             var productUpdateObj;
@@ -285,7 +286,7 @@ function sendDeltaExportProducts(parameters) {
                 productLogData.processedToUpdateRecords++;
             }
         }
-    });
+    }
 
     // closing XML update file
     updateXmlWriter.writeEndElement();
