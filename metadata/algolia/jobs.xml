@@ -158,7 +158,7 @@ Chunk-based script, supports parallel execution.</description>
         <flow>
             <context site-id="RefArch"/>
             <step step-id="algoliaSendPartialInventoryUpdates" type="custom.algoliaSendPartialProductUpdates" enforce-restart="false">
-                <description>Retrieves and sends inventory data for all products assigned to the current site. Sends partial product updates to Algolia, updating only the "in_stock"  property of the product objects in the index by default.</description>
+                <description>Retrieves and sends inventory data for all products assigned to the current site. Sends partial product updates to Algolia, updating only the "in_stock" property of the product objects in the index by default.</description>
                 <parameters>
                     <parameter name="resourceType">inventory</parameter>
                     <parameter name="fieldListOverride">id, in_stock</parameter>

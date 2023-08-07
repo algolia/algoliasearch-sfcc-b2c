@@ -18,7 +18,7 @@ var products;
 const MAX_TRIES = 5;
 
 /*
- * Parallel execution works something like this:
+ * Rough algorithm of chunk-oriented script module execution:
  *
  *  counter = 0
  *  beforeStep() - executed before starting the job step, initialization
