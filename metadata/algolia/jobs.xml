@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
+
     <job job-id="AlgoliaProductsIndex" priority="0">
         <description>Export products to Algolia service for update search index files</description>
         <parameters/>
@@ -65,17 +66,27 @@
     </job>
 
     <job job-id="AlgoliaProductsDeltaExport" priority="0">
-        <description>This is an alternative to the current delta calculation and sending method which calculates the delta export file by comparing the last full export to the current one, possibly comparing two huge XML files.
+        <description>This is an alternative to the previous delta calculation and sending method which calculates the delta export file by comparing the last full export to the current one, comparing two large XML files.
 This method relies on SFCC's built-in Delta Exports feature to calculate the delta (omitting the delta calculation phase completely and speeding up the process considerably), then enriches and transforms the products before sending them to Algolia for indexing.
 Make sure to contact SFCC Support to enable delta exports on your instance.</description>
         <parameters>
-            <parameter name="deltaExportJobName">ProductDeltaExport</parameter>
+            <parameter name="catalogIDs">apparel-catalog, apparel-m-catalog</parameter>
             <parameter name="consumer">algolia</parameter>
+            <parameter name="deltaExportJobName">productDeltaExport</parameter>
         </parameters>
         <flow>
             <context site-id="RefArch"/>
+            <step step-id="catalogDeltaExport" type="CatalogDeltaExport" enforce-restart="false">
+                <description>Standard B2C catalog delta export. The productIDs are extracted from this export, the products retrieved from the database, enriched and sent to Algolia.</description>
+                <parameters>
+                    <parameter name="CatalogIDs" job-parameter-ref="catalogIDs"/>
+                    <parameter name="Consumers" job-parameter-ref="consumer"/>
+                    <parameter name="ExportFile" job-parameter-ref="deltaExportJobName"/>
+                    <parameter name="MasterProductExport">false</parameter>
+                </parameters>
+            </step>
             <step step-id="sendDeltaExportProducts" type="custom.algoliaSendDeltaExportProducts" enforce-restart="false">
-                <description/>
+                <description>Takes the productIDs from the standard B2C product delta export, retrieves the products from the database, enriches them and then sends them to Algolia.</description>
                 <parameters>
                     <parameter name="consumer" job-parameter-ref="consumer"/>
                     <parameter name="deltaExportJobName" job-parameter-ref="deltaExportJobName"/>
@@ -91,6 +102,86 @@ Make sure to contact SFCC Support to enable delta exports on your instance.</des
             <run-once enabled="false">
                 <date>2023-06-13Z</date>
                 <time>21:00:00.000Z</time>
+                <rules>
+                    <on-exit status="ERROR">
+                        <retry>
+                            <interval>30m</interval>
+                            <max-retries>2</max-retries>
+                        </retry>
+                    </on-exit>
+                </rules>
+            </run-once>
+        </triggers>
+    </job>
+
+    <job job-id="AlgoliaProductPricesExport" priority="0">
+        <description>Exports price data for each product assigned to the current site.
+Performs a partial update on the product objects in the Algolia index.
+Chunk-based script, supports parallel execution.</description>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="algoliaSendPartialPriceUpdates" type="custom.algoliaSendPartialProductUpdates" enforce-restart="false">
+                <description>Retrieves and sends price data for all products assigned to the current site. Sends partial product updates to Algolia, updating only the "price" property of the product objects in the index by default.</description>
+                <parameters>
+                    <parameter name="resourceType">price</parameter>
+                    <parameter name="fieldListOverride">id, price</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules>
+            <on-running runtime-threshold="60m" enabled="false">
+                <mark-job-as-hanging/>
+            </on-running>
+        </rules>
+        <triggers>
+            <run-once enabled="false">
+                <date>2023-07-26Z</date>
+                <time>15:33:00.000Z</time>
+                <rules>
+                    <on-exit status="ERROR">
+                        <retry>
+                            <interval>1m</interval>
+                            <max-retries>3</max-retries>
+                        </retry>
+                    </on-exit>
+                </rules>
+            </run-once>
+        </triggers>
+    </job>
+
+    <job job-id="AlgoliaProductInventoryExport" priority="0">
+        <description>Exports inventory data for each product assigned to the current site.
+Performs a partial update on the product objects in the Algolia index.
+Chunk-based script, supports parallel execution.</description>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="algoliaSendPartialInventoryUpdates" type="custom.algoliaSendPartialProductUpdates" enforce-restart="false">
+                <description>Retrieves and sends inventory data for all products assigned to the current site. Sends partial product updates to Algolia, updating only the "in_stock" property of the product objects in the index by default.</description>
+                <parameters>
+                    <parameter name="resourceType">inventory</parameter>
+                    <parameter name="fieldListOverride">id, in_stock</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules>
+            <on-running runtime-threshold="60m" enabled="false">
+                <mark-job-as-hanging/>
+            </on-running>
+        </rules>
+        <triggers>
+            <run-once enabled="false">
+                <date>2023-08-01Z</date>
+                <time>16:05:00.000Z</time>
+                <rules>
+                    <on-exit status="ERROR">
+                        <retry>
+                            <interval>1m</interval>
+                            <max-retries>3</max-retries>
+                        </retry>
+                    </on-exit>
+                </rules>
             </run-once>
         </triggers>
     </job>

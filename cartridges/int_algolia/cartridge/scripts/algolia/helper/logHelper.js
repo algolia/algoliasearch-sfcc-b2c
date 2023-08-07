@@ -43,7 +43,7 @@ function readObject(xmlStreamReader, nodeName) {
 
 /**
  * @description Get category and product log data from log file for current site
- * @param {string} id - name of preference [category | product | productdelta]
+ * @param {string} id - name of preference [category | product | productdelta | partialproductprice | partialproductinventory]
  * @param {string} logFileName - full Log file name
  * @returns {Object} - log data
  */
@@ -52,6 +52,8 @@ function getLogData(id, logFileName) {
         category: new LogJob(),
         product: new LogJob(),
         productdelta: new LogJob(),
+        partialproductprice: new LogJob(),
+        partialproductinventory: new LogJob(),
     };
 
     var logFile = empty(logFileName) ? new File(algoliaConstants.ALGOLIA_LOG_FILE) : new File(logFileName);
@@ -78,6 +80,8 @@ function getLogData(id, logFileName) {
         case 'category': result = logData.category ? logData.category : null; break;
         case 'product': result = logData.product ? logData.product : null; break;
         case 'productdelta': result = logData.productdelta ? logData.productdelta : null; break;
+        case 'partialproductprice': result = logData.partialproductprice ? logData.partialproductprice : null; break;
+        case 'partialproductinventory': result = logData.partialproductinventory ? logData.partialproductinventory : null; break;
         case LOG_NODE_NAME: result = logData; break;
     }
 
@@ -101,10 +105,15 @@ function getLogDataAllSites() {
                 category: null,
                 product: null,
                 productdelta: null,
+                partialproductprice: null,
+                partialproductinventory: null,
+
             };
             siteLog.category = getLogData('category', logFileName);
             siteLog.product = getLogData('product', logFileName);
             siteLog.productdelta = getLogData('productdelta', logFileName);
+            siteLog.partialproductprice = getLogData('partialproductprice', logFileName);
+            siteLog.partialproductinventory = getLogData('partialproductinventory', logFileName);
             result.push(siteLog);
         }
     }
@@ -113,7 +122,7 @@ function getLogDataAllSites() {
 
 /**
  * @description Save product and category log data to file for current site
- * @param {string} id - name of preference [category | product | productdelta]
+ * @param {string} id - name of preference [category | product | productdelta | partialproductprice | partialproductinventory]
  * @param {Object} productLog - product log Object
  * @returns {boolean} - Log data write success
  */

@@ -69,7 +69,7 @@ function callService(title, service, params) {
     try {
         result = service.setThrowOnError().call(JSON.stringify(params));
     } catch (error) {
-        logger.error('HTTP Service request failed.\nMessage:{0}, Url:{1}', error.name, service.getURL());
+        logger.error('HTTP Service request failed.\nMessage: {0}, Url: {1}', error.name, service.getURL());
         return null;
     }
 
@@ -112,7 +112,7 @@ function callJsonService(title, service, params) {
         result = service.setThrowOnError().call(JSON.stringify(params));
     } catch (error) {
         statusItem.setStatus(Status.ERROR);
-        logger.error('HTTP Service request failed.\nMessage:{0}, Url:{1}', error.name, service.getURL());
+        logger.error('HTTP Service request failed.\nMessage: {0}, Url: {1}', error.name, service.getURL());
         return callStatus;
     }
 
@@ -124,12 +124,12 @@ function callJsonService(title, service, params) {
             } catch (parseError) {
                 // response is marked as json, but it is not
                 statusItem.setStatus(Status.ERROR);
-                logger.error('JSON.parse error. Method: {0}. String:{1}', title, result.object.response);
+                logger.error('JSON.parse error. Method: {0}. String: {1}', title, result.object.response);
             }
         } else {
             // statusItem.setStatus(Status.ERROR);
             statusItem.addDetail('object', {});
-            logger.warn('Response is not JSON. Method: {0}. Result:{1}', title, result.object.response);
+            logger.warn('Response is not JSON. Method: {0}. Result: {1}', title, result.object.response);
         }
     } else {
         statusItem.setStatus(Status.ERROR);
