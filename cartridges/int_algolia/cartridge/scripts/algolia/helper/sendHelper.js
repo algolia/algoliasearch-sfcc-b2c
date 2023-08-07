@@ -11,20 +11,24 @@ var Status = require('dw/system/Status');
 /**
  * Send array of objects to Algolia API
  * @param {Array} entriesArray - array of objects for send to Algolia
+ * @param {string} [resType] (optional, when using multiple endpoints) "price" | "inventory" - passing it over to sendProductObjects()
+ * @param {string} [fieldList] (optional) if supplied, it will override the list of fields to be sent in the handshake - passing it over to sendProductObjects()
  * @returns {boolean} - successful to send
  */
-function sendChunk(entriesArray) {
+function sendChunk(entriesArray, resType, fieldList) {
     var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
-    var result = algoliaExportAPI.sendDelta(entriesArray);
+    var result = algoliaExportAPI.sendProductObjects(entriesArray, resType, fieldList);
     return result;
 }
 
 /**
  * Resending unsent objects to Algolia API
  * @param {Array} failedChunks - array of objects for send to Algolia
+ * @param {string} [resType] (optional, when using multiple endpoints) "price" | "inventory" - passing it over to sendProductObjects()
+ * @param {string} [fieldList] (optional) if supplied, it will override the list of fields to be sent in the handshake - passing it over to sendProductObjects()
  * @returns {boolean} - successful
  */
-function sendFailedChunks(failedChunks) {
+function sendFailedChunks(failedChunks, resType, fieldList) {
     var status = new Status(Status.OK);
 
     if (failedChunks.length === 0) {
@@ -67,7 +71,7 @@ function sendDelta(deltaList, logID, parameters) {
 
     var status = new Status(Status.OK);
 
-    if (deltaList.getSize() === 0) {
+    if (empty(deltaList) || deltaList.getSize() === 0) {
         logger.info('Delta is empty, no syncronization is needed');
         deltaList.close();
         sendLogData.sendError = false;
@@ -137,4 +141,6 @@ function sendDelta(deltaList, logID, parameters) {
     return status;
 }
 
-module.exports = sendDelta;
+module.exports.sendChunk = sendChunk;
+module.exports.sendFailedChunks = sendFailedChunks;
+module.exports.sendDelta = sendDelta;

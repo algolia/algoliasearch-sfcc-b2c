@@ -10,6 +10,8 @@ var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 
+const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+
 /**
  * Get the lowest promotional price for product
  * list all the active promotions for the product, then compares the prices and select the lowest.
@@ -257,9 +259,8 @@ var aggregatedValueHandlers = {
         return productPrice;
     },
     in_stock: function (product) {
-        return product.availabilityModel.inStock
-            ? product.availabilityModel.availability >= algoliaData.getPreference('InStockThreshold')
-            : false;
+        let inventoryRecord = product.getAvailabilityModel().getInventoryRecord(); // can be null
+        return (inventoryRecord ? inventoryRecord.getATS().getValue() >= ALGOLIA_IN_STOCK_THRESHOLD : false);
     },
     image_groups: function (product) {
         // Get all image Groups of product for all locales
@@ -304,12 +305,23 @@ var aggregatedValueHandlers = {
 
 /**
  * AlgoliaProduct class that represents an algoliaProduct Object
- * @param {dw.order.Product} product - Product
+ * @param {dw.order.Product} product Product
+ * @param {Array} [fieldListOverride] (optional) if supplied, it overrides the regular list of attributes to be sent (default + customFields)
  * @constructor
  */
-function algoliaProduct(product) {
-    var customFields = algoliaData.getSetOfArray('CustomFields');
-    var algoliaFields = algoliaProductConfig.defaultAttributes.concat(customFields);
+function algoliaProduct(product, fieldListOverride) {
+
+    // list of fields to build the object with
+    var algoliaFields;
+
+    if (!empty(fieldListOverride)) {
+        // use overridden list of fields
+        algoliaFields = fieldListOverride;
+    } else {
+        // use regular list of fields (default behavior)
+        let customFields = algoliaData.getSetOfArray('CustomFields');
+        algoliaFields = algoliaProductConfig.defaultAttributes.concat(customFields);
+    }
 
     if (empty(product)) {
         this.id = null;

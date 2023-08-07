@@ -69,13 +69,16 @@ const clientSideData = {
 //  ════════════════════════╩═══════════════════════════════════════════════════╩═══════════════════════════
 //  Preferences stored in the XML file
 //
-//             ID           ║                       description                        ║ type of preference
-//   ═══════════════════════╬══════════════════════════════════════════════════════════╬════════════════════
-//   LastCategorySyncDate   ║ Date of the last Category index sync job run (read only) ║ String
-//   LastProductSyncDate    ║ Date of the last product index sync job run (read only)  ║ String
-//   LastProductSyncLog     ║ Last product sync job log                                ║ String
-//   LastCategorySyncLog    ║ Last category sync job log                               ║ String
-//   ═══════════════════════╩══════════════════════════════════════════════════════════╩════════════════════
+//             ID                ║                       description                        ║ type of preference
+//   ════════════════════════════╬══════════════════════════════════════════════════════════╬════════════════════
+//   LastCategorySyncDate        ║ Date of the last Category index sync job run (read only) ║ String
+//   LastProductSyncDate         ║ Date of the last product index sync job run (read only)  ║ String
+//   LastProductSyncLog          ║ Last product sync job log                                ║ String
+//   LastProductDeltaSyncLog     ║ Last product delta sync job log                          ║ String
+//   LastPartialPriceSyncLog     ║ Last partial price sync job log                          ║ String
+//   LastPartialInventorySyncLog ║ Last partial inventory sync job log                      ║ String
+//   LastCategorySyncLog         ║ Last category sync job log                               ║ String
+//   ════════════════════════════╩══════════════════════════════════════════════════════════╩════════════════════
 //
 //  Example:
 //    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
@@ -142,26 +145,36 @@ function setSetOfStrings(id, value) {
 
 /**
  * @description Get category and product log data from log file for current Site
- * @param {string} id name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastPartialPriceSyncLog | LastPartialInventorySyncLog | LastCategorySyncLog]
  * @returns {Object} log data
  */
 function getLogData(id) {
     var productLog = null;
-    if (id === 'LastCategorySyncLog') productLog = logHelper.getLogData('category');
-    else if (id === 'LastProductSyncLog') productLog = logHelper.getLogData('product');
+    switch (id) {
+        case 'LastCategorySyncLog': productLog = logHelper.getLogData('category'); break;
+        case 'LastProductSyncLog': productLog = logHelper.getLogData('product'); break;
+        case 'LastProductDeltaSyncLog': productLog = logHelper.getLogData('productdelta'); break;
+        case 'LastPartialPriceSyncLog': productLog = logHelper.getLogData('partialproductprice'); break;
+        case 'LastPartialInventorySyncLog': productLog = logHelper.getLogData('partialproductinventory'); break;
+    }
     return productLog;
 }
 
 /**
  * @description Save product and category log data to file for current Site
- * @param {string} id name of preference [LastProductSyncLog, LastCategorySyncLog]
+ * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastPartialPriceSyncLog | LastPartialInventorySyncLog | LastCategorySyncLog]
  * @param {Object} productLog ploduct log Object
  * @returns {bullean} Log data write success
  */
 function setLogData(id, productLog) {
     var result = false;
-    if (id === 'LastCategorySyncLog') result = logHelper.setLogData('category', productLog);
-    else if (id === 'LastProductSyncLog') result = logHelper.setLogData('product', productLog);
+    switch (id) {
+        case 'LastCategorySyncLog': result = logHelper.setLogData('category', productLog); break;
+        case 'LastProductSyncLog': result = logHelper.setLogData('product', productLog); break;
+        case 'LastProductDeltaSyncLog': result = logHelper.setLogData('productdelta', productLog); break;
+        case 'LastPartialPriceSyncLog': result = logHelper.setLogData('partialproductprice', productLog); break;
+        case 'LastPartialInventorySyncLog': result = logHelper.setLogData('partialproductinventory', productLog); break;
+    }
     return result;
 }
 
@@ -233,8 +246,13 @@ function getLocalDateTime(date) {
  */
 function getSyncLocalDateTime(id) {
     var productLog = null;
-    if (id === 'LastCategorySyncDate') productLog = logHelper.getLogData('category');
-    else if (id === 'LastProductSyncDate') productLog = logHelper.getLogData('product');
+    switch (id) {
+        case 'LastCategorySyncDate': productLog = logHelper.getLogData('category'); break;
+        case 'LastProductSyncDate': productLog = logHelper.getLogData('product'); break;
+        case 'LastProductDeltaSyncDate': productLog = logHelper.getLogData('productdelta'); break;
+        case 'LastPartialPriceSyncLog': productLog = logHelper.getLogData('partialproductprice'); break;
+        case 'LastPartialInventorySyncLog': productLog = logHelper.getLogData('partialproductinventory'); break;
+    }
     return empty(productLog) ? '---' : productLog.sendDate;
 }
 
@@ -271,6 +289,22 @@ function getCurrentSite() {
     return Site.getCurrent();
 }
 
+/**
+ * Splits a string by a separator into an array of substrings and trims the values
+ * @param {string} string input string
+ * @param {string} [separator] separator to split by
+ * @returns {Array} array of strings the original string is separated into
+ */
+function csvStringToArray(string, separator) {
+    if (typeof string !== 'string' || empty(string)) {
+        return [];
+    } else {
+        return string.split(separator ? separator : ',').map(function(item) {
+            return item.trim();
+        });
+    }
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
@@ -287,6 +321,7 @@ module.exports = {
     getSyncLocalDateTime: getSyncLocalDateTime,
     getAlgoliaSites: getAlgoliaSites,
     getCurrentSite: getCurrentSite,
+    csvStringToArray: csvStringToArray,
     CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR,
     clientSideData: clientSideData,
 };

@@ -1,0 +1,88 @@
+{
+	"step-types": {
+		"script-module-step": [{
+			"@type-id": "custom.algoliaSendDeltaExportProducts",
+			"@supports-parallel-execution": "false",
+			"@supports-site-context": "true",
+			"@supports-organization-context": "false",
+			"description": "Takes the product delta export created by SFCC, extracts the PIDs from it, retrieves and enriches the products, then sends them to Algolia. Performs a full update on product objects; product objects in the index are fully replaced with any new data with the same productID (objectID in the index).",
+			"module": "int_algolia/cartridge/scripts/algolia/steps/sendDeltaExportProducts.js",
+			"function": "sendDeltaExportProducts",
+			"transactional": "false",
+			"timeout-in-seconds": "7200",
+			"parameters": {
+				"parameter": [{
+						"@name": "consumer",
+						"@type": "string",
+						"@required": "true"
+					},
+					{
+						"@name": "deltaExportJobName",
+						"@type": "string",
+						"@required": "true"
+					}
+
+				]
+			},
+			"status-codes": {
+				"status": [{
+						"@code": "ERROR",
+						"description": "Used when the step failed with an error."
+					},
+					{
+						"@code": "FINISHED",
+						"description": "Used when the step finished successfully."
+					},
+					{
+						"@code": "FINISHED_WITH_WARNINGS",
+						"description": "Used when the step finished with warnings."
+					}
+				]
+			}
+		}],
+		"chunk-script-module-step": [{
+			"@type-id": "custom.algoliaSendPartialProductUpdates",
+			"@supports-parallel-execution": true,
+			"@supports-site-context": true,
+			"@supports-organization-context": false,
+			"description": "Sends partial updates of all products assigned to the selected site to Algolia. Only the specified fields will be updated in the index. Can be used for more frequent price or inventory updates.",
+			"module": "int_algolia/cartridge/scripts/algolia/steps/sendPartialProductUpdates.js",
+			"read-function": "read",
+			"process-function": "process",
+			"write-function": "send",
+			"total-count-function": "getTotalCount",
+			"before-step-function": "beforeStep",
+			"before-chunk-function": "",
+			"after-chunk-function": "",
+			"after-step-function": "afterStep",
+			"chunk-size": 100,
+			"transactional": false,
+			"timeout-in-seconds": "600",
+			"parameters": {
+				"parameter": [{
+						"@name": "resourceType",
+						"@type": "string",
+						"@required": true
+					},
+					{
+						"@name": "fieldListOverride",
+						"@type": "string",
+						"@required": true
+					}
+				]
+
+			},
+			"status-codes": {
+				"status": [{
+						"@code": "ERROR",
+						"description": "Used when the step failed with an error."
+					},
+					{
+						"@code": "OK",
+						"description": "Used when the step finished successfully."
+					}
+				]
+			}
+		}]
+	}
+}
