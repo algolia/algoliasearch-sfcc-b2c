@@ -55,7 +55,7 @@
 			"before-chunk-function": "",
 			"after-chunk-function": "",
 			"after-step-function": "afterStep",
-			"chunk-size": 100,
+			"chunk-size": 5000,
 			"transactional": false,
 			"timeout-in-seconds": "600",
 			"parameters": {
@@ -68,6 +68,11 @@
 						"@name": "fieldListOverride",
 						"@type": "string",
 						"@required": true
+					},
+					{
+						"@name": "fullRecordUpdate",
+						"@type": "boolean",
+						"@required": false
 					}
 				]
 
