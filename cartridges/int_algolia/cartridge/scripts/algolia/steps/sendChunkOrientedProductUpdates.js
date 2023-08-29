@@ -8,7 +8,7 @@ var logger;
 var resourceType, fieldListOverride, fullRecordUpdate;
 
 // Algolia requires
-var algoliaData, AlgoliaProduct, jobHelper, algoliaExportAPI, sendHelper;
+var algoliaData, AlgoliaProduct, jobHelper, algoliaExportAPI, sendHelper, productFilter;
 
 // logging-related variables
 var logData, updateLogType;
@@ -49,6 +49,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+    productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
     // checking parameters
     if (empty(parameters.resourceType)) {
@@ -120,17 +121,23 @@ exports.read = function(parameters, stepExecution) {
  */
 exports.process = function(product, parameters, stepExecution) {
 
-    // enrich product
-    var algoliaProduct = new AlgoliaProduct(product, fieldListOverride);
-    var productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
-    if (!fullRecordUpdate) {
-        productUpdateObj.options.partial = true;
+    if (productFilter.isInclude(product)) {
+
+        // enrich product
+        var algoliaProduct = new AlgoliaProduct(product, fieldListOverride);
+        var productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
+        if (!fullRecordUpdate) {
+            productUpdateObj.options.partial = true;
+        }
+
+        logData.processedRecords++;
+        logData.processedToUpdateRecords++;
+
+        return productUpdateObj;
+
+    } else {
+        return;
     }
-
-    logData.processedRecords++;
-    logData.processedToUpdateRecords++;
-
-    return productUpdateObj;
 }
 
 /**

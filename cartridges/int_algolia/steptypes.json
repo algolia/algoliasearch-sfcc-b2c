@@ -55,7 +55,7 @@
 			"before-chunk-function": "",
 			"after-chunk-function": "",
 			"after-step-function": "afterStep",
-			"chunk-size": 1000,
+			"chunk-size": 500,
 			"transactional": false,
 			"timeout-in-seconds": "600",
 			"parameters": {
