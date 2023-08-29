@@ -13,7 +13,7 @@ var algoliaData, AlgoliaProduct, jobHelper, algoliaExportAPI, sendHelper;
 // logging-related variables
 var logData, updateLogType;
 
-var products;
+var products = [];
 
 const MAX_TRIES = 5;
 
@@ -51,8 +51,8 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
 
     // checking parameters
-    if (empty(parameters.resourceType) || empty(parameters.fieldListOverride)) {
-        let errorMessage = 'Mandatory job step parameters missing!';
+    if (empty(parameters.resourceType)) {
+        let errorMessage = 'Mandatory job step parameter "resourceType" missing!';
         jobHelper.logError(errorMessage);
         return;
     }
