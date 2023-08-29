@@ -41,12 +41,12 @@
 			}
 		}],
 		"chunk-script-module-step": [{
-			"@type-id": "custom.algoliaSendPartialProductUpdates",
+			"@type-id": "custom.sendChunkOrientedProductUpdates",
 			"@supports-parallel-execution": true,
 			"@supports-site-context": true,
 			"@supports-organization-context": false,
-			"description": "Sends partial updates of all products assigned to the selected site to Algolia. Only the specified fields will be updated in the index. Can be used for more frequent price or inventory updates.",
-			"module": "int_algolia/cartridge/scripts/algolia/steps/sendPartialProductUpdates.js",
+			"description": "Sends chunk-oriented (parallelized) updates of all products assigned to the selected site to Algolia. Only the specified fields will be updated in the index. Can be used for partially updating the records with only a few attributes or for full record updates.",
+			"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates.js",
 			"read-function": "read",
 			"process-function": "process",
 			"write-function": "send",
@@ -55,7 +55,7 @@
 			"before-chunk-function": "",
 			"after-chunk-function": "",
 			"after-step-function": "afterStep",
-			"chunk-size": 5000,
+			"chunk-size": 1000,
 			"transactional": false,
 			"timeout-in-seconds": "600",
 			"parameters": {
@@ -67,7 +67,7 @@
 					{
 						"@name": "fieldListOverride",
 						"@type": "string",
-						"@required": true
+						"@required": false
 					},
 					{
 						"@name": "fullRecordUpdate",
