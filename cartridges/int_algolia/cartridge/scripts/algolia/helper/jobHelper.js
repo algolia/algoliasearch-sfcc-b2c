@@ -449,9 +449,11 @@ function isObjectsArrayEmpty(objectsArray) {
  * @returns {Object} The result object containing `success` (boolean) and `nrProductsRead` (number)
  */
 function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
+    var ProductMgr = require('dw/catalog/ProductMgr');
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
+    var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     var catalogID;
     var resultObj = {
         nrProductsRead: 0,
@@ -475,8 +477,32 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
                                 var mode = xmlStreamReader.getAttributeValue(null, 'mode'); // <product mode="delete">
                                 var isAvailable = mode !== 'delete';
 
-                                // adding new productID to structure or updating it if key already exists
-                                _updateOrAddValue(changedProducts, productID, isAvailable);
+                                let product = ProductMgr.getProduct(productID);
+
+                                if (!empty(product) && product.isMaster()) {
+                                    // if the product is a master, include its variants in changedProducts instead
+                                    // as changes to the master can be inherited by its variants (and masters shouldn't be indexed)
+                                    let variants = product.getVariants().toArray();
+
+                                    for (let i = 0; i < variants.length; i++) {
+                                        let variant = variants[i];
+
+                                        // adding new productID to structure or updating it if key already exists
+                                        if (productFilter.isInclude(variant)) {
+                                            _updateOrAddValue(changedProducts, variant.ID, isAvailable);
+                                        }
+                                    }
+                                } else if (!empty(product)) { // product exists and is a variant
+                                    if (productFilter.isInclude(product)) {
+                                        _updateOrAddValue(changedProducts, productID, isAvailable);
+                                    }
+                                } else { // product doesn't exist (getProduct() returned null)
+                                    // If product no longer exists at the time of the query, mark it for deletion from the index.
+                                    // Deleting a master in B2C will cause its variants to be deleted as well.
+                                    // Fortunately doing this will cause the master's variants to be included in the B2C delta XML file with mode="delete",
+                                    // otherwise there would be no way to retrieve a deleted master's variants (since the product can no longer be retrieved with getProduct()).
+                                    _updateOrAddValue(changedProducts, productID, false);
+                                }
 
                                 resultObj.nrProductsRead++;
                             }
@@ -533,6 +559,7 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
             xmlStreamReader.close();
         };
     } catch (error) {
+        var e = error;
         resultObj.success = false;
         return resultObj;
     }
