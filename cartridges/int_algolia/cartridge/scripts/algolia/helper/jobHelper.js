@@ -559,7 +559,6 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
             xmlStreamReader.close();
         };
     } catch (error) {
-        var e = error;
         resultObj.success = false;
         return resultObj;
     }
