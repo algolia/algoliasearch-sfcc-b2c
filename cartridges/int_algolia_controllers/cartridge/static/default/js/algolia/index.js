@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var searchPageRoot = $suggestionsWrapper.attr('data-search-page-root'); // onload search query - for search page - URL param: q
 
     var searchClient = algoliasearch(algoliaData.applicationID, algoliaData.searchApiKey);
-    searchClient.addAlgoliaAgent('Algolia Salesforce B2C (SG)', 'v23.4.0');
+    searchClient.addAlgoliaAgent('Algolia Salesforce B2C (SG)', 'v23.4.1');
 
     enableAutocomplete({
         searchClient: searchClient,

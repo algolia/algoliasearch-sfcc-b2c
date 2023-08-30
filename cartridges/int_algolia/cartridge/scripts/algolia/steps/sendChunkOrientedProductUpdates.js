@@ -5,15 +5,15 @@ var Status = require('dw/system/Status');
 var logger;
 
 // job step parameters
-var resourceType, fieldListOverride;
+var resourceType, fieldListOverride, fullRecordUpdate;
 
 // Algolia requires
-var algoliaData, AlgoliaProduct, jobHelper, algoliaExportAPI, sendHelper;
+var algoliaData, AlgoliaProduct, jobHelper, algoliaExportAPI, sendHelper, productFilter;
 
 // logging-related variables
 var logData, updateLogType;
 
-var products;
+var products = [];
 
 const MAX_TRIES = 5;
 
@@ -49,10 +49,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+    productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
     // checking parameters
-    if (empty(parameters.resourceType) || empty(parameters.fieldListOverride)) {
-        let errorMessage = 'Mandatory job step parameters missing!';
+    if (empty(parameters.resourceType)) {
+        let errorMessage = 'Mandatory job step parameter "resourceType" missing!';
         jobHelper.logError(errorMessage);
         return;
     }
@@ -60,11 +61,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     // parameters
     resourceType = parameters.resourceType; // resouceType (price | inventory) - pass it along to sendChunk()
     fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
+    fullRecordUpdate = !!parameters.fullRecordUpdate || false;
 
     // configure logging
     switch (resourceType) {
         case 'price': updateLogType = 'LastPartialPriceSyncLog'; break;
         case 'inventory': updateLogType = 'LastPartialInventorySyncLog'; break;
+        case 'product': updateLogType = 'LastProductSyncLog'; break;
     }
 
     // initializing logs
@@ -118,15 +121,23 @@ exports.read = function(parameters, stepExecution) {
  */
 exports.process = function(product, parameters, stepExecution) {
 
-    // enrich product
-    var algoliaProduct = new AlgoliaProduct(product, fieldListOverride);
-    var productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
-    productUpdateObj.options.partial = true;
+    if (productFilter.isInclude(product)) {
 
-    logData.processedRecords++;
-    logData.processedToUpdateRecords++;
+        // enrich product
+        var algoliaProduct = new AlgoliaProduct(product, fieldListOverride);
+        var productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
+        if (!fullRecordUpdate) {
+            productUpdateObj.options.partial = true;
+        }
 
-    return productUpdateObj;
+        logData.processedRecords++;
+        logData.processedToUpdateRecords++;
+
+        return productUpdateObj;
+
+    } else {
+        return;
+    }
 }
 
 /**
