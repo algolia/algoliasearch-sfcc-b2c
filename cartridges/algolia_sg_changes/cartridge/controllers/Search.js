@@ -49,7 +49,7 @@ function show() {
         var cgid = params.cgid ? params.cgid.value : null;
         var category = null;
         var categoryBannerUrl;
-        var categoryDisplayNamePath = null;
+        var categoryDisplayNamePath = '';
         var categoryDisplayNamePathSeparator = '>';
         if (cgid) {    // get category - need image, name and if root
             category = CatalogMgr.getCategory(cgid);
@@ -83,14 +83,14 @@ function show() {
             }).render('algolia/categoryproducthits');
         }
     }
-    if (!useAlgolia) {    // deafult Search-Show	
+    if (!useAlgolia) {    // deafult Search-Show
         if (params.format.stringValue === 'ajax' || params.format.stringValue === 'page-element') {
             showProductGrid();
             return;
         }
-    
+
         var redirectUrl = SearchModel.getSearchRedirect(params.q.value);
-    
+
         if (redirectUrl){
             app.getView({
                 Location: redirectUrl.location,

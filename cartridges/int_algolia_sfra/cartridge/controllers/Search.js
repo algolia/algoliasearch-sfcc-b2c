@@ -21,7 +21,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         var cgid = req.querystring.cgid;
         var category = null;
         var categoryBannerUrl;
-        var categoryDisplayNamePath = null;
+        var categoryDisplayNamePath = '';
         var categoryDisplayNamePathSeparator = '>';
 
         if (cgid) { // get category - need image, name and if root
