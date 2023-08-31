@@ -251,36 +251,36 @@ Product.prototype.getImages = function (viewtype) {
     var arrDefaultLarge = [
         {
             alt: 'Floral Dress, Hot Pink Combo, large',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         },
         {
             alt: 'Floral Dress, Hot Pink Combo, large',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         }
     ];
     var arrFrLarge = [
         {
             alt: 'French Floral Dress, Hot Pink Combo, large',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg'},
             title: 'French Floral Dress, Hot Pink Combo'
         },
         {
             alt: 'French Floral Dress, Hot Pink Combo, large',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg'},
             title: 'French Floral Dress, Hot Pink Combo'
         }
     ];
     var arrEnLarge = [
         {
             alt: 'Floral Dress, Hot Pink Combo, large',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         },
         {
             alt: 'Floral Dress, Hot Pink Combo, large',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         }
     ];
@@ -288,36 +288,36 @@ Product.prototype.getImages = function (viewtype) {
     var arrDefaultSmall = [
         {
             alt: 'Floral Dress, Hot Pink Combo, small',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         },
         {
             alt: 'Floral Dress, Hot Pink Combo, small',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         }
     ];
     var arrFrSmall = [
         {
             alt: 'Floral Dress, Hot Pink Combo, small',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         },
         {
             alt: 'Floral Dress, Hot Pink Combo, small',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         }
     ];
     var arrEnSmall = [
         {
             alt: 'Floral Dress, Hot Pink Combo, small',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         },
         {
             alt: 'Floral Dress, Hot Pink Combo, small',
-            absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg',
+            getURL: function() { return '/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg'},
             title: 'Floral Dress, Hot Pink Combo'
         }
     ];
