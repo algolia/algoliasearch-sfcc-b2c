@@ -45,6 +45,10 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
         https: function (endpoint, param, id) {
             var baseUrl = 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/';
             return baseUrl + request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
+        },
+        url: function(endpoint, param, id) {
+            var relURL = '/on/demandware.store/Sites-Algolia_SFRA-Site/';
+            return relURL + request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
         }
     },
     '*/cartridge/scripts/algolia/lib/algoliaData': {
@@ -222,9 +226,9 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                 en: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'
             },
             url: {
-                default: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M',
-                fr: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M',
-                en: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M'
+                default: '/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M',
+                fr: '/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M',
+                en: '/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M'
             },
             UPC: '701644031206',
             variant: true,
