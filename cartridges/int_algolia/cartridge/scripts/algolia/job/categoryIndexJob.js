@@ -64,7 +64,7 @@ function getCategoryUrl(category) {
  * @returns {string} - Url of the image
  */
 function getImageUrl(image) {
-    return image ? image.getHttpsURL().toString() : null;
+    return image ? image.getURL().toString() : null;
 }
 
 /**

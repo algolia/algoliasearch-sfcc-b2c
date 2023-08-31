@@ -78,7 +78,7 @@ function getImagesGroup(product, viewtype) {
             request.setLocale(localeName);
             var imageItems = product.getImages(viewtype);
             image.alt[localeName] = stringUtils.trim(imageItems[i].alt);
-            image.dis_base_link[localeName] = stringUtils.trim(imageItems[i].absURL.toString());
+            image.dis_base_link[localeName] = stringUtils.trim(imageItems[i].getURL().toString());
             image.title[localeName] = stringUtils.trim(imageItems[i].title);
         }
 
