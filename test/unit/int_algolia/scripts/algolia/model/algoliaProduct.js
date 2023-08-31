@@ -42,10 +42,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
         trim: function (str) { return str; }
     },
     'dw/web/URLUtils': {
-        https: function (endpoint, param, id) {
-            var baseUrl = 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/';
-            return baseUrl + request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
-        },
+
         url: function(endpoint, param, id) {
             var relURL = '/on/demandware.store/Sites-Algolia_SFRA-Site/';
             return relURL + request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
