@@ -7,7 +7,7 @@
 function init() {
     var exportService = require('dw/svc/LocalServiceRegistry').createService('algolia.http.export', {
         createRequest: function (service, params) {
-            service.addHeader('User-Agent', 'INTEGRATION v1; Algolia for Javascript(SitegGenesis + SFRA); PLATFORM: SFCC ' + dw.system.System.compatibilityMode);
+            service.addHeader('User-Agent', 'INTEGRATION v23.4.1; Algolia B2C; Compatibility Mode: ' + dw.system.System.compatibilityMode);
             service.addHeader('Content-Type', 'application/json');
             return params;
         },
