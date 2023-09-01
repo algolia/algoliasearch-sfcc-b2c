@@ -272,7 +272,7 @@ function enableInstantSearch(config) {
 
                         // url with queryID (used for analytics)
                         if (item.url) {
-                            var url = new URL(item.url);
+                            var url = new URL(item.url, window.location.origin);
                             url.searchParams.append('queryID', item.__queryID);
                             url.searchParams.append('objectID', item.objectID);
                             url.searchParams.append('indexName', item.__indexName);
