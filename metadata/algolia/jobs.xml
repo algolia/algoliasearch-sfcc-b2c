@@ -82,7 +82,7 @@ Make sure to contact SFCC Support to enable delta exports on your instance.</des
                     <parameter name="CatalogIDs" job-parameter-ref="catalogIDs"/>
                     <parameter name="Consumers" job-parameter-ref="consumer"/>
                     <parameter name="ExportFile" job-parameter-ref="deltaExportJobName"/>
-                    <parameter name="MasterProductExport">false</parameter>
+                    <parameter name="MasterProductExport">true</parameter>
                 </parameters>
             </step>
             <step step-id="sendDeltaExportProducts" type="custom.algoliaSendDeltaExportProducts" enforce-restart="false">
