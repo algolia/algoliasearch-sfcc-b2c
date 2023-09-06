@@ -80,7 +80,7 @@ function sendDeltaExportProducts(parameters) {
     var fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
 
     var AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
-
+    var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
     // initializing log data
     const updateLogType = 'LastProductDeltaSyncLog';
@@ -257,8 +257,10 @@ function sendDeltaExportProducts(parameters) {
                 var product = ProductMgr.getProduct(productID); // get product from database, send remove request to Algolia if null
 
                 if (!empty(product)) {
-                    var algoliaProduct = new AlgoliaProduct(product);
-                    productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
+                    if (productFilter.isInclude(product)) {
+                        var algoliaProduct = new AlgoliaProduct(product);
+                        productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
+                    }
 
                 } else { // the data from the delta export about this product is stale, product can no longer be found in the database -- send a remove request
                     productUpdateObj = new jobHelper.DeleteProductModel(productID);
