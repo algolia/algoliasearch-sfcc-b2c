@@ -1,22 +1,23 @@
 'use strict';
 
-var Site = require('dw/system/Site');
 var ProductMgr = require('dw/catalog/ProductMgr');
+var Status = require('dw/system/Status');
 var logger;
 
 // job step parameters
-var resourceType, fieldListOverride, fullRecordUpdate;
+var consumer, deltaExportJobName, fieldListOverride;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, algoliaIndexingAPI, sendHelper, productFilter;
-var indexingOperation;
+var algoliaData, AlgoliaProduct, jobHelper, algoliaExportAPI, sendHelper, productFilter;
 
-// logging-related variables
-var logData, updateLogType;
+// logging-related variables and constants
+var logData;
+const resourceType = 'productdelta';
+const updateLogType = 'LastProductDeltaSyncLog';
 
 var products = [];
-var siteLocales;
-var nonLocalizedAttributes = [];
+
+const MAX_TRIES = 5;
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -45,46 +46,24 @@ var nonLocalizedAttributes = [];
  */
 exports.beforeStep = function(parameters, stepExecution) {
     algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+    AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
+    algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
-    algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 
     // checking mandatory parameters
-    if (empty(parameters.resourceType)) {
-        let errorMessage = 'Mandatory job step parameter "resourceType" missing!';
+    if (empty(parameters.consumer) || empty(parameters.deltaExportJobName)) {
+        let errorMessage = 'Mandatory job step parameters missing!';
         jobHelper.logError(errorMessage);
         return;
     }
 
     // parameters
-    resourceType = parameters.resourceType; // resouceType ( price | inventory | product ) - pass it along to sendChunk()
+    consumer = parameters.consumer;
+    deltaExportJobName = parameters.deltaExportJobName;
     fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
-    fullRecordUpdate = !!parameters.fullRecordUpdate || false;
-
-    if (empty(fieldListOverride)) {
-        const customFields = algoliaData.getSetOfArray('CustomFields');
-        fieldListOverride = algoliaProductConfig.defaultAttributes.concat(customFields);
-    }
-    Object.keys(algoliaProductConfig.attributeConfig).forEach(function(attributeName) {
-        if (!algoliaProductConfig.attributeConfig[attributeName].localized &&
-          fieldListOverride.indexOf(attributeName) >= 0) {
-            if (attributeName !== 'categories') {
-                nonLocalizedAttributes.push(attributeName);
-            }
-        }
-    });
-    logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
-
-    // configure logging
-    switch (resourceType) {
-        case 'price': updateLogType = 'LastPartialPriceSyncLog'; break;
-        case 'inventory': updateLogType = 'LastPartialInventorySyncLog'; break;
-        case 'product': updateLogType = 'LastProductSyncLog'; break;
-    }
 
     // initializing logs
     logData = algoliaData.getLogData(updateLogType) || {};
@@ -102,9 +81,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     logData.failedChunks = 0;
     logData.failedRecords = 0;
 
-    indexingOperation = fullRecordUpdate ? 'addObject' : 'partialUpdateObject';
-    siteLocales = Site.getCurrent().getAllowedLocales();
-    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
     // getting all products assigned to the site
     products = ProductMgr.queryAllSiteProducts();
 }
@@ -136,61 +112,59 @@ exports.read = function(parameters, stepExecution) {
  * @param {dw.catalog.Product} product one single product
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
- * @returns {Array} an array that contains one AlgoliaOperation per locale:
- *                  [ "action": "addObject", "indexName": "sfcc_products_en_US", body: { "id": "008884303989M", "name": "Fitted Shirt" },
- *                    "action": "addObject", "indexName": "sfcc_products_fr_FR", body: { "id": "008884303989M", "name": "Chemise ajustée" } ]
+ * @returns {UpdateProductModel} the product object in the form in which it will be sent to Algolia
  */
 exports.process = function(product, parameters, stepExecution) {
 
     if (productFilter.isInclude(product)) {
-        var algoliaOperations = [];
-        var localizedProduct;
-        // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-        var baseModel = new AlgoliaLocalizedProduct(product, 'default', nonLocalizedAttributes);
-        for (let l = 0; l < siteLocales.size(); ++l) {
-            var locale = siteLocales[l];
-            var indexName = algoliaData.calculateIndexName('products', locale);
-            localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldListOverride, baseModel);
-            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName))
-        }
+
+        // enrich product
+        var algoliaProduct = new AlgoliaProduct(product, fieldListOverride);
+        var productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
 
         logData.processedRecords++;
         logData.processedToUpdateRecords++;
 
-        return algoliaOperations;
+        return productUpdateObj;
 
+    } else {
+        return;
     }
 }
 
 /**
  * write-function (steptypes.json)
  * Any returns from this function result in the "success" parameter of "afterStep()" to become false.
- * @param {dw.util.List} algoliaOperations a List containing ${chunkSize} of Algolia operations Lists ready to be sent
+ * @param {dw.util.List} algoliaProducts a List containing ${chunkSize} UpdateProductModel objects
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
-exports.send = function(algoliaOperations, parameters, stepExecution) {
+exports.send = function(algoliaProducts, parameters, stepExecution) {
     var status;
 
-    // algoliaOperations contains all the returned Algolia operations from process() as a List of arrays
-    var algoliaOperationsArray = algoliaOperations.toArray();
-    var productCount = algoliaOperationsArray.length;
+    // algoliaProducts contains all the returned products from process() as a List
+    var algoliaProductsArray = algoliaProducts.toArray();
+    var productCount = algoliaProductsArray.length;
 
-    var batch = [];
-    for (let i = 0; i < productCount; ++i) {
-        // The array returned by the 'process' function is converted to a dw.util.List
-        batch = batch.concat(algoliaOperationsArray[i].toArray());
+    // retrying
+    for (var i = 0; i < MAX_TRIES; i++) {
+        status = sendHelper.sendChunk(algoliaProductsArray, resourceType, fieldListOverride);
+        if (!status.error) {
+            // don't retry if managed to send
+            break;
+        }
     }
 
-    status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
+    // if still couldn't send after MAX_TRIES attempts, return
     if (status.error) {
         logData.failedChunks++;
-        logData.failedRecords += batch.length;
+        logData.failedRecords += productCount;
+        return; // results in `success` in afterStep() becoming false - can't return a Status inside chunks
     }
-    else {
-        logData.sentRecords += batch.length;
-        logData.sentChunks++;
-    }
+
+    // sending was successful
+    logData.sentChunks++;
+    logData.sentRecords += productCount;
 }
 
 /**
@@ -202,7 +176,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 exports.afterStep = function(success, parameters, stepExecution) {
     // You can't define the exit status for a chunk-oriented script module.
     // Chunk modules always finish with either OK or ERROR.
-    // "success" conveys whether an error occurred in any previous chunks or not.
+    // "sucess" conveys whether an error occurred in any previous chunks or not.
     // Any prior return statements will set success to false (even if it returns Status.OK).
 
     products.close();

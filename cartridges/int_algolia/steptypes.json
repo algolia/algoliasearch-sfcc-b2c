@@ -88,6 +88,55 @@
 					}
 				]
 			}
+		},
+		{
+			"@type-id": "custom.sendChunkOrientedDeltaProductUpdates",
+			"@supports-parallel-execution": true,
+			"@supports-site-context": true,
+			"@supports-organization-context": false,
+			"description": "Sends chunk-oriented (parallelized) delta updates of products returned by the B2C delta export.",
+			"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates.js",
+			"read-function": "read",
+			"process-function": "process",
+			"write-function": "send",
+			"total-count-function": "getTotalCount",
+			"before-step-function": "beforeStep",
+			"before-chunk-function": "",
+			"after-chunk-function": "",
+			"after-step-function": "afterStep",
+			"chunk-size": 500,
+			"transactional": false,
+			"timeout-in-seconds": "600",
+			"parameters": {
+				"parameter": [{
+						"@name": "consumer",
+						"@type": "string",
+						"@required": true
+					},
+					{
+						"@name": "deltaExportJobName",
+						"@type": "string",
+						"@required": true
+					},
+					{
+						"@name": "fieldListOverride",
+						"@type": "string",
+						"@required": false
+					}
+				]
+
+			},
+			"status-codes": {
+				"status": [{
+						"@code": "ERROR",
+						"description": "Used when the step failed with an error."
+					},
+					{
+						"@code": "OK",
+						"description": "Used when the step finished successfully."
+					}
+				]
+			}
 		}]
 	}
 }
