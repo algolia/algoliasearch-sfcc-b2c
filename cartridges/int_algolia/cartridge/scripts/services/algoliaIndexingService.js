@@ -17,8 +17,6 @@ function getService() {
         throw new Error('Indexing service: Missing credentials');
     }
 
-    const defaultHostname = applicationID + '.algolia.net';
-
     let indexingService = LocalServiceRegistry.createService('algolia.http.search.write', {
         createRequest: function (service, parameters) {
             if (parameters) {

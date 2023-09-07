@@ -3,7 +3,7 @@
     "version": "23.4.1",
     "description": "Algolia SFRA Link Cartridge",
     "scripts": {
-        "test": "sgmf-scripts --test test/unit/**/*.js",
+        "test": "sgmf-scripts --test test/unit/**/model/*.js",
         "test:unit": "jest",
         "test:integration": "sgmf-scripts --integration 'test/integration/**/*.js'",
         "copy-scripts": "copy-files-from-to",
