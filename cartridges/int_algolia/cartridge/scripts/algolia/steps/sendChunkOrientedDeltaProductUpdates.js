@@ -17,6 +17,7 @@ const resourceType = 'productdelta';
 
 var changedProducts = [];
 var changedProductsIterator;
+var deltaExportZips;
 
 const MAX_TRIES = 5;
 
@@ -103,7 +104,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     }
 
     // list all the delta export zips in the folder
-    var deltaExportZips = fileHelper.getDeltaExportZipList(l0_deltaExportDir);
+    deltaExportZips = fileHelper.getDeltaExportZipList(l0_deltaExportDir);
 
     // if there are no files to process, there's no point in continuing
     if (empty(deltaExportZips)) {
