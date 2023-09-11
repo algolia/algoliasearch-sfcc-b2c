@@ -16,12 +16,15 @@ const logger = require('dw/system/Logger').getLogger('algolia');
 function sendBatch(indexName, requestsArray) {
     var indexingService = algoliaIndexingService.getService();
 
-    var batchObj = Object.create(null);
-    batchObj.requests = requestsArray;
-
     var result = retryableCall(
         indexingService,
-        { method: 'POST', path: '/1/indexes/' + indexName + '/batch', body: batchObj }
+        {
+            method: 'POST',
+            path: '/1/indexes/' + indexName + '/batch',
+            body: {
+                requests: requestsArray,
+            }
+        }
     );
 
     if (!result.ok) {

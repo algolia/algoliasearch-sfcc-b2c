@@ -94,6 +94,8 @@ function isRetryable(result) {
 /**
  * Main logic of the retry strategy.
  * For a given request parameters, sends the request to each available hosts until it gets a valid response.
+ * Available hosts are calculated based on the 'ApplicationID' custom property.
+ *
  * @param {dw.svc.HTTPService} service The service used to send the request
  * @param {Object} requestParams The request parameters
  * @return {dw.svc.Result} The first non-retryable result
