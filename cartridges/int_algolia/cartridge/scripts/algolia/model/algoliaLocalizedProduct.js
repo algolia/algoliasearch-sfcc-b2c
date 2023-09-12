@@ -129,6 +129,48 @@ function getCategoryFlatTree(category) {
 }
 
 /**
+ * Create hierarchical facets from the primary category path:
+ * If the primary category is "Flat Screen" and the path to the primary category is "Electronics > Televisions > Flat Screen",
+ * this method returns the following object:
+ * {
+ *   0: "Electronics"
+ *   1: "Electronics > Televisions"
+ *   2: "Electronics > Televisions > Flat Screen"
+ * }
+ * https://www.algolia.com/doc/guides/managing-results/refine-results/faceting/#hierarchical-facets
+ * @param {dw.order.Product} product - product
+ * @returns {Object} - the primary category's hierarchical facets
+ */
+function getPrimaryCategoryHierarchicalFacets(product) {
+    var categoriesHierarchy = {};
+    var categoriesTree = [];
+    var currentCategory = product.getPrimaryCategory();
+
+    if (empty(currentCategory) && product.isVariant()) {
+        currentCategory = product.getMasterProduct().getPrimaryCategory();
+    }
+    if (empty(currentCategory)) {
+        return;
+    }
+
+    categoriesTree.push(currentCategory.displayName);
+    while (!currentCategory.topLevel && !currentCategory.root) {
+        currentCategory = currentCategory.parent;
+        if (!currentCategory.online) {
+            break;
+        }
+        categoriesTree.push(currentCategory.displayName);
+    }
+
+    categoriesTree.reverse();
+    for (var i = 0; i < categoriesTree.length; ++i) {
+        categoriesHierarchy[i] = categoriesTree.slice(0, i + 1).join(' > ');
+    }
+
+    return categoriesHierarchy;
+}
+
+/**
  * Safely gets a custom attribute from a System Object.
  * Since attempting to return a nonexistent custom attribute throws an error in SFCC,
  * this is the safest way to check whether an attribute exists.
@@ -290,6 +332,7 @@ function algoliaLocalizedProduct(product, locale, fieldListOverride) {
     if (empty(product)) {
         this.id = null;
     } else {
+        this.objectID = product.ID;
         for (var i = 0; i < algoliaFields.length; i += 1) {
             var attributeName = algoliaFields[i];
             var config = algoliaProductConfig.attributeConfig[attributeName];
@@ -300,6 +343,13 @@ function algoliaLocalizedProduct(product, locale, fieldListOverride) {
                     : getAttributeValue(product, config.attribute);
             }
         }
+        if (algoliaFields.indexOf('primary_category_id') >= 0 && algoliaFields.indexOf('categories') >= 0) {
+            this['__primary_category'] = getPrimaryCategoryHierarchicalFacets(product);
+        }
+        if (algoliaFields.indexOf('id') >= 0) {
+            this._tags = ['id:' + product.ID];
+        }
+        productModelCustomizer.customizeLocalizedProductModel(this, algoliaFields);
     }
 }
 

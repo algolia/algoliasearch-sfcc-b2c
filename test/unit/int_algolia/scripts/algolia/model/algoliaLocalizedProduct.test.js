@@ -69,9 +69,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
 }, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', () => {
-    return {
-        customizeProductModel: function (productModel) { return productModel; }
-    }
+    return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/customization/productModelCustomizer');
 }, {virtual: true});
 
 const AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
@@ -80,6 +78,7 @@ describe('algoliaLocalizedProduct', function () {
     test('default locale', function () {
         let product = new ProductMock();
         let algoliaProductModel = {
+            objectID: '701644031206M',
             id: '701644031206M',
             in_stock: true,
             primary_category_id: 'womens-clothing-bottoms',
@@ -109,6 +108,11 @@ describe('algoliaLocalizedProduct', function () {
                     }
                 ]
             ],
+            __primary_category: {
+                0: 'Womens',
+                1: 'Womens > Clothing',
+                2: 'Womens > Clothing > Bottoms',
+            },
             brand: null,
             image_groups: [
                 {
@@ -163,6 +167,9 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Pink',
             size: '4',
             refinementSize: '4',
+            _tags: [
+                'id:701644031206M',
+            ],
         };
         expect(new AlgoliaLocalizedProduct(product)).toEqual(algoliaProductModel);
     });
@@ -170,6 +177,7 @@ describe('algoliaLocalizedProduct', function () {
     test('fr locale', function () {
         let product = new ProductMock();
         let algoliaProductModel = {
+            objectID: '701644031206M',
             id: '701644031206M',
             in_stock: true,
             primary_category_id: 'womens-clothing-bottoms',
@@ -199,6 +207,11 @@ describe('algoliaLocalizedProduct', function () {
                     }
                 ]
             ],
+            __primary_category: {
+                0: 'Femmes',
+                1: 'Femmes > Vêtements',
+                2: 'Femmes > Vêtements > Bas',
+            },
             brand: null,
             image_groups: [
                 {
@@ -253,6 +266,9 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Rose',
             size: '4',
             refinementSize: '4',
+            _tags: [
+                'id:701644031206M',
+            ],
         };
         expect(new AlgoliaLocalizedProduct(product, 'fr')).toEqual(algoliaProductModel);
     });
@@ -260,12 +276,12 @@ describe('algoliaLocalizedProduct', function () {
     test('en locale + fieldListOverride', function () {
         let product = new ProductMock();
         let algoliaProductModel = {
-            id: '701644031206M',
+            objectID: '701644031206M',
             price: {
                 USD: 129,
                 EUR: 92.88
             },
         };
-        expect(new AlgoliaLocalizedProduct(product, 'fr', ['id', 'price'])).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct(product, 'fr', ['price'])).toEqual(algoliaProductModel);
     });
 });

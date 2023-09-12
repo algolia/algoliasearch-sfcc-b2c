@@ -53,6 +53,32 @@ function customizeProductModel(productModel) {
     }
 }
 
+/**
+ * Customize Localized Algolia Product.
+ * Add extra properties to the product model.
+ * @param {Object} productModel - Algolia product model
+ * @param {Object} algoliaFields - The fields to index
+ */
+function customizeLocalizedProductModel(productModel, algoliaFields) {
+    var CATEGORY_ATTRIBUTE = 'CATEGORIES_NEW_ARRIVALS';
+    var CATEGORY_ID = 'newarrivals';
+
+    if (algoliaFields.includes(CATEGORY_ATTRIBUTE)) {
+        productModel[CATEGORY_ATTRIBUTE] = null;
+
+        if (!empty(productModel.categories)) {
+            for (var i = 0; i < productModel.categories.length; i += 1) {
+                var rootCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
+                if (rootCategoryId === CATEGORY_ID) {
+                    productModel[CATEGORY_ATTRIBUTE] = createAlgoliaCategoryObject(productModel.categories[i]);
+                    break;
+                }
+            }
+        }
+    }
+}
+
 module.exports = {
-    customizeProductModel: customizeProductModel
+    customizeProductModel: customizeProductModel,
+    customizeLocalizedProductModel: customizeLocalizedProductModel
 };
