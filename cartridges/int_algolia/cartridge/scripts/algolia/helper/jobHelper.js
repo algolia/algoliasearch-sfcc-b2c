@@ -514,7 +514,7 @@ function isObjectsArrayEmpty(objectsArray) {
 /**
  * Returns the total number of properties in an array of objects
  * @param {Array} objectsArray The array of objects to check
- * @returns The number of properties in an array of objects
+ * @returns {number} The number of properties in an array of objects
  */
 function getObjectsArrayLength(objectsArray) {
     let length = 0;
