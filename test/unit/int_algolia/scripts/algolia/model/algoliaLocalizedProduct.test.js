@@ -82,7 +82,7 @@ describe('algoliaLocalizedProduct', function () {
         let algoliaProductModel = {
             id: '701644031206M',
             in_stock: true,
-            primary_category_id: 'womens',
+            primary_category_id: 'womens-clothing-bottoms',
             price: {
                 USD: 129,
                 EUR: 92.88
@@ -98,6 +98,14 @@ describe('algoliaLocalizedProduct', function () {
                     {
                         id: 'womens-clothing-bottoms',
                         name: 'Bottoms',
+                    },
+                    {
+                        id: 'womens-clothing',
+                        name: 'Clothing',
+                    },
+                    {
+                        id: 'womens',
+                        name: 'Womens',
                     }
                 ]
             ],
@@ -164,7 +172,7 @@ describe('algoliaLocalizedProduct', function () {
         let algoliaProductModel = {
             id: '701644031206M',
             in_stock: true,
-            primary_category_id: 'womens',
+            primary_category_id: 'womens-clothing-bottoms',
             price: {
                 USD: 129,
                 EUR: 92.88
@@ -180,6 +188,14 @@ describe('algoliaLocalizedProduct', function () {
                     {
                         id: 'womens-clothing-bottoms',
                         name: 'Bas',
+                    },
+                    {
+                        id: 'womens-clothing',
+                        name: 'Vêtements',
+                    },
+                    {
+                        id: 'womens',
+                        name: 'Femmes',
                     }
                 ]
             ],

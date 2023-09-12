@@ -72,7 +72,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
         let algoliaProductModel = {
             id: '701644031206M',
             in_stock: true,
-            primary_category_id: 'womens',
+            primary_category_id: 'womens-clothing-bottoms',
             price: {
                 USD: 129,
                 EUR: 92.88
@@ -95,6 +95,22 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             default: 'Bottoms',
                             fr: 'Bas',
                             en: 'Bottoms'
+                        }
+                    },
+                    {
+                        id: 'womens-clothing',
+                        name: {
+                            default: 'Clothing',
+                            fr: 'Vêtements',
+                            en: 'Clothing'
+                        },
+                    },
+                    {
+                        id: 'womens',
+                        name: {
+                            default: 'Womens',
+                            fr: 'Femmes',
+                            en: 'Womens'
                         }
                     }
                 ]

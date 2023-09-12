@@ -100,7 +100,6 @@ Product.prototype = {
     }
 };
 Product.prototype.ID = '701644031206M';
-Product.prototype.primaryCategory = { ID: 'womens' };
 Product.prototype.online = true;
 Product.prototype.searchable = true;
 Product.prototype.UPC = '701644031206';
@@ -137,6 +136,59 @@ Product.prototype.custom = {
     },
     refinementSize: '4',
 };
+var primaryCategory = {
+    ID: 'womens-clothing-bottoms',
+    get displayName() {
+        var name = null;
+        switch (request.getLocale()) {
+            case 'default': name = 'Bottoms'; break;
+            case 'fr': name = 'Bas'; break;
+            case 'en': name = 'Bottoms'; break;
+            default: break;
+        }
+        return name;
+    },
+    online: true,
+    root: false,
+    parent: {
+        ID: 'womens-clothing',
+        get displayName() {
+            var name = null;
+            switch (request.getLocale()) {
+                case 'default': name = 'Clothing'; break;
+                case 'fr': name = 'Vêtements'; break;
+                case 'en': name = 'Clothing'; break;
+                default: break;
+            }
+            return name;
+        },
+        online: true,
+        root: false,
+        parent: {
+            ID: 'womens',
+            get displayName() {
+                var name = null;
+                switch (request.getLocale()) {
+                    case 'default': name = 'Womens'; break;
+                    case 'fr': name = 'Femmes'; break;
+                    case 'en': name = 'Womens'; break;
+                    default: break;
+                }
+                return name;
+            },
+            online: true,
+            root: true,
+            parent: {
+                ID: 'root',
+                displayName: 'Storefront Catalog - EN'
+            }
+        }
+    }
+}
+Product.prototype.primaryCategory = primaryCategory;
+Product.prototype.getPrimaryCategory = function() {
+    return primaryCategory;
+};
 Product.prototype.getOnlineCategories = function () {
     var result = [
         {
@@ -171,52 +223,7 @@ Product.prototype.getOnlineCategories = function () {
                 }
             }
         },
-        {
-            ID: 'womens-clothing-bottoms',
-            get displayName() {
-                var name = null;
-                switch (request.getLocale()) {
-                    case 'default': name = 'Bottoms'; break;
-                    case 'fr': name = 'Bas'; break;
-                    case 'en': name = 'Bottoms'; break;
-                    default: break;
-                }
-                return name;
-            },
-            root: false,
-            parent: {
-                ID: 'womens-clothing',
-                get displayName() {
-                    var name = null;
-                    switch (request.getLocale()) {
-                        case 'default': name = 'Clothing'; break;
-                        case 'fr': name = 'Vêtements'; break;
-                        case 'en': name = 'Clothing'; break;
-                        default: break;
-                    }
-                    return name;
-                },
-                root: false,
-                parent: {
-                    ID: 'womens',
-                    get displayName() {
-                        var name = null;
-                        switch (request.getLocale()) {
-                            case 'default': name = 'Womens'; break;
-                            case 'fr': name = 'Femmes'; break;
-                            case 'en': name = 'Womens'; break;
-                            default: break;
-                        }
-                        return name;
-                    },
-                    root: true,
-                    parent: {
-                        ID: 'root',
-                        displayName: 'Storefront Catalog - EN'
-                    }
-                }
-            }
-        }
+        primaryCategory,
     ];
     result.toArray = function () { return result; };
     return result;
