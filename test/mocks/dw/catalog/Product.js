@@ -16,7 +16,7 @@ Product.prototype = {
         var result = null;
         switch (request.getLocale()) {
             case 'default': result = 'Floral Dress'; break;
-            case 'fr': result = 'Floral Dress'; break;
+            case 'fr': result = 'Robe florale'; break;
             case 'en': result = 'Floral Dress'; break;
             default: break;
         }
@@ -26,7 +26,7 @@ Product.prototype = {
         var result = null;
         switch (request.getLocale()) {
             case 'default': result = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
-            case 'fr': result = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'fr': result = 'Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.'; break;
             case 'en': result = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
             default: break;
         }
@@ -46,7 +46,7 @@ Product.prototype = {
         var result = null;
         switch (request.getLocale()) {
             case 'default': result = 'Floral Dress'; break;
-            case 'fr': result = 'Floral Dress'; break;
+            case 'fr': result = 'Robe florale'; break;
             case 'en': result = 'Floral Dress'; break;
             default: break;
         }
@@ -56,7 +56,7 @@ Product.prototype = {
         var result = { source: null };
         switch (request.getLocale()) {
             case 'default': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
-            case 'fr': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'fr': result.source = 'Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.'; break;
             case 'en': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
             default: break;
         }
@@ -66,7 +66,7 @@ Product.prototype = {
         var result = { source: null };
         switch (request.getLocale()) {
             case 'default': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
-            case 'fr': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
+            case 'fr': result.source = 'Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.'; break;
             case 'en': result.source = 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'; break;
             default: break;
         }
@@ -126,7 +126,14 @@ Product.prototype.getAvailabilityModel = function() {
 Product.prototype.isVariant = function () { return false; };
 Product.prototype.custom = {
     refinementColor: {
-        displayValue: 'Pink'
+        get displayValue() {
+            switch (request.getLocale()) {
+                case 'default': return 'Pink';
+                case 'fr': return 'Rose';
+                case 'en': return 'Pink';
+                default: return 'Pink';
+            }
+        }
     },
     refinementSize: '4',
 };
@@ -138,7 +145,7 @@ Product.prototype.getOnlineCategories = function () {
                 var name = null;
                 switch (request.getLocale()) {
                     case 'default': name = 'Womens'; break;
-                    case 'fr': name = 'Womens'; break;
+                    case 'fr': name = 'Femmes'; break;
                     case 'en': name = 'Womens'; break;
                     default: break;
                 }
@@ -151,7 +158,7 @@ Product.prototype.getOnlineCategories = function () {
                     var name = null;
                     switch (request.getLocale()) {
                         case 'default': name = 'New Arrivals'; break;
-                        case 'fr': name = 'New Arrivals'; break;
+                        case 'fr': name = 'Nouveaux arrivages'; break;
                         case 'en': name = 'New Arrivals'; break;
                         default: break;
                     }
@@ -170,7 +177,7 @@ Product.prototype.getOnlineCategories = function () {
                 var name = null;
                 switch (request.getLocale()) {
                     case 'default': name = 'Bottoms'; break;
-                    case 'fr': name = 'Bottoms'; break;
+                    case 'fr': name = 'Bas'; break;
                     case 'en': name = 'Bottoms'; break;
                     default: break;
                 }
@@ -183,7 +190,7 @@ Product.prototype.getOnlineCategories = function () {
                     var name = null;
                     switch (request.getLocale()) {
                         case 'default': name = 'Clothing'; break;
-                        case 'fr': name = 'Clothing'; break;
+                        case 'fr': name = 'Vêtements'; break;
                         case 'en': name = 'Clothing'; break;
                         default: break;
                     }
@@ -196,7 +203,7 @@ Product.prototype.getOnlineCategories = function () {
                         var name = null;
                         switch (request.getLocale()) {
                             case 'default': name = 'Womens'; break;
-                            case 'fr': name = 'Womens'; break;
+                            case 'fr': name = 'Femmes'; break;
                             case 'en': name = 'Womens'; break;
                             default: break;
                         }
@@ -223,7 +230,7 @@ Product.prototype.getVariationModel = function () {
                 case 'color':
                     switch (request.getLocale()) {
                         case 'default': result = { displayValue: 'Hot Pink Combo' }; break;
-                        case 'fr': result = { displayValue: 'Hot Pink Combo' }; break;
+                        case 'fr': result = { displayValue: 'Combo rose vif' }; break;
                         case 'en': result = { displayValue: 'Hot Pink Combo' }; break;
                         default: break;
                     }
@@ -262,14 +269,14 @@ Product.prototype.getImages = function (viewtype) {
     ];
     var arrFrLarge = [
         {
-            alt: 'French Floral Dress, Hot Pink Combo, large',
+            alt: 'Robe florale, Combo rose vif, large',
             absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg',
-            title: 'French Floral Dress, Hot Pink Combo'
+            title: 'Robe florale, Combo rose vif'
         },
         {
-            alt: 'French Floral Dress, Hot Pink Combo, large',
+            alt: 'Robe florale, Combo rose vif, large',
             absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg',
-            title: 'French Floral Dress, Hot Pink Combo'
+            title: 'Robe florale, Combo rose vif'
         }
     ];
     var arrEnLarge = [
@@ -299,14 +306,14 @@ Product.prototype.getImages = function (viewtype) {
     ];
     var arrFrSmall = [
         {
-            alt: 'Floral Dress, Hot Pink Combo, small',
+            alt: 'Robe florale, Combo rose vif, small',
             absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg',
-            title: 'Floral Dress, Hot Pink Combo'
+            title: 'Robe florale, Combo rose vif'
         },
         {
-            alt: 'Floral Dress, Hot Pink Combo, small',
+            alt: 'Robe florale, Combo rose vif, small',
             absURL: 'https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg',
-            title: 'Floral Dress, Hot Pink Combo'
+            title: 'Robe florale, Combo rose vif'
         }
     ];
     var arrEnSmall = [

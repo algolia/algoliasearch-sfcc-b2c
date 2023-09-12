@@ -83,7 +83,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                         id: 'newarrivals-womens',
                         name: {
                             default: 'Womens',
-                            fr: 'Womens',
+                            fr: 'Femmes',
                             en: 'Womens'
                         }
                     }
@@ -93,7 +93,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                         id: 'womens-clothing-bottoms',
                         name: {
                             default: 'Bottoms',
-                            fr: 'Bottoms',
+                            fr: 'Bas',
                             en: 'Bottoms'
                         }
                     }
@@ -112,7 +112,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             _type: 'image',
                             alt: {
                                 default: 'Floral Dress, Hot Pink Combo, large',
-                                fr: 'French Floral Dress, Hot Pink Combo, large',
+                                fr: 'Robe florale, Combo rose vif, large',
                                 en: 'Floral Dress, Hot Pink Combo, large'
                             },
                             dis_base_link: {
@@ -122,7 +122,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             },
                             title: {
                                 default: 'Floral Dress, Hot Pink Combo',
-                                fr: 'French Floral Dress, Hot Pink Combo',
+                                fr: 'Robe florale, Combo rose vif',
                                 en: 'Floral Dress, Hot Pink Combo'
                             }
                         },
@@ -130,7 +130,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             _type: 'image',
                             alt: {
                                 default: 'Floral Dress, Hot Pink Combo, large',
-                                fr: 'French Floral Dress, Hot Pink Combo, large',
+                                fr: 'Robe florale, Combo rose vif, large',
                                 en: 'Floral Dress, Hot Pink Combo, large'
                             },
                             dis_base_link: {
@@ -140,7 +140,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             },
                             title: {
                                 default: 'Floral Dress, Hot Pink Combo',
-                                fr: 'French Floral Dress, Hot Pink Combo',
+                                fr: 'Robe florale, Combo rose vif',
                                 en: 'Floral Dress, Hot Pink Combo'
                             }
                         }
@@ -154,7 +154,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             _type: 'image',
                             alt: {
                                 default: 'Floral Dress, Hot Pink Combo, small',
-                                fr: 'Floral Dress, Hot Pink Combo, small',
+                                fr: 'Robe florale, Combo rose vif, small',
                                 en: 'Floral Dress, Hot Pink Combo, small'
                             },
                             dis_base_link: {
@@ -164,7 +164,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             },
                             title: {
                                 default: 'Floral Dress, Hot Pink Combo',
-                                fr: 'Floral Dress, Hot Pink Combo',
+                                fr: 'Robe florale, Combo rose vif',
                                 en: 'Floral Dress, Hot Pink Combo'
                             }
                         },
@@ -172,7 +172,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             _type: 'image',
                             alt: {
                                 default: 'Floral Dress, Hot Pink Combo, small',
-                                fr: 'Floral Dress, Hot Pink Combo, small',
+                                fr: 'Robe florale, Combo rose vif, small',
                                 en: 'Floral Dress, Hot Pink Combo, small'
                             },
                             dis_base_link: {
@@ -182,7 +182,7 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
                             },
                             title: {
                                 default: 'Floral Dress, Hot Pink Combo',
-                                fr: 'Floral Dress, Hot Pink Combo',
+                                fr: 'Robe florale, Combo rose vif',
                                 en: 'Floral Dress, Hot Pink Combo'
                             }
                         }
@@ -192,18 +192,18 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
             ],
             long_description: {
                 default: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.',
-                fr: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.',
+                fr: 'Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.',
                 en: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'
             },
             name: {
                 default: 'Floral Dress',
-                fr: 'Floral Dress',
+                fr: 'Robe florale',
                 en: 'Floral Dress'
             },
             online: true,
             pageDescription: {
                 default: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.',
-                fr: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.',
+                fr: 'Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.',
                 en: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'
             },
             pageKeywords: {
@@ -213,13 +213,13 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
             },
             pageTitle: {
                 default: 'Floral Dress',
-                fr: 'Floral Dress',
+                fr: 'Robe florale',
                 en: 'Floral Dress'
             },
             searchable: true,
             short_description: {
                 default: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.',
-                fr: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.',
+                fr: 'Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.',
                 en: 'Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.'
             },
             url: {
@@ -231,12 +231,12 @@ describe('algoliaProduct module - Test Algolia Product model', function () {
             variant: true,
             color: {
                 default: 'Hot Pink Combo',
-                fr: 'Hot Pink Combo',
+                fr: 'Combo rose vif',
                 en: 'Hot Pink Combo'
             },
             refinementColor: {
                 default: 'Pink',
-                fr: 'Pink',
+                fr: 'Rose',
                 en: 'Pink'
             },
             size: {
