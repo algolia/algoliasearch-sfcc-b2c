@@ -106,7 +106,7 @@
 			"after-step-function": "afterStep",
 			"chunk-size": 500,
 			"transactional": false,
-			"timeout-in-seconds": "600",
+			"timeout-in-seconds": "14400",
 			"parameters": {
 				"parameter": [{
 						"@name": "consumer",
