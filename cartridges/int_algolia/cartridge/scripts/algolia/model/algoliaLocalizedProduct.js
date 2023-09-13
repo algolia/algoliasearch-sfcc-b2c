@@ -313,9 +313,10 @@ var aggregatedValueHandlers = {
  * @param {dw.order.Product} product - Product
  * @param {string} locale - The requested locale
  * @param {Array} [fieldListOverride] (optional) if supplied, it overrides the regular list of attributes to be sent (default + customFields)
+ * @param {Object} baseProduct - A base product that contains pre-fetched properties
  * @constructor
  */
-function algoliaLocalizedProduct(product, locale, fieldListOverride) {
+function algoliaLocalizedProduct(product, locale, fieldListOverride, baseProduct) {
     request.setLocale(locale || 'default');
 
     // list of fields to build the object with
@@ -338,9 +339,13 @@ function algoliaLocalizedProduct(product, locale, fieldListOverride) {
             var config = algoliaProductConfig.attributeConfig[attributeName];
 
             if (!empty(config)) {
-                this[attributeName] = aggregatedValueHandlers[attributeName]
-                    ? aggregatedValueHandlers[attributeName](product)
-                    : getAttributeValue(product, config.attribute);
+                if (baseProduct && baseProduct[attributeName]) {
+                    this[attributeName] = baseProduct[attributeName];
+                } else {
+                    this[attributeName] = aggregatedValueHandlers[attributeName]
+                        ? aggregatedValueHandlers[attributeName](product)
+                        : getAttributeValue(product, config.attribute);
+                }
             }
         }
         if (algoliaFields.indexOf('id') >= 0) {

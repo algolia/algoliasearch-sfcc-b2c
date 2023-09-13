@@ -76,8 +76,8 @@ const AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algoli
 
 describe('algoliaLocalizedProduct', function () {
     test('default locale', function () {
-        let product = new ProductMock();
-        let algoliaProductModel = {
+        const product = new ProductMock();
+        const algoliaProductModel = {
             objectID: '701644031206M',
             id: '701644031206M',
             in_stock: true,
@@ -175,8 +175,8 @@ describe('algoliaLocalizedProduct', function () {
     });
 
     test('fr locale', function () {
-        let product = new ProductMock();
-        let algoliaProductModel = {
+        const product = new ProductMock();
+        const algoliaProductModel = {
             objectID: '701644031206M',
             id: '701644031206M',
             in_stock: true,
@@ -273,15 +273,37 @@ describe('algoliaLocalizedProduct', function () {
         expect(new AlgoliaLocalizedProduct(product, 'fr')).toEqual(algoliaProductModel);
     });
 
-    test('en locale + fieldListOverride', function () {
-        let product = new ProductMock();
-        let algoliaProductModel = {
+    test('fieldListOverride', function () {
+        const product = new ProductMock();
+        const algoliaProductModel = {
             objectID: '701644031206M',
             price: {
                 USD: 129,
                 EUR: 92.88
             },
         };
-        expect(new AlgoliaLocalizedProduct(product, 'fr', ['price'])).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct(product, undefined, ['price'])).toEqual(algoliaProductModel);
+    });
+
+    test('baseProduct', function () {
+        const product = new ProductMock();
+        const baseProduct = {
+            UPC: 'Test UPC',
+            price: {
+                USD: 1,
+                EUR: 0.93
+            },
+            name: 'Test name',
+        }
+        const algoliaProductModel = {
+            objectID: '701644031206M',
+            UPC: 'Test UPC',
+            price: {
+                USD: 1,
+                EUR: 0.93
+            },
+            name: 'Test name',
+        };
+        expect(new AlgoliaLocalizedProduct(product, 'default', ['price', 'UPC', 'name'], baseProduct)).toEqual(algoliaProductModel);
     });
 });
