@@ -343,11 +343,11 @@ function algoliaLocalizedProduct(product, locale, fieldListOverride) {
                     : getAttributeValue(product, config.attribute);
             }
         }
-        if (algoliaFields.indexOf('primary_category_id') >= 0 && algoliaFields.indexOf('categories') >= 0) {
-            this['__primary_category'] = getPrimaryCategoryHierarchicalFacets(product);
-        }
         if (algoliaFields.indexOf('id') >= 0) {
             this._tags = ['id:' + product.ID];
+        }
+        if (algoliaFields.indexOf('primary_category_id') >= 0 && algoliaFields.indexOf('categories') >= 0) {
+            this['__primary_category'] = getPrimaryCategoryHierarchicalFacets(product);
         }
         productModelCustomizer.customizeLocalizedProductModel(this, algoliaFields);
     }
