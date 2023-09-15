@@ -230,13 +230,11 @@ exports.process = function(cpObj, parameters, stepExecution) {
             var algoliaProduct = new AlgoliaProduct(product, paramFieldListOverride);
             productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
 
-            logData.processedRecords++;
             logData.processedToUpdateRecords++;
             return productUpdateObj;
         }
     } else {
         productUpdateObj = new jobHelper.DeleteProductModel(cpObj.productID);
-        logData.processedRecords++;
         logData.processedToUpdateRecords++;
         return productUpdateObj;
     }
