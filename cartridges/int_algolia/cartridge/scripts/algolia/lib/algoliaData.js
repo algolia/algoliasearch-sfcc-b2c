@@ -224,10 +224,11 @@ function getIndexPrefix() {
  * If custom site preference Algolia_IndexPrefix is set in BM,
  * its value will be used as a prefix instead of the first part of the hostname and the siteID
  * @param {string} type type of indices: products | categories
+ * @param {string} locale optional: requested locale
  * @returns {string} index name
  */
-function calculateIndexName(type) {
-    return getIndexPrefix() + '__' + type + '__' + request.getLocale();
+function calculateIndexName(type, locale) {
+    return getIndexPrefix() + '__' + type + '__' + (locale || request.getLocale());
 }
 
 /**

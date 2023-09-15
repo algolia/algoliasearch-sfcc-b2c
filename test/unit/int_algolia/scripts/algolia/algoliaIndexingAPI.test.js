@@ -23,6 +23,29 @@ test('sendBatch', () => {
     const algoliaRequests = [
         {
             action: 'addObject',
+            body: { firstname: 'Jimmie', lastname: 'Barninger' }
+        },
+        {
+            action: 'addObject',
+            body: { firstname: 'Warren', lastname: 'Speach' }
+        }
+    ];
+
+    indexingAPI.sendBatch(indexName, algoliaRequests);
+
+    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+        method: 'POST',
+        path: '/1/indexes/' + indexName + '/batch',
+        body: {
+            requests: algoliaRequests
+        }
+    });
+});
+
+test('sendMultiIndicesBatch', () => {
+    const algoliaRequests = [
+        {
+            action: 'addObject',
             indexName: 'index1',
             body: { firstname: 'Jimmie', lastname: 'Barninger' }
         },
@@ -33,11 +56,11 @@ test('sendBatch', () => {
         }
     ];
 
-    indexingAPI.sendBatch(indexName, algoliaRequests);
+    indexingAPI.sendMultiIndicesBatch(algoliaRequests);
 
     expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
         method: 'POST',
-        path: '/1/indexes/' + indexName + '/batch',
+        path: '/1/indexes/*/batch',
         body: {
             requests: algoliaRequests
         }

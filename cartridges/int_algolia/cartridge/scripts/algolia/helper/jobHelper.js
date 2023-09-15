@@ -335,6 +335,26 @@ function UpdateProductModel(algoliaProduct) {
 }
 
 /**
+ * Operation class that represents an Algolia batch operation: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
+ * @param {string} action - Operation to perform: addObject, updateObject, deleteObject
+ * @param {Object} algoliaObject - Algolia object to index
+ * @param {string} indexName - The index to target
+ * @constructor
+ */
+function AlgoliaOperation(action, algoliaObject, indexName) {
+    this.action = action;
+    if (indexName) {
+        this.indexName = indexName;
+    }
+    this.body = {};
+
+    var keys = Object.keys(algoliaObject);
+    for (var i = 0; i < keys.length; i += 1) {
+        this.body[keys[i]] = algoliaObject[keys[i]];
+    }
+}
+
+/**
  * Constructs a model for products that are to be deleted from the Algolia index
  * @param {string} productID productID
  * @returns {Object} The object to be sent to Algolia
@@ -553,6 +573,7 @@ module.exports = {
     logFileInfo: logFileInfo,
     checkAlgoliaFolder: checkAlgoliaFolder,
 
+    AlgoliaOperation: AlgoliaOperation,
     UpdateProductModel: UpdateProductModel,
     DeleteProductModel: DeleteProductModel,
     writeObjectToXMLStream: writeObjectToXMLStream,
