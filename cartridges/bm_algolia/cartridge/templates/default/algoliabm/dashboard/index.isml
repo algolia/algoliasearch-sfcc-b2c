@@ -78,16 +78,6 @@
                     </td>
                 </tr>
 
-                <iscomment> Algolia_HostBase </iscomment>
-                <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.baseurl', 'algolia', null)}" encoding="jshtml" />
-                    </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
-                        <input type="text" value="${pdict.algoliaData.getPreference('HostBase') ? pdict.algoliaData.getPreference('HostBase') : ''}" id="HostBase" name="HostBase" />
-                    </td>
-                </tr>
-
                 <iscomment> Algolia_InStockThreshold </iscomment>
                 <tr>
                     <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
