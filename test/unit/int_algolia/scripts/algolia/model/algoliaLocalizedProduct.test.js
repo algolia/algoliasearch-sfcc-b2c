@@ -285,9 +285,9 @@ describe('algoliaLocalizedProduct', function () {
         expect(new AlgoliaLocalizedProduct(product, undefined, ['price'])).toEqual(algoliaProductModel);
     });
 
-    test('baseProduct', function () {
+    test('baseModel', function () {
         const product = new ProductMock();
-        const baseProduct = {
+        const baseModel = {
             UPC: 'Test UPC',
             price: {
                 USD: 1,
@@ -295,7 +295,7 @@ describe('algoliaLocalizedProduct', function () {
             },
             name: 'Test name',
         }
-        const algoliaProductModel = {
+        const expectedProductModel = {
             objectID: '701644031206M',
             UPC: 'Test UPC',
             price: {
@@ -304,6 +304,6 @@ describe('algoliaLocalizedProduct', function () {
             },
             name: 'Test name',
         };
-        expect(new AlgoliaLocalizedProduct(product, 'default', ['price', 'UPC', 'name'], baseProduct)).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct(product, 'default', ['price', 'UPC', 'name'], baseModel)).toEqual(expectedProductModel);
     });
 });
