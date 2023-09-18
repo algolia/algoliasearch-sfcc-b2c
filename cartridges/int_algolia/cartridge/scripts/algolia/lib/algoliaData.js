@@ -59,7 +59,6 @@ const clientSideData = {
 //   ApplicationID          ║ Identifies the application for this site          ║ String
 //   SearchApiKey           ║ Authorization key for Algolia                     ║ String
 //   AdminApiKey            ║ Authorization Admin key for Algolia               ║ String
-//   HostBase               ║ Host for read operations                          ║ String
 //   CustomFields           ║ Any additional attributes of Product Object       ║ Set-of-string
 //   InStockThreshold       ║ Stock Threshold                                   ║ Double
 //   IndexPrefix            ║ Optional prefix for the index name                ║ String
