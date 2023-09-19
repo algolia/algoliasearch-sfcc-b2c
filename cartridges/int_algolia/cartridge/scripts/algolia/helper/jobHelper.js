@@ -336,7 +336,7 @@ function UpdateProductModel(algoliaProduct) {
 
 /**
  * Operation class that represents an Algolia batch operation: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
- * @param {string} action - Operation to perform: addObject, updateObject, deleteObject
+ * @param {string} action - Operation to perform: addObject, partialUpdateObject, deleteObject, ...
  * @param {Object} algoliaObject - Algolia object to index
  * @param {string} indexName - The index to target
  * @constructor
