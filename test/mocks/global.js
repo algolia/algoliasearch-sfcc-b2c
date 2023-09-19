@@ -9,7 +9,13 @@ function empty(obj) {
 
 function CurrentSession() {
     this.currency = {
-        currencyCode: 'USD'
+        currencyCode: 'USD',
+        getCurrencyCode: function() {
+            return 'USD';
+        },
+        getSymbol: function() {
+            return '$';
+        }
     };
     this.getCurrency = function () {
         return this.currency;
