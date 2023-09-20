@@ -16,13 +16,20 @@ jest.mock('dw/web/URLUtils', () => {
 const AlgoliaLocalizedCategory = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedCategory');
 
 describe('algoliaLocalizedCategory', function () {
-    test('default locale', function () {
-        const catalogId = 'testCatalog';
-        const category = new CategoryMock({ name: 'Electronics' });
-        const subcategory = new CategoryMock({ name: 'Digital Cameras', parent: category });
-        const subcategory2 = new CategoryMock({ name: 'Gaming', parent: category });
-        category.subcategories = [subcategory, subcategory2];
+    // We define categories mocks that represent the following categories hierarchy:
+    // Electronics
+    // |__Digital Cameras
+    // |__Audio
+    //    |__Headphones
+    const catalogId = 'testCatalog';
+    const category = new CategoryMock({ name: 'Electronics' });
+    const subcategory1 = new CategoryMock({ name: 'Digital Cameras', parent: category });
+    const subcategory2 = new CategoryMock({ name: 'Audio', parent: category });
+    const subsubcategory2 = new CategoryMock({ name: 'Headphones', parent: subcategory2 });
+    category.subcategories = [subcategory1, subcategory2];
+    subcategory2.subcategories = [subsubcategory2];
 
+    test('default locale', function () {
         const expectedParentCategoryModel = {
             objectID: 'testCatalog/storefront-catalog-m-en/electronics',
             id: 'testCatalog/storefront-catalog-m-en/electronics',
@@ -33,7 +40,7 @@ describe('algoliaLocalizedCategory', function () {
             url: '/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/electronics',
             subCategories: [
                 "testCatalog/storefront-catalog-m-en/digital-cameras",
-                "testCatalog/storefront-catalog-m-en/gaming",
+                "testCatalog/storefront-catalog-m-en/audio",
             ],
             _tags: ['id:testCatalog/storefront-catalog-m-en/electronics'],
         }
@@ -50,29 +57,26 @@ describe('algoliaLocalizedCategory', function () {
             parent_category_id: 'testCatalog/storefront-catalog-m-en/electronics',
             _tags: ['id:testCatalog/storefront-catalog-m-en/digital-cameras'],
         }
-        expect(new AlgoliaLocalizedCategory(subcategory, catalogId)).toEqual(expectedSubCategoryModel);
+        expect(new AlgoliaLocalizedCategory(subcategory1, catalogId)).toEqual(expectedSubCategoryModel);
 
         const expectedSubCategory2Model = {
-            objectID: 'testCatalog/storefront-catalog-m-en/gaming',
-            id: 'testCatalog/storefront-catalog-m-en/gaming',
-            name: 'Gaming',
-            description: 'Description of Gaming',
-            image: 'http://example.com/gaming.jpg',
-            thumbnail: 'http://example.com/gaming-thumbnail.jpg',
-            url: '/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/gaming',
+            objectID: 'testCatalog/storefront-catalog-m-en/audio',
+            id: 'testCatalog/storefront-catalog-m-en/audio',
+            name: 'Audio',
+            description: 'Description of Audio',
+            image: 'http://example.com/audio.jpg',
+            thumbnail: 'http://example.com/audio-thumbnail.jpg',
+            url: '/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/audio',
             parent_category_id: 'testCatalog/storefront-catalog-m-en/electronics',
-            _tags: ['id:testCatalog/storefront-catalog-m-en/gaming'],
+            subCategories: [
+                "testCatalog/storefront-catalog-m-en/headphones",
+            ],
+            _tags: ['id:testCatalog/storefront-catalog-m-en/audio'],
         }
         expect(new AlgoliaLocalizedCategory(subcategory2, catalogId)).toEqual(expectedSubCategory2Model);
     });
 
     test('french locale', function () {
-        const catalogId = 'testCatalog';
-        const category = new CategoryMock({ name: 'Electronics' });
-        const subcategory = new CategoryMock({ name: 'Digital Cameras', parent: category });
-        const subcategory2 = new CategoryMock({ name: 'Gaming', parent: category });
-        category.subcategories = [subcategory, subcategory2];
-
         const expectedParentCategoryModel = {
             objectID: 'testCatalog/storefront-catalog-m-en/electronics',
             id: 'testCatalog/storefront-catalog-m-en/electronics',
@@ -83,7 +87,7 @@ describe('algoliaLocalizedCategory', function () {
             url: '/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/electronics',
             subCategories: [
                 "testCatalog/storefront-catalog-m-en/digital-cameras",
-                "testCatalog/storefront-catalog-m-en/gaming",
+                "testCatalog/storefront-catalog-m-en/audio",
             ],
             _tags: ['id:testCatalog/storefront-catalog-m-en/electronics'],
         }
@@ -100,19 +104,35 @@ describe('algoliaLocalizedCategory', function () {
             parent_category_id: 'testCatalog/storefront-catalog-m-en/electronics',
             _tags: ['id:testCatalog/storefront-catalog-m-en/digital-cameras'],
         }
-        expect(new AlgoliaLocalizedCategory(subcategory, catalogId, 'fr')).toEqual(expectedSubCategoryModel);
+        expect(new AlgoliaLocalizedCategory(subcategory1, catalogId, 'fr')).toEqual(expectedSubCategoryModel);
 
         const expectedSubCategory2Model = {
-            objectID: 'testCatalog/storefront-catalog-m-en/gaming',
-            id: 'testCatalog/storefront-catalog-m-en/gaming',
-            name: 'Nom français de Gaming',
-            description: 'Description française de Gaming',
-            image: 'http://example.com/gaming.jpg',
-            thumbnail: 'http://example.com/gaming-thumbnail.jpg',
-            url: '/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/gaming',
+            objectID: 'testCatalog/storefront-catalog-m-en/audio',
+            id: 'testCatalog/storefront-catalog-m-en/audio',
+            name: 'Nom français de Audio',
+            description: 'Description française de Audio',
+            image: 'http://example.com/audio.jpg',
+            thumbnail: 'http://example.com/audio-thumbnail.jpg',
+            url: '/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/audio',
             parent_category_id: 'testCatalog/storefront-catalog-m-en/electronics',
-            _tags: ['id:testCatalog/storefront-catalog-m-en/gaming'],
+            subCategories: [
+                "testCatalog/storefront-catalog-m-en/headphones",
+            ],
+            _tags: ['id:testCatalog/storefront-catalog-m-en/audio'],
         }
         expect(new AlgoliaLocalizedCategory(subcategory2, catalogId, 'fr')).toEqual(expectedSubCategory2Model);
+
+        const expectedSubSubCategory2Model = {
+            objectID: 'testCatalog/storefront-catalog-m-en/headphones',
+            id: 'testCatalog/storefront-catalog-m-en/headphones',
+            name: 'Nom français de Headphones',
+            description: 'Description française de Headphones',
+            image: 'http://example.com/headphones.jpg',
+            thumbnail: 'http://example.com/headphones-thumbnail.jpg',
+            url: '/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/headphones',
+            parent_category_id: 'testCatalog/storefront-catalog-m-en/audio',
+            _tags: ['id:testCatalog/storefront-catalog-m-en/headphones'],
+        }
+        expect(new AlgoliaLocalizedCategory(subsubcategory2, catalogId, 'fr')).toEqual(expectedSubSubCategory2Model);
     });
 });
