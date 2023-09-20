@@ -39,6 +39,18 @@
 					}
 				]
 			}
+		}, {
+			"@type-id": "custom.algoliaTestTaskOrientedPerf",
+			"@supports-parallel-execution": "false",
+			"@supports-site-context": "true",
+			"@supports-organization-context": "false",
+			"description": "Perf testing",
+			"module": "int_algolia/cartridge/scripts/algolia/job/testTaskOrientedJob.js",
+			"function": "execute",
+			"transactional": "false",
+			"timeout-in-seconds": "28800",
+			"parameters": {},
+			"status-codes": {}
 		}],
 		"chunk-script-module-step": [{
 			"@type-id": "custom.sendChunkOrientedProductUpdates",
@@ -85,6 +97,35 @@
 					{
 						"@code": "OK",
 						"description": "Used when the step finished successfully."
+					}
+				]
+			}
+		},
+		{
+			"@type-id": "custom.algoliaTestChunkOrientedPerf",
+			"@supports-parallel-execution": true,
+			"@supports-site-context": true,
+			"@supports-organization-context": false,
+			"description": "Perf testing",
+			"module": "int_algolia/cartridge/scripts/algolia/job/testChunkOrientedJob.js",
+			"read-function": "read",
+			"process-function": "process",
+			"write-function": "send",
+			"total-count-function": "getTotalCount",
+			"before-step-function": "beforeStep",
+			"before-chunk-function": "",
+			"after-chunk-function": "",
+			"after-step-function": "afterStep",
+			"chunk-size": 1000,
+			"transactional": false,
+			"timeout-in-seconds": "14400",
+			"status-codes": {
+				"status": [
+					{
+						"@code": "ERROR"
+					},
+					{
+						"@code": "OK"
 					}
 				]
 			}
