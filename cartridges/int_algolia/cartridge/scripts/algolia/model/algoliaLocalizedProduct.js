@@ -129,8 +129,17 @@ function getCategoryFlatTree(category) {
 }
 
 /**
- * Create hierarchical facets from the primary category path:
- * If the primary category is "Flat Screen" and the path to the primary category is "Electronics > Televisions > Flat Screen",
+ * Compute hierarchical facets from the 'categories' field:
+ * If we have the following categories:
+ * [
+ *   [{ id: 'newarrivals-televisions', name: 'New TVs' } ],
+ *   [
+ *     { id: 'electronics-televisions-flatscreen', name: 'Flat Screen' },
+ *     { id: 'electronics-televisions', name: 'Televisions' },
+ *     { id: 'electronics', name: 'Electronics' }
+ *   ]
+ * ]
+ * And the primary category is "electronics-televisions-flatscreen",
  * this method returns the following object:
  * {
  *   0: "Electronics"
@@ -138,36 +147,36 @@ function getCategoryFlatTree(category) {
  *   2: "Electronics > Televisions > Flat Screen"
  * }
  * https://www.algolia.com/doc/guides/managing-results/refine-results/faceting/#hierarchical-facets
- * @param {dw.order.Product} product - product
+ * @param {Array} categories - array containing one array per assigned categories, representing the category hierarchy
+ * @param {string} primaryCategoryId - the id primary category
  * @returns {Object} - the primary category's hierarchical facets
  */
-function getPrimaryCategoryHierarchicalFacets(product) {
-    var categoriesHierarchy = {};
-    var categoriesTree = [];
-    var currentCategory = product.getPrimaryCategory();
+function computePrimaryCategoryHierarchicalFacets(categories, primaryCategoryId) {
+    var res = {};
 
-    if (empty(currentCategory) && product.isVariant()) {
-        currentCategory = product.getMasterProduct().getPrimaryCategory();
-    }
-    if (empty(currentCategory)) {
-        return;
-    }
-
-    categoriesTree.push(currentCategory.displayName);
-    while (!currentCategory.topLevel && !currentCategory.root) {
-        currentCategory = currentCategory.parent;
-        if (!currentCategory.online) {
-            break;
+    // Find the hierarchy that contains the primary category
+    var primaryCategoryHierarchy;
+    for (let i = 0; i < categories.length && !primaryCategoryHierarchy; ++i) {
+        for (let j = 0; j < categories[i].length && !primaryCategoryHierarchy; ++j) {
+            if (categories[i][j].id === primaryCategoryId) {
+                primaryCategoryHierarchy = categories[i];
+            }
         }
-        categoriesTree.push(currentCategory.displayName);
+    }
+    if (!primaryCategoryHierarchy) {
+        return res;
     }
 
-    categoriesTree.reverse();
-    for (var i = 0; i < categoriesTree.length; ++i) {
-        categoriesHierarchy[i] = categoriesTree.slice(0, i + 1).join(' > ');
+    // Reverse the hierarchy to have the top category first, and keep only the name
+    var reverseHierarchyNames = [];
+    for (let i = 0; i < primaryCategoryHierarchy.length; ++i) {
+        reverseHierarchyNames.unshift(primaryCategoryHierarchy[i].name);
     }
 
-    return categoriesHierarchy;
+    for (let i = 0; i < reverseHierarchyNames.length; ++i) {
+        res[i] = reverseHierarchyNames.slice(0, i + 1).join(' > ');
+    }
+    return res;
 }
 
 /**
@@ -351,8 +360,8 @@ function algoliaLocalizedProduct(product, locale, fieldListOverride, baseModel) 
         if (algoliaFields.indexOf('id') >= 0) {
             this._tags = ['id:' + product.ID];
         }
-        if (algoliaFields.indexOf('primary_category_id') >= 0 && algoliaFields.indexOf('categories') >= 0) {
-            this['__primary_category'] = getPrimaryCategoryHierarchicalFacets(product);
+        if (this.primary_category_id && this.categories) {
+            this['__primary_category'] = computePrimaryCategoryHierarchicalFacets(this.categories, this.primary_category_id);
         }
         productModelCustomizer.customizeLocalizedProductModel(this, algoliaFields);
     }
