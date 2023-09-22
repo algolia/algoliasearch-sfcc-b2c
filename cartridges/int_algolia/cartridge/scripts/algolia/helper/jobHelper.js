@@ -327,7 +327,7 @@ function UpdateProductModel(algoliaProduct) {
     };
 
     var keys = Object.keys(algoliaProduct);
-    for (var i = 0; i < keys.length; i += 1) {
+    for (var i = 0; i < keys.length; ++i) {
         if (keys[i] !== 'id') {
             this.options.data[keys[i]] = algoliaProduct[keys[i]];
         }
@@ -349,7 +349,7 @@ function AlgoliaOperation(action, algoliaObject, indexName) {
     this.body = {};
 
     var keys = Object.keys(algoliaObject);
-    for (var i = 0; i < keys.length; i += 1) {
+    for (var i = 0; i < keys.length; ++i) {
         this.body[keys[i]] = algoliaObject[keys[i]];
     }
 }
