@@ -14,9 +14,7 @@ var indexingOperation;
 // logging-related variables
 var logData, updateLogType;
 
-var products = [];
-var siteLocales;
-var nonLocalizedAttributes = [];
+var products = [], siteLocales, nonLocalizedAttributes = [], fieldsToSend;
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -67,17 +65,24 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     if (empty(fieldListOverride)) {
         const customFields = algoliaData.getSetOfArray('CustomFields');
-        fieldListOverride = algoliaProductConfig.defaultAttributes.concat(customFields);
+        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
+    } else {
+        fieldsToSend = fieldListOverride;
     }
+
     Object.keys(algoliaProductConfig.attributeConfig).forEach(function(attributeName) {
         if (!algoliaProductConfig.attributeConfig[attributeName].localized &&
-          fieldListOverride.indexOf(attributeName) >= 0) {
+          fieldsToSend.indexOf(attributeName) >= 0) {
             if (attributeName !== 'categories') {
                 nonLocalizedAttributes.push(attributeName);
             }
         }
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
+
+    indexingOperation = fullRecordUpdate ? 'addObject' : 'partialUpdateObject';
+    siteLocales = Site.getCurrent().getAllowedLocales();
+    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
 
     // configure logging
     switch (resourceType) {
@@ -102,9 +107,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     logData.failedChunks = 0;
     logData.failedRecords = 0;
 
-    indexingOperation = fullRecordUpdate ? 'addObject' : 'partialUpdateObject';
-    siteLocales = Site.getCurrent().getAllowedLocales();
-    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
     // getting all products assigned to the site
     products = ProductMgr.queryAllSiteProducts();
 }
@@ -144,14 +146,14 @@ exports.process = function(product, parameters, stepExecution) {
 
     if (productFilter.isInclude(product)) {
         var algoliaOperations = [];
-        var localizedProduct;
+
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
         var baseModel = new AlgoliaLocalizedProduct(product, 'default', nonLocalizedAttributes);
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var indexName = algoliaData.calculateIndexName('products', locale);
-            localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldListOverride, baseModel);
-            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName))
+            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldsToSend, baseModel);
+            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
         }
 
         logData.processedRecords++;
