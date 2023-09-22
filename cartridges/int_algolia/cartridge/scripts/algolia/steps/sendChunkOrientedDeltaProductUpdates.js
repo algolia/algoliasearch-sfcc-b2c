@@ -1,7 +1,6 @@
 'use strict';
 
 var ProductMgr = require('dw/catalog/ProductMgr');
-var Status = require('dw/system/Status');
 var logger;
 
 // job step parameters
