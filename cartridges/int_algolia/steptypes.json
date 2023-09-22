@@ -39,6 +39,19 @@
 					}
 				]
 			}
+		},
+		{
+			"@type-id": "custom.algoliaSendCategories",
+			"@supports-parallel-execution": "false",
+			"@supports-site-context": "true",
+			"@supports-organization-context": "false",
+			"description": "Index the site's categories into Algolia",
+			"module": "int_algolia/cartridge/scripts/algolia/job/sendCategories.js",
+			"function": "execute",
+			"transactional": "false",
+			"timeout-in-seconds": "600",
+			"parameters": {},
+			"status-codes": {}
 		}],
 		"chunk-script-module-step": [{
 			"@type-id": "custom.sendChunkOrientedProductUpdates",

@@ -1,7 +1,8 @@
-var Category = function ({ name, parent, subcategories}) {
+var Category = function ({ name, parent, subcategories, showInMenu }) {
     this.ID = `storefront-catalog-m-en/${name.split(' ').join('-').toLowerCase()}`;
     this.parent = parent;
     this.subcategories = subcategories;
+    this.showInMenu = showInMenu !== undefined ? showInMenu : true;
 
     this.getID = function() {
         return this.ID;
@@ -40,8 +41,11 @@ var Category = function ({ name, parent, subcategories}) {
     this.getOnlineSubCategories= function() {
         return new Collection(this.subcategories || []);
     }
+    this.hasOnlineSubCategories= function() {
+        return this.subcategories && this.subcategories.length > 0;
+    }
     this.custom = {
-        showInMenu: true,
+        showInMenu: this.showInMenu,
     }
     this.hasOnlineProducts= function() {
         return true;

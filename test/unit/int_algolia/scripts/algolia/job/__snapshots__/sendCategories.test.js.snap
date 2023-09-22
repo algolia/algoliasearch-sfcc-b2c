@@ -1,0 +1,127 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSubCategoriesModels default locale 1`] = `
+[
+  algoliaLocalizedCategory {
+    "_tags": [
+      "id:testCatalog/storefront-catalog-m-en/electronics",
+    ],
+    "description": "Description of Electronics",
+    "id": "testCatalog/storefront-catalog-m-en/electronics",
+    "image": "http://example.com/electronics.jpg",
+    "name": "Electronics",
+    "objectID": "testCatalog/storefront-catalog-m-en/electronics",
+    "subCategories": [
+      "testCatalog/storefront-catalog-m-en/digital-cameras",
+      "testCatalog/storefront-catalog-m-en/audio",
+    ],
+    "thumbnail": "http://example.com/electronics-thumbnail.jpg",
+    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/electronics",
+  },
+  algoliaLocalizedCategory {
+    "_tags": [
+      "id:testCatalog/storefront-catalog-m-en/digital-cameras",
+    ],
+    "description": "Description of Digital Cameras",
+    "id": "testCatalog/storefront-catalog-m-en/digital-cameras",
+    "image": "http://example.com/digital-cameras.jpg",
+    "name": "Digital Cameras",
+    "objectID": "testCatalog/storefront-catalog-m-en/digital-cameras",
+    "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
+    "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
+    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
+  },
+  algoliaLocalizedCategory {
+    "_tags": [
+      "id:testCatalog/storefront-catalog-m-en/audio",
+    ],
+    "description": "Description of Audio",
+    "id": "testCatalog/storefront-catalog-m-en/audio",
+    "image": "http://example.com/audio.jpg",
+    "name": "Audio",
+    "objectID": "testCatalog/storefront-catalog-m-en/audio",
+    "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
+    "subCategories": [
+      "testCatalog/storefront-catalog-m-en/headphones",
+    ],
+    "thumbnail": "http://example.com/audio-thumbnail.jpg",
+    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/audio",
+  },
+  algoliaLocalizedCategory {
+    "_tags": [
+      "id:testCatalog/storefront-catalog-m-en/headphones",
+    ],
+    "description": "Description of Headphones",
+    "id": "testCatalog/storefront-catalog-m-en/headphones",
+    "image": "http://example.com/headphones.jpg",
+    "name": "Headphones",
+    "objectID": "testCatalog/storefront-catalog-m-en/headphones",
+    "parent_category_id": "testCatalog/storefront-catalog-m-en/audio",
+    "thumbnail": "http://example.com/headphones-thumbnail.jpg",
+    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/headphones",
+  },
+]
+`;
+
+exports[`getSubCategoriesModels french locale 1`] = `
+[
+  algoliaLocalizedCategory {
+    "_tags": [
+      "id:testCatalog/storefront-catalog-m-en/electronics",
+    ],
+    "description": "Description française de Electronics",
+    "id": "testCatalog/storefront-catalog-m-en/electronics",
+    "image": "http://example.com/electronics.jpg",
+    "name": "Nom français de Electronics",
+    "objectID": "testCatalog/storefront-catalog-m-en/electronics",
+    "subCategories": [
+      "testCatalog/storefront-catalog-m-en/digital-cameras",
+      "testCatalog/storefront-catalog-m-en/audio",
+    ],
+    "thumbnail": "http://example.com/electronics-thumbnail.jpg",
+    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/electronics",
+  },
+  algoliaLocalizedCategory {
+    "_tags": [
+      "id:testCatalog/storefront-catalog-m-en/digital-cameras",
+    ],
+    "description": "Description française de Digital Cameras",
+    "id": "testCatalog/storefront-catalog-m-en/digital-cameras",
+    "image": "http://example.com/digital-cameras.jpg",
+    "name": "Nom français de Digital Cameras",
+    "objectID": "testCatalog/storefront-catalog-m-en/digital-cameras",
+    "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
+    "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
+    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
+  },
+  algoliaLocalizedCategory {
+    "_tags": [
+      "id:testCatalog/storefront-catalog-m-en/audio",
+    ],
+    "description": "Description française de Audio",
+    "id": "testCatalog/storefront-catalog-m-en/audio",
+    "image": "http://example.com/audio.jpg",
+    "name": "Nom français de Audio",
+    "objectID": "testCatalog/storefront-catalog-m-en/audio",
+    "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
+    "subCategories": [
+      "testCatalog/storefront-catalog-m-en/headphones",
+    ],
+    "thumbnail": "http://example.com/audio-thumbnail.jpg",
+    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/audio",
+  },
+  algoliaLocalizedCategory {
+    "_tags": [
+      "id:testCatalog/storefront-catalog-m-en/headphones",
+    ],
+    "description": "Description française de Headphones",
+    "id": "testCatalog/storefront-catalog-m-en/headphones",
+    "image": "http://example.com/headphones.jpg",
+    "name": "Nom français de Headphones",
+    "objectID": "testCatalog/storefront-catalog-m-en/headphones",
+    "parent_category_id": "testCatalog/storefront-catalog-m-en/audio",
+    "thumbnail": "http://example.com/headphones-thumbnail.jpg",
+    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/headphones",
+  },
+]
+`;
