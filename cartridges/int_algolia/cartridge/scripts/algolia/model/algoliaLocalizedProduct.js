@@ -153,6 +153,8 @@ function getCategoryFlatTree(category) {
  */
 function computePrimaryCategoryHierarchicalFacets(categories, primaryCategoryId) {
     var res = {};
+
+    // Find the hierarchy that contains the primary category
     var primaryCategoryHierarchy;
     for (let i = 0; i < categories.length && !primaryCategoryHierarchy; ++i) {
         for (let j = 0; j < categories[i].length && !primaryCategoryHierarchy; ++j) {
