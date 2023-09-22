@@ -1,19 +1,22 @@
 'use strict';
 
 var ProductMgr = require('dw/catalog/ProductMgr');
+var File = require('dw/io/File');
 var logger;
 
 // job step parameters
 var paramConsumer, paramDeltaExportJobName, paramFieldListOverride;
 
 // Algolia requires
-var algoliaData, AlgoliaProduct, jobHelper, algoliaExportAPI, sendHelper, productFilter;
+var algoliaData, AlgoliaLocalizedProduct, jobHelper, fileHelper, algoliaExportAPI, sendHelper, productFilter;
+
 
 // logging-related variables and constants
 var logData;
 const updateLogType = 'LastProductDeltaSyncLog';
 const resourceType = 'productdelta';
 
+var l0_deltaExportDir, l1_processingDir, l1_completedDir;
 var changedProducts = [];
 var changedProductsIterator;
 var deltaExportZips;
@@ -47,8 +50,9 @@ const MAX_TRIES = 5;
 */
 exports.beforeStep = function(parameters, stepExecution) {
     algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
+    AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+    fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
     algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -82,20 +86,12 @@ exports.beforeStep = function(parameters, stepExecution) {
     logData.failedChunks = 0;
     logData.failedRecords = 0;
 
-
-
-
-
-
     // ----------------------------- Extracting productIDs from the output of the Delta Export -----------------------------
 
-    var File = require('dw/io/File');
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-    var fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
-
 
     // creating working folder (same as the delta export output folder) - if there were no previous changes, the delta export job step won't create it
-    var l0_deltaExportDir = new File(algoliaConstants.ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramDeltaExportJobName); // Impex/src/platform/outbox/algolia/productDeltaExport
+    l0_deltaExportDir = new File(algoliaConstants.ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramDeltaExportJobName); // Impex/src/platform/outbox/algolia/productDeltaExport
 
     // return OK if the folder doesn't exist, this means that the CatalogDeltaExport job step finished OK but didn't have any output (there were no changes)
     if (!l0_deltaExportDir.exists()) {
@@ -111,14 +107,14 @@ exports.beforeStep = function(parameters, stepExecution) {
     }
 
     // creating empty temporary "_processing" dir
-    var l1_processingDir = new File(l0_deltaExportDir, '_processing');
+    l1_processingDir = new File(l0_deltaExportDir, '_processing');
     if (l1_processingDir.exists()) {
         fileHelper.removeFolderRecursively(l1_processingDir);
     }
     l1_processingDir.mkdir();
 
     // creating "_completed" dir
-    var l1_completedDir = new File(l0_deltaExportDir, '_completed');
+    l1_completedDir = new File(l0_deltaExportDir, '_completed');
     l1_completedDir.mkdir(); // creating "_completed" folder -- does no harm if it already exists
 
     // process each export zip one by one
@@ -178,15 +174,6 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     changedProductsIterator = new jobHelper.CPObjectIterator(changedProducts);
 
-
-
-    // ---------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
 }
 
 /**
@@ -226,7 +213,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
         if (productFilter.isInclude(product)) {
 
             // enrich product
-            var algoliaProduct = new AlgoliaProduct(product, paramFieldListOverride);
+            var algoliaProduct = new AlgoliaLocalizedProduct(product, paramFieldListOverride);
             productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
 
             logData.processedToUpdateRecords++;
@@ -288,13 +275,22 @@ exports.afterStep = function(success, parameters, stepExecution) {
     // "sucess" conveys whether an error occurred in any previous chunks or not.
     // Any prior return statements will set success to false (even if it returns Status.OK).
 
-    // TODO: add cleanup, move file, etc.
-
     if (success) {
         logData.processedError = false;
         logData.processedErrorMessage = '';
         logData.sendError = false;
         logData.sendErrorMessage = '';
+
+        // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
+        deltaExportZips.forEach(function(filename) {
+            let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
+            let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
+            fileHelper.moveFile(currentZipFile, targetZipFile);
+
+            let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
+            let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
+            fileHelper.moveFile(currentMetaFile, targetMetaFile);
+        });
     } else {
         let errorMessage = 'An error occurred during the job. Please see the error log for more details.';
         logData.processedError = true;
