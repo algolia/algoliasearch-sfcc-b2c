@@ -11,16 +11,17 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     }
 }, {virtual: true});
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates');
+const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates');
 
 test('process', () => {
-    job.beforeStep({ resourceType: 'test' });
-    var algoliaOperations = job.process(new ProductMock());
+    job.beforeStep({ resourceType: 'test', consumer: 'algolia', deltaExportJobName: 'productDeltaExport' });
+    var product = new ProductMock();
+    var algoliaOperations = job.process({ productID: '701644031206M', available: true });
     expect(algoliaOperations).toMatchSnapshot();
 });
 
 test('send', () => {
-    job.beforeStep({ resourceType: 'test' });
+    job.beforeStep({ resourceType: 'test', consumer: 'algolia', deltaExportJobName: 'productDeltaExport' });
 
     const algoliaOperationsChunk = [];
     for (let i = 0; i < 3; ++i) {
