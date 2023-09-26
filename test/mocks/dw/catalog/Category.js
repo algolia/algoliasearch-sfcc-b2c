@@ -1,4 +1,6 @@
-var Category = function ({ name, parent, subcategories, showInMenu }) {
+const Collection = require('../util/Collection');
+
+const Category = function ({ name, parent, subcategories, showInMenu }) {
     this.ID = `storefront-catalog-m-en/${name.split(' ').join('-').toLowerCase()}`;
     this.parent = parent;
     this.subcategories = subcategories;
@@ -51,26 +53,5 @@ var Category = function ({ name, parent, subcategories, showInMenu }) {
         return true;
     }
 };
-
-// Mock of dw.util.Collection
-const Collection = function(values) {
-    this.values = values;
-    const that = this;
-
-    this.iterator = function() {
-        let nextIndex = 0;
-
-        return {
-            hasNext() {
-                return nextIndex < that.values.length;
-            },
-            next() {
-                if (nextIndex < that.values.length) {
-                    return that.values[nextIndex++];
-                }
-            },
-        };
-    }
-}
 
 module.exports = Category;
