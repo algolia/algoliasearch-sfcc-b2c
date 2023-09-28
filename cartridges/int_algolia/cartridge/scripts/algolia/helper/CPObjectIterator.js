@@ -13,10 +13,10 @@
 *      "productID2000": true
 *    },
 *    {
-* 		"productID2001": true,
-* 		...
-* 		"productID4000": false
-* 	  },
+*      "productID2001": true,
+*      ...
+*      "productID4000": false
+*    },
 *    ...
 *    {
 *      "productID38000001": true,

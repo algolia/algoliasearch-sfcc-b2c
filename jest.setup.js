@@ -126,6 +126,9 @@ jest.mock('*/cartridge/scripts/algolia/filters/productFilter', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
 }, {virtual: true});
 
+jest.mock('*/cartridge/scripts/algolia/helper/CPObjectIterator', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/CPObjectIterator');
+}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/fileHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/fileHelper');
 }, {virtual: true});
