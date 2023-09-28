@@ -3,7 +3,7 @@
 exports[`process 1`] = `
 [
   AlgoliaOperation {
-    "action": "partialUpdateObject",
+    "action": "addObject",
     "body": {
       "UPC": "701644031206",
       "__primary_category": {
@@ -101,7 +101,7 @@ exports[`process 1`] = `
     "indexName": "test_index___products__default",
   },
   AlgoliaOperation {
-    "action": "partialUpdateObject",
+    "action": "addObject",
     "body": {
       "UPC": "701644031206",
       "__primary_category": {
@@ -199,7 +199,7 @@ exports[`process 1`] = `
     "indexName": "test_index___products__fr",
   },
   AlgoliaOperation {
-    "action": "partialUpdateObject",
+    "action": "addObject",
     "body": {
       "UPC": "701644031206",
       "__primary_category": {

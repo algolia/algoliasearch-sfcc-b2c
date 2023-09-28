@@ -6,7 +6,7 @@ var File = require('dw/io/File');
 var logger;
 
 // job step parameters
-var paramConsumer, paramDeltaExportJobName, paramFieldListOverride;
+var paramConsumer, paramDeltaExportJobName, paramFieldListOverride, paramIndexingMethod;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator;
@@ -19,7 +19,7 @@ const resourceType = 'productdelta';
 var l0_deltaExportDir, l1_processingDir, l1_completedDir;
 var changedProducts = [], changedProductsIterator;
 var deltaExportZips, siteLocales, nonLocalizedAttributes = [], fieldsToSend;
-var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on the step parameter 'fullRecordUpdate'
+var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on the step parameter 'indexingMethod'
 const deleteIndexingOperation = 'deleteObject';
 
 /*
@@ -71,7 +71,17 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramConsumer = parameters.consumer.trim();
     paramDeltaExportJobName = parameters.deltaExportJobName.trim();
     paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
-    baseIndexingOperation = !!parameters.fullRecordUpdate ? 'addObject' : 'partialUpdateObject';
+    paramIndexingMethod = parameters.indexingMethod; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
+
+    switch (paramIndexingMethod) {
+        case 'partialRecordUpdate':
+            baseIndexingOperation = 'partialUpdateObject';
+            break;
+        case 'fullRecordUpdate':
+        default:
+            baseIndexingOperation = 'addObject';
+            break;
+    }
 
     // TODO: move to helper
     if (empty(paramFieldListOverride)) {
@@ -217,11 +227,8 @@ exports.getTotalCount = function(parameters, stepExecution) {
  */
 exports.read = function(parameters, stepExecution) {
     let cpObject;
-    if ((cpObject = changedProductsIterator.next()) !== null) {
+    if (changedProductsIterator && (cpObject = changedProductsIterator.next()) !== null) {
         return cpObject;
-    }
-    else {
-        var x = 5;
     }
 }
 

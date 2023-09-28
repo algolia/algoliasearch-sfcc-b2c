@@ -124,9 +124,16 @@
 						"@required": false
 					},
 					{
-						"@name": "fullRecordUpdate",
-						"@type": "boolean",
-						"@required": false
+						"@name": "indexingMethod",
+						"@type": "string",
+						"@required": "true",
+						"enum-values": {
+							"value": [
+								"partialRecordUpdate",
+								"fullRecordUpdate"
+							]
+						},
+						"default-value": "fullRecordUpdate"
 					}
 				]
 
