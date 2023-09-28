@@ -62,7 +62,7 @@ function runCategoryExport(parameters) {
     categoryLogData.failedChunks = 0;
     categoryLogData.failedRecords = 0;
 
-    logger.info('Site: ' + Site.getCurrent().getName() +'. Enabled locales: ' + siteLocales.toArray())
+    logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray())
     logger.info('CatalogID: ' + siteCatalogId)
 
     var status;
