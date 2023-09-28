@@ -439,58 +439,6 @@ function _updateOrAddValue(objectsArray, key, value) {
 }
 
 /**
- * Iterator constructor for the ChangedProducts structure (array of objects).
- * Implements the hasNext() and next() methods.
- * @param {Array} changedProducts - ChangeProducts structure - array of objects
- * @constructor
- */
-function CPObjectIterator(changedProducts) {
-    this.currentArrayElem = null;
-    this.currentObjectElem = null;
-    this.nextArrayElem = null;
-    this.nextObjectElem = null;
-    this.nextElem = null;
-
-    this.hasNext = function() {
-        let currentObjectKeys;
-
-        if (this.currentArrayElem === null && this.currentObjectElem === null) { // first element
-            this.currentArrayElem = 0;
-            this.currentObjectElem = 0;
-            this.nextArrayElem = 0;
-            this.nextObjectElem = 0;
-        } else if (this.currentObjectElem === Object.keys(changedProducts[this.currentArrayElem]).length - 1) { // last property in the object, switch to the next object in the array
-            this.nextArrayElem = this.currentArrayElem + 1;
-            this.nextObjectElem = 0;
-        } else { // continuing in the same object
-            this.nextArrayElem = this.currentArrayElem;
-            this.nextObjectElem = this.currentObjectElem + 1;
-        }
-
-        // reached the last element of the last object in the structure
-        if (this.nextArrayElem === changedProducts.length) {
-            return false;
-        } else {
-            let nextObjectKeys = Object.keys(changedProducts[this.nextArrayElem]);
-            let productID = nextObjectKeys[this.nextObjectElem];
-            let available = changedProducts[this.nextArrayElem][productID];
-            this.nextElem = {
-                productID: productID,
-                available: available
-            };
-            return true;
-        }
-    }
-
-    this.next = function() {
-        this.currentArrayElem = this.nextArrayElem;
-        this.currentObjectElem = this.nextObjectElem;
-        this.currentElem = this.nextElem;
-        return this.nextElem;
-    }
-}
-
-/**
  * Returns whether the supplied array of objects is empty.
  * It is considered empty if it contains no objects that contain any key-value pairs,
  * so if it's either an empty array or an array with one empty object element.
@@ -650,7 +598,6 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     // delta jobs
-    CPObjectIterator: CPObjectIterator,
     isObjectsArrayEmpty: isObjectsArrayEmpty,
     getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,

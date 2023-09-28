@@ -9,7 +9,7 @@ var logger;
 var paramConsumer, paramDeltaExportJobName, paramFieldListOverride;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, algoliaIndexingAPI, sendHelper, productFilter;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator;
 
 // logging-related variables and constants
 var logData;
@@ -57,6 +57,8 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
+
+    CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
 
     // checking mandatory parameters
     if (empty(parameters.consumer) || empty(parameters.deltaExportJobName)) {
@@ -194,7 +196,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     // cleanup - removing "_processing" dir
     fileHelper.removeFolderRecursively(l1_processingDir);
 
-    changedProductsIterator = new jobHelper.CPObjectIterator(changedProducts);
+    changedProductsIterator = new CPObjectIterator(changedProducts);
 }
 
 /**
@@ -214,8 +216,12 @@ exports.getTotalCount = function(parameters, stepExecution) {
  * @returns {string} productID
  */
 exports.read = function(parameters, stepExecution) {
-    if (changedProductsIterator && changedProductsIterator.hasNext()) {
-        return changedProductsIterator.next();
+    let cpObject;
+    if ((cpObject = changedProductsIterator.next()) !== null) {
+        return cpObject;
+    }
+    else {
+        var x = 5;
     }
 }
 
@@ -254,7 +260,6 @@ exports.process = function(cpObj, parameters, stepExecution) {
         }
     }
 
-    logData.processedRecords++;
     logData.processedToUpdateRecords++;
 
     return algoliaOperations;
