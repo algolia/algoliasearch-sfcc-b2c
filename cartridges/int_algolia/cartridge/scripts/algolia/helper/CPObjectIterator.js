@@ -46,21 +46,17 @@ CPObjectIterator.prototype.next = function() {
         return null;
     }
 
-    // first element, we know at this point that the structure has at least one element
-    if (this.currentArrayIndex === null && this.currentObjectIndex === null) {
+    if (this.currentArrayIndex === null && this.currentObjectIndex === null) { // first element, we know at this point that the structure has at least one element
         this.currentArrayIndex = 0;
         this.currentObjectIndex = 0;
-        // last property in the object, switch to the next object in the array
-    } else if (this.currentObjectIndex === this.currentObjectKeys.length - 1) {
+    } else if (this.currentObjectIndex === this.currentObjectKeys.length - 1) { // last property in the object, switch to the next object in the array
         this.currentArrayIndex++;
         this.currentObjectIndex = 0;
-        // continuing in the same object
-    } else {
+    } else { // advancing in the same object
         this.currentObjectIndex++;
     }
 
-    // there's no next element
-    if (this.currentArrayIndex === this.changedProducts.length) {
+    if (this.currentArrayIndex === this.changedProducts.length) { // there's no next element
         return null;
     } else { // still within the bounds of the array
         this.currentObject = this.changedProducts[this.currentArrayIndex];
