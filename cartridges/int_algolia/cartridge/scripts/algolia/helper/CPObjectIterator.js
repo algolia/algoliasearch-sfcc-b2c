@@ -3,7 +3,8 @@
 /* The changedProducts structure is an array of objects, introduced as a workaround
 * to Salesforce B2C's API quota limitations (collections can store 20K elements,
 * while objects can store 2K elements). By using an array of objects, we can store
-* up to 40M elements in a single collection.
+* up to 40M elements in a single collection. Key is the product ID, value is a boolean
+* indicating whether the product should be added/updated or deleted from the index.
 * The structure looks like this:
 *  [
 *    {
