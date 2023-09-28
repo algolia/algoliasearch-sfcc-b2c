@@ -25,12 +25,7 @@
             </step>
         </flow>
         <rules/>
-        <triggers>
-            <run-once enabled="false">
-                <date>2020-04-03Z</date>
-                <time>11:58:28.000Z</time>
-            </run-once>
-        </triggers>
+        <triggers/>
     </job>
 
     <job job-id="AlgoliaCategoriesIndex" priority="0">
@@ -57,12 +52,7 @@
             </step>
         </flow>
         <rules/>
-        <triggers>
-            <run-once enabled="false">
-                <date>2020-04-15Z</date>
-                <time>07:48:46.000Z</time>
-            </run-once>
-        </triggers>
+        <triggers/>
     </job>
 
     <job job-id="AlgoliaProductsDeltaExport" priority="0">
@@ -145,12 +135,7 @@ Relies on B2C Delta Exports to determine which products have been changed since 
             </step>
         </flow>
         <rules/>
-        <triggers>
-            <run-once enabled="false">
-                <date>2023-09-04Z</date>
-                <time>14:38:00.000Z</time>
-            </run-once>
-        </triggers>
+        <triggers/>
     </job>
 
     <job job-id="AlgoliaProductPricesExport" priority="0">
