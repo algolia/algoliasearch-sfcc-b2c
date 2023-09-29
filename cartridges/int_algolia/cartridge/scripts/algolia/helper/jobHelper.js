@@ -460,6 +460,24 @@ function isObjectsArrayEmpty(objectsArray) {
 }
 
 /**
+ * Returns the total number of properties in an array of objects
+ * @param {Array} objectsArray The array of objects to check
+ * @returns {number} The number of properties in an array of objects
+ */
+function getObjectsArrayLength(objectsArray) {
+    let length = 0;
+    if (empty(objectsArray) || !Array.isArray(objectsArray)) {
+        return length;
+    }
+
+    for (let i = 0; i < objectsArray.length; i++) {
+        length += Object.keys(objectsArray[i]).length;
+    }
+
+    return length;
+}
+
+/**
  * Retrieves the IDs of the products which have changed since the last update
  * (an attribute of the product's, its inventory levels or its price)
  * from the supplied XML and adds them to the changedProducts structure.
@@ -579,7 +597,8 @@ module.exports = {
     writeObjectToXMLStream: writeObjectToXMLStream,
     getNextProductModel: getNextProductModel,
 
-    // sendDeltaExportProducts
+    // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,
+    getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,
 };

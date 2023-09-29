@@ -1,8 +1,9 @@
 'use strict';
 
 var currentSiteID = require('dw/system/Site').getCurrent().getID();
+var File = require('dw/io/File');
 
-const ALGOLIA_FILES_FOLDER = dw.io.File.IMPEX + '/src/Algolia/';
+const ALGOLIA_FILES_FOLDER = File.IMPEX + '/src/Algolia/';
 
 const SNAPSHOT_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + currentSiteID + '_product.xml';
 const TMP_SNAPSHOT_PRODUCTS_FILE_NAME = ALGOLIA_FILES_FOLDER + currentSiteID + '_product_tmp.xml';
@@ -16,7 +17,7 @@ const ALGOLIA_LOG_FILE_NAME = '_lastUpdateLog.xml';
 const ALGOLIA_LOG_FILE = ALGOLIA_FILES_FOLDER + currentSiteID + ALGOLIA_LOG_FILE_NAME;
 
 // delta export job
-const ALGOLIA_DELTA_EXPORT_BASE_FOLDER = dw.io.File.IMPEX + '/src/platform/outbox/';
+const ALGOLIA_DELTA_EXPORT_BASE_FOLDER = File.IMPEX + '/src/platform/outbox/';
 const ALGOLIA_DELTA_EXPORT_UPDATE_FILE_NAME = currentSiteID + '_product_update.xml';
 
 module.exports = {

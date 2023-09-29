@@ -1,5 +1,6 @@
 doc/
 ./*.js
+jest.setup.js
 bin/
 workspace/
 cartridges/modules
