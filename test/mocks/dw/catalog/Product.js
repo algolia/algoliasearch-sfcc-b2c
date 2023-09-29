@@ -1,4 +1,12 @@
 var Product = function () {
+    this.ID = '701644031206M';
+    this.online = true;
+    this.searchable = true;
+    this.UPC = '701644031206';
+    this.unit = 1;
+    this.EAN = null;
+    this.searchable = true;
+    this.variant = true;
 };
 
 Product.prototype = {
@@ -99,14 +107,6 @@ Product.prototype = {
         return result;
     }
 };
-Product.prototype.ID = '701644031206M';
-Product.prototype.online = true;
-Product.prototype.searchable = true;
-Product.prototype.UPC = '701644031206';
-Product.prototype.unit = 1;
-Product.prototype.EAN = null;
-Product.prototype.searchable = true;
-Product.prototype.variant = true;
 Product.prototype.getAvailabilityModel = function() {
     return {
         getInventoryRecord: function() {

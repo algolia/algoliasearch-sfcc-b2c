@@ -25,12 +25,7 @@
             </step>
         </flow>
         <rules/>
-        <triggers>
-            <run-once enabled="false">
-                <date>2020-04-03Z</date>
-                <time>11:58:28.000Z</time>
-            </run-once>
-        </triggers>
+        <triggers/>
     </job>
 
     <job job-id="AlgoliaCategoriesIndex" priority="0">
@@ -57,12 +52,7 @@
             </step>
         </flow>
         <rules/>
-        <triggers>
-            <run-once enabled="false">
-                <date>2020-04-15Z</date>
-                <time>07:48:46.000Z</time>
-            </run-once>
-        </triggers>
+        <triggers/>
     </job>
 
     <job job-id="AlgoliaProductsDeltaExport" priority="0">
@@ -112,6 +102,40 @@ Make sure to contact SFCC Support to enable delta exports on your instance.</des
                 </rules>
             </run-once>
         </triggers>
+    </job>
+
+    <job job-id="AlgoliaNewProductsDeltaExport" priority="0">
+        <description>Sends chunk-oriented product delta updates to Algolia.
+This method relies on SFCC's built-in Delta Exports feature to calculate the delta, then enriches and transforms the products before sending them to Algolia for indexing.
+Make sure to contact SFCC Support to enable delta exports on your instance.</description>
+        <parameters>
+            <parameter name="catalogIDs">apparel-catalog, apparel-m-catalog</parameter>
+            <parameter name="consumer">algolia</parameter>
+            <parameter name="deltaExportJobName">productDeltaExport</parameter>
+        </parameters>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="catalogDeltaExport" type="CatalogDeltaExport" enforce-restart="false">
+                <description>Standard B2C catalog delta export. The productIDs are extracted from this export, the products retrieved from the database, enriched and sent to Algolia.</description>
+                <parameters>
+                    <parameter name="CatalogIDs" job-parameter-ref="catalogIDs"/>
+                    <parameter name="Consumers" job-parameter-ref="consumer"/>
+                    <parameter name="ExportFile" job-parameter-ref="deltaExportJobName"/>
+                    <parameter name="MasterProductExport">true</parameter>
+                </parameters>
+            </step>
+            <step step-id="algoliaSendChunkOrientedDeltaProductUpdates" type="custom.sendChunkOrientedDeltaProductUpdates" enforce-restart="false">
+                <description>Sends chunk-oritented (parallelized) delta product updates to Algolia.
+Relies on B2C Delta Exports to determine which products have been changed since the last export.</description>
+                <parameters>
+                    <parameter name="consumer" job-parameter-ref="consumer"/>
+                    <parameter name="deltaExportJobName" job-parameter-ref="deltaExportJobName"/>
+                    <parameter name="fullRecordUpdate">true</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers/>
     </job>
 
     <job job-id="AlgoliaProductPricesExport" priority="0">
