@@ -22,38 +22,6 @@ category.subcategories = [subcategory1, subcategory2, subcategory3];
 const catalogId = 'testCatalog';
 const mockOnlineSubCategories = new Collection([category]);
 
-jest.mock('dw/system/Site', () => {
-    return {
-        getCurrent: function () {
-            return {
-                getID: function() {
-                    return 'Test-Site'
-                },
-                getName: function() {
-                    return 'Name of the Test-Site'
-                },
-                getAllowedLocales: function () {
-                    var arr = ['default', 'fr', 'en'];
-                    arr.size = function () {
-                        return arr.length;
-                    };
-                    arr.toArray = function () {
-                        return arr;
-                    };
-                    return arr;
-                },
-                getCustomPreferenceValue: function(id) {
-                    switch(id) {
-                        case 'Algolia_IndexPrefix':
-                            return 'test_index_';
-                        default:
-                            return null;
-                    }
-                },
-            }
-        },
-    }
-}, {virtual: true});
 jest.mock('dw/catalog/CatalogMgr', () => {
     return {
         getSiteCatalog: function() {
@@ -74,44 +42,8 @@ jest.mock('dw/catalog/CatalogMgr', () => {
     }
 }, {virtual: true});
 
-jest.mock('dw/web/URLUtils', () => {
-    return {
-        https: function(endpoint, param, id) {
-            var relURL = '/on/demandware.store/Sites-Algolia_SFRA-Site/';
-            return relURL + global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
-        },
-        staticURL: function(url) {
-            return url;
-        },
-        url: function(endpoint, param, id) {
-            var relURL = '/on/demandware.store/Sites-Algolia_SFRA-Site/';
-            return relURL + global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
-        },
-    }
-}, {virtual: true});
-
 jest.mock('*/cartridge/scripts/algolia/model/algoliaLocalizedCategory', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedCategory');
-}, {virtual: true});
-jest.mock('*/cartridge/scripts/algolia/helper/logHelper', () => {
-    return {
-        getLogData: (id) => {
-            return {};
-        },
-        setLogData: (id, logData) => {}
-    }
-}, {virtual: true});
-jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
-    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
-    return {
-        ...originalModule,
-        getSetOfArray: function (id) {
-            return id === 'CustomFields'
-                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
-                    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
-                : null;
-        },
-    }
 }, {virtual: true});
 
 const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({ ok: true });

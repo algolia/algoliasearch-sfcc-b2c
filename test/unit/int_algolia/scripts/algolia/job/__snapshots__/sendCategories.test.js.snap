@@ -16,7 +16,7 @@ exports[`getSubCategoriesModels default locale 1`] = `
       "testCatalog/storefront-catalog-m-en/audio",
     ],
     "thumbnail": "http://example.com/electronics-thumbnail.jpg",
-    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/electronics",
+    "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/electronics",
   },
   algoliaLocalizedCategory {
     "_tags": [
@@ -29,7 +29,7 @@ exports[`getSubCategoriesModels default locale 1`] = `
     "objectID": "testCatalog/storefront-catalog-m-en/digital-cameras",
     "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
     "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
-    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
+    "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
   },
   algoliaLocalizedCategory {
     "_tags": [
@@ -45,7 +45,7 @@ exports[`getSubCategoriesModels default locale 1`] = `
       "testCatalog/storefront-catalog-m-en/headphones",
     ],
     "thumbnail": "http://example.com/audio-thumbnail.jpg",
-    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/audio",
+    "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/audio",
   },
   algoliaLocalizedCategory {
     "_tags": [
@@ -58,7 +58,7 @@ exports[`getSubCategoriesModels default locale 1`] = `
     "objectID": "testCatalog/storefront-catalog-m-en/headphones",
     "parent_category_id": "testCatalog/storefront-catalog-m-en/audio",
     "thumbnail": "http://example.com/headphones-thumbnail.jpg",
-    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/headphones",
+    "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/headphones",
   },
 ]
 `;
@@ -79,7 +79,7 @@ exports[`getSubCategoriesModels french locale 1`] = `
       "testCatalog/storefront-catalog-m-en/audio",
     ],
     "thumbnail": "http://example.com/electronics-thumbnail.jpg",
-    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/electronics",
+    "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/electronics",
   },
   algoliaLocalizedCategory {
     "_tags": [
@@ -92,7 +92,7 @@ exports[`getSubCategoriesModels french locale 1`] = `
     "objectID": "testCatalog/storefront-catalog-m-en/digital-cameras",
     "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
     "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
-    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
+    "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
   },
   algoliaLocalizedCategory {
     "_tags": [
@@ -108,7 +108,7 @@ exports[`getSubCategoriesModels french locale 1`] = `
       "testCatalog/storefront-catalog-m-en/headphones",
     ],
     "thumbnail": "http://example.com/audio-thumbnail.jpg",
-    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/audio",
+    "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/audio",
   },
   algoliaLocalizedCategory {
     "_tags": [
@@ -121,7 +121,7 @@ exports[`getSubCategoriesModels french locale 1`] = `
     "objectID": "testCatalog/storefront-catalog-m-en/headphones",
     "parent_category_id": "testCatalog/storefront-catalog-m-en/audio",
     "thumbnail": "http://example.com/headphones-thumbnail.jpg",
-    "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/headphones",
+    "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/headphones",
   },
 ]
 `;
@@ -147,7 +147,7 @@ exports[`runCategoryExport 1`] = `
               "testCatalog/storefront-catalog-m-en/audio",
             ],
             "thumbnail": "http://example.com/electronics-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/electronics",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/electronics",
           },
           "indexName": "test_index___categories__default",
         },
@@ -164,7 +164,7 @@ exports[`runCategoryExport 1`] = `
             "objectID": "testCatalog/storefront-catalog-m-en/digital-cameras",
             "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
             "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
           },
           "indexName": "test_index___categories__default",
         },
@@ -184,7 +184,7 @@ exports[`runCategoryExport 1`] = `
               "testCatalog/storefront-catalog-m-en/headphones",
             ],
             "thumbnail": "http://example.com/audio-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/audio",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/audio",
           },
           "indexName": "test_index___categories__default",
         },
@@ -201,7 +201,7 @@ exports[`runCategoryExport 1`] = `
             "objectID": "testCatalog/storefront-catalog-m-en/headphones",
             "parent_category_id": "testCatalog/storefront-catalog-m-en/audio",
             "thumbnail": "http://example.com/headphones-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/headphones",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/headphones",
           },
           "indexName": "test_index___categories__default",
         },
@@ -221,7 +221,7 @@ exports[`runCategoryExport 1`] = `
               "testCatalog/storefront-catalog-m-en/audio",
             ],
             "thumbnail": "http://example.com/electronics-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/electronics",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/electronics",
           },
           "indexName": "test_index___categories__fr",
         },
@@ -238,7 +238,7 @@ exports[`runCategoryExport 1`] = `
             "objectID": "testCatalog/storefront-catalog-m-en/digital-cameras",
             "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
             "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
           },
           "indexName": "test_index___categories__fr",
         },
@@ -258,7 +258,7 @@ exports[`runCategoryExport 1`] = `
               "testCatalog/storefront-catalog-m-en/headphones",
             ],
             "thumbnail": "http://example.com/audio-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/audio",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/audio",
           },
           "indexName": "test_index___categories__fr",
         },
@@ -275,7 +275,7 @@ exports[`runCategoryExport 1`] = `
             "objectID": "testCatalog/storefront-catalog-m-en/headphones",
             "parent_category_id": "testCatalog/storefront-catalog-m-en/audio",
             "thumbnail": "http://example.com/headphones-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/headphones",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/headphones",
           },
           "indexName": "test_index___categories__fr",
         },
@@ -295,7 +295,7 @@ exports[`runCategoryExport 1`] = `
               "testCatalog/storefront-catalog-m-en/audio",
             ],
             "thumbnail": "http://example.com/electronics-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/electronics",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/electronics",
           },
           "indexName": "test_index___categories__en",
         },
@@ -312,7 +312,7 @@ exports[`runCategoryExport 1`] = `
             "objectID": "testCatalog/storefront-catalog-m-en/digital-cameras",
             "parent_category_id": "testCatalog/storefront-catalog-m-en/electronics",
             "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
           },
           "indexName": "test_index___categories__en",
         },
@@ -332,7 +332,7 @@ exports[`runCategoryExport 1`] = `
               "testCatalog/storefront-catalog-m-en/headphones",
             ],
             "thumbnail": "http://example.com/audio-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/audio",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/audio",
           },
           "indexName": "test_index___categories__en",
         },
@@ -349,7 +349,7 @@ exports[`runCategoryExport 1`] = `
             "objectID": "testCatalog/storefront-catalog-m-en/headphones",
             "parent_category_id": "testCatalog/storefront-catalog-m-en/audio",
             "thumbnail": "http://example.com/headphones-thumbnail.jpg",
-            "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/headphones",
+            "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/headphones",
           },
           "indexName": "test_index___categories__en",
         },

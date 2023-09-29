@@ -98,6 +98,10 @@ jest.mock('dw/web/Resource', () => {
 }, {virtual: true});
 jest.mock('dw/web/URLUtils', () => {
     return {
+        https: function(endpoint, param, id) {
+            var absURL = 'https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/';
+            return absURL + global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
+        },
         url: function(endpoint, param, id) {
             var relURL = '/on/demandware.store/Sites-Algolia_SFRA-Site/';
             return relURL + global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
@@ -111,7 +115,10 @@ jest.mock('dw/web/URLUtils', () => {
 // Mocked libraries, to be rewritten with `requireActual()`
 jest.mock('*/cartridge/scripts/algolia/helper/logHelper', () => {
     return {
-        getLogData: function() {}
+        getLogData: function() {
+            return {};
+        },
+        setLogData: function() {}
     }
 }, {virtual: true});
 jest.mock('*/cartridge/scripts/services/algoliaIndexingService', () => {}, {virtual: true});
