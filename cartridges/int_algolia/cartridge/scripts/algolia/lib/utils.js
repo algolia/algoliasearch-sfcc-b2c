@@ -65,7 +65,7 @@ function forEach(collection, callback, scope) {
         } else {
             callback(item, index, collection);
         }
-        index += 1;
+        ++index;
     }
 }
 
