@@ -80,6 +80,7 @@ Make sure to contact SFCC Support to enable delta exports on your instance.</des
                 <parameters>
                     <parameter name="consumer" job-parameter-ref="consumer"/>
                     <parameter name="deltaExportJobName" job-parameter-ref="deltaExportJobName"/>
+                    <parameter name="indexingMethod">fullRecordUpdate</parameter>
                 </parameters>
             </step>
         </flow>
