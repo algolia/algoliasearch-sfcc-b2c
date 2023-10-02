@@ -8,13 +8,15 @@ var logger;
 var resourceType, fieldListOverride, fullRecordUpdate;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, algoliaIndexingAPI, sendHelper, productFilter;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter;
 var indexingOperation;
 
 // logging-related variables
 var logData, updateLogType;
 
 var products = [], siteLocales, nonLocalizedAttributes = [], fieldsToSend;
+var indexingMethod;
+var lastIndexingTasks = {};
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -45,6 +47,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+    reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
@@ -62,6 +65,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     resourceType = parameters.resourceType; // resouceType ( price | inventory | product ) - pass it along to sendChunk()
     fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
     fullRecordUpdate = !!parameters.fullRecordUpdate || false;
+    // indexingMethod = parameters.indexingMethod || 'fullCatalogReindex';
 
     if (empty(fieldListOverride)) {
         const customFields = algoliaData.getSetOfArray('CustomFields');
@@ -107,8 +111,17 @@ exports.beforeStep = function(parameters, stepExecution) {
     logData.failedChunks = 0;
     logData.failedRecords = 0;
 
+    if (indexingMethod === 'fullCatalogReindex') {
+        indexingOperation = 'addObject';
+        logger.info('Deleting existing temporary indices...');
+        var deletionTasks = reindexHelper.deleteTemporariesIndices('products', siteLocales.toArray());
+        algoliaIndexingAPI.waitForTasks(deletionTasks);
+        logger.info('Temporary indices deleted.');
+    }
+
     // getting all products assigned to the site
     products = ProductMgr.queryAllSiteProducts();
+    logger.info('Starting indexing...')
 }
 
 /**
@@ -152,8 +165,11 @@ exports.process = function(product, parameters, stepExecution) {
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var indexName = algoliaData.calculateIndexName('products', locale);
-            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldsToSend, baseModel);
-            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
+            if (indexingMethod === 'fullCatalogReindex') {
+                indexName += '.tmp'
+            }
+            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldListOverride, baseModel);
+            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName))
         }
 
         logData.processedRecords++;
@@ -192,6 +208,13 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     else {
         logData.sentRecords += batch.length;
         logData.sentChunks++;
+
+        // Store Algolia indexing tasks ids.
+        // When doing a fullCatalogReindex, we will wait to the last indexing tasks in the afterStep.
+        var taskIDs = status.object.body.taskID;
+        Object.keys(taskIDs).forEach(function (taskIndexName) {
+            lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
+        });
     }
 }
 
@@ -222,6 +245,10 @@ exports.afterStep = function(success, parameters, stepExecution) {
         logData.sendErrorMessage = errorMessage;
     }
 
+    if (indexingMethod === 'fullCatalogReindex') {
+        reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
+    }
+
     logData.processedDate = algoliaData.getLocalDateTime(new Date());
     logData.sendDate = algoliaData.getLocalDateTime(new Date());
     algoliaData.setLogData(updateLogType, logData);
@@ -229,3 +256,8 @@ exports.afterStep = function(success, parameters, stepExecution) {
     logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
         logData.sentChunks, logData.failedChunks, logData.sentRecords, logData.failedRecords);
 }
+
+// For testing
+exports.__setLastIndexingTasks = function(indexingTasks) {
+    lastIndexingTasks = indexingTasks;
+};

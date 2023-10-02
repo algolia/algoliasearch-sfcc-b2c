@@ -36,6 +36,7 @@ function getSubCategoriesModels(category, catalogId, locale) {
 function runCategoryExport(parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+    var reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
 
     var currentSite = Site.getCurrent();
@@ -65,17 +66,23 @@ function runCategoryExport(parameters) {
     logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray())
     logger.info('CatalogID: ' + siteCatalogId)
 
+    logger.info('Deleting existing temporary indices...');
+    var deletionTasks = reindexHelper.deleteTemporariesIndices('categories', siteLocales.toArray());
+    algoliaIndexingAPI.waitForTasks(deletionTasks);
+    logger.info('Temporary indices deleted. Starting indexing...');
+
     var status;
+    var lastIndexingTasks = {};
     while (topLevelCategories.hasNext()) {
         var batch = [];
         var category = topLevelCategories.next();
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
-            var indexName = algoliaData.calculateIndexName('categories', locale);
+            var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
             var localizedCategories = getSubCategoriesModels(category, siteCatalogId, locale);
 
             for (let i = 0; i < localizedCategories.length; ++i) {
-                batch.push(new jobHelper.AlgoliaOperation('addObject', localizedCategories[i], indexName));
+                batch.push(new jobHelper.AlgoliaOperation('addObject', localizedCategories[i], tmpIndexName));
             }
         }
 
@@ -87,7 +94,7 @@ function runCategoryExport(parameters) {
             continue;
         }
 
-        logger.info('Sending a batch of ' + batch.length + ' records (top-level category id: ' + category.getID() + ')');
+        logger.info('Sending a batch of ' + batch.length + ' records for top-level category id: ' + category.getID());
         status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
         if (status.error) {
             categoryLogData.failedRecords += batch.length;
@@ -97,10 +104,17 @@ function runCategoryExport(parameters) {
         else {
             categoryLogData.sentRecords += batch.length;
             categoryLogData.sentChunks++;
+
+            var taskIDs = status.object.body.taskID;
+            Object.keys(taskIDs).forEach(function (taskIndexName) {
+                lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
+            });
         }
     }
 
     categoryLogData.sendDate = algoliaData.getLocalDateTime(new Date());
+
+    reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
 
     algoliaData.setLogData(updateLogType, categoryLogData);
 }

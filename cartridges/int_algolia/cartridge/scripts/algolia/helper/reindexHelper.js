@@ -60,6 +60,31 @@ function moveTemporariesIndices(indexType, locales) {
     });
 }
 
-module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;
+/**
+ * Finalize an atomic reindex. For each locale:
+ *   - Copy the index settings from the production index to the temporary index
+ *   - Wait for all tasks to complete: the last reindex tasks + the copy settings tasks
+ *   - Move the temporary indices to production
+ * @param {string} indexType - 'products' or 'categories'
+ * @param {string[]} locales - locales for which the reindex was triggered
+ * @param {Object} lastIndexingTasks - Task IDs of the last reindex tasks to wait for, for each locale. Under the form: { "<indexName1>": <taskID>, "<indexName2>": <taskID> }
+ */
+function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
+    logger.info('[FinishReindex] copying index settings from production...');
+    var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
+
+    logger.info('[FinishReindex] Waiting for the last indexing tasks to complete... ' + JSON.stringify(lastIndexingTasks));
+    algoliaIndexingAPI.waitForTasks(lastIndexingTasks);
+    logger.info('[FinishReindex] Waiting for the last copy settings tasks to complete... ' + JSON.stringify(copySettingsTasks));
+    algoliaIndexingAPI.waitForTasks(copySettingsTasks);
+
+    logger.info('[FinishReindex] Moving temporary indices to production...');
+    moveTemporariesIndices(indexType, locales);
+}
+
 module.exports.deleteTemporariesIndices = deleteTemporariesIndices;
+module.exports.finishAtomicReindex = finishAtomicReindex;
+
+// For unit testing
+module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;
 module.exports.moveTemporariesIndices = moveTemporariesIndices;
