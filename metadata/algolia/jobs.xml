@@ -130,7 +130,6 @@ Relies on B2C Delta Exports to determine which products have been changed since 
                 <parameters>
                     <parameter name="consumer" job-parameter-ref="consumer"/>
                     <parameter name="deltaExportJobName" job-parameter-ref="deltaExportJobName"/>
-                    <parameter name="fullRecordUpdate">true</parameter>
                 </parameters>
             </step>
         </flow>
