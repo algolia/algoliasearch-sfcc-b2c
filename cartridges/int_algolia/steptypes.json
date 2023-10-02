@@ -15,15 +15,13 @@
 						"@name": "consumer",
 						"@type": "string",
 						"description": "The name of the consumer to be used for retrieving the delta export file. Also determines the WebDAV folder for the B2C delta export, together with the deltaExportJobName parameter.",
-						"@required": "true",
-						"@trim": "true"
+						"@required": "true"
 					},
 					{
 						"@name": "deltaExportJobName",
 						"@type": "string",
 						"description": "The name of the delta export job to be used for retrieving the delta export file. Also determines the WebDAV folder for the B2C delta export, together with the consumer parameter.",
-						"@required": "true",
-						"@trim": "true"
+						"@required": "true"
 					}
 				]
 			},
@@ -55,7 +53,14 @@
 			"timeout-in-seconds": "600",
 			"parameters": {},
 			"status-codes": {
-				"status": []
+				"status": [{
+					"@code": "ERROR",
+					"description": "Used when the step failed with an error."
+				},
+				{
+					"@code": "OK",
+					"description": "Used when the step finished successfully."
+				}]
 			}
 		}],
 		"chunk-script-module-step": [{
