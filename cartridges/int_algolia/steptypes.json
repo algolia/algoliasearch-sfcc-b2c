@@ -78,7 +78,8 @@
 					"parameter": [{
 							"@name": "resourceType",
 							"@type": "string",
-							"@required": true
+							"@required": true,
+							"@trim": true
 						},
 						{
 							"@name": "fieldListOverride",
