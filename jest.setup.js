@@ -1,9 +1,15 @@
 // Initialize some default mocks for all tests.
 
+const GlobalMock = require('./test/mocks/global');
+global.empty = GlobalMock.empty;
+global.request = new GlobalMock.RequestMock();
+
 // System classes, alphabetical order
 jest.mock('dw/catalog/ProductMgr', () => {
     return {
-        queryAllSiteProducts: function() {},
+        queryAllSiteProducts: jest.fn().mockReturnValue({
+            close: jest.fn(),
+        }),
         getProduct: jest.fn(() => {
             const ProductMock = require('./test/mocks/dw/catalog/Product');
             return new ProductMock();

@@ -149,7 +149,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/electronics-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/electronics",
           },
-          "indexName": "test_index___categories__default",
+          "indexName": "test_index___categories__default.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -166,7 +166,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
           },
-          "indexName": "test_index___categories__default",
+          "indexName": "test_index___categories__default.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -186,7 +186,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/audio-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/audio",
           },
-          "indexName": "test_index___categories__default",
+          "indexName": "test_index___categories__default.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -203,7 +203,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/headphones-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/Search-Show?cgid=storefront-catalog-m-en/headphones",
           },
-          "indexName": "test_index___categories__default",
+          "indexName": "test_index___categories__default.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -223,7 +223,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/electronics-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/electronics",
           },
-          "indexName": "test_index___categories__fr",
+          "indexName": "test_index___categories__fr.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -240,7 +240,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
           },
-          "indexName": "test_index___categories__fr",
+          "indexName": "test_index___categories__fr.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -260,7 +260,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/audio-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/audio",
           },
-          "indexName": "test_index___categories__fr",
+          "indexName": "test_index___categories__fr.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -277,7 +277,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/headphones-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Search-Show?cgid=storefront-catalog-m-en/headphones",
           },
-          "indexName": "test_index___categories__fr",
+          "indexName": "test_index___categories__fr.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -297,7 +297,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/electronics-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/electronics",
           },
-          "indexName": "test_index___categories__en",
+          "indexName": "test_index___categories__en.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -314,7 +314,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/digital-cameras-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/digital-cameras",
           },
-          "indexName": "test_index___categories__en",
+          "indexName": "test_index___categories__en.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -334,7 +334,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/audio-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/audio",
           },
-          "indexName": "test_index___categories__en",
+          "indexName": "test_index___categories__en.tmp",
         },
         AlgoliaOperation {
           "action": "addObject",
@@ -351,7 +351,7 @@ exports[`runCategoryExport 1`] = `
             "thumbnail": "http://example.com/headphones-thumbnail.jpg",
             "url": "https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/en/Search-Show?cgid=storefront-catalog-m-en/headphones",
           },
-          "indexName": "test_index___categories__en",
+          "indexName": "test_index___categories__en.tmp",
         },
       ],
     ],
@@ -360,6 +360,14 @@ exports[`runCategoryExport 1`] = `
     {
       "type": "return",
       "value": {
+        "object": {
+          "body": {
+            "taskID": {
+              "test_index_en": 42,
+              "test_index_fr": 33,
+            },
+          },
+        },
         "ok": true,
       },
     },
