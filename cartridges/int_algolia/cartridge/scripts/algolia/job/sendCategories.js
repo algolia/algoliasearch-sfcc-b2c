@@ -68,7 +68,7 @@ function runCategoryExport(parameters) {
 
     logger.info('Deleting existing temporary indices...');
     var deletionTasks = reindexHelper.deleteTemporariesIndices('categories', siteLocales.toArray());
-    algoliaIndexingAPI.waitForTasks(deletionTasks);
+    reindexHelper.waitForTasks(deletionTasks);
     logger.info('Temporary indices deleted. Starting indexing...');
 
     var status;

@@ -148,7 +148,7 @@ function moveIndex(indexNameSrc, indexNameDest) {
  * @param {string} indexName - index name where the task was executed
  * @param {number} taskID - id of the task
  */
-function waitForTask(indexName, taskID) {
+function waitTask(indexName, taskID) {
     var indexingService = algoliaIndexingService.getService();
     var maxRetries = 1000
 
@@ -165,7 +165,7 @@ function waitForTask(indexName, taskID) {
             logger.error(result.getErrorMessage());
         } else {
             if (result.object.body.status === 'published') {
-                logger.info('Task' + taskID + ' published. (' + i + ' requests sent).');
+                logger.info('Task ' + taskID + ' published. (' + i + ' requests sent).');
                 return;
             }
         }
@@ -173,23 +173,9 @@ function waitForTask(indexName, taskID) {
     logger.info('Max wait time reached, continuing...');
 }
 
-/**
- * Wait for multiple Algolia tasks to complete.
- * This method takes the "taskID" object structure returned by the multi-indices batch write operation and wait for each task to complete.
- * https://www.algolia.com/doc/rest-api/search/#batch-write-operations-multiple-indices
- * @param {Object} taskIDs - object containing a map of { "<indexName>": <taskID> }
- */
-function waitForTasks(taskIDs) {
-    Object.keys(taskIDs).forEach(function (indexName) {
-        logger.info('Waiting for task ' + taskIDs[indexName] + ' on index ' + indexName);
-        waitForTask(indexName, taskIDs[indexName]);
-    });
-}
-
 module.exports.sendBatch = sendBatch;
 module.exports.sendMultiIndicesBatch = sendMultiIndicesBatch;
 module.exports.deleteIndex = deleteIndex;
 module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;
-module.exports.waitForTask = waitForTask;
-module.exports.waitForTasks = waitForTasks;
+module.exports.waitTask = waitTask;

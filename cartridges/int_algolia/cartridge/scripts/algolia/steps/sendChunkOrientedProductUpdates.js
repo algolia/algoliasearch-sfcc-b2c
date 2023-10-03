@@ -114,7 +114,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         indexingOperation = 'addObject';
         logger.info('Deleting existing temporary indices...');
         var deletionTasks = reindexHelper.deleteTemporariesIndices('products', siteLocales.toArray());
-        algoliaIndexingAPI.waitForTasks(deletionTasks);
+        reindexHelper.waitForTasks(deletionTasks);
         logger.info('Temporary indices deleted.');
     }
 

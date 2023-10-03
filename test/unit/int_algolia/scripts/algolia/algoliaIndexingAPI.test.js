@@ -119,30 +119,11 @@ test('waitForTask', () => {
             ok: true,
             object: { body: { status: 'notPublished' }}
         });
-    indexingAPI.waitForTask('testIndex', 33);
+    indexingAPI.waitTask('testIndex', 33);
 
     expect(mockRetryableCall).toHaveBeenCalledTimes(3);
     expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
         method: 'GET',
         path: '/1/indexes/testIndex/task/33',
-    });
-});
-
-test('waitForTasks', () => {
-    mockRetryableCall
-        .mockReturnValue({
-            ok: true,
-            object: { body: { status: 'published' }}
-        });
-    indexingAPI.waitForTasks({ 'testIndex': 33, 'testIndex2': 51 });
-
-    expect(mockRetryableCall).toHaveBeenCalledTimes(2);
-    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
-        method: 'GET',
-        path: '/1/indexes/testIndex/task/33',
-    });
-    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
-        method: 'GET',
-        path: '/1/indexes/testIndex2/task/51',
     });
 });

@@ -60,7 +60,6 @@ const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         sendMultiIndicesBatch: mockSendMultiIndicesBatch,
-        waitForTasks: jest.fn(),
     }
 }, {virtual: true});
 
@@ -70,6 +69,7 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     return {
         deleteTemporariesIndices: mockDeleteTemporariesIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
+        waitForTasks: jest.fn(),
     };
 }, {virtual: true});
 

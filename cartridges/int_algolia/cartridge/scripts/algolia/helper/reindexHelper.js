@@ -1,4 +1,4 @@
-var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+const logger = require('dw/system/Logger').getLogger('algolia');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
@@ -61,6 +61,19 @@ function moveTemporariesIndices(indexType, locales) {
 }
 
 /**
+ * Wait for multiple Algolia tasks to complete.
+ * This method takes the "taskID" object structure returned by the multi-indices batch write operation and wait for each task to complete.
+ * https://www.algolia.com/doc/rest-api/search/#batch-write-operations-multiple-indices
+ * @param {Object} taskIDs - object containing a map of { "<indexName>": <taskID>, "<indexName2>: <taskID> }
+ */
+function waitForTasks(taskIDs) {
+    Object.keys(taskIDs).forEach(function (indexName) {
+        logger.info('Waiting for task ' + taskIDs[indexName] + ' on index ' + indexName);
+        algoliaIndexingAPI.waitTask(indexName, taskIDs[indexName]);
+    });
+}
+
+/**
  * Finalize an atomic reindex. For each locale:
  *   - Copy the index settings from the production index to the temporary index
  *   - Wait for all tasks to complete: the last reindex tasks + the copy settings tasks
@@ -74,9 +87,9 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
     var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
 
     logger.info('[FinishReindex] Waiting for the last indexing tasks to complete... ' + JSON.stringify(lastIndexingTasks));
-    algoliaIndexingAPI.waitForTasks(lastIndexingTasks);
+    waitForTasks(lastIndexingTasks);
     logger.info('[FinishReindex] Waiting for the last copy settings tasks to complete... ' + JSON.stringify(copySettingsTasks));
-    algoliaIndexingAPI.waitForTasks(copySettingsTasks);
+    waitForTasks(copySettingsTasks);
 
     logger.info('[FinishReindex] Moving temporary indices to production...');
     moveTemporariesIndices(indexType, locales);
@@ -84,6 +97,7 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
 
 module.exports.deleteTemporariesIndices = deleteTemporariesIndices;
 module.exports.finishAtomicReindex = finishAtomicReindex;
+module.exports.waitForTasks = waitForTasks;
 
 // For unit testing
 module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;
