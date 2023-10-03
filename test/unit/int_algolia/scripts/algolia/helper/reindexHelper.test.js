@@ -37,8 +37,8 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
 
 const reindexHelper = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
 
-test('deleteTemporayIndices', () => {
-    const res = reindexHelper.deleteTemporayIndices('products', ['fr', 'en']);
+test('deleteTemporaryIndices', () => {
+    const res = reindexHelper.deleteTemporaryIndices('products', ['fr', 'en']);
     expect(mockDeleteIndex).nthCalledWith(1, 'test_index___products__fr.tmp');
     expect(mockDeleteIndex).nthCalledWith(2, 'test_index___products__en.tmp');
     expect(res).toEqual({

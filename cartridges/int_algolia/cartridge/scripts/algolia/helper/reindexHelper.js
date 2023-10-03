@@ -9,7 +9,7 @@ var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
  * @param {string[]} locales - locales for which we want to delete the indices
  * @return {Object} Algolia taskIDs, in the form: { indexName1: <taskID>, indexName2: <taskID> }
  */
-function deleteTemporayIndices(indexType, locales) {
+function deleteTemporaryIndices(indexType, locales) {
     var deletionTasks = {};
     locales.forEach(function(locale) {
         var tmpIndexName = algoliaData.calculateIndexName(indexType, locale) + '.tmp';
@@ -99,7 +99,7 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
     moveTemporaryIndices(indexType, locales);
 }
 
-module.exports.deleteTemporayIndices = deleteTemporayIndices;
+module.exports.deleteTemporaryIndices = deleteTemporaryIndices;
 module.exports.finishAtomicReindex = finishAtomicReindex;
 module.exports.waitForTasks = waitForTasks;
 

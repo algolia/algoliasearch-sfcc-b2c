@@ -63,11 +63,11 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     }
 }, {virtual: true});
 
-const mockDeleteTemporayIndices = jest.fn();
+const mockDeleteTemporaryIndices = jest.fn();
 const mockFinishAtomicReindex = jest.fn();
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     return {
-        deleteTemporayIndices: mockDeleteTemporayIndices,
+        deleteTemporaryIndices: mockDeleteTemporaryIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
         waitForTasks: jest.fn(),
     };
