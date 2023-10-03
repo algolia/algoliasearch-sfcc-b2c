@@ -150,7 +150,7 @@ function moveIndex(indexNameSrc, indexNameDest) {
  */
 function waitTask(indexName, taskID) {
     var indexingService = algoliaIndexingService.getService();
-    var maxWait = 3 * 60 * 1000;
+    var maxWait = 5 * 60 * 1000;
     var start = Date.now();
     var nbRequestsSent = 0;
 
@@ -173,7 +173,8 @@ function waitTask(indexName, taskID) {
             }
         }
     }
-    logger.info('Max wait time reached, continuing...');
+    logger.error('Max wait time reached... TaskID: ' + taskID + '; index: ' + indexName);
+    throw new Error('Max wait time reached. TaskID: ' + taskID + '; index: ' + indexName);
 }
 
 module.exports.sendBatch = sendBatch;

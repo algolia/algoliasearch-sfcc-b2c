@@ -1,6 +1,7 @@
 var catalogMgr = require('dw/catalog/CatalogMgr');
-var Site = require('dw/system/Site');
 var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+var Site = require('dw/system/Site');
+var Status = require('dw/system/Status');
 
 var AlgoliaLocalizedCategory = require('*/cartridge/scripts/algolia/model/algoliaLocalizedCategory');
 var utils = require('../lib/utils');
@@ -32,6 +33,7 @@ function getSubCategoriesModels(category, catalogId, locale) {
  * Job that fetch all categories of the site catalog, convert them into AlgoliaOperations
  * and send them for indexing.
  * @param {dw.util.HashMap} parameters job step parameters
+ * @returns {dw.system.Status} - status
  */
 function runCategoryExport(parameters) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
@@ -66,10 +68,14 @@ function runCategoryExport(parameters) {
     logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray())
     logger.info('CatalogID: ' + siteCatalogId)
 
-    logger.info('Deleting existing temporary indices...');
-    var deletionTasks = reindexHelper.deleteTemporariesIndices('categories', siteLocales.toArray());
-    reindexHelper.waitForTasks(deletionTasks);
-    logger.info('Temporary indices deleted. Starting indexing...');
+    try {
+        logger.info('Deleting existing temporary indices...');
+        var deletionTasks = reindexHelper.deleteTemporariesIndices('categories', siteLocales.toArray());
+        reindexHelper.waitForTasks(deletionTasks);
+        logger.info('Temporary indices deleted. Starting indexing...');
+    } catch (e) {
+        return new Status(Status.ERROR, '', 'Failed to delete temporaries: ' + e.message);
+    }
 
     var status;
     var lastIndexingTasks = {};

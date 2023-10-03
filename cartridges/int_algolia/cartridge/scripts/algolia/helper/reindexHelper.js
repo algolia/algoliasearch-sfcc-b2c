@@ -17,6 +17,8 @@ function deleteTemporariesIndices(indexType, locales) {
         if (res.ok) {
             logger.info(tmpIndexName + ' deleted. ' + JSON.stringify(res.object.body));
             deletionTasks[tmpIndexName] = res.object.body.taskID;
+        } else {
+            throw new Error('Error while deleting temporary indices: ' + res.getErrorMessage())
         }
     });
     return deletionTasks;
@@ -35,8 +37,10 @@ function copySettingsFromProdIndices(indexType, locales) {
         var tmpIndexName = indexName + '.tmp';
         var res = algoliaIndexingAPI.copyIndexSettings(indexName, tmpIndexName);
         if (res.ok) {
-            logger.info('Settings copied to ' + tmpIndexName);
+            logger.info('Settings copied to ' + tmpIndexName + '. ' + JSON.stringify(res.object.body));
             copySettingsTasks[tmpIndexName] = res.object.body.taskID;
+        } else {
+            throw new Error('Error while copying index settings: ' + res.getErrorMessage())
         }
     });
     return copySettingsTasks;
@@ -53,9 +57,9 @@ function moveTemporariesIndices(indexType, locales) {
         var tmpIndexName = indexName + '.tmp';
         var res = algoliaIndexingAPI.moveIndex(tmpIndexName, indexName);
         if (res.ok) {
-            logger.info('Index ' + tmpIndexName + ' moved to ' + indexName);
+            logger.info('Index ' + tmpIndexName + ' moved to ' + indexName + '. ' + JSON.stringify(res.object.body));
         } else {
-            logger.error('Error while moving ' + tmpIndexName + ' to ' + indexName)
+            logger.error('Error while moving ' + tmpIndexName + ' to ' + indexName + ': ' + res.getErrorMessage());
         }
     });
 }
