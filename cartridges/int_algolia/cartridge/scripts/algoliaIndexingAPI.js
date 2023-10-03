@@ -150,9 +150,12 @@ function moveIndex(indexNameSrc, indexNameDest) {
  */
 function waitTask(indexName, taskID) {
     var indexingService = algoliaIndexingService.getService();
-    var maxRetries = 1000
+    var maxWait = 3 * 60 * 1000;
+    var start = Date.now();
+    var nbRequestsSent = 0;
 
-    for (let i = 0; i < maxRetries; ++i) {
+    while (Date.now() < start + maxWait) {
+        ++nbRequestsSent;
         var result = retryableCall(
             indexingService,
             {
@@ -165,7 +168,7 @@ function waitTask(indexName, taskID) {
             logger.error(result.getErrorMessage());
         } else {
             if (result.object.body.status === 'published') {
-                logger.info('Task ' + taskID + ' published. (' + i + ' requests sent).');
+                logger.info('Task ' + taskID + ' published. (' + nbRequestsSent + ' requests sent).');
                 return;
             }
         }
