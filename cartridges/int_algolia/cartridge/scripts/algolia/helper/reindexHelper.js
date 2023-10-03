@@ -9,7 +9,7 @@ var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
  * @param {string[]} locales - locales for which we want to delete the indices
  * @return {Object} Algolia taskIDs, in the form: { indexName1: <taskID>, indexName2: <taskID> }
  */
-function deleteTemporariesIndices(indexType, locales) {
+function deleteTemporayIndices(indexType, locales) {
     var deletionTasks = {};
     locales.forEach(function(locale) {
         var tmpIndexName = algoliaData.calculateIndexName(indexType, locale) + '.tmp';
@@ -51,7 +51,7 @@ function copySettingsFromProdIndices(indexType, locales) {
  * @param {string} indexType - type of the index (products or categories)
  * @param {string[]} locales - locales for which we want to move the indices
  */
-function moveTemporariesIndices(indexType, locales) {
+function moveTemporaryIndices(indexType, locales) {
     locales.forEach(function(locale) {
         var indexName = algoliaData.calculateIndexName(indexType, locale);
         var tmpIndexName = indexName + '.tmp';
@@ -96,13 +96,13 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
     waitForTasks(copySettingsTasks);
 
     logger.info('[FinishReindex] Moving temporary indices to production...');
-    moveTemporariesIndices(indexType, locales);
+    moveTemporaryIndices(indexType, locales);
 }
 
-module.exports.deleteTemporariesIndices = deleteTemporariesIndices;
+module.exports.deleteTemporayIndices = deleteTemporayIndices;
 module.exports.finishAtomicReindex = finishAtomicReindex;
 module.exports.waitForTasks = waitForTasks;
 
 // For unit testing
 module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;
-module.exports.moveTemporariesIndices = moveTemporariesIndices;
+module.exports.moveTemporaryIndices = moveTemporaryIndices;

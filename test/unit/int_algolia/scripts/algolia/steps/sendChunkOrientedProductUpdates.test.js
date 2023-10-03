@@ -6,15 +6,15 @@ global.request = new GlobalMock.RequestMock();
 
 jest.mock('*/cartridge/scripts/algolia/helper/logHelper', () => {}, {virtual: true});
 
-const mockDeleteTemporariesIndices = jest.fn();
+const mockDeleteTemporayIndices = jest.fn();
 const mockCopySettingsFromProdIndices = jest.fn();
-const mockMoveTemporariesIndices = jest.fn();
+const mockMoveTemporaryIndices = jest.fn();
 const mockFinishAtomicReindex = jest.fn();
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     return {
-        deleteTemporariesIndices: mockDeleteTemporariesIndices,
+        deleteTemporayIndices: mockDeleteTemporayIndices,
         copySettingsFromProdIndices: mockCopySettingsFromProdIndices,
-        moveTemporariesIndices: mockMoveTemporariesIndices,
+        moveTemporaryIndices: mockMoveTemporaryIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
         waitForTasks: jest.fn(),
     };
@@ -44,21 +44,21 @@ const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/
 describe('process', () => {
     test('partialRecordUpdate', () => {
         job.beforeStep({ resourceType: 'test', indexingMethod: 'partialRecordUpdate' });
-        expect(mockDeleteTemporariesIndices).not.toHaveBeenCalled();
+        expect(mockDeleteTemporayIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('fullRecordUpdate', () => {
         job.beforeStep({ resourceType: 'test', indexingMethod: 'fullRecordUpdate' });
-        expect(mockDeleteTemporariesIndices).not.toHaveBeenCalled();
+        expect(mockDeleteTemporayIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('fullCatalogReindex', () => {
         job.beforeStep({ resourceType: 'test', indexingMethod: 'fullCatalogReindex' });
-        expect(mockDeleteTemporariesIndices).toHaveBeenCalledWith('products', expect.arrayContaining(['default', 'fr', 'en']));
+        expect(mockDeleteTemporayIndices).toHaveBeenCalledWith('products', expect.arrayContaining(['default', 'fr', 'en']));
 
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot();

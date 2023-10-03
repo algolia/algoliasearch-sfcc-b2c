@@ -113,7 +113,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     if (indexingMethod === 'fullCatalogReindex') {
         indexingOperation = 'addObject';
         logger.info('Deleting existing temporary indices...');
-        var deletionTasks = reindexHelper.deleteTemporariesIndices('products', siteLocales.toArray());
+        var deletionTasks = reindexHelper.deleteTemporayIndices('products', siteLocales.toArray());
         reindexHelper.waitForTasks(deletionTasks);
         logger.info('Temporary indices deleted.');
     }
