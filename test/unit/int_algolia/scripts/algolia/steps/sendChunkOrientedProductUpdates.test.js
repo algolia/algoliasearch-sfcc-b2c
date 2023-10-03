@@ -49,6 +49,13 @@ describe('process', () => {
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot();
     });
+    test('fullRecordUpdate', () => {
+        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullRecordUpdate' });
+        expect(mockDeleteTemporariesIndices).not.toHaveBeenCalled();
+
+        var algoliaOperations = job.process(new ProductMock());
+        expect(algoliaOperations).toMatchSnapshot();
+    });
     test('fullCatalogReindex', () => {
         job.beforeStep({ resourceType: 'test', indexingMethod: 'fullCatalogReindex' });
         expect(mockDeleteTemporariesIndices).toHaveBeenCalledWith('products', expect.arrayContaining(['default', 'fr', 'en']));

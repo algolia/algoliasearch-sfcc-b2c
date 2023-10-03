@@ -5,7 +5,7 @@ var ProductMgr = require('dw/catalog/ProductMgr');
 var logger;
 
 // job step parameters
-var resourceType, fieldListOverride, fullRecordUpdate;
+var resourceType, fieldListOverride;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter;
@@ -64,8 +64,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     // parameters
     resourceType = parameters.resourceType; // resouceType ( price | inventory | product ) - pass it along to sendChunk()
     fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
-    fullRecordUpdate = !!parameters.fullRecordUpdate || false;
-    // indexingMethod = parameters.indexingMethod || 'fullCatalogReindex';
+    indexingMethod = parameters.indexingMethod;
 
     if (empty(fieldListOverride)) {
         const customFields = algoliaData.getSetOfArray('CustomFields');
@@ -84,7 +83,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
 
-    indexingOperation = fullRecordUpdate ? 'addObject' : 'partialUpdateObject';
+    indexingOperation = indexingMethod === 'partialRecordUpdate' ? 'partialUpdateObject' : 'addObject';
     siteLocales = Site.getCurrent().getAllowedLocales();
     logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
 

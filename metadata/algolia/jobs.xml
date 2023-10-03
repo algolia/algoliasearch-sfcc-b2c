@@ -138,6 +138,28 @@ Relies on B2C Delta Exports to determine which products have been changed since 
         <triggers/>
     </job>
 
+    <job job-id="AlgoliaProductExport_v2" priority="0">
+        <description>Exports all catalog products and index them into Algolia.</description>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="algoliaSendProducts" type="custom.sendChunkOrientedProductUpdates" enforce-restart="false">
+                <description>Exports all catalog products and index them into Algolia.</description>
+                <parameters>
+                    <parameter name="resourceType">products</parameter>
+                    <parameter name="fieldListOverride"/>
+                    <parameter name="indexingMethod">fullRecordUpdate</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules>
+            <on-running runtime-threshold="60m" enabled="false">
+                <mark-job-as-hanging/>
+            </on-running>
+        </rules>
+        <triggers/>
+    </job>
+
     <job job-id="AlgoliaProductPricesExport" priority="0">
         <description>Exports price data for each product assigned to the current site.
 Performs a partial update on the product objects in the Algolia index.
@@ -150,7 +172,7 @@ Chunk-based script, supports parallel execution.</description>
                 <parameters>
                     <parameter name="resourceType">price</parameter>
                     <parameter name="fieldListOverride">id, price</parameter>
-                    <parameter name="fullRecordUpdate">false</parameter>
+                    <parameter name="indexingMethod">partialRecordUpdate</parameter>
                 </parameters>
             </step>
         </flow>
@@ -187,7 +209,7 @@ Chunk-based script, supports parallel execution.</description>
                 <parameters>
                     <parameter name="resourceType">inventory</parameter>
                     <parameter name="fieldListOverride">id, in_stock</parameter>
-                    <parameter name="fullRecordUpdate">false</parameter>
+                    <parameter name="indexingMethod">partialRecordUpdate</parameter>
                 </parameters>
             </step>
         </flow>
