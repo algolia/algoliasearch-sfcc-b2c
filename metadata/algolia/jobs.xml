@@ -94,20 +94,7 @@ Performs a partial update on the product objects in the Algolia index.</descript
                 <mark-job-as-hanging/>
             </on-running>
         </rules>
-        <triggers>
-            <run-once enabled="false">
-                <date>2023-07-26Z</date>
-                <time>15:33:00.000Z</time>
-                <rules>
-                    <on-exit status="ERROR">
-                        <retry>
-                            <interval>1m</interval>
-                            <max-retries>3</max-retries>
-                        </retry>
-                    </on-exit>
-                </rules>
-            </run-once>
-        </triggers>
+        <triggers/>
     </job>
 
     <job job-id="AlgoliaProductsInventoryIndex_v2" priority="0">
@@ -130,20 +117,7 @@ Performs a partial update on the product objects in the Algolia index.</descript
                 <mark-job-as-hanging/>
             </on-running>
         </rules>
-        <triggers>
-            <run-once enabled="false">
-                <date>2023-08-01Z</date>
-                <time>16:05:00.000Z</time>
-                <rules>
-                    <on-exit status="ERROR">
-                        <retry>
-                            <interval>1m</interval>
-                            <max-retries>3</max-retries>
-                        </retry>
-                    </on-exit>
-                </rules>
-            </run-once>
-        </triggers>
+        <triggers/>
     </job>
 
 </jobs>
