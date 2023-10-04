@@ -2,9 +2,8 @@
 <jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
 
     <job job-id="AlgoliaProductsDeltaIndex_v2" priority="0">
-        <description>Sends product updates to Algolia, only for the products that have changed since the last run of this job.
-This method relies on SFCC's built-in Delta Exports feature to calculate the delta, then enriches and transforms the products before sending them to Algolia for indexing.
-Make sure to contact SFCC Support to enable delta exports on your instance.</description>
+        <description>Send product record index updates to Algolia for B2C Product objects assigned to the site that have changed since the last job run (either via BM or a product feed import, max 7 days).
+The job relies on SFCC's built-in Delta Exports feature (needs to be enabled) to calculate the delta, then enriches and transforms the products before sending them to Algolia for indexing.</description>
         <parameters>
             <parameter name="catalogIDs">apparel-catalog, apparel-m-catalog</parameter>
             <parameter name="consumer">algolia</parameter>
@@ -22,8 +21,9 @@ Make sure to contact SFCC Support to enable delta exports on your instance.</des
                 </parameters>
             </step>
             <step step-id="algoliaIndexDeltaProductUpdates" type="custom.algoliaIndexDeltaProductUpdates" enforce-restart="false">
-                <description>Sends delta product updates to Algolia.
-Relies on B2C Delta Exports to determine which products have been changed since the last export.</description>
+                <description>Performs delta index updates on your Algolia product records using the B2C Delta Export feature (needs to be enabled).
+Extracts the list of productIDs (of changed products) from the B2C Delta Export, retrieves and enriches the products data, then sends them to Algolia.
+Can perform full records updates or partial records updates. See the 'indexingMethod' field for details.</description>
                 <parameters>
                     <parameter name="consumer" job-parameter-ref="consumer"/>
                     <parameter name="deltaExportJobName" job-parameter-ref="deltaExportJobName"/>
@@ -36,13 +36,12 @@ Relies on B2C Delta Exports to determine which products have been changed since 
     </job>
 
     <job job-id="AlgoliaCategoriesIndex_v2" priority="0">
-        <description>Index all categories assigned to the selected site to Algolia.</description>
+        <description>Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.</description>
         <parameters/>
         <flow>
             <context site-id="RefArch"/>
             <step step-id="algoliaCategoriesIndex" type="custom.algoliaCategoriesIndex" enforce-restart="false">
-                <description>Index all categories assigned to the selected site to Algolia.
-It will create a temporary Algolia index, reindex all your categories in it, and replace the production index at the end.</description>
+                <description>Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.</description>
             </step>
         </flow>
         <rules/>
@@ -55,7 +54,7 @@ It will create a temporary Algolia index, reindex all your categories in it, and
         <flow>
             <context site-id="RefArch"/>
             <step step-id="algoliaProductsIndex" type="custom.algoliaProductsIndex" enforce-restart="false">
-                <description>Index all products assigned to the selected site to Algolia. Can perform partial records updates, full records updates or a full catalog reindex, depending on the 'indexingMethod':
+                <description>Index all products assigned to the selected site to Algolia. The list of indexed attributes is configurable, and by default contains related price and inventory data for each product. Can perform partial records updates, full records updates or a full catalog reindex, depending on the 'indexingMethod':
 - 'partialRecordUpdate' will only update the specified fields in the index.
 - 'fullRecordUpdate' will replace the entire record in the index with the new data.
 - 'fullCatalogReindex' will create a temporary Algolia index, reindex all your products catalog in it, and replace the production index at the end.</description>

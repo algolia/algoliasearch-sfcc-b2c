@@ -5,7 +5,7 @@
 			"@supports-parallel-execution": "false",
 			"@supports-site-context": "true",
 			"@supports-organization-context": "false",
-			"description": "Index all categories assigned to the selected site to Algolia.",
+			"description": "Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.",
 			"module": "int_algolia/cartridge/scripts/algolia/job/sendCategories.js",
 			"function": "execute",
 			"transactional": "false",
@@ -27,7 +27,7 @@
 				"@supports-parallel-execution": true,
 				"@supports-site-context": true,
 				"@supports-organization-context": false,
-				"description": "Index all products assigned to the selected site to Algolia. Can perform partial records updates, full records updates or a full catalog reindex. See the 'indexingMethod' field for details.",
+				"description": "Index all products assigned to the selected site. The list of indexed attributes is configurable. Can perform partial records updates, full records updates or a full catalog reindex. See the 'indexingMethod' field for details.",
 				"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates.js",
 				"read-function": "read",
 				"process-function": "process",
@@ -57,7 +57,7 @@
 						{
 							"@name": "indexingMethod",
 							"@type": "string",
-							"description": "'partialRecordUpdate': only the specified fields are updated in the index. 'fullRecordUpdate': replace the entire records in the index with the new data. 'fullCatalogReindex': reindex all products in a temporary Algolia index, and replace the production index at the end.",
+							"description": "'partialRecordUpdate': only the specified fields are updated/added for each record (without affecting other fields). If the record doesn't exist, a new one will be created. 'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data (without removing stale/deleted records). 'fullCatalogReindex': reindex all products (incl. removing stale records).",
 							"@required": "true",
 							"enum-values": {
 								"value": [
@@ -88,7 +88,7 @@
 				"@supports-parallel-execution": true,
 				"@supports-site-context": true,
 				"@supports-organization-context": false,
-				"description": "Takes the product delta export created by SFCC, extracts the PIDs from it, retrieves and enriches the products, then sends them to Algolia. Can perform full records updates or partial records updates. See the 'indexingMethod' field for details.",
+				"description": "Extracts the list of productIDs (of changed products) from a B2C Delta Export, retrieves and enriches the products data, then sends them to Algolia. Can perform full records updates or partial records updates. See the 'indexingMethod' field for details.",
 				"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates.js",
 				"read-function": "read",
 				"process-function": "process",
@@ -124,7 +124,7 @@
 						{
 							"@name": "indexingMethod",
 							"@type": "string",
-							"description": "'partialRecordUpdate': only the specified fields are updated in the index. 'fullRecordUpdate': replace the entire records in the index with the new data.",
+							"description": "'partialRecordUpdate': only the specified fields are updated/added for each record (without affecting other fields). If the record doesn't exist, a new one will be created. 'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data. Deleted products are removed from the index.",
 							"@required": "true",
 							"enum-values": {
 								"value": [
