@@ -42,11 +42,11 @@
 			}
 		},
 		{
-			"@type-id": "custom.algoliaSendCategories",
+			"@type-id": "custom.algoliaCategoriesIndex",
 			"@supports-parallel-execution": "false",
 			"@supports-site-context": "true",
 			"@supports-organization-context": "false",
-			"description": "Index the site's categories into Algolia",
+			"description": "Index all categories assigned to the selected site to Algolia.",
 			"module": "int_algolia/cartridge/scripts/algolia/job/sendCategories.js",
 			"function": "execute",
 			"transactional": "false",
@@ -64,11 +64,11 @@
 			}
 		}],
 		"chunk-script-module-step": [{
-				"@type-id": "custom.sendChunkOrientedProductUpdates",
+				"@type-id": "custom.algoliaProductsIndex",
 				"@supports-parallel-execution": true,
 				"@supports-site-context": true,
 				"@supports-organization-context": false,
-				"description": "Sends chunk-oriented updates of all products assigned to the selected site to Algolia. Only the specified fields will be updated in the index. Can be used for partially updating the records with only a few attributes or for full record updates.",
+				"description": "Index all products assigned to the selected site to Algolia. Can perform partial records updates, full records updates or a full catalog reindex. See the 'indexingMethod' field for details.",
 				"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates.js",
 				"read-function": "read",
 				"process-function": "process",
@@ -98,7 +98,7 @@
 						{
 							"@name": "indexingMethod",
 							"@type": "string",
-							"description": "Determines whether the step will perform partial records updates, full records updates or a full catalog reindex. A partial record update will only update the specified fields in the index. A full record update will replace the entire record in the index with the new data. A full catalog reindex will create a temporary Algolia index, reindex all your catalog in it, and finally replace the production index with the created temporary index.",
+							"description": "'partialRecordUpdate': only the specified fields are updated in the index. 'fullRecordUpdate': replace the entire records in the index with the new data. 'fullCatalogReindex': reindex all products in a temporary Algolia index, and replace the production index at the end.",
 							"@required": "true",
 							"enum-values": {
 								"value": [
@@ -125,11 +125,11 @@
 				}
 			},
 			{
-				"@type-id": "custom.sendChunkOrientedDeltaProductUpdates",
+				"@type-id": "custom.algoliaIndexDeltaProductUpdates",
 				"@supports-parallel-execution": true,
 				"@supports-site-context": true,
 				"@supports-organization-context": false,
-				"description": "Sends chunk-oriented delta updates of products returned by the B2C delta export.",
+				"description": "Takes the product delta export created by SFCC, extracts the PIDs from it, retrieves and enriches the products, then sends them to Algolia. Can perform full records updates or partial records updates. See the 'indexingMethod' field for details.",
 				"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates.js",
 				"read-function": "read",
 				"process-function": "process",
@@ -165,7 +165,7 @@
 						{
 							"@name": "indexingMethod",
 							"@type": "string",
-							"description": "Determines whether the step will perform a full record update or a partial record update. A full record update will replace the entire record in the index with the new data. A partial record update will only update the specified fields in the index.",
+							"description": "'partialRecordUpdate': only the specified fields are updated in the index. 'fullRecordUpdate': replace the entire records in the index with the new data.",
 							"@required": "true",
 							"enum-values": {
 								"value": [

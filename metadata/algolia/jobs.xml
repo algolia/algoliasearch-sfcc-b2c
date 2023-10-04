@@ -104,8 +104,8 @@ Make sure to contact SFCC Support to enable delta exports on your instance.</des
         </triggers>
     </job>
 
-    <job job-id="AlgoliaNewProductsDeltaExport" priority="0">
-        <description>Sends chunk-oriented product delta updates to Algolia.
+    <job job-id="AlgoliaProductsDeltaIndex_v2" priority="0">
+        <description>Sends product updates to Algolia, only for the products that have changed since the last run of this job.
 This method relies on SFCC's built-in Delta Exports feature to calculate the delta, then enriches and transforms the products before sending them to Algolia for indexing.
 Make sure to contact SFCC Support to enable delta exports on your instance.</description>
         <parameters>
@@ -116,7 +116,7 @@ Make sure to contact SFCC Support to enable delta exports on your instance.</des
         <flow>
             <context site-id="RefArch"/>
             <step step-id="catalogDeltaExport" type="CatalogDeltaExport" enforce-restart="false">
-                <description>Standard B2C catalog delta export. The productIDs are extracted from this export, the products retrieved from the database, enriched and sent to Algolia.</description>
+                <description>Standard B2C catalog delta export. The productIDs will be extracted from this export, the products retrieved from the database, enriched and sent to Algolia.</description>
                 <parameters>
                     <parameter name="CatalogIDs" job-parameter-ref="catalogIDs"/>
                     <parameter name="Consumers" job-parameter-ref="consumer"/>
@@ -124,8 +124,8 @@ Make sure to contact SFCC Support to enable delta exports on your instance.</des
                     <parameter name="MasterProductExport">true</parameter>
                 </parameters>
             </step>
-            <step step-id="algoliaSendChunkOrientedDeltaProductUpdates" type="custom.sendChunkOrientedDeltaProductUpdates" enforce-restart="false">
-                <description>Sends chunk-oritented (parallelized) delta product updates to Algolia.
+            <step step-id="algoliaIndexDeltaProductUpdates" type="custom.algoliaIndexDeltaProductUpdates" enforce-restart="false">
+                <description>Sends delta product updates to Algolia.
 Relies on B2C Delta Exports to determine which products have been changed since the last export.</description>
                 <parameters>
                     <parameter name="consumer" job-parameter-ref="consumer"/>
@@ -138,13 +138,34 @@ Relies on B2C Delta Exports to determine which products have been changed since 
         <triggers/>
     </job>
 
-    <job job-id="AlgoliaProductExport_v2" priority="0">
-        <description>Exports all catalog products and index them into Algolia.</description>
+    <job job-id="AlgoliaCategoriesIndex_v2" priority="0">
+        <description>Index all categories assigned to the selected site to Algolia.</description>
         <parameters/>
         <flow>
             <context site-id="RefArch"/>
-            <step step-id="algoliaSendProducts" type="custom.sendChunkOrientedProductUpdates" enforce-restart="false">
-                <description>Exports all catalog products and index them into Algolia.</description>
+            <step step-id="algoliaCategoriesIndex" type="custom.algoliaCategoriesIndex" enforce-restart="false">
+                <description>Index all categories assigned to the selected site to Algolia.
+It will create a temporary Algolia index, reindex all your categories in it, and replace the production index at the end.</description>
+            </step>
+        </flow>
+        <rules>
+            <on-running runtime-threshold="60m" enabled="false">
+                <mark-job-as-hanging/>
+            </on-running>
+        </rules>
+        <triggers/>
+    </job>
+
+    <job job-id="AlgoliaProductsIndex_v2" priority="0">
+        <description>Index all products assigned to the selected site to Algolia.</description>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="algoliaProductsIndex" type="custom.algoliaProductsIndex" enforce-restart="false">
+                <description>Index all products assigned to the selected site to Algolia. Can perform partial records updates, full records updates or a full catalog reindex, depending on the 'indexingMethod':
+- 'partialRecordUpdate' will only update the specified fields in the index.
+- 'fullRecordUpdate' will replace the entire record in the index with the new data.
+- 'fullCatalogReindex' will create a temporary Algolia index, reindex all your products catalog in it, and replace the production index at the end.</description>
                 <parameters>
                     <parameter name="resourceType">products</parameter>
                     <parameter name="fieldListOverride"/>
@@ -160,18 +181,17 @@ Relies on B2C Delta Exports to determine which products have been changed since 
         <triggers/>
     </job>
 
-    <job job-id="AlgoliaProductPricesExport" priority="0">
-        <description>Exports price data for each product assigned to the current site.
-Performs a partial update on the product objects in the Algolia index.
-Chunk-based script, supports parallel execution.</description>
+    <job job-id="AlgoliaProductsPricesIndex_v2" priority="0">
+        <description>Reindex price data for each product assigned to the current site.
+Performs a partial update on the product objects in the Algolia index.</description>
         <parameters/>
         <flow>
             <context site-id="RefArch"/>
-            <step step-id="algoliaSendPartialPriceUpdates" type="custom.sendChunkOrientedProductUpdates" enforce-restart="false">
+            <step step-id="algoliaPricesIndex" type="custom.algoliaProductsIndex" enforce-restart="false">
                 <description>Retrieves and sends price data for all products assigned to the current site. Sends partial product updates to Algolia, updating only the "price" property of the product objects in the index by default.</description>
                 <parameters>
                     <parameter name="resourceType">price</parameter>
-                    <parameter name="fieldListOverride">id, price</parameter>
+                    <parameter name="fieldListOverride">price</parameter>
                     <parameter name="indexingMethod">partialRecordUpdate</parameter>
                 </parameters>
             </step>
@@ -197,18 +217,17 @@ Chunk-based script, supports parallel execution.</description>
         </triggers>
     </job>
 
-    <job job-id="AlgoliaProductInventoryExport" priority="0">
-        <description>Exports inventory data for each product assigned to the current site.
-Performs a partial update on the product objects in the Algolia index.
-Chunk-based script, supports parallel execution.</description>
+    <job job-id="AlgoliaProductsInventoryIndex_v2" priority="0">
+        <description>Reindex inventory data for each product assigned to the current site.
+Performs a partial update on the product objects in the Algolia index.</description>
         <parameters/>
         <flow>
             <context site-id="RefArch"/>
-            <step step-id="algoliaSendPartialInventoryUpdates" type="custom.sendChunkOrientedProductUpdates" enforce-restart="false">
+            <step step-id="algoliaInventoryIndex" type="custom.algoliaProductsIndex" enforce-restart="false">
                 <description>Retrieves and sends inventory data for all products assigned to the current site. Sends partial product updates to Algolia, updating only the "in_stock" property of the product objects in the index by default.</description>
                 <parameters>
                     <parameter name="resourceType">inventory</parameter>
-                    <parameter name="fieldListOverride">id, in_stock</parameter>
+                    <parameter name="fieldListOverride">in_stock</parameter>
                     <parameter name="indexingMethod">partialRecordUpdate</parameter>
                 </parameters>
             </step>
