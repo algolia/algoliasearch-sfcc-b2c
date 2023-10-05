@@ -64,7 +64,18 @@ exports.beforeStep = function(parameters, stepExecution) {
     // parameters
     resourceType = parameters.resourceType; // resouceType ( price | inventory | product ) - pass it along to sendChunk()
     fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
-    indexingMethod = parameters.indexingMethod;
+    indexingMethod = parameters.indexingMethod || 'partialRecordUpdate';
+
+    switch (indexingMethod) {
+        case 'fullRecordUpdate':
+        case 'fullCatalogReindexUpdate':
+            indexingOperation = 'addObject';
+            break;
+        case 'partialRecordUpdate':
+        default:
+            indexingOperation = 'partialUpdateObject';
+            break;
+    }
 
     if (empty(fieldListOverride)) {
         const customFields = algoliaData.getSetOfArray('CustomFields');
@@ -83,7 +94,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
 
-    indexingOperation = indexingMethod === 'partialRecordUpdate' ? 'partialUpdateObject' : 'addObject';
     siteLocales = Site.getCurrent().getAllowedLocales();
     logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
 
