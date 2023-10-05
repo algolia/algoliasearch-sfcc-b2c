@@ -60,19 +60,26 @@ exports.beforeStep = function(parameters, stepExecution) {
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
     AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
 
-    // checking mandatory parameters
+    /* --- checking mandatory parameters --- */
     if (empty(parameters.consumer) || empty(parameters.deltaExportJobName)) {
         let errorMessage = 'Mandatory job step parameters missing!';
         jobHelper.logError(errorMessage);
         return;
     }
 
-    // parameters
+
+    /* --- initializing custom object logging --- */
+    jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'product');
+
+
+    /* --- parameters --- */
     paramConsumer = parameters.consumer.trim();
     paramDeltaExportJobName = parameters.deltaExportJobName.trim();
     paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sending method
-    paramIndexingMethod = parameters.indexingMethod; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
+    paramIndexingMethod = parameters.indexingMethod || 'fullRecordUpdate'; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
 
+
+    /* --- indexingMethod parameter --- */
     switch (paramIndexingMethod) {
         case 'partialRecordUpdate':
             baseIndexingOperation = 'partialUpdateObject';
@@ -82,15 +89,20 @@ exports.beforeStep = function(parameters, stepExecution) {
             baseIndexingOperation = 'addObject';
             break;
     }
+    logger.info('Indexing method: ' + paramIndexingMethod);
 
-    // TODO: move to helper
+
+    /* --- fieldListOverride parameter --- */
     if (empty(paramFieldListOverride)) {
         const customFields = algoliaData.getSetOfArray('CustomFields');
         fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
     } else {
         fieldsToSend = paramFieldListOverride;
     }
+    logger.info('Fields to be sent: ' + JSON.stringify(fieldsToSend));
 
+
+    /* --- non-localized attributes --- */
     Object.keys(algoliaProductConfig.attributeConfig).forEach(function(attributeName) {
         if (!algoliaProductConfig.attributeConfig[attributeName].localized &&
             fieldsToSend.indexOf(attributeName) >= 0) {
@@ -101,11 +113,10 @@ exports.beforeStep = function(parameters, stepExecution) {
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
 
-    siteLocales = Site.getCurrent().getAllowedLocales();
-    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
 
-    // initializing logging
-    jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'product');
+    /* --- site locales --- */
+    siteLocales = Site.getCurrent().getAllowedLocales();
+    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
 
 
     algoliaIndexingAPI.setJobInfo({

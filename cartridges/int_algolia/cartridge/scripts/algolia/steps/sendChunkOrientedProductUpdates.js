@@ -54,13 +54,19 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
 
-    // parameters
-    paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sending method
-    paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate';
+    /* --- initializing custom object logging --- */
+    jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'product');
 
+
+    /* --- parameters --- */
+    paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sending method
+    paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullCatalogReindex'
+
+
+    /* --- indexingMethod parameter --- */
     switch (paramIndexingMethod) {
         case 'fullRecordUpdate':
-        case 'fullCatalogReindexUpdate':
+        case 'fullCatalogReindex':
             indexingOperation = 'addObject';
             break;
         case 'partialRecordUpdate':
@@ -68,14 +74,20 @@ exports.beforeStep = function(parameters, stepExecution) {
             indexingOperation = 'partialUpdateObject';
             break;
     }
+    logger.info('Indexing method: ' + paramIndexingMethod);
 
+
+    /* --- fieldListOverride parameter --- */
     if (empty(paramFieldListOverride)) {
         const customFields = algoliaData.getSetOfArray('CustomFields');
         fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
     } else {
         fieldsToSend = paramFieldListOverride;
     }
+    logger.info('Fields to be sent: ' + JSON.stringify(fieldsToSend));
 
+
+    /* --- non-localized attributes --- */
     Object.keys(algoliaProductConfig.attributeConfig).forEach(function(attributeName) {
         if (!algoliaProductConfig.attributeConfig[attributeName].localized &&
           fieldsToSend.indexOf(attributeName) >= 0) {
@@ -86,26 +98,26 @@ exports.beforeStep = function(parameters, stepExecution) {
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
 
+
+    /* --- site locales --- */
     siteLocales = Site.getCurrent().getAllowedLocales();
     logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
-
-    // initializing logging
-    jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'product');
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
         stepID: stepExecution.getStepID()
     });
 
+    /* --- removing any leftover temporary indices --- */
     if (paramIndexingMethod === 'fullCatalogReindex') {
-        indexingOperation = 'addObject';
         logger.info('Deleting existing temporary indices...');
         var deletionTasks = reindexHelper.deleteTemporaryIndices('products', siteLocales.toArray());
         reindexHelper.waitForTasks(deletionTasks);
         logger.info('Temporary indices deleted.');
     }
 
-    // getting all products assigned to the site
+
+    /* --- getting all products assigned to the site --- */
     products = ProductMgr.queryAllSiteProducts();
     logger.info('Starting indexing...')
 }
@@ -194,8 +206,8 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         jobLog.sentRecords += batch.length;
         jobLog.sentChunks++;
 
-        // Store Algolia indexing tasks ids.
-        // When doing a fullCatalogReindex, we will wait to the last indexing tasks in the afterStep.
+        // Store Algolia indexing task IDs.
+        // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
         var taskIDs = status.object.body.taskID;
         Object.keys(taskIDs).forEach(function (taskIndexName) {
             lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];

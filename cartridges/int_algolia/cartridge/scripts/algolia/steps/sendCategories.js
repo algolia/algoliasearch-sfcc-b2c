@@ -107,6 +107,7 @@ function runCategoryExport(parameters, stepExecution) {
             jobLog.sentRecords += batch.length;
             jobLog.sentChunks++;
 
+            // Store Algolia indexing task IDs
             var taskIDs = status.object.body.taskID;
             Object.keys(taskIDs).forEach(function (taskIndexName) {
                 lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
