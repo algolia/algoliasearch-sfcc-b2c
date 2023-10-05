@@ -42,6 +42,13 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates');
 
 describe('process', () => {
+    test('default', () => {
+        job.beforeStep({ resourceType: 'test' });
+        expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
+
+        var algoliaOperations = job.process(new ProductMock());
+        expect(algoliaOperations).toMatchSnapshot(); //  "action" should be "partialUpdateObject" when no indexingMethod is specified
+    });
     test('partialRecordUpdate', () => {
         job.beforeStep({ resourceType: 'test', indexingMethod: 'partialRecordUpdate' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
