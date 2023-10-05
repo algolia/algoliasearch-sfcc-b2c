@@ -79,6 +79,22 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramIndexingMethod = parameters.indexingMethod || 'fullRecordUpdate'; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
 
 
+    /* --- B2C delta job parameters --- */
+    logger.info('consumer parameter: ' + paramConsumer);
+    logger.info('deltaExportJobName parameter: ' + paramDeltaExportJobName);
+
+
+    /* --- fieldListOverride parameter --- */
+    if (empty(paramFieldListOverride)) {
+        const customFields = algoliaData.getSetOfArray('CustomFields');
+        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
+    } else {
+        fieldsToSend = paramFieldListOverride;
+    }
+    logger.info('fieldListOverride parameter: ' + paramFieldListOverride);
+    logger.info('Actual fields to be sent: ' + JSON.stringify(fieldsToSend));
+
+
     /* --- indexingMethod parameter --- */
     switch (paramIndexingMethod) {
         case 'partialRecordUpdate':
@@ -89,17 +105,7 @@ exports.beforeStep = function(parameters, stepExecution) {
             baseIndexingOperation = 'addObject';
             break;
     }
-    logger.info('Indexing method: ' + paramIndexingMethod);
-
-
-    /* --- fieldListOverride parameter --- */
-    if (empty(paramFieldListOverride)) {
-        const customFields = algoliaData.getSetOfArray('CustomFields');
-        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
-    } else {
-        fieldsToSend = paramFieldListOverride;
-    }
-    logger.info('Fields to be sent: ' + JSON.stringify(fieldsToSend));
+    logger.info('indexingMethod parameter: ' + paramIndexingMethod);
 
 
     /* --- non-localized attributes --- */

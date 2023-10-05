@@ -63,6 +63,17 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullCatalogReindex'
 
 
+    /* --- fieldListOverride parameter --- */
+    if (empty(paramFieldListOverride)) {
+        const customFields = algoliaData.getSetOfArray('CustomFields');
+        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
+    } else {
+        fieldsToSend = paramFieldListOverride;
+    }
+    logger.info('fieldListOverride parameter: ' + paramFieldListOverride);
+    logger.info('Actual fields to be sent: ' + JSON.stringify(fieldsToSend));
+
+
     /* --- indexingMethod parameter --- */
     switch (paramIndexingMethod) {
         case 'fullRecordUpdate':
@@ -74,17 +85,7 @@ exports.beforeStep = function(parameters, stepExecution) {
             indexingOperation = 'partialUpdateObject';
             break;
     }
-    logger.info('Indexing method: ' + paramIndexingMethod);
-
-
-    /* --- fieldListOverride parameter --- */
-    if (empty(paramFieldListOverride)) {
-        const customFields = algoliaData.getSetOfArray('CustomFields');
-        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
-    } else {
-        fieldsToSend = paramFieldListOverride;
-    }
-    logger.info('Fields to be sent: ' + JSON.stringify(fieldsToSend));
+    logger.info('indexingMethod parameter: ' + paramIndexingMethod);
 
 
     /* --- non-localized attributes --- */
