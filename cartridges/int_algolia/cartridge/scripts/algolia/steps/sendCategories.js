@@ -7,7 +7,7 @@ var AlgoliaLocalizedCategory = require('*/cartridge/scripts/algolia/model/algoli
 var utils = require('../lib/utils');
 
 /**
- * Converts a given dw.catalog.Category and its sub categories to objects ready to be indexed
+ * Converts a given dw.catalog.Category and its subcategories to objects ready to be indexed
  * @param {dw.catalog.Category} category - A category
  * @param {string} catalogId - ID of the site catalog
  * @param {string} locale - The locale to use to fetch the categories properties
@@ -30,7 +30,7 @@ function getSubCategoryModels(category, catalogId, locale) {
 }
 
 /**
- * Job that fetch all categories of the site catalog, convert them into AlgoliaOperations
+ * Job that fetches all categories of the site catalog and converts them into AlgoliaOperations
  * and send them for indexing.
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution job step execution
