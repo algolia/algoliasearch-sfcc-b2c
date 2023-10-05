@@ -73,7 +73,7 @@ Can perform full records updates or partial records updates. See the 'indexingMe
         <triggers/>
     </job>
 
-    <job job-id="AlgoliaProductsPricesIndex_v2" priority="0">
+    <job job-id="AlgoliaProductPricesIndex_v2" priority="0">
         <description>Reindex price data for each product assigned to the current site.
 Performs a partial update on the product objects in the Algolia index.</description>
         <parameters/>
@@ -95,7 +95,7 @@ Performs a partial update on the product objects in the Algolia index.</descript
         <triggers/>
     </job>
 
-    <job job-id="AlgoliaProductsInventoryIndex_v2" priority="0">
+    <job job-id="AlgoliaProductInventoryIndex_v2" priority="0">
         <description>Reindex inventory data for each product assigned to the current site.
 Performs a partial update on the product objects in the Algolia index.</description>
         <parameters/>
