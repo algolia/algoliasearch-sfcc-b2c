@@ -30,6 +30,10 @@ jest.mock('dw/io/File', () => {
     }
     return MockedFile;
 }, {virtual: true});
+jest.mock('dw/object/CustomObjectMgr', () => ({
+	createCustomObject: jest.fn(),
+	getCustomObject: jest.fn(),
+}), {virtual: true});
 jest.mock('dw/system/Logger', () => {
     return {
         info: jest.fn(),
@@ -86,16 +90,21 @@ jest.mock('dw/system/Site', () => {
 }, {virtual: true});
 jest.mock('dw/system/Status', () => {}, {virtual: true});
 jest.mock('dw/system/System', () => {}, {virtual: true});
-jest.mock('dw/system/Transaction', () => {}, {virtual: true});
+jest.mock('dw/system/Transaction', () => {
+	return {
+		wrap: function(callback) { return callback(); },
+	}
+}, {virtual: true});
 jest.mock('dw/util/Currency', () => {
     return {
         getCurrency: function (currency) { return currency; }
     }
 }, {virtual: true});
 jest.mock('dw/util/StringUtils', () => {
-    return {
-        trim: function (str) { return str; }
-    }
+	return {
+		trim: function (str) { return str; },
+		encodeBase64: function(str) { return str; },
+	}
 }, {virtual: true});
 jest.mock('dw/web/Resource', () => {
     return {
@@ -142,6 +151,9 @@ jest.mock('*/cartridge/scripts/algolia/filters/productFilter', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
 }, {virtual: true});
 
+jest.mock('*/cartridge/scripts/algolia/helper/AlgoliaJobLog', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/AlgoliaJobLog');
+}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/CPObjectIterator', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/CPObjectIterator');
 }, {virtual: true});

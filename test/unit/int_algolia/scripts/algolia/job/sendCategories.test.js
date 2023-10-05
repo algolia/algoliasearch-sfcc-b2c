@@ -77,13 +77,13 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/job/sendCategories');
 
-describe('getSubCategoriesModels', () => {
+describe('getSubCategoryModels', () => {
     test('default locale', () => {
-        var categoriesModels = job.getSubCategoriesModels(category, catalogId, 'default');
+        var categoriesModels = job.getSubCategoryModels(category, catalogId, 'default');
         expect(categoriesModels).toMatchSnapshot();
     });
     test('french locale', () => {
-        var categoriesModels = job.getSubCategoriesModels(category, catalogId, 'fr');
+        var categoriesModels = job.getSubCategoryModels(category, catalogId, 'fr');
         expect(categoriesModels).toMatchSnapshot();
     });
 });

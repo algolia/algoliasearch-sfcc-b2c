@@ -5,17 +5,17 @@ var ProductMgr = require('dw/catalog/ProductMgr');
 var logger;
 
 // job step parameters
-var resourceType, fieldListOverride;
+var paramFieldListOverride, paramIndexingMethod;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, AlgoliaJobLog;
 var indexingOperation;
 
 // logging-related variables
-var logData, updateLogType;
+var jobLog, jobID;
+const jobType = 'product';
 
 var products = [], siteLocales, nonLocalizedAttributes = [], fieldsToSend;
-var indexingMethod;
 var lastIndexingTasks = {};
 
 /*
@@ -53,20 +53,15 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
+    AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
 
-    // checking mandatory parameters
-    if (empty(parameters.resourceType)) {
-        let errorMessage = 'Mandatory job step parameter "resourceType" missing!';
-        jobHelper.logError(errorMessage);
-        return;
-    }
+    jobID = stepExecution.getJobExecution().getJobID();
 
     // parameters
-    resourceType = parameters.resourceType; // resouceType ( price | inventory | product ) - pass it along to sendChunk()
-    fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
-    indexingMethod = parameters.indexingMethod || 'partialRecordUpdate';
+    paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sending method
+    paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate';
 
-    switch (indexingMethod) {
+    switch (paramIndexingMethod) {
         case 'fullRecordUpdate':
         case 'fullCatalogReindexUpdate':
             indexingOperation = 'addObject';
@@ -77,11 +72,11 @@ exports.beforeStep = function(parameters, stepExecution) {
             break;
     }
 
-    if (empty(fieldListOverride)) {
+    if (empty(paramFieldListOverride)) {
         const customFields = algoliaData.getSetOfArray('CustomFields');
         fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
     } else {
-        fieldsToSend = fieldListOverride;
+        fieldsToSend = paramFieldListOverride;
     }
 
     Object.keys(algoliaProductConfig.attributeConfig).forEach(function(attributeName) {
@@ -97,35 +92,15 @@ exports.beforeStep = function(parameters, stepExecution) {
     siteLocales = Site.getCurrent().getAllowedLocales();
     logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
 
-    // configure logging
-    switch (resourceType) {
-        case 'price': updateLogType = 'LastPartialPriceSyncLog'; break;
-        case 'inventory': updateLogType = 'LastPartialInventorySyncLog'; break;
-        case 'product': updateLogType = 'LastProductSyncLog'; break;
-    }
-
-    // initializing logs
-    logData = algoliaData.getLogData(updateLogType) || {};
-    logData.processedDate = algoliaData.getLocalDateTime(new Date());
-    logData.processedError = true;
-    logData.processedErrorMessage = '';
-    logData.processedRecords = 0;
-    logData.processedToUpdateRecords = 0;
-
-    logData.sendDate = algoliaData.getLocalDateTime(new Date());
-    logData.sendError = true;
-    logData.sendErrorMessage = '';
-    logData.sentChunks = 0;
-    logData.sentRecords = 0;
-    logData.failedChunks = 0;
-    logData.failedRecords = 0;
+    // initializing logging
+    jobLog = new AlgoliaJobLog(jobID, jobType);
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
         stepID: stepExecution.getStepID()
     });
 
-    if (indexingMethod === 'fullCatalogReindex') {
+    if (paramIndexingMethod === 'fullCatalogReindex') {
         indexingOperation = 'addObject';
         logger.info('Deleting existing temporary indices...');
         var deletionTasks = reindexHelper.deleteTemporaryIndices('products', siteLocales.toArray());
@@ -179,18 +154,17 @@ exports.process = function(product, parameters, stepExecution) {
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var indexName = algoliaData.calculateIndexName('products', locale);
-            if (indexingMethod === 'fullCatalogReindex') {
-                indexName += '.tmp'
-            }
-            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldListOverride, baseModel);
-            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName))
+
+            if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
+
+            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, paramFieldListOverride, baseModel);
+            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
         }
 
-        logData.processedRecords++;
-        logData.processedToUpdateRecords++;
+        jobLog.processedRecords++; // number of actual products processed
+        jobLog.processedRecordsToUpdate += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per product)
 
         return algoliaOperations;
-
     }
 }
 
@@ -216,12 +190,12 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
     status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
     if (status.error) {
-        logData.failedChunks++;
-        logData.failedRecords += batch.length;
+        jobLog.failedChunks++;
+        jobLog.failedRecords += batch.length;
     }
     else {
-        logData.sentRecords += batch.length;
-        logData.sentChunks++;
+        jobLog.sentRecords += batch.length;
+        jobLog.sentChunks++;
 
         // Store Algolia indexing tasks ids.
         // When doing a fullCatalogReindex, we will wait to the last indexing tasks in the afterStep.
@@ -247,28 +221,28 @@ exports.afterStep = function(success, parameters, stepExecution) {
     products.close();
 
     if (success) {
-        logData.processedError = false;
-        logData.processedErrorMessage = '';
-        logData.sendError = false;
-        logData.sendErrorMessage = '';
+        jobLog.processedError = false;
+        jobLog.processedErrorMessage = '';
+        jobLog.sendError = false;
+        jobLog.sendErrorMessage = '';
     } else {
         let errorMessage = 'An error occurred during the job. Please see the error log for more details.';
-        logData.processedError = true;
-        logData.processedErrorMessage = errorMessage;
-        logData.sendError = true;
-        logData.sendErrorMessage = errorMessage;
+        jobLog.processedError = true;
+        jobLog.processedErrorMessage = errorMessage;
+        jobLog.sendError = true;
+        jobLog.sendErrorMessage = errorMessage;
     }
 
-    if (indexingMethod === 'fullCatalogReindex') {
+    if (paramIndexingMethod === 'fullCatalogReindex') {
         reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
     }
 
-    logData.processedDate = algoliaData.getLocalDateTime(new Date());
-    logData.sendDate = algoliaData.getLocalDateTime(new Date());
-    algoliaData.setLogData(updateLogType, logData);
+    jobLog.processedDate = new Date(); // there's no separate date for processing and sending due to the nature of the job
+    jobLog.sendDate = new Date();
+    jobLog.writeToCustomObject();
 
     logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
-        logData.sentChunks, logData.failedChunks, logData.sentRecords, logData.failedRecords);
+        jobLog.sentChunks, jobLog.failedChunks, jobLog.sentRecords, jobLog.failedRecords);
 }
 
 // For testing

@@ -13,7 +13,7 @@ var utils = require('../lib/utils');
  * @param {string} locale - The locale to use to fetch the categories properties
  * @returns {Array} the category and all its subcategories converted to objects ready to be indexed
  */
-function getSubCategoriesModels(category, catalogId, locale) {
+function getSubCategoryModels(category, catalogId, locale) {
     var res = [];
     if (!category.custom || !category.custom.showInMenu
       || (!category.hasOnlineProducts() && !category.hasOnlineSubCategories())) {
@@ -24,7 +24,7 @@ function getSubCategoriesModels(category, catalogId, locale) {
 
     var subCategories = category.getOnlineSubCategories();
     utils.forEach(subCategories, function (subcategory) {
-        res = res.concat(getSubCategoriesModels(subcategory, catalogId, locale));
+        res = res.concat(getSubCategoryModels(subcategory, catalogId, locale));
     });
     return res;
 }
@@ -91,7 +91,7 @@ function runCategoryExport(parameters, stepExecution) {
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
-            var localizedCategories = getSubCategoriesModels(category, siteCatalogId, locale);
+            var localizedCategories = getSubCategoryModels(category, siteCatalogId, locale);
 
             for (let i = 0; i < localizedCategories.length; ++i) {
                 batch.push(new jobHelper.AlgoliaOperation('addObject', localizedCategories[i], tmpIndexName));
@@ -134,4 +134,4 @@ function runCategoryExport(parameters, stepExecution) {
 module.exports.execute = runCategoryExport;
 
 // for testing
-module.exports.getSubCategoriesModels = getSubCategoriesModels;
+module.exports.getSubCategoryModels = getSubCategoryModels;

@@ -9,16 +9,16 @@ var logger;
 var paramConsumer, paramDeltaExportJobName, paramFieldListOverride, paramIndexingMethod;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator, AlgoliaJobLog;
 
 // logging-related variables and constants
-var logData;
-const updateLogType = 'LastProductDeltaSyncLog';
-const resourceType = 'productdelta';
+var jobLog, jobID;
+const jobType = 'product';
 
 var l0_deltaExportDir, l1_processingDir, l1_completedDir;
 var changedProducts = [], changedProductsIterator;
 var deltaExportZips, siteLocales, nonLocalizedAttributes = [], fieldsToSend;
+
 var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on the step parameter 'indexingMethod'
 const deleteIndexingOperation = 'deleteObject';
 
@@ -59,6 +59,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
 
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
+    AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
+
+    jobID = stepExecution.getJobExecution().getJobID();
 
     // checking mandatory parameters
     if (empty(parameters.consumer) || empty(parameters.deltaExportJobName)) {
@@ -70,7 +73,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     // parameters
     paramConsumer = parameters.consumer.trim();
     paramDeltaExportJobName = parameters.deltaExportJobName.trim();
-    paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
+    paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
 
     switch (paramIndexingMethod) {
@@ -104,21 +107,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     siteLocales = Site.getCurrent().getAllowedLocales();
     logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
 
-    // initializing log data
-    logData = algoliaData.getLogData(updateLogType) || {};
-    logData.processedDate = algoliaData.getLocalDateTime(new Date());
-    logData.processedError = true;
-    logData.processedErrorMessage = '';
-    logData.processedRecords = 0;
-    logData.processedToUpdateRecords = 0;
+    // initializing logging
+    jobLog = new AlgoliaJobLog(jobID, jobType);
 
-    logData.sendDate = algoliaData.getLocalDateTime(new Date());
-    logData.sendError = true;
-    logData.sendErrorMessage = '';
-    logData.sentChunks = 0;
-    logData.sentRecords = 0;
-    logData.failedChunks = 0;
-    logData.failedRecords = 0;
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
@@ -126,6 +117,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     });
 
     // ----------------------------- Extracting productIDs from the output of the Delta Export -----------------------------
+
 
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
@@ -188,13 +180,16 @@ exports.beforeStep = function(parameters, stepExecution) {
                 let result = jobHelper.updateCPObjectFromXML(catalogFile, changedProducts, 'catalog');
 
                 if (result.success) {
-                    logData.processedRecords += result.nrProductsRead;
+                    jobLog.processedRecords += result.nrProductsRead;
                 } else {
                     // abort if error reading from any of the delta export zips
                     let errorMessage = 'Error reading from file: ' + catalogFile;
                     jobHelper.logError(errorMessage);
-                    logData.processedErrorMessage = errorMessage;
-                    algoliaData.setLogData(updateLogType, logData);
+
+                    jobLog.processedError = true;
+                    jobLog.processedErrorMessage = errorMessage;
+                    jogLog.writeToCustomObject();
+
                     return;
                 }
             });
@@ -205,8 +200,9 @@ exports.beforeStep = function(parameters, stepExecution) {
         fileHelper.removeFolderRecursively(l2_tempZipDir);
     });
 
-    // writing number of records read from the B2C delta zips
-    jobHelper.logInfo(logData.processedRecords + ' records read from B2C delta zips');
+    // writing number of records read from the B2C delta zips and recording the time
+    jobLog.processedDate = new Date();
+    jobHelper.logInfo(jobLog.processedRecords + ' records read from B2C delta zips');
 
     // cleanup - removing "_processing" dir
     fileHelper.removeFolderRecursively(l1_processingDir);
@@ -271,8 +267,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
         }
     }
 
-    logData.processedToUpdateRecords++;
-
+    jobLog.processedRecordsToUpdate += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per product)
     return algoliaOperations;
 }
 
@@ -299,11 +294,11 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
 
     if (status.error) {
-        logData.failedChunks++;
-        logData.failedRecords += batch.length;
+        jobLog.failedChunks++;
+        jobLog.failedRecords += batch.length;
     } else {
-        logData.sentRecords += batch.length;
-        logData.sentChunks++;
+        jobLog.sentRecords += batch.length;
+        jobLog.sentChunks++;
     }
 }
 
@@ -320,33 +315,40 @@ exports.afterStep = function(success, parameters, stepExecution) {
     // Any prior return statements will set success to false (even if it returns Status.OK).
 
     if (success) {
-        logData.processedError = false;
-        logData.processedErrorMessage = '';
-        logData.sendError = false;
-        logData.sendErrorMessage = '';
+        jobLog.processedError = false;
+        jobLog.processedErrorMessage = '';
+        jobLog.sendError = false;
+        jobLog.sendErrorMessage = '';
 
-        // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
-        deltaExportZips.forEach(function(filename) {
-            let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
-            let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
-            fileHelper.moveFile(currentZipFile, targetZipFile);
 
-            let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
-            let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
-            fileHelper.moveFile(currentMetaFile, targetMetaFile);
-        });
+
+
+        // // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
+        // deltaExportZips.forEach(function(filename) {
+        //     let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
+        //     let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
+        //     fileHelper.moveFile(currentZipFile, targetZipFile);
+
+        //     let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
+        //     let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
+        //     fileHelper.moveFile(currentMetaFile, targetMetaFile);
+        // });
+
+
+
+
     } else {
         let errorMessage = 'An error occurred during the job. Please see the error log for more details.';
-        logData.processedError = true;
-        logData.processedErrorMessage = errorMessage;
-        logData.sendError = true;
-        logData.sendErrorMessage = errorMessage;
+
+        jobLog.processedError = true;
+        jobLog.processedErrorMessage = errorMessage;
+        jobLog.sendError = true;
+        jobLog.sendErrorMessage = errorMessage;
     }
 
-    logData.processedDate = algoliaData.getLocalDateTime(new Date());
-    logData.sendDate = algoliaData.getLocalDateTime(new Date());
-    algoliaData.setLogData(updateLogType, logData);
+    jobLog.sendDate = new Date();
+    jobLog.writeToCustomObject();
 
     logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
-        logData.sentChunks, logData.failedChunks, logData.sentRecords, logData.failedRecords);
+        jobLog.sentChunks, jobLog.failedChunks, jobLog.sentRecords, jobLog.failedRecords);
 }
