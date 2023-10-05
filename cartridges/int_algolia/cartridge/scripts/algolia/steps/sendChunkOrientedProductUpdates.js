@@ -110,6 +110,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     logData.failedChunks = 0;
     logData.failedRecords = 0;
 
+    algoliaIndexingAPI.setJobInfo({
+        jobID: stepExecution.getJobExecution().getJobID(),
+        stepID: stepExecution.getStepID()
+    });
+
     if (indexingMethod === 'fullCatalogReindex') {
         indexingOperation = 'addObject';
         logger.info('Deleting existing temporary indices...');

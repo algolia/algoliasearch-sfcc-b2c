@@ -120,6 +120,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     logData.failedChunks = 0;
     logData.failedRecords = 0;
 
+    algoliaIndexingAPI.setJobInfo({
+        jobID: stepExecution.getJobExecution().getJobID(),
+        stepID: stepExecution.getStepID()
+    });
+
     // ----------------------------- Extracting productIDs from the output of the Delta Export -----------------------------
 
     var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
@@ -243,7 +248,6 @@ exports.read = function(parameters, stepExecution) {
  */
 exports.process = function(cpObj, parameters, stepExecution) {
     var product = ProductMgr.getProduct(cpObj.productID);
-    var productUpdateObj;
 
     let algoliaOperations = [];
 

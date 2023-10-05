@@ -33,9 +33,10 @@ function getSubCategoriesModels(category, catalogId, locale) {
  * Job that fetch all categories of the site catalog, convert them into AlgoliaOperations
  * and send them for indexing.
  * @param {dw.util.HashMap} parameters job step parameters
+ * @param {dw.job.JobStepExecution} stepExecution job step execution
  * @returns {dw.system.Status} - status
  */
-function runCategoryExport(parameters) {
+function runCategoryExport(parameters, stepExecution) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     var reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
@@ -65,8 +66,13 @@ function runCategoryExport(parameters) {
     categoryLogData.failedChunks = 0;
     categoryLogData.failedRecords = 0;
 
-    logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray())
-    logger.info('CatalogID: ' + siteCatalogId)
+    logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray());
+    logger.info('CatalogID: ' + siteCatalogId);
+
+    algoliaIndexingAPI.setJobInfo({
+        jobID: stepExecution.getJobExecution().getJobID(),
+        stepID: stepExecution.getStepID()
+    });
 
     try {
         logger.info('Deleting existing temporary indices...');
