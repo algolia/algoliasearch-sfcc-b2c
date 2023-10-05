@@ -75,7 +75,7 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     };
 }, {virtual: true});
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/job/sendCategories');
+const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendCategories');
 
 describe('getSubCategoryModels', () => {
     test('default locale', () => {

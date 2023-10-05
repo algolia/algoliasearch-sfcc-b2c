@@ -6,7 +6,7 @@
 			"@supports-site-context": "true",
 			"@supports-organization-context": "false",
 			"description": "Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.",
-			"module": "int_algolia/cartridge/scripts/algolia/job/sendCategories.js",
+			"module": "int_algolia/cartridge/scripts/algolia/steps/sendCategories.js",
 			"function": "execute",
 			"transactional": "false",
 			"timeout-in-seconds": "600",
