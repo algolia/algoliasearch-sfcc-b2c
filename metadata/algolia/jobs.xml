@@ -61,7 +61,7 @@ Can perform full records updates or partial records updates. See the 'indexingMe
                 <parameters>
                     <parameter name="resourceType">products</parameter>
                     <parameter name="fieldListOverride"/>
-                    <parameter name="indexingMethod">fullRecordUpdate</parameter>
+                    <parameter name="indexingMethod">fullCatalogReindex</parameter>
                 </parameters>
             </step>
         </flow>
