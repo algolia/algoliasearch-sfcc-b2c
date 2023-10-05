@@ -306,7 +306,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
 exports.afterStep = function(success, parameters, stepExecution) {
-    // You can't define the exit status for a chunk-oriented script module.
+    // An exit status cannot be defined for a chunk-oriented script module.
     // Chunk modules always finish with either OK or ERROR.
     // "success" conveys whether an error occurred in any previous chunks or not.
     // Any prior return statements will set success to false (even if it returns Status.OK).

@@ -47,7 +47,7 @@ function runCategoryExport(parameters, stepExecution) {
     var currentSite = Site.getCurrent();
     var siteLocales = currentSite.getAllowedLocales();
     var siteCatalog = catalogMgr.getSiteCatalog();
-    var siteCatalogId = siteCatalog.getID();
+    var siteCatalogID = siteCatalog.getID();
     var siteRootCategory = siteCatalog.getRoot();
     var topLevelCategories = siteRootCategory.hasOnlineSubCategories()
         ? siteRootCategory.getOnlineSubCategories().iterator() : null;
@@ -55,7 +55,7 @@ function runCategoryExport(parameters, stepExecution) {
     var jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'category');
 
     logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray());
-    logger.info('CatalogID: ' + siteCatalogId);
+    logger.info('CatalogID: ' + siteCatalogID);
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
@@ -79,7 +79,7 @@ function runCategoryExport(parameters, stepExecution) {
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
-            var localizedCategories = getSubCategoryModels(category, siteCatalogId, locale);
+            var localizedCategories = getSubCategoryModels(category, siteCatalogID, locale);
 
             for (let i = 0; i < localizedCategories.length; ++i) {
                 batch.push(new jobHelper.AlgoliaOperation('addObject', localizedCategories[i], tmpIndexName));
