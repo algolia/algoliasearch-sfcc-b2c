@@ -54,7 +54,7 @@ const stepExecution = {
 
 describe('process', () => {
     test('default', () => {
-        job.beforeStep({ resourceType: 'test' });
+        job.beforeStep({ resourceType: 'test' }, stepExecution);
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
