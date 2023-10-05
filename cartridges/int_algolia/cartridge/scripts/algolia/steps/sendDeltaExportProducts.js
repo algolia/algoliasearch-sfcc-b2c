@@ -1,5 +1,7 @@
 'use strict';
 
+// This is the sequential version of the chunk-based delta export job. It is now deprecated and should not be used.
+
 /*
     This job takes the productIDs from a standard B2C product delta export (configured as the job's first step),
     then retrieves the products, enriches them and then sends them to Algolia.

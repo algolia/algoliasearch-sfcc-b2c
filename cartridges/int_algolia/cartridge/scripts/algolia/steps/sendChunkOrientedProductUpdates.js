@@ -12,8 +12,7 @@ var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reind
 var indexingOperation;
 
 // logging-related variables
-var jobLog, jobID;
-const jobType = 'product';
+var jobLog;
 
 var products = [], siteLocales, nonLocalizedAttributes = [], fieldsToSend;
 var lastIndexingTasks = {};
@@ -55,8 +54,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
 
-    jobID = stepExecution.getJobExecution().getJobID();
-
     // parameters
     paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate';
@@ -93,7 +90,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
 
     // initializing logging
-    jobLog = new AlgoliaJobLog(jobID, jobType);
+    jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'product');
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),

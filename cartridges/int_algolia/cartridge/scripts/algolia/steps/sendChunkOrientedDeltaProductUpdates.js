@@ -12,8 +12,7 @@ var paramConsumer, paramDeltaExportJobName, paramFieldListOverride, paramIndexin
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator, AlgoliaJobLog;
 
 // logging-related variables and constants
-var jobLog, jobID;
-const jobType = 'product';
+var jobLog;
 
 var l0_deltaExportDir, l1_processingDir, l1_completedDir;
 var changedProducts = [], changedProductsIterator;
@@ -61,8 +60,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
     AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
 
-    jobID = stepExecution.getJobExecution().getJobID();
-
     // checking mandatory parameters
     if (empty(parameters.consumer) || empty(parameters.deltaExportJobName)) {
         let errorMessage = 'Mandatory job step parameters missing!';
@@ -108,7 +105,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
 
     // initializing logging
-    jobLog = new AlgoliaJobLog(jobID, jobType);
+    jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'product');
 
 
     algoliaIndexingAPI.setJobInfo({
@@ -320,7 +317,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
         jobLog.sendError = false;
         jobLog.sendErrorMessage = '';
 
-        // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
+        // // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
         deltaExportZips.forEach(function(filename) {
             let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
             let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
@@ -330,6 +327,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
             let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
             fileHelper.moveFile(currentMetaFile, targetMetaFile);
         });
+
     } else {
         let errorMessage = 'An error occurred during the job. Please see the error log for more details.';
 
