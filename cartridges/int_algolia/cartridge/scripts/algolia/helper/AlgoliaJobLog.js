@@ -29,11 +29,10 @@ const AlgoliaJobLog = function(jobID, jobType) {
 AlgoliaJobLog.prototype.writeToCustomObject = function() {
     const CustomObjectMgr = require('dw/object/CustomObjectMgr');
     const Transaction = require('dw/system/Transaction');
+    const System = require('dw/system/System');
+    const StringUtils = require('dw/util/StringUtils');
 
-    var StringUtils = require('dw/util/StringUtils');
-    var uniqueID = StringUtils.encodeBase64(Math.floor(Date.now() / 1000).toString()); // current UNIX timestamp in seconds, base64-encoded
-
-    const customObjectID = this.jobID + '__' + uniqueID;
+    const customObjectID = this.jobID + '__' + StringUtils.formatCalendar(System.getCalendar(), 'yyMMddHHmmss'); // returns GMT time
 
     let that = this; // context changes inside Transaction.wrap()
 
@@ -63,21 +62,25 @@ AlgoliaJobLog.prototype.writeToCustomObject = function() {
     return true;
 }
 
-AlgoliaJobLog.prototype.readFromCustomObject = function(customObject) {
+AlgoliaJobLog.prototype.formatCustomObject = function(customObject) {
+    const StringUtils = require('dw/util/StringUtils');
+    const Calendar = require('dw/util/Calendar');
+
     this.jobID = customObject.custom.jobID;
     this.jobType = customObject.custom.jobType;
-    this.processedDate = customObject.custom.processedDate;
+    this.processedDate = StringUtils.formatCalendar(new Calendar(customObject.custom.processedDate));
     this.processedError = customObject.custom.processedError;
     this.processedErrorMessage = customObject.custom.processedErrorMessage;
-    this.processedRecords = customObject.custom.processedRecords;
-    this.processedRecordsToUpdate = customObject.custom.processedRecordsToUpdate;
-    this.sendDate = customObject.custom.sendDate;
+    this.processedRecords = customObject.custom.processedRecords.toFixed();
+    this.processedRecordsToUpdate = customObject.custom.processedRecordsToUpdate.toFixed();
+    this.sendDate = StringUtils.formatCalendar(new Calendar(customObject.custom.sendDate));
     this.sendError = customObject.custom.sendError;
     this.sendErrorMessage = customObject.custom.sendErrorMessage;
-    this.sentChunks = customObject.custom.sentChunks;
-    this.sentRecords = customObject.custom.sentRecords;
-    this.failedChunks = customObject.custom.failedChunks;
-    this.failedRecords = customObject.custom.failedRecords;
+    this.sentChunks = customObject.custom.sentChunks.toFixed();
+    this.sentRecords = customObject.custom.sentRecords.toFixed();
+    this.failedChunks = customObject.custom.failedChunks.toFixed();
+    this.failedRecords = customObject.custom.failedRecords.toFixed();
+    return this;
 }
 
 module.exports = AlgoliaJobLog;

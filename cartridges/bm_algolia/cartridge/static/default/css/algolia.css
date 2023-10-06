@@ -1,8 +1,27 @@
 .tab {
     padding: 0.5em;
 }
-  
 .tab-title {
-    padding: 1em;
+    padding: 3px;
+}
+table#indexing-status {
+    margin: 2em auto;
+}
+table#co-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 2em auto;
+    border: 1px solid #dadada;
+}
+.label {
+    font-weight: 400;
+}
+.b {
     font-weight: bold;
+}
+td {
+    padding: 0;
+}
+tr {
+    padding: 0;
 }

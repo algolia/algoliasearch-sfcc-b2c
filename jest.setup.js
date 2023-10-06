@@ -89,11 +89,26 @@ jest.mock('dw/system/Site', () => {
     }
 }, {virtual: true});
 jest.mock('dw/system/Status', () => {}, {virtual: true});
-jest.mock('dw/system/System', () => {}, {virtual: true});
+jest.mock('dw/system/System', () => {
+    return {
+        getCalendar: function() {
+            return {
+                getTime: function() {
+                    return new Date();
+                }
+            }
+        }
+    }
+}, {virtual: true});
 jest.mock('dw/system/Transaction', () => {
 	return {
 		wrap: function(callback) { return callback(); },
 	}
+}, {virtual: true});
+jest.mock('dw/util/Calendar', () => {
+    return function() {
+        return new Date();
+    }
 }, {virtual: true});
 jest.mock('dw/util/Currency', () => {
     return {
@@ -103,7 +118,7 @@ jest.mock('dw/util/Currency', () => {
 jest.mock('dw/util/StringUtils', () => {
 	return {
 		trim: function (str) { return str; },
-		encodeBase64: function(str) { return str; },
+		formatCalendar: function(str1, str2) { return str1; },
 	}
 }, {virtual: true});
 jest.mock('dw/web/Resource', () => {

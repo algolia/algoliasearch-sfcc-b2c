@@ -24,6 +24,7 @@
             </td>
         </tr>
     </tbody></table>
+
     <div class="algolia-bm-settings">
         <form action="${pdict.setttingsUpdateUrl}" class="form-horizontal" method="post">
         <input type="hidden" name="csrf_token" />
@@ -151,7 +152,8 @@
         </form>
     </div>
 
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+    <iscomment> Stream monitoring, deprecated</iscomment>
+    <table id="indexing-status" border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
             <tr>
                 <td class="table_header w s center tab-title" nowrap="nowrap" width="33%" colspan="1">
@@ -166,10 +168,10 @@
             </tr>
             <isloop items="${pdict.algoliaData.getAlgoliaSites()}" var="site">
                 <tr class="site-status-row" data-get-status-url="${URLUtils.https('AlgoliaBM-Indexing', 'siteID', site.ID, 'requestType', 'status').toString()}">
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         ${Resource.msgf('algolia.msg.indexingstatus', 'algolia', null, site.name, site.ID)}
                     </td>
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         <span
                             class="status-result"
                             data-general-error-msg="${Resource.msg('algolia.msg.error', 'algolia', null)}"
@@ -177,7 +179,7 @@
                             ${Resource.msg('algolia.msg.loading', 'algolia', null)}
                         </span>
                     </td>
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         <button
                             class="clean-queue-btn"
                             data-success-msg="${Resource.msg('algolia.msg.indexingcleaned', 'algolia', null)}"
@@ -208,6 +210,80 @@
     >
     </div>
 
+
+    <iscomment> Custom Object log table </iscomment>
+    <isloop items="${pdict.latestLogs}" var="log">
+        <table border="1" cellpadding="0" cellspacing="0" id="co-table">
+            <tbody>
+                <tr>
+                    <td class="table_header center tab-title" colspan="7">
+                        <isprint value="${log.jobID}" encoding="jshtml" />
+                    </td>
+                    <td class="table_header center tab-title" colspan="1">
+                        <isprint value="${log.jobType}" encoding="jshtml" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="center tab-title label" colspan="4">${Resource.msg('algolia.label.processed', 'algolia', null)}</td>
+                    <td class="center tab-title label" colspan="4">${Resource.msg('algolia.label.sent', 'algolia', null)}</td>
+                </tr>
+                <tr>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.date', 'algolia', null)}</td>
+                    <td class="center tab-title" colspan="3">
+                        <isprint value="${log.processedDate}" />
+                    </td>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.date', 'algolia', null)}</td>
+                    <td class="center tab-title" colspan="3">
+                        <isprint value="${log.sendDate}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.error', 'algolia', null)}</td>
+                    <td class="center tab-title" colspan="3">
+                        <isprint value="${log.processedError ? log.processedErrorMessage : '—'}" encoding="jshtml" />
+                    </td>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.error', 'algolia', null)}</td>
+                    <td class="center tab-title" colspan="3">
+                        <isprint value="${log.sendError ? log.sendErrorMessage : '—'}" encoding="jshtml" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.products', 'algolia', null)}</td>
+                    <td class="center tab-title" colspan="3">
+                        <isprint value="${log.processedRecords}" encoding="jshtml" />
+                    </td>
+
+                    <td class="center tab-title label">${Resource.msg('algolia.label.chunkssent', 'algolia', null)}</td>
+                    <td class="center tab-title">
+                        <isprint value="${log.sentChunks}" encoding="jshtml" />
+                    </td>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.chunkssent', 'algolia', null)}</td>
+                    <td class="center tab-title">
+                        <isprint value="${log.failedChunks}" encoding="jshtml" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.records', 'algolia', null)}</td>
+                    <td class="center tab-title" colspan="3">
+                        <isprint value="${log.processedRecordsToUpdate}" encoding="jshtml" />
+                    </td>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.recordssent', 'algolia', null)}</td>
+                    <td class="center tab-title">
+                        <isprint value="${log.sentRecords}" encoding="jshtml" />
+                    </td>
+                    <td class="center tab-title label">${Resource.msg('algolia.label.recordsfailed', 'algolia', null)}</td>
+                    <td class="center tab-title">
+                        <isprint value="${log.failedRecords}" encoding="jshtml" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </isloop>
+
+
+    <iscomment> Deprecated, to be removed </iscomment>
+    <iscomment>
+
     <isloop items="${pdict.algoliaData.getLogDataAllSites()}" var="logData">
         <p></p>
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -225,4 +301,7 @@
         <isinclude template="algoliabm/dashboard/productInventoryLog" />
         <isinclude template="algoliabm/dashboard/categoryLog" />
     </isloop>
+
+
+    </iscomment>
 </isdecorate>
