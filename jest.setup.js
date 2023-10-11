@@ -131,8 +131,8 @@ jest.mock('*/cartridge/scripts/services/algoliaIndexingService', () => {}, {virt
 
 // The following are not mocks, it points SFCC relative requires to the actual files
 // https://developer.salesforce.com/docs/commerce/b2c-commerce/guide/usingjavascriptmodules.html#path-lookup-behavior-of-the-require-method
-jest.mock('*/version', () => {
-    return jest.requireActual('./cartridges/int_algolia/version');
+jest.mock('*/algoliaconfig', () => {
+    return jest.requireActual('./cartridges/int_algolia/algoliaconfig');
 }, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/customization/productModelCustomizer');
