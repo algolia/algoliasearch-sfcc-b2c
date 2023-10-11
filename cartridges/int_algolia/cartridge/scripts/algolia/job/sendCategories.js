@@ -130,7 +130,7 @@ function runCategoryExport(parameters, stepExecution) {
     if (categoryLogData.failedRecords === 0) {
         reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
     } else {
-        throw new Error('Some records failed to be indexed (check the above logs for details). Not moving temporaries indices to production.');
+        throw new Error('Some records failed to be indexed (check the logs for details). Not moving temporaries indices to production.');
     }
 }
 

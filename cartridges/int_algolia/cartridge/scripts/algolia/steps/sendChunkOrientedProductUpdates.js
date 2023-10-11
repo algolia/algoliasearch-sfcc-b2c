@@ -271,8 +271,10 @@ exports.afterStep = function(success, parameters, stepExecution) {
         if (logData.failedRecords === 0) {
             reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
         } else {
-            throw new Error('Some records failed to be indexed (check the above logs for details). Not moving temporaries indices to production.');
+            throw new Error('Some records failed to be indexed (check the logs for details). Not moving temporaries indices to production.');
         }
+    } else if (logData.failedChunks > 0) {
+        throw new Error('Some chunks failed to be sent, check the logs for details.');
     }
 }
 
