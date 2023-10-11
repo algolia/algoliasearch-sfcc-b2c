@@ -7,6 +7,16 @@ const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaInde
 const retryableCall = require('*/cartridge/scripts/algolia/helper/retryStrategy').retryableCall;
 const logger = require('dw/system/Logger').getLogger('algolia');
 
+var __jobInfo = {};
+
+/**
+ * Set information about the job using the API Client
+ * @param {Object} jobInfo - object with the following structure: { "jobID": "", "stepID": "" }
+ */
+function setJobInfo(jobInfo) {
+    __jobInfo = jobInfo;
+}
+
 /**
  * Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
  * @param {string} indexName - name of the index to target
@@ -14,7 +24,7 @@ const logger = require('dw/system/Logger').getLogger('algolia');
  * @returns {dw.svc.Result} - result of the call
  */
 function sendBatch(indexName, requestsArray) {
-    var indexingService = algoliaIndexingService.getService();
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
 
     var result = retryableCall(
         indexingService,
@@ -41,7 +51,7 @@ function sendBatch(indexName, requestsArray) {
  * @returns {dw.svc.Result} - result of the call
  */
 function sendMultiIndicesBatch(requestsArray) {
-    var indexingService = algoliaIndexingService.getService();
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
 
     var result = retryableCall(
         indexingService,
@@ -67,7 +77,7 @@ function sendMultiIndicesBatch(requestsArray) {
  * @returns {dw.svc.Result} - result of the call
  */
 function deleteIndex(indexName) {
-    var indexingService = algoliaIndexingService.getService();
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
 
     var result = retryableCall(
         indexingService,
@@ -91,7 +101,7 @@ function deleteIndex(indexName) {
  * @returns {dw.svc.Result} - result of the call
  */
 function copyIndexSettings(indexNameSrc, indexNameDest) {
-    var indexingService = algoliaIndexingService.getService();
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
 
     var result = retryableCall(
         indexingService,
@@ -120,7 +130,7 @@ function copyIndexSettings(indexNameSrc, indexNameDest) {
  * @returns {dw.svc.Result} - result of the call
  */
 function moveIndex(indexNameSrc, indexNameDest) {
-    var indexingService = algoliaIndexingService.getService();
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
 
     var result = retryableCall(
         indexingService,
@@ -149,7 +159,7 @@ function moveIndex(indexNameSrc, indexNameDest) {
  * @param {number} taskID - id of the task
  */
 function waitTask(indexName, taskID) {
-    var indexingService = algoliaIndexingService.getService();
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
     var maxWait = 5 * 60 * 1000;
     var start = Date.now();
     var nbRequestsSent = 0;
@@ -177,6 +187,7 @@ function waitTask(indexName, taskID) {
     throw new Error('Max wait time reached. TaskID: ' + taskID + '; index: ' + indexName);
 }
 
+module.exports.setJobInfo = setJobInfo;
 module.exports.sendBatch = sendBatch;
 module.exports.sendMultiIndicesBatch = sendMultiIndicesBatch;
 module.exports.deleteIndex = deleteIndex;

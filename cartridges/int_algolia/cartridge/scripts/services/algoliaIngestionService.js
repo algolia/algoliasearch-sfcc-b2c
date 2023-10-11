@@ -3,6 +3,8 @@
 const LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
+const version = require('*/algoliaconfig').version;
+
 /**
  * Algolia Ingestion Service definition file
  * @returns {dw.svc.HTTPService} - HTTPService object
@@ -23,7 +25,7 @@ function getService() {
             service.addHeader('Content-Type', 'application/json; charset=UTF-8');
             service.addHeader('X-Algolia-Application-Id', applicationID);
             service.addHeader('X-Algolia-API-Key', adminAPIKey);
-            service.addHeader('X-Algolia-Agent', 'Algolia Salesforce B2C v23.4.1');
+            service.addHeader('X-Algolia-Agent', 'Algolia Salesforce B2C v' + version);
 
             return JSON.stringify(requestBody);
         },

@@ -22,6 +22,7 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
 
 jest.mock('*/cartridge/scripts/services/algoliaIndexingService', () => {}, {virtual: true});
 
+const mockSetJobInfo = jest.fn();
 const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({
     ok: true,
     object: {
@@ -35,36 +36,50 @@ const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({
 });
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
+        setJobInfo: mockSetJobInfo,
         sendMultiIndicesBatch: mockSendMultiIndicesBatch,
     }
 }, {virtual: true});
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates');
 
+const stepExecution = {
+    getJobExecution: () => {
+        return {
+            getJobID: () => 'SendProductsTestJob',
+        }
+    },
+    getStepID: () => 'sendProductsTestStep',
+}
+
 describe('process', () => {
     test('default', () => {
-        job.beforeStep({ resourceType: 'test' });
+        job.beforeStep({ resourceType: 'test' }, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot(); //  "action" should be "partialUpdateObject" when no indexingMethod is specified
     });
     test('partialRecordUpdate', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'partialRecordUpdate' });
+        job.beforeStep({ resourceType: 'test', indexingMethod: 'partialRecordUpdate' }, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('fullRecordUpdate', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullRecordUpdate' });
+        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullRecordUpdate' }, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('fullCatalogReindex', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullCatalogReindex' });
+        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullCatalogReindex' }, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
         expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith('products', expect.arrayContaining(['default', 'fr', 'en']));
 
         var algoliaOperations = job.process(new ProductMock());
@@ -73,7 +88,7 @@ describe('process', () => {
 });
 
 test('send', () => {
-    job.beforeStep({ resourceType: 'test' });
+    job.beforeStep({ resourceType: 'test' }, stepExecution);
 
     const algoliaOperationsChunk = [];
     for (let i = 0; i < 3; ++i) {
@@ -101,12 +116,12 @@ describe('afterStep', () => {
     });
 
     test('partialRecordUpdate', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'partialRecordUpdate' });
+        job.beforeStep({ resourceType: 'test', indexingMethod: 'partialRecordUpdate' }, stepExecution);
         job.afterStep();
         expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
     });
     test('fullCatalogReindex', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullCatalogReindex' });
+        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullCatalogReindex' }, stepExecution);
         job.afterStep();
         expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
             'products',
