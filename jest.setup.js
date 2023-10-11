@@ -85,7 +85,10 @@ jest.mock('dw/system/Site', () => {
                         default:
                             return null;
                     }
-                }
+                },
+                getTimezone: function() {
+                    return 'Europe/Paris';
+                },
             };
         }
     }
@@ -99,7 +102,10 @@ jest.mock('dw/system/System', () => {
                     return new Date();
                 }
             }
-        }
+        },
+        getInstanceTimeZone: function() {
+            return 'Europe/Paris';
+        },
     }
 }, {virtual: true});
 jest.mock('dw/system/Transaction', () => {
@@ -108,8 +114,23 @@ jest.mock('dw/system/Transaction', () => {
 	}
 }, {virtual: true});
 jest.mock('dw/util/Calendar', () => {
-    return function() {
-        return new Date();
+    return class CalendarMock {
+        constructor() {
+            this.time = new Date();
+            this.timeZone = 'Europe/Paris';
+        }
+        getTime() {
+            return this.time;
+        }
+        setTime(date) {
+            this.time = date;
+        }
+        setTimeZone(timeZone) {
+            this.timeZone = timeZone;
+        }
+        getTimeZone() {
+            return this.timeZone;
+        }
     }
 }, {virtual: true});
 jest.mock('dw/util/Currency', () => {

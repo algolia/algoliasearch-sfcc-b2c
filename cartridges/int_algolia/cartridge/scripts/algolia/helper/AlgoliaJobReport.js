@@ -72,14 +72,22 @@ AlgoliaJobReport.prototype.writeToCustomObject = function() {
 }
 
 AlgoliaJobReport.prototype.formatCustomObject = function(customObject) {
+    const System = require('dw/system/System');
     const StringUtils = require('dw/util/StringUtils');
     const Calendar = require('dw/util/Calendar');
+
+    const timeZone = System.getInstanceTimeZone();
 
     this.jobID = customObject.custom.jobID;
     this.jobType = customObject.custom.jobType;
 
-    this.startTime = StringUtils.formatCalendar(new Calendar(customObject.custom.startTime));
-    this.endTime = StringUtils.formatCalendar(new Calendar(customObject.custom.endTime));
+    let startTime = new Calendar(customObject.custom.startTime);
+    startTime.setTimeZone(timeZone);
+    this.startTime = StringUtils.formatCalendar(startTime);
+
+    let endTime = new Calendar(customObject.custom.endTime);
+    endTime.setTimeZone(timeZone);
+    this.endTime = StringUtils.formatCalendar(endTime);
 
     this.processedItems = customObject.custom.processedItems.toFixed();
     this.processedItemsToSend = customObject.custom.processedItemsToSend.toFixed();
