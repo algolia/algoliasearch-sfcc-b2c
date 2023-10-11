@@ -4,7 +4,7 @@ const LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 const System = require('dw/system/System');
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
-const version = require('*/version').version;
+const version = require('*/algoliaconfig').version;
 
 /**
  * Algolia Indexing Service definition file

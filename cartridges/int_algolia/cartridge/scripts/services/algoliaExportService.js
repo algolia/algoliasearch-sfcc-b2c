@@ -1,6 +1,6 @@
 'use strict';
 
-const version = require('*/version').version;
+const version = require('*/algoliaconfig').version;
 
 /**
  * Algolia Export Service definition file

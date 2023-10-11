@@ -7,7 +7,7 @@ var URLUtils = require('dw/web/URLUtils');
 var Resource = require('dw/web/Resource');
 var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
-const version = require('*/version').version;
+const version = require('*/algoliaconfig').version;
 
 var currentSite = getCurrentSite(); // eslint-disable-line no-use-before-define
 
