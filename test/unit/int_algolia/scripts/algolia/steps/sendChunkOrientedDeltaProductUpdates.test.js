@@ -12,6 +12,12 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
         sendMultiIndicesBatch: mockSendMultiIndicesBatch,
     }
 }, {virtual: true});
+jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
+    return {
+        sendRetryableBatch: originalModule.sendRetryableBatch,
+    }
+}, {virtual: true});
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates');
 const stepExecution = {
