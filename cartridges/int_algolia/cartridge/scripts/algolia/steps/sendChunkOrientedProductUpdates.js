@@ -214,7 +214,10 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         batch = batch.concat(algoliaOperationsArray[i].toArray());
     }
 
-    status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
+    var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+    status = retryableBatchRes.result;
+    logData.failedRecords += retryableBatchRes.failedRecords;
+
     if (status.error) {
         logData.failedChunks++;
         logData.failedRecords += batch.length;

@@ -107,7 +107,10 @@ function runCategoryExport(parameters, stepExecution) {
         }
 
         logger.info('Sending a batch of ' + batch.length + ' records for top-level category id: ' + category.getID());
-        status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
+        var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+        status = retryableBatchRes.result;
+        categoryLogData.failedRecords += retryableBatchRes.failedRecords;
+
         if (status.error) {
             categoryLogData.failedRecords += batch.length;
             categoryLogData.failedChunks++;

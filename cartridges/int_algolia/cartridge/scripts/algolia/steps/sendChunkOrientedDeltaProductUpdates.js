@@ -9,7 +9,7 @@ var logger;
 var paramConsumer, paramDeltaExportJobName, paramFieldListOverride, paramIndexingMethod;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator;
 
 // logging-related variables and constants
 var logData;
@@ -53,6 +53,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
+    reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -296,7 +297,9 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         batch = batch.concat(algoliaOperationsArray[i].toArray());
     }
 
-    status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
+    var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+    status = retryableBatchRes.result;
+    logData.failedRecords += retryableBatchRes.failedRecords;
 
     if (status.error) {
         logData.failedChunks++;
