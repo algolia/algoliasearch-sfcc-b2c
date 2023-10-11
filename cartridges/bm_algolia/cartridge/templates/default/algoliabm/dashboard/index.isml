@@ -156,16 +156,15 @@
     </div>
 
 
-
     <h2>v2 Job Reports</h2>
 
     <iscomment> v2 job reporting table </iscomment>
-    <isif condition="${pdict.latestReports === false}">
+    <isif condition="${pdict.latestReportsByJob === false}">
         <iscomment> custom object type AlgoliaJobReport does not exist on the instance </iscomment>
         <div class="warning-box">
             ${Resource.msg('algolia.msg.nometadata', 'algolia', null)}
         </div>
-    <iselseif condition="${pdict.latestReports.length === 0}"/>
+    <iselseif condition="${pdict.latestReportsByJob.length === 0}"/>
         <iscomment> custom object type exists, but there are no reports to display </iscomment>
         <p>${Resource.msg('algolia.msg.noreports', 'algolia', null)}</p>
     <iselse/>
