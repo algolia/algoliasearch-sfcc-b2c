@@ -259,16 +259,21 @@ exports.afterStep = function(success, parameters, stepExecution) {
         logData.sendErrorMessage = errorMessage;
     }
 
-    if (indexingMethod === 'fullCatalogReindex') {
-        reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
-    }
-
     logData.processedDate = algoliaData.getLocalDateTime(new Date());
     logData.sendDate = algoliaData.getLocalDateTime(new Date());
     algoliaData.setLogData(updateLogType, logData);
 
     logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
         logData.sentChunks, logData.failedChunks, logData.sentRecords, logData.failedRecords);
+
+    if (indexingMethod === 'fullCatalogReindex') {
+        reindexHelper.waitForTasks(lastIndexingTasks);
+        if (logData.failedRecords === 0) {
+            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
+        } else {
+            throw new Error('Some records failed to be indexed (check the above logs for details). Not moving temporaries indices to production.');
+        }
+    }
 }
 
 // For testing

@@ -125,10 +125,13 @@ function runCategoryExport(parameters, stepExecution) {
     }
 
     categoryLogData.sendDate = algoliaData.getLocalDateTime(new Date());
-
-    reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
-
     algoliaData.setLogData(updateLogType, categoryLogData);
+
+    if (categoryLogData.failedRecords === 0) {
+        reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
+    } else {
+        throw new Error('Some records failed to be indexed (check the above logs for details). Not moving temporaries indices to production.');
+    }
 }
 
 module.exports.execute = runCategoryExport;
