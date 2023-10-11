@@ -7,14 +7,36 @@
 table#indexing-status {
     margin: 2em auto;
 }
-table#co-table {
+table#algolia-report-table, table#algolia-bm-settings {
     border-collapse: collapse;
     width: 100%;
     margin: 2em auto;
     border: 1px solid #dadada;
+    margin-bottom: 20px;
+}
+.cell-time {
+    width: 150px;
+}
+.cell-number {
+    width: 120px;
+}
+.red {
+    color: red;
 }
 .label {
-    font-weight: 400;
+    font-weight: bold;
+}
+
+.warning-box {
+    border: 1px solid #f0ad4e;
+    background-color: #fcf8e3;
+    color: #8a6d3b;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+h2 {
+    font-size: 1.5em;
+    font-family: "Helvetica Neue",Helvetica,Arial,Verdana,sans-serif;
 }
 .b {
     font-weight: bold;

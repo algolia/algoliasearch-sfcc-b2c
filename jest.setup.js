@@ -33,6 +33,8 @@ jest.mock('dw/io/File', () => {
 jest.mock('dw/object/CustomObjectMgr', () => ({
 	createCustomObject: jest.fn(),
 	getCustomObject: jest.fn(),
+    getAllCustomObjects: jest.fn(),
+    queryCustomObjects: jest.fn(),
 }), {virtual: true});
 jest.mock('dw/system/Logger', () => {
     return {
@@ -166,8 +168,8 @@ jest.mock('*/cartridge/scripts/algolia/filters/productFilter', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
 }, {virtual: true});
 
-jest.mock('*/cartridge/scripts/algolia/helper/AlgoliaJobLog', () => {
-    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/AlgoliaJobLog');
+jest.mock('*/cartridge/scripts/algolia/helper/AlgoliaJobReport', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 }, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/CPObjectIterator', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/CPObjectIterator');

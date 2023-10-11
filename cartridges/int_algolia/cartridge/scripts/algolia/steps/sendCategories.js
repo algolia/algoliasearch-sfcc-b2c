@@ -42,7 +42,7 @@ function runCategoryExport(parameters, stepExecution) {
     const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     const reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
-    const AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
+    const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 
     var currentSite = Site.getCurrent();
     var siteLocales = currentSite.getAllowedLocales();
@@ -52,7 +52,9 @@ function runCategoryExport(parameters, stepExecution) {
     var topLevelCategories = siteRootCategory.hasOnlineSubCategories()
         ? siteRootCategory.getOnlineSubCategories().iterator() : null;
 
-    var jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'category');
+    var jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'category');
+    jobReport.startTime = new Date();
+    jobReport.siteLocales = siteLocales.size();
 
     logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray());
     logger.info('CatalogID: ' + siteCatalogID);
@@ -68,7 +70,7 @@ function runCategoryExport(parameters, stepExecution) {
         reindexHelper.waitForTasks(deletionTasks);
         logger.info('Temporary indices deleted. Starting indexing...');
     } catch (e) {
-        return new Status(Status.ERROR, '', 'Failed to delete temporaries: ' + e.message);
+        return new Status(Status.ERROR, '', 'Failed to delete temporary indices: ' + e.message);
     }
 
     var status;
@@ -86,40 +88,50 @@ function runCategoryExport(parameters, stepExecution) {
             }
         }
 
-        jobLog.processedRecordsToUpdate += batch.length;
+        jobReport.processedItemsToSend += (batch.length / siteLocales.size()); // number of categories for one locale
+        jobReport.processedItems = jobReport.processedItemsToSend; // same value, there's no filtering for categories
+        jobReport.recordsToSend += batch.length;
 
         if (batch.length === 0) {
             logger.info('No records generated for category: ' + category.getID() + ', continuing...');
             continue;
         }
 
-        jobLog.processedDate = new Date();
-
-        logger.info('Sending a batch of ' + batch.length + ' records for top-level category id: ' + category.getID());
+        logger.info('Sending a batch of ' + batch.length + ' records for top-level category ID: ' + category.getID());
 
         status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
-        if (status.error) {
-            jobLog.failedRecords += batch.length;
-            jobLog.failedChunks++;
-            jobLog.sendError = true;
-        }
-        else {
-            jobLog.sentRecords += batch.length;
-            jobLog.sentChunks++;
+        if (!status.error) {
+            jobReport.recordsSent += batch.length;
+            jobReport.chunksSent++;
 
             // Store Algolia indexing task IDs
             var taskIDs = status.object.body.taskID;
             Object.keys(taskIDs).forEach(function (taskIndexName) {
                 lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
             });
+        } else {
+            let errorMessage = 'Failed to send categories: ' + status.errorMessage + ', stopping job.';
+
+            jobReport.recordsFailed += batch.length;
+            jobReport.chunksFailed++;
+            jobReport.error = true;
+            jobReport.errorMessage = errorMessage;
+
+            jobReport.endTime = new Date();
+            jobReport.writeToCustomObject();
+
+            // return ERROR if at least one batch failed, don't proceed with the atomic reindexing
+            logger.error(errorMessage);
+            return new Status(Status.ERROR, '', errorMessage);
         }
     }
 
     reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
 
-    jobLog.processedRecords = jobLog.processedRecordsToUpdate / siteLocales.size(); // number of categories for each locale
-    jobLog.sendDate = new Date();
-    jobLog.writeToCustomObject();
+    jobReport.endTime = new Date();
+    jobReport.writeToCustomObject();
+
+    logger.info('Indexing completed successfully.');
 }
 
 module.exports.runCategoryExport = runCategoryExport;

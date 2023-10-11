@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+
+    <custom-type type-id="AlgoliaJobReport">
+        <display-name xml:lang="x-default">AlgoliaJobReport</display-name>
+        <description xml:lang="x-default">Contains a report for a single Algolia job run.</description>
+        <staging-mode>no-staging</staging-mode>
+        <storage-scope>site</storage-scope>
+        <retention-days>30</retention-days>
+        <key-definition attribute-id="ID">
+            <display-name xml:lang="x-default">Custom Object ID</display-name>
+            <type>string</type>
+            <min-length>0</min-length>
+        </key-definition>
+        <attribute-definitions>
+            <attribute-definition attribute-id="chunksFailed">
+                <display-name xml:lang="x-default">Chunks failed</display-name>
+                <description xml:lang="x-default">The number of chunks that were not sent successfully. It should ideally be zero.</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="chunksSent">
+                <display-name xml:lang="x-default">Chunks sent</display-name>
+                <description xml:lang="x-default">The number of chunks that were successfully sent to Algolia. Depends on the chunk-size configured for the job in steptypes.json.</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="endTime">
+                <display-name xml:lang="x-default">End time</display-name>
+                <description xml:lang="x-default">The date and time the job finished executing.</description>
+                <type>datetime</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="error">
+                <display-name xml:lang="x-default">Error</display-name>
+                <description xml:lang="x-default">Indicated whether there was an error during job execution.</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="errorMessage">
+                <display-name xml:lang="x-default">Error message</display-name>
+                <description xml:lang="x-default">The error message in case an error occurred during job execution.</description>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="jobID">
+                <display-name xml:lang="x-default">Job ID</display-name>
+                <description xml:lang="x-default">The ID of the job that created this report.</description>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="jobType">
+                <display-name xml:lang="x-default">Job Type</display-name>
+                <description xml:lang="x-default">The resource type of the job that created this report (possible values: product or category).</description>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="processedItems">
+                <display-name xml:lang="x-default">Processed items</display-name>
+                <description xml:lang="x-default">Number of processed items (product or category).</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="processedItemsToSend">
+                <display-name xml:lang="x-default">Processed items to send</display-name>
+                <description xml:lang="x-default">The number of items that are ready to be sent to Algolia (after applying product filters).</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="recordsFailed">
+                <display-name xml:lang="x-default">Records failed</display-name>
+                <description xml:lang="x-default">The number of records that were not sent successfully. It should ideally be zero.</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="recordsSent">
+                <display-name xml:lang="x-default">Records sent</display-name>
+                <description xml:lang="x-default">The number of items that were successfully sent to Algolia. if sending is successful, it should be the same as recordsToSend.</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="recordsToSend">
+                <display-name xml:lang="x-default">Records to send</display-name>
+                <description xml:lang="x-default">The number of records that are to be sent to Algolia (for product export jobs this should be processedItemsToSend multiplied by the number of locales).</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="siteLocales">
+                <display-name xml:lang="x-default">Site locales</display-name>
+                <description xml:lang="x-default">Number of locales configured for the current site.</description>
+                <type>double</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+            <attribute-definition attribute-id="startTime">
+                <display-name xml:lang="x-default">Start time</display-name>
+                <description xml:lang="x-default">The date and time the job started executing.</description>
+                <type>datetime</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+        </attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="jobInfo">
+                <display-name xml:lang="x-default">Job info</display-name>
+                <description xml:lang="x-default">Information pertaining to the job that created this report</description>
+                <attribute attribute-id="jobID"/>
+                <attribute attribute-id="jobType"/>
+            </attribute-group>
+            <attribute-group group-id="report">
+                <display-name xml:lang="x-default">Report</display-name>
+                <description xml:lang="x-default">The report itself</description>
+                <attribute attribute-id="startTime"/>
+                <attribute attribute-id="endTime"/>
+                <attribute attribute-id="processedItems"/>
+                <attribute attribute-id="processedItemsToSend"/>
+                <attribute attribute-id="siteLocales"/>
+                <attribute attribute-id="recordsToSend"/>
+                <attribute attribute-id="recordsSent"/>
+                <attribute attribute-id="recordsFailed"/>
+                <attribute attribute-id="chunksSent"/>
+                <attribute attribute-id="chunksFailed"/>
+                <attribute attribute-id="error"/>
+                <attribute attribute-id="errorMessage"/>
+            </attribute-group>
+        </group-definitions>
+    </custom-type>
+
+</metadata>

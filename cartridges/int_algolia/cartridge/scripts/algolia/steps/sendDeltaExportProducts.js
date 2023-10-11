@@ -65,6 +65,7 @@
 /**
  * Takes the delta export created by the CatalogDeltaExport system job step,
  * enriches/transforms it and then sends it to Algolia for indexing.
+ * @deprecated Will be removed soon
  * @param {dw.util.HashMap} parameters Job step parameters - make sure to define the parameters for both job steps as job parameters, not step parameters so that they're shared across the job steps
  * @returns {dw.system.Status} Status
 */

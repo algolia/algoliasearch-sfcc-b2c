@@ -19,7 +19,7 @@ function start() {
     var pdictValues = {
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData,
-        latestLogs: BMHelper.getLatestCOLogs(),
+        latestReportsByJob: BMHelper.getLatestCOReportsByJob(),
     };
 
     ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);

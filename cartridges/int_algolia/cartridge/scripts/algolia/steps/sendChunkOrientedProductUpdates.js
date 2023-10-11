@@ -8,11 +8,11 @@ var logger;
 var paramFieldListOverride, paramIndexingMethod;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, AlgoliaJobLog;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, AlgoliaJobReport;
 var indexingOperation;
 
 // logging-related variables
-var jobLog;
+var jobReport;
 
 var products = [], siteLocales, nonLocalizedAttributes = [], fieldsToSend;
 var lastIndexingTasks = {};
@@ -52,10 +52,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
-    AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
+    AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 
     /* --- initializing custom object logging --- */
-    jobLog = new AlgoliaJobLog(stepExecution.getJobExecution().getJobID(), 'product');
+    jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'product');
+    jobReport.startTime = new Date();
 
 
     /* --- parameters --- */
@@ -102,7 +103,8 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- site locales --- */
     siteLocales = Site.getCurrent().getAllowedLocales();
-    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
+    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
+    jobReport.siteLocales = siteLocales.size();
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
@@ -156,6 +158,8 @@ exports.read = function(parameters, stepExecution) {
  */
 exports.process = function(product, parameters, stepExecution) {
 
+    jobReport.processedItems++; // counts towards the total number of products processed
+
     if (productFilter.isInclude(product)) {
         var algoliaOperations = [];
 
@@ -171,8 +175,8 @@ exports.process = function(product, parameters, stepExecution) {
             algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
         }
 
-        jobLog.processedRecords++; // number of actual products processed
-        jobLog.processedRecordsToUpdate += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per product)
+        jobReport.processedItemsToSend++; // number of actual products processed
+        jobReport.recordsToSend += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per product)
 
         return algoliaOperations;
     }
@@ -199,13 +203,9 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     }
 
     status = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
-    if (status.error) {
-        jobLog.failedChunks++;
-        jobLog.failedRecords += batch.length;
-    }
-    else {
-        jobLog.sentRecords += batch.length;
-        jobLog.sentChunks++;
+    if (!status.error) {
+        jobReport.recordsSent += batch.length;
+        jobReport.chunksSent++;
 
         // Store Algolia indexing task IDs.
         // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
@@ -213,6 +213,9 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         Object.keys(taskIDs).forEach(function (taskIndexName) {
             lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
         });
+    } else {
+        jobReport.recordsFailed += batch.length;
+        jobReport.chunksFailed++;
     }
 }
 
@@ -231,28 +234,32 @@ exports.afterStep = function(success, parameters, stepExecution) {
     products.close();
 
     if (success) {
-        jobLog.processedError = false;
-        jobLog.processedErrorMessage = '';
-        jobLog.sendError = false;
-        jobLog.sendErrorMessage = '';
+        jobReport.error = false;
+        jobReport.errorMessage = '';
     } else {
-        let errorMessage = 'An error occurred during the job. Please see the error log for more details.';
-        jobLog.processedError = true;
-        jobLog.processedErrorMessage = errorMessage;
-        jobLog.sendError = true;
-        jobLog.sendErrorMessage = errorMessage;
+        jobReport.error = true;
+        jobReport.errorMessage = 'An error occurred during the job. Please see the error log for more details.';
     }
 
+    // don't proceed with the atomic reindexing if there were errors
     if (paramIndexingMethod === 'fullCatalogReindex') {
         reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
     }
 
-    jobLog.processedDate = new Date(); // there's no separate date for processing and sending due to the nature of the job
-    jobLog.sendDate = new Date();
-    jobLog.writeToCustomObject();
+    logger.info('Total number of products: {0}', jobReport.processedItems);
+    logger.info('Number of products marked for sending: {0}', jobReport.processedItemsToSend);
+    logger.info('Number of locales configured for the site: {0}', jobReport.siteLocales);
+    logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
+    logger.info('Chunks sent: {0}; Chunks failed: {1}', jobReport.chunksSent, jobReport.chunksFailed);
 
-    logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
-        jobLog.sentChunks, jobLog.failedChunks, jobLog.sentRecords, jobLog.failedRecords);
+    jobReport.endTime = new Date();
+    jobReport.writeToCustomObject();
+
+    if (success) {
+        logger.info('Indexing completed successfully.');
+    } else {
+        logger.error('Indexing failed.');
+    }
 }
 
 // For testing

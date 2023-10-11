@@ -1,36 +1,41 @@
 'use strict';
 
-/**
- * @description Get the latest log entry for each job ID
- * @returns {Array} Array of AlgoliaJobLog objects
- */
-function getLatestCOLogs() {
+function getLatestCOReportsByJob() {
     const CustomObjectMgr = require('dw/object/CustomObjectMgr');
-    const AlgoliaJobLog = require('*/cartridge/scripts/algolia/helper/AlgoliaJobLog');
+    const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 
-    const allJobLogs = CustomObjectMgr.getAllCustomObjects('AlgoliaJobLog').asList().toArray();
+    const nrReportsPerJob = 3;
+    var allJobReports;
+
+    try {
+        allJobReports = CustomObjectMgr.getAllCustomObjects('AlgoliaJobReport').asList().toArray();
+    } catch (e) {
+        return false; // false indicates that the custom object type does not exist
+    }
 
     // create a list of unique job IDs
     const uniqueJobIDs = [];
-    for (var i = 0; i < allJobLogs.length; i++) {
-        var jobID = allJobLogs[i].custom.jobID;
+    for (let i = 0; i < allJobReports.length; i++) {
+        let jobID = allJobReports[i].custom.jobID;
         if (uniqueJobIDs.indexOf(jobID) === -1) {
             uniqueJobIDs.push(jobID);
         }
     }
     uniqueJobIDs.sort();
 
-    // for each unique job ID, get the last log entry
-    const lastJobs = [];
-    for (var i = 0; i < uniqueJobIDs.length; i++) {
-        var jobID = uniqueJobIDs[i];
-        var lastJobLog = CustomObjectMgr.queryCustomObjects('AlgoliaJobLog', 'custom.jobID = {0} ', 'creationDate desc', jobID).first();
-        lastJobs.push(new AlgoliaJobLog().formatCustomObject(lastJobLog));
+    let reportsByJob = [];
+    for (let i = 0; i < uniqueJobIDs.length; i++) {
+        let jobID = uniqueJobIDs[i];
+        let reports = CustomObjectMgr.queryCustomObjects('AlgoliaJobReport', 'custom.jobID = {0} ', 'creationDate desc', jobID).asList().toArray();
+        let formattedReports = reports.map(function(report) {
+            return new AlgoliaJobReport().formatCustomObject(report);
+        });
+        reportsByJob.push(formattedReports.slice(0, nrReportsPerJob)); // last three reports only
     }
 
-    return lastJobs;
+    return reportsByJob;
 }
 
 module.exports = {
-    getLatestCOLogs: getLatestCOLogs,
+    getLatestCOReportsByJob: getLatestCOReportsByJob,
 };
