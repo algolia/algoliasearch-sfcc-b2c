@@ -1,6 +1,6 @@
 const CustomObjectMgr = require('dw/object/CustomObjectMgr');
 const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
-const { getLatestCOReportsByJob } = require('../../../../../cartridges/bm_algolia/cartridge/scripts/helper/BMHelper');
+const BMHelper = require('../../../../../cartridges/bm_algolia/cartridge/scripts/helper/BMHelper');
 
 jest.doMock('dw/object/CustomObjectMgr', () => {
     const originalCustomObjectMgr = jest.requireActual('dw/object/CustomObjectMgr');
@@ -39,7 +39,7 @@ describe('getLatestCOReportsByJob', () => {
             throw new Error('Custom object type does not exist');
         });
 
-        const result = getLatestCOReportsByJob();
+        const result = BMHelper.getLatestCOReportsByJob();
 
         expect(result).toBe(false);
         expect(CustomObjectMgr.getAllCustomObjects).toHaveBeenCalledWith('AlgoliaJobReport');
@@ -93,7 +93,7 @@ describe('getLatestCOReportsByJob', () => {
         ];
         AlgoliaJobReport.prototype.formatCustomObject = jest.fn((report) => report);
 
-        const result = getLatestCOReportsByJob();
+        const result = BMHelper.getLatestCOReportsByJob();
 
         expect(result).toEqual([
             job1Reports,
@@ -119,11 +119,22 @@ describe('getLatestCOReportsByJob', () => {
             asList: () => ({ toArray: () => [] }),
         });
 
-        const result = getLatestCOReportsByJob();
+        const result = BMHelper.getLatestCOReportsByJob();
 
         expect(result).toEqual([]);
         expect(CustomObjectMgr.getAllCustomObjects).toHaveBeenCalledWith('AlgoliaJobReport');
         expect(CustomObjectMgr.queryCustomObjects).not.toHaveBeenCalled();
         expect(AlgoliaJobReport.prototype.formatCustomObject).not.toHaveBeenCalled();
+    });
+});
+
+describe('getJobBMLink', () => {
+    it('should return the Business Manager link for a job', () => {
+        const URLUtils = require('dw/web/URLUtils');
+        const CSRFProtection = require('dw/web/CSRFProtection');
+
+        const result = BMHelper.getJobBMLink('AlgoliaProductIndex_v2');
+
+        expect(result).toBe('https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/ViewApplication-BM?csrf_token=csrfToken#/?job#editor!id!AlgoliaProductIndex_v2!config!AlgoliaProductIndex_v2!domain!Sites!tab!schedule-and-history');
     });
 });

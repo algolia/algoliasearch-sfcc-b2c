@@ -138,6 +138,14 @@ jest.mock('dw/util/Currency', () => {
         getCurrency: function (currency) { return currency; }
     }
 }, {virtual: true});
+
+jest.mock('dw/web/CSRFProtection', () => {
+    return {
+        generateToken: function() {
+            return 'csrfToken';
+        }
+    }
+}, {virtual: true});
 jest.mock('dw/util/StringUtils', () => {
     return {
         trim: function (str) { return str; },

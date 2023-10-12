@@ -40,6 +40,24 @@ function getLatestCOReportsByJob() {
     return reportsByJob;
 }
 
+/**
+ * Returns the Business Manager link for a job
+ * @param {string} jobID - the ID of the job
+ * @returns {string} - the Business Manager link for the job
+ */
+function getJobBMLink(jobID) {
+    const URLUtils = require('dw/web/URLUtils');
+    const CSRFProtection = require('dw/web/CSRFProtection');
+
+    let csrfToken = CSRFProtection.generateToken();
+    let jobURL = URLUtils.https('ViewApplication-BM', 'csrf_token', csrfToken).toString() +
+        '#/?job#editor!id!' + jobID +
+        '!config!' + jobID + '!domain!Sites!tab!schedule-and-history';
+
+    return jobURL;
+}
+
 module.exports = {
     getLatestCOReportsByJob: getLatestCOReportsByJob,
+    getJobBMLink: getJobBMLink,
 };
