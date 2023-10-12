@@ -1,5 +1,9 @@
 'use strict';
 
+/**
+ * Returns the latest AlgoliaJobReport custom objects for each job
+ * @returns {Array} - an array of arrays of AlgoliaJobReport objects, each outer array representing a job
+ */
 function getLatestCOReportsByJob() {
     const CustomObjectMgr = require('dw/object/CustomObjectMgr');
     const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');

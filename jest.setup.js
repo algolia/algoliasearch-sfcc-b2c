@@ -31,8 +31,8 @@ jest.mock('dw/io/File', () => {
     return MockedFile;
 }, {virtual: true});
 jest.mock('dw/object/CustomObjectMgr', () => ({
-	createCustomObject: jest.fn(),
-	getCustomObject: jest.fn(),
+    createCustomObject: jest.fn(),
+    getCustomObject: jest.fn(),
     getAllCustomObjects: jest.fn(),
     queryCustomObjects: jest.fn(),
 }), {virtual: true});
@@ -81,9 +81,9 @@ jest.mock('dw/system/Site', () => {
                 getCustomPreferenceValue: function(id) {
                     switch(id) {
                         case 'Algolia_IndexPrefix':
-                            return 'test_index_';
+                        return 'test_index_';
                         default:
-                            return null;
+                        return null;
                     }
                 },
                 getTimezone: function() {
@@ -109,9 +109,9 @@ jest.mock('dw/system/System', () => {
     }
 }, {virtual: true});
 jest.mock('dw/system/Transaction', () => {
-	return {
-		wrap: function(callback) { return callback(); },
-	}
+    return {
+        wrap: function(callback) { return callback(); },
+    }
 }, {virtual: true});
 jest.mock('dw/util/Calendar', () => {
     return class CalendarMock {
@@ -139,10 +139,10 @@ jest.mock('dw/util/Currency', () => {
     }
 }, {virtual: true});
 jest.mock('dw/util/StringUtils', () => {
-	return {
-		trim: function (str) { return str; },
-		formatCalendar: function(str1, str2) { return str1; },
-	}
+    return {
+        trim: function (str) { return str; },
+        formatCalendar: function(str1, str2) { return str1; },
+    }
 }, {virtual: true});
 jest.mock('dw/web/Resource', () => {
     return {

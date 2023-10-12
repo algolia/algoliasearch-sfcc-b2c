@@ -78,10 +78,13 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
 }, {virtual: true});
 
 const stepExecution = {
-    getJobExecution: () => ({
-        getJobID: () => 'myJobID'
-    })
-};
+    getJobExecution: () => {
+        return {
+            getJobID: () => 'SendCategoriesTestJob',
+        }
+    },
+    getStepID: () => 'sendCategoriesTestStep',
+}
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendCategories');
 
@@ -97,14 +100,7 @@ describe('getSubCategoryModels', () => {
 });
 
 test('runCategoryExport', () => {
-    const stepExecution = {
-        getJobExecution: () => {
-            return {
-                getJobID: () => 'SendCategoriesTestJob',
-            }
-        },
-        getStepID: () => 'sendCategoriesTestStep',
-    }
+
     job.runCategoryExport({}, stepExecution);
     expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendCategoriesTestJob', stepID: 'sendCategoriesTestStep' });
     expect(mockSendMultiIndicesBatch).toMatchSnapshot();
