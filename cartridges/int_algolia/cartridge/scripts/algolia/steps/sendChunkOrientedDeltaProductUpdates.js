@@ -351,6 +351,6 @@ exports.afterStep = function(success, parameters, stepExecution) {
         logData.sentChunks, logData.failedChunks, logData.sentRecords, logData.failedRecords);
 
     if (logData.failedChunks > 0) {
-        throw new Error('Some chunks failed to be sent, check the above logs for details.');
+        throw new Error('Some chunks failed to be sent, check the logs for details.');
     }
 }
