@@ -136,7 +136,7 @@ function sendRetryableBatch(batch) {
             break;
         }
     }
-    if (attempts === MAX_ATTEMPT) {
+    if (attempts === MAX_ATTEMPTS) {
         logger.error('[Retryable batch] Too many products are in error, aborting the batch...');
     }
     return {
