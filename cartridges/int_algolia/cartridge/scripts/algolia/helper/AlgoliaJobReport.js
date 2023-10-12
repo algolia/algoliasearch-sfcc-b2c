@@ -1,5 +1,7 @@
 'use strict';
 
+const System = require('dw/system/System');
+
 /**
 * @class AlgoliaJobReport
 * @description Iterator for the changedProducts array of objects structure used in the delta export job
@@ -31,7 +33,6 @@ const AlgoliaJobReport = function(jobID, jobType) {
 AlgoliaJobReport.prototype.writeToCustomObject = function() {
     const CustomObjectMgr = require('dw/object/CustomObjectMgr');
     const Transaction = require('dw/system/Transaction');
-    const System = require('dw/system/System');
     const StringUtils = require('dw/util/StringUtils');
 
     const customObjectID = this.jobID + '__' + StringUtils.formatCalendar(System.getCalendar(), 'yyMMdd-HHmmss'); // returns GMT time
@@ -72,7 +73,6 @@ AlgoliaJobReport.prototype.writeToCustomObject = function() {
 }
 
 AlgoliaJobReport.prototype.formatCustomObject = function(customObject) {
-    const System = require('dw/system/System');
     const StringUtils = require('dw/util/StringUtils');
     const Calendar = require('dw/util/Calendar');
 

@@ -31,8 +31,8 @@ function getSubCategoryModels(category, catalogId, locale) {
 }
 
 /**
- * Job that fetches all categories of the site catalog and converts them into AlgoliaOperations
- * and send them for indexing.
+ * Job that fetches all categories of the site catalog,
+ * converts them into AlgoliaOperations and sends them for indexing.
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution job step execution
  * @returns {dw.system.Status} - status

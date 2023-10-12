@@ -2,33 +2,6 @@ const CustomObjectMgr = require('dw/object/CustomObjectMgr');
 const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 const BMHelper = require('../../../../../cartridges/bm_algolia/cartridge/scripts/helper/BMHelper');
 
-jest.doMock('dw/object/CustomObjectMgr', () => {
-    const originalCustomObjectMgr = jest.requireActual('dw/object/CustomObjectMgr');
-    return {
-        ...originalCustomObjectMgr,
-        createCustomObject: jest.fn(() => {
-            return {
-                custom: {
-                    jobID: 'job-id',
-                    jobType: 'product',
-                    startTime: new Date(),
-                    endTime: new Date(),
-                    processedItems: 10,
-                    processedItemsToSend: 5,
-                    siteLocales: 2,
-                    recordsToSend: 20,
-                    recordsSent: 15,
-                    recordsFailed: 5,
-                    chunksSent: 3,
-                    chunksFailed: 1,
-                    error: false,
-                    errorMessage: '',
-                },
-            }
-        }),
-    };
-});
-
 describe('getLatestCOReportsByJob', () => {
     beforeEach(() => {
         jest.clearAllMocks();

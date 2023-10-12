@@ -28,7 +28,7 @@
         </tbody>
     </table>
 
-    <div id="algolia-bm-settings">
+    <div>
         <form action="${pdict.setttingsUpdateUrl}" class="form-horizontal" method="post">
         <input type="hidden" name="csrf_token" />
         <table border="0" cellpadding="0" cellspacing="0" width="100%" id="algolia-bm-settings">

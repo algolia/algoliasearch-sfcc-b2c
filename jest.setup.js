@@ -31,7 +31,11 @@ jest.mock('dw/io/File', () => {
     return MockedFile;
 }, {virtual: true});
 jest.mock('dw/object/CustomObjectMgr', () => ({
-    createCustomObject: jest.fn(),
+    createCustomObject: jest.fn(() => {
+        return {
+            custom: {},
+        }
+    }),
     getCustomObject: jest.fn(),
     getAllCustomObjects: jest.fn(),
     queryCustomObjects: jest.fn(),

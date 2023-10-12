@@ -35,7 +35,7 @@ describe('AlgoliaJobReport', () => {
                         errorMessage: '',
                     },
                 };
-                throw new Error('Invalid arguments');
+                // throw new Error('Invalid arguments');
             });
 
             const createCustomObjectSpy = jest.spyOn(CustomObjectMgr, 'createCustomObject');
