@@ -106,11 +106,11 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
  * @return {{failedRecords: number}} returns an object with the last call result and the number of failed records.
  */
 function sendRetryableBatch(batch) {
-    var MAX_ATTEMPT = 50;
+    var MAX_ATTEMPTS = 50;
     var attempts = 0;
     var failedRecords = 0;
     var result = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
-    while (result.error && attempts < MAX_ATTEMPT) {
+    while (result.error && attempts < MAX_ATTEMPTS) {
         ++attempts;
         try {
             var apiResponse = JSON.parse(result.getErrorMessage());
