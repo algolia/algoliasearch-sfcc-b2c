@@ -59,7 +59,6 @@ Can perform full records updates or partial records updates. See the 'indexingMe
 - 'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data (without removing stale/deleted records).
 - 'fullCatalogReindex': reindex all products (incl. removing stale records).</description>
                 <parameters>
-                    <parameter name="resourceType">products</parameter>
                     <parameter name="fieldListOverride"/>
                     <parameter name="indexingMethod">fullCatalogReindex</parameter>
                 </parameters>
@@ -82,7 +81,6 @@ Performs a partial update on the product objects in the Algolia index.</descript
             <step step-id="algoliaPricesIndex" type="custom.algoliaProductsPartialUpdate" enforce-restart="false">
                 <description>Retrieves and sends price data for all products assigned to the current site. Sends partial product updates to Algolia, updating only the "price" property of the product objects in the index by default.</description>
                 <parameters>
-                    <parameter name="resourceType">price</parameter>
                     <parameter name="fieldListOverride">price</parameter>
                 </parameters>
             </step>
@@ -104,7 +102,6 @@ Performs a partial update on the product objects in the Algolia index.</descript
             <step step-id="algoliaInventoryIndex" type="custom.algoliaProductsPartialUpdate" enforce-restart="false">
                 <description>Retrieves and sends inventory data for all products assigned to the current site. Sends partial product updates to Algolia, updating only the "in_stock" property of the product objects in the index by default.</description>
                 <parameters>
-                    <parameter name="resourceType">inventory</parameter>
                     <parameter name="fieldListOverride">in_stock</parameter>
                 </parameters>
             </step>
@@ -116,5 +113,4 @@ Performs a partial update on the product objects in the Algolia index.</descript
         </rules>
         <triggers/>
     </job>
-
 </jobs>

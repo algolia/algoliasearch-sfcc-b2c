@@ -6,8 +6,8 @@
 			"@supports-site-context": "true",
 			"@supports-organization-context": "false",
 			"description": "Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.",
-			"module": "int_algolia/cartridge/scripts/algolia/job/sendCategories.js",
-			"function": "execute",
+			"module": "int_algolia/cartridge/scripts/algolia/steps/sendCategories.js",
+			"function": "runCategoryExport",
 			"transactional": "false",
 			"timeout-in-seconds": "600",
 			"parameters": {},
@@ -42,12 +42,7 @@
 				"transactional": false,
 				"timeout-in-seconds": "14400",
 				"parameters": {
-					"parameter": [{
-							"@name": "resourceType",
-							"@type": "string",
-							"description": "Used for logging purposes only [ price | product | inventory ]",
-							"@required": true
-						},
+					"parameter": [
 						{
 							"@name": "fieldListOverride",
 							"@type": "string",
@@ -104,12 +99,6 @@
 				"timeout-in-seconds": "14400",
 				"parameters": {
 					"parameter": [{
-							"@name": "resourceType",
-							"@type": "string",
-							"description": "Used for logging purposes only [ price | product | inventory ]",
-							"@required": true
-						},
-						{
 							"@name": "fieldListOverride",
 							"@type": "string",
 							"description": "A comma-separated list of fields to be updated in the index. If not specified, the default list of fields will be used (defaultAttributes + Algolia_CustomFields).",
