@@ -16,28 +16,6 @@ describe('AlgoliaJobReport', () => {
 
             const customObjectID = 'job-id__' + StringUtils.formatCalendar(System.getCalendar(), 'yyMMdd-HHmmss');
 
-            CustomObjectMgr.createCustomObject.mockImplementation((objectType, id) => {
-                return {
-                    custom: {
-                        jobID: 'job-id',
-                        jobType: 'product',
-                        startTime: new Date(),
-                        endTime: new Date(),
-                        processedItems: 10,
-                        processedItemsToSend: 5,
-                        siteLocales: 2,
-                        recordsToSend: 20,
-                        recordsSent: 15,
-                        recordsFailed: 5,
-                        chunksSent: 3,
-                        chunksFailed: 1,
-                        error: false,
-                        errorMessage: '',
-                    },
-                };
-                // throw new Error('Invalid arguments');
-            });
-
             const createCustomObjectSpy = jest.spyOn(CustomObjectMgr, 'createCustomObject');
             const transactionWrapSpy = jest.spyOn(Transaction, 'wrap');
 
