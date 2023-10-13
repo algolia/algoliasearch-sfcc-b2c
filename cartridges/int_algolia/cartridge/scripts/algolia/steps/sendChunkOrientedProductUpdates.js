@@ -252,7 +252,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
             reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
         } else {
             // don't proceed with the atomic reindexing if there were errors
-            throw new Error('Some records failed to be indexed (check the logs for details). Not moving temporaries indices to production.');
+            throw new Error('Some records failed to be indexed (check the logs for details). Not moving temporary indices to production.');
         }
     } else if (jobReport.chunksFailed > 0) {
         // Showing the job in ERROR in the history
