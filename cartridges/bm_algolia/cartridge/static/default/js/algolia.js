@@ -1,6 +1,7 @@
 'use strict';
 
 /* globals jQuery */
+/* @deprecated */
 (function ($) {
     $(document).ready(function () {
         var $siteStatusRow = $('.site-status-row');

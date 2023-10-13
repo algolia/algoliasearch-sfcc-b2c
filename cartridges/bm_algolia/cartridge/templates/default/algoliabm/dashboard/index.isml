@@ -6,28 +6,32 @@
     <link rel="stylesheet" href="${dw.web.URLUtils.staticURL('/css/algolia.css')}" />
     <isinclude template="inc/Modules" />
     <isbreadcrumb name1="Merchant Tools" name2="Algolia" />
-    <table border="0" cellpadding="0" cellspacing="0" width="100%"><tbody>
-        <tr>
-            <td width="100%" class="table_title aldi">
-                <isprint value="${Resource.msg('algolia.label.algolia', 'algolia', null)}" encoding="jshtml" />
-            </td>
-        </tr>
-        <tr>
-            <td class="w s e"></td>
-        </tr>
-        <tr>
-            <td class="table_title_description w e s">
-                <p><isprint value="${Resource.msg('algolia.label.settings', 'algolia', null)}" encoding="jshtml" /></p>
-                <p><a href="https://www.algolia.com/users/sign_in" target="_blank" rel="noreferrer">
-                    <isprint value="${Resource.msg('algolia.label.dashboard', 'algolia', null)}" encoding="jshtml" />
-                </a></p>
-            </td>
-        </tr>
-    </tbody></table>
-    <div class="algolia-bm-settings">
+
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td width="100%" class="table_title aldi">
+                    <isprint value="${Resource.msg('algolia.label.algolia', 'algolia', null)}" encoding="jshtml" />
+                </td>
+            </tr>
+            <tr>
+                <td class="w s e"></td>
+            </tr>
+            <tr>
+                <td class="table_title_description w e s">
+                    <p><isprint value="${Resource.msg('algolia.label.settings', 'algolia', null)}" encoding="jshtml" /></p>
+                    <p><a href="https://dashboard.algolia.com" target="_blank" rel="noreferrer">
+                        <isprint value="${Resource.msg('algolia.label.dashboard', 'algolia', null)}" encoding="jshtml" />
+                    </a></p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div>
         <form action="${pdict.setttingsUpdateUrl}" class="form-horizontal" method="post">
         <input type="hidden" name="csrf_token" />
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" id="algolia-bm-settings">
             <tbody>
                 <tr>
                     <td class="table_header w s tab" nowrap="nowrap" width="70%" colspan="1">
@@ -151,7 +155,72 @@
         </form>
     </div>
 
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+
+    <h2>v2 Job Reports</h2>
+
+    <iscomment> v2 job reporting table </iscomment>
+    <isif condition="${pdict.latestReports === false}">
+        <iscomment> custom object type AlgoliaJobReport does not exist on the instance </iscomment>
+        <div class="warning-box">
+            ${Resource.msg('algolia.msg.nometadata', 'algolia', null)}
+        </div>
+    <iselseif condition="${pdict.latestReports.length === 0}"/>
+        <iscomment> custom object type exists, but there are no reports to display </iscomment>
+        <p>${Resource.msg('algolia.msg.noreports', 'algolia', null)}</p>
+    <iselse/>
+        <iscomment> displaying reports </iscomment>
+
+        <isset name="BMHelper" value="${require('~/cartridge/scripts/helper/BMHelper.js')}" scope="page"/>
+
+        <isloop items="${pdict.latestReports}" var="job">
+            <table border="1" cellpadding="0" cellspacing="0" id="algolia-report-table">
+                <tbody>
+                    <isloop items="${job}" var="log" status="status">
+
+                        <isif condition="${status.first}">
+                            <tr>
+                                <td class="table_header center tab-title" colspan="7">
+                                    <a href="${BMHelper.getJobBMLink(log.jobID)}" target="_blank">
+                                        <isprint value="${log.jobID}" encoding="jshtml" />
+                                    </a>
+                                </td>
+                                <td class="table_header center tab-title" colspan="1">
+                                    ${Resource.msg('algolia.label.jobtype', 'algolia', null)} <isprint value="${log.jobType}" encoding="jshtml" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="table-subheader label cell-time">${Resource.msg('algolia.label.start', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-time">${Resource.msg('algolia.label.end', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number-wide">${Resource.msg('algolia.label.tobesent.total.' + log.jobType, 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number-narrow">${Resource.msg('algolia.label.nrlocales', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number">${Resource.msg('algolia.label.recordstobesent', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number">${Resource.msg('algolia.label.recordssent.failed', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number">${Resource.msg('algolia.label.chunkssent.failed', 'algolia', null)}</td>
+                                <td class="table-subheader label">${Resource.msg('algolia.label.error', 'algolia', null)}</td>
+                            </tr>
+                        </isif>
+
+                        <tr>
+                            <td>${log.startTime}</td>
+                            <td>${log.endTime}</td>
+                            <td>${log.processedItemsToSend} / ${log.processedItems}</td>
+                            <td>${log.siteLocales}</td>
+                            <td>${log.recordsToSend}</td>
+                            <td>${log.recordsSent} / <span class="${log.recordsFailed !== '0' ? 'red' : ''}">${log.recordsFailed}</span></td>
+                            <td>${log.chunksSent} / <span class="${log.chunksFailed !== '0' ? 'red' : ''}">${log.chunksFailed}</span></td>
+                            <td><span class="${log.error ? 'red narrow' : ''}">${log.error ? log.errorMessage : Resource.msg('algolia.label.noerror', 'algolia', null)}<span></td>
+                        </tr>
+                    </isloop>
+                </tbody>
+            </table>
+        </isloop>
+    </isif>
+
+
+    <h2>v1 Job Reports (Deprecated)</h2>
+
+    <iscomment> Stream monitoring, deprecated</iscomment>
+    <table id="indexing-status" border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
             <tr>
                 <td class="table_header w s center tab-title" nowrap="nowrap" width="33%" colspan="1">
@@ -166,10 +235,10 @@
             </tr>
             <isloop items="${pdict.algoliaData.getAlgoliaSites()}" var="site">
                 <tr class="site-status-row" data-get-status-url="${URLUtils.https('AlgoliaBM-Indexing', 'siteID', site.ID, 'requestType', 'status').toString()}">
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         ${Resource.msgf('algolia.msg.indexingstatus', 'algolia', null, site.name, site.ID)}
                     </td>
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         <span
                             class="status-result"
                             data-general-error-msg="${Resource.msg('algolia.msg.error', 'algolia', null)}"
@@ -177,7 +246,7 @@
                             ${Resource.msg('algolia.msg.loading', 'algolia', null)}
                         </span>
                     </td>
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         <button
                             class="clean-queue-btn"
                             data-success-msg="${Resource.msg('algolia.msg.indexingcleaned', 'algolia', null)}"
@@ -225,4 +294,5 @@
         <isinclude template="algoliabm/dashboard/productInventoryLog" />
         <isinclude template="algoliabm/dashboard/categoryLog" />
     </isloop>
+
 </isdecorate>

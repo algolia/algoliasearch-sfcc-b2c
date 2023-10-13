@@ -13,21 +13,16 @@ var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
  * @description Render default template
  * @returns {void} ISML.renderTemplate
  */
-function renderIndex() {
+function start() {
+    const BMHelper = require('../scripts/helper/BMHelper');
+
     var pdictValues = {
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
-        algoliaData: algoliaData
+        algoliaData: algoliaData,
+        latestReports: BMHelper.getLatestCOReportsByJob(),
     };
 
     ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
-}
-
-/**
- * @description Main pipelet
- * @returns {void} renderIndex
- */
-function start() {
-    renderIndex();
 }
 
 /**

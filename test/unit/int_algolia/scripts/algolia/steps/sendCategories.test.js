@@ -11,11 +11,13 @@ global.request = new GlobalMock.RequestMock();
 // |__Digital Cameras
 // |__Audio
 //    |__Headphones
+
 const category = new CategoryMock({ name: 'Electronics' });
 const subcategory1 = new CategoryMock({ name: 'Digital Cameras', parent: category });
 const subcategory2 = new CategoryMock({ name: 'Audio', parent: category });
 const subsubcategory2 = new CategoryMock({ name: 'Headphones', parent: subcategory2 });
 subcategory2.subcategories = [subsubcategory2];
+
 // This category won't be exported because showInMenu is false
 const subcategory3 = new CategoryMock({ name: 'Video', parent: category, showInMenu: false });
 category.subcategories = [subcategory1, subcategory2, subcategory3];
@@ -75,29 +77,31 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     };
 }, {virtual: true});
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/job/sendCategories');
+const stepExecution = {
+    getJobExecution: () => {
+        return {
+            getJobID: () => 'SendCategoriesTestJob',
+        }
+    },
+    getStepID: () => 'sendCategoriesTestStep',
+}
 
-describe('getSubCategoriesModels', () => {
+const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendCategories');
+
+describe('getSubCategoryModels', () => {
     test('default locale', () => {
-        var categoriesModels = job.getSubCategoriesModels(category, catalogId, 'default');
+        var categoriesModels = job.getSubCategoryModels(category, catalogId, 'default');
         expect(categoriesModels).toMatchSnapshot();
     });
     test('french locale', () => {
-        var categoriesModels = job.getSubCategoriesModels(category, catalogId, 'fr');
+        var categoriesModels = job.getSubCategoryModels(category, catalogId, 'fr');
         expect(categoriesModels).toMatchSnapshot();
     });
 });
 
 test('runCategoryExport', () => {
-    const stepExecution = {
-        getJobExecution: () => {
-            return {
-                getJobID: () => 'SendCategoriesTestJob',
-            }
-        },
-        getStepID: () => 'sendCategoriesTestStep',
-    }
-    job.execute(undefined, stepExecution);
+
+    job.runCategoryExport({}, stepExecution);
     expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendCategoriesTestJob', stepID: 'sendCategoriesTestStep' });
     expect(mockSendMultiIndicesBatch).toMatchSnapshot();
     expect(mockFinishAtomicReindex).toHaveBeenCalledWith(

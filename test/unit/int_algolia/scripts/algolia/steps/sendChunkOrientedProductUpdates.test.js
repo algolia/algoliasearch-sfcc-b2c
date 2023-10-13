@@ -41,8 +41,6 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     }
 }, {virtual: true});
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates');
-
 const stepExecution = {
     getJobExecution: () => {
         return {
@@ -50,11 +48,13 @@ const stepExecution = {
         }
     },
     getStepID: () => 'sendProductsTestStep',
-}
+};
+
+const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates');
 
 describe('process', () => {
     test('default', () => {
-        job.beforeStep({ resourceType: 'test' }, stepExecution);
+        job.beforeStep({}, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -62,7 +62,7 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot(); //  "action" should be "partialUpdateObject" when no indexingMethod is specified
     });
     test('partialRecordUpdate', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'partialRecordUpdate' }, stepExecution);
+        job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -70,7 +70,7 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('fullRecordUpdate', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullRecordUpdate' }, stepExecution);
+        job.beforeStep({ indexingMethod: 'fullRecordUpdate' }, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -78,7 +78,7 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('fullCatalogReindex', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullCatalogReindex' }, stepExecution);
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
         expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith('products', expect.arrayContaining(['default', 'fr', 'en']));
 
@@ -88,7 +88,7 @@ describe('process', () => {
 });
 
 test('send', () => {
-    job.beforeStep({ resourceType: 'test' }, stepExecution);
+    job.beforeStep({}, stepExecution);
 
     const algoliaOperationsChunk = [];
     for (let i = 0; i < 3; ++i) {
@@ -116,12 +116,12 @@ describe('afterStep', () => {
     });
 
     test('partialRecordUpdate', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'partialRecordUpdate' }, stepExecution);
+        job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
         job.afterStep();
         expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
     });
     test('fullCatalogReindex', () => {
-        job.beforeStep({ resourceType: 'test', indexingMethod: 'fullCatalogReindex' }, stepExecution);
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
         job.afterStep();
         expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
             'products',
