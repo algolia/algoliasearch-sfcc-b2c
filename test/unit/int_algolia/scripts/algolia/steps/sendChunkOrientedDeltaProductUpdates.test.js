@@ -19,7 +19,12 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     }
 }, {virtual: true});
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates');
+const parameters = {
+    consumer: 'algolia',
+    deltaExportJobName: 'productDeltaExport',
+    indexingMethod: 'fullRecordUpdate',
+};
+
 const stepExecution = {
     getJobExecution: () => {
         return {
@@ -27,18 +32,19 @@ const stepExecution = {
         }
     },
     getStepID: () => 'sendDeltaTestStep',
-}
+};
+
+const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates');
 
 test('process', () => {
-    job.beforeStep({ resourceType: 'test', consumer: 'algolia', deltaExportJobName: 'productDeltaExport' }, stepExecution);
+    job.beforeStep(parameters, stepExecution);
     expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendDeltaTestJob', stepID: 'sendDeltaTestStep' });
-
     var algoliaOperations = job.process({ productID: '701644031206M', available: true });
     expect(algoliaOperations).toMatchSnapshot();
 });
 
 test('send', () => {
-    job.beforeStep({ resourceType: 'test', consumer: 'algolia', deltaExportJobName: 'productDeltaExport' }, stepExecution);
+    job.beforeStep(parameters, stepExecution);
 
     const algoliaOperationsChunk = [];
     for (let i = 0; i < 3; ++i) {

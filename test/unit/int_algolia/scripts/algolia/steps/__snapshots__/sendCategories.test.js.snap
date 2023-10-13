@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`getSubCategoriesModels default locale 1`] = `
+exports[`getSubCategoryModels default locale 1`] = `
 [
   algoliaLocalizedCategory {
     "_tags": [
@@ -63,7 +63,7 @@ exports[`getSubCategoriesModels default locale 1`] = `
 ]
 `;
 
-exports[`getSubCategoriesModels french locale 1`] = `
+exports[`getSubCategoryModels french locale 1`] = `
 [
   algoliaLocalizedCategory {
     "_tags": [

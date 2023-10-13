@@ -1,5 +1,7 @@
 'use strict';
 
+// This is the sequential version of the chunk-based delta export job. It is now deprecated and should not be used.
+
 /*
     This job takes the productIDs from a standard B2C product delta export (configured as the job's first step),
     then retrieves the products, enriches them and then sends them to Algolia.
@@ -63,6 +65,7 @@
 /**
  * Takes the delta export created by the CatalogDeltaExport system job step,
  * enriches/transforms it and then sends it to Algolia for indexing.
+ * @deprecated Will be removed soon
  * @param {dw.util.HashMap} parameters Job step parameters - make sure to define the parameters for both job steps as job parameters, not step parameters so that they're shared across the job steps
  * @returns {dw.system.Status} Status
 */

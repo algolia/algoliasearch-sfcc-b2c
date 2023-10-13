@@ -1,19 +1,20 @@
-var catalogMgr = require('dw/catalog/CatalogMgr');
-var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
-var Site = require('dw/system/Site');
-var Status = require('dw/system/Status');
+const catalogMgr = require('dw/catalog/CatalogMgr');
+const logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+const Site = require('dw/system/Site');
+const Status = require('dw/system/Status');
 
-var AlgoliaLocalizedCategory = require('*/cartridge/scripts/algolia/model/algoliaLocalizedCategory');
+const AlgoliaLocalizedCategory = require('*/cartridge/scripts/algolia/model/algoliaLocalizedCategory');
+
 var utils = require('../lib/utils');
 
 /**
- * Converts a given dw.catalog.Category and its sub categories to objects ready to be indexed
+ * Converts a given dw.catalog.Category and its subcategories to objects ready to be indexed
  * @param {dw.catalog.Category} category - A category
  * @param {string} catalogId - ID of the site catalog
  * @param {string} locale - The locale to use to fetch the categories properties
  * @returns {Array} the category and all its subcategories converted to objects ready to be indexed
  */
-function getSubCategoriesModels(category, catalogId, locale) {
+function getSubCategoryModels(category, catalogId, locale) {
     var res = [];
     if (!category.custom || !category.custom.showInMenu
       || (!category.hasOnlineProducts() && !category.hasOnlineSubCategories())) {
@@ -24,50 +25,39 @@ function getSubCategoriesModels(category, catalogId, locale) {
 
     var subCategories = category.getOnlineSubCategories();
     utils.forEach(subCategories, function (subcategory) {
-        res = res.concat(getSubCategoriesModels(subcategory, catalogId, locale));
+        res = res.concat(getSubCategoryModels(subcategory, catalogId, locale));
     });
     return res;
 }
 
 /**
- * Job that fetch all categories of the site catalog, convert them into AlgoliaOperations
- * and send them for indexing.
+ * Job that fetches all categories of the site catalog,
+ * converts them into AlgoliaOperations and sends them for indexing.
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution job step execution
  * @returns {dw.system.Status} - status
  */
 function runCategoryExport(parameters, stepExecution) {
-    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    var reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
-    var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
+    const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+    const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+    const reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+    const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
+    const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 
     var currentSite = Site.getCurrent();
     var siteLocales = currentSite.getAllowedLocales();
     var siteCatalog = catalogMgr.getSiteCatalog();
-    var siteCatalogId = siteCatalog.getID();
+    var siteCatalogID = siteCatalog.getID();
     var siteRootCategory = siteCatalog.getRoot();
     var topLevelCategories = siteRootCategory.hasOnlineSubCategories()
         ? siteRootCategory.getOnlineSubCategories().iterator() : null;
 
-    var updateLogType = 'LastCategorySyncLog';
-
-    var categoryLogData = algoliaData.getLogData(updateLogType);
-    categoryLogData.processedDate = algoliaData.getLocalDateTime(new Date());
-    categoryLogData.processedError = false;
-    categoryLogData.processedErrorMessage = '';
-    categoryLogData.processedRecords = 0;
-    categoryLogData.processedToUpdateRecords = 0;
-
-    categoryLogData.sendError = false;
-    categoryLogData.sendErrorMessage = '';
-    categoryLogData.sentChunks = 0;
-    categoryLogData.sentRecords = 0;
-    categoryLogData.failedChunks = 0;
-    categoryLogData.failedRecords = 0;
+    var jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'category');
+    jobReport.startTime = new Date();
+    jobReport.siteLocales = siteLocales.size();
 
     logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray());
-    logger.info('CatalogID: ' + siteCatalogId);
+    logger.info('CatalogID: ' + siteCatalogID);
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
@@ -80,7 +70,7 @@ function runCategoryExport(parameters, stepExecution) {
         reindexHelper.waitForTasks(deletionTasks);
         logger.info('Temporary indices deleted. Starting indexing...');
     } catch (e) {
-        return new Status(Status.ERROR, '', 'Failed to delete temporaries: ' + e.message);
+        return new Status(Status.ERROR, '', 'Failed to delete temporary indices: ' + e.message);
     }
 
     var status;
@@ -91,50 +81,63 @@ function runCategoryExport(parameters, stepExecution) {
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
-            var localizedCategories = getSubCategoriesModels(category, siteCatalogId, locale);
+            var localizedCategories = getSubCategoryModels(category, siteCatalogID, locale);
 
             for (let i = 0; i < localizedCategories.length; ++i) {
                 batch.push(new jobHelper.AlgoliaOperation('addObject', localizedCategories[i], tmpIndexName));
             }
         }
 
-        categoryLogData.processedRecords += batch.length;
-        categoryLogData.processedToUpdateRecords += batch.length;
+        jobReport.processedItemsToSend += (batch.length / siteLocales.size()); // number of categories for one locale
+        jobReport.processedItems = jobReport.processedItemsToSend; // same value, there's no filtering for categories
+        jobReport.recordsToSend += batch.length;
 
         if (batch.length === 0) {
             logger.info('No records generated for category: ' + category.getID() + ', continuing...');
             continue;
         }
 
-        logger.info('Sending a batch of ' + batch.length + ' records for top-level category id: ' + category.getID());
+        logger.info('Sending a batch of ' + batch.length + ' records for top-level category ID: ' + category.getID());
+
         var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
         status = retryableBatchRes.result;
-        categoryLogData.failedRecords += retryableBatchRes.failedRecords;
+        jobReport.recordsFailed += retryableBatchRes.failedRecords;
 
-        if (status.error) {
-            categoryLogData.failedRecords += batch.length;
-            categoryLogData.failedChunks++;
-            categoryLogData.sendError = true;
-        }
-        else {
-            categoryLogData.sentRecords += batch.length;
-            categoryLogData.sentChunks++;
+        if (!status.error) {
+            jobReport.recordsSent += batch.length;
+            jobReport.chunksSent++;
 
+            // Store Algolia indexing task IDs
             var taskIDs = status.object.body.taskID;
             Object.keys(taskIDs).forEach(function (taskIndexName) {
                 lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
             });
+        } else {
+            let errorMessage = 'Failed to send categories: ' + status.errorMessage + ', stopping job.';
+
+            jobReport.recordsFailed += batch.length;
+            jobReport.chunksFailed++;
+            jobReport.error = true;
+            jobReport.errorMessage = errorMessage;
+
+            jobReport.endTime = new Date();
+            jobReport.writeToCustomObject();
+
+            // return ERROR if at least one batch failed, don't proceed with the atomic reindexing
+            logger.error(errorMessage);
+            return new Status(Status.ERROR, '', errorMessage);
         }
     }
 
-    categoryLogData.sendDate = algoliaData.getLocalDateTime(new Date());
-
     reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
 
-    algoliaData.setLogData(updateLogType, categoryLogData);
+    jobReport.endTime = new Date();
+    jobReport.writeToCustomObject();
+
+    logger.info('Indexing completed successfully.');
 }
 
-module.exports.execute = runCategoryExport;
+module.exports.runCategoryExport = runCategoryExport;
 
 // for testing
-module.exports.getSubCategoriesModels = getSubCategoriesModels;
+module.exports.getSubCategoryModels = getSubCategoryModels;

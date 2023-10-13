@@ -5,17 +5,16 @@ var ProductMgr = require('dw/catalog/ProductMgr');
 var logger;
 
 // job step parameters
-var resourceType, fieldListOverride;
+var paramFieldListOverride, paramIndexingMethod;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, AlgoliaJobReport;
 var indexingOperation;
 
 // logging-related variables
-var logData, updateLogType;
+var jobReport;
 
 var products = [], siteLocales, nonLocalizedAttributes = [], fieldsToSend;
-var indexingMethod;
 var lastIndexingTasks = {};
 
 /*
@@ -53,22 +52,33 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
+    AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 
-    // checking mandatory parameters
-    if (empty(parameters.resourceType)) {
-        let errorMessage = 'Mandatory job step parameter "resourceType" missing!';
-        jobHelper.logError(errorMessage);
-        return;
+    /* --- initializing custom object logging --- */
+    jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'product');
+    jobReport.startTime = new Date();
+
+
+    /* --- parameters --- */
+    paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sending method
+    paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullCatalogReindex'
+
+
+    /* --- fieldListOverride parameter --- */
+    if (empty(paramFieldListOverride)) {
+        const customFields = algoliaData.getSetOfArray('CustomFields');
+        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
+    } else {
+        fieldsToSend = paramFieldListOverride;
     }
+    logger.info('fieldListOverride parameter: ' + paramFieldListOverride);
+    logger.info('Actual fields to be sent: ' + JSON.stringify(fieldsToSend));
 
-    // parameters
-    resourceType = parameters.resourceType; // resouceType ( price | inventory | product ) - pass it along to sendChunk()
-    fieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sendChunk()
-    indexingMethod = parameters.indexingMethod || 'partialRecordUpdate';
 
-    switch (indexingMethod) {
+    /* --- indexingMethod parameter --- */
+    switch (paramIndexingMethod) {
         case 'fullRecordUpdate':
-        case 'fullCatalogReindexUpdate':
+        case 'fullCatalogReindex':
             indexingOperation = 'addObject';
             break;
         case 'partialRecordUpdate':
@@ -76,14 +86,10 @@ exports.beforeStep = function(parameters, stepExecution) {
             indexingOperation = 'partialUpdateObject';
             break;
     }
+    logger.info('indexingMethod parameter: ' + paramIndexingMethod);
 
-    if (empty(fieldListOverride)) {
-        const customFields = algoliaData.getSetOfArray('CustomFields');
-        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
-    } else {
-        fieldsToSend = fieldListOverride;
-    }
 
+    /* --- non-localized attributes --- */
     Object.keys(algoliaProductConfig.attributeConfig).forEach(function(attributeName) {
         if (!algoliaProductConfig.attributeConfig[attributeName].localized &&
           fieldsToSend.indexOf(attributeName) >= 0) {
@@ -94,46 +100,27 @@ exports.beforeStep = function(parameters, stepExecution) {
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
 
+
+    /* --- site locales --- */
     siteLocales = Site.getCurrent().getAllowedLocales();
-    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray())
-
-    // configure logging
-    switch (resourceType) {
-        case 'price': updateLogType = 'LastPartialPriceSyncLog'; break;
-        case 'inventory': updateLogType = 'LastPartialInventorySyncLog'; break;
-        case 'product': updateLogType = 'LastProductSyncLog'; break;
-    }
-
-    // initializing logs
-    logData = algoliaData.getLogData(updateLogType) || {};
-    logData.processedDate = algoliaData.getLocalDateTime(new Date());
-    logData.processedError = true;
-    logData.processedErrorMessage = '';
-    logData.processedRecords = 0;
-    logData.processedToUpdateRecords = 0;
-
-    logData.sendDate = algoliaData.getLocalDateTime(new Date());
-    logData.sendError = true;
-    logData.sendErrorMessage = '';
-    logData.sentChunks = 0;
-    logData.sentRecords = 0;
-    logData.failedChunks = 0;
-    logData.failedRecords = 0;
+    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
+    jobReport.siteLocales = siteLocales.size();
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
         stepID: stepExecution.getStepID()
     });
 
-    if (indexingMethod === 'fullCatalogReindex') {
-        indexingOperation = 'addObject';
+    /* --- removing any leftover temporary indices --- */
+    if (paramIndexingMethod === 'fullCatalogReindex') {
         logger.info('Deleting existing temporary indices...');
         var deletionTasks = reindexHelper.deleteTemporaryIndices('products', siteLocales.toArray());
         reindexHelper.waitForTasks(deletionTasks);
         logger.info('Temporary indices deleted.');
     }
 
-    // getting all products assigned to the site
+
+    /* --- getting all products assigned to the site --- */
     products = ProductMgr.queryAllSiteProducts();
     logger.info('Starting indexing...')
 }
@@ -171,6 +158,8 @@ exports.read = function(parameters, stepExecution) {
  */
 exports.process = function(product, parameters, stepExecution) {
 
+    jobReport.processedItems++; // counts towards the total number of products processed
+
     if (productFilter.isInclude(product)) {
         var algoliaOperations = [];
 
@@ -179,18 +168,17 @@ exports.process = function(product, parameters, stepExecution) {
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var indexName = algoliaData.calculateIndexName('products', locale);
-            if (indexingMethod === 'fullCatalogReindex') {
-                indexName += '.tmp'
-            }
-            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldListOverride, baseModel);
-            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName))
+
+            if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
+
+            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, paramFieldListOverride, baseModel);
+            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
         }
 
-        logData.processedRecords++;
-        logData.processedToUpdateRecords++;
+        jobReport.processedItemsToSend++; // number of actual products processed
+        jobReport.recordsToSend += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per product)
 
         return algoliaOperations;
-
     }
 }
 
@@ -216,22 +204,21 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
     var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
     status = retryableBatchRes.result;
-    logData.failedRecords += retryableBatchRes.failedRecords;
+    jobReport.recordsFailed += retryableBatchRes.failedRecords;
 
-    if (status.error) {
-        logData.failedChunks++;
-        logData.failedRecords += batch.length;
-    }
-    else {
-        logData.sentRecords += batch.length;
-        logData.sentChunks++;
+    if (!status.error) {
+        jobReport.recordsSent += batch.length;
+        jobReport.chunksSent++;
 
-        // Store Algolia indexing tasks ids.
-        // When doing a fullCatalogReindex, we will wait to the last indexing tasks in the afterStep.
+        // Store Algolia indexing task IDs.
+        // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
         var taskIDs = status.object.body.taskID;
         Object.keys(taskIDs).forEach(function (taskIndexName) {
             lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
         });
+    } else {
+        jobReport.recordsFailed += batch.length;
+        jobReport.chunksFailed++;
     }
 }
 
@@ -242,7 +229,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
 exports.afterStep = function(success, parameters, stepExecution) {
-    // You can't define the exit status for a chunk-oriented script module.
+    // An exit status cannot be defined for a chunk-oriented script module.
     // Chunk modules always finish with either OK or ERROR.
     // "success" conveys whether an error occurred in any previous chunks or not.
     // Any prior return statements will set success to false (even if it returns Status.OK).
@@ -250,28 +237,32 @@ exports.afterStep = function(success, parameters, stepExecution) {
     products.close();
 
     if (success) {
-        logData.processedError = false;
-        logData.processedErrorMessage = '';
-        logData.sendError = false;
-        logData.sendErrorMessage = '';
+        jobReport.error = false;
+        jobReport.errorMessage = '';
     } else {
-        let errorMessage = 'An error occurred during the job. Please see the error log for more details.';
-        logData.processedError = true;
-        logData.processedErrorMessage = errorMessage;
-        logData.sendError = true;
-        logData.sendErrorMessage = errorMessage;
+        jobReport.error = true;
+        jobReport.errorMessage = 'An error occurred during the job. Please see the error log for more details.';
     }
 
-    if (indexingMethod === 'fullCatalogReindex') {
+    // don't proceed with the atomic reindexing if there were errors
+    if (paramIndexingMethod === 'fullCatalogReindex') {
         reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
     }
 
-    logData.processedDate = algoliaData.getLocalDateTime(new Date());
-    logData.sendDate = algoliaData.getLocalDateTime(new Date());
-    algoliaData.setLogData(updateLogType, logData);
+    logger.info('Total number of products: {0}', jobReport.processedItems);
+    logger.info('Number of products marked for sending: {0}', jobReport.processedItemsToSend);
+    logger.info('Number of locales configured for the site: {0}', jobReport.siteLocales);
+    logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
+    logger.info('Chunks sent: {0}; Chunks failed: {1}', jobReport.chunksSent, jobReport.chunksFailed);
 
-    logger.info('Chunks sent: {0}; Failed chunks: {1}\nRecords sent: {2}; Failed records: {3}',
-        logData.sentChunks, logData.failedChunks, logData.sentRecords, logData.failedRecords);
+    jobReport.endTime = new Date();
+    jobReport.writeToCustomObject();
+
+    if (success) {
+        logger.info('Indexing completed successfully.');
+    } else {
+        logger.error('Indexing failed.');
+    }
 }
 
 // For testing

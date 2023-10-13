@@ -30,6 +30,16 @@ jest.mock('dw/io/File', () => {
     }
     return MockedFile;
 }, {virtual: true});
+jest.mock('dw/object/CustomObjectMgr', () => ({
+    createCustomObject: jest.fn(() => {
+        return {
+            custom: {},
+        }
+    }),
+    getCustomObject: jest.fn(),
+    getAllCustomObjects: jest.fn(),
+    queryCustomObjects: jest.fn(),
+}), {virtual: true});
 jest.mock('dw/system/Logger', () => {
     return {
         info: jest.fn(),
@@ -75,26 +85,75 @@ jest.mock('dw/system/Site', () => {
                 getCustomPreferenceValue: function(id) {
                     switch(id) {
                         case 'Algolia_IndexPrefix':
-                            return 'test_index_';
+                        return 'test_index_';
                         default:
-                            return null;
+                        return null;
                     }
-                }
+                },
+                getTimezone: function() {
+                    return 'Europe/Paris';
+                },
             };
         }
     }
 }, {virtual: true});
 jest.mock('dw/system/Status', () => {}, {virtual: true});
-jest.mock('dw/system/System', () => {}, {virtual: true});
-jest.mock('dw/system/Transaction', () => {}, {virtual: true});
+jest.mock('dw/system/System', () => {
+    return {
+        getCalendar: function() {
+            return {
+                getTime: function() {
+                    return new Date();
+                }
+            }
+        },
+        getInstanceTimeZone: function() {
+            return 'Europe/Paris';
+        },
+    }
+}, {virtual: true});
+jest.mock('dw/system/Transaction', () => {
+    return {
+        wrap: function(callback) { return callback(); },
+    }
+}, {virtual: true});
+jest.mock('dw/util/Calendar', () => {
+    return class CalendarMock {
+        constructor() {
+            this.time = new Date();
+            this.timeZone = 'Europe/Paris';
+        }
+        getTime() {
+            return this.time;
+        }
+        setTime(date) {
+            this.time = date;
+        }
+        setTimeZone(timeZone) {
+            this.timeZone = timeZone;
+        }
+        getTimeZone() {
+            return this.timeZone;
+        }
+    }
+}, {virtual: true});
 jest.mock('dw/util/Currency', () => {
     return {
         getCurrency: function (currency) { return currency; }
     }
 }, {virtual: true});
+
+jest.mock('dw/web/CSRFProtection', () => {
+    return {
+        generateToken: function() {
+            return 'csrfToken';
+        }
+    }
+}, {virtual: true});
 jest.mock('dw/util/StringUtils', () => {
     return {
-        trim: function (str) { return str; }
+        trim: function (str) { return str; },
+        formatCalendar: function(str1, str2) { return str1; },
     }
 }, {virtual: true});
 jest.mock('dw/web/Resource', () => {
@@ -142,6 +201,9 @@ jest.mock('*/cartridge/scripts/algolia/filters/productFilter', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
 }, {virtual: true});
 
+jest.mock('*/cartridge/scripts/algolia/helper/AlgoliaJobReport', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/CPObjectIterator', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/CPObjectIterator');
 }, {virtual: true});

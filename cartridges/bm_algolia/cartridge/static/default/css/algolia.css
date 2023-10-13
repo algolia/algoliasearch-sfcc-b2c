@@ -1,8 +1,63 @@
 .tab {
     padding: 0.5em;
 }
-  
-.tab-title {
-    padding: 1em;
+
+table#indexing-status {
+    margin: 2em auto;
+}
+table#algolia-report-table, table#algolia-bm-settings {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 2em auto;
+    /* border: 1px solid #dadada; */
+    margin-bottom: 20px;
+
+}
+table#algolia-report-table td {
+    padding: 3px;
+    text-align: center;
+}
+table#algolia-report-table .table-subheader {
+    background-color: #eee;
+    color: #54585a;
+    font-family: 'Arial Narrow', Helvetica, Arial, Verdana, sans-serif;
+}
+table#algolia-report-table .cell-time {
+    width: 160px;
+}
+table#algolia-report-table .cell-number-narrow {
+    width: 60px;
+}
+table#algolia-report-table .cell-number {
+    width: 130px;
+}
+.cell-number-wide {
+    width: 160px;
+}
+.red {
+    color: red;
+}
+.narrow {
+    font-family: 'Arial Narrow', Helvetica, Arial, Verdana, sans-serif;
+}
+
+.warning-box {
+    border: 1px solid #f0ad4e;
+    background-color: #fcf8e3;
+    color: #8a6d3b;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+h2 {
+    font-size: 1.5em;
+    font-family: "Helvetica Neue",Helvetica,Arial,Verdana,sans-serif;
+}
+.b {
     font-weight: bold;
+}
+td {
+    padding: 0;
+}
+tr {
+    padding: 0;
 }
