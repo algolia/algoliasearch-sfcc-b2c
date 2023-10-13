@@ -44,7 +44,7 @@ test('sendBatch', () => {
     });
 });
 
-test('sendMultiIndicesBatch', () => {
+test('sendMultiIndexBatch', () => {
     const algoliaRequests = [
         {
             action: 'addObject',
@@ -58,7 +58,7 @@ test('sendMultiIndicesBatch', () => {
         }
     ];
 
-    indexingAPI.sendMultiIndicesBatch(algoliaRequests);
+    indexingAPI.sendMultiIndexBatch(algoliaRequests);
 
     expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
         method: 'POST',

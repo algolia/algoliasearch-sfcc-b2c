@@ -50,7 +50,7 @@ function sendBatch(indexName, requestsArray) {
  * @param {AlgoliaOperation[]} requestsArray - array of requests to send to Algolia. Each operation must contain the `indexName` to target.
  * @returns {dw.svc.Result} - result of the call
  */
-function sendMultiIndicesBatch(requestsArray) {
+function sendMultiIndexBatch(requestsArray) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
     var result = retryableCall(
@@ -189,7 +189,7 @@ function waitTask(indexName, taskID) {
 
 module.exports.setJobInfo = setJobInfo;
 module.exports.sendBatch = sendBatch;
-module.exports.sendMultiIndicesBatch = sendMultiIndicesBatch;
+module.exports.sendMultiIndexBatch = sendMultiIndexBatch;
 module.exports.deleteIndex = deleteIndex;
 module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;

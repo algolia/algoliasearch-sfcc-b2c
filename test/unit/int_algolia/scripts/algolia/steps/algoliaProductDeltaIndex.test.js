@@ -5,11 +5,11 @@ global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
 const mockSetJobInfo = jest.fn();
-const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({ ok: true });
+const mockSendMultiIndexBatch = jest.fn().mockReturnValue({ ok: true });
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         setJobInfo: mockSetJobInfo,
-        sendMultiIndicesBatch: mockSendMultiIndicesBatch,
+        sendMultiIndexBatch: mockSendMultiIndexBatch,
     }
 }, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
@@ -28,17 +28,17 @@ const parameters = {
 const stepExecution = {
     getJobExecution: () => {
         return {
-            getJobID: () => 'SendDeltaTestJob',
+            getJobID: () => 'TestJobID',
         }
     },
-    getStepID: () => 'sendDeltaTestStep',
+    getStepID: () => 'TestStepID',
 };
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates');
+const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
 
 test('process', () => {
     job.beforeStep(parameters, stepExecution);
-    expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendDeltaTestJob', stepID: 'sendDeltaTestStep' });
+    expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
     var algoliaOperations = job.process({ productID: '701644031206M', available: true });
     expect(algoliaOperations).toMatchSnapshot();
 });
@@ -63,5 +63,5 @@ test('send', () => {
 
     job.send(algoliaOperationsChunk);
 
-    expect(mockSendMultiIndicesBatch).toHaveBeenCalledWith(algoliaOperationsChunk.flat());
+    expect(mockSendMultiIndexBatch).toHaveBeenCalledWith(algoliaOperationsChunk.flat());
 });

@@ -25,7 +25,7 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
 jest.mock('*/cartridge/scripts/services/algoliaIndexingService', () => {}, {virtual: true});
 
 const mockSetJobInfo = jest.fn();
-const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({
+const mockSendMultiIndexBatch = jest.fn().mockReturnValue({
     ok: true,
     object: {
         body: {
@@ -39,25 +39,25 @@ const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         setJobInfo: mockSetJobInfo,
-        sendMultiIndicesBatch: mockSendMultiIndicesBatch,
+        sendMultiIndexBatch: mockSendMultiIndexBatch,
     }
 }, {virtual: true});
 
 const stepExecution = {
     getJobExecution: () => {
         return {
-            getJobID: () => 'SendProductsTestJob',
+            getJobID: () => 'TestJobID',
         }
     },
-    getStepID: () => 'sendProductsTestStep',
+    getStepID: () => 'TestStepID',
 };
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates');
+const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex');
 
 describe('process', () => {
     test('default', () => {
         job.beforeStep({}, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
@@ -65,7 +65,7 @@ describe('process', () => {
     });
     test('partialRecordUpdate', () => {
         job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
@@ -73,7 +73,7 @@ describe('process', () => {
     });
     test('fullRecordUpdate', () => {
         job.beforeStep({ indexingMethod: 'fullRecordUpdate' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
@@ -81,7 +81,7 @@ describe('process', () => {
     });
     test('fullCatalogReindex', () => {
         job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendProductsTestJob', stepID: 'sendProductsTestStep' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
         expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith('products', expect.arrayContaining(['default', 'fr', 'en']));
 
         var algoliaOperations = job.process(new ProductMock());
@@ -109,7 +109,7 @@ test('send', () => {
 
     job.send(algoliaOperationsChunk);
 
-    expect(mockSendMultiIndicesBatch).toHaveBeenCalledWith(algoliaOperationsChunk.flat());
+    expect(mockSendMultiIndexBatch).toHaveBeenCalledWith(algoliaOperationsChunk.flat());
 });
 
 describe('afterStep', () => {

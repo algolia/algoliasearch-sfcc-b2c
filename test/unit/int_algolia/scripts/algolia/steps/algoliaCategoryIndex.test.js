@@ -49,7 +49,7 @@ jest.mock('*/cartridge/scripts/algolia/model/algoliaLocalizedCategory', () => {
 }, {virtual: true});
 
 const mockSetJobInfo = jest.fn();
-const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({
+const mockSendMultiIndexBatch = jest.fn().mockReturnValue({
     ok: true,
     object: {
         body: {
@@ -63,7 +63,7 @@ const mockSendMultiIndicesBatch = jest.fn().mockReturnValue({
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         setJobInfo: mockSetJobInfo,
-        sendMultiIndicesBatch: mockSendMultiIndicesBatch,
+        sendMultiIndexBatch: mockSendMultiIndexBatch,
     }
 }, {virtual: true});
 
@@ -82,13 +82,13 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
 const stepExecution = {
     getJobExecution: () => {
         return {
-            getJobID: () => 'SendCategoriesTestJob',
+            getJobID: () => 'TestJobID',
         }
     },
-    getStepID: () => 'sendCategoriesTestStep',
+    getStepID: () => 'TestStepID',
 }
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/sendCategories');
+const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaCategoryIndex');
 
 describe('getSubCategoryModels', () => {
     test('default locale', () => {
@@ -104,8 +104,8 @@ describe('getSubCategoryModels', () => {
 test('runCategoryExport', () => {
 
     job.runCategoryExport({}, stepExecution);
-    expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'SendCategoriesTestJob', stepID: 'sendCategoriesTestStep' });
-    expect(mockSendMultiIndicesBatch).toMatchSnapshot();
+    expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
+    expect(mockSendMultiIndexBatch).toMatchSnapshot();
     expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
         'categories',
         expect.arrayContaining(['default', 'fr', 'en']),

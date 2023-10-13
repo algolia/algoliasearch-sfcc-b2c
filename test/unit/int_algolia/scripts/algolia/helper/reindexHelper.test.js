@@ -26,14 +26,14 @@ const mockMoveIndex = jest.fn().mockReturnValue({
     }
 });
 const mockWaitTask = jest.fn();
-const mockSendMultiIndicesBatch = jest.fn();
+const mockSendMultiIndexBatch = jest.fn();
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         deleteIndex: mockDeleteIndex,
         copyIndexSettings: mockCopySettingsFromProdIndices,
         moveIndex: mockMoveIndex,
         waitTask: mockWaitTask,
-        sendMultiIndicesBatch: mockSendMultiIndicesBatch,
+        sendMultiIndexBatch: mockSendMultiIndexBatch,
     }
 }, {virtual: true});
 
@@ -112,17 +112,17 @@ test('sendRetryableBatch', () => {
             body: { objectID: 'record3', name: 'record3' },
         }
     ];
-    mockSendMultiIndicesBatch.mockReturnValueOnce({
+    mockSendMultiIndexBatch.mockReturnValueOnce({
         error: true,
         getErrorMessage: () => '{"message":"Record at the position 0 objectID=record1 is too big size=11072/10000 bytes. Please have a look at https://www.algolia.com/doc/guides/sending-and-managing-data/prepare-your-data/in-depth/index-and-records-size-and-usage-limitations/#record-size-limits","position":2,"objectID":"record2","status":400}'
     });
-    mockSendMultiIndicesBatch.mockReturnValue({
+    mockSendMultiIndexBatch.mockReturnValue({
         ok: true,
     });
 
     const res = reindexHelper.sendRetryableBatch(batch);
 
-    expect(mockSendMultiIndicesBatch).toHaveBeenCalledTimes(2);
+    expect(mockSendMultiIndexBatch).toHaveBeenCalledTimes(2);
     expect(res.result.ok).toBe(true);
     expect(res.failedRecords).toBe(2);
     expect(batch.length).toBe(4); // 2 records have been removed

@@ -109,7 +109,7 @@ function sendRetryableBatch(batch) {
     var MAX_ATTEMPTS = 50;
     var attempt = 0;
     var failedRecords = 0;
-    var result = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
+    var result = algoliaIndexingAPI.sendMultiIndexBatch(batch);
     while (result.error && attempt < MAX_ATTEMPTS) {
         ++attempt;
         try {
@@ -129,7 +129,7 @@ function sendRetryableBatch(batch) {
                 }
             }
             logger.info('[Retryable batch] Retrying batch...');
-            result = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
+            result = algoliaIndexingAPI.sendMultiIndexBatch(batch);
         } catch(e) {
             // Error message is not JSON, ignoring
             logger.error('[Retryable batch] Error while parsing response: ' + e.message);
