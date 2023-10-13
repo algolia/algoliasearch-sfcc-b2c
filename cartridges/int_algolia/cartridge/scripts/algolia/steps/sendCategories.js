@@ -129,7 +129,14 @@ function runCategoryExport(parameters, stepExecution) {
         }
     }
 
-    reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
+    if (jobReport.recordsFailed === 0) {
+        reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
+    } else {
+        jobReport.error = true;
+        jobReport.endTime = new Date();
+        jobReport.writeToCustomObject();
+        throw new Error('Some records failed to be indexed (check the logs for details). Not moving temporary indices to production.');
+    }
 
     jobReport.endTime = new Date();
     jobReport.writeToCustomObject();

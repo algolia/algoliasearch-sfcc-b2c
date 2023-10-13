@@ -244,16 +244,23 @@ exports.afterStep = function(success, parameters, stepExecution) {
         jobReport.errorMessage = 'An error occurred during the job. Please see the error log for more details.';
     }
 
-    // don't proceed with the atomic reindexing if there were errors
-    if (paramIndexingMethod === 'fullCatalogReindex') {
-        reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
-    }
-
     logger.info('Total number of products: {0}', jobReport.processedItems);
     logger.info('Number of products marked for sending: {0}', jobReport.processedItemsToSend);
     logger.info('Number of locales configured for the site: {0}', jobReport.siteLocales);
     logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
     logger.info('Chunks sent: {0}; Chunks failed: {1}', jobReport.chunksSent, jobReport.chunksFailed);
+
+    if (paramIndexingMethod === 'fullCatalogReindex') {
+        if (jobReport.recordsFailed === 0) {
+            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
+        } else {
+            // don't proceed with the atomic reindexing if there were errors
+            throw new Error('Some records failed to be indexed (check the logs for details). Not moving temporary indices to production.');
+        }
+    } else if (jobReport.chunksFailed > 0) {
+        // Showing the job in ERROR in the history
+        throw new Error('Some chunks failed to be sent, check the logs for details.');
+    }
 
     jobReport.endTime = new Date();
     jobReport.writeToCustomObject();

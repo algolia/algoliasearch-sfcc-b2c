@@ -361,6 +361,10 @@ exports.afterStep = function(success, parameters, stepExecution) {
     jobReport.endTime = new Date();
     jobReport.writeToCustomObject();
 
+    if (jobReport.chunksFailed > 0) {
+        throw new Error('Some chunks failed to be sent, check the logs for details.');
+    }
+
     if (success) {
         logger.info('Indexing completed successfully.');
     } else {
