@@ -70,7 +70,9 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
 const mockDeleteTemporaryIndices = jest.fn();
 const mockFinishAtomicReindex = jest.fn();
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
     return {
+        sendRetryableBatch: originalModule.sendRetryableBatch,
         deleteTemporaryIndices: mockDeleteTemporaryIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
         waitForTasks: jest.fn(),

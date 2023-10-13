@@ -99,9 +99,56 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
     moveTemporaryIndices(indexType, locales);
 }
 
+/**
+ * Sends an Algolia batch to the multi-indices batch endpoint.
+ * If records fail to be indexed (because e.g. they are too big), they are removed from the batch and the batch is retried.
+ * @param {Object} batch - Algolia multi-indices batch
+ * @return {{failedRecords: number}} returns an object with the last call result and the number of failed records.
+ */
+function sendRetryableBatch(batch) {
+    var MAX_ATTEMPTS = 50;
+    var attempt = 0;
+    var failedRecords = 0;
+    var result = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
+    while (result.error && attempt < MAX_ATTEMPTS) {
+        ++attempt;
+        try {
+            var apiResponse = JSON.parse(result.getErrorMessage());
+            // When records are failing, Algolia returns the following:
+            // {"message":"Record at the position 6 objectID=008884303996M is too big size=11072/10000 bytes. Please have a look at [...]", "position":6,"objectID":"008884303996M","status":400}
+            if (!apiResponse.objectID || !apiResponse.message || !apiResponse.message.startsWith('Record at the position')) {
+                // No faulty record detected, nothing else to do
+                break;
+            }
+            logger.info('[Retryable batch] Removing records for product ' + apiResponse.objectID);
+            for (var i = batch.length - 1; i >= 0; --i) {
+                if (batch[i].body.objectID === apiResponse.objectID) {
+                    logger.info('[Retryable batch] Removing record for product ' + apiResponse.objectID + ' from the batch (index '+ batch[i].indexName + ')');
+                    batch.splice(i, 1);
+                    failedRecords++;
+                }
+            }
+            logger.info('[Retryable batch] Retrying batch...');
+            result = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
+        } catch(e) {
+            // Error message is not JSON, ignoring
+            logger.error('[Retryable batch] Error while parsing response: ' + e.message);
+            break;
+        }
+    }
+    if (attempt === MAX_ATTEMPTS) {
+        logger.error('[Retryable batch] Too many products are in error, aborting the batch...');
+    }
+    return {
+        result: result,
+        failedRecords: failedRecords,
+    }
+}
+
 module.exports.deleteTemporaryIndices = deleteTemporaryIndices;
 module.exports.finishAtomicReindex = finishAtomicReindex;
 module.exports.waitForTasks = waitForTasks;
+module.exports.sendRetryableBatch = sendRetryableBatch;
 
 // For unit testing
 module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;
