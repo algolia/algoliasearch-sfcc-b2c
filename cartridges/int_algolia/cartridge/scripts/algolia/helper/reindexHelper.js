@@ -107,11 +107,11 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
  */
 function sendRetryableBatch(batch) {
     var MAX_ATTEMPTS = 50;
-    var attempts = 0;
+    var attempt = 0;
     var failedRecords = 0;
     var result = algoliaIndexingAPI.sendMultiIndicesBatch(batch);
-    while (result.error && attempts < MAX_ATTEMPTS) {
-        ++attempts;
+    while (result.error && attempt < MAX_ATTEMPTS) {
+        ++attempt;
         try {
             var apiResponse = JSON.parse(result.getErrorMessage());
             // When records are failing, Algolia returns the following:
@@ -136,7 +136,7 @@ function sendRetryableBatch(batch) {
             break;
         }
     }
-    if (attempts === MAX_ATTEMPTS) {
+    if (attempt === MAX_ATTEMPTS) {
         logger.error('[Retryable batch] Too many products are in error, aborting the batch...');
     }
     return {
