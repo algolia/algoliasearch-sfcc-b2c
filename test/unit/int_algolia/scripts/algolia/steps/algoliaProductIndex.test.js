@@ -79,6 +79,12 @@ describe('beforeStep', () => {
         expect(job.__getFieldsToSend()).toStrictEqual(['name', 'primary_category_id',
             'categories', 'in_stock', 'price', 'image_groups', 'url']);
     });
+    test('no duplicated attributes', () => {
+        mockCustomFields = ['name'];
+        job.beforeStep({}, stepExecution);
+        expect(job.__getFieldsToSend()).toStrictEqual(['name', 'primary_category_id',
+            'categories', 'in_stock', 'price', 'image_groups', 'url']);
+    });
 });
 
 describe('process', () => {
