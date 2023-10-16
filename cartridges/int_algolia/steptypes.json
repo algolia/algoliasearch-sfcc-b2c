@@ -1,12 +1,12 @@
 {
 	"step-types": {
 		"script-module-step": [{
-			"@type-id": "custom.algoliaCategoriesIndex",
+			"@type-id": "custom.algoliaCategoryIndex",
 			"@supports-parallel-execution": "false",
 			"@supports-site-context": "true",
 			"@supports-organization-context": "false",
 			"description": "Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.",
-			"module": "int_algolia/cartridge/scripts/algolia/steps/sendCategories.js",
+			"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaCategoryIndex.js",
 			"function": "runCategoryExport",
 			"transactional": "false",
 			"timeout-in-seconds": "600",
@@ -24,12 +24,12 @@
 			}
 		}],
 		"chunk-script-module-step": [{
-				"@type-id": "custom.algoliaProductsIndex",
+				"@type-id": "custom.algoliaProductIndex",
 				"@supports-parallel-execution": true,
 				"@supports-site-context": true,
 				"@supports-organization-context": false,
 				"description": "Index all products assigned to the selected site. The list of indexed attributes is configurable. Can perform partial records updates, full records updates or a full catalog reindex. See the 'indexingMethod' field for details.",
-				"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates.js",
+				"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex.js",
 				"read-function": "read",
 				"process-function": "process",
 				"write-function": "send",
@@ -80,12 +80,12 @@
 				}
 			},
 			{
-				"@type-id": "custom.algoliaProductsPartialUpdate",
+				"@type-id": "custom.algoliaProductPartialIndex",
 				"@supports-parallel-execution": true,
 				"@supports-site-context": true,
 				"@supports-organization-context": false,
 				"description": "Update all products assigned to the selected site. The list of indexed attributes is configurable. Performs partial records updates: only the specified fields are updated/added for each record (without affecting other fields). If the record doesn't exist, a new one will be created.",
-				"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates.js",
+				"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex.js",
 				"read-function": "read",
 				"process-function": "process",
 				"write-function": "send",
@@ -121,12 +121,12 @@
 				}
 			},
 			{
-				"@type-id": "custom.algoliaIndexDeltaProductUpdates",
+				"@type-id": "custom.algoliaProductDeltaIndex",
 				"@supports-parallel-execution": true,
 				"@supports-site-context": true,
 				"@supports-organization-context": false,
 				"description": "Extracts the list of productIDs (of changed products) from a B2C Delta Export, retrieves and enriches the products data, then sends them to Algolia. Can perform full records updates or partial records updates. See the 'indexingMethod' field for details.",
-				"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedDeltaProductUpdates.js",
+				"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex.js",
 				"read-function": "read",
 				"process-function": "process",
 				"write-function": "send",

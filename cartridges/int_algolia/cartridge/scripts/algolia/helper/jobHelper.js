@@ -404,7 +404,7 @@ function getNextProductModel(productsIterator) {
     return algoliaProductModel;
 }
 
-// ----------------------------- helpers used by sendDeltaExportProducts.js -----------------------------
+// ----------------------------- helpers used by algoliaProductDeltaIndex.js -----------------------------
 
 /**
  * Updates or adds a key-value pair to the last object in the array that has less than 2000 properties.
