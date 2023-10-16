@@ -281,3 +281,6 @@ exports.afterStep = function(success, parameters, stepExecution) {
 exports.__setLastIndexingTasks = function(indexingTasks) {
     lastIndexingTasks = indexingTasks;
 };
+exports.__getFieldsToSend = function() {
+    return fieldsToSend;
+}
