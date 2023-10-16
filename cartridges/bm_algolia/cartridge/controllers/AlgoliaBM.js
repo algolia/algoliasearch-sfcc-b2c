@@ -27,7 +27,6 @@ function start() {
 
 /**
  * @description Handle form for settings
- * @returns {void} renderIndex
  */
 function handleSettings() {
     var params = request.httpParameterMap;
@@ -47,7 +46,7 @@ function handleSettings() {
         Logger.error(error);
     }
 
-    renderIndex();
+    start();
 }
 
 /**
