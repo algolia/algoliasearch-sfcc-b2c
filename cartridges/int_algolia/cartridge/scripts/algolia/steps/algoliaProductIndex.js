@@ -66,8 +66,13 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- fieldListOverride parameter --- */
     if (empty(paramFieldListOverride)) {
+        fieldsToSend = algoliaProductConfig.defaultAttributes_v2;
         const customFields = algoliaData.getSetOfArray('CustomFields');
-        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
+        customFields.map(function(field) {
+            if (fieldsToSend.indexOf(field) < 0) {
+                fieldsToSend.push(field);
+            }
+        });
     } else {
         fieldsToSend = paramFieldListOverride;
     }
@@ -171,7 +176,7 @@ exports.process = function(product, parameters, stepExecution) {
 
             if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
 
-            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, paramFieldListOverride, baseModel);
+            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldsToSend, baseModel);
             algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
         }
 

@@ -38,7 +38,6 @@ exports[`process default 1`] = `
         ],
       ],
       "color": "Hot Pink Combo",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -136,7 +135,6 @@ exports[`process default 1`] = `
         ],
       ],
       "color": "Combo rose vif",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -234,7 +232,6 @@ exports[`process default 1`] = `
         ],
       ],
       "color": "Hot Pink Combo",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -337,7 +334,6 @@ exports[`process fullCatalogReindex 1`] = `
         ],
       ],
       "color": "Hot Pink Combo",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -435,7 +431,6 @@ exports[`process fullCatalogReindex 1`] = `
         ],
       ],
       "color": "Combo rose vif",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -533,7 +528,6 @@ exports[`process fullCatalogReindex 1`] = `
         ],
       ],
       "color": "Hot Pink Combo",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -636,7 +630,6 @@ exports[`process fullRecordUpdate 1`] = `
         ],
       ],
       "color": "Hot Pink Combo",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -734,7 +727,6 @@ exports[`process fullRecordUpdate 1`] = `
         ],
       ],
       "color": "Combo rose vif",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -832,7 +824,6 @@ exports[`process fullRecordUpdate 1`] = `
         ],
       ],
       "color": "Hot Pink Combo",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -935,7 +926,6 @@ exports[`process partialRecordUpdate 1`] = `
         ],
       ],
       "color": "Hot Pink Combo",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -1033,7 +1023,6 @@ exports[`process partialRecordUpdate 1`] = `
         ],
       ],
       "color": "Combo rose vif",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -1131,7 +1120,6 @@ exports[`process partialRecordUpdate 1`] = `
         ],
       ],
       "color": "Hot Pink Combo",
-      "id": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",

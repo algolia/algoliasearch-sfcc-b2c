@@ -88,8 +88,13 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- fieldListOverride parameter --- */
     if (empty(paramFieldListOverride)) {
+        fieldsToSend = algoliaProductConfig.defaultAttributes_v2;
         const customFields = algoliaData.getSetOfArray('CustomFields');
-        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
+        customFields.map(function(field) {
+            if (fieldsToSend.indexOf(field) < 0) {
+                fieldsToSend.push(field);
+            }
+        });
     } else {
         fieldsToSend = paramFieldListOverride;
     }

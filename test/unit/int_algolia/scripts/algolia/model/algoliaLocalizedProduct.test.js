@@ -73,13 +73,15 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 }, {virtual: true});
 
 const AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+const algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig')
+const fields = algoliaProductConfig.defaultAttributes_v2.concat(['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
+    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']);
 
 describe('algoliaLocalizedProduct', function () {
     test('default locale', function () {
         const product = new ProductMock();
         const algoliaProductModel = {
             objectID: '701644031206M',
-            id: '701644031206M',
             in_stock: true,
             primary_category_id: 'womens-clothing-bottoms',
             price: {
@@ -171,14 +173,13 @@ describe('algoliaLocalizedProduct', function () {
                 'id:701644031206M',
             ],
         };
-        expect(new AlgoliaLocalizedProduct(product)).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct(product, 'default', fields)).toEqual(algoliaProductModel);
     });
 
     test('fr locale', function () {
         const product = new ProductMock();
         const algoliaProductModel = {
             objectID: '701644031206M',
-            id: '701644031206M',
             in_stock: true,
             primary_category_id: 'womens-clothing-bottoms',
             price: {
@@ -270,7 +271,7 @@ describe('algoliaLocalizedProduct', function () {
                 'id:701644031206M',
             ],
         };
-        expect(new AlgoliaLocalizedProduct(product, 'fr')).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct(product, 'fr', fields)).toEqual(algoliaProductModel);
     });
 
     test('fieldListOverride', function () {
@@ -303,6 +304,7 @@ describe('algoliaLocalizedProduct', function () {
                 EUR: 0.93
             },
             name: 'Test name',
+            _tags: ['id:' + product.ID]
         };
         expect(new AlgoliaLocalizedProduct(product, 'default', ['price', 'UPC', 'name'], baseModel)).toEqual(expectedProductModel);
     });

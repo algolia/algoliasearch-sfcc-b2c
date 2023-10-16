@@ -321,30 +321,19 @@ var aggregatedValueHandlers = {
  * AlgoliaLocalizedProduct class that represents a localized algoliaProduct ready to be indexed
  * @param {dw.order.Product} product - Product
  * @param {string} locale - The requested locale
- * @param {Array} [fieldListOverride] (optional) if supplied, it overrides the regular list of attributes to be sent (default + customFields)
+ * @param {Array} [fieldList] list of attributes to be fetched
  * @param {Object} baseModel - A base model object that contains some pre-fetched properties
  * @constructor
  */
-function algoliaLocalizedProduct(product, locale, fieldListOverride, baseModel) {
+function algoliaLocalizedProduct(product, locale, fieldList, baseModel) {
     request.setLocale(locale || 'default');
 
-    // list of fields to build the object with
-    let algoliaFields;
-    if (!empty(fieldListOverride)) {
-        // use overridden list of fields
-        algoliaFields = fieldListOverride;
-    } else {
-        // use regular list of fields (default behavior)
-        const customFields = algoliaData.getSetOfArray('CustomFields');
-        algoliaFields = algoliaProductConfig.defaultAttributes.concat(customFields);
-    }
-
-    if (empty(product)) {
+    if (empty(product) || empty(fieldList)) {
         this.id = null;
     } else {
         this.objectID = product.ID;
-        for (var i = 0; i < algoliaFields.length; i += 1) {
-            var attributeName = algoliaFields[i];
+        for (var i = 0; i < fieldList.length; i += 1) {
+            var attributeName = fieldList[i];
             var config = algoliaProductConfig.attributeConfig[attributeName];
 
             if (!empty(config)) {
@@ -357,13 +346,13 @@ function algoliaLocalizedProduct(product, locale, fieldListOverride, baseModel) 
                 }
             }
         }
-        if (algoliaFields.indexOf('id') >= 0) {
+        if (fieldList.indexOf('name') >= 0) {
             this._tags = ['id:' + product.ID];
         }
         if (this.primary_category_id && this.categories) {
             this['__primary_category'] = computePrimaryCategoryHierarchicalFacets(this.categories, this.primary_category_id);
         }
-        productModelCustomizer.customizeLocalizedProductModel(this, algoliaFields);
+        productModelCustomizer.customizeLocalizedProductModel(this, fieldList);
     }
 }
 
