@@ -5,11 +5,30 @@
 table#indexing-status {
     margin: 2em auto;
 }
+table#algolia-bm-settings input[type=text], input[type=number] {
+    width: 100%;
+}
+table#algolia-bm-settings tr > td:first-child {
+    width: 30%;
+    word-wrap: break-word;
+    white-space: normal;
+}
+table#algolia-bm-settings td.right {
+    width: 70%;
+}
+.nowrap {
+    white-space: nowrap;
+}
+.normal-wrap {
+    white-space: normal;
+}
+pre {
+    margin: 0;
+}
 table#algolia-report-table, table#algolia-bm-settings {
     border-collapse: collapse;
     width: 100%;
     margin: 2em auto;
-    /* border: 1px solid #dadada; */
     margin-bottom: 20px;
 
 }
