@@ -22,9 +22,10 @@ StatefulHost.prototype.markDown = function() {
     this.isDown = true;
 }
 StatefulHost.prototype.isExpired = function() {
-    return this.isDown && Date.now() - this.lastUpdate > EXPIRATION_DELAY
+    return this.isDown && (Date.now() - this.lastUpdate > EXPIRATION_DELAY)
 }
 StatefulHost.prototype.reset = function() {
+    Logger.info('Resetting host ' + this.hostname + '...');
     this.lastUpdate = Date.now();
     this.isDown = false;
 }
@@ -63,6 +64,7 @@ function getAvailableHosts() {
         return res;
     }
 
+    Logger.info('All hosts are down, retrying them...');
     for (let i = 0; i < statefulhosts.length; ++i) {
         res.push(statefulhosts[i]);
     }
@@ -102,10 +104,9 @@ function isRetryable(result) {
  */
 function retryableCall(service, requestParams) {
     var result;
-    const hosts = getAvailableHosts();
+    var hosts = getAvailableHosts();
     for (let i = 0; i < hosts.length; ++i) {
-        const statefulhost = hosts[i];
-        const hostname = statefulhost.hostname;
+        var statefulhost = hosts[i];
         result = service.call({
             method: requestParams.method,
             url: 'https://' + statefulhost.hostname + requestParams.path,
@@ -119,6 +120,7 @@ function retryableCall(service, requestParams) {
         Logger.error('Request error on ' + statefulhost.hostname + ': ' +
           result.getError() + ' - ' + result.getErrorMessage());
         if (!isTimeoutError(result)) {
+            Logger.info('Marking host ' + statefulhost.hostname + ' down.');
             statefulhost.markDown();
         }
     }
