@@ -12,7 +12,7 @@ module.exports.execute = function (parameters) {
 
     // Remove old Snapshot file and rename a new one
     var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_PRODUCTS_FILE_NAME);
-    if (status.error) {
+    if (!status.ok) {
         try {
             if (newSnapshotFile.exists()) {
                 newSnapshotFile.remove();

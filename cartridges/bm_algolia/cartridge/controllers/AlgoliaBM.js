@@ -57,7 +57,7 @@ function indexing() {
     var responseData = {};
     var status = algoliaExportAPI.makeIndexingRequest(requestType);
 
-    if (status.error) {
+    if (!status.ok) {
         responseData.errorMessage = status.details.errorMessage ? status.details.errorMessage : Resource.msg('algolia.error.service', 'algolia', null);
     } else {
         responseData = status.details.object.body;
