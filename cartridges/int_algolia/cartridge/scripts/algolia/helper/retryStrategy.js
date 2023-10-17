@@ -103,10 +103,10 @@ function isRetryable(result) {
  * @return {dw.svc.Result} The first non-retryable result
  */
 function retryableCall(service, requestParams) {
-    var result;
-    var hosts = getAvailableHosts();
+    let result;
+    let hosts = getAvailableHosts();
     for (let i = 0; i < hosts.length; ++i) {
-        var statefulhost = hosts[i];
+        let statefulhost = hosts[i];
         result = service.call({
             method: requestParams.method,
             url: 'https://' + statefulhost.hostname + requestParams.path,
