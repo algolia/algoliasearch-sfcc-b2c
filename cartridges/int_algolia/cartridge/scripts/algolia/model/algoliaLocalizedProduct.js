@@ -322,10 +322,11 @@ var aggregatedValueHandlers = {
  * @param {dw.order.Product} product - Product
  * @param {string} locale - The requested locale
  * @param {Array} [fieldList] list of attributes to be fetched
- * @param {Object} baseModel - A base model object that contains some pre-fetched properties
+ * @param {Object?} baseModel - (optional) A base model object that contains some pre-fetched properties
+ * @param {boolean?} fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
  * @constructor
  */
-function algoliaLocalizedProduct(product, locale, fieldList, baseModel) {
+function algoliaLocalizedProduct({ product, locale, fieldList, baseModel, fullRecordUpdate}) {
     request.setLocale(locale || 'default');
 
     if (empty(product) || empty(fieldList)) {
@@ -346,7 +347,7 @@ function algoliaLocalizedProduct(product, locale, fieldList, baseModel) {
                 }
             }
         }
-        if (fieldList.indexOf('name') >= 0) {
+        if (fullRecordUpdate) {
             this._tags = ['id:' + product.ID];
         }
         if (this.primary_category_id && this.categories) {

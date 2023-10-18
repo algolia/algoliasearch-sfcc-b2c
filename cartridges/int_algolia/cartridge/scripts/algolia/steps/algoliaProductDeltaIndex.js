@@ -20,6 +20,7 @@ var deltaExportZips, siteLocales, nonLocalizedAttributes = [], fieldsToSend;
 
 var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on the step parameter 'indexingMethod'
 const deleteIndexingOperation = 'deleteObject';
+var fullRecordUpdate = false;
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -110,6 +111,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         case 'fullRecordUpdate':
         default:
             baseIndexingOperation = 'addObject';
+            fullRecordUpdate = true;
             break;
     }
     logger.info('indexingMethod parameter: ' + paramIndexingMethod);
@@ -269,11 +271,11 @@ exports.process = function(cpObj, parameters, stepExecution) {
         if (productFilter.isInclude(product)) {
 
             // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-            let baseModel = new AlgoliaLocalizedProduct(product, 'default', nonLocalizedAttributes);
+            let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
             for (let l = 0; l < siteLocales.size(); l++) {
                 let locale = siteLocales[l];
                 let indexName = algoliaData.calculateIndexName('products', locale);
-                let localizedProduct = new AlgoliaLocalizedProduct(product, locale, fieldsToSend, baseModel);
+                let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, fieldList: fieldsToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
                 algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
             }
             jobReport.processedItemsToSend++;

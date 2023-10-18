@@ -169,11 +169,13 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Pink',
             size: '4',
             refinementSize: '4',
-            _tags: [
-                'id:701644031206M',
-            ],
         };
-        expect(new AlgoliaLocalizedProduct(product, 'default', fields)).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: fields })).toEqual(algoliaProductModel);
+        // Tags are added in case of fullRecordUpdate
+        algoliaProductModel._tags= [
+            'id:701644031206M',
+        ];
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
     });
 
     test('fr locale', function () {
@@ -267,11 +269,13 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Rose',
             size: '4',
             refinementSize: '4',
-            _tags: [
-                'id:701644031206M',
-            ],
         };
-        expect(new AlgoliaLocalizedProduct(product, 'fr', fields)).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', fieldList: fields })).toEqual(algoliaProductModel);
+        // Tags are added in case of fullRecordUpdate
+        algoliaProductModel._tags= [
+            'id:701644031206M',
+        ];
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', fieldList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
     });
 
     test('fieldListOverride', function () {
@@ -283,7 +287,7 @@ describe('algoliaLocalizedProduct', function () {
                 EUR: 92.88
             },
         };
-        expect(new AlgoliaLocalizedProduct(product, undefined, ['price'])).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: undefined, fieldList: ['price'] })).toEqual(algoliaProductModel);
     });
 
     test('baseModel', function () {
@@ -304,8 +308,7 @@ describe('algoliaLocalizedProduct', function () {
                 EUR: 0.93
             },
             name: 'Test name',
-            _tags: ['id:' + product.ID]
         };
-        expect(new AlgoliaLocalizedProduct(product, 'default', ['price', 'UPC', 'name'], baseModel)).toEqual(expectedProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: ['price', 'UPC', 'name'], baseModel: baseModel })).toEqual(expectedProductModel);
     });
 });
