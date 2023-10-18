@@ -283,6 +283,6 @@ exports.afterStep = function(success, parameters, stepExecution) {
 exports.__setLastIndexingTasks = function(indexingTasks) {
     lastIndexingTasks = indexingTasks;
 };
-exports.__getattributesToSend = function() {
+exports.__getAttributesToSend = function() {
     return attributesToSend;
 }
