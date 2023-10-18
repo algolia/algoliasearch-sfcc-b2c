@@ -104,7 +104,7 @@ function runCategoryExport(parameters, stepExecution) {
         status = retryableBatchRes.result;
         jobReport.recordsFailed += retryableBatchRes.failedRecords;
 
-        if (!status.error) {
+        if (status.ok) {
             jobReport.recordsSent += batch.length;
             jobReport.chunksSent++;
 
