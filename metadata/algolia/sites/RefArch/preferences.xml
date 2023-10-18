@@ -3,11 +3,8 @@
     <custom-preferences>
         <all-instances>
             <preference preference-id="Algolia_CustomFields">
-                <value>name</value>
                 <value>short_description</value>
                 <value>long_description</value>
-                <value>image_groups</value>
-                <value>url</value>
                 <value>variant</value>
                 <value>master</value>
             </preference>
@@ -17,4 +14,3 @@
         <production/>
     </custom-preferences>
 </preferences>
-

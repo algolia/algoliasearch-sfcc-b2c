@@ -1,6 +1,7 @@
 'use strict';
 
 var defaultAttributes = ['id', 'primary_category_id', 'in_stock', 'price', 'categories'];
+var defaultAttributes_v2 = ['name', 'primary_category_id', 'categories', 'in_stock', 'price', 'image_groups', 'url'];
 
 var attributeConfig = {
     id: {
@@ -122,5 +123,6 @@ var attributeConfig = {
 
 module.exports = {
     defaultAttributes: defaultAttributes,
+    defaultAttributes_v2: defaultAttributes_v2,
     attributeConfig: attributeConfig
 };

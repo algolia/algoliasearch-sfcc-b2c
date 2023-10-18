@@ -10,6 +10,7 @@ var paramFieldListOverride, paramIndexingMethod;
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, AlgoliaJobReport;
 var indexingOperation;
+var fullRecordUpdate = false;
 
 // logging-related variables
 var jobReport;
@@ -66,8 +67,13 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- fieldListOverride parameter --- */
     if (empty(paramFieldListOverride)) {
+        fieldsToSend = algoliaProductConfig.defaultAttributes_v2;
         const customFields = algoliaData.getSetOfArray('CustomFields');
-        fieldsToSend = algoliaProductConfig.defaultAttributes.concat(customFields);
+        customFields.map(function(field) {
+            if (fieldsToSend.indexOf(field) < 0) {
+                fieldsToSend.push(field);
+            }
+        });
     } else {
         fieldsToSend = paramFieldListOverride;
     }
@@ -80,6 +86,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         case 'fullRecordUpdate':
         case 'fullCatalogReindex':
             indexingOperation = 'addObject';
+            fullRecordUpdate = true;
             break;
         case 'partialRecordUpdate':
         default:
@@ -164,14 +171,14 @@ exports.process = function(product, parameters, stepExecution) {
         var algoliaOperations = [];
 
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-        var baseModel = new AlgoliaLocalizedProduct(product, 'default', nonLocalizedAttributes);
+        var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var indexName = algoliaData.calculateIndexName('products', locale);
 
             if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
 
-            let localizedProduct = new AlgoliaLocalizedProduct(product, locale, paramFieldListOverride, baseModel);
+            let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, fieldList: fieldsToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
             algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
         }
 
@@ -276,3 +283,6 @@ exports.afterStep = function(success, parameters, stepExecution) {
 exports.__setLastIndexingTasks = function(indexingTasks) {
     lastIndexingTasks = indexingTasks;
 };
+exports.__getFieldsToSend = function() {
+    return fieldsToSend;
+}

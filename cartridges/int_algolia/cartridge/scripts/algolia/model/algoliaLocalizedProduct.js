@@ -319,32 +319,27 @@ var aggregatedValueHandlers = {
 
 /**
  * AlgoliaLocalizedProduct class that represents a localized algoliaProduct ready to be indexed
- * @param {dw.order.Product} product - Product
- * @param {string} locale - The requested locale
- * @param {Array} [fieldListOverride] (optional) if supplied, it overrides the regular list of attributes to be sent (default + customFields)
- * @param {Object} baseModel - A base model object that contains some pre-fetched properties
+ * @param {Object} parameters - model parameters
+ * @param {dw.order.Product} parameters.product - Product
+ * @param {string} parameters.locale - The requested locale
+ * @param {Array} parameters.fieldList list of attributes to be fetched
+ * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
+ * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
  * @constructor
  */
-function algoliaLocalizedProduct(product, locale, fieldListOverride, baseModel) {
-    request.setLocale(locale || 'default');
+function algoliaLocalizedProduct(parameters) {
+    const product = parameters.product;
+    const fieldList = parameters.fieldList;
+    const baseModel = parameters.baseModel;
 
-    // list of fields to build the object with
-    let algoliaFields;
-    if (!empty(fieldListOverride)) {
-        // use overridden list of fields
-        algoliaFields = fieldListOverride;
-    } else {
-        // use regular list of fields (default behavior)
-        const customFields = algoliaData.getSetOfArray('CustomFields');
-        algoliaFields = algoliaProductConfig.defaultAttributes.concat(customFields);
-    }
+    request.setLocale(parameters.locale || 'default');
 
-    if (empty(product)) {
+    if (empty(product) || empty(fieldList)) {
         this.id = null;
     } else {
         this.objectID = product.ID;
-        for (var i = 0; i < algoliaFields.length; i += 1) {
-            var attributeName = algoliaFields[i];
+        for (var i = 0; i < fieldList.length; i += 1) {
+            var attributeName = fieldList[i];
             var config = algoliaProductConfig.attributeConfig[attributeName];
 
             if (!empty(config)) {
@@ -357,13 +352,13 @@ function algoliaLocalizedProduct(product, locale, fieldListOverride, baseModel) 
                 }
             }
         }
-        if (algoliaFields.indexOf('id') >= 0) {
+        if (parameters.fullRecordUpdate) {
             this._tags = ['id:' + product.ID];
         }
         if (this.primary_category_id && this.categories) {
             this['__primary_category'] = computePrimaryCategoryHierarchicalFacets(this.categories, this.primary_category_id);
         }
-        productModelCustomizer.customizeLocalizedProductModel(this, algoliaFields);
+        productModelCustomizer.customizeLocalizedProductModel(this, fieldList);
     }
 }
 

@@ -73,13 +73,15 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 }, {virtual: true});
 
 const AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+const algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig')
+const fields = algoliaProductConfig.defaultAttributes_v2.concat(['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
+    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']);
 
 describe('algoliaLocalizedProduct', function () {
     test('default locale', function () {
         const product = new ProductMock();
         const algoliaProductModel = {
             objectID: '701644031206M',
-            id: '701644031206M',
             in_stock: true,
             primary_category_id: 'womens-clothing-bottoms',
             price: {
@@ -167,18 +169,19 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Pink',
             size: '4',
             refinementSize: '4',
-            _tags: [
-                'id:701644031206M',
-            ],
         };
-        expect(new AlgoliaLocalizedProduct(product)).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: fields })).toEqual(algoliaProductModel);
+        // Tags are added in case of fullRecordUpdate
+        algoliaProductModel._tags= [
+            'id:701644031206M',
+        ];
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
     });
 
     test('fr locale', function () {
         const product = new ProductMock();
         const algoliaProductModel = {
             objectID: '701644031206M',
-            id: '701644031206M',
             in_stock: true,
             primary_category_id: 'womens-clothing-bottoms',
             price: {
@@ -266,11 +269,13 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Rose',
             size: '4',
             refinementSize: '4',
-            _tags: [
-                'id:701644031206M',
-            ],
         };
-        expect(new AlgoliaLocalizedProduct(product, 'fr')).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', fieldList: fields })).toEqual(algoliaProductModel);
+        // Tags are added in case of fullRecordUpdate
+        algoliaProductModel._tags= [
+            'id:701644031206M',
+        ];
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', fieldList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
     });
 
     test('fieldListOverride', function () {
@@ -282,7 +287,7 @@ describe('algoliaLocalizedProduct', function () {
                 EUR: 92.88
             },
         };
-        expect(new AlgoliaLocalizedProduct(product, undefined, ['price'])).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: undefined, fieldList: ['price'] })).toEqual(algoliaProductModel);
     });
 
     test('baseModel', function () {
@@ -304,6 +309,6 @@ describe('algoliaLocalizedProduct', function () {
             },
             name: 'Test name',
         };
-        expect(new AlgoliaLocalizedProduct(product, 'default', ['price', 'UPC', 'name'], baseModel)).toEqual(expectedProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: ['price', 'UPC', 'name'], baseModel: baseModel })).toEqual(expectedProductModel);
     });
 });

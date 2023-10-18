@@ -43,6 +43,19 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     }
 }, {virtual: true});
 
+let mockCustomFields;
+jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
+    return {
+        ...originalModule,
+        getSetOfArray: function (id) {
+            return id === 'CustomFields'
+                ? mockCustomFields
+                : null;
+        },
+    }
+}, {virtual: true});
+
 const stepExecution = {
     getJobExecution: () => {
         return {
@@ -53,6 +66,26 @@ const stepExecution = {
 };
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex');
+
+beforeEach(() => {
+    mockCustomFields = ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
+        'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
+});
+
+describe('beforeStep', () => {
+    test('defaultAttributes', () => {
+        mockCustomFields = [];
+        job.beforeStep({}, stepExecution);
+        expect(job.__getFieldsToSend()).toStrictEqual(['name', 'primary_category_id',
+            'categories', 'in_stock', 'price', 'image_groups', 'url']);
+    });
+    test('no duplicated attributes', () => {
+        mockCustomFields = ['name'];
+        job.beforeStep({}, stepExecution);
+        expect(job.__getFieldsToSend()).toStrictEqual(['name', 'primary_category_id',
+            'categories', 'in_stock', 'price', 'image_groups', 'url']);
+    });
+});
 
 describe('process', () => {
     test('default', () => {
