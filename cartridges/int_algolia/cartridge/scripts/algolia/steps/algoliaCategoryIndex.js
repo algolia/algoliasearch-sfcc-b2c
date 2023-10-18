@@ -70,6 +70,7 @@ function runCategoryExport(parameters, stepExecution) {
         reindexHelper.waitForTasks(deletionTasks);
         logger.info('Temporary indices deleted. Starting indexing...');
     } catch (e) {
+        logger.error('Failed to delete temporary indices. Stopping job... Error: ' + e.message)
         return new Status(Status.ERROR, '', 'Failed to delete temporary indices: ' + e.message);
     }
 
