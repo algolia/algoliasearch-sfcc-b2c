@@ -212,9 +212,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
                     jobReport.error = true;
                     jobReport.errorMessage = errorMessage;
-                    jogLog.writeToCustomObject();
-
-                    return;
+                    jobReport.writeToCustomObject();
                 }
             });
         }
