@@ -6,7 +6,7 @@ var File = require('dw/io/File');
 var logger;
 
 // job step parameters
-var paramConsumer, paramDeltaExportJobName, paramFieldListOverride, paramIndexingMethod;
+var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator, AlgoliaJobReport;
@@ -78,7 +78,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     /* --- parameters --- */
     paramConsumer = parameters.consumer.trim();
     paramDeltaExportJobName = parameters.deltaExportJobName.trim();
-    paramFieldListOverride = algoliaData.csvStringToArray(parameters.fieldListOverride); // fieldListOverride - pass it along to sending method
+    paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'fullRecordUpdate'; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
 
 
@@ -87,8 +87,8 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('deltaExportJobName parameter: ' + paramDeltaExportJobName);
 
 
-    /* --- fieldListOverride parameter --- */
-    if (empty(paramFieldListOverride)) {
+    /* --- attributeListOverride parameter --- */
+    if (empty(paramAttributeListOverride)) {
         fieldsToSend = algoliaProductConfig.defaultAttributes_v2;
         const customFields = algoliaData.getSetOfArray('CustomFields');
         customFields.map(function(field) {
@@ -97,9 +97,9 @@ exports.beforeStep = function(parameters, stepExecution) {
             }
         });
     } else {
-        fieldsToSend = paramFieldListOverride;
+        fieldsToSend = paramAttributeListOverride;
     }
-    logger.info('fieldListOverride parameter: ' + paramFieldListOverride);
+    logger.info('attributeListOverride parameter: ' + paramAttributeListOverride);
     logger.info('Actual fields to be sent: ' + JSON.stringify(fieldsToSend));
 
 
@@ -269,11 +269,11 @@ exports.process = function(cpObj, parameters, stepExecution) {
         if (productFilter.isInclude(product)) {
 
             // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-            let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
+            let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
             for (let l = 0; l < siteLocales.size(); l++) {
                 let locale = siteLocales[l];
                 let indexName = algoliaData.calculateIndexName('products', locale);
-                let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, fieldList: fieldsToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+                let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: fieldsToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
                 algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
             }
             jobReport.processedItemsToSend++;

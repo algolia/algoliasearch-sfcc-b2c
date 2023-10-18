@@ -322,24 +322,24 @@ var aggregatedValueHandlers = {
  * @param {Object} parameters - model parameters
  * @param {dw.order.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
- * @param {Array} parameters.fieldList list of attributes to be fetched
+ * @param {Array} parameters.attributeList list of attributes to be fetched
  * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
  * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
  * @constructor
  */
 function algoliaLocalizedProduct(parameters) {
     const product = parameters.product;
-    const fieldList = parameters.fieldList;
+    const attributeList = parameters.attributeList;
     const baseModel = parameters.baseModel;
 
     request.setLocale(parameters.locale || 'default');
 
-    if (empty(product) || empty(fieldList)) {
+    if (empty(product) || empty(attributeList)) {
         this.id = null;
     } else {
         this.objectID = product.ID;
-        for (var i = 0; i < fieldList.length; i += 1) {
-            var attributeName = fieldList[i];
+        for (var i = 0; i < attributeList.length; i += 1) {
+            var attributeName = attributeList[i];
             var config = algoliaProductConfig.attributeConfig[attributeName];
 
             if (!empty(config)) {
@@ -358,7 +358,7 @@ function algoliaLocalizedProduct(parameters) {
         if (this.primary_category_id && this.categories) {
             this['__primary_category'] = computePrimaryCategoryHierarchicalFacets(this.categories, this.primary_category_id);
         }
-        productModelCustomizer.customizeLocalizedProductModel(this, fieldList);
+        productModelCustomizer.customizeLocalizedProductModel(this, attributeList);
     }
 }
 

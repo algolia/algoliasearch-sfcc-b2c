@@ -170,12 +170,12 @@ describe('algoliaLocalizedProduct', function () {
             size: '4',
             refinementSize: '4',
         };
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: fields })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: fields })).toEqual(algoliaProductModel);
         // Tags are added in case of fullRecordUpdate
         algoliaProductModel._tags= [
             'id:701644031206M',
         ];
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
     });
 
     test('fr locale', function () {
@@ -270,15 +270,15 @@ describe('algoliaLocalizedProduct', function () {
             size: '4',
             refinementSize: '4',
         };
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', fieldList: fields })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: fields })).toEqual(algoliaProductModel);
         // Tags are added in case of fullRecordUpdate
         algoliaProductModel._tags= [
             'id:701644031206M',
         ];
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', fieldList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
     });
 
-    test('fieldListOverride', function () {
+    test('attributeListOverride', function () {
         const product = new ProductMock();
         const algoliaProductModel = {
             objectID: '701644031206M',
@@ -287,7 +287,7 @@ describe('algoliaLocalizedProduct', function () {
                 EUR: 92.88
             },
         };
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: undefined, fieldList: ['price'] })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: undefined, attributeList: ['price'] })).toEqual(algoliaProductModel);
     });
 
     test('baseModel', function () {
@@ -309,6 +309,6 @@ describe('algoliaLocalizedProduct', function () {
             },
             name: 'Test name',
         };
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', fieldList: ['price', 'UPC', 'name'], baseModel: baseModel })).toEqual(expectedProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: ['price', 'UPC', 'name'], baseModel: baseModel })).toEqual(expectedProductModel);
     });
 });

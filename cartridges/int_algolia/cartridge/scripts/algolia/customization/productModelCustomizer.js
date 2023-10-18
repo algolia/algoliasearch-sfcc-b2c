@@ -57,13 +57,13 @@ function customizeProductModel(productModel) {
  * Customize Localized Algolia Product.
  * Add extra properties to the product model.
  * @param {Object} productModel - Algolia product model
- * @param {Object} algoliaFields - The fields to index
+ * @param {Object} algoliaAttributes - The fields to index
  */
-function customizeLocalizedProductModel(productModel, algoliaFields) {
+function customizeLocalizedProductModel(productModel, algoliaAttributes) {
     var CATEGORY_ATTRIBUTE = 'CATEGORIES_NEW_ARRIVALS';
     var CATEGORY_ID = 'newarrivals';
 
-    if (algoliaFields.includes(CATEGORY_ATTRIBUTE)) {
+    if (algoliaAttributes.includes(CATEGORY_ATTRIBUTE)) {
         productModel[CATEGORY_ATTRIBUTE] = null;
 
         if (!empty(productModel.categories)) {
