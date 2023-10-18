@@ -15,7 +15,7 @@ var fullRecordUpdate = false;
 // logging-related variables
 var jobReport;
 
-var products = [], siteLocales, nonLocalizedAttributes = [], fieldsToSend;
+var products = [], siteLocales, nonLocalizedAttributes = [], attributesToSend;
 var lastIndexingTasks = {};
 
 /*
@@ -67,18 +67,18 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
-        fieldsToSend = algoliaProductConfig.defaultAttributes_v2;
-        const customFields = algoliaData.getSetOfArray('CustomFields');
-        customFields.map(function(field) {
-            if (fieldsToSend.indexOf(field) < 0) {
-                fieldsToSend.push(field);
+        attributesToSend = algoliaProductConfig.defaultAttributes_v2;
+        const additionalAttributes = algoliaData.getSetOfArray('CustomFields');
+        additionalAttributes.map(function(attribute) {
+            if (attributesToSend.indexOf(attribute) < 0) {
+                attributesToSend.push(attribute);
             }
         });
     } else {
-        fieldsToSend = paramAttributeListOverride;
+        attributesToSend = paramAttributeListOverride;
     }
     logger.info('attributeListOverride parameter: ' + paramAttributeListOverride);
-    logger.info('Actual attributes to be sent: ' + JSON.stringify(fieldsToSend));
+    logger.info('Actual attributes to be sent: ' + JSON.stringify(attributesToSend));
 
 
     /* --- indexingMethod parameter --- */
@@ -99,7 +99,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     /* --- non-localized attributes --- */
     Object.keys(algoliaProductConfig.attributeConfig).forEach(function(attributeName) {
         if (!algoliaProductConfig.attributeConfig[attributeName].localized &&
-          fieldsToSend.indexOf(attributeName) >= 0) {
+          attributesToSend.indexOf(attributeName) >= 0) {
             if (attributeName !== 'categories') {
                 nonLocalizedAttributes.push(attributeName);
             }
@@ -178,7 +178,7 @@ exports.process = function(product, parameters, stepExecution) {
 
             if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
 
-            let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: fieldsToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+            let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
             algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
         }
 
@@ -283,6 +283,6 @@ exports.afterStep = function(success, parameters, stepExecution) {
 exports.__setLastIndexingTasks = function(indexingTasks) {
     lastIndexingTasks = indexingTasks;
 };
-exports.__getFieldsToSend = function() {
-    return fieldsToSend;
+exports.__getattributesToSend = function() {
+    return attributesToSend;
 }

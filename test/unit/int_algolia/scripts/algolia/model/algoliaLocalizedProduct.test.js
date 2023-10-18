@@ -74,7 +74,7 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 
 const AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 const algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig')
-const fields = algoliaProductConfig.defaultAttributes_v2.concat(['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
+const attributes = algoliaProductConfig.defaultAttributes_v2.concat(['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']);
 
 describe('algoliaLocalizedProduct', function () {
@@ -170,12 +170,12 @@ describe('algoliaLocalizedProduct', function () {
             size: '4',
             refinementSize: '4',
         };
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: fields })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: attributes })).toEqual(algoliaProductModel);
         // Tags are added in case of fullRecordUpdate
         algoliaProductModel._tags= [
             'id:701644031206M',
         ];
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: attributes, fullRecordUpdate: true })).toEqual(algoliaProductModel);
     });
 
     test('fr locale', function () {
@@ -270,12 +270,12 @@ describe('algoliaLocalizedProduct', function () {
             size: '4',
             refinementSize: '4',
         };
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: fields })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: attributes })).toEqual(algoliaProductModel);
         // Tags are added in case of fullRecordUpdate
         algoliaProductModel._tags= [
             'id:701644031206M',
         ];
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: fields, fullRecordUpdate: true })).toEqual(algoliaProductModel);
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: attributes, fullRecordUpdate: true })).toEqual(algoliaProductModel);
     });
 
     test('attributeListOverride', function () {
