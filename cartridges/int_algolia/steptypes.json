@@ -249,7 +249,7 @@
 						"@required": true
 					},
 						{
-							"@name": "attributeListOverride",
+							"@name": "fieldListOverride",
 							"@type": "string",
 							"@required": false
 						},
