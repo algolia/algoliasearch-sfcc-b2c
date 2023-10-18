@@ -171,6 +171,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <default-value>false</default-value>
             </attribute-definition>
 
+            <!-- Deprecated, will be removed soon -->
             <attribute-definition attribute-id="Algolia_OCAPIClientID">
                 <display-name xml:lang="x-default">OCAPI client ID</display-name>
                 <description xml:lang="x-default">Authorization OCAPI client ID</description>
@@ -180,6 +181,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <min-length>0</min-length>
             </attribute-definition>
 
+            <!-- Deprecated, will be removed soon -->
             <attribute-definition attribute-id="Algolia_OCAPIClientPassword">
                 <display-name xml:lang="x-default">OCAPI client password</display-name>
                 <description xml:lang="x-default">Authorization OCAPI client password</description>
@@ -201,8 +203,6 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_CustomFields"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
-                <attribute attribute-id="Algolia_OCAPIClientID"/>
-                <attribute attribute-id="Algolia_OCAPIClientPassword"/>
 
             </attribute-group>
         </group-definitions>
