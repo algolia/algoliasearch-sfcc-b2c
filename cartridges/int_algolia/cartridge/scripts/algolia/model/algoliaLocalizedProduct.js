@@ -319,15 +319,20 @@ var aggregatedValueHandlers = {
 
 /**
  * AlgoliaLocalizedProduct class that represents a localized algoliaProduct ready to be indexed
- * @param {dw.order.Product} product - Product
- * @param {string} locale - The requested locale
- * @param {Array} [fieldList] list of attributes to be fetched
- * @param {Object?} baseModel - (optional) A base model object that contains some pre-fetched properties
- * @param {boolean?} fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
+ * @param {Object} parameters - model parameters
+ * @param {dw.order.Product} parameters.product - Product
+ * @param {string} parameters.locale - The requested locale
+ * @param {Array} parameters.fieldList list of attributes to be fetched
+ * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
+ * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
  * @constructor
  */
-function algoliaLocalizedProduct({ product, locale, fieldList, baseModel, fullRecordUpdate}) {
-    request.setLocale(locale || 'default');
+function algoliaLocalizedProduct(parameters) {
+    const product = parameters.product;
+    const fieldList = parameters.fieldList;
+    const baseModel = parameters.baseModel;
+
+    request.setLocale(parameters.locale || 'default');
 
     if (empty(product) || empty(fieldList)) {
         this.id = null;
@@ -347,7 +352,7 @@ function algoliaLocalizedProduct({ product, locale, fieldList, baseModel, fullRe
                 }
             }
         }
-        if (fullRecordUpdate) {
+        if (parameters.fullRecordUpdate) {
             this._tags = ['id:' + product.ID];
         }
         if (this.primary_category_id && this.categories) {
