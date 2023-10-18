@@ -40,8 +40,6 @@ function handleSettings() {
         algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
         algoliaData.setPreference('IndexPrefix', params.IndexPrefix.value);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
-        algoliaData.setPreference('OCAPIClientID', params.OCAPIClientID.value);
-        algoliaData.setPreference('OCAPIClientPassword', params.OCAPIClientPassword.value);
     } catch (error) {
         Logger.error(error);
     }

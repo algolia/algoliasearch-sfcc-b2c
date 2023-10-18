@@ -66,8 +66,6 @@ const clientSideData = {
 //   InStockThreshold       ║ Stock Threshold                                   ║ Double
 //   IndexPrefix            ║ Optional prefix for the index name                ║ String
 //   EnableSSR              ║ Enables server-side rendering of CLP results      ║ Boolean
-//   OCAPIClientID          ║ Authorization OCAPI SFCC Client ID                ║ String
-//   OCAPIClientPassword    ║ Authorization OCAPI SFCC Client passwrd           ║ String
 //  ════════════════════════╩═══════════════════════════════════════════════════╩═══════════════════════════
 //  Preferences stored in the XML file
 //
