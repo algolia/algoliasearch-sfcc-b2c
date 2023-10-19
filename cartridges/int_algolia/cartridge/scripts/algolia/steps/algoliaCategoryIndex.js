@@ -1,5 +1,4 @@
 const catalogMgr = require('dw/catalog/CatalogMgr');
-const logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
 const Site = require('dw/system/Site');
 const Status = require('dw/system/Status');
 
@@ -43,6 +42,7 @@ function runCategoryExport(parameters, stepExecution) {
     const reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+    const logger = jobHelper.getAlgoliaLogger();
 
     var currentSite = Site.getCurrent();
     var siteLocales = currentSite.getAllowedLocales();

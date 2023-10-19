@@ -5,7 +5,7 @@
 
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
 const retryableCall = require('*/cartridge/scripts/algolia/helper/retryStrategy').retryableCall;
-const logger = require('dw/system/Logger').getLogger('algolia');
+const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
 var __jobInfo = {};
 

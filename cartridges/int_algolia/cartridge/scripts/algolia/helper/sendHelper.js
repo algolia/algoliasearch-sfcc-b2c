@@ -5,7 +5,7 @@ var QUOTA_API_JS_JSON_STRING_LENGTH = 600000; // The maximum allowed length of a
 var MAX_CHUNKS_SIZE = 1000; // Maximum chunk size
 var MAX_FAILED_CHUNKS = 3;
 
-var logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 var Status = require('dw/system/Status');
 
 /**

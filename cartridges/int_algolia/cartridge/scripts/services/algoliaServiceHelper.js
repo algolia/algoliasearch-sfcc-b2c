@@ -4,7 +4,7 @@
  * Call REST service and handle common errors
  */
 
-var logger = require('dw/system/Logger').getLogger('algolia');
+var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 var stringUtils = require('dw/util/StringUtils');
 
 var UNEXPECTED_ERROR_CODE = '-1';

@@ -55,7 +55,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
-    logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+    logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
 
