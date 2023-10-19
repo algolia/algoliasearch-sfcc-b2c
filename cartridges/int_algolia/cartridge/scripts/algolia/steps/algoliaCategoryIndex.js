@@ -74,7 +74,6 @@ function runCategoryExport(parameters, stepExecution) {
         return new Status(Status.ERROR, '', 'Failed to delete temporary indices: ' + e.message);
     }
 
-    var status;
     var lastIndexingTasks = {};
     while (topLevelCategories.hasNext()) {
         var batch = [];
@@ -101,20 +100,20 @@ function runCategoryExport(parameters, stepExecution) {
         logger.info('Sending a batch of ' + batch.length + ' records for top-level category ID: ' + category.getID());
 
         var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-        status = retryableBatchRes.result;
+        var result = retryableBatchRes.result;
         jobReport.recordsFailed += retryableBatchRes.failedRecords;
 
-        if (status.ok) {
+        if (result.ok) {
             jobReport.recordsSent += batch.length;
             jobReport.chunksSent++;
 
             // Store Algolia indexing task IDs
-            var taskIDs = status.object.body.taskID;
+            var taskIDs = result.object.body.taskID;
             Object.keys(taskIDs).forEach(function (taskIndexName) {
                 lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
             });
         } else {
-            let errorMessage = 'Failed to send categories: ' + status.errorMessage + ', stopping job.';
+            let errorMessage = 'Failed to send categories: ' + result.errorMessage + ', stopping job.';
 
             jobReport.recordsFailed += batch.length;
             jobReport.chunksFailed++;

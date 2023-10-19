@@ -10,7 +10,7 @@ module.exports.execute = function (parameters) {
     var deltaList = deltaIterator.create(algoliaConstants.UPDATE_CATEGORIES_FILE_NAME, 'category');
     var status = sendHelper.sendDelta(deltaList, 'LastCategorySyncLog', parameters);
     var newSnapshotFile = new File(algoliaConstants.TMP_SNAPSHOT_CATEGORIES_FILE_NAME);
-    if (!status.ok) {
+    if (status.error) {
         try {
             if (newSnapshotFile.exists()) {
                 newSnapshotFile.remove();

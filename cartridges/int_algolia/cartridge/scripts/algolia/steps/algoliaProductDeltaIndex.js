@@ -299,8 +299,6 @@ exports.process = function(cpObj, parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
 exports.send = function(algoliaOperations, parameters, stepExecution) {
-    var status;
-
     // algoliaOperations contains all returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
     var productCount = algoliaOperationsArray.length;
@@ -312,10 +310,10 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     }
 
     var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-    status = retryableBatchRes.result;
+    var result = retryableBatchRes.result;
     jobReport.recordsFailed += retryableBatchRes.failedRecords;
 
-    if (status.ok) {
+    if (result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
     } else {
