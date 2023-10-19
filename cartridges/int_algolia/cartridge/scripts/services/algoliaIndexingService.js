@@ -45,7 +45,8 @@ function getService(jobInfo) {
         'X-Algolia-Agent', 'Algolia Salesforce B2C v' + version +
         '; CM: ' + System.getCompatibilityMode() +
         '; JobID: ' + (jobInfo ? jobInfo.jobID : 'unknown') +
-        '; StepID: ' + (jobInfo ? jobInfo.stepID : 'unknown')
+        '; StepID: ' + (jobInfo ? jobInfo.stepID : 'unknown') +
+        (jobInfo && jobInfo.indexingMethod ? '; IndexingMethod: ' + jobInfo.indexingMethod : '')
     );
 
     return indexingService;

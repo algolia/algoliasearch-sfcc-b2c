@@ -11,7 +11,7 @@ var __jobInfo = {};
 
 /**
  * Set information about the job using the API Client
- * @param {Object} jobInfo - object with the following structure: { "jobID": "", "stepID": "" }
+ * @param {Object} jobInfo - object with the following structure: { "jobID": "", "stepID": "", "indexingMethod": "" }
  */
 function setJobInfo(jobInfo) {
     __jobInfo = jobInfo;
