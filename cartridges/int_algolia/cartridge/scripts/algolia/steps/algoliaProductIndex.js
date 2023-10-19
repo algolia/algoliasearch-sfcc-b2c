@@ -197,8 +197,6 @@ exports.process = function(product, parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
 exports.send = function(algoliaOperations, parameters, stepExecution) {
-    var status;
-
     // algoliaOperations contains all the returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
     var productCount = algoliaOperationsArray.length;
@@ -210,16 +208,16 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     }
 
     var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-    status = retryableBatchRes.result;
+    var result = retryableBatchRes.result;
     jobReport.recordsFailed += retryableBatchRes.failedRecords;
 
-    if (status.ok) {
+    if (result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
 
         // Store Algolia indexing task IDs.
         // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
-        var taskIDs = status.object.body.taskID;
+        var taskIDs = result.object.body.taskID;
         Object.keys(taskIDs).forEach(function (taskIndexName) {
             lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
         });

@@ -323,7 +323,7 @@ function sendDeltaExportProducts(parameters) {
         status = sendHelper.sendDelta(deltaList, updateLogType, parameters); // returns Status.OK if all is well
     }
 
-    if (!status.ok) {
+    if (status.error) {
         let errorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending delta. See the logs for details.';
         jobHelper.logError(errorMessage);
         productLogData = algoliaData.getLogData(updateLogType); // need to get it again since sendDelta has updated the file, the in-memory one is out of date

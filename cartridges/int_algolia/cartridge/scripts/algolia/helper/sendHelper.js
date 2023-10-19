@@ -40,7 +40,7 @@ function sendFailedChunks(failedChunks, resType, fieldList) {
     for (var startIndex = 0; startIndex < failedChunks.length; startIndex += chunkLength) {
         var elements = failedChunks.slice(startIndex, startIndex + chunkLength);
         status = sendChunk(elements);
-        if (!status.ok) { break; }
+        if (status.error) { break; }
     }
 
     return status;
@@ -94,7 +94,7 @@ function sendDelta(deltaList, logID, parameters) {
         if (entries.length >= maxNumberOfEntries || !deltaList.hasNext()) {
             // send the chunks
             status = sendChunk(entries);
-            if (!status.ok) {
+            if (status.error) {
                 failedChunks = failedChunks.concat(entries);
                 countFailedChunks += 1;
                 sendLogData.failedChunks += 1;
@@ -121,7 +121,7 @@ function sendDelta(deltaList, logID, parameters) {
     // Resending failed chunks
     status = sendFailedChunks(failedChunks);
 
-    if (!status.ok) {
+    if (status.error) {
         sendLogData.sendError = true;
         sendLogData.sendErrorMessage = status.details.errorMessage ? status.details.errorMessage : 'Error sending chunk. See the log file for details.';
     } else {
