@@ -137,7 +137,8 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
-        stepID: stepExecution.getStepID()
+        stepID: stepExecution.getStepID(),
+        indexingMethod: paramIndexingMethod,
     });
 
     // ----------------------------- Extracting productIDs from the output of the Delta Export -----------------------------

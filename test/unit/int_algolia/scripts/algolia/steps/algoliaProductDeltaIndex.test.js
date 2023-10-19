@@ -38,7 +38,7 @@ const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/
 
 test('process', () => {
     job.beforeStep(parameters, stepExecution);
-    expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
+    expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullRecordUpdate' });
     var algoliaOperations = job.process({ productID: '701644031206M', available: true });
     expect(algoliaOperations).toMatchSnapshot();
 });

@@ -115,7 +115,8 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
-        stepID: stepExecution.getStepID()
+        stepID: stepExecution.getStepID(),
+        indexingMethod: paramIndexingMethod,
     });
 
     /* --- removing any leftover temporary indices --- */
