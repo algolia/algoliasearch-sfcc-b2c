@@ -65,7 +65,7 @@ AlgoliaJobReport.prototype.writeToCustomObject = function() {
 
         });
     } catch (e) {
-        require('dw/system/Logger').getLogger('algolia', 'Algolia').error('Failed to write AlgoliaJobReport to custom object: ' + e.message);
+        require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger().error('Failed to write AlgoliaJobReport to custom object: ' + e.message);
         return false;
     }
 

@@ -1,5 +1,7 @@
 'use strict';
 
+var algoliaLogger = require('dw/system/Logger').getLogger('algolia');
+
 /**
  * Function to convert array to XML object
  * @param {Array} arr Array
@@ -252,12 +254,19 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
 }
 
 /**
+ * Return a logger object set for the 'algolia' category
+ * @return {dw.system.Logger} The logger object
+ */
+function getAlgoliaLogger() {
+    return algoliaLogger;
+}
+
+/**
  * Parse error message and write it to log
  * @param {string} errorMessage Error message
  */
 function logError(errorMessage) {
-    var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.error('\nError: {0}', errorMessage);
+    algoliaLogger.error('\nError: {0}', errorMessage);
 }
 
 /**
@@ -267,8 +276,7 @@ function logError(errorMessage) {
  * @param {Error} error IOError
  */
 function logFileError(file, errorMessage, error) {
-    var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.error('\nFile: {0},\nError: {1},\nError: {2},',
+    algoliaLogger.error('\nFile: {0},\nError: {1},\nError: {2},',
         file,
         errorMessage,
         error.message
@@ -280,8 +288,7 @@ function logFileError(file, errorMessage, error) {
  * @param {string} message Info message
  */
 function logInfo(message) {
-    var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.info('Message: {0}', message);
+    algoliaLogger.info('Message: {0}', message);
 }
 
 /**
@@ -290,8 +297,7 @@ function logInfo(message) {
  * @param {string} infoMessage Info message
  */
 function logFileInfo(file, infoMessage) {
-    var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.info('\nFile: {0},\nMessage: {1}', file, infoMessage);
+    algoliaLogger.info('\nFile: {0},\nMessage: {1}', file, infoMessage);
 }
 
 /**
@@ -585,6 +591,7 @@ module.exports = {
     objectCompare: objectCompare,
     hasSameProperties: hasSameProperties,
     readXMLObjectFromStream: readXMLObjectFromStream,
+    getAlgoliaLogger: getAlgoliaLogger,
     logError: logError,
     logFileError: logFileError,
     logInfo: logInfo,

@@ -1,4 +1,4 @@
-const logger = require('dw/system/Logger').getLogger('algolia');
+const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');

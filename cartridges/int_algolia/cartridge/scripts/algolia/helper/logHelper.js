@@ -1,4 +1,5 @@
 'use strict';
+/** @deprecated */
 
 var File = require('dw/io/File');
 var FileWriter = require('dw/io/FileWriter');

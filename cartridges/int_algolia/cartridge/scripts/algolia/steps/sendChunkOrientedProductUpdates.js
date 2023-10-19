@@ -49,7 +49,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
-    logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+    logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
     // checking parameters
