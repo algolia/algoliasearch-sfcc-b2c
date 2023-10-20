@@ -123,7 +123,7 @@
 				"@supports-parallel-execution": true,
 				"@supports-site-context": true,
 				"@supports-organization-context": false,
-				"description": "Update all products assigned to the selected site. The list of indexed attributes is configurable. Performs partial records updates: only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created.",
+				"description": "Update all products assigned to the selected site. The list of indexed attributes is configurable. Performs partial records updates: only the specified attributes are updated/added for each record. If the record doesn't exist, a new one will be created.",
 				"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex.js",
 				"read-function": "read",
 				"process-function": "process",
