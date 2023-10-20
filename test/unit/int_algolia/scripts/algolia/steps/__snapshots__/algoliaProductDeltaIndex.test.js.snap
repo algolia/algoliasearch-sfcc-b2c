@@ -141,15 +141,15 @@ exports[`process 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
+              "alt": "Robe florale, Combo rose vif, large",
               "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
+              "title": "Robe florale, Combo rose vif",
             },
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
+              "alt": "Robe florale, Combo rose vif, large",
               "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
+              "title": "Robe florale, Combo rose vif",
             },
           ],
           "view_type": "large",
@@ -159,15 +159,15 @@ exports[`process 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
+              "alt": "Robe florale, Combo rose vif, small",
               "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
+              "title": "Robe florale, Combo rose vif",
             },
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
+              "alt": "Robe florale, Combo rose vif, small",
               "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
+              "title": "Robe florale, Combo rose vif",
             },
           ],
           "view_type": "small",

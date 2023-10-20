@@ -340,7 +340,7 @@ function algoliaLocalizedProduct(parameters) {
         this.objectID = product.ID;
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
-            var config = algoliaProductConfig.attributeConfig[attributeName];
+            var config = algoliaProductConfig.attributeConfig_v2[attributeName];
 
             if (!empty(config)) {
                 if (baseModel && baseModel[attributeName]) {

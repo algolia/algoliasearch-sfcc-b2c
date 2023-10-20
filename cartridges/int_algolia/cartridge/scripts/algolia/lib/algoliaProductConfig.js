@@ -121,8 +121,128 @@ var attributeConfig = {
     }
 };
 
+var attributeConfig_v2 = {
+    brand: {
+        attribute: 'brand',
+        localized: true
+    },
+    EAN: {
+        attribute: 'EAN',
+        localized: false
+    },
+    id: {
+        attribute: 'ID',
+        localized: false
+    },
+    in_stock: {
+        attribute: 'availabilityModel.inStock',
+        localized: false
+    },
+    long_description: {
+        attribute: 'longDescription.source',
+        localized: true
+    },
+    manufacturerName: {
+        attribute: 'manufacturerName',
+        localized: false
+    },
+    manufacturerSKU: {
+        attribute: 'manufacturerSKU',
+        localized: false
+    },
+    master: {
+        attribute: 'master',
+        localized: false
+    },
+    name: {
+        attribute: 'name',
+        localized: true
+    },
+    online: {
+        attribute: 'online',
+        localized: false
+    },
+    optionProduct: {
+        attribute: 'optionProduct',
+        localized: false
+    },
+    pageDescription: {
+        attribute: 'pageDescription',
+        localized: true
+    },
+    pageKeywords: {
+        attribute: 'pageKeywords',
+        localized: true
+    },
+    pageTitle: {
+        attribute: 'pageTitle',
+        localized: true
+    },
+    primary_category_id: {
+        attribute: 'primaryCategory.ID',
+        localized: false
+    },
+    productSet: {
+        attribute: 'productSet',
+        localized: false
+    },
+    productSetProduct: {
+        attribute: 'productSetProduct',
+        localized: false
+    },
+    searchable: {
+        attribute: 'searchable',
+        localized: false
+    },
+    short_description: {
+        attribute: 'shortDescription.source',
+        localized: true
+    },
+    unit: {
+        attribute: 'unit',
+        localized: false
+    },
+    UPC: {
+        attribute: 'UPC',
+        localized: false
+    },
+    variant: {
+        attribute: 'variant',
+        localized: false
+    },
+    // The following have no 'attribute' declared because the model has special values handlers
+    categories: {
+        localized: true
+    },
+    color: {
+        localized: true
+    },
+    image_groups: {
+        localized: true
+    },
+    price: {
+        localized: false
+    },
+    promotionalPrice: {
+        localized: false
+    },
+    refinementColor: {
+        localized: true
+    },
+    refinementSize: {
+        localized: true
+    },
+    size: {
+        localized: true
+    },
+    url: {
+        localized: true
+    },
+};
+
 module.exports = {
     defaultAttributes: defaultAttributes,
     defaultAttributes_v2: defaultAttributes_v2,
-    attributeConfig: attributeConfig
+    attributeConfig: attributeConfig,
+    attributeConfig_v2: attributeConfig_v2
 };
