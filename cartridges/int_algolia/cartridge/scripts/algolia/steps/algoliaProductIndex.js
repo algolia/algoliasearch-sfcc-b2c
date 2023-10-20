@@ -119,10 +119,18 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- removing any leftover temporary indices --- */
     if (paramIndexingMethod === 'fullCatalogReindex') {
-        logger.info('Deleting existing temporary indices...');
-        var deletionTasks = reindexHelper.deleteTemporaryIndices('products', siteLocales.toArray());
-        reindexHelper.waitForTasks(deletionTasks);
-        logger.info('Temporary indices deleted.');
+        try {
+            logger.info('Deleting existing temporary indices...');
+            var deletionTasks = reindexHelper.deleteTemporaryIndices('products', siteLocales.toArray());
+            reindexHelper.waitForTasks(deletionTasks);
+            logger.info('Temporary indices deleted.');
+        } catch (e) {
+            jobReport.endTime = new Date();
+            jobReport.error = true;
+            jobReport.errorMessage = 'Failed to delete temporary indices: ' + e.message;
+            jobReport.writeToCustomObject();
+            throw e;
+        }
     }
 
 
@@ -259,20 +267,22 @@ exports.afterStep = function(success, parameters, stepExecution) {
             reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
         } else {
             // don't proceed with the atomic reindexing if there were errors
-            throw new Error('Some records failed to be indexed (check the logs for details). Not moving temporary indices to production.');
+            jobReport.error = true;
+            jobReport.errorMessage = 'Some records failed to be indexed (check the logs for details). Not moving temporary indices to production.';
         }
     } else if (jobReport.chunksFailed > 0) {
-        // Showing the job in ERROR in the history
-        throw new Error('Some chunks failed to be sent, check the logs for details.');
+        jobReport.error = true;
+        jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
     }
 
     jobReport.endTime = new Date();
     jobReport.writeToCustomObject();
 
-    if (success) {
+    if (!jobReport.error) {
         logger.info('Indexing completed successfully.');
     } else {
-        logger.error('Indexing failed.');
+        // Showing the job in ERROR in the history
+        throw new Error(jobReport.errorMessage);
     }
 }
 

@@ -152,16 +152,21 @@ describe('afterStep', () => {
 
     test('partialRecordUpdate', () => {
         job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
-        job.afterStep();
+        job.afterStep(true);
         expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
     });
     test('fullCatalogReindex', () => {
         job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
-        job.afterStep();
+        job.afterStep(true);
         expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
             'products',
             expect.arrayContaining(['default', 'fr', 'en']),
             { "test_index_fr": 42, "test_index_en": 51 }
         );
+    });
+    test('job is marked as failed if error in the previous steps', () => {
+        job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
+        expect(() => job.afterStep(false)).toThrow();
+        expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
     });
 });
