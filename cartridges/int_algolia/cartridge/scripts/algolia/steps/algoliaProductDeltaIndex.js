@@ -118,12 +118,10 @@ exports.beforeStep = function(parameters, stepExecution) {
 
 
     /* --- non-localized attributes --- */
-    Object.keys(algoliaProductConfig.attributeConfig).forEach(function(attributeName) {
-        if (!algoliaProductConfig.attributeConfig[attributeName].localized &&
+    Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
+        if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized &&
             attributesToSend.indexOf(attributeName) >= 0) {
-            if (attributeName !== 'categories') {
-                nonLocalizedAttributes.push(attributeName);
-            }
+            nonLocalizedAttributes.push(attributeName);
         }
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
