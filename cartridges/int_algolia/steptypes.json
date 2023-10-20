@@ -1,278 +1,288 @@
 {
-	"step-types": {
-		"script-module-step": [{
-			"@type-id": "custom.algoliaCategoryIndex",
-			"@supports-parallel-execution": "false",
-			"@supports-site-context": "true",
-			"@supports-organization-context": "false",
-			"description": "Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.",
-			"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaCategoryIndex.js",
-			"function": "runCategoryExport",
-			"transactional": "false",
-			"timeout-in-seconds": "600",
-			"parameters": {},
-			"status-codes": {
-				"status": [{
-						"@code": "ERROR",
-						"description": "Used when the step failed with an error."
-					},
-					{
-						"@code": "OK",
-						"description": "Used when the step finished successfully."
-					}
-				]
-			}
-		}, {
-			"@type-id": "custom.algoliaSendDeltaExportProducts",
-			"@supports-parallel-execution": "false",
-			"@supports-site-context": "true",
-			"@supports-organization-context": "false",
-			"description": "DEPRECATED. Use 'custom.algoliaProductDeltaIndex' instead. Takes the product delta export created by SFCC, extracts the PIDs from it, retrieves and enriches the products, then sends them to Algolia. Records in the index are fully replaced.",
-			"module": "int_algolia/cartridge/scripts/algolia/steps/sendDeltaExportProducts.js",
-			"function": "sendDeltaExportProducts",
-			"transactional": "false",
-			"timeout-in-seconds": "7200",
-			"parameters": {
-				"parameter": [{
-					"@name": "consumer",
-					"@type": "string",
-					"@required": "true"
-				},
-					{
-						"@name": "deltaExportJobName",
-						"@type": "string",
-						"@required": "true"
-					}
-
-				]
-			},
-			"status-codes": {
-				"status": [{
-					"@code": "ERROR",
-					"description": "Used when the step failed with an error."
-				},
-					{
-						"@code": "FINISHED",
-						"description": "Used when the step finished successfully."
-					},
-					{
-						"@code": "FINISHED_WITH_WARNINGS",
-						"description": "Used when the step finished with warnings."
-					}
-				]
-			}
-		}],
-		"chunk-script-module-step": [{
-				"@type-id": "custom.algoliaProductIndex",
-				"@supports-parallel-execution": true,
-				"@supports-site-context": true,
-				"@supports-organization-context": false,
-				"description": "Index all products assigned to the selected site. The list of indexed attributes is configurable. Can perform partial records updates, full records updates or a full catalog reindex. See the 'indexingMethod' parameter for details.",
-				"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex.js",
-				"read-function": "read",
-				"process-function": "process",
-				"write-function": "send",
-				"total-count-function": "getTotalCount",
-				"before-step-function": "beforeStep",
-				"before-chunk-function": "",
-				"after-chunk-function": "",
-				"after-step-function": "afterStep",
-				"chunk-size": 500,
-				"transactional": false,
-				"timeout-in-seconds": "14400",
-				"parameters": {
-					"parameter": [
-						{
-							"@name": "attributeListOverride",
-							"@type": "string",
-							"description": "A comma-separated list of attributes to be updated in the index. If not specified, the default list of attributes will be used (defaultAttributes + Algolia_CustomFields).",
-							"@required": false,
-							"@trim": true
-						},
-						{
-							"@name": "indexingMethod",
-							"@type": "string",
-							"description": "'partialRecordUpdate': only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created. 'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data (without removing stale/deleted records). 'fullCatalogReindex': reindex all products (incl. removing stale records).",
-							"@required": "true",
-							"enum-values": {
-								"value": [
-									"fullCatalogReindex",
-									"fullRecordUpdate",
-									"partialRecordUpdate"
-								]
-							},
-							"default-value": "partialRecordUpdate"
-						}
-					]
-
-				},
-				"status-codes": {
-					"status": [{
-							"@code": "ERROR",
-							"description": "Used when the step failed with an error."
-						},
-						{
-							"@code": "OK",
-							"description": "Used when the step finished successfully."
-						}
-					]
-				}
-			},
-			{
-				"@type-id": "custom.algoliaProductPartialIndex",
-				"@supports-parallel-execution": true,
-				"@supports-site-context": true,
-				"@supports-organization-context": false,
-				"description": "Update all products assigned to the selected site. The list of indexed attributes is configurable. Performs partial records updates: only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created.",
-				"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex.js",
-				"read-function": "read",
-				"process-function": "process",
-				"write-function": "send",
-				"total-count-function": "getTotalCount",
-				"before-step-function": "beforeStep",
-				"before-chunk-function": "",
-				"after-chunk-function": "",
-				"after-step-function": "afterStep",
-				"chunk-size": 500,
-				"transactional": false,
-				"timeout-in-seconds": "14400",
-				"parameters": {
-					"parameter": [{
-							"@name": "attributeListOverride",
-							"@type": "string",
-							"description": "A comma-separated list of attributes to be updated in the index. If not specified, the default list of attributes will be used (defaultAttributes + Algolia_CustomFields).",
-							"@required": false,
-							"@trim": true
-						}
-					]
-
-				},
-				"status-codes": {
-					"status": [{
-							"@code": "ERROR",
-							"description": "Used when the step failed with an error."
-						},
-						{
-							"@code": "OK",
-							"description": "Used when the step finished successfully."
-						}
-					]
-				}
-			},
-			{
-				"@type-id": "custom.algoliaProductDeltaIndex",
-				"@supports-parallel-execution": true,
-				"@supports-site-context": true,
-				"@supports-organization-context": false,
-				"description": "Extracts the list of productIDs (of changed products) from a B2C Delta Export, retrieves and enriches the products data, then sends them to Algolia. Can perform full records updates or partial records updates. See the 'indexingMethod' parameter for details.",
-				"module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex.js",
-				"read-function": "read",
-				"process-function": "process",
-				"write-function": "send",
-				"total-count-function": "getTotalCount",
-				"before-step-function": "beforeStep",
-				"before-chunk-function": "",
-				"after-chunk-function": "",
-				"after-step-function": "afterStep",
-				"chunk-size": 500,
-				"transactional": false,
-				"timeout-in-seconds": "14400",
-				"parameters": {
-					"parameter": [{
-							"@name": "consumer",
-							"@type": "string",
-							"description": "The name of the consumer to be used for retrieving the delta export file. Also determines the WebDAV folder for the B2C delta export, together with the deltaExportJobName parameter.",
-							"@required": true
-						},
-						{
-							"@name": "deltaExportJobName",
-							"@type": "string",
-							"description": "The name of the delta export job to be used for retrieving the delta export file. Also determines the WebDAV folder for the B2C delta export, together with the consumer parameter.",
-							"@required": true
-						},
-						{
-							"@name": "attributeListOverride",
-							"@type": "string",
-							"description": "A comma-separated list of attributes to be updated in the index. If not specified, the default list of attributes will be used (defaultAttributes + Algolia_CustomFields).",
-							"@required": false,
-							"@trim": true
-						},
-						{
-							"@name": "indexingMethod",
-							"@type": "string",
-							"description": "'partialRecordUpdate': only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created. 'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data. Deleted products are removed from the index.",
-							"@required": "true",
-							"enum-values": {
-								"value": [
-									"partialRecordUpdate",
-									"fullRecordUpdate"
-								]
-							},
-							"default-value": "fullRecordUpdate"
-						}
-					]
-				},
-				"status-codes": {
-					"status": [{
-							"@code": "ERROR",
-							"description": "Used when the step failed with an error."
-						},
-						{
-							"@code": "OK",
-							"description": "Used when the step finished successfully."
-						}
-					]
-				}
-			},
-			{
-				"@type-id": "custom.sendChunkOrientedProductUpdates",
-				"@supports-parallel-execution": true,
-				"@supports-site-context": true,
-				"@supports-organization-context": false,
-				"description": "DEPRECATED. Use 'custom.algoliaProductIndex' instead. Sends updates of all products assigned to the selected site to Algolia. The list of indexed attributes is configurable. Can perform partial records updates or full records updates.",
-				"module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates.js",
-				"read-function": "read",
-				"process-function": "process",
-				"write-function": "send",
-				"total-count-function": "getTotalCount",
-				"before-step-function": "beforeStep",
-				"before-chunk-function": "",
-				"after-chunk-function": "",
-				"after-step-function": "afterStep",
-				"chunk-size": 500,
-				"transactional": false,
-				"timeout-in-seconds": "600",
-				"parameters": {
-					"parameter": [{
-						"@name": "resourceType",
-						"@type": "string",
-						"@required": true
-					},
-						{
-							"@name": "fieldListOverride",
-							"@type": "string",
-							"@required": false
-						},
-						{
-							"@name": "fullRecordUpdate",
-							"@type": "boolean",
-							"@required": false
-						}
-					]
-
-				},
-				"status-codes": {
-					"status": [{
-						"@code": "ERROR",
-						"description": "Used when the step failed with an error."
-					},
-						{
-							"@code": "OK",
-							"description": "Used when the step finished successfully."
-						}
-					]
-				}
-			}
-		]
-	}
+    "step-types": {
+        "script-module-step": [
+            {
+                "@type-id": "custom.algoliaCategoryIndex",
+                "@supports-parallel-execution": "false",
+                "@supports-site-context": "true",
+                "@supports-organization-context": "false",
+                "description": "Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/algoliaCategoryIndex.js",
+                "function": "runCategoryExport",
+                "transactional": "false",
+                "timeout-in-seconds": "600",
+                "parameters": {},
+                "status-codes": {
+                    "status": [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when the step finished successfully."
+                        }
+                    ]
+                }
+            },
+            {
+                "@type-id": "custom.algoliaSendDeltaExportProducts",
+                "@supports-parallel-execution": "false",
+                "@supports-site-context": "true",
+                "@supports-organization-context": "false",
+                "description": "DEPRECATED. Use 'custom.algoliaProductDeltaIndex' instead. Takes the product delta export created by SFCC, extracts the PIDs from it, retrieves and enriches the products, then sends them to Algolia. Records in the index are fully replaced.",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/sendDeltaExportProducts.js",
+                "function": "sendDeltaExportProducts",
+                "transactional": "false",
+                "timeout-in-seconds": "7200",
+                "parameters": {
+                    "parameter": [
+                        {
+                            "@name": "consumer",
+                            "@type": "string",
+                            "@required": "true"
+                        },
+                        {
+                            "@name": "deltaExportJobName",
+                            "@type": "string",
+                            "@required": "true"
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "FINISHED",
+                            "description": "Used when the step finished successfully."
+                        },
+                        {
+                            "@code": "FINISHED_WITH_WARNINGS",
+                            "description": "Used when the step finished with warnings."
+                        }
+                    ]
+                }
+            }
+        ],
+        "chunk-script-module-step": [
+            {
+                "@type-id": "custom.algoliaProductIndex",
+                "@supports-parallel-execution": true,
+                "@supports-site-context": true,
+                "@supports-organization-context": false,
+                "description": "Index all products assigned to the selected site. The list of indexed attributes is configurable. Can perform partial records updates, full records updates or a full catalog reindex. See the 'indexingMethod' parameter for details.",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex.js",
+                "read-function": "read",
+                "process-function": "process",
+                "write-function": "send",
+                "total-count-function": "getTotalCount",
+                "before-step-function": "beforeStep",
+                "before-chunk-function": "",
+                "after-chunk-function": "",
+                "after-step-function": "afterStep",
+                "chunk-size": 500,
+                "transactional": false,
+                "timeout-in-seconds": "14400",
+                "parameters": {
+                    "parameter": [
+                        {
+                            "@name": "attributeListOverride",
+                            "@type": "string",
+                            "description": "A comma-separated list of attributes to be updated in the index. If not specified, the default list of attributes will be used (defaultAttributes + Algolia_CustomFields).",
+                            "@required": false,
+                            "@trim": true
+                        },
+                        {
+                            "@name": "indexingMethod",
+                            "@type": "string",
+                            "description": "'partialRecordUpdate': only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created. 'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data (without removing stale/deleted records). 'fullCatalogReindex': reindex all products (incl. removing stale records).",
+                            "@required": "true",
+                            "enum-values": {
+                                "value": [
+                                    "fullCatalogReindex",
+                                    "fullRecordUpdate",
+                                    "partialRecordUpdate"
+                                ]
+                            },
+                            "default-value": "partialRecordUpdate"
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when the step finished successfully."
+                        }
+                    ]
+                }
+            },
+            {
+                "@type-id": "custom.algoliaProductPartialIndex",
+                "@supports-parallel-execution": true,
+                "@supports-site-context": true,
+                "@supports-organization-context": false,
+                "description": "Update all products assigned to the selected site. The list of indexed attributes is configurable. Performs partial records updates: only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created.",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex.js",
+                "read-function": "read",
+                "process-function": "process",
+                "write-function": "send",
+                "total-count-function": "getTotalCount",
+                "before-step-function": "beforeStep",
+                "before-chunk-function": "",
+                "after-chunk-function": "",
+                "after-step-function": "afterStep",
+                "chunk-size": 500,
+                "transactional": false,
+                "timeout-in-seconds": "14400",
+                "parameters": {
+                    "parameter": [
+                        {
+                            "@name": "attributeListOverride",
+                            "@type": "string",
+                            "description": "A comma-separated list of attributes to be updated in the index. If not specified, the default list of attributes will be used (defaultAttributes + Algolia_CustomFields).",
+                            "@required": false,
+                            "@trim": true
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when the step finished successfully."
+                        }
+                    ]
+                }
+            },
+            {
+                "@type-id": "custom.algoliaProductDeltaIndex",
+                "@supports-parallel-execution": true,
+                "@supports-site-context": true,
+                "@supports-organization-context": false,
+                "description": "Extracts the list of productIDs (of changed products) from a B2C Delta Export, retrieves and enriches the products data, then sends them to Algolia. Can perform full records updates or partial records updates. See the 'indexingMethod' parameter for details.",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex.js",
+                "read-function": "read",
+                "process-function": "process",
+                "write-function": "send",
+                "total-count-function": "getTotalCount",
+                "before-step-function": "beforeStep",
+                "before-chunk-function": "",
+                "after-chunk-function": "",
+                "after-step-function": "afterStep",
+                "chunk-size": 500,
+                "transactional": false,
+                "timeout-in-seconds": "14400",
+                "parameters": {
+                    "parameter": [
+                        {
+                            "@name": "consumer",
+                            "@type": "string",
+                            "description": "The name of the consumer to be used for retrieving the delta export file. Also determines the WebDAV folder for the B2C delta export, together with the deltaExportJobName parameter.",
+                            "@required": true
+                        },
+                        {
+                            "@name": "deltaExportJobName",
+                            "@type": "string",
+                            "description": "The name of the delta export job to be used for retrieving the delta export file. Also determines the WebDAV folder for the B2C delta export, together with the consumer parameter.",
+                            "@required": true
+                        },
+                        {
+                            "@name": "attributeListOverride",
+                            "@type": "string",
+                            "description": "A comma-separated list of attributes to be updated in the index. If not specified, the default list of attributes will be used (defaultAttributes + Algolia_CustomFields).",
+                            "@required": false,
+                            "@trim": true
+                        },
+                        {
+                            "@name": "indexingMethod",
+                            "@type": "string",
+                            "description": "'partialRecordUpdate': only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created. 'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data. Deleted products are removed from the index.",
+                            "@required": "true",
+                            "enum-values": {
+                                "value": [
+                                    "partialRecordUpdate",
+                                    "fullRecordUpdate"
+                                ]
+                            },
+                            "default-value": "fullRecordUpdate"
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when the step finished successfully."
+                        }
+                    ]
+                }
+            },
+            {
+                "@type-id": "custom.sendChunkOrientedProductUpdates",
+                "@supports-parallel-execution": true,
+                "@supports-site-context": true,
+                "@supports-organization-context": false,
+                "description": "DEPRECATED. Use 'custom.algoliaProductIndex' instead. Sends updates of all products assigned to the selected site to Algolia. The list of indexed attributes is configurable. Can perform partial records updates or full records updates.",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates.js",
+                "read-function": "read",
+                "process-function": "process",
+                "write-function": "send",
+                "total-count-function": "getTotalCount",
+                "before-step-function": "beforeStep",
+                "before-chunk-function": "",
+                "after-chunk-function": "",
+                "after-step-function": "afterStep",
+                "chunk-size": 500,
+                "transactional": false,
+                "timeout-in-seconds": "600",
+                "parameters": {
+                    "parameter": [
+                        {
+                            "@name": "resourceType",
+                            "@type": "string",
+                            "@required": true
+                        },
+                        {
+                            "@name": "fieldListOverride",
+                            "@type": "string",
+                            "@required": false
+                        },
+                        {
+                            "@name": "fullRecordUpdate",
+                            "@type": "boolean",
+                            "@required": false
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when the step finished successfully."
+                        }
+                    ]
+                }
+            }
+        ]
+    }
 }
