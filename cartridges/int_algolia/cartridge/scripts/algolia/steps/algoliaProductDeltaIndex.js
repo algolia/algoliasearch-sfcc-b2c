@@ -255,7 +255,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
     let algoliaOperations = [];
 
-    if (!empty(product) && cpObj.available) {
+    if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
         if (productFilter.isInclude(product)) {
 
             // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
