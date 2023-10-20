@@ -70,7 +70,10 @@ function runCategoryExport(parameters, stepExecution) {
         reindexHelper.waitForTasks(deletionTasks);
         logger.info('Temporary indices deleted. Starting indexing...');
     } catch (e) {
-        logger.error('Failed to delete temporary indices. Stopping job... Error: ' + e.message)
+        jobReport.endTime = new Date();
+        jobReport.error = true;
+        jobReport.errorMessage = 'Failed to delete temporary indices: ' + e.message;
+        jobReport.writeToCustomObject();
         return new Status(Status.ERROR, '', 'Failed to delete temporary indices: ' + e.message);
     }
 
@@ -133,15 +136,18 @@ function runCategoryExport(parameters, stepExecution) {
         reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
     } else {
         jobReport.error = true;
-        jobReport.endTime = new Date();
-        jobReport.writeToCustomObject();
-        throw new Error('Some records failed to be indexed (check the logs for details). Not moving temporary indices to production.');
+        jobReport.errorMessage = 'Some records failed to be indexed (check the logs for details). Not moving temporary indices to production.';
     }
 
     jobReport.endTime = new Date();
     jobReport.writeToCustomObject();
 
-    logger.info('Indexing completed successfully.');
+    if (!jobReport.error) {
+        logger.info('Indexing completed successfully.');
+    } else {
+        // Showing the job in ERROR in the history
+        throw new Error(jobReport.errorMessage);
+    }
 }
 
 module.exports.runCategoryExport = runCategoryExport;

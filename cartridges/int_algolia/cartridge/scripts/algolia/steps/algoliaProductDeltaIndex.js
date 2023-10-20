@@ -366,12 +366,14 @@ exports.afterStep = function(success, parameters, stepExecution) {
     jobReport.writeToCustomObject();
 
     if (jobReport.chunksFailed > 0) {
-        throw new Error('Some chunks failed to be sent, check the logs for details.');
+        jobReport.error = true;
+        jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
     }
 
-    if (success) {
+    if (!jobReport.error) {
         logger.info('Indexing completed successfully.');
     } else {
-        logger.error('Indexing failed.');
+        // Showing the job in ERROR in the history
+        throw new Error(jobReport.errorMessage);
     }
 }
