@@ -107,6 +107,9 @@ Product.prototype = {
         return result;
     }
 };
+Product.prototype.isAssignedToSiteCatalog = function() {
+    return true;
+};
 Product.prototype.getAvailabilityModel = function() {
     return {
         getInventoryRecord: function() {
