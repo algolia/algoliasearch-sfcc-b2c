@@ -62,18 +62,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 
-    /* --- checking mandatory parameters --- */
-    if (empty(parameters.consumer) || empty(parameters.deltaExportJobName)) {
-        let errorMessage = 'Mandatory job step parameters missing!';
-        jobHelper.logError(errorMessage);
-        return;
-    }
-
-
     /* --- initializing custom object logging --- */
     jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'product');
     jobReport.startTime = new Date();
-
 
     /* --- parameters --- */
     paramConsumer = parameters.consumer.trim();
@@ -208,7 +199,7 @@ exports.beforeStep = function(parameters, stepExecution) {
                     jobReport.processedItems += result.nrProductsRead;
                 } else {
                     // abort if error reading from any of the delta export zips
-                    let errorMessage = 'Error reading from file: ' + catalogFile;
+                    let errorMessage = 'Error reading from file: ' + catalogFile.getFullPath();
                     jobHelper.logError(errorMessage);
 
                     jobReport.error = true;
