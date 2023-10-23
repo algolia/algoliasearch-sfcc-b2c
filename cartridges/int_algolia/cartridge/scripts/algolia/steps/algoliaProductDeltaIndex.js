@@ -140,7 +140,8 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     // return OK if the folder doesn't exist, this means that the CatalogDeltaExport job step finished OK but didn't have any output (there were no changes)
     if (!l0_deltaExportDir.exists()) {
-        logger.info('Export directory does not exist (CatalogDeltaExport didn\'t generate anything here): ' + l0_deltaExportDir.getFullPath());
+        logger.info('Export directory does not exist (' + l0_deltaExportDir.getFullPath() +
+            '). There haven\'t been any changes to the catalog yet or the "consumer" and "deltaExportJobName" parameters do not match for both job steps.')
         return; // return with an empty changedProducts object
     }
 
