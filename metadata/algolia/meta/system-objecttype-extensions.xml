@@ -144,9 +144,9 @@
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
-            <attribute-definition attribute-id="Algolia_CustomFields">
+            <attribute-definition attribute-id="Algolia_AdditionalAttributes">
                 <display-name xml:lang="x-default">Additional Product Attributes</display-name>
-                <description xml:lang="x-default">Any additional attributes of Product Object</description>
+                <description xml:lang="x-default">Any additional Product attributes</description>
                 <type>set-of-string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -200,7 +200,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_SearchApiKey"/>
                 <attribute attribute-id="Algolia_AdminApiKey"/>
                 <attribute attribute-id="Algolia_InStockThreshold"/>
-                <attribute attribute-id="Algolia_CustomFields"/>
+                <attribute attribute-id="Algolia_AdditionalAttributes"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
 

@@ -62,7 +62,7 @@ const clientSideData = {
 //   ApplicationID          ║ Identifies the application for this site          ║ String
 //   SearchApiKey           ║ Authorization key for Algolia                     ║ String
 //   AdminApiKey            ║ Authorization Admin key for Algolia               ║ String
-//   CustomFields           ║ Any additional attributes of Product Object       ║ Set-of-string
+//   AdditionalAttributes   ║ Any additional Product attributes                 ║ Set-of-string
 //   InStockThreshold       ║ Stock Threshold                                   ║ Double
 //   IndexPrefix            ║ Optional prefix for the index name                ║ String
 //   EnableSSR              ║ Enables server-side rendering of CLP results      ║ Boolean

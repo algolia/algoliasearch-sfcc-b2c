@@ -228,7 +228,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
     return {
         ...originalModule,
         getSetOfArray: function (id) {
-            return id === 'CustomFields'
+            return id === 'AdditionalAttributes'
                 ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
                     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
                 : null;
