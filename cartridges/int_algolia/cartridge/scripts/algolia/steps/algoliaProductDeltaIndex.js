@@ -140,6 +140,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     // return OK if the folder doesn't exist, this means that the CatalogDeltaExport job step finished OK but didn't have any output (there were no changes)
     if (!l0_deltaExportDir.exists()) {
+        logger.info('Export directory does not exist (CatalogDeltaExport didn\'t generate anything here): ' + l0_deltaExportDir.getFullPath());
         return; // return with an empty changedProducts object
     }
 
@@ -148,6 +149,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     // if there are no files to process, there's no point in continuing
     if (empty(deltaExportZips)) {
+        logger.info('No delta exports found at ' + l0_deltaExportDir.getFullPath());
         return; // return with an empty changedProducts object
     }
 
@@ -324,25 +326,30 @@ exports.afterStep = function(success, parameters, stepExecution) {
     // "success" conveys whether an error occurred in any previous chunks or not.
     // Any prior return statements will set success to false (even if it returns Status.OK).
 
-    if (success) {
+    if (!jobReport.error) {
+        if (jobReport.chunksFailed > 0) {
+            jobReport.error = true;
+            jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
+        } else if (success) {
+            jobReport.error = false;
+            jobReport.errorMessage = '';
 
-        jobReport.error = false;
-        jobReport.errorMessage = '';
+            // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
+            if (!empty(deltaExportZips)) {
+                deltaExportZips.forEach(function (filename) {
+                    let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
+                    let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
+                    fileHelper.moveFile(currentZipFile, targetZipFile);
 
-        // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
-        deltaExportZips.forEach(function(filename) {
-            let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
-            let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
-            fileHelper.moveFile(currentZipFile, targetZipFile);
-
-            let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
-            let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
-            fileHelper.moveFile(currentMetaFile, targetMetaFile);
-        });
-
-    } else {
-        jobReport.error = true;
-        jobReport.errorMessage = 'An error occurred while sending data. Please see the error log for more details.';
+                    let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
+                    let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
+                    fileHelper.moveFile(currentMetaFile, targetMetaFile);
+                });
+            }
+        } else {
+            jobReport.error = true;
+            jobReport.errorMessage = 'An error occurred while sending data. Please see the error log for more details.';
+        }
     }
 
     logger.info('Number of productIDs read from B2C delta zips: {0}', jobReport.processedItems);
@@ -353,11 +360,6 @@ exports.afterStep = function(success, parameters, stepExecution) {
 
     jobReport.endTime = new Date();
     jobReport.writeToCustomObject();
-
-    if (jobReport.chunksFailed > 0) {
-        jobReport.error = true;
-        jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
-    }
 
     if (!jobReport.error) {
         logger.info('Indexing completed successfully.');
