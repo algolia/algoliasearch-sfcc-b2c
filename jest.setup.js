@@ -27,6 +27,9 @@ jest.mock('dw/io/File', () => {
         list() {
             return [];
         }
+        getFullPath() {
+            return '/path/to/mocked/file';
+        }
     }
     return MockedFile;
 }, {virtual: true});
