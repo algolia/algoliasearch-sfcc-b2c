@@ -278,7 +278,7 @@ var aggregatedValueHandlers = {
     },
     url: function (product) {
         // Get product page urlfor current locale
-        var productPageUrl = URLUtils.https('Product-Show', 'pid', product.ID);
+        var productPageUrl = URLUtils.url('Product-Show', 'pid', product.ID);
         return productPageUrl ? productPageUrl.toString() : null;
     },
     promotionalPrice: function (product) {

@@ -7,11 +7,14 @@ var URLUtils = require('dw/web/URLUtils');
 var Resource = require('dw/web/Resource');
 var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
+const version = require('*/algoliaconfig').version;
+
 var currentSite = getCurrentSite(); // eslint-disable-line no-use-before-define
 
 // exported properties
 const CATEGORIES_SEPARATOR = ' > ';
 const clientSideData = {
+    "version": version,
     "enable": getPreference('Enable'),
     "applicationID": getPreference('ApplicationID'),
     "searchApiKey": getPreference('SearchApiKey'),
@@ -59,13 +62,10 @@ const clientSideData = {
 //   ApplicationID          ║ Identifies the application for this site          ║ String
 //   SearchApiKey           ║ Authorization key for Algolia                     ║ String
 //   AdminApiKey            ║ Authorization Admin key for Algolia               ║ String
-//   HostBase               ║ Host for read operations                          ║ String
-//   CustomFields           ║ Any additional attributes of Product Object       ║ Set-of-string
+//   AdditionalAttributes   ║ Any additional Product attributes                 ║ Set-of-string
 //   InStockThreshold       ║ Stock Threshold                                   ║ Double
 //   IndexPrefix            ║ Optional prefix for the index name                ║ String
 //   EnableSSR              ║ Enables server-side rendering of CLP results      ║ Boolean
-//   OCAPIClientID          ║ Authorization OCAPI SFCC Client ID                ║ String
-//   OCAPIClientPassword    ║ Authorization OCAPI SFCC Client passwrd           ║ String
 //  ════════════════════════╩═══════════════════════════════════════════════════╩═══════════════════════════
 //  Preferences stored in the XML file
 //
@@ -94,7 +94,8 @@ const clientSideData = {
  * @returns {*} value of preference
  */
 function getPreference(id) {
-    return currentSite.getCustomPreferenceValue('Algolia_' + id);
+    let value = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return value === null ? '' : value;
 }
 
 /**
@@ -115,8 +116,8 @@ function setPreference(id, value) {
  * @returns {array} value of preference
  */
 function getSetOfArray(id) {
-    var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
-    return values.length ? values.map(function (element) { return element; }) : [];
+    let values = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return values && values.length ? values.map(function (element) { return element; }) : [];
 }
 
 /**
@@ -125,8 +126,8 @@ function getSetOfArray(id) {
  * @returns {string} value of preference
  */
 function getSetOfStrings(id) {
-    var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
-    return values.length ? values.join() : ', ';
+    let values = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return values && values.length ? values.join(', ') : '';
 }
 
 /**
@@ -224,10 +225,11 @@ function getIndexPrefix() {
  * If custom site preference Algolia_IndexPrefix is set in BM,
  * its value will be used as a prefix instead of the first part of the hostname and the siteID
  * @param {string} type type of indices: products | categories
+ * @param {string} locale optional: requested locale
  * @returns {string} index name
  */
-function calculateIndexName(type) {
-    return getIndexPrefix() + '__' + type + '__' + request.getLocale();
+function calculateIndexName(type, locale) {
+    return getIndexPrefix() + '__' + type + '__' + (locale || request.getLocale());
 }
 
 /**

@@ -1,5 +1,7 @@
 'use strict';
 
+// This is the sequential version of the chunk-based delta export job. It is now deprecated and should not be used.
+
 /*
     This job takes the productIDs from a standard B2C product delta export (configured as the job's first step),
     then retrieves the products, enriches them and then sends them to Algolia.
@@ -63,6 +65,7 @@
 /**
  * Takes the delta export created by the CatalogDeltaExport system job step,
  * enriches/transforms it and then sends it to Algolia for indexing.
+ * @deprecated Will be removed soon
  * @param {dw.util.HashMap} parameters Job step parameters - make sure to define the parameters for both job steps as job parameters, not step parameters so that they're shared across the job steps
  * @returns {dw.system.Status} Status
 */
@@ -80,7 +83,7 @@ function sendDeltaExportProducts(parameters) {
     var fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
 
     var AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
-
+    var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
     // initializing log data
     const updateLogType = 'LastProductDeltaSyncLog';
@@ -138,26 +141,26 @@ function sendDeltaExportProducts(parameters) {
 
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
-        var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
+        let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
 
         // this will create a structure like so: "l0_deltaExportDir/_processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/...
-        var l2_tempZipDir = new File(l1_processingDir, filename);
+        let l2_tempZipDir = new File(l1_processingDir, filename);
         if (l2_tempZipDir.mkdir()) { // mkdir() returns a success boolean
             currentZipFile.unzip(l2_tempZipDir);
         }
 
         // there's a folder with a UUID as a name one level down, we need to open that
-        var l3_uuidDir = fileHelper.getFirstChildFolder(l2_tempZipDir); // _processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/
+        let l3_uuidDir = fileHelper.getFirstChildFolder(l2_tempZipDir); // _processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/
 
         // UUID-named folder has "catalogs" in it, open that
-        var l4_catalogsDir = new File(l3_uuidDir, 'catalogs'); // _processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/
+        let l4_catalogsDir = new File(l3_uuidDir, 'catalogs'); // _processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/
 
         // -------------------- processing catalog XMLs --------------------
 
         if (l4_catalogsDir.exists() && l4_catalogsDir.isDirectory()) {
 
             // getting child catalog folders, there can be more than one - folder name is the ID of the catalog
-            var l5_catalogDirList = fileHelper.getChildFolders(l4_catalogsDir);
+            let l5_catalogDirList = fileHelper.getChildFolders(l4_catalogsDir);
 
             // processing catalog.xml files in each folder
             l5_catalogDirList.forEach(function(l5_catalogDir) {
@@ -201,12 +204,12 @@ function sendDeltaExportProducts(parameters) {
         // This is for handling the case where the B2C delta export job creates a zip file with no changed products
         // In this case the script doesn't need to proceed, but the zip file should still be moved to "_completed".
         deltaExportZips.forEach(function(filename) {
-            var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
-            var targetZipFile = new File(l1_completedDir, currentZipFile.getName());
+            let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
+            let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
             fileHelper.moveFile(currentZipFile, targetZipFile);
 
-            var currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
-            var targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
+            let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
+            let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
             fileHelper.moveFile(currentMetaFile, targetMetaFile);
         });
 
@@ -245,20 +248,22 @@ function sendDeltaExportProducts(parameters) {
 
     // retrieving products from database and enriching them
     for (let i = 0; i < changedProducts.length; i++) {
-        var currentObject = changedProducts[i];
+        let currentObject = changedProducts[i];
 
-        for (var productID in currentObject) {
+        for (let productID in currentObject) {
 
-            var productUpdateObj;
-            var isAvailable = currentObject[productID];
+            let productUpdateObj;
+            let isAvailable = currentObject[productID];
 
             if (isAvailable) { // <productID>: true - product was either added or modified
 
-                var product = ProductMgr.getProduct(productID); // get product from database, send remove request to Algolia if null
+                let product = ProductMgr.getProduct(productID); // get product from database, send remove request to Algolia if null
 
                 if (!empty(product)) {
-                    var algoliaProduct = new AlgoliaProduct(product);
-                    productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
+                    if (productFilter.isInclude(product)) {
+                        let algoliaProduct = new AlgoliaProduct(product);
+                        productUpdateObj = new jobHelper.UpdateProductModel(algoliaProduct);
+                    }
 
                 } else { // the data from the delta export about this product is stale, product can no longer be found in the database -- send a remove request
                     productUpdateObj = new jobHelper.DeleteProductModel(productID);
@@ -332,12 +337,12 @@ function sendDeltaExportProducts(parameters) {
 
     // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
     deltaExportZips.forEach(function(filename) {
-        var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
-        var targetZipFile = new File(l1_completedDir, currentZipFile.getName());
+        let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
+        let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
         fileHelper.moveFile(currentZipFile, targetZipFile);
 
-        var currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
-        var targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
+        let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
+        let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
         fileHelper.moveFile(currentMetaFile, targetMetaFile);
     });
 

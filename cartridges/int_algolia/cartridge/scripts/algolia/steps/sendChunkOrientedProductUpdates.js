@@ -39,6 +39,7 @@ const MAX_TRIES = 5;
  * before-step-function (steptypes.json)
  * Any returns from this function result in skipping to the afterStep() function (omitting read-process-writealtogether)
  * with the "success" parameter passed to it set to false.
+ * @deprecated Will be removed soon
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
@@ -48,7 +49,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
-    logger = require('dw/system/Logger').getLogger('algolia', 'Algolia');
+    logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
     // checking parameters

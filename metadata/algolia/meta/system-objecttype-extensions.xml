@@ -136,15 +136,6 @@
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
-            <attribute-definition attribute-id="Algolia_HostBase">
-                <display-name xml:lang="x-default">Read Host Base Url</display-name>
-                <description xml:lang="x-default">Host for read operations</description>
-                <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <min-length>0</min-length>
-            </attribute-definition>
-
             <attribute-definition attribute-id="Algolia_InStockThreshold">
                 <display-name xml:lang="x-default">InStock Threshold</display-name>
                 <description xml:lang="x-default">Stock Threshold</description>
@@ -153,9 +144,9 @@
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
-            <attribute-definition attribute-id="Algolia_CustomFields">
-                <display-name xml:lang="x-default">Custom Fields</display-name>
-                <description xml:lang="x-default">Any additional attributes of Product Object</description>
+            <attribute-definition attribute-id="Algolia_AdditionalAttributes">
+                <display-name xml:lang="x-default">Additional Product Attributes</display-name>
+                <description xml:lang="x-default">Any additional Product attributes</description>
                 <type>set-of-string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -180,6 +171,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <default-value>false</default-value>
             </attribute-definition>
 
+            <!-- Deprecated, will be removed soon -->
             <attribute-definition attribute-id="Algolia_OCAPIClientID">
                 <display-name xml:lang="x-default">OCAPI client ID</display-name>
                 <description xml:lang="x-default">Authorization OCAPI client ID</description>
@@ -189,6 +181,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <min-length>0</min-length>
             </attribute-definition>
 
+            <!-- Deprecated, will be removed soon -->
             <attribute-definition attribute-id="Algolia_OCAPIClientPassword">
                 <display-name xml:lang="x-default">OCAPI client password</display-name>
                 <description xml:lang="x-default">Authorization OCAPI client password</description>
@@ -206,13 +199,10 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_ApplicationID"/>
                 <attribute attribute-id="Algolia_SearchApiKey"/>
                 <attribute attribute-id="Algolia_AdminApiKey"/>
-                <attribute attribute-id="Algolia_HostBase"/>
                 <attribute attribute-id="Algolia_InStockThreshold"/>
-                <attribute attribute-id="Algolia_CustomFields"/>
+                <attribute attribute-id="Algolia_AdditionalAttributes"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
-                <attribute attribute-id="Algolia_OCAPIClientID"/>
-                <attribute attribute-id="Algolia_OCAPIClientPassword"/>
 
             </attribute-group>
         </group-definitions>

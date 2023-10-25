@@ -1,5 +1,7 @@
 'use strict';
 
+var algoliaLogger = require('dw/system/Logger').getLogger('algolia');
+
 /**
  * Function to convert array to XML object
  * @param {Array} arr Array
@@ -252,12 +254,19 @@ function readXMLObjectFromStream(xmlStreamReader, modeName) {
 }
 
 /**
+ * Return a logger object set for the 'algolia' category
+ * @return {dw.system.Logger} The logger object
+ */
+function getAlgoliaLogger() {
+    return algoliaLogger;
+}
+
+/**
  * Parse error message and write it to log
  * @param {string} errorMessage Error message
  */
 function logError(errorMessage) {
-    var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.error('\nError: {0}', errorMessage);
+    algoliaLogger.error('\nError: {0}', errorMessage);
 }
 
 /**
@@ -267,8 +276,7 @@ function logError(errorMessage) {
  * @param {Error} error IOError
  */
 function logFileError(file, errorMessage, error) {
-    var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.error('\nFile: {0},\nError: {1},\nError: {2},',
+    algoliaLogger.error('\nFile: {0},\nError: {1},\nError: {2},',
         file,
         errorMessage,
         error.message
@@ -280,8 +288,7 @@ function logFileError(file, errorMessage, error) {
  * @param {string} message Info message
  */
 function logInfo(message) {
-    var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.info('Message: {0}', message);
+    algoliaLogger.info('Message: {0}', message);
 }
 
 /**
@@ -290,8 +297,7 @@ function logInfo(message) {
  * @param {string} infoMessage Info message
  */
 function logFileInfo(file, infoMessage) {
-    var logger = require('dw/system/Logger').getLogger('algolia');
-    logger.info('\nFile: {0},\nMessage: {1}', file, infoMessage);
+    algoliaLogger.info('\nFile: {0},\nMessage: {1}', file, infoMessage);
 }
 
 /**
@@ -327,10 +333,30 @@ function UpdateProductModel(algoliaProduct) {
     };
 
     var keys = Object.keys(algoliaProduct);
-    for (var i = 0; i < keys.length; i += 1) {
+    for (var i = 0; i < keys.length; ++i) {
         if (keys[i] !== 'id') {
             this.options.data[keys[i]] = algoliaProduct[keys[i]];
         }
+    }
+}
+
+/**
+ * Operation class that represents an Algolia batch operation: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
+ * @param {string} action - Operation to perform: addObject, partialUpdateObject, deleteObject, ...
+ * @param {Object} algoliaObject - Algolia object to index
+ * @param {string} indexName - The index to target
+ * @constructor
+ */
+function AlgoliaOperation(action, algoliaObject, indexName) {
+    this.action = action;
+    if (indexName) {
+        this.indexName = indexName;
+    }
+    this.body = {};
+
+    var keys = Object.keys(algoliaObject);
+    for (var i = 0; i < keys.length; ++i) {
+        this.body[keys[i]] = algoliaObject[keys[i]];
     }
 }
 
@@ -384,7 +410,7 @@ function getNextProductModel(productsIterator) {
     return algoliaProductModel;
 }
 
-// ----------------------------- helpers used by sendDeltaExportProducts.js -----------------------------
+// ----------------------------- helpers used by algoliaProductDeltaIndex.js -----------------------------
 
 /**
  * Updates or adds a key-value pair to the last object in the array that has less than 2000 properties.
@@ -440,6 +466,24 @@ function isObjectsArrayEmpty(objectsArray) {
 }
 
 /**
+ * Returns the total number of properties in an array of objects
+ * @param {Array} objectsArray The array of objects to check
+ * @returns {number} The number of properties in an array of objects
+ */
+function getObjectsArrayLength(objectsArray) {
+    let length = 0;
+    if (empty(objectsArray) || !Array.isArray(objectsArray)) {
+        return length;
+    }
+
+    for (let i = 0; i < objectsArray.length; i++) {
+        length += Object.keys(objectsArray[i]).length;
+    }
+
+    return length;
+}
+
+/**
  * Retrieves the IDs of the products which have changed since the last update
  * (an attribute of the product's, its inventory levels or its price)
  * from the supplied XML and adds them to the changedProducts structure.
@@ -449,11 +493,9 @@ function isObjectsArrayEmpty(objectsArray) {
  * @returns {Object} The result object containing `success` (boolean) and `nrProductsRead` (number)
  */
 function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
-    var ProductMgr = require('dw/catalog/ProductMgr');
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
-    var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     var catalogID;
     var resultObj = {
         nrProductsRead: 0,
@@ -477,32 +519,8 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
                                 var mode = xmlStreamReader.getAttributeValue(null, 'mode'); // <product mode="delete">
                                 var isAvailable = mode !== 'delete';
 
-                                let product = ProductMgr.getProduct(productID);
-
-                                if (!empty(product) && product.isMaster()) {
-                                    // if the product is a master, include its variants in changedProducts instead
-                                    // as changes to the master can be inherited by its variants (and masters shouldn't be indexed)
-                                    let variants = product.getVariants().toArray();
-
-                                    for (let i = 0; i < variants.length; i++) {
-                                        let variant = variants[i];
-
-                                        // adding new productID to structure or updating it if key already exists
-                                        if (productFilter.isInclude(variant)) {
-                                            _updateOrAddValue(changedProducts, variant.ID, isAvailable);
-                                        }
-                                    }
-                                } else if (!empty(product)) { // product exists and is a variant
-                                    if (productFilter.isInclude(product)) {
-                                        _updateOrAddValue(changedProducts, productID, isAvailable);
-                                    }
-                                } else { // product doesn't exist (getProduct() returned null)
-                                    // If product no longer exists at the time of the query, mark it for deletion from the index.
-                                    // Deleting a master in B2C will cause its variants to be deleted as well.
-                                    // Fortunately doing this will cause the master's variants to be included in the B2C delta XML file with mode="delete",
-                                    // otherwise there would be no way to retrieve a deleted master's variants (since the product can no longer be retrieved with getProduct()).
-                                    _updateOrAddValue(changedProducts, productID, false);
-                                }
+                                // adding new productID to structure or updating it if key already exists
+                                _updateOrAddValue(changedProducts, productID, isAvailable);
 
                                 resultObj.nrProductsRead++;
                             }
@@ -573,18 +591,21 @@ module.exports = {
     objectCompare: objectCompare,
     hasSameProperties: hasSameProperties,
     readXMLObjectFromStream: readXMLObjectFromStream,
+    getAlgoliaLogger: getAlgoliaLogger,
     logError: logError,
     logFileError: logFileError,
     logInfo: logInfo,
     logFileInfo: logFileInfo,
     checkAlgoliaFolder: checkAlgoliaFolder,
 
+    AlgoliaOperation: AlgoliaOperation,
     UpdateProductModel: UpdateProductModel,
     DeleteProductModel: DeleteProductModel,
     writeObjectToXMLStream: writeObjectToXMLStream,
     getNextProductModel: getNextProductModel,
 
-    // sendDeltaExportProducts
+    // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,
+    getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,
 };

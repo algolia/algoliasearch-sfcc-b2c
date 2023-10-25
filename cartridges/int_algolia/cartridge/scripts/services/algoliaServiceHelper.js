@@ -4,7 +4,7 @@
  * Call REST service and handle common errors
  */
 
-var logger = require('dw/system/Logger').getLogger('algolia');
+var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 var stringUtils = require('dw/util/StringUtils');
 
 var UNEXPECTED_ERROR_CODE = '-1';
@@ -129,7 +129,9 @@ function callJsonService(title, service, params) {
         } else {
             // statusItem.setStatus(Status.ERROR);
             statusItem.addDetail('object', {});
-            logger.warn('Response is not JSON. Method: {0}. Result: {1}', title, result.object.response);
+            if (result.object && result.object.response) {
+                logger.warn('Response is not JSON. Method: {0}. Result: {1}', title, result.object.response);
+            }
         }
     } else {
         statusItem.setStatus(Status.ERROR);

@@ -6,145 +6,124 @@
     <link rel="stylesheet" href="${dw.web.URLUtils.staticURL('/css/algolia.css')}" />
     <isinclude template="inc/Modules" />
     <isbreadcrumb name1="Merchant Tools" name2="Algolia" />
-    <table border="0" cellpadding="0" cellspacing="0" width="100%"><tbody>
-        <tr>
-            <td width="100%" class="table_title aldi">
-                <isprint value="${Resource.msg('algolia.label.algolia', 'algolia', null)}" encoding="jshtml" />
-            </td>
-        </tr>
-        <tr>
-            <td class="w s e"></td>
-        </tr>
-        <tr>
-            <td class="table_title_description w e s">
-                <p><isprint value="${Resource.msg('algolia.label.settings', 'algolia', null)}" encoding="jshtml" /></p>
-                <p><a href="https://www.algolia.com/users/sign_in" target="_blank" rel="noreferrer">
-                    <isprint value="${Resource.msg('algolia.label.dashboard', 'algolia', null)}" encoding="jshtml" />
-                </a></p>
-            </td>
-        </tr>
-    </tbody></table>
-    <div class="algolia-bm-settings">
+
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <tbody>
+            <tr>
+                <td width="100%" class="table_title">
+                    <isprint value="${Resource.msg('algolia.label.algolia', 'algolia', null)}" encoding="jshtml" />
+                </td>
+            </tr>
+            <tr>
+                <td class="w s e"></td>
+            </tr>
+            <tr>
+                <td class="table_title_description w e s">
+                    <p><isprint value="${Resource.msg('algolia.label.settings', 'algolia', null)}" encoding="jshtml" /></p>
+                    <p><a href="https://dashboard.algolia.com" target="_blank" rel="noreferrer">
+                        <isprint value="${Resource.msg('algolia.label.dashboard', 'algolia', null)}" encoding="jshtml" />
+                    </a></p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div>
         <form action="${pdict.setttingsUpdateUrl}" class="form-horizontal" method="post">
         <input type="hidden" name="csrf_token" />
-        <table border="0" cellpadding="0" cellspacing="0" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0" width="100%" id="algolia-bm-settings">
             <tbody>
                 <tr>
-                    <td class="table_header w s tab" nowrap="nowrap" width="70%" colspan="1">
+                    <td class="table_header w s tab left"colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.name', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_header w e s center">
+                    <td class="table_header w e s center right">
                         <isprint value="${Resource.msg('algolia.label.value', 'algolia', null)}" encoding="jshtml" />
                     </td>
                 </tr>
 
                 <iscomment> Algolia_Enable </iscomment>
                 <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                    <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.enable', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
+                    <td class="table_detail w e s">
                         <input type="checkbox" ${pdict.algoliaData.getPreference('Enable') ? "checked": ""} id="Enable" name="Enable" />
                     </td>
                 </tr>
 
                 <iscomment> Algolia_ApplicationID </iscomment>
                 <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                    <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.applicationid', 'algolia', null)}" encoding="jshtml" />
                    </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
+                    <td class="table_detail w e s">
                         <input type="text" value="${pdict.algoliaData.getPreference('ApplicationID') ? pdict.algoliaData.getPreference('ApplicationID') : ''}" id="ApplicationID" name="ApplicationID" />
                     </td>
                 </tr>
 
                 <iscomment> Algolia_SearchApiKey </iscomment>
                 <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                    <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
+                    <td class="table_detail w e s">
                         <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" />
                     </td>
                 </tr>
 
                 <iscomment> Algolia_AdminApiKey </iscomment>
                 <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                    <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.adminkey', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
+                    <td class="table_detail w e s">
                         <input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey') ? pdict.algoliaData.getPreference('AdminApiKey') : ''}" id="AdminApiKey" name="AdminApiKey" />
-                    </td>
-                </tr>
-
-                <iscomment> Algolia_HostBase </iscomment>
-                <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.baseurl', 'algolia', null)}" encoding="jshtml" />
-                    </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
-                        <input type="text" value="${pdict.algoliaData.getPreference('HostBase') ? pdict.algoliaData.getPreference('HostBase') : ''}" id="HostBase" name="HostBase" />
                     </td>
                 </tr>
 
                 <iscomment> Algolia_InStockThreshold </iscomment>
                 <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                    <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
+                    <td class="table_detail w e s">
                         <input type="number" value="${pdict.algoliaData.getPreference('InStockThreshold')}" id="InStockThreshold" name="InStockThreshold" />
                     </td>
                 </tr>
 
-                <iscomment> Algolia_CustomFields </iscomment>
+                <iscomment> Algolia_AdditionalAttributes </iscomment>
                 <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                    <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.custom', 'algolia', null)}" encoding="jshtml" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
-                        <input type="text" value="${pdict.algoliaData.getSetOfStrings('CustomFields') ? pdict.algoliaData.getSetOfStrings('CustomFields') : ''}" id="CustomFields" name="CustomFields" />
+                    <td class="table_detail w e s">
+                        <input type="text" value="${pdict.algoliaData.getSetOfStrings('AdditionalAttributes') ? pdict.algoliaData.getSetOfStrings('AdditionalAttributes') : ''}" id="AdditionalAttributes" name="AdditionalAttributes" />
                     </td>
                 </tr>
 
                 <iscomment> Algolia_IndexPrefix </iscomment>
                 <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.indexprefix', 'algolia', null)}" encoding="jshtml" />
+                    <td class="table_detail w s" colspan="1">
+                        <span class="normal-wrap">
+                            <isprint value="${Resource.msg('algolia.label.preference.indexprefix', 'algolia', null)}" encoding="jshtml" />
+                        </span>
+                        <span class="nowrap">
+                            <pre><isprint value="${Resource.msg('algolia.label.preference.indexprefix.example', 'algolia', null)}" encoding="htmlcontent" /></pre>
+                        </span>
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
+                    <td class="table_detail w e s">
                         <input type="text" value="${pdict.algoliaData.getPreference('IndexPrefix') ? pdict.algoliaData.getPreference('IndexPrefix') : ''}" id="IndexPrefix" name="IndexPrefix" />
                     </td>
                 </tr>
 
                 <iscomment> Algolia_EnableSSR </iscomment>
                 <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
+                    <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.enablessr', 'algolia', null)}" />
                     </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
+                    <td class="table_detail w e s">
                         <input type="checkbox" ${pdict.algoliaData.getPreference('EnableSSR') ? "checked": ""} id="EnableSSR" name="EnableSSR" />
-                    </td>
-                </tr>
-
-                <iscomment> Algolia_OCAPIClientID </iscomment>
-                <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.clientid', 'algolia', null)}" encoding="jshtml" />
-                    </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
-                        <input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientID') ? pdict.algoliaData.getPreference('OCAPIClientID') : ''}" id="OCAPIClientID" name="OCAPIClientID" />
-                    </td>
-                </tr>
-
-                <iscomment> Algolia_OCAPIClientPassword </iscomment>
-                <tr>
-                    <td class="table_detail w s" width="70%" nowrap="nowrap" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.clientpassword', 'algolia', null)}" encoding="jshtml" />
-                    </td>
-                    <td class="table_detail w e s" nowrap="nowrap">
-                        <input type="text" value="${pdict.algoliaData.getPreference('OCAPIClientPassword') ? pdict.algoliaData.getPreference('OCAPIClientPassword') : ''}" id="OCAPIClientPassword" name="OCAPIClientPassword" />
                     </td>
                 </tr>
 
@@ -161,25 +140,90 @@
         </form>
     </div>
 
-    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+
+    <h2>v2 Job Reports</h2>
+
+    <iscomment> v2 job reporting table </iscomment>
+    <isif condition="${pdict.latestReports === false}">
+        <iscomment> custom object type AlgoliaJobReport does not exist on the instance </iscomment>
+        <div class="warning-box">
+            ${Resource.msg('algolia.msg.nometadata', 'algolia', null)}
+        </div>
+    <iselseif condition="${pdict.latestReports.length === 0}"/>
+        <iscomment> custom object type exists, but there are no reports to display </iscomment>
+        <p>${Resource.msg('algolia.msg.noreports', 'algolia', null)}</p>
+    <iselse/>
+        <iscomment> displaying reports </iscomment>
+
+        <isset name="BMHelper" value="${require('~/cartridge/scripts/helper/BMHelper.js')}" scope="page"/>
+
+        <isloop items="${pdict.latestReports}" var="job">
+            <table border="1" cellpadding="0" cellspacing="0" id="algolia-report-table">
+                <tbody>
+                    <isloop items="${job}" var="log" status="status">
+
+                        <isif condition="${status.first}">
+                            <tr>
+                                <td class="table_header center tab-title" colspan="7">
+                                    <a href="${BMHelper.getJobBMLink(log.jobID)}" target="_blank">
+                                        <isprint value="${log.jobID}" encoding="jshtml" />
+                                    </a>
+                                </td>
+                                <td class="table_header center tab-title" colspan="1">
+                                    ${Resource.msg('algolia.label.jobtype', 'algolia', null)} <isprint value="${log.jobType}" encoding="jshtml" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="table-subheader label cell-time">${Resource.msg('algolia.label.start', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-time">${Resource.msg('algolia.label.end', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number-wide">${Resource.msg('algolia.label.tobesent.total.' + log.jobType, 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number-narrow">${Resource.msg('algolia.label.nrlocales', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number">${Resource.msg('algolia.label.recordstobesent', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number">${Resource.msg('algolia.label.recordssent.failed', 'algolia', null)}</td>
+                                <td class="table-subheader label cell-number">${Resource.msg('algolia.label.chunkssent.failed', 'algolia', null)}</td>
+                                <td class="table-subheader label">${Resource.msg('algolia.label.error', 'algolia', null)}</td>
+                            </tr>
+                        </isif>
+
+                        <tr>
+                            <td>${log.startTime}</td>
+                            <td>${log.endTime}</td>
+                            <td>${log.processedItemsToSend} / ${log.processedItems}</td>
+                            <td>${log.siteLocales}</td>
+                            <td>${log.recordsToSend}</td>
+                            <td>${log.recordsSent} / <span class="${log.recordsFailed !== '0' ? 'red' : ''}">${log.recordsFailed}</span></td>
+                            <td>${log.chunksSent} / <span class="${log.chunksFailed !== '0' ? 'red' : ''}">${log.chunksFailed}</span></td>
+                            <td><span class="${log.error ? 'red narrow' : ''}">${log.error ? log.errorMessage : Resource.msg('algolia.label.noerror', 'algolia', null)}<span></td>
+                        </tr>
+                    </isloop>
+                </tbody>
+            </table>
+        </isloop>
+    </isif>
+
+
+    <h2>v1 Job Reports (Deprecated)</h2>
+
+    <iscomment> Stream monitoring, deprecated</iscomment>
+    <table id="indexing-status" border="0" cellpadding="0" cellspacing="0" width="100%">
         <tbody>
             <tr>
-                <td class="table_header w s center tab-title" nowrap="nowrap" width="33%" colspan="1">
+                <td class="table_header w s center tab-title" width="33%" colspan="1">
                     ${Resource.msg('algolia.label.site.title', 'algolia', null)}
                 </td>
-                <td class="table_header w s center tab-title" nowrap="nowrap" width="33%" colspan="1">
+                <td class="table_header w s center tab-title" width="33%" colspan="1">
                     ${Resource.msg('algolia.label.indexingstatus.title', 'algolia', null)}
                 </td>
-                <td class="table_header w s center tab-title" nowrap="nowrap" width="33%" colspan="1">
+                <td class="table_header w s center tab-title" width="33%" colspan="1">
                     ${Resource.msg('algolia.label.actions.title', 'algolia', null)}
                 </td>
             </tr>
             <isloop items="${pdict.algoliaData.getAlgoliaSites()}" var="site">
                 <tr class="site-status-row" data-get-status-url="${URLUtils.https('AlgoliaBM-Indexing', 'siteID', site.ID, 'requestType', 'status').toString()}">
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         ${Resource.msgf('algolia.msg.indexingstatus', 'algolia', null, site.name, site.ID)}
                     </td>
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         <span
                             class="status-result"
                             data-general-error-msg="${Resource.msg('algolia.msg.error', 'algolia', null)}"
@@ -187,7 +231,7 @@
                             ${Resource.msg('algolia.msg.loading', 'algolia', null)}
                         </span>
                     </td>
-                    <td class="w s center tab-title">
+                    <td class="w s e center tab-title">
                         <button
                             class="clean-queue-btn"
                             data-success-msg="${Resource.msg('algolia.msg.indexingcleaned', 'algolia', null)}"
@@ -223,7 +267,7 @@
         <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tbody>
                 <tr>
-                    <td class="table_header w s center tab-title" nowrap="nowrap" width="100%" colspan="1">
+                    <td class="table_header w s center tab-title" width="100%" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.site', 'algolia', null) + ' ' + logData.siteID}" encoding="jshtml" />
                     </td>
                 </tr>
@@ -235,4 +279,5 @@
         <isinclude template="algoliabm/dashboard/productInventoryLog" />
         <isinclude template="algoliabm/dashboard/categoryLog" />
     </isloop>
+
 </isdecorate>

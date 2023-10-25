@@ -2,14 +2,9 @@
 <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
     <custom-preferences>
         <all-instances>
-            <preference preference-id="Algolia_CustomFields">
-                <value>name</value>
+            <preference preference-id="Algolia_AdditionalAttributes">
                 <value>short_description</value>
                 <value>long_description</value>
-                <value>image_groups</value>
-                <value>url</value>
-                <value>variant</value>
-                <value>master</value>
             </preference>
         </all-instances>
         <development/>
@@ -17,4 +12,3 @@
         <production/>
     </custom-preferences>
 </preferences>
-
