@@ -94,7 +94,8 @@ const clientSideData = {
  * @returns {*} value of preference
  */
 function getPreference(id) {
-    return currentSite.getCustomPreferenceValue('Algolia_' + id);
+    let value = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return value === null ? '' : value;
 }
 
 /**
@@ -115,8 +116,8 @@ function setPreference(id, value) {
  * @returns {array} value of preference
  */
 function getSetOfArray(id) {
-    var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
-    return values.length ? values.map(function (element) { return element; }) : [];
+    let values = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return values && values.length ? values.map(function (element) { return element; }) : [];
 }
 
 /**
@@ -125,8 +126,8 @@ function getSetOfArray(id) {
  * @returns {string} value of preference
  */
 function getSetOfStrings(id) {
-    var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
-    return values.length ? values.join() : ', ';
+    let values = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return values && values.length ? values.join(', ') : '';
 }
 
 /**
