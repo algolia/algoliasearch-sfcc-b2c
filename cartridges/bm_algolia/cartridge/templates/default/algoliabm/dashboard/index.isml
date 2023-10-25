@@ -92,13 +92,13 @@
                     </td>
                 </tr>
 
-                <iscomment> Algolia_CustomFields </iscomment>
+                <iscomment> Algolia_AdditionalAttributes </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.custom', 'algolia', null)}" encoding="jshtml" />
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getSetOfStrings('CustomFields') ? pdict.algoliaData.getSetOfStrings('CustomFields') : ''}" id="CustomFields" name="CustomFields" />
+                        <input type="text" value="${pdict.algoliaData.getSetOfStrings('AdditionalAttributes') ? pdict.algoliaData.getSetOfStrings('AdditionalAttributes') : ''}" id="AdditionalAttributes" name="AdditionalAttributes" />
                     </td>
                 </tr>
 

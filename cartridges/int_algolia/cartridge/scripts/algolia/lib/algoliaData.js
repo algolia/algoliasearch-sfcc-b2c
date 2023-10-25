@@ -62,7 +62,7 @@ const clientSideData = {
 //   ApplicationID          ║ Identifies the application for this site          ║ String
 //   SearchApiKey           ║ Authorization key for Algolia                     ║ String
 //   AdminApiKey            ║ Authorization Admin key for Algolia               ║ String
-//   CustomFields           ║ Any additional attributes of Product Object       ║ Set-of-string
+//   AdditionalAttributes   ║ Any additional Product attributes                 ║ Set-of-string
 //   InStockThreshold       ║ Stock Threshold                                   ║ Double
 //   IndexPrefix            ║ Optional prefix for the index name                ║ String
 //   EnableSSR              ║ Enables server-side rendering of CLP results      ║ Boolean
@@ -94,7 +94,8 @@ const clientSideData = {
  * @returns {*} value of preference
  */
 function getPreference(id) {
-    return currentSite.getCustomPreferenceValue('Algolia_' + id);
+    let value = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return value === null ? '' : value;
 }
 
 /**
@@ -115,8 +116,8 @@ function setPreference(id, value) {
  * @returns {array} value of preference
  */
 function getSetOfArray(id) {
-    var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
-    return values.length ? values.map(function (element) { return element; }) : [];
+    let values = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return values && values.length ? values.map(function (element) { return element; }) : [];
 }
 
 /**
@@ -125,8 +126,8 @@ function getSetOfArray(id) {
  * @returns {string} value of preference
  */
 function getSetOfStrings(id) {
-    var values = currentSite.getCustomPreferenceValue('Algolia_' + id);
-    return values.length ? values.join() : ', ';
+    let values = currentSite.getCustomPreferenceValue('Algolia_' + id);
+    return values && values.length ? values.join(', ') : '';
 }
 
 /**

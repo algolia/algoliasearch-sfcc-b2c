@@ -81,7 +81,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
         attributesToSend = algoliaProductConfig.defaultAttributes_v2;
-        const additionalAttributes = algoliaData.getSetOfArray('CustomFields');
+        const additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
         additionalAttributes.map(function(attribute) {
             if (attributesToSend.indexOf(attribute) < 0) {
                 attributesToSend.push(attribute);

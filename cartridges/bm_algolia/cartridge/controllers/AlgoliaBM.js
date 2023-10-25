@@ -34,7 +34,7 @@ function handleSettings() {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', params.ApplicationID.value);
-        algoliaData.setSetOfStrings('CustomFields', params.CustomFields.value);
+        algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
         algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
         algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
