@@ -26,7 +26,7 @@ function getService() {
             service.addHeader('Content-Type', 'application/json; charset=UTF-8');
             service.addHeader('X-Algolia-Application-Id', applicationID);
             service.addHeader('X-Algolia-API-Key', searchAPIKey);
-            service.addHeader('X-Algolia-Agent', 'Algolia Salesforce B2C (SFRA) SSR v' + version);
+            service.addHeader('x-algolia-agent', 'Algolia Salesforce B2C (SFRA) SSR v' + version);
 
             // request body that is sent to Algolia should look like this:
             // '{"params":"facetFilters=%5B%22__primary_category.2%3AMens%20%3E%20Clothing%20%3E%20Suits%22%5D"}'

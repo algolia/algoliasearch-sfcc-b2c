@@ -25,7 +25,7 @@ function getService() {
             service.addHeader('Content-Type', 'application/json; charset=UTF-8');
             service.addHeader('X-Algolia-Application-Id', applicationID);
             service.addHeader('X-Algolia-API-Key', adminAPIKey);
-            service.addHeader('X-Algolia-Agent', 'Algolia Salesforce B2C v' + version);
+            service.addHeader('x-algolia-agent', 'Algolia Salesforce B2C v' + version);
 
             return JSON.stringify(requestBody);
         },
