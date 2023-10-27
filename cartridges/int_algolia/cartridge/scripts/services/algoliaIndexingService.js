@@ -42,7 +42,7 @@ function getService(jobInfo) {
     indexingService.addHeader('X-Algolia-Application-Id', applicationID);
     indexingService.addHeader('X-Algolia-API-Key', adminAPIKey);
     indexingService.addHeader(
-        'X-Algolia-Agent', 'Algolia Salesforce B2C v' + version +
+        'x-algolia-agent', 'Algolia Salesforce B2C v' + version +
         '; CM: ' + System.getCompatibilityMode() +
         '; JobID: ' + (jobInfo ? jobInfo.jobID : 'unknown') +
         '; StepID: ' + (jobInfo ? jobInfo.stepID : 'unknown') +
