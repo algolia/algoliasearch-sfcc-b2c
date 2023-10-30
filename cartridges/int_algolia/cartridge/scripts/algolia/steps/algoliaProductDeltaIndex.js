@@ -349,6 +349,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
 
             // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
             if (!empty(deltaExportZips)) {
+                logger.info('Moving the Delta export files to the "_completed" directory...')
                 deltaExportZips.forEach(function (filename) {
                     let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
                     let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
