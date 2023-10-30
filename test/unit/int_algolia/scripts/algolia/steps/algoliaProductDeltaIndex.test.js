@@ -23,6 +23,7 @@ const parameters = {
     consumer: 'algolia',
     deltaExportJobName: 'productDeltaExport',
     indexingMethod: 'fullRecordUpdate',
+    failureThresholdPercentage: 5,
 };
 
 const stepExecution = {
@@ -64,4 +65,27 @@ test('send', () => {
     job.send(algoliaOperationsChunk);
 
     expect(mockSendMultiIndexBatch).toHaveBeenCalledWith(algoliaOperationsChunk.flat());
+});
+
+describe('afterStep', () => {
+    beforeAll(() => {
+        job.beforeStep(parameters, stepExecution);
+    });
+
+    describe('partialRecordUpdate', () => {
+        test('failurePercentage <= failureThresholdPercentage', () => {
+            job.__getJobReport().recordsFailed = 5;
+            job.__getJobReport().recordsToSend = 100;
+            job.afterStep(true);
+            expect(job.__getJobReport().error).toBe(false);
+        });
+        test('failurePercentage > failureThresholdPercentage', () => {
+            job.__getJobReport().recordsFailed = 6;
+            job.__getJobReport().recordsToSend = 100;
+            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Check the logs for details.';
+            expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
+            expect(job.__getJobReport().error).toBe(true);
+            expect(job.__getJobReport().errorMessage).toBe(expectedErrorMsg);
+        });
+    })
 });

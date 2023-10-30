@@ -156,6 +156,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         logger.info('No delta exports found at ' + l0_deltaExportDir.getFullPath());
         return; // return with an empty changedProducts object
     }
+    logger.info('Delta exports found: ' + deltaExportZips);
 
     // creating empty temporary "_processing" dir
     l1_processingDir = new File(l0_deltaExportDir, '_processing');
@@ -170,6 +171,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
+        logger.info('Processing ' + filename + '...');
         var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
 
         // this will create a structure like so: "l0_deltaExportDir/_processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/...
@@ -222,6 +224,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     fileHelper.removeFolderRecursively(l1_processingDir);
 
     changedProductsIterator = new CPObjectIterator(changedProducts);
+    logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
 }
 
 /**
@@ -377,4 +380,9 @@ exports.afterStep = function(success, parameters, stepExecution) {
         // Showing the job in ERROR in the history
         throw new Error(jobReport.errorMessage);
     }
+}
+
+// For testing
+exports.__getJobReport = function() {
+    return jobReport;
 }
