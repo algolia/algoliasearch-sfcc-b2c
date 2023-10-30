@@ -46,6 +46,14 @@
                             "@name": "deltaExportJobName",
                             "@type": "string",
                             "@required": "true"
+                        },
+                        {
+                            "@name": "failureThresholdPercentage",
+                            "@type": "long",
+                            "description": "Allowed percentage of records that failed to be indexed before marking the job in error. Default: 0.",
+                            "@required": false,
+                            "min-value":"0",
+                            "max-value":"100"
                         }
                     ]
                 },
@@ -108,6 +116,14 @@
                                 ]
                             },
                             "default-value": "partialRecordUpdate"
+                        },
+                        {
+                            "@name": "failureThresholdPercentage",
+                            "@type": "long",
+                            "description": "Allowed percentage of records that failed to be indexed before marking the job in error. Default: 0. When indexingMethod=fullCatalogReindex, the temporary index is not moved to production if the failure percentage exceeds this threshold.",
+                            "@required": false,
+                            "min-value":"0",
+                            "max-value":"100"
                         }
                     ]
                 },
@@ -150,6 +166,14 @@
                             "description": "A comma-separated list of attributes to be updated in the index. If not specified, the default list of attributes will be used (defaultAttributes + Algolia_AdditionalAttributes).",
                             "@required": false,
                             "@trim": true
+                        },
+                        {
+                            "@name": "failureThresholdPercentage",
+                            "@type": "long",
+                            "description": "Allowed percentage of records that failed to be indexed before marking the job in error. Default: 0",
+                            "@required": false,
+                            "min-value":"0",
+                            "max-value":"100"
                         }
                     ]
                 },
@@ -217,6 +241,14 @@
                                 ]
                             },
                             "default-value": "fullRecordUpdate"
+                        },
+                        {
+                            "@name": "failureThresholdPercentage",
+                            "@type": "long",
+                            "description": "Allowed percentage of records that failed to be indexed before marking the job in error. Default: 0",
+                            "@required": false,
+                            "min-value":"0",
+                            "max-value":"100"
                         }
                     ]
                 },

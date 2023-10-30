@@ -6,7 +6,7 @@ var File = require('dw/io/File');
 var logger;
 
 // job step parameters
-var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod;
+var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator, AlgoliaJobReport;
@@ -71,7 +71,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramDeltaExportJobName = parameters.deltaExportJobName.trim();
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'fullRecordUpdate'; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
-
+    paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
 
     /* --- B2C delta job parameters --- */
     logger.info('consumer parameter: ' + paramConsumer);
@@ -129,6 +129,9 @@ exports.beforeStep = function(parameters, stepExecution) {
         stepID: stepExecution.getStepID(),
         indexingMethod: paramIndexingMethod,
     });
+
+    logger.info('failureThresholdPercentage parameter: ' + paramFailureThresholdPercentage);
+    logger.info('Starting Delta export extraction...');
 
     // ----------------------------- Extracting productIDs from the output of the Delta Export -----------------------------
 
@@ -328,7 +331,13 @@ exports.afterStep = function(success, parameters, stepExecution) {
     // Any prior return statements will set success to false (even if it returns Status.OK).
 
     if (!jobReport.error) {
-        if (jobReport.chunksFailed > 0) {
+        const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
+
+        if (failurePercentage > paramFailureThresholdPercentage) {
+            jobReport.error = true;
+            jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
+                paramFailureThresholdPercentage + '%). Check the logs for details.';
+        } else if (jobReport.chunksFailed > 0) {
             jobReport.error = true;
             jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
         } else if (success) {
