@@ -52,8 +52,8 @@
                             "@type": "long",
                             "description": "Allowed percentage of records that fails to be indexed before marking the job in error. Default: 0.",
                             "@required": false,
-                            "min-value":"0",
-                            "max-value":"100"
+                            "min-value": "0",
+                            "max-value": "100"
                         }
                     ]
                 },
