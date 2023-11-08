@@ -1,7 +1,5 @@
 'use strict';
 
-const URLUtils = require('dw/web/URLUtils');
-const URLParameter = require('dw/web/URLParameter');
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData').clientSideData;
 
 /**
@@ -51,8 +49,6 @@ function transformItems(items) {
 
         return item;
     });
-
-    return items;
 }
 
 /**
