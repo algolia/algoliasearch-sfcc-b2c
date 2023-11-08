@@ -134,10 +134,6 @@ var attributeConfig_v2 = {
         attribute: 'ID',
         localized: false
     },
-    in_stock: {
-        attribute: 'availabilityModel.inStock',
-        localized: false
-    },
     long_description: {
         attribute: 'longDescription.source',
         localized: true
@@ -219,6 +215,9 @@ var attributeConfig_v2 = {
     },
     image_groups: {
         localized: true
+    },
+    in_stock: {
+        localized: false
     },
     price: {
         localized: false
