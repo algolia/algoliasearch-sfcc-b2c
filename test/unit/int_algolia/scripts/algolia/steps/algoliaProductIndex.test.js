@@ -150,23 +150,54 @@ describe('afterStep', () => {
         job.__setLastIndexingTasks({ "test_index_fr": 42, "test_index_en": 51 });
     });
 
-    test('partialRecordUpdate', () => {
-        job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
-        job.afterStep(true);
-        expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
+    describe('partialRecordUpdate', () => {
+        test('failurePercentage <= failureThresholdPercentage', () => {
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().recordsFailed = 5;
+            job.__getJobReport().recordsToSend = 100;
+            job.afterStep(true);
+            expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
+            expect(job.__getJobReport().error).toBe(false);
+        });
+        test('failurePercentage > failureThresholdPercentage', () => {
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().recordsFailed = 6;
+            job.__getJobReport().recordsToSend = 100;
+            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Check the logs for details.';
+            expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
+            expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
+            expect(job.__getJobReport().error).toBe(true);
+            expect(job.__getJobReport().errorMessage).toBe(expectedErrorMsg);
+        });
     });
-    test('fullCatalogReindex', () => {
-        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
-        job.afterStep(true);
-        expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
-            'products',
-            expect.arrayContaining(['default', 'fr', 'en']),
-            { "test_index_fr": 42, "test_index_en": 51 }
-        );
+    describe('fullCatalogReindex', () => {
+        test('failurePercentage <= failureThresholdPercentage', () => {
+            job.beforeStep({ indexingMethod: 'fullCatalogReindex', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().recordsFailed = 5;
+            job.__getJobReport().recordsToSend = 100;
+            job.afterStep(true);
+            expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
+                'products',
+                expect.arrayContaining(['default', 'fr', 'en']),
+                {"test_index_fr": 42, "test_index_en": 51}
+            );
+            expect(job.__getJobReport().error).toBe(false);
+        });
+        test('failurePercentage > failureThresholdPercentage', () => {
+            job.beforeStep({ indexingMethod: 'fullCatalogReindex', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().recordsFailed = 6;
+            job.__getJobReport().recordsToSend = 100;
+            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Not moving temporary indices to production. Check the logs for details.';
+            expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
+            expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
+            expect(job.__getJobReport().error).toBe(true);
+            expect(job.__getJobReport().errorMessage).toBe(expectedErrorMsg);
+        });
     });
     test('job is marked as failed if error in the previous steps', () => {
         job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
         expect(() => job.afterStep(false)).toThrow();
         expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
+        expect(job.__getJobReport().error).toBe(true);
     });
 });
