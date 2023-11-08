@@ -1,7 +1,5 @@
 'use strict';
 
-const URLUtils = require('dw/web/URLUtils');
-const URLParameter = require('dw/web/URLParameter');
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData').clientSideData;
 
 /**
@@ -51,8 +49,6 @@ function transformItems(items) {
 
         return item;
     });
-
-    return items;
 }
 
 /**
@@ -64,7 +60,7 @@ function transformItems(items) {
  */
 function facetFiltersParamValueFromBreadcrumbs(cgid) {
     var breadcrumbs = require('*/cartridge/scripts/helpers/productHelpers').getAllBreadcrumbs(cgid, null, []);
-    var breadcrumbArray = breadcrumbs.map(({ htmlValue }) => htmlValue); // eslint-disable-line
+    var breadcrumbArray = breadcrumbs.map((breadcrumb) => breadcrumb.htmlValue);
 
     // example: ["__primary_category.2:Mens > Clothing > Suits"]
     var facetFiltersParamValue = '["__primary_category.' + (breadcrumbArray.length - 1) + ':' + breadcrumbArray.reverse().join(' > ') + '"]'
