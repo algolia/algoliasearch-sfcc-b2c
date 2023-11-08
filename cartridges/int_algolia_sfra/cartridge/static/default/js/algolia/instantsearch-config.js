@@ -57,10 +57,15 @@ function enableInstantSearch(config) {
             instantsearch.widgets.stats({
                 container: '#algolia-stats-placeholder',
                 templates: {
-                    text: ''
-                        + '{{#hasNoResults}} ' + algoliaData.strings.noResults + ' {{/hasNoResults}} '
-                        + '{{#hasOneResult}} 1 ' + algoliaData.strings.result + ' {{/hasOneResult}}'
-                        + '{{#hasManyResults}}{{#helpers.formatNumber}}{{nbHits}}{{/helpers.formatNumber}} ' + algoliaData.strings.results + ' {{/hasManyResults}}'
+                    text(data) {
+                        if (data.hasManyResults) {
+                            return `${data.nbHits} ${algoliaData.strings.results}`;
+                        } else if (data.hasOneResult) {
+                            return `1 ${algoliaData.strings.result}`;
+                        } else {
+                            return algoliaData.strings.noResults;
+                        }
+                    },
                 }
             }),
             instantsearch.widgets.sortBy({
