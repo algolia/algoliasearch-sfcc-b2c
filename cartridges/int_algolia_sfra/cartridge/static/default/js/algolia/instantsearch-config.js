@@ -95,16 +95,14 @@ function enableInstantSearch(config) {
                 container: '#algolia-categories-list-placeholder',
                 attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
                 templates: {
-                    item: ''
-                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
-                        + '    {{#isRefined}}'
-                        + '      <i class="fa fa-check-circle"></i>'
-                        + '    {{/isRefined}}'
-                        + '    {{^isRefined}}'
-                        + '      <i class="fa fa-circle-o"></i>'
-                        + '    {{/isRefined}}'
-                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
-                        + '</a>',
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
                 },
                 panelTitle: algoliaData.strings.categoryPanelTitle
             }),
@@ -113,16 +111,14 @@ function enableInstantSearch(config) {
                 container: '#algolia-newarrivals-list-placeholder',
                 attributes: ['CATEGORIES_NEW_ARRIVALS.level_0', 'CATEGORIES_NEW_ARRIVALS.level_1'],
                 templates: {
-                    item: ''
-                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
-                        + '    {{#isRefined}}'
-                        + '      <i class="fa fa-check-circle"></i>'
-                        + '    {{/isRefined}}'
-                        + '    {{^isRefined}}'
-                        + '      <i class="fa fa-circle-o"></i>'
-                        + '    {{/isRefined}}'
-                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
-                        + '</a>',
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
                 },
                 panelTitle: algoliaData.strings.newArrivals
             }),
