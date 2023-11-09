@@ -189,43 +189,37 @@ function enableInstantSearch(config) {
                 templates: {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
-                    item: ''
-                        + '<div class="product-tile" data-itemid="{{objectID}}"' +
-                        +'     data-pid="{{objectID}}"'
-                        + '     data-query-id="{{__queryID}}"'
-                        + '     data-index-name="{{__indexName}}"'
-                        + '>'
-                        + '        {{#image}}'
-                        + '        <div class="product-image">'
-                        + '            <a class="thumb-link" href="{{url}}">'
-                        + '              <img class="tile-image" src="{{image.dis_base_link}}" alt="{{image.alt}}" title="{{name}}"/>'
-                        + '            </a>'
-                        + '            <a id="quickviewbutton" class="quickview" href="{{quickShowUrl}}">Quick View<i class="fa fa-arrows-alt"></i></a>'
-                        + '        </div>'
-                        + '        {{/image}}'
-                        + '        <div class="product-name">'
-                        + '            <a class="name-link" href="{{url}}" title="{{name}}">'
-                        + '               {{#helpers.highlight}}{ "attribute": "name" }{{/helpers.highlight}}'
-                        + '            </a>'
-                        + '        </div>'
-                        + '        <div class="product-pricing">'
-                        + '            {{#promotionalPrice}}'
-                        + '            <span class="product-standard-price">'
-                        + '                {{currencySymbol}} {{price}}'
-                        + '            </span>'
-                        + '            <span class="product-sales-price">'
-                        + '                {{currencySymbol}} {{promotionalPrice}}'
-                        + '            </span>'
-                        + '            {{/promotionalPrice}}'
-                        + '            {{^promotionalPrice}}'
-                        + '                {{#price}}'
-                        + '                    <span class="product-sales-price">'
-                        + '                        {{currencySymbol}} {{price}}'
-                        + '                    </span>'
-                        + '                {{/price}}'
-                        + '            {{/promotionalPrice}}'
-                        + '        </div>'
-                        + '</div>'
+                    item(hit, { html, components }) {
+                        return html`
+                            <div class="product-tile" data-itemid="${hit.objectID}"
+                                 data-pid="${hit.objectID}"
+                                 data-query-id="${hit.__queryID}"
+                                 data-index-name="${hit.__indexName}"
+                            >
+                                <div class="product-image">
+                                    <a class="thumb-link" href="${hit.url}">
+                                        <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
+                                    </a>
+                                    <a id="quickviewbutton" class="quickview" href="${hit.quickShowUrl}">Quick View<i class="fa fa-arrows-alt"></i></a>
+                                </div>
+                                <div class="product-name">
+                                    <a class="name-link" href="${hit.url}" title="${hit.name}">
+                                        ${components.Highlight({hit, attribute: 'name'})}
+                                    </a>
+                                </div>
+                                <div class="product-pricing">
+                                    ${hit.promotionalPrice && html`
+                                        <span class="product-standard-price">
+                                            ${hit.currencySymbol} ${hit.price}
+                                        </span>
+                                    `}
+                                    <span class="product-sales-price">
+                                        ${hit.currencySymbol} ${hit.promotionalPrice ? hit.promotionalPrice : hit.price}
+                                    </span>
+                                </div>
+                            </div>
+                        `
+                    },
                 },
                 transformItems: function (items) {
                     return items.map(function (item) {

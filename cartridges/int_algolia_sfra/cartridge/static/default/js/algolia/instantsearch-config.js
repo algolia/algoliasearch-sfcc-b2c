@@ -198,53 +198,52 @@ function enableInstantSearch(config) {
                 templates: {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
-                    item: ''
-                        + '<div class="product" ' +
-                        +'     data-pid="{{objectID}}"'
-                        + '     data-query-id="{{__queryID}}"'
-                        + '     data-index-name="{{__indexName}}"'
-                        + '>'
-                        + '    <div class="product-tile">'
-                        + '        {{#image}}'
-                        + '        <div class="image-container">'
-                        + '            <a href="{{url}}">'
-                        + '              <img class="tile-image" src="{{image.dis_base_link}}" alt="{{image.alt}}" title="{{name}}"/>'
-                        + '            </a>'
-                        + '            <a class="quickview hidden-sm-down" href="{{quickShowUrl}}"  data-toggle="modal" data-target="#quickViewModal" title="{{name}}" aria-label="{{name}}"  data-query-id="{{__queryID}}" data-object-id="{{objectID}}" data-index-name="{{__indexName}}">'
-                        + '               <span class="fa-stack fa-lg">'
-                        + '                 <i class="fa fa-circle fa-inverse fa-stack-2x"></i>'
-                        + '                 <i class="fa fa-expand fa-stack-1x"></i>'
-                        + '               </span>'
-                        + '            </a>'
-                        + '        </div>'
-                        + '        {{/image}}'
-                        + '        <div class="tile-body">'
-                        + '            <div class="pdp-link">'
-                        + '                <a href="{{url}}">'
-                        + '                   {{#helpers.highlight}}{ "attribute": "name" }{{/helpers.highlight}}'
-                        + '                </a>'
-                        + '            </div>'
-                        + '            <div class="price">'
-                        + '                {{#promotionalPrice}}'
-                        + '                    <span class="strike-through list">'
-                        + '                         <span class="value"> {{currencySymbol}} {{price}} </span>'
-                        + '                    </span>'
-                        + '                    <span class="sales">'
-                        + '                        <span class="value">'
-                        + '                            {{currencySymbol}} {{promotionalPrice}}'
-                        + '                        </span>'
-                        + '                    </span>'
-                        + '                {{/promotionalPrice}}'
-                        + '                {{^promotionalPrice}}'
-                        + '                {{#price}}'
-                        + '                <span class="sales">'
-                        + '                    <span class="value"> {{currencySymbol}} {{price}} </span>'
-                        + '                </span>'
-                        + '                {{/price}}'
-                        + '                {{/promotionalPrice}}'
-                        + '            </div>'
-                        + '        </div>'
-                        + '    </div>'
+                    item(hit, { html, components }) {
+                        return html`
+                            <div class="product"
+                                 data-pid="${hit.objectID}"
+                                 data-query-id="${hit.__queryID}"
+                                 data-index-name="${hit.__indexName}"
+                            >
+                                <div class="product-tile">
+                                    <div class="image-container">
+                                        <a href="${hit.url}">
+                                            <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
+                                        </a>
+                                        <a class="quickview hidden-sm-down" href="${hit.quickShowUrl}"
+                                           data-toggle="modal" data-target="#quickViewModal" title="${hit.name}"
+                                           aria-label="${hit.name}" data-query-id="${hit.__queryID}"
+                                           data-object-id="${hit.objectID}" data-index-name="${hit.__indexName}"
+                                        >
+                                            <span class="fa-stack fa-lg">
+                                                <i class="fa fa-circle fa-inverse fa-stack-2x"></i>
+                                                <i class="fa fa-expand fa-stack-1x"></i>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div class="tile-body">
+                                        <div class="pdp-link">
+                                            <a href="${hit.url}">
+                                                ${components.Highlight({hit, attribute: 'name'})}
+                                            </a>
+                                        </div>
+                                        <div class="price">
+                                            ${hit.promotionalPrice && html`
+                                                <span class="strike-through list">
+                                                     <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
+                                                </span>
+                                            `}
+                                            <span class="sales">
+                                                <span class="value">
+                                                    ${hit.currencySymbol} ${hit.promotionalPrice ? hit.promotionalPrice : hit.price}
+                                                </span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `
+                    },
                 },
                 transformItems: function (items) {
                     return items.map(function (item) {
