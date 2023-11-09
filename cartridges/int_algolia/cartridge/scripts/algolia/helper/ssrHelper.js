@@ -42,7 +42,7 @@ function transformItems(items) {
         // currency symbol
         item.currencySymbol = algoliaData.currencySymbol;
 
-        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + item.id;
+        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + item.objectID;
 
         // originating index
         item.__indexName = algoliaData.productsIndex;
