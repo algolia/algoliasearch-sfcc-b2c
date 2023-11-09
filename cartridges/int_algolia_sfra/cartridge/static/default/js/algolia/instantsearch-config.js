@@ -127,16 +127,14 @@ function enableInstantSearch(config) {
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
                 templates: {
-                    item: ''
-                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
-                        + '    {{#isRefined}}'
-                        + '      <i class="fa fa-check-square"></i>'
-                        + '    {{/isRefined}}'
-                        + '    {{^isRefined}}'
-                        + '      <i class="fa fa-square-o"></i>'
-                        + '    {{/isRefined}}'
-                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
-                        + '</a>',
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
                 },
                 panelTitle: algoliaData.strings.brandPanelTitle
             }),
@@ -161,16 +159,14 @@ function enableInstantSearch(config) {
                 container: '#algolia-size-list-placeholder',
                 attribute: 'size',
                 templates: {
-                    item: ''
-                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
-                        + '    {{#isRefined}}'
-                        + '      <i class="fa fa-check-square"></i>'
-                        + '    {{/isRefined}}'
-                        + '    {{^isRefined}}'
-                        + '      <i class="fa fa-square-o"></i>'
-                        + '    {{/isRefined}}'
-                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
-                        + '</a>',
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
                 },
                 panelTitle: algoliaData.strings.sizePanelTitle
             }),
@@ -179,16 +175,14 @@ function enableInstantSearch(config) {
                 container: '#algolia-color-list-placeholder',
                 attribute: 'color',
                 templates: {
-                    item: ''
-                        + '<a class="{{cssClasses.link}}" href="{{url}}" style="white-space: nowrap; {{#isRefined}} font-weight: bold; {{/isRefined}}">'
-                        + '    {{#isRefined}}'
-                        + '      <i class="fa fa-check-square"></i>'
-                        + '    {{/isRefined}}'
-                        + '    {{^isRefined}}'
-                        + '      <i class="fa fa-square-o"></i>'
-                        + '    {{/isRefined}}'
-                        + '    <span class="{{cssClasses.label}}">{{label}}</span>'
-                        + '</a>',
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
                 },
                 panelTitle: algoliaData.strings.colorPanelTitle
             }),
