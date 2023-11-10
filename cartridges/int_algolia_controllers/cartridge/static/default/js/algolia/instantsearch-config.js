@@ -324,7 +324,7 @@ function enableInstantSearch(config) {
                         <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-${attribute}" aria-expanded="false">
                             ${panelTitle}
                         </button>
-                        <h2 aria-label="Brand" class="d-none d-md-block">${panelTitle}</h2>
+                        <h2 aria-label="${panelTitle}" class="d-none d-md-block">${panelTitle}</h2>
                     `
                 }
             },
