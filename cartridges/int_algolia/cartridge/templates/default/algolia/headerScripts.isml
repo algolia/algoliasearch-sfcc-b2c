@@ -12,9 +12,6 @@
         window.algoliasearch = algoliasearch;
     </script>
 
-    <script src="${URLUtils.staticURL('js/lib/hogan.js')}"></script>
-
-
     <iscomment>--- Algolia autocomplete.js ---</iscomment>
 
     <link rel="stylesheet" href="${URLUtils.staticURL('css/algolia/autocomplete-theme.min.css')}" />

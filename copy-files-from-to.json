@@ -4,10 +4,6 @@
 			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/algoliasearch-lite.esm.browser.js"
 		},
 		{
-			"from": "node_modules/hogan.js/lib/hogan.js",
-			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/hogan.js"
-		},
-		{
 			"from": "node_modules/@algolia/autocomplete-theme-classic/dist/theme.min.css",
 			"to": "cartridges/int_algolia_sfra/cartridge/static/default/css/algolia/autocomplete-theme.min.css"
 		},
