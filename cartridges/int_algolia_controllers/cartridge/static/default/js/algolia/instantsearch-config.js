@@ -311,12 +311,6 @@ function enableInstantSearch(config) {
     }
 
     function withPanel(attribute, panelTitle) {
-        var headerTemplate = Hogan.compile(''
-            + '<button class="title btn text-left btn-block d-md-none" aria-controls="refinement-{{attribute}}" aria-expanded="false">'
-            + '  {{panelTitle}} '
-            + '</button>'
-            + '<h2 aria-label="Brand" class="d-none d-md-block">{{ panelTitle }}</h2>'
-        );
         return instantsearch.widgets.panel({
             hidden: function(options) {
                 var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
@@ -325,7 +319,14 @@ function enableInstantSearch(config) {
                 return !facetExists; // hides panel if not facets selectable
               },
             templates: {
-                header: headerTemplate.render({ panelTitle: panelTitle, attribute: attribute })
+                header(options, {html}) {
+                    return html`
+                        <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-${attribute}" aria-expanded="false">
+                            ${panelTitle}
+                        </button>
+                        <h2 aria-label="Brand" class="d-none d-md-block">${panelTitle}</h2>
+                    `
+                }
             },
             cssClasses: {
                 root: 'card refinement collapsible-sm overflow-hidden',
