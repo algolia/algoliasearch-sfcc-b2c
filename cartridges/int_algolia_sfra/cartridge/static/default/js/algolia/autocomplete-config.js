@@ -1,4 +1,4 @@
-/* global autocomplete, getAlgoliaResults, html, algoliaData  */
+/* global autocomplete, getAlgoliaResults, algoliaData  */
 
 /**
  * Enables autocomplete
@@ -36,7 +36,7 @@ function enableAutocomplete(config) {
                             });
                         },
                         templates: {
-                            header() {
+                            header({ html }) {
                                 return html`
                                   <div class="header row justify-content-end">
                                     <div class="col-xs-12 col-sm-10">${algoliaData.strings.products}</div>
@@ -44,7 +44,8 @@ function enableAutocomplete(config) {
                             },
                             item({
                                 item,
-                                components
+                                components,
+                                html,
                             }) {
                                 if (typeof (item.image_groups) === "undefined") {
                                     item.firstImage = algoliaData.noImages.small;
@@ -91,7 +92,7 @@ function enableAutocomplete(config) {
                             });
                         },
                         templates: {
-                            header() {
+                            header({ html }) {
                                 return html`
                                   <div class="header row justify-content-end">
                                     <div class="col-xs-12 col-sm-10">${algoliaData.strings.categories}</div>
@@ -99,7 +100,8 @@ function enableAutocomplete(config) {
                             },
                             item({
                                 item,
-                                components
+                                components,
+                                html,
                             }) {
                                 return html`
                                   <div class="text-truncate text-nowrap">
