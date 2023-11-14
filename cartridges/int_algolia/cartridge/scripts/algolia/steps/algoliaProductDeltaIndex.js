@@ -6,7 +6,7 @@ var File = require('dw/io/File');
 var logger;
 
 // job step parameters
-var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod;
+var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator, AlgoliaJobReport;
@@ -71,7 +71,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramDeltaExportJobName = parameters.deltaExportJobName.trim();
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'fullRecordUpdate'; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
-
+    paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
 
     /* --- B2C delta job parameters --- */
     logger.info('consumer parameter: ' + paramConsumer);
@@ -130,6 +130,9 @@ exports.beforeStep = function(parameters, stepExecution) {
         indexingMethod: paramIndexingMethod,
     });
 
+    logger.info('failureThresholdPercentage parameter: ' + paramFailureThresholdPercentage);
+    logger.info('Starting Delta export extraction...');
+
     // ----------------------------- Extracting productIDs from the output of the Delta Export -----------------------------
 
 
@@ -153,6 +156,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         logger.info('No delta exports found at ' + l0_deltaExportDir.getFullPath());
         return; // return with an empty changedProducts object
     }
+    logger.info('Delta exports found: ' + deltaExportZips);
 
     // creating empty temporary "_processing" dir
     l1_processingDir = new File(l0_deltaExportDir, '_processing');
@@ -167,6 +171,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
+        logger.info('Processing ' + filename + '...');
         var currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
 
         // this will create a structure like so: "l0_deltaExportDir/_processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/...
@@ -219,6 +224,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     fileHelper.removeFolderRecursively(l1_processingDir);
 
     changedProductsIterator = new CPObjectIterator(changedProducts);
+    logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
 }
 
 /**
@@ -328,7 +334,13 @@ exports.afterStep = function(success, parameters, stepExecution) {
     // Any prior return statements will set success to false (even if it returns Status.OK).
 
     if (!jobReport.error) {
-        if (jobReport.chunksFailed > 0) {
+        const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
+
+        if (failurePercentage > paramFailureThresholdPercentage) {
+            jobReport.error = true;
+            jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
+                paramFailureThresholdPercentage + '%). Check the logs for details.';
+        } else if (jobReport.chunksFailed > 0) {
             jobReport.error = true;
             jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
         } else if (success) {
@@ -337,6 +349,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
 
             // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
             if (!empty(deltaExportZips)) {
+                logger.info('Moving the Delta export files to the "_completed" directory...')
                 deltaExportZips.forEach(function (filename) {
                     let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
                     let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
@@ -368,4 +381,9 @@ exports.afterStep = function(success, parameters, stepExecution) {
         // Showing the job in ERROR in the history
         throw new Error(jobReport.errorMessage);
     }
+}
+
+// For testing
+exports.__getJobReport = function() {
+    return jobReport;
 }
