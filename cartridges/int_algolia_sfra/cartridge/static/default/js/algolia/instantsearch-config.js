@@ -42,6 +42,24 @@ function enableInstantSearch(config) {
         },
     });
 
+    search.addWidgets([
+        instantsearch.widgets.breadcrumb({
+            container: '#algolia-category-title-placeholder',
+            attributes: [
+                '__primary_category.0',
+                '__primary_category.1',
+                '__primary_category.2'
+            ],
+            templates: {
+                home: '',
+                separator: ''
+            },
+            transformItems: function (items) {
+                return items.slice(-1); // keep only last item
+            }
+        })
+    ])
+
     if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
             instantsearch.widgets.configure({
@@ -296,26 +314,6 @@ function enableInstantSearch(config) {
                 }
             })
         ]);
-    }
-
-    if (document.querySelector('#algolia-category-title-placeholder')) {
-        search.addWidgets([
-            instantsearch.widgets.breadcrumb({
-                container: '#algolia-category-title-placeholder',
-                attributes: [
-                    '__primary_category.0',
-                    '__primary_category.1',
-                    '__primary_category.2'
-                ],
-                templates: {
-                    home: '',
-                    separator: ''
-                },
-                transformItems: function (items) {
-                    return items.slice(-1); // keep only last item
-                }
-            })
-        ])
     }
 
     search.start();

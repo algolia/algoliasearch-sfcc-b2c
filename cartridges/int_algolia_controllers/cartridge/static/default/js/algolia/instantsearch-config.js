@@ -42,6 +42,26 @@ function enableInstantSearch(config) {
         },
     });
 
+    if (document.querySelector('.cat-banner h1')) {
+        search.addWidgets([
+            instantsearch.widgets.breadcrumb({
+                container: '.cat-banner h1',
+                attributes: [
+                    '__primary_category.0',
+                    '__primary_category.1',
+                    '__primary_category.2'
+                ],
+                templates: {
+                    home: '',
+                    separator: ''
+                },
+                transformItems: function (items) {
+                    return items.slice(-1); // keep only last item
+                }
+            })
+        ])
+    }
+
     if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
             instantsearch.widgets.configure({
@@ -275,27 +295,6 @@ function enableInstantSearch(config) {
         ]);
     }
 
-    if (document.querySelector('.cat-banner h1')) {
-        search.addWidgets([
-            instantsearch.widgets.breadcrumb({
-                container: '.cat-banner h1',
-                attributes: [
-                    '__primary_category.0',
-                    '__primary_category.1',
-                    '__primary_category.2'
-                ],
-                templates: {
-                    home: '',
-                    separator: ''
-                },
-                transformItems: function (items) {
-                    return items.slice(-1); // keep only last item
-                }
-            })
-        ])
-    }
-
-    $('.cat-banner h1').empty();
     search.start();
 
     function hierarchicalMenuWithPanel(options) {
