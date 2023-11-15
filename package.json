@@ -24,9 +24,9 @@
         "node": "18"
     },
     "devDependencies": {
-        "@algolia/autocomplete-js": "1.9.2",
-        "@algolia/autocomplete-theme-classic": "1.9.2",
-        "algoliasearch": "4.17.0",
+        "@algolia/autocomplete-js": "1.12.1",
+        "@algolia/autocomplete-theme-classic": "1.12.1",
+        "algoliasearch": "4.20.0",
         "chai": "^4.3.7",
         "copy-files-from-to": "^3.8.0",
         "eslint": "^7.32.0",
