@@ -318,7 +318,7 @@ function enableInstantSearch(config) {
                 return !facetExists; // hides panel if not facets selectable
               },
             templates: {
-                header(options, {html}) {
+                header(options, { html }) {
                     return html`
                         <button class="title btn text-left btn-block d-md-none" aria-controls="refinement-${attribute}" aria-expanded="false">
                             ${panelTitle}
