@@ -3,7 +3,7 @@
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 /**
- * Create secondary category Algolia object from a categories flat tree:
+ * Create secondary category Algolia object from a flat category tree:
  * For example, the following categories flat tree:
  *   [
  *     { id: 'newarrivals-electronics', name: { en: 'Electronics', fr: 'Electronique' } },
