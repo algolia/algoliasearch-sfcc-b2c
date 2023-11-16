@@ -12,9 +12,6 @@
         window.algoliasearch = algoliasearch;
     </script>
 
-    <script src="${URLUtils.staticURL('js/lib/hogan.js')}"></script>
-
-
     <iscomment>--- Algolia autocomplete.js ---</iscomment>
 
     <link rel="stylesheet" href="${URLUtils.staticURL('css/algolia/autocomplete-theme.min.css')}" />
@@ -22,10 +19,6 @@
 
     <script>
         const { autocomplete, getAlgoliaResults } = window['@algolia/autocomplete-js'];
-    </script>
-    <script type="module">
-        import { html } from '${URLUtils.staticURL("js/lib/preact-standalone.module.js")}';
-        window.html = html;
     </script>
     <script src="${URLUtils.staticURL('js/algolia/autocomplete-config.js')}"></script>
 
