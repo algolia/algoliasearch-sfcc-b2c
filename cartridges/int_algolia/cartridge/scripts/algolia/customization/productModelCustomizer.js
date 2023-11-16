@@ -3,7 +3,17 @@
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 /**
- * Create secondary category Algolia object
+ * Create secondary category Algolia object from a flat category tree:
+ * For example, the following categories flat tree:
+ *   [
+ *     { id: 'newarrivals-electronics', name: { en: 'Electronics', fr: 'Electronique' } },
+ *     { id: 'newarrivals', name: { en: 'New Arrivals', fr: 'Nouveautés' } },
+ *   ]
+ * Will generate:
+ *   {
+ *      level_0: { en: 'New Arrivals', fr: 'Nouveautés' },
+ *      level_1: { en: 'New Arrivals > Electronics', fr: 'Nouveautés > Electronique' }
+ *   }
  * @param {Array} category - array of categories tree
  * @returns {Object} - secondary category Algolia object
  */
@@ -54,7 +64,39 @@ function customizeProductModel(productModel) {
 }
 
 /**
- * Customize Localized Algolia Product.
+ * Create a hierarchical category Algolia object from a categories flat tree, for a localized model.
+ * For example, the following categories flat tree:
+ *   [
+ *     { id: 'newarrivals-electronics', name: 'Electronics' },
+ *     { id: 'newarrivals', name: 'New Arrivals' }
+ *   ]
+ * Will generate:
+ *   {
+ *      level_0: 'New Arrivals',
+ *      level_1: 'New Arrivals > Electronics'
+ *   }
+ * @param {Array} category - array of categories tree
+ * @returns {Object} - secondary category Algolia object
+ */
+function createAlgoliaLocalizedCategoryObject(category) {
+    var CATEGORIES_LEVEL_PREFIX = 'level_';
+    var result = {};
+
+    category
+        .concat()
+        .reverse()
+        .reduce(function (parentCategory, childCategory, index) {
+            result[CATEGORIES_LEVEL_PREFIX + index] = parentCategory
+                ? parentCategory.name + algoliaData.CATEGORIES_SEPARATOR + childCategory.name
+                : childCategory.name
+            return childCategory;
+        }, null);
+
+    return result;
+}
+
+/**
+ * Customize a Localized Algolia Product.
  * Add extra properties to the product model.
  * @param {Object} productModel - Algolia product model
  * @param {Object} algoliaAttributes - The attributes to index
@@ -70,7 +112,7 @@ function customizeLocalizedProductModel(productModel, algoliaAttributes) {
             for (var i = 0; i < productModel.categories.length; i += 1) {
                 var rootCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
                 if (rootCategoryId === CATEGORY_ID) {
-                    productModel[CATEGORY_ATTRIBUTE] = createAlgoliaCategoryObject(productModel.categories[i]);
+                    productModel[CATEGORY_ATTRIBUTE] = createAlgoliaLocalizedCategoryObject(productModel.categories[i]);
                     break;
                 }
             }
