@@ -106,7 +106,7 @@
                 <display-name xml:lang="x-default">Enable Algolia</display-name>
                 <description xml:lang="x-default">Enable/disable all Algolia</description>
                 <type>boolean</type>
-                <mandatory-flag>false</mandatory-flag>
+                <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
@@ -114,7 +114,7 @@
                 <display-name xml:lang="x-default">Application ID</display-name>
                 <description xml:lang="x-default">This is your unique application identifier. If you haven't already, please signup to Algolia and create an Algolia application on the Algolia Dashboard.</description>
                 <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
+                <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
@@ -123,7 +123,7 @@
                 <display-name xml:lang="x-default">Search API key</display-name>
                 <description xml:lang="x-default">This is the public API key which can be safely used in your frontend code.This key is usable for search queries and it's also able to list the indices you've got access to.</description>
                 <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
+                <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
             </attribute-definition>
@@ -132,7 +132,7 @@
                 <display-name xml:lang="x-default">Admin API key</display-name>
                 <description xml:lang="x-default">This is the ADMIN API key. Please keep it secret and use it ONLY from your backend: this key is used to create, update and DELETE your indices. You can also use it to manage your API keys.</description>
                 <type>password</type>
-                <mandatory-flag>false</mandatory-flag>
+                <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
@@ -140,13 +140,14 @@
                 <display-name xml:lang="x-default">InStock Threshold</display-name>
                 <description xml:lang="x-default">Stock Threshold</description>
                 <type>double</type>
-                <mandatory-flag>false</mandatory-flag>
+                <default-value>0.0</default-value>
+                <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
             <attribute-definition attribute-id="Algolia_AdditionalAttributes">
                 <display-name xml:lang="x-default">Additional Product Attributes</display-name>
-                <description xml:lang="x-default">Any additional Product attributes</description>
+                <description xml:lang="x-default">Any additional Product attribute</description>
                 <type>set-of-string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -166,7 +167,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <display-name xml:lang="x-default">Enable SSR</display-name>
                 <description xml:lang="x-default">Enables server-side rendering for CLP search results. Helps with SEO as CLP pages are no longer rendered with empty containers that are to be filled by client-side code, but increases page load times a tiny bit (which can be countered with page caching).</description>
                 <type>boolean</type>
-                <mandatory-flag>false</mandatory-flag>
+                <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <default-value>false</default-value>
             </attribute-definition>

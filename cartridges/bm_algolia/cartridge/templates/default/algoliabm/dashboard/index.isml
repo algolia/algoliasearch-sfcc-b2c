@@ -46,6 +46,8 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.enable', 'algolia', null)}" encoding="jshtml" />
+                        <span class="info-icon">&#8505;</span>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.enable.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
                         <input type="checkbox" ${pdict.algoliaData.getPreference('Enable') ? "checked": ""} id="Enable" name="Enable" />
@@ -55,30 +57,36 @@
                 <iscomment> Algolia_ApplicationID </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.applicationid', 'algolia', null)}" encoding="jshtml" />
+                        <isprint value="${Resource.msg('algolia.label.preference.applicationid', 'algolia', null)}" encoding="jshtml" /><span class="red b"> ${Resource.msg('algolia.label.util.required', 'algolia', null)}</span>
+                        <span class="info-icon">&#8505;</span>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.applicationid.help', 'algolia', null)}</div>
                    </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('ApplicationID') ? pdict.algoliaData.getPreference('ApplicationID') : ''}" id="ApplicationID" name="ApplicationID" />
+                        <input type="text" value="${pdict.algoliaData.getPreference('ApplicationID') ? pdict.algoliaData.getPreference('ApplicationID') : ''}" id="ApplicationID" name="ApplicationID" required/>
                     </td>
                 </tr>
 
                 <iscomment> Algolia_SearchApiKey </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" />
+                        <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" /><span class="red b"> ${Resource.msg('algolia.label.util.required', 'algolia', null)}</span>
+                        <span class="info-icon">&#8505;</span>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.searchkey.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" />
+                        <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" required/>
                     </td>
                 </tr>
 
                 <iscomment> Algolia_AdminApiKey </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.adminkey', 'algolia', null)}" encoding="jshtml" />
+                        <isprint value="${Resource.msg('algolia.label.preference.adminkey', 'algolia', null)}" encoding="jshtml" /><span class="red b"> ${Resource.msg('algolia.label.util.required', 'algolia', null)}</span>
+                        <span class="info-icon">&#8505;</span>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.adminkey.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey') ? pdict.algoliaData.getPreference('AdminApiKey') : ''}" id="AdminApiKey" name="AdminApiKey" />
+                        <input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey') ? pdict.algoliaData.getPreference('AdminApiKey') : ''}" id="AdminApiKey" name="AdminApiKey" required/>
                     </td>
                 </tr>
 
@@ -86,6 +94,8 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}" encoding="jshtml" />
+                        <span class="info-icon">&#8505;</span>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.instock.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
                         <input type="number" value="${pdict.algoliaData.getPreference('InStockThreshold')}" id="InStockThreshold" name="InStockThreshold" />
@@ -96,9 +106,11 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.custom', 'algolia', null)}" encoding="jshtml" />
+                        <span class="info-icon">&#8505;</span>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.custom.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getSetOfStrings('AdditionalAttributes') ? pdict.algoliaData.getSetOfStrings('AdditionalAttributes') : ''}" id="AdditionalAttributes" name="AdditionalAttributes" />
+                        <input type="text" value="${pdict.algoliaData.getSetOfStrings('AdditionalAttributes') ? pdict.algoliaData.getSetOfStrings('AdditionalAttributes') : ''}" id="AdditionalAttributes" name="AdditionalAttributes" placeholder="${Resource.msg('algolia.label.util.optional', 'algolia', null)}"/>
                     </td>
                 </tr>
 
@@ -107,13 +119,12 @@
                     <td class="table_detail w s" colspan="1">
                         <span class="normal-wrap">
                             <isprint value="${Resource.msg('algolia.label.preference.indexprefix', 'algolia', null)}" encoding="jshtml" />
-                        </span>
-                        <span class="nowrap">
-                            <pre><isprint value="${Resource.msg('algolia.label.preference.indexprefix.example', 'algolia', null)}" encoding="htmlcontent" /></pre>
+                            <span class="info-icon">&#8505;</span>
+                            <div class="tooltip">${Resource.msg('algolia.label.preference.indexprefix.help', 'algolia', null)}</div>
                         </span>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('IndexPrefix') ? pdict.algoliaData.getPreference('IndexPrefix') : ''}" id="IndexPrefix" name="IndexPrefix" />
+                        <input type="text" value="${pdict.algoliaData.getPreference('IndexPrefix') ? pdict.algoliaData.getPreference('IndexPrefix') : ''}" id="IndexPrefix" name="IndexPrefix" placeholder="${Resource.msg('algolia.label.util.optional', 'algolia', null)}"/>
                     </td>
                 </tr>
 
@@ -121,6 +132,8 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.enablessr', 'algolia', null)}" />
+                        <span class="info-icon">&#8505;</span>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.enablessr.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
                         <input type="checkbox" ${pdict.algoliaData.getPreference('EnableSSR') ? "checked": ""} id="EnableSSR" name="EnableSSR" />
