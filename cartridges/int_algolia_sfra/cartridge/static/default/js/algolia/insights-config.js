@@ -2,27 +2,78 @@
 
 /**
  * Configures Insights
+ * Relies on the objects and events created by SFRA's addToCart handler:
+ * https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L624
  * @param {string} appId Application ID
  * @param {string} searchApiKey Search API Key
  */
 function enableInsights(appId, searchApiKey) {
+    window.aa('init', {
+        appId,
+        apiKey: searchApiKey,
+    });
 
-    // when on product page
-    document.addEventListener('click', function (event) {
-        if ($(event.target).is('button.add-to-cart')) {
-            // read data from URL
-            var queryID = getUrlParameter('queryID');
-            var objectID = getUrlParameter('objectID');
-            var indexName = getUrlParameter('indexName');
-            if (queryID && objectID && indexName) {
-                window.aa('convertedObjectIDsAfterSearch', {
-                    eventName: 'Product Add to cart',
-                    index: indexName,
-                    queryID: queryID,
-                    objectIDs: [objectID],
-                });
-            }
+    let pidsOjs;
+
+    // Event defined at https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L668
+    $(document).on('updateAddToCartFormData', function (event, data) {
+        // The 'product:afterAddToCart' event returns the current cart, without a way to identify
+        // the product(s) just added. We store temporarily the added products and their quantity.
+        if (data.pidsObj) {
+            // product set
+            pidsOjs = JSON.parse(data.pidsObj);
+        } else {
+            // For a single product, the information is at the top level. We recreate the same pidsObj as for a product set.
+            pidsOjs = [
+                {
+                    pid: data.pid,
+                    qty: data.quantity,
+                },
+            ];
         }
+    });
+    // Event defined at https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L676
+    // The data in the callback comes from the Cart-AddProduct controller: https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/controllers/Cart.js#L144
+    $('body').on('product:afterAddToCart', function (event, data) {
+        const objectIDs = [];
+        const objectData = [];
+        const queryID = getUrlParameter('queryID') || lastQueryID;
+        const index = getUrlParameter('indexName') || lastIndexName;
+        let currency;
+
+        pidsOjs.forEach((pidObj) => {
+            const product = data.cart.items.find((item) => item.id === pidObj.pid);
+            const productInfo = {
+                queryID: queryID,
+                price: product.price.sales.value,
+                quantity: parseInt(pidObj.qty),
+            };
+            if (product.price.list) {
+                // Operation needs to be rounded to avoid "Discount must be a decimal number" errors
+                productInfo.discount = +(
+                    product.price.list.value - product.price.sales.value
+                ).toFixed(2);
+            }
+            currency = product.price.sales.currency;
+
+            objectIDs.push(product.id);
+            objectData.push(productInfo);
+        });
+
+        const algoliaEventType = queryID
+            ? 'addedToCartObjectIDsAfterSearch'
+            : 'addedToCartObjectIDs';
+        // pliUUID is defined only for a single product add to cart: https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/1d7d4d987d681a11b045746618aec744b4409540/cartridges/app_storefront_base/cartridge/controllers/Cart.js#L125
+        const eventName = data.pliUUID ? 'Product Add to cart' : 'Global Add to cart';
+
+        const algoliaEvent = {
+            eventName,
+            index,
+            objectIDs,
+            objectData,
+            currency,
+        };
+        window.aa(algoliaEventType, algoliaEvent);
     });
 
     // when on search page
@@ -38,17 +89,6 @@ function enableInsights(appId, searchApiKey) {
             lastQueryID = $(insightsTarget).data('query-id');
             lastObjectID = $(insightsTarget).data('object-id');
             lastIndexName = $(insightsTarget).data('index-name');
-        }
-    });
-
-    document.addEventListener('click', function (event) {
-        if ($(event.target).is('button.add-to-cart-global')) {
-            window.aa('convertedObjectIDsAfterSearch', {
-                eventName: 'Global Add to cart',
-                index: lastIndexName,
-                queryID: lastQueryID,
-                objectIDs: [lastObjectID],
-            });
         }
     });
 
