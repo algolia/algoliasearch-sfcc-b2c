@@ -6,14 +6,17 @@
  * https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L624
  * @param {string} appId Application ID
  * @param {string} searchApiKey Search API Key
+ * @param {string} productsIndex Products index name
  */
-function enableInsights(appId, searchApiKey) {
+function enableInsights(appId, searchApiKey, productsIndex) {
     window.aa('init', {
         appId,
         apiKey: searchApiKey,
     });
 
-    let pidsOjs;
+    let lastQueryID = null;
+    let lastIndexName = null;
+    let lastPidsOjs = [];
 
     // Event defined at https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L668
     $(document).on('updateAddToCartFormData', function (event, data) {
@@ -21,10 +24,10 @@ function enableInsights(appId, searchApiKey) {
         // the product(s) just added. We store temporarily the added products and their quantity.
         if (data.pidsObj) {
             // product set
-            pidsOjs = JSON.parse(data.pidsObj);
+            lastPidsOjs = JSON.parse(data.pidsObj);
         } else {
             // For a single product, the information is at the top level. We recreate the same pidsObj as for a product set.
-            pidsOjs = [
+            lastPidsOjs = [
                 {
                     pid: data.pid,
                     qty: data.quantity,
@@ -38,10 +41,10 @@ function enableInsights(appId, searchApiKey) {
         const objectIDs = [];
         const objectData = [];
         const queryID = getUrlParameter('queryID') || lastQueryID;
-        const index = getUrlParameter('indexName') || lastIndexName;
+        const index = getUrlParameter('indexName') || lastIndexName || productsIndex;
         let currency;
 
-        pidsOjs.forEach((pidObj) => {
+        lastPidsOjs.forEach((pidObj) => {
             const product = data.cart.items.find((item) => item.id === pidObj.pid);
             const productInfo = {
                 queryID: queryID,
@@ -78,19 +81,15 @@ function enableInsights(appId, searchApiKey) {
 
     // when on search page
     var searchPage = document.querySelector('.ais-InstantSearch');
-    if (!searchPage) return;
-
-    var lastQueryID = null;
-    var lastIndexName = null;
-
-    searchPage.addEventListener('click', function (event) {
-        var insightsTarget = findInsightsTarget(event.target, event.currentTarget);
-        if (insightsTarget) {
-            lastQueryID = $(insightsTarget).data('query-id');
-            lastObjectID = $(insightsTarget).data('object-id');
-            lastIndexName = $(insightsTarget).data('index-name');
-        }
-    });
+    if (searchPage) {
+        searchPage.addEventListener('click', function (event) {
+            var insightsTarget = findInsightsTarget(event.target, event.currentTarget);
+            if (insightsTarget) {
+                lastQueryID = $(insightsTarget).data('query-id');
+                lastIndexName = $(insightsTarget).data('index-name');
+            }
+        });
+    }
 
     /**
      * Finds Insights target
@@ -107,7 +106,7 @@ function enableInsights(appId, searchApiKey) {
             element = element.parentElement;
         }
         return element;
-    };
+    }
 
     /**
      * Returns the value of a URL parameter
@@ -123,8 +122,10 @@ function enableInsights(appId, searchApiKey) {
             currentParameterName = sURLVariables[i].split('=');
 
             if (currentParameterName[0] === parameterName) {
-                return currentParameterName[1] === undefined ? true : decodeURIComponent(currentParameterName[1]);
+                return currentParameterName[1] === undefined
+                    ? true
+                    : decodeURIComponent(currentParameterName[1]);
             }
         }
-    };
+    }
 }
