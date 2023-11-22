@@ -26,6 +26,10 @@
 		{
 			"from": "node_modules/instantsearch.js/dist/instantsearch.production.min.js.map",
 			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/instantsearch.production.min.js.map"
+		},
+		{
+			"from": "node_modules/search-insights/dist/search-insights.min.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/search-insights.min.js"
 		}
 	],
 	"copyFilesSettings": {

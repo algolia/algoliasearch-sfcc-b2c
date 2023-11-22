@@ -24,5 +24,5 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
     });
 
-    enableInsights(algoliaData.applicationID, algoliaData.searchApiKey);
+    enableInsights(algoliaData.applicationID, algoliaData.searchApiKey, algoliaData.productsIndex);
 });
