@@ -80,23 +80,6 @@ td {
 tr {
     padding: 0;
 }
-.info-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 5px;
-    cursor: pointer;
-    background-color: #007bff;
-    color: #eee;
-    border-radius: 50%;
-    width: 12px;
-    height: 12px;
-    font-family: sans-serif;
-    font-size: 10px;
-    font-weight: bold;
-    padding-bottom: 3px;
-}
-
 .tooltip {
     display: none;
     position: absolute;
@@ -110,6 +93,6 @@ tr {
     box-shadow: 0px 2px 4px rgba(0,0,0,0.3);
     z-index: 100;
 }
-.info-icon:hover + .tooltip {
+.info-hover:hover + .tooltip {
     display: block;
 }

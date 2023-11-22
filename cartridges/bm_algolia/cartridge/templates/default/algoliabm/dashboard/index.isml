@@ -46,7 +46,7 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.enable', 'algolia', null)}" encoding="jshtml" />
-                        <span class="info-icon">&#8505;</span>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.enable.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
@@ -58,7 +58,7 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.applicationid', 'algolia', null)}" encoding="jshtml" /><span class="red b"> ${Resource.msg('algolia.label.util.required', 'algolia', null)}</span>
-                        <span class="info-icon">&#8505;</span>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.applicationid.help', 'algolia', null)}</div>
                    </td>
                     <td class="table_detail w e s">
@@ -69,12 +69,12 @@
                 <iscomment> Algolia_SearchApiKey </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" /><span class="red b"> ${Resource.msg('algolia.label.util.required', 'algolia', null)}</span>
-                        <span class="info-icon">&#8505;</span>
+                        <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" /><span class="red b">
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.searchkey.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" required/>
+                        <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" placeholder="${Resource.msg('algolia.label.util.optional.headless', 'algolia', null)}"/>
                     </td>
                 </tr>
 
@@ -82,7 +82,7 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.adminkey', 'algolia', null)}" encoding="jshtml" /><span class="red b"> ${Resource.msg('algolia.label.util.required', 'algolia', null)}</span>
-                        <span class="info-icon">&#8505;</span>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.adminkey.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
@@ -94,7 +94,7 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}" encoding="jshtml" />
-                        <span class="info-icon">&#8505;</span>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.instock.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
@@ -106,7 +106,7 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.custom', 'algolia', null)}" encoding="jshtml" />
-                        <span class="info-icon">&#8505;</span>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.custom.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
@@ -118,7 +118,7 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.indexprefix', 'algolia', null)}" encoding="jshtml" />
-                        <span class="info-icon">&#8505;</span>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.indexprefix.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
@@ -130,7 +130,7 @@
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.enablessr', 'algolia', null)}" />
-                        <span class="info-icon">&#8505;</span>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.enablessr.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
