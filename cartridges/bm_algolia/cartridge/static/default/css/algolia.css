@@ -81,20 +81,22 @@ tr {
     padding: 0;
 }
 .info-icon {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-left: 5px;
     cursor: pointer;
     background-color: #007bff;
     color: #eee;
     border-radius: 50%;
-    width: 15px;
-    height: 15px;
-    text-align: center;
-    line-height: 15px;
+    width: 12px;
+    height: 12px;
     font-family: sans-serif;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
+    padding-bottom: 3px;
 }
+
 .tooltip {
     display: none;
     position: absolute;
