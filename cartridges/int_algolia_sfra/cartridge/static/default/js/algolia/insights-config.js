@@ -16,7 +16,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
 
     let lastQueryID = null;
     let lastIndexName = null;
-    let lastPidsOjs = [];
+    let lastPidsObj = [];
 
     // Event defined at https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L668
     $(document).on('updateAddToCartFormData', function (event, data) {
@@ -24,10 +24,10 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         // the product(s) just added. We store temporarily the added products and their quantity.
         if (data.pidsObj) {
             // product set
-            lastPidsOjs = JSON.parse(data.pidsObj);
+            lastPidsObj = JSON.parse(data.pidsObj);
         } else {
             // For a single product, the information is at the top level. We recreate the same pidsObj as for a product set.
-            lastPidsOjs = [
+            lastPidsObj = [
                 {
                     pid: data.pid,
                     qty: data.quantity,
@@ -44,7 +44,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         const index = getUrlParameter('indexName') || lastIndexName || productsIndex;
         let currency;
 
-        lastPidsOjs.forEach((pidObj) => {
+        lastPidsObj.forEach((pidObj) => {
             const product = data.cart.items.find((item) => item.id === pidObj.pid);
             const productInfo = {
                 queryID: queryID,
