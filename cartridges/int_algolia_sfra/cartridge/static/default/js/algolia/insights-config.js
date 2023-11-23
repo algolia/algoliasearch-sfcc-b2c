@@ -91,6 +91,63 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         });
     }
 
+    // Purchase events.
+    // SFRA doesn't trigger any 'afterPurchase' event or similar, but triggers a 'checkout:updateCheckoutView' event multiple times
+    // during the checkout process, for example after entering shipping information, or payment details.
+    // E.g.: https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/checkout/checkout.js#L147
+    // The payload of this event contains the order information. We are storing it locally and use it to send
+    // a 'purchasedObjectIDs' event to Algolia when the user finally clicks on the 'Place Order' button.
+    //
+    // TODO: keep track of the queryID in the local storage when users give their consent, and send a 'purchasedObjectIDsAfterSearch' event
+
+    // Store the 'order' property of the last 'checkout:updateCheckoutView' received
+    let lastOrder;
+
+    // The data object has a `order` attribute containing a OrderModel object:
+    // https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/models/order.js#L113
+    $('body').on('checkout:updateCheckoutView', function (event, data) {
+        lastOrder = data.order;
+    });
+
+    // Place Order button: https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/templates/default/checkout/checkout.isml#L106
+    $('.place-order').on('click', function () {
+        const objectIDs = [];
+        const objectData = [];
+        let currency;
+
+        if (!lastOrder || !lastOrder.items || !lastOrder.items.items) {
+            return;
+        }
+
+        const products = lastOrder.items.items.slice(0, 20); // The Insights API accepts up to 20 objectID
+
+        products.forEach((product) => {
+            const productInfo = {
+                price: product.price.sales.value,
+                quantity: product.quantity,
+            };
+            if (product.price.list) {
+                // Operation needs to be rounded to avoid "Discount must be a decimal number" errors
+                productInfo.discount = +(
+                    product.price.list.value - product.price.sales.value
+                ).toFixed(2);
+            }
+            currency = product.price.sales.currency;
+
+            objectIDs.push(product.id);
+            objectData.push(productInfo);
+        });
+
+        const algoliaEvent = {
+            eventName: 'Products purchased',
+            index: productsIndex,
+            objectIDs,
+            objectData,
+            currency,
+        };
+        window.aa('purchasedObjectIDs', algoliaEvent);
+    });
+
     /**
      * Finds Insights target
      * @param {Object} startElement Element to start from
