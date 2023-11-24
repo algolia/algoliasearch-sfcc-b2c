@@ -99,13 +99,13 @@ function createAlgoliaLocalizedCategoryObject(category) {
  * Customize a Localized Algolia Product.
  * Add extra properties to the product model.
  * @param {Object} productModel - Algolia product model
- * @param {Object} algoliaAttributes - The attributes to index
+ * @param {Array} algoliaAttributes - The attributes to index
  */
 function customizeLocalizedProductModel(productModel, algoliaAttributes) {
     var CATEGORY_ATTRIBUTE = 'CATEGORIES_NEW_ARRIVALS';
     var CATEGORY_ID = 'newarrivals';
 
-    if (algoliaAttributes.includes(CATEGORY_ATTRIBUTE)) {
+    if (algoliaAttributes.indexOf(CATEGORY_ATTRIBUTE) >= 0) {
         productModel[CATEGORY_ATTRIBUTE] = null;
 
         if (!empty(productModel.categories)) {
