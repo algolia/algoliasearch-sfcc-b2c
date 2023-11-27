@@ -92,6 +92,7 @@ describe('process', () => {
         job.beforeStep({}, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
+        expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot(); //  "action" should be "partialUpdateObject" when no indexingMethod is specified
@@ -99,6 +100,7 @@ describe('process', () => {
     test('partialRecordUpdate', () => {
         job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate' });
+        expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
@@ -108,6 +110,7 @@ describe('process', () => {
         job.beforeStep({ indexingMethod: 'fullRecordUpdate' }, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullRecordUpdate' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
+        expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
         var algoliaOperations = job.process(new ProductMock());
         expect(algoliaOperations).toMatchSnapshot();
@@ -115,6 +118,10 @@ describe('process', () => {
     test('fullCatalogReindex', () => {
         job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullCatalogReindex' });
+        expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith(
+            'products',
+            expect.arrayContaining(['default', 'fr', 'en'])
+        );
         expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith('products', expect.arrayContaining(['default', 'fr', 'en']));
 
         var algoliaOperations = job.process(new ProductMock());

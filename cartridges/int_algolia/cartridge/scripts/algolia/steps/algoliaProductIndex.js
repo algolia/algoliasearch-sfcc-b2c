@@ -123,7 +123,8 @@ exports.beforeStep = function(parameters, stepExecution) {
             logger.info('Deleting existing temporary indices...');
             var deletionTasks = reindexHelper.deleteTemporaryIndices('products', siteLocales.toArray());
             reindexHelper.waitForTasks(deletionTasks);
-            logger.info('Temporary indices deleted.');
+            logger.info('Temporary indices deleted. Copying index settings from production and starting indexing...');
+            reindexHelper.copySettingsFromProdIndices('products', siteLocales.toArray());
         } catch (e) {
             jobReport.endTime = new Date();
             jobReport.error = true;
