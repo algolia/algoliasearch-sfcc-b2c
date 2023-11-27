@@ -25,11 +25,15 @@ const mockMoveIndex = jest.fn().mockReturnValue({
         }
     }
 });
+const mockGetIndexSettings = jest.fn();
+const mockSetIndexSettings = jest.fn();
 const mockWaitTask = jest.fn();
 const mockSendMultiIndexBatch = jest.fn();
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         deleteIndex: mockDeleteIndex,
+        getIndexSettings: mockGetIndexSettings,
+        setIndexSettings: mockSetIndexSettings,
         copyIndexSettings: mockCopySettingsFromProdIndices,
         moveIndex: mockMoveIndex,
         waitTask: mockWaitTask,
@@ -50,12 +54,36 @@ test('deleteTemporaryIndices', () => {
 });
 
 test('copyIndexSettings', () => {
+    const frSettings = { attributesForFaceting: ['price.EUR'] }
+    const enSettings = { attributesForFaceting: ['price.USD'] }
+    mockGetIndexSettings.mockImplementation(indexName => {
+        return {
+            ok: true,
+            object: {
+                body: indexName.endsWith('fr') ? frSettings : enSettings,
+            }
+        }
+    });
+    mockSetIndexSettings.mockImplementation((indexName, settings) => {
+        return {
+            ok: true,
+            object: {
+                body: {
+                    taskID:  indexName.endsWith('fr.tmp') ? 806 : 807,
+                    updatedAt: '2023-10-01T12:00:00.000Z'
+                }
+            }
+        }
+    });
+
     var res = reindexHelper.copySettingsFromProdIndices('products', ['fr', 'en']);
-    expect(mockCopySettingsFromProdIndices).nthCalledWith(1, 'test_index___products__fr', 'test_index___products__fr.tmp');
-    expect(mockCopySettingsFromProdIndices).nthCalledWith(2, 'test_index___products__en', 'test_index___products__en.tmp');
+    expect(mockGetIndexSettings).nthCalledWith(1, 'test_index___products__fr');
+    expect(mockSetIndexSettings).nthCalledWith(1, 'test_index___products__fr.tmp', frSettings);
+    expect(mockGetIndexSettings).nthCalledWith(2, 'test_index___products__en');
+    expect(mockSetIndexSettings).nthCalledWith(2, 'test_index___products__en.tmp', enSettings);
     expect(res).toEqual({
-        "test_index___products__en.tmp": 42,
-        "test_index___products__fr.tmp": 42,
+        "test_index___products__fr.tmp": 806,
+        "test_index___products__en.tmp": 807,
     });
 });
 

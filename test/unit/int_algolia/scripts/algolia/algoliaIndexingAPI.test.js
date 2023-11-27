@@ -78,6 +78,26 @@ test('deleteIndex', () => {
     });
 });
 
+test('getIndexSettings', () => {
+    indexingAPI.getIndexSettings('testIndex');
+
+    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+        method: 'GET',
+        path: '/1/indexes/testIndex/settings',
+    });
+});
+
+test('setIndexSettings', () => {
+    const settings = { 'testSetting': 'testValue' };
+    indexingAPI.setIndexSettings('testIndex', settings);
+
+    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+        method: 'PUT',
+        path: '/1/indexes/testIndex/settings',
+        body: settings,
+    });
+});
+
 test('copyIndexSettings', () => {
     indexingAPI.copyIndexSettings('testIndexSrc', 'testIndexDest');
 

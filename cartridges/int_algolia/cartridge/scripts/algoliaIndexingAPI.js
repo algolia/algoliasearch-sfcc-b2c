@@ -95,6 +95,58 @@ function deleteIndex(indexName) {
 }
 
 /**
+ * Get index settings. https://www.algolia.com/doc/rest-api/search/#get-settings
+ * @param {string} indexName - index to get the settings from
+ * @returns {dw.svc.Result} - result of the call
+ */
+function getIndexSettings(indexName) {
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
+
+    var result = retryableCall(
+        indexingService,
+        {
+            method: 'GET',
+            path: '/1/indexes/' + indexName + '/settings',
+        }
+    );
+
+    if (!result.ok) {
+        if (result.error === 404) {
+            logger.info('Index ' + indexName + ' does not exist.');
+        } else {
+            logger.error(result.getErrorMessage());
+        }
+    }
+
+    return result;
+}
+
+/**
+ * Set index settings. https://www.algolia.com/doc/rest-api/search/#set-settings
+ * @param {string} indexName - targeted index
+ * @param {string} indexSettings - index settings to set
+ * @returns {dw.svc.Result} - result of the call
+ */
+function setIndexSettings(indexName, indexSettings) {
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
+
+    var result = retryableCall(
+        indexingService,
+        {
+            method: 'PUT',
+            path: '/1/indexes/' + indexName + '/settings',
+            body: indexSettings,
+        }
+    );
+
+    if (!result.ok) {
+        logger.error(result.getErrorMessage());
+    }
+
+    return result;
+}
+
+/**
  * Copy the settings of an index to another. https://www.algolia.com/doc/rest-api/search/#copymove-index
  * @param {string} indexNameSrc - index to copy
  * @param {string} indexNameDest - name of the destination index
@@ -191,6 +243,8 @@ module.exports.setJobInfo = setJobInfo;
 module.exports.sendBatch = sendBatch;
 module.exports.sendMultiIndexBatch = sendMultiIndexBatch;
 module.exports.deleteIndex = deleteIndex;
+module.exports.getIndexSettings = getIndexSettings;
+module.exports.setIndexSettings = setIndexSettings;
 module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;
 module.exports.waitTask = waitTask;
