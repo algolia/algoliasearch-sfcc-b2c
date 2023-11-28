@@ -68,7 +68,8 @@ function runCategoryExport(parameters, stepExecution) {
         logger.info('Deleting existing temporary indices...');
         var deletionTasks = reindexHelper.deleteTemporaryIndices('categories', siteLocales.toArray());
         reindexHelper.waitForTasks(deletionTasks);
-        logger.info('Temporary indices deleted. Starting indexing...');
+        logger.info('Temporary indices deleted. Copying index settings from production and starting indexing...');
+        reindexHelper.copySettingsFromProdIndices('categories', siteLocales.toArray());
     } catch (e) {
         jobReport.endTime = new Date();
         jobReport.error = true;

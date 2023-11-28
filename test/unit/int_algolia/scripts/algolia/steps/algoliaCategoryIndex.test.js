@@ -67,6 +67,7 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     }
 }, {virtual: true});
 
+const mockCopySettingsFromProdIndices = jest.fn();
 const mockDeleteTemporaryIndices = jest.fn();
 const mockFinishAtomicReindex = jest.fn();
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
@@ -74,6 +75,7 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     return {
         sendRetryableBatch: originalModule.sendRetryableBatch,
         deleteTemporaryIndices: mockDeleteTemporaryIndices,
+        copySettingsFromProdIndices: mockCopySettingsFromProdIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
         waitForTasks: jest.fn(),
     };
@@ -105,6 +107,14 @@ test('runCategoryExport', () => {
 
     job.runCategoryExport({}, stepExecution);
     expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
+    expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith(
+        'categories',
+        expect.arrayContaining(['default', 'fr', 'en'])
+    );
+    expect(mockCopySettingsFromProdIndices).toHaveBeenCalledWith(
+        'categories',
+        expect.arrayContaining(['default', 'fr', 'en'])
+    );
     expect(mockSendMultiIndexBatch).toMatchSnapshot();
     expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
         'categories',

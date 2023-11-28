@@ -35,12 +35,16 @@ function copySettingsFromProdIndices(indexType, locales) {
     locales.forEach(function(locale) {
         var indexName = algoliaData.calculateIndexName(indexType, locale);
         var tmpIndexName = indexName + '.tmp';
-        var res = algoliaIndexingAPI.copyIndexSettings(indexName, tmpIndexName);
-        if (res.ok) {
-            logger.info('Settings copied to ' + tmpIndexName + '. ' + JSON.stringify(res.object.body));
-            copySettingsTasks[tmpIndexName] = res.object.body.taskID;
-        } else {
-            throw new Error('Error while copying index settings: ' + res.getErrorMessage())
+        var getSettingsRes = algoliaIndexingAPI.getIndexSettings(indexName);
+        if (getSettingsRes.ok) {
+            var setSettingsRes = algoliaIndexingAPI.setIndexSettings(tmpIndexName, getSettingsRes.object.body);
+            if (!setSettingsRes.ok) {
+                throw new Error('Error while setting index settings to ' + tmpIndexName + ': ' + setSettingsRes.getErrorMessage())
+            }
+            logger.info('Settings copied to ' + tmpIndexName + ': ' + JSON.stringify(setSettingsRes.object.body));
+            copySettingsTasks[tmpIndexName] = setSettingsRes.object.body.taskID;
+        } else if (getSettingsRes.error !== 404) {
+            throw new Error('Error while getting index settings from ' + indexName + ': ' + getSettingsRes.getErrorMessage())
         }
     });
     return copySettingsTasks;
