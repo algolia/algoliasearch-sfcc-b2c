@@ -91,6 +91,51 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         });
     }
 
+    // Purchase events.
+    // The purchase event is sent when the user reaches the Order-Confirm endpoint.
+    // We can detect it because it's the only endpoint that sets a `orderUUID` in `pdict` properties:
+    // https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/controllers/Order.js#L87
+    // Our 'algolia-insights' tag exposes its "data-order" attribute only in that case. When it is present, we can send the purchase event.
+    //
+    // TODO: keep track of the queryID in the local storage when users give their consent, and send a 'purchasedObjectIDsAfterSearch' event
+
+    const insightsData = document.querySelector('#algolia-insights');
+    const order = insightsData && insightsData.dataset.order;
+    if (order) {
+        const orderObj = JSON.parse(order);
+        const products = orderObj.items.items.slice(0, 20); // The Insights API accepts up to 20 objectID
+
+        const objectIDs = [];
+        const objectData = [];
+        let currency;
+
+        products.forEach((product) => {
+            const productInfo = {
+                price: product.price.sales.value,
+                quantity: product.quantity,
+            };
+            if (product.price.list) {
+                // Operation needs to be rounded to avoid "Discount must be a decimal number" errors
+                productInfo.discount = +(
+                    product.price.list.value - product.price.sales.value
+                ).toFixed(2);
+            }
+            currency = product.price.sales.currency;
+
+            objectIDs.push(product.id);
+            objectData.push(productInfo);
+        });
+
+        const algoliaEvent = {
+            eventName: 'Products purchased',
+            index: productsIndex,
+            objectIDs,
+            objectData,
+            currency,
+        };
+        window.aa('purchasedObjectIDs', algoliaEvent);
+    }
+
     /**
      * Finds Insights target
      * @param {Object} startElement Element to start from

@@ -2,6 +2,8 @@
 <isset name="algoliaData" value="${require('*/cartridge/scripts/algolia/lib/algoliaData')}" scope="page" />
 
 <isif condition="${algoliaData.getPreference('Enable')}">
+    <isinclude template="algolia/insights" />
+
     <script>
         var algoliaData = <isprint value="${JSON.stringify(algoliaData.clientSideData)}" encoding="off"/>;
     </script>

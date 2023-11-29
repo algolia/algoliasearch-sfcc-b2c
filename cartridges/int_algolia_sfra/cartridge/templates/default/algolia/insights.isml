@@ -1,0 +1,6 @@
+<span id="algolia-insights"
+    <iscomment>orderUUID is only present after a completed purchase (Order-Confirm)</iscomment>
+    <isif condition="${pdict.orderUUID}">
+        data-order="${JSON.stringify(pdict.order)}"
+    </isif>
+></span>
