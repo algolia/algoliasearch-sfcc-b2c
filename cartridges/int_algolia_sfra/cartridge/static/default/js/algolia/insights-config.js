@@ -14,7 +14,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     let userToken;
     let authenticatedUserToken;
 
-    const dwanonymousCookieMatch = document.cookie.match(/dwanonymous_.\w*=(\w*);/);
+    const dwanonymousCookieMatch = document.cookie.match(/dwanonymous_\w*=(\w*);/);
     if (dwanonymousCookieMatch) {
         userToken = dwanonymousCookieMatch[1];
     }
