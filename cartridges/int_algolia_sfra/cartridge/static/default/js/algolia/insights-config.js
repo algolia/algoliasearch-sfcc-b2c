@@ -9,10 +9,13 @@
  * @param {string} productsIndex Products index name
  */
 function enableInsights(appId, searchApiKey, productsIndex) {
+    const LOCAL_STORAGE_KEY = 'algolia-insights';
     const insightsData = document.querySelector('#algolia-insights');
 
     let userToken;
     let authenticatedUserToken;
+    let trackingAllowed = false;
+    let trackedQueryIDs;
 
     const dwanonymousCookieMatch = document.cookie.match(/dwanonymous_\w*=(\w*);/);
     if (dwanonymousCookieMatch) {
@@ -20,6 +23,16 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     }
     if (insightsData && insightsData.dataset.userauthenticated === 'true') {
         authenticatedUserToken = insightsData.dataset.usertoken;
+    }
+    if (insightsData && insightsData.dataset.trackingallowed === 'true') {
+        trackingAllowed = true;
+        try {
+            trackedQueryIDs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
+        } catch (e) {
+            localStorage.removeItem(LOCAL_STORAGE_KEY);
+        }
+    } else {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
 
     window.aa('init', {
@@ -76,7 +89,18 @@ function enableInsights(appId, searchApiKey, productsIndex) {
 
             objectIDs.push(product.id);
             objectData.push(productInfo);
+            trackedQueryIDs[product.id] = queryID;
         });
+
+        if (trackingAllowed) {
+            // Clean up products that were removed from the cart and save the new trackedQueryIDs
+            for (const key in trackedQueryIDs) {
+                if (!data.cart.items.find((item) => item.id === key)) {
+                    delete trackedQueryIDs[key];
+                }
+            }
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(trackedQueryIDs));
+        }
 
         const algoliaEventType = queryID
             ? 'addedToCartObjectIDsAfterSearch'
@@ -111,8 +135,6 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     // We can detect it because it's the only endpoint that sets a `orderUUID` in `pdict` properties:
     // https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/controllers/Order.js#L87
     // Our 'algolia-insights' tag exposes its "data-order" attribute only in that case. When it is present, we can send the purchase event.
-    //
-    // TODO: keep track of the queryID in the local storage when users give their consent, and send a 'purchasedObjectIDsAfterSearch' event
 
     const order = insightsData && insightsData.dataset.order;
     if (order) {
@@ -134,11 +156,18 @@ function enableInsights(appId, searchApiKey, productsIndex) {
                     product.price.list.value - product.price.sales.value
                 ).toFixed(2);
             }
+            if (trackingAllowed) {
+                productInfo.queryID = trackedQueryIDs && trackedQueryIDs[product.id];
+                delete trackedQueryIDs[product.id];
+            }
             currency = product.price.sales.currency;
 
             objectIDs.push(product.id);
             objectData.push(productInfo);
         });
+        if (trackingAllowed) {
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(trackedQueryIDs));
+        }
 
         const algoliaEvent = {
             eventName: 'Products purchased',
@@ -147,7 +176,10 @@ function enableInsights(appId, searchApiKey, productsIndex) {
             objectData,
             currency,
         };
-        window.aa('purchasedObjectIDs', algoliaEvent);
+        const algoliaEventType = trackingAllowed
+            ? 'purchasedObjectIDsAfterSearch'
+            : 'purchasedObjectIDs';
+        window.aa(algoliaEventType, algoliaEvent);
     }
 
     /**
