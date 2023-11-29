@@ -9,9 +9,24 @@
  * @param {string} productsIndex Products index name
  */
 function enableInsights(appId, searchApiKey, productsIndex) {
+    const insightsData = document.querySelector('#algolia-insights');
+
+    let userToken;
+    let authenticatedUserToken;
+
+    const dwanonymousCookieMatch = document.cookie.match(/dwanonymous_.\w*=(\w*);/)
+    if (dwanonymousCookieMatch) {
+        userToken = dwanonymousCookieMatch[1];
+    }
+    if (insightsData && insightsData.dataset.userauthenticated === 'true') {
+        authenticatedUserToken = insightsData.dataset.usertoken;
+    }
+
     window.aa('init', {
         appId,
         apiKey: searchApiKey,
+        userToken,
+        authenticatedUserToken,
     });
 
     let lastQueryID = null;
@@ -99,7 +114,6 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     //
     // TODO: keep track of the queryID in the local storage when users give their consent, and send a 'purchasedObjectIDsAfterSearch' event
 
-    const insightsData = document.querySelector('#algolia-insights');
     const order = insightsData && insightsData.dataset.order;
     if (order) {
         const orderObj = JSON.parse(order);
