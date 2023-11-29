@@ -100,7 +100,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     // TODO: keep track of the queryID in the local storage when users give their consent, and send a 'purchasedObjectIDsAfterSearch' event
 
     const insightsData = document.querySelector('#algolia-insights');
-    const order = insightsData.dataset.order;
+    const order = insightsData && insightsData.dataset.order;
     if (order) {
         const orderObj = JSON.parse(order);
         const products = orderObj.items.items.slice(0, 20); // The Insights API accepts up to 20 objectID
