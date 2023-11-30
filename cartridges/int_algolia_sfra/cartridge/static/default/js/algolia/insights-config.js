@@ -15,7 +15,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     let userToken;
     let authenticatedUserToken;
     let trackingAllowed = false;
-    let trackedQueryIDs;
+    let trackedQueryIDs = {};
 
     const dwanonymousCookieMatch = document.cookie.match(/dwanonymous_\w*=(\w*);/);
     if (dwanonymousCookieMatch) {
@@ -89,7 +89,9 @@ function enableInsights(appId, searchApiKey, productsIndex) {
 
             objectIDs.push(product.id);
             objectData.push(productInfo);
-            trackedQueryIDs[product.id] = queryID;
+            if (trackingAllowed) {
+                trackedQueryIDs[product.id] = queryID;
+            }
         });
 
         if (trackingAllowed) {
@@ -157,7 +159,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
                 ).toFixed(2);
             }
             if (trackingAllowed) {
-                productInfo.queryID = trackedQueryIDs && trackedQueryIDs[product.id];
+                productInfo.queryID = trackedQueryIDs[product.id];
                 delete trackedQueryIDs[product.id];
             }
             currency = product.price.sales.currency;
