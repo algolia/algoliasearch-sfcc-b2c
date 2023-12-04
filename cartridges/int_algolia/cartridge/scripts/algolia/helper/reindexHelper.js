@@ -135,13 +135,19 @@ function sendRetryableBatch(batch) {
                 }
             }
             logger.info('[Retryable batch] Removing records for product "' + objectIdToRemove + '"');
+            var removedRecords = 0;
             for (var i = batch.length - 1; i >= 0; --i) {
                 if (batch[i].body.objectID === objectIdToRemove) {
                     batch.splice(i, 1);
                     failedRecords++;
+                    removedRecords++;
                 }
             }
-            logger.info('[Retryable batch] Retrying batch...');
+            if (removedRecords === 0) {
+                logger.warn('[Retryable batch] could not remove any record. Not retrying the batch.');
+                break;
+            }
+            logger.info('[Retryable batch] Removed ' + removedRecords + ' records. Retrying batch...');
             result = algoliaIndexingAPI.sendMultiIndexBatch(batch);
         } catch(e) {
             // Error message is not JSON, ignoring
