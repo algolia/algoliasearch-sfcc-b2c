@@ -1,6 +1,7 @@
 <span id="algolia-insights"
     data-usertoken="${session.customer.ID}"
     data-userauthenticated="${session.customer.authenticated}"
+    data-trackingallowed="${session.trackingAllowed}"
     <iscomment>orderUUID is only present after a completed purchase (Order-Confirm)</iscomment>
     <isif condition="${pdict.orderUUID}">
         data-order="${JSON.stringify(pdict.order)}"
