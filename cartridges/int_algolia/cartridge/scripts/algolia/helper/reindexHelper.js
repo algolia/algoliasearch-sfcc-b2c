@@ -118,21 +118,36 @@ function sendRetryableBatch(batch) {
         ++attempt;
         try {
             var apiResponse = JSON.parse(result.getErrorMessage());
-            // When records are failing, Algolia returns the following:
-            // {"message":"Record at the position 6 objectID=008884303996M is too big size=11072/10000 bytes. Please have a look at [...]", "position":6,"objectID":"008884303996M","status":400}
-            if (!apiResponse.objectID || !apiResponse.message || !apiResponse.message.startsWith('Record at the position')) {
-                // No faulty record detected, nothing else to do
+            // When records are failing, Algolia returns the following (those are examples for records too big):
+            // - For Classic: {"message":"Record at the position 6 objectID=008884303996M is too big size=11072/10000 bytes. Please have a look at [...]", "position":6,"objectID":"008884303996M","status":400}
+            // - For Current: {"message":"Record 008884303996M is too big: size: 11072 byte(s), maximum allowed: 100000 byte(s). Please have a look at [...]","status":400}
+            if (!apiResponse.objectID && (!apiResponse.message || !apiResponse.message.indexOf('is too big') > 0)) {
+                // No identified objectID, and not an "is too big" error. Nothing else to do
                 break;
             }
-            logger.info('[Retryable batch] Removing records for product ' + apiResponse.objectID);
-            for (var i = batch.length - 1; i >= 0; --i) {
-                if (batch[i].body.objectID === apiResponse.objectID) {
-                    logger.info('[Retryable batch] Removing record for product ' + apiResponse.objectID + ' from the batch (index '+ batch[i].indexName + ')');
-                    batch.splice(i, 1);
-                    failedRecords++;
+            var objectIdToRemove;
+            if (apiResponse.objectID) {
+                objectIdToRemove = apiResponse.objectID
+            } else {
+                var match = apiResponse.message.match(/^Record (.*) is too big/);
+                if (match) {
+                    objectIdToRemove = match[1];
                 }
             }
-            logger.info('[Retryable batch] Retrying batch...');
+            logger.info('[Retryable batch] Removing records for product "' + objectIdToRemove + '"');
+            var removedRecords = 0;
+            for (var i = batch.length - 1; i >= 0; --i) {
+                if (batch[i].body.objectID === objectIdToRemove) {
+                    batch.splice(i, 1);
+                    failedRecords++;
+                    removedRecords++;
+                }
+            }
+            if (removedRecords === 0) {
+                logger.warn('[Retryable batch] could not remove any record. Not retrying the batch.');
+                break;
+            }
+            logger.info('[Retryable batch] Removed ' + removedRecords + ' records. Retrying batch...');
             result = algoliaIndexingAPI.sendMultiIndexBatch(batch);
         } catch(e) {
             // Error message is not JSON, ignoring
