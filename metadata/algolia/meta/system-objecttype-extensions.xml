@@ -140,9 +140,9 @@
                 <display-name xml:lang="x-default">InStock Threshold</display-name>
                 <description xml:lang="x-default">Stock Threshold</description>
                 <type>double</type>
-                <default-value>0.0</default-value>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
+                <default-value>0.0</default-value>
             </attribute-definition>
 
             <attribute-definition attribute-id="Algolia_AdditionalAttributes">
