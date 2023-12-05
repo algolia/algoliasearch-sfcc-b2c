@@ -39,6 +39,7 @@ function handleSettings() {
         algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
         algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
         algoliaData.setPreference('IndexPrefix', params.IndexPrefix.value);
+        algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
     } catch (error) {
         Logger.error(error);

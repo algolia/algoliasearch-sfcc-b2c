@@ -126,6 +126,18 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_EnableInsights </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.enableinsights', 'algolia', null)}" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.enableinsights.help', 'algolia', null)}</div>
+                    </td>
+                    <td class="table_detail w e s">
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('EnableInsights') ? "checked": ""} id="EnableInsights" name="EnableInsights" />
+                    </td>
+                </tr>
+
                 <iscomment> Algolia_EnableSSR </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">

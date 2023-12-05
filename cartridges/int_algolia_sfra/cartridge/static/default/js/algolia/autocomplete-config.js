@@ -117,7 +117,8 @@ function enableAutocomplete(config) {
                     },
                 ];
             },
-            insights: true,
+            // If insights is not enabled in the BM, let the value undefined, to rely on the Dashboard setting
+            insights: algoliaData.enableInsights ? true : undefined,
         });
 
         inputElement.addEventListener('keypress', function (event) {
