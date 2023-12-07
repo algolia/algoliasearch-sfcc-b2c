@@ -35,6 +35,7 @@ function handleSettings() {
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', params.ApplicationID.value);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
+        algoliaData.setSetOfStrings('AdditionalContentAttributes', params.AdditionalContentAttributes.value);
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
         algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
         algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
