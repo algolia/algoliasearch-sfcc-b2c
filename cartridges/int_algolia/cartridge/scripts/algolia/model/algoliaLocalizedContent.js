@@ -7,6 +7,15 @@ var AlgoliaContentConfig = require('*/cartridge/scripts/algolia/lib/algoliaConte
 
 var ACTION_ENDPOINT_CONTENT = 'Page-Show';
 
+/**
+ * Function get value of object property by attribute name.
+ * An attribute name can be complex and consist of several levels.
+ * Attribute names must be separated by dots.
+ * Example: primaryCategory.ID
+ * @param {dw.object.ExtensibleObject} extensibleObject - business object
+ * @param {string} attributeName - object attribute name
+ * @returns {string|boolean|number|null} - value
+ */
 function getAttributeValue(extensibleObject, attributeName) {
     var properties = attributeName.split('.');
     var result = properties.reduce(function (previousValue, currentProperty) {
@@ -20,6 +29,16 @@ function getAttributeValue(extensibleObject, attributeName) {
     return result;
 }
 
+/**
+ * Safely gets a custom attribute from a System Object.
+ * Since attempting to return a nonexistent custom attribute throws an error in SFCC,
+ * this is the safest way to check whether an attribute exists.
+ * @param {dw.object.CustomAttributes} customAttributes The CustomAttributes object, e.g. content.getCustom()
+ * @param {string} caKey The custom attribute's key whose value we want to return
+ * @returns {*} The custom attribute value if exists,
+ *              null if the custom attribute is defined but it has no value for this specific SO,
+ *              undefined if the custom attribute is not defined at all in BM
+ */
 function safelyGetCustomAttribute(customAttributes, caKey) {
     try {
         return customAttributes[caKey];
@@ -28,6 +47,9 @@ function safelyGetCustomAttribute(customAttributes, caKey) {
     }
 }
 
+/**
+ * Handler complex and calculated Content attributes
+ */
 var aggregatedValueHandlers = {
     url: function (content) {
         var pageURL = URLUtils.url(ACTION_ENDPOINT_CONTENT, 'cid', content.ID);
@@ -44,6 +66,16 @@ var aggregatedValueHandlers = {
     }
 };
 
+/**
+ * AlgoliaLocalizedContent class that represents a localized algoliaContent ready to be indexed
+ * @param {Object} parameters - model parameters
+ * @param {dw.content.Content} parameters.content - Content
+ * @param {string} parameters.locale - The requested locale
+ * @param {Array} parameters.attributeList list of attributes to be fetched
+ * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
+ * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
+ * @constructor
+ */
 function AlgoliaLocalizedContent(parameters) {
     request.setLocale(parameters.locale || 'default');
     this.objectID = parameters.content && parameters.content.ID ? parameters.content.ID : null;

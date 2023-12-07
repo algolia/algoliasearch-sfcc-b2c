@@ -9,6 +9,15 @@ const algoliaContentConfig = require('*/cartridge/scripts/algolia/lib/algoliaCon
 
 const ACTION_ENDPOINT_CONTENT = 'Page-Show';
 
+/**
+ * Function get value of content property by attribute name.
+ * An attribute name can be complex and consist of several levels.
+ * Attribute names must be separated by dots.
+ * Examle: primaryCategory.ID
+ * @param {dw.content.Content} content - content
+ * @param {string} contentAttributeName - content attribute name
+ * @returns {string|boolean|number|null} - value
+ */
 function getAttributeValue(content, contentAttributeName) {
     const properties = contentAttributeName.split('.');
     let result = properties.reduce((previousValue, currentProperty) => 
@@ -20,6 +29,15 @@ function getAttributeValue(content, contentAttributeName) {
     return result || null;
 }
 
+/**
+ * Function get localazed value of content property by attribute name.
+ * An attribute name can be complex and consist of several levels.
+ * Attribute names must be separated by dots.
+ * Examle: primaryCategory.ID
+ * @param {dw.content.Content} content - content
+ * @param {string} contentAttributeName - content attribute name
+ * @returns {Object} - value
+ */
 function getAttributeLocalizedValues(content, contentAttributeName) {
     const currentSites = Site.getCurrent();
     const siteLocales = currentSites.getAllowedLocales();
@@ -35,6 +53,16 @@ function getAttributeLocalizedValues(content, contentAttributeName) {
     return value;
 }
 
+/**
+ * Safely gets a custom attribute from a System Object.
+ * Since attempting to return a nonexistent custom attribute throws an error in SFCC,
+ * this is the safest way to check whether an attribute exists.
+ * @param {dw.object.CustomAttributes} customAttributes The CustomAttributes object, e.g. content.getCustom()
+ * @param {string} caKey The custom attribute's key whose value we want to return
+ * @returns {*} The custom attribute value if exists,
+ *              null if the custom attribute is defined but it has no value for this specific SO,
+ *              undefined if the custom attribute is not defined at all in BM
+ */
 function safelyGetCustomAttribute(customAttributes, caKey) {
     try {
         return customAttributes[caKey];
@@ -43,12 +71,31 @@ function safelyGetCustomAttribute(customAttributes, caKey) {
     }
 }
 
-const aggregatedValueHandlers = {
-    url: content => URLUtils.url(ACTION_ENDPOINT_CONTENT, 'cid', content.ID)?.toString() || null,
-    body: content => content.custom.body?.source || null,
-    order: () => null,
+/**
+ * Handler complex and calculated Content attributes
+ */
+var aggregatedValueHandlers = {
+    url: function (content) {
+        var pageURL = URLUtils.url(ACTION_ENDPOINT_CONTENT, 'cid', content.ID);
+        return pageURL ? pageURL.toString() : null;
+    },
+    body: function (content) {
+        if (content && content.custom && content.custom.body) {
+            return content.custom.body.source;
+        }
+        return null;
+    },
+    order: function () {
+        return null;
+    }
 };
 
+/**
+ * AlgoliaContent class that represents an algoliaContent Object
+ * @param {dw.content.Content} content content
+ * @param {Array} [fieldListOverride] (optional) if supplied, it overrides the regular list of attributes to be sent (default + customFields)
+ * @constructor
+ */
 function algoliaContent(content, fieldListOverride) {
     const algoliaFields = fieldListOverride || algoliaContentConfig.defaultAttributes.concat(algoliaData.getSetOfArray('CustomFields'));
 
