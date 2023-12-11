@@ -126,6 +126,21 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_EnableInsights </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.enable', 'algolia', null)}" />
+                        <a href="https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/building-the-search-ui/events/" target="_blank">
+                            <isprint value="${Resource.msg('algolia.label.preference.insights', 'algolia', null)}" />
+                        </a>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.enableinsights.help', 'algolia', null)}</div>
+                    </td>
+                    <td class="table_detail w e s">
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('EnableInsights') ? "checked": ""} id="EnableInsights" name="EnableInsights" />
+                    </td>
+                </tr>
+
                 <iscomment> Algolia_EnableSSR </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
