@@ -12,7 +12,7 @@
         "compile:fonts": "node bin/Makefile compileFonts",
         "lint:js": "sgmf-scripts --lint js",
         "upload": "sgmf-scripts --upload",
-        "uploadCartridge": "sgmf-scripts --uploadCartridge int_algolia && sgmf-scripts --uploadCartridge int_algolia_controllers && sgmf-scripts --uploadCartridge int_algolia_sfra && sgmf-scripts --uploadCartridge bm_algolia",
+        "uploadCartridge": "sgmf-scripts --uploadCartridge int_algolia && sgmf-scripts --uploadCartridge int_algolia_controllers && sgmf-scripts --uploadCartridge int_algolia_sfra && sgmf-scripts --uploadCartridge algolia_sg_changes && sgmf-scripts --uploadCartridge bm_algolia",
         "watch": "sgmf-scripts --watch",
         "watch:static": "sgmf-scripts --watch static"
     },
