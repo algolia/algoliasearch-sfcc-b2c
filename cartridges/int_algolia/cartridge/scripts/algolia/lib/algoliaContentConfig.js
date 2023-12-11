@@ -15,10 +15,6 @@ var attributeConfig = {
         attribute: 'description',
         localized: true
     },
-    folders: {
-        attribute: 'folders',
-        localized: false
-    },
     id: {
         attribute: 'ID',
         localized: false
@@ -49,10 +45,6 @@ var attributeConfig = {
     },
     pageKeywords: {
         attribute: 'pageKeywords',
-        localized: true
-    },
-    pageMetaTags: {
-        attribute: 'pageMetaTags',
         localized: true
     },
     pageTitle: {
