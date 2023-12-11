@@ -192,7 +192,7 @@ exports.process = function(content, parameters, stepExecution) {
             var locale = siteLocales[l];
             var indexName = algoliaData.calculateIndexName('contents', locale);
 
-            if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
+            if (paramIndexingMethod === 'fullContentReindex') indexName += '.tmp';
 
             let localizedContent = new algoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
             let splits = [];
