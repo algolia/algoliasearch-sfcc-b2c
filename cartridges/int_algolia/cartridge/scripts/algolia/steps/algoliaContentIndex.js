@@ -286,7 +286,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
 
     const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
 
-    if (paramIndexingMethod === 'fullCatalogReindex') {
+    if (paramIndexingMethod === 'fullContentReindex') {
         if (failurePercentage <= paramFailureThresholdPercentage) {
             reindexHelper.finishAtomicReindex('contents', siteLocales.toArray(), lastIndexingTasks);
         } else {
