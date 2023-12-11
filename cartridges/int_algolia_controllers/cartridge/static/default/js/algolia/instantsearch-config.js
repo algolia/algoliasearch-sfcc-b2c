@@ -31,7 +31,7 @@ function enableInstantSearch(config) {
     });
 
     if (algoliaData.enableInsights) {
-        const insightsMiddleware = instantsearch.widgets.createInsightsMiddleware();
+        const insightsMiddleware = instantsearch.middlewares.createInsightsMiddleware();
         search.use(insightsMiddleware);
     }
 
