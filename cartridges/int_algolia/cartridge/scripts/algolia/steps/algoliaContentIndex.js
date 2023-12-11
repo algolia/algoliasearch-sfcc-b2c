@@ -198,7 +198,6 @@ exports.process = function(content, parameters, stepExecution) {
             let splits = [];
             let splitterTag = parameters.splitterTag;
             if (attributesToSend.indexOf('body') >= 0 && splitterTag && localizedContent.body) {
-                logger.info('failed content', localizedContent.id);
                 let maxRecordBytes = algoliaSplitter.getMaxByteSize(localizedContent);
                 splits = algoliaSplitter.splitHtmlContent(localizedContent.body, maxRecordBytes, splitterTag);
                 for (let i = 0; i < splits.length; i++) {
