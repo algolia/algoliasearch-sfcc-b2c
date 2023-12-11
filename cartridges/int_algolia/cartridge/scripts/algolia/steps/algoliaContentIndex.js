@@ -247,7 +247,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         jobReport.chunksSent++;
 
         // Store Algolia indexing task IDs.
-        // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
+        // When performing a fullContentReindex, afterStep will wait for the last indexing tasks to complete.
         var taskIDs = result.object.body.taskID;
         Object.keys(taskIDs).forEach(function (taskIndexName) {
             lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
