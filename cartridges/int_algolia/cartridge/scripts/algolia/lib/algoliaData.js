@@ -16,6 +16,7 @@ const CATEGORIES_SEPARATOR = ' > ';
 const clientSideData = {
     "version": version,
     "enable": getPreference('Enable'),
+    "enableInsights": getPreference('EnableInsights'),
     "applicationID": getPreference('ApplicationID'),
     "searchApiKey": getPreference('SearchApiKey'),
     "locale": request.getLocale(),
@@ -66,6 +67,7 @@ const clientSideData = {
 //   AdditionalContentAttributes  ║ Any additional Content attributes                 ║ Set-of-string
 //   InStockThreshold             ║ Stock Threshold                                   ║ Double
 //   IndexPrefix                  ║ Optional prefix for the index name                ║ String
+//   EnableInsights         ║ Enables insights events on the Storefront               ║ Boolean
 //   EnableSSR                    ║ Enables server-side rendering of CLP results      ║ Boolean
 //  ══════════════════════════════╩═══════════════════════════════════════════════════╩═══════════════════════════
 //  Preferences stored in the XML file

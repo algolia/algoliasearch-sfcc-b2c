@@ -28,19 +28,12 @@ function enableInstantSearch(config) {
         indexName: productsIndex,
         searchClient: config.searchClient,
         initialUiState: initialUiState,
-        insights: {
-            insightsInitParams: {
-                // The default value of useCookie was changed to false starting with SearchInsights v2.
-                // This means that the anonymous user token will no longer be saved to a cookie and used throughout the session.
-                // Please see the documentation for more details:
-                // https://www.npmjs.com/package/search-insights
-                // https://www.algolia.com/doc/api-reference/widgets/insights/js/#widget-param-insightsinitparams
-                useCookie: false,
-                // You can set a userToken here explicitly (uncomment and edit):
-                // userToken: 'userToken',
-            }
-        },
     });
+
+    if (algoliaData.enableInsights) {
+        const insightsMiddleware = instantsearch.widgets.createInsightsMiddleware();
+        search.use(insightsMiddleware);
+    }
 
     if (document.querySelector('.cat-banner h1')) {
         search.addWidgets([

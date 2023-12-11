@@ -171,6 +171,15 @@ Setting this preference replaces the first two segments, the final index name be
                 <min-length>0</min-length>
             </attribute-definition>
 
+            <attribute-definition attribute-id="Algolia_EnableInsights">
+                <display-name xml:lang="x-default">Enable Insights Events</display-name>
+                <description xml:lang="x-default">When enabled, the Storefront sends insights events to Algolia: views, clicks, addToCart and purchases</description>
+                <type>boolean</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_EnableSSR">
                 <display-name xml:lang="x-default">Enable SSR</display-name>
                 <description xml:lang="x-default">Enables server-side rendering for CLP search results. Helps with SEO as CLP pages are no longer rendered with empty containers that are to be filled by client-side code, but increases page load times a tiny bit (which can be countered with page caching).</description>
@@ -212,6 +221,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_AdditionalAttributes"/>
                 <attribute attribute-id="Algolia_AdditionalContentAttributes"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
+                <attribute attribute-id="Algolia_EnableInsights"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
 
             </attribute-group>

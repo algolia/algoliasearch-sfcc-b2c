@@ -15,7 +15,7 @@ function enableInsights(appId, searchApiKey) {
             var objectID = getUrlParameter('objectID');
             var indexName = getUrlParameter('indexName');
             if (queryID && objectID && indexName) {
-                window.aa('convertedObjectIDsAfterSearch', {
+                window.aa('addedToCartObjectIDsAfterSearch', {
                     eventName: 'Product Add to cart',
                     index: indexName,
                     queryID: queryID,
@@ -43,7 +43,7 @@ function enableInsights(appId, searchApiKey) {
 
     document.addEventListener('click', function (event) {
         if ($(event.target).is('button.add-to-cart-global')) {
-            window.aa('convertedObjectIDsAfterSearch', {
+            window.aa('addedToCartObjectIDsAfterSearch', {
                 eventName: 'Global Add to cart',
                 index: lastIndexName,
                 queryID: lastQueryID,
