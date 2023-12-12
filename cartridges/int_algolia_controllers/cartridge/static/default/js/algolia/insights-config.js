@@ -10,37 +10,15 @@ function enableInsights(appId, searchApiKey) {
     var lastIndexName = null;
     var lastObjectID = null;
 
-    // when on product page
     document.addEventListener('click', function (event) {
-        if ($(event.target).is('button.add-to-cart')) {
-            // read data from URL
-            var queryID = getUrlParameter('queryID') || lastQueryID;
-            var objectID = getUrlParameter('objectID') || lastObjectID;
-            var indexName = getUrlParameter('indexName') || lastIndexName;
-            if (queryID && objectID && indexName) {
-                window.aa('addedToCartObjectIDsAfterSearch', {
-                    eventName: 'Product Add to cart',
-                    index: indexName,
-                    queryID: queryID,
-                    objectIDs: [objectID],
-                });
-            }
-        }
-    });
+        var queryID = getUrlParameter('queryID') || lastQueryID;
+        var objectID = getUrlParameter('objectID') || lastObjectID;
+        var indexName = getUrlParameter('indexName') || lastIndexName;
 
-    document.addEventListener('click', function (event) {
-        if ($(event.target).is('button#add-all-to-cart')) {
-            var queryID = getUrlParameter('queryID') || lastQueryID;
-            var objectID = getUrlParameter('objectID') || lastObjectID;
-            var indexName = getUrlParameter('indexName') || lastIndexName;
-            if (queryID && objectID && indexName) {
-                window.aa('addedToCartObjectIDsAfterSearch', {
-                    eventName: 'Global Add to cart',
-                    index: indexName,
-                    queryID: queryID,
-                    objectIDs: [objectID],
-                });
-            }
+        if ($(event.target).is('button.add-to-cart')) {
+            handleCartAction('Product Add to cart', queryID, objectID, indexName);
+        } else if ($(event.target).is('button#add-all-to-cart')) {
+            handleCartAction('Global Add to cart', queryID, objectID, indexName);
         }
     });
 
@@ -56,6 +34,24 @@ function enableInsights(appId, searchApiKey) {
             lastIndexName = $(insightsTarget).data('index-name');
         }
     });
+
+    /**
+     * Send an addedToCart event
+     * @param {string} eventName event name
+     * @param {string} queryID query ID
+     * @param {string} objectID product ID
+     * @param {string} indexName index name
+     */
+    function handleCartAction(eventName, queryID, objectID, indexName) {
+        if (queryID && objectID && indexName) {
+            window.aa('addedToCartObjectIDsAfterSearch', {
+                eventName: eventName,
+                index: indexName,
+                queryID: queryID,
+                objectIDs: ['' + objectID],
+            });
+        }
+    }
 
     /**
      * Finds Insights target
