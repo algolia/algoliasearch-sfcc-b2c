@@ -87,7 +87,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
             }
             currency = product.price.sales.currency;
 
-            objectIDs.push(product.id);
+            objectIDs.push('' + product.id);
             objectData.push(productInfo);
             if (trackingAllowed) {
                 trackedQueryIDs[product.id] = queryID;
