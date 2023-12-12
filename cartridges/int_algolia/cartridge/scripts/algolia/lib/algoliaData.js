@@ -26,7 +26,7 @@ const clientSideData = {
     "categoriesIndex": calculateIndexName('categories'),
     "quickViewUrlBase": URLUtils.url('Product-ShowQuickView').toString(),
     "strings": {
-        "placeholder": Resource.msg('label.header.searchwatermark', 'common', null),
+        "placeholder": Resource.msg('label.header.searchwatermark', 'common', ''),
         "moreResults": Resource.msg('button.more', 'algolia', null),
         "noResults": Resource.msg('search.noResults','algolia',null),
         "result": Resource.msg('search.result','algolia',null),
