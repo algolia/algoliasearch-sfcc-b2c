@@ -191,9 +191,7 @@ exports.process = function(content, parameters, stepExecution) {
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var indexName = algoliaData.calculateIndexName('contents', locale);
-
             if (paramIndexingMethod === 'fullContentReindex') indexName += '.tmp';
-
             let localizedContent = new algoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
             let splits = [];
             let splitterTag = parameters.splitterTag;
@@ -201,7 +199,12 @@ exports.process = function(content, parameters, stepExecution) {
                 let maxRecordBytes = algoliaSplitter.getMaxByteSize(localizedContent);
                 splits = algoliaSplitter.splitHtmlContent(localizedContent.body, maxRecordBytes, splitterTag);
                 for (let i = 0; i < splits.length; i++) {
-                    var splittedContent = Object.assign({}, localizedContent);
+                    var splittedContent = {};
+                    for (var key in localizedContent) {
+                        if (localizedContent.hasOwnProperty(key)) {
+                            splittedContent[key] = localizedContent[key];
+                        }
+                    }
                     splittedContent.id = localizedContent.id + '_' + i;
                     splittedContent.objectID = localizedContent.id + '_' + i;
                     splittedContent.order = i;

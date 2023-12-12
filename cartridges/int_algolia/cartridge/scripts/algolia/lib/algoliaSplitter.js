@@ -1,8 +1,8 @@
 'use strict';
 
-const Bytes = require('dw/util/Bytes');
-const StringUtils = require('dw/util/StringUtils');
-const DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
+var Bytes = require('dw/util/Bytes');
+var StringUtils = require('dw/util/StringUtils');
+var DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
 
 /**
  * Splits HTML content into multiple records based on a specified HTML element.
@@ -13,20 +13,22 @@ const DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
  * @returns {string[]} Array of split content pieces.
  */
 function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
-    const split = [];
-    const splitterBegin = `<${splitterElement}>`;
-    const sections = htmlContent.split(splitterBegin);
+    var split = [];
+    var splitterBegin = '<' + splitterElement + '>';
+    var sections = htmlContent.split(splitterBegin);
 
-    sections.forEach(section => {
-        section = StringUtils.trim(`${splitterBegin}${section}`) || '';
+    sections.forEach(function(section) {
+        section = StringUtils.trim(splitterBegin + section) || '';
 
         if (!section.trim()) {
             return;
         }
 
-        const sectionSize = new Bytes(section).getLength();
+        var sectionSize = new Bytes(section).getLength();
         if (sectionSize > maxByteSize) {
-            splitLargeContent(section, maxByteSize).forEach(subsection => split.push(subsection));
+            splitLargeContent(section, maxByteSize).forEach(function(subsection) {
+                split.push(subsection);
+            });
         } else {
             split.push(section);
         }
@@ -43,13 +45,13 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
  * @returns {string[]} Array of split content.
  */
 function splitLargeContent(content, maxByteSize) {
-    const splitContent = [];
-    const parts = content.split(' ');
-    let currentPart = '';
+    var splitContent = [];
+    var parts = content.split(' ');
+    var currentPart = '';
 
-    parts.forEach(part => {
-        const partBytes = new Bytes(part).getLength();
-        const currentPartBytes = new Bytes(currentPart).getLength();
+    parts.forEach(function(part) {
+        var partBytes = new Bytes(part).getLength();
+        var currentPartBytes = new Bytes(currentPart).getLength();
 
         if ((currentPartBytes + partBytes) > maxByteSize) {
             splitContent.push(currentPart);
@@ -73,15 +75,15 @@ function splitLargeContent(content, maxByteSize) {
  * @returns {number} Max byte size.
  */
 function getMaxByteSize(content) {
-    const tempBody = content.body;
+    var tempBody = content.body;
     delete content.body;
-    const contentSize = new Bytes(JSON.stringify(content)).getLength() + 250;
+    var contentSize = new Bytes(JSON.stringify(content)).getLength() + 250;
     content.body = tempBody;
 
     return DEFAULT_MAX_RECORD_BYTES - contentSize;
 }
 
 module.exports = {
-    splitHtmlContent,
-    getMaxByteSize
+    splitHtmlContent: splitHtmlContent,
+    getMaxByteSize: getMaxByteSize
 };
