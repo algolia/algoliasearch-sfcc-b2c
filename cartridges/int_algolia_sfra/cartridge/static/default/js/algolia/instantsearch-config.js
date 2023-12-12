@@ -344,7 +344,7 @@ function enableInstantSearch(config) {
      * Builds an InstantSearch Panel widget with the supplied parameters
      * @param {string} attribute Attribute
      * @param {string} panelTitle Title of the Panel
-     * @returns {Object} A new InstantSearh Panel
+     * @returns {Object} A new InstantSearch Panel
      */
     function withPanel(attribute, panelTitle) {
         return instantsearch.widgets.panel({

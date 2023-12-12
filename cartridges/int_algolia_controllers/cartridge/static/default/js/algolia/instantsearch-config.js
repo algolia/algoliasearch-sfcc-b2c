@@ -31,7 +31,7 @@ function enableInstantSearch(config) {
     });
 
     if (algoliaData.enableInsights) {
-        const insightsMiddleware = instantsearch.widgets.createInsightsMiddleware();
+        const insightsMiddleware = instantsearch.middlewares.createInsightsMiddleware();
         search.use(insightsMiddleware);
     }
 
@@ -290,26 +290,47 @@ function enableInstantSearch(config) {
 
     search.start();
 
+    /**
+     * Generates a menu with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
     function hierarchicalMenuWithPanel(options) {
         return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(options)
     }
 
+    /**
+     * Builds a refinement list with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
     function refinementListWithPanel(options) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(options)
     }
 
+    /**
+     * Builds a range input with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
     function rangeInputWithPanel(options) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.rangeInput)(options)
     }
 
+    /**
+     * Builds an InstantSearch Panel widget with the supplied parameters
+     * @param {string} attribute Attribute
+     * @param {string} panelTitle Title of the Panel
+     * @returns {Object} A new InstantSearch Panel
+     */
     function withPanel(attribute, panelTitle) {
         return instantsearch.widgets.panel({
             hidden: function(options) {
                 var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
-                var facet = facets.find(function(facet) { return facet.name === attribute });
+                var facet = facets.find(function(facet) { return facet.name === attribute }); // eslint-disable-line no-shadow
                 var facetExists = !!facet;
                 return !facetExists; // hides panel if not facets selectable
-              },
+            },
             templates: {
                 header(options, { html }) {
                     return html`
@@ -325,7 +346,7 @@ function enableInstantSearch(config) {
                 header: 'card-header col-sm-12',
                 body: 'card-body content value',
                 footer: 'card-footer',
-              }
+            }
 
         })
     }

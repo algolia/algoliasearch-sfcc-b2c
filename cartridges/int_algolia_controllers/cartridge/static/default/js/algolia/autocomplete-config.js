@@ -68,19 +68,19 @@ function enableAutocomplete(config) {
 
                                 return createElement("div", { class: "product-suggestion" },
                                     createElement("a", {
-                                            class: "product-link",
-                                            href: newURL,
-                                        },
-                                        createElement("div", { class: "product-image" },
-                                            createElement("img", { src: item.firstImage.dis_base_link })
-                                        ),
-                                        createElement("div", { class: "product-details" },
-                                            createElement("div", { class: "product-name" }, components.Highlight({
-                                                hit: item,
-                                                attribute: "name",
-                                                tagName: "em"
-                                            }))
-                                        )
+                                        class: "product-link",
+                                        href: newURL,
+                                    },
+                                    createElement("div", { class: "product-image" },
+                                        createElement("img", { src: item.firstImage.dis_base_link })
+                                    ),
+                                    createElement("div", { class: "product-details" },
+                                        createElement("div", { class: "product-name" }, components.Highlight({
+                                            hit: item,
+                                            attribute: "name",
+                                            tagName: "em"
+                                        }))
+                                    )
                                     )
                                 );
                             },
