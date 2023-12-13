@@ -3,6 +3,10 @@
 var Bytes = require('dw/util/Bytes');
 var StringUtils = require('dw/util/StringUtils');
 var DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
+var RESTRICTED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 'button',
+    'canvas', 'command', 'datalist', 'dialog', 'embed', 'form', 'frame', 'frameset', 'iframe',
+    'image', 'input', 'map', 'noembed', 'noscript', 'object', 'picture', 'script', 'style',
+    'svg', 'template', 'textarea', 'video'];
 
 /**
  * Splits HTML content into multiple records based on a specified HTML element.
@@ -23,6 +27,14 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
         if (!section.trim()) {
             return;
         }
+
+        //remove restricted tags and their content
+        RESTRICTED_TAGS.forEach(function(tag) {
+            section = section.replace(new RegExp('<' + tag + '.*?' + tag + '>', 'g'), '');
+        });
+
+        //remove all HTML tags
+        section = section.replace(/<[^>]*>/g, '');
 
         var sectionSize = new Bytes(section).getLength();
         if (sectionSize > maxByteSize) {
