@@ -3,6 +3,7 @@
 var Bytes = require('dw/util/Bytes');
 var StringUtils = require('dw/util/StringUtils');
 var DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
+var SAFETY_MARGIN = 250; // expressed in bytes
 var RESTRICTED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 'button',
     'canvas', 'command', 'datalist', 'dialog', 'embed', 'form', 'frame', 'frameset', 'iframe',
     'image', 'input', 'map', 'noembed', 'noscript', 'object', 'picture', 'script', 'style',
@@ -89,7 +90,7 @@ function splitLargeContent(content, maxByteSize) {
 function getMaxByteSize(content) {
     var tempBody = content.body;
     delete content.body;
-    var contentSize = new Bytes(JSON.stringify(content)).getLength() + 250;
+    var contentSize = new Bytes(JSON.stringify(content)).getLength() + SAFETY_MARGIN;
     content.body = tempBody;
 
     return DEFAULT_MAX_RECORD_BYTES - contentSize;
