@@ -345,16 +345,15 @@
                         {
                             "@name": "indexingMethod",
                             "@type": "string",
-                            "description": "'partialRecordUpdate': only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created. 'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data (without removing stale/deleted records). 'fullContentReindex': reindex all contents (incl. removing stale records).",
+                            "description": "'fullRecordUpdate': replace the entire record (or create new records) in the index with the specified data (without removing stale/deleted records). 'fullContentReindex': reindex all contents (incl. removing stale records).",
                             "@required": "true",
                             "enum-values": {
                                 "value": [
                                     "fullContentReindex",
-                                    "fullRecordUpdate",
-                                    "partialRecordUpdate"
+                                    "fullRecordUpdate"
                                 ]
                             },
-                            "default-value": "partialRecordUpdate"
+                            "default-value": "fullContentReindex"
                         },
                         {
                             "@name": "failureThresholdPercentage",
