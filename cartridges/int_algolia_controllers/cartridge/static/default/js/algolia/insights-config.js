@@ -6,6 +6,26 @@
  * @param {string} searchApiKey Search API Key
  */
 function enableInsights(appId, searchApiKey) {
+    const insightsData = document.querySelector('#algolia-insights');
+
+    let userToken;
+    let authenticatedUserToken;
+
+    const dwanonymousCookieMatch = document.cookie.match(/dwanonymous_\w*=(\w*);/);
+    if (dwanonymousCookieMatch) {
+        userToken = dwanonymousCookieMatch[1];
+    }
+    if (insightsData && insightsData.dataset.userauthenticated === 'true') {
+        authenticatedUserToken = insightsData.dataset.usertoken;
+    }
+
+    window.aa('init', {
+        appId,
+        apiKey: searchApiKey,
+        userToken,
+        authenticatedUserToken,
+    });
+
     var lastQueryID = null;
     var lastIndexName = null;
     var lastObjectID = null;
