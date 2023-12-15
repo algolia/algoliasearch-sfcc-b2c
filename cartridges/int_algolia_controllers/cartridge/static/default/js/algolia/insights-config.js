@@ -4,8 +4,9 @@
  * Configures Insights
  * @param {string} appId Application ID
  * @param {string} searchApiKey Search API Key
+ * @param {string} productsIndex Products index name
  */
-function enableInsights(appId, searchApiKey) {
+function enableInsights(appId, searchApiKey, productsIndex) {
     const insightsData = document.querySelector('#algolia-insights');
 
     let userToken;
@@ -33,7 +34,7 @@ function enableInsights(appId, searchApiKey) {
     document.addEventListener('click', function (event) {
         var queryID = getUrlParameter('queryID') || lastQueryID;
         var objectID = getUrlParameter('objectID') || lastObjectID;
-        var indexName = getUrlParameter('indexName') || lastIndexName;
+        var indexName = getUrlParameter('indexName') || lastIndexName || productsIndex;
 
         if ($(event.target).is('button.add-to-cart')) {
             handleCartAction('Product Add to cart', queryID, objectID, indexName);
