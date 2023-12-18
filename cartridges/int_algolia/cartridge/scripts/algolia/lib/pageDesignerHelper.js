@@ -81,7 +81,7 @@ function getAttributeDefinitions (pageMetaDefinition) {
 
     pageMetaDefinition.attribute_definition_groups.forEach(function(group) {
         group.attribute_definitions.forEach(function(definition) {
-          attributeDefinitions.push(definition);
+            attributeDefinitions.push(definition);
         });
     });
 
