@@ -176,8 +176,8 @@ exports.read = function(parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {Array} an array that contains one AlgoliaOperation per locale:
- *                  [ "action": "addObject", "indexName": "sfcc_contents_en_US", body: { "id": "008884303989M", "name": "Fitted Shirt" },
- *                    "action": "addObject", "indexName": "sfcc_contents_fr_FR", body: { "id": "008884303989M", "name": "Chemise ajustée" } ]
+ *                  [ "action": "addObject", "indexName": "sfcc_contents_en_US", body: { "id": "terms_1", "name": "Terms" },
+ *                    "action": "addObject", "indexName": "sfcc_contents_fr_FR", body: { "id": "new_sales", "name": "New Sales" } ]
  */
 exports.process = function(content, parameters, stepExecution) {
 
@@ -205,9 +205,9 @@ exports.process = function(content, parameters, stepExecution) {
                             splittedContent[key] = localizedContent[key];
                         }
                     }
-                    splittedContent.id = localizedContent.id + '_' + i;
-                    splittedContent.objectID = localizedContent.id + '_' + i;
-                    splittedContent.order = i;
+                    splittedContent.objectID = localizedContent.objectID + '_' + i;
+                    splittedContent.id = localizedContent.id;
+                    splittedContent.algolia_chunk_order = i;
                     splittedContent.body = splits[i];
                     algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, splittedContent, indexName));
                 }

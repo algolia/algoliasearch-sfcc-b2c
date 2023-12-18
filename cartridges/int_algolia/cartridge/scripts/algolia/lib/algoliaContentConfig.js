@@ -1,6 +1,6 @@
 'use strict';
 
-var defaultAttributes = ['id', 'name', 'description', 'url', 'body', 'classificationFolder', 'page', 'order'];
+var defaultAttributes = ['id', 'name', 'description', 'url', 'body', 'page']; 
 
 var attributeConfig = {
     body: {
@@ -23,20 +23,8 @@ var attributeConfig = {
         attribute: 'name',
         localized: true
     },
-    order: {
+    algolia_chunk_order: {
         attribute: 'order',
-        localized: false
-    },
-    online: {
-        attribute: 'online',
-        localized: false
-    },
-    onlineFlag: {
-        attribute: 'onlineFlag',
-        localized: false
-    },
-    page: {
-        attribute: 'page',
         localized: false
     },
     pageDescription: {
@@ -54,26 +42,6 @@ var attributeConfig = {
     url: {
         attribute: 'url',
         localized: true
-    },
-    searchable: {
-        attribute: 'searchable',
-        localized: false
-    },
-    searchableFlag: {
-        attribute: 'searchableFlag',
-        localized: false
-    },
-    siteMapChangeFrequency: {
-        attribute: 'siteMapChangeFrequency',
-        localized: false
-    },
-    siteMapIncluded: {
-        attribute: 'siteMapIncluded',
-        localized: false
-    },
-    siteMapPriority: {
-        attribute: 'siteMapPriority',
-        localized: false
     },
     template: {
         attribute: 'template',

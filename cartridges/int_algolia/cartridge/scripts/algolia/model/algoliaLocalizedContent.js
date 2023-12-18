@@ -56,12 +56,21 @@ var aggregatedValueHandlers = {
         return pageURL ? pageURL.toString() : null;
     },
     body: function (content) {
+        var pageDesignerContent;
+
+        if (content.isPage()) {
+            var pageDesignerHelper = require('*/cartridge/scripts/algolia/lib/pageDesignerHelper');
+            var body = pageDesignerHelper.getContainerContent(content, 'pages');
+            return body;
+        }
+
         if (content && content.custom && content.custom.body) {
             return content.custom.body.source;
         }
         return null;
     },
-    order: function () {
+
+    algolia_chunk_order: function () {
         return null;
     }
 };
