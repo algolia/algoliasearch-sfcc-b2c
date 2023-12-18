@@ -23,7 +23,7 @@ function isIndexableComponent(component) {
 }
 
 /**
- * Retrieves the content of a container.
+ * Retrieves the content of a container (Works Recursively).
  *
  * @param {Object} container - The container from which to retrieve content.
  * @param {string} type - The type of the container.
