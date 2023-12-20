@@ -368,8 +368,7 @@
                             "@type": "string",
                             "description": "The tag used to split the content into chunks. If not specified, splitment will not work.",
                             "@required": false,
-                            "@trim": true,
-                            "default-value": "h2"
+                            "@trim": true
                         }
                     ]
                 },

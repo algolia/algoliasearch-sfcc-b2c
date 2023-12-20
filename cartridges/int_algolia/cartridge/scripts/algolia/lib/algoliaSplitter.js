@@ -4,7 +4,7 @@ var Bytes = require('dw/util/Bytes');
 var StringUtils = require('dw/util/StringUtils');
 var DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
 var SAFETY_MARGIN = 250; // expressed in bytes
-var RESTRICTED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 'button',
+var IGNORED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 'button',
     'canvas', 'command', 'datalist', 'dialog', 'embed', 'form', 'frame', 'frameset', 'iframe',
     'image', 'input', 'map', 'noembed', 'noscript', 'object', 'picture', 'script', 'style',
     'svg', 'template', 'textarea', 'video'];
@@ -30,7 +30,7 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
         }
 
         //remove restricted tags and their content
-        RESTRICTED_TAGS.forEach(function(tag) {
+        IGNORED_TAGS.forEach(function(tag) {
             section = section.replace(new RegExp('<' + tag + '.*?' + tag + '>', 'g'), '');
         });
 
@@ -84,7 +84,7 @@ function splitLargeContent(content, maxByteSize) {
 /**
  * Calculates the max byte size of a record.
  *
- * @param {dw.content.Content} content - Content object.
+ * @param {Object} content - Content object.
  * @returns {number} Max byte size.
  */
 function getMaxByteSize(content) {

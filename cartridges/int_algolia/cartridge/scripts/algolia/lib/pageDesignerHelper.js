@@ -34,6 +34,7 @@ function getContainerContent(container, type) {
     var contentArr = [];
     var typeId;
 
+    // We are fetching predefined metadata for the page type that is created by developers
     var pageMetaDefinition = require('*/cartridge/experience/' + type + '/' + page.typeID.replace(/\./g, '/') + '.json');
     var attributeDefinitions = [];
     var regionDefinitions = [];
@@ -44,7 +45,7 @@ function getContainerContent(container, type) {
     for (var i = 0; i < attributeDefinitions.length; i++) {
         var attribute_definition = attributeDefinitions[i];
         if (isIndexableComponent(attribute_definition)) {
-            var content = getAttibuteContent(page, attribute_definition);
+            var content = getAttributeContent(page, attribute_definition);
             if (content) {
                 contentArr.push(content);
             }
@@ -72,7 +73,7 @@ function getContainerContent(container, type) {
  * @param {Object} pageMetaDefinition - The page meta definition to retrieve attribute definitions from.
  * @returns {Array} An array of attribute definitions.
  */
-function getAttributeDefinitions (pageMetaDefinition) {
+function getAttributeDefinitions(pageMetaDefinition) {
     var attributeDefinitions = [];
 
     if (!pageMetaDefinition.attribute_definition_groups) {
@@ -109,7 +110,7 @@ function getRegionDefinitons (pageMetaDefinition) {
  * @param {Object} attribute_definition - The definition of the attribute to retrieve.
  * @returns {string} The content of the attribute.
  */
-function getAttibuteContent (component, attribute_definition) {
+function getAttributeContent (component, attribute_definition) {
     var content = component.getAttribute(attribute_definition.id);
     return content;
 }
