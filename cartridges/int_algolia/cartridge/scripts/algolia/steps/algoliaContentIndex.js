@@ -5,10 +5,10 @@ var ContentSearchModel = require('dw/content/ContentSearchModel');
 var logger;
 
 // job step parameters
-var paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
+var paramAttributeListOverride, paramFailureThresholdPercentage;
 
 // Algolia requires
-var algoliaData, algoliaLocalizedContent, algoliaContentConfig, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter;
+var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter;
 var indexingOperation;
 var fullRecordUpdate = false;
 
@@ -18,23 +18,6 @@ var jobReport;
 var contents = [], siteLocales, nonLocalizedAttributes = [], attributesToSend, count;
 var lastIndexingTasks = {};
 
-/*
- * Rough algorithm of chunk-oriented script module execution:
- *
- *  counter = 0
- *  beforeStep() - executed before starting the job step, initialization
- *    repeat until counter reaches getTotalCount() {
- *         create new thread {
- *             beforeChunk() - executed before each chunk
- *             read() - repeat until chunkSize, each run reads one content
- *             process() - repeat until chunkSize, each run processes one content
- *             write() - executed one time, sends all contents from the chunk at once
- *             counter += chunkSize
- *             afterChunk() - executed after each chunk
- *         }
- *     }
- *     afterStep() - executed after the job step finishes
- */
 
 /**
  * before-step-function (steptypes.json)
@@ -45,7 +28,7 @@ var lastIndexingTasks = {};
  */
 exports.beforeStep = function(parameters, stepExecution) {
     algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    algoliaLocalizedContent = require('*/cartridge/scripts/algolia/model/algoliaLocalizedContent');
+    AlgoliaLocalizedContent = require('*/cartridge/scripts/algolia/model/algoliaLocalizedContent');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
@@ -62,7 +45,6 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- parameters --- */
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
-    paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullContentReindex'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
 
     /* --- attributeListOverride parameter --- */
@@ -80,21 +62,8 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('attributeListOverride parameter: ' + paramAttributeListOverride);
     logger.info('Actual attributes to be sent: ' + JSON.stringify(attributesToSend));
 
-
-    /* --- indexingMethod parameter --- */
-    switch (paramIndexingMethod) {
-        case 'fullRecordUpdate':
-        case 'fullContentReindex':
-            indexingOperation = 'addObject';
-            fullRecordUpdate = true;
-            break;
-        case 'partialRecordUpdate':
-        default:
-            indexingOperation = 'partialUpdateObject';
-            break;
-    }
-    logger.info('indexingMethod parameter: ' + paramIndexingMethod);
-
+    indexingOperation = 'addObject';
+    fullRecordUpdate = true;
 
     /* --- non-localized attributes --- */
     Object.keys(algoliaContentConfig.attributeConfig).forEach(function(attributeName) {
@@ -114,24 +83,21 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
         stepID: stepExecution.getStepID(),
-        indexingMethod: paramIndexingMethod,
+        indexingMethod: 'fullContentReindex',
     });
 
-    /* --- removing any leftover temporary indices --- */
-    if (paramIndexingMethod === 'fullContentReindex') {
-        try {
-            logger.info('Deleting existing temporary indices...');
-            var deletionTasks = reindexHelper.deleteTemporaryIndices('contents', siteLocales.toArray());
-            reindexHelper.waitForTasks(deletionTasks);
-            logger.info('Temporary indices deleted. Copying index settings from production and starting indexing...');
-            reindexHelper.copySettingsFromProdIndices('contents', siteLocales.toArray());
-        } catch (e) {
-            jobReport.endTime = new Date();
-            jobReport.error = true;
-            jobReport.errorMessage = 'Failed to delete temporary indices: ' + e.message;
-            jobReport.writeToCustomObject();
-            throw e;
-        }
+    try {
+        logger.info('Deleting existing temporary indices...');
+        var deletionTasks = reindexHelper.deleteTemporaryIndices('contents', siteLocales.toArray());
+        reindexHelper.waitForTasks(deletionTasks);
+        logger.info('Temporary indices deleted. Copying index settings from production and starting indexing...');
+        reindexHelper.copySettingsFromProdIndices('contents', siteLocales.toArray());
+    } catch (e) {
+        jobReport.endTime = new Date();
+        jobReport.error = true;
+        jobReport.errorMessage = 'Failed to delete temporary indices: ' + e.message;
+        jobReport.writeToCustomObject();
+        throw e;
     }
 
 
@@ -142,7 +108,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     apiContentSearchModel.setFolderID('xxx'); // a random id, doesn't matter and it is the tricky part
     apiContentSearchModel.search();
     contents = apiContentSearchModel.getContent();
-    count = Number(apiContentSearchModel.getCount());
+    count = apiContentSearchModel.getCount();
     logger.info('failureThresholdPercentage parameter: ' + paramFailureThresholdPercentage);
     logger.info('Starting indexing...')
 }
@@ -187,12 +153,12 @@ exports.process = function(content, parameters, stepExecution) {
         var algoliaOperations = [];
 
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-        var baseModel = new algoliaLocalizedContent({ content: content, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
+        var baseModel = new AlgoliaLocalizedContent({ content: content, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
         for (let l = 0; l < siteLocales.size(); ++l) {
             var locale = siteLocales[l];
             var indexName = algoliaData.calculateIndexName('contents', locale);
-            if (paramIndexingMethod === 'fullContentReindex') indexName += '.tmp';
-            let localizedContent = new algoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+            indexName += '.tmp';
+            let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
             let splits = [];
             let splitterTag = parameters.splitterTag;
             if (attributesToSend.indexOf('body') >= 0 && localizedContent.body) {
@@ -289,22 +255,13 @@ exports.afterStep = function(success, parameters, stepExecution) {
 
     const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
 
-    if (paramIndexingMethod === 'fullContentReindex') {
-        if (failurePercentage <= paramFailureThresholdPercentage) {
-            reindexHelper.finishAtomicReindex('contents', siteLocales.toArray(), lastIndexingTasks);
-        } else {
-            // don't proceed with the atomic reindexing
-            jobReport.error = true;
-            jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
-                 paramFailureThresholdPercentage + '%). Not moving temporary indices to production. Check the logs for details.';
-        }
-    } else if (failurePercentage > paramFailureThresholdPercentage) {
+    if (failurePercentage <= paramFailureThresholdPercentage) {
+        reindexHelper.finishAtomicReindex('contents', siteLocales.toArray(), lastIndexingTasks);
+    } else {
+        // don't proceed with the atomic reindexing
         jobReport.error = true;
         jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
-            paramFailureThresholdPercentage + '%). Check the logs for details.';
-    } else if (jobReport.chunksFailed > 0) {
-        jobReport.error = true;
-        jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
+             paramFailureThresholdPercentage + '%). Not moving temporary indices to production. Check the logs for details.';
     }
 
     jobReport.endTime = new Date();
