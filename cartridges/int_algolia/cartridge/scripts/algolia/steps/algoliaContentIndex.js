@@ -105,7 +105,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     var apiContentSearchModel = new ContentSearchModel();
     apiContentSearchModel.setRecursiveFolderSearch(true);
     apiContentSearchModel.setFilteredByFolder(false);
-    apiContentSearchModel.setFolderID('xxx'); // a random id, doesn't matter and it is the tricky part
+    apiContentSearchModel.setFolderID('root');
     apiContentSearchModel.search();
     contents = apiContentSearchModel.getContent();
     count = apiContentSearchModel.getCount();
