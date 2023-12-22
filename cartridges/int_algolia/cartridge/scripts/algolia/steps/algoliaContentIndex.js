@@ -8,7 +8,7 @@ var logger;
 var paramAttributeListOverride, paramFailureThresholdPercentage;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter;
+var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig;
 var indexingOperation;
 var fullRecordUpdate = false;
 
