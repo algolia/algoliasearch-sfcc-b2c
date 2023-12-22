@@ -63,9 +63,9 @@ function getContainerContent(container, type) {
         }
     }
 
-    var indexableContet = contentArr.join('</div>');
+    var indexableContent = contentArr.join('</div>');
 
-    return indexableContet;
+    return indexableContent;
 }
 
 /**
