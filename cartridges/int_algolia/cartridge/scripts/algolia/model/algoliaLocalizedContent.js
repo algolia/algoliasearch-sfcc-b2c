@@ -68,10 +68,6 @@ var aggregatedValueHandlers = {
             return content.custom.body.source;
         }
         return null;
-    },
-
-    algolia_chunk_order: function () {
-        return null;
     }
 };
 
