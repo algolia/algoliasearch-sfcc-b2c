@@ -123,7 +123,7 @@ Can perform full records updates or partial records updates. See the 'indexingMe
                 <description>Index all searchable contents assigned to the selected site to Algolia. The list of indexed attributes is configurable.
 It highly depends content search index on salesforce, so do not forget to trigger search index after content update or enable incremental update.</description>
                 <parameters>
-                    <parameter name="splitterTag">p</parameter>
+                    <parameter name="splitterTag">h</parameter>
                 </parameters>
             </step>
         </flow>
