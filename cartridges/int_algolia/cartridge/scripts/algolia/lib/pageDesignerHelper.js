@@ -34,7 +34,8 @@ function getContainerContent(container, type) {
     var contentArr = [];
     var typeId;
 
-    // We are fetching predefined metadata for the page type that is created by developers, for detail: https://developer.salesforce.com/docs/commerce/b2c-commerce/guide/b2c-dev-for-page-designer.html#create-page-and-component-types
+    // We are fetching predefined metadata for the page type that is created by developers, 
+    // for the detail: https://developer.salesforce.com/docs/commerce/b2c-commerce/guide/b2c-dev-for-page-designer.html#create-page-and-component-types
     var pageMetaDefinition = require('*/cartridge/experience/' + type + '/' + page.typeID.replace(/\./g, '/') + '.json');
     var attributeDefinitions = [];
     var regionDefinitions = [];
