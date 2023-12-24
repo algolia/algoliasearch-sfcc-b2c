@@ -33,7 +33,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
-    contentFilter = require('*/cartridge/scripts/algolia/filters/contentFilter');
     algoliaContentConfig = require('*/cartridge/scripts/algolia/lib/algoliaContentConfig');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
     algoliaSplitter = require('*/cartridge/scripts/algolia/lib/algoliaSplitter');
@@ -149,44 +148,42 @@ exports.process = function(content, parameters, stepExecution) {
 
     jobReport.processedItems++; // counts towards the total number of contents processed
 
-    if (contentFilter.isInclude(content)) {
-        var algoliaOperations = [];
+    var algoliaOperations = [];
+    // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
+    var baseModel = new AlgoliaLocalizedContent({ content: content, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
 
-        // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-        var baseModel = new AlgoliaLocalizedContent({ content: content, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
-        for (let l = 0; l < siteLocales.size(); ++l) {
-            var locale = siteLocales[l];
-            var indexName = algoliaData.calculateIndexName('contents', locale);
-            indexName += '.tmp';
-            let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
-            let splits = [];
-            let splitterTag = parameters.splitterTag;
-            if (attributesToSend.indexOf('body') >= 0 && localizedContent.body) {
-                let maxRecordBytes = algoliaSplitter.getMaxByteSize(localizedContent);
-                splits = algoliaSplitter.splitHtmlContent(localizedContent.body, maxRecordBytes, splitterTag);
-                for (let i = 0; i < splits.length; i++) {
-                    var splittedContent = {};
-                    for (var key in localizedContent) {
-                        if (localizedContent.hasOwnProperty(key)) {
-                            splittedContent[key] = localizedContent[key];
-                        }
+    for (let l = 0; l < siteLocales.size(); ++l) {
+        var locale = siteLocales[l];
+        var indexName = algoliaData.calculateIndexName('contents', locale);
+        indexName += '.tmp';
+        let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+        let splits = [];
+        let splitterTag = parameters.splitterTag;
+        if (attributesToSend.indexOf('body') >= 0 && localizedContent.body) {
+            let maxRecordBytes = algoliaSplitter.getMaxByteSize(localizedContent);
+            splits = algoliaSplitter.splitHtmlContent(localizedContent.body, maxRecordBytes, splitterTag);
+            for (let i = 0; i < splits.length; i++) {
+                var splittedContent = {};
+                for (var key in localizedContent) {
+                    if (localizedContent.hasOwnProperty(key)) {
+                        splittedContent[key] = localizedContent[key];
                     }
-                    splittedContent.objectID = localizedContent.objectID + '_' + i;
-                    splittedContent.id = localizedContent.id;
-                    splittedContent.algolia_chunk_order = i;
-                    splittedContent.body = splits[i];
-                    algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, splittedContent, indexName));
                 }
-            } else {
-                algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedContent, indexName));
+                splittedContent.objectID = localizedContent.objectID + '_' + i;
+                splittedContent.id = localizedContent.id;
+                splittedContent.algolia_chunk_order = i;
+                splittedContent.body = splits[i];
+                algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, splittedContent, indexName));
             }
+        } else {
+            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedContent, indexName));
         }
-
-        jobReport.processedItemsToSend++; // number of actual contents processed
-        jobReport.recordsToSend += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per content)
-
-        return algoliaOperations;
     }
+
+    jobReport.processedItemsToSend++; // number of actual contents processed
+    jobReport.recordsToSend += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per content)
+
+    return algoliaOperations;
 }
 
 /**
