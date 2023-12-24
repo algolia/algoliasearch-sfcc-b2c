@@ -2,8 +2,16 @@
 
 const PageMgr = require('dw/experience/PageMgr');
 const contentMgr = require('dw/content/ContentMgr');
-const indexableComponents = ['custom', 'cms_record', 'enum', 'markup', 'string', 'text'];
+var URLUtils = require('dw/web/URLUtils');
+
 const indexOnlySearchables = false;
+
+/* Usable if indexOnlySearchables is set to false because in this case, we are indexing all the components and not only the searchable ones
+* It is already configured for default SFRA components, feel free to add your own
+*/
+const indexableComponents = ['custom', 'cms_record', 'enum', 'markup', 'string', 'text', 'url'];
+const ignoredAttributes = ['xsCarouselIndicators', 'xsCarouselControls', 'xsCarouselSlidesToDisplay', 'customCategoryName1', 'customCategoryName2', 'customCategoryName3', 'customCategoryName4', 'customCategoryName5', 'customCategoryName6', 'customCategoryName7',
+    'customCategoryName8', 'customCategoryName9', 'customCategoryName10', 'customCategoryName11', 'customCategoryName12', 'imagesize', 'offset', 'smCarouselSlidesToDisplay', 'mdCarouselSlidesToDisplay'];
 
 /**
  * Checks if a component is indexable.
@@ -15,11 +23,7 @@ const indexOnlySearchables = false;
  * @returns {boolean} Returns true if the component is indexable, otherwise false.
  */
 function isIndexableComponent(component) {
-    if (indexableComponents.indexOf(component.type) === -1) {
-        return false;
-    }
-
-    return !indexOnlySearchables || (component.searching && component.searching.searchable);
+    return component.searching && component.searching.searchable;
 }
 
 /**
@@ -39,17 +43,16 @@ function getContainerContent(container, type) {
     var pageMetaDefinition = require('*/cartridge/experience/' + type + '/' + page.typeID.replace(/\./g, '/') + '.json');
     var attributeDefinitions = [];
     var regionDefinitions = [];
+    var content;
 
     var attributeDefinitions = getAttributeDefinitions(pageMetaDefinition);
     var regionDefinitions = getRegionDefinitons(pageMetaDefinition);
 
     for (var i = 0; i < attributeDefinitions.length; i++) {
         var attribute_definition = attributeDefinitions[i];
-        if (isIndexableComponent(attribute_definition)) {
-            var content = getAttributeContent(page, attribute_definition);
-            if (content) {
-                contentArr.push(content);
-            }
+        content = getAttributeContent(page, attribute_definition);
+        if (content && (indexOnlySearchables || (isIndexableComponent(attribute_definition) && !isIgnoredAttributes(attribute_definition)))) {
+            contentArr.push(content);
         }
     }
 
@@ -63,7 +66,7 @@ function getContainerContent(container, type) {
         }
     }
 
-    var indexableContent = contentArr.join('</div>');
+    var indexableContent = contentArr.join(' ');
 
     return indexableContent;
 }
@@ -114,6 +117,20 @@ function getRegionDefinitons (pageMetaDefinition) {
 function getAttributeContent (component, attribute_definition) {
     var content = component.getAttribute(attribute_definition.id);
     return content;
+}
+
+
+/**
+ * Filter the components based on their ids.
+ * @param {Object} component - The component to check.
+ * @returns {boolean} Returns true if the component is indexable, otherwise false.
+ */
+function isIgnoredAttributes(component) {
+    if (ignoredAttributes.indexOf(component.id) === -1) {
+        return false;
+    }
+
+    return true;
 }
 
 /**
