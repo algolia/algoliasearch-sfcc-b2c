@@ -2,7 +2,7 @@
 
 const PageMgr = require('dw/experience/PageMgr');
 const contentMgr = require('dw/content/ContentMgr');
-var URLUtils = require('dw/web/URLUtils');
+const URLUtils = require('dw/web/URLUtils');
 
 const indexOnlySearchables = false;
 
@@ -36,7 +36,6 @@ function isIndexableComponent(component) {
 function getContainerContent(container, type) {
     var page = PageMgr.getPage(container.ID) || container;
     var contentArr = [];
-    var typeId;
 
     // We are fetching predefined metadata for the page type that is created by developers, 
     // for the detail: https://developer.salesforce.com/docs/commerce/b2c-commerce/guide/b2c-dev-for-page-designer.html#create-page-and-component-types
@@ -45,13 +44,14 @@ function getContainerContent(container, type) {
     var regionDefinitions = [];
     var content;
 
-    var attributeDefinitions = getAttributeDefinitions(pageMetaDefinition);
-    var regionDefinitions = getRegionDefinitons(pageMetaDefinition);
+    attributeDefinitions = getAttributeDefinitions(pageMetaDefinition);
+    regionDefinitions = getRegionDefinitons(pageMetaDefinition);
 
     for (var i = 0; i < attributeDefinitions.length; i++) {
         var attribute_definition = attributeDefinitions[i];
         content = getAttributeContent(page, attribute_definition);
-        if (content && (indexOnlySearchables || (isIndexableComponent(attribute_definition) && !isIgnoredAttributes(attribute_definition)))) {
+        if (content && ((indexOnlySearchables && isIndexableComponent(attribute_definition)) ||
+            (!indexOnlySearchables && !isIgnoredAttribute(attribute_definition)))) {
             contentArr.push(content);
         }
     }
@@ -125,7 +125,7 @@ function getAttributeContent (component, attribute_definition) {
  * @param {Object} component - The component to check.
  * @returns {boolean} Returns true if the component is indexable, otherwise false.
  */
-function isIgnoredAttributes(component) {
+function isIgnoredAttribute(component) {
     if (ignoredAttributes.indexOf(component.id) === -1) {
         return false;
     }
@@ -144,13 +144,12 @@ function getRegionContent (region, type) {
     var visibleComponents = region.visibleComponents;
     var contentArr = [];
 
-    if (!visibleComponents.length || !visibleComponents.length > 0) {
+    if (!visibleComponents.length) {
         return null;
     }
 
     for (var i = 0; i < visibleComponents.length; i++) {
-        var component = visibleComponents[i];
-        var content = getContainerContent(component, type);
+        var content = getContainerContent(visibleComponents[i], type);
         if (content) {
             contentArr.push(content);
         }

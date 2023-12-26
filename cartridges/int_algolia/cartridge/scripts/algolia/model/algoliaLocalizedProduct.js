@@ -9,6 +9,7 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
+var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 
@@ -79,27 +80,6 @@ function getImagesGroup(product, viewtype) {
 }
 
 /**
- * Function get value of object property by attribute name.
- * An attribute name can be complex and consist of several levels.
- * Attribute names must be separated by dots.
- * Example: primaryCategory.ID
- * @param {dw.object.ExtensibleObject} extensibleObject - business object
- * @param {string} attributeName - object attribute name
- * @returns {string|boolean|number|null} - value
- */
-function getAttributeValue(extensibleObject, attributeName) {
-    var properties = attributeName.split('.');
-    var result = properties.reduce(function (previousValue, currentProperty) {
-        return previousValue ? previousValue[currentProperty] : null;
-    }, extensibleObject);
-
-    if ((typeof result) === 'string') {
-        result = empty(result) ? null : stringUtils.trim(algoliaUtils.escapeEmoji(result.toString()));
-    }
-    return result;
-}
-
-/**
  * Create category tree of Product
  * @param {dw.catalog.Category} category - category
  * @returns {Object} - category tree
@@ -111,7 +91,7 @@ function getCategoryFlatTree(category) {
     var currentCategory = category;
     categoryTree.push({
         id: currentCategory.ID,
-        name: getAttributeValue(currentCategory, 'displayName')
+        name: ObjectHelper.getAttributeValue(currentCategory, 'displayName')
     });
 
     while (!currentCategory.topLevel && !currentCategory.root) {
@@ -121,7 +101,7 @@ function getCategoryFlatTree(category) {
         }
         categoryTree.push({
             id: currentCategory.ID,
-            name: getAttributeValue(currentCategory, 'displayName')
+            name: ObjectHelper.getAttributeValue(currentCategory, 'displayName')
         });
     }
 
@@ -180,27 +160,6 @@ function computePrimaryCategoryHierarchicalFacets(categories, primaryCategoryId)
 }
 
 /**
- * Safely gets a custom attribute from a System Object.
- * Since attempting to return a nonexistent custom attribute throws an error in SFCC,
- * this is the safest way to check whether an attribute exists.
- * @param {dw.object.CustomAttributes} customAttributes The CustomAttributes object, e.g. product.getCustom()
- * @param {string} caKey The custom attribute's key whose value we want to return
- * @returns {*} The custom attribute value if exists,
- *              null if the custom attribute is defined but it has no value for this specific SO,
- *              undefined if the custom attribute is not defined at all in BM
- */
-function safelyGetCustomAttribute(customAttributes, caKey) {
-    let customAttributeValue;
-    try {
-        customAttributeValue = customAttributes[caKey];
-    } catch(e) {
-        customAttributeValue = undefined;
-    } finally {
-        return customAttributeValue;
-    }
-}
-
-/**
  * Handler complex and calculated Product attributes
  */
 var aggregatedValueHandlers = {
@@ -237,7 +196,7 @@ var aggregatedValueHandlers = {
             : null;
     },
     refinementColor: function (product) {
-        return safelyGetCustomAttribute(product.custom, 'refinementColor')
+        return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementColor')
             ? product.custom.refinementColor.displayValue
             : null;
     },
@@ -249,7 +208,7 @@ var aggregatedValueHandlers = {
             : null;
     },
     refinementSize: function (product) {
-        return safelyGetCustomAttribute(product.custom, 'refinementSize')
+        return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementSize')
             ? product.custom.refinementSize
             : null;
     },
@@ -348,7 +307,7 @@ function algoliaLocalizedProduct(parameters) {
                 } else {
                     this[attributeName] = aggregatedValueHandlers[attributeName]
                         ? aggregatedValueHandlers[attributeName](product)
-                        : getAttributeValue(product, config.attribute);
+                        : ObjectHelper.getAttributeValue(product, config.attribute);
                 }
             }
         }

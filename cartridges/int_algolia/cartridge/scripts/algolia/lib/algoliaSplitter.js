@@ -2,9 +2,9 @@
 
 var Bytes = require('dw/util/Bytes');
 var StringUtils = require('dw/util/StringUtils');
-var DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
-var SAFETY_MARGIN = 250; // expressed in bytes
-var IGNORED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 'button',
+const DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
+const SAFETY_MARGIN = 250; // expressed in bytes
+const IGNORED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 'button',
     'canvas', 'command', 'datalist', 'dialog', 'embed', 'form', 'frame', 'frameset', 'iframe',
     'image', 'input', 'map', 'noembed', 'noscript', 'object', 'picture', 'script', 'style',
     'svg', 'template', 'textarea', 'video'];
@@ -20,7 +20,11 @@ var IGNORED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 'b
 function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
     var split = [];
     var splitterBegin = '<' + splitterElement + '>';
-    var sections = htmlContent.split(splitterBegin);
+
+    //remove restricted tags and their content
+    var content = removeRestrictedContent(htmlContent);
+
+    var sections = content.split(splitterBegin);
 
     sections.forEach(function(section) {
         section = StringUtils.trim(splitterBegin + section) || '';
@@ -29,13 +33,9 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
             return;
         }
 
-        //remove restricted tags and their content
-        IGNORED_TAGS.forEach(function(tag) {
-            section = section.replace(new RegExp('<' + tag + '.*?' + tag + '>', 'g'), '');
-        });
 
         //remove all HTML tags
-        section = section.replace(/<[^>]*>/g, '');
+        section = removeHtmlTags(section);
 
         var sectionSize = new Bytes(section).getLength();
         if (sectionSize > maxByteSize) {
@@ -48,6 +48,30 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
     });
 
     return split;
+}
+
+/**
+ * Removes restricted tags
+ *
+ * @param {string} content - Content will be sanitized
+ * @returns {string} Sanitized content
+ */
+function removeRestrictedContent(content) {
+    //remove restricted tags and their content
+    IGNORED_TAGS.forEach(function(tag) {
+        content = content.replace(new RegExp('<' + tag + '.*?' + tag + '>', 'g'), '');
+    });
+
+    return content;
+}
+
+/**
+ * removes all HTML tags
+ * @param {string} content - Content will be sanitized
+ * @returns {string} Sanitized content
+ */
+function removeHtmlTags(content) {
+    return content.replace(/<[^>]*>/g, '');
 }
 
 /**
