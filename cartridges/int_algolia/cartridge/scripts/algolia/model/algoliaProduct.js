@@ -109,7 +109,7 @@ function getAttributeLocalizedValues(product, productAttributeName) {
     for (var l = 0; l < siteLocalesSize; l += 1) {
         var localeName = siteLocales[l];
         request.setLocale(localeName);
-        value[localeName] = objectHelper.getAttributeValue(product, productAttributeName);
+        value[localeName] = ObjectHelper.getAttributeValue(product, productAttributeName);
     }
     request.setLocale(currentLocale);
     return value;
@@ -181,7 +181,7 @@ var aggregatedValueHandlers = {
             : null;
     },
     refinementColor: function (product) {
-        return objectHelper.safelyGetCustomAttribute(product.custom, 'refinementColor')
+        return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementColor')
             ? product.custom.refinementColor.displayValue
             : null;
     },
@@ -193,7 +193,7 @@ var aggregatedValueHandlers = {
             : null;
     },
     refinementSize: function (product) {
-        return objectHelper.safelyGetCustomAttribute(product.custom, 'refinementSize')
+        return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementSize')
             ? product.custom.refinementSize
             : null;
     },
@@ -303,13 +303,13 @@ function algoliaProduct(product, fieldListOverride) {
                         request.setLocale(localeName);
                         value[localeName] = aggregatedValueHandlers[attributeName]
                             ? aggregatedValueHandlers[attributeName](product)
-                            : objectHelper.getAttributeValue(product, config.attribute);
+                            : ObjectHelper.getAttributeValue(product, config.attribute);
                     }
                     request.setLocale(currentLocale);
                 } else {
                     value = aggregatedValueHandlers[attributeName]
                         ? aggregatedValueHandlers[attributeName](product)
-                        : objectHelper.getAttributeValue(product, config.attribute);
+                        : ObjectHelper.getAttributeValue(product, config.attribute);
                 }
 
                 if (!empty(value)) { this[attributeName] = value; }

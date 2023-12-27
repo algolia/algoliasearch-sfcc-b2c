@@ -1,6 +1,5 @@
 'use strict';
 
-var StringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 var AlgoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var AlgoliaContentConfig = require('*/cartridge/scripts/algolia/lib/algoliaContentConfig');

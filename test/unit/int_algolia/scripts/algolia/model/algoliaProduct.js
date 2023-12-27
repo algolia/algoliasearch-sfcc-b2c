@@ -8,6 +8,13 @@ var ProductMock = require('../../../../../mocks/dw/catalog/Product');
 var algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var algoliaUtils = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/utils');
 
+var objectHelper = proxyquire('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper', {
+    'dw/util/StringUtils': {
+        trim: function (str) { return str; }
+    },
+    '*/cartridge/scripts/algolia/lib/utils': algoliaUtils
+});
+
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
@@ -63,7 +70,8 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
     '*/cartridge/scripts/algolia/lib/algoliaProductConfig': algoliaProductConfig,
     '*/cartridge/scripts/algolia/customization/productModelCustomizer': {
         customizeProductModel: function (productModel) { return productModel; }
-    }
+    },
+    '*/cartridge/scripts/algolia/helper/objectHelper': objectHelper
 });
 
 describe('algoliaProduct module - Test Algolia Product model', function () {
