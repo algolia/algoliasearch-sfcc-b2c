@@ -209,6 +209,9 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     // algoliaOperations contains all the returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
     var productCount = algoliaOperationsArray.length;
+    if (!productCount) {
+        return;
+    }
 
     var batch = [];
     for (let i = 0; i < productCount; ++i) {
