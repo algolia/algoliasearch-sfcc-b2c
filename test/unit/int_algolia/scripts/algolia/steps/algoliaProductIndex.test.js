@@ -164,7 +164,7 @@ describe('send', () => {
 
         expect(mockSendMultiIndexBatch).not.toHaveBeenCalled();
     });
-})
+});
 
 describe('afterStep', () => {
     beforeAll(() => {
