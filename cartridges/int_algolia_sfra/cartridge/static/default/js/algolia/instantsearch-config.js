@@ -8,6 +8,7 @@ function enableInstantSearch(config) {
     const productsIndexPriceAsc = productsIndex + '__price_' + algoliaData.currencyCode + '_asc';
     const productsIndexPriceDesc = productsIndex + '__price_' + algoliaData.currencyCode + '_desc';
 
+    let displaySwatches = false;
     var initialUiState = {};
     var hierarchicalMenuValue = {};
     if (config.categoryDisplayNamePath && config.categoryDisplayNamePath.indexOf('New Arrivals') > -1) {
@@ -156,7 +157,7 @@ function enableInstantSearch(config) {
                 container: '#algolia-price-filter-placeholder',
                 attribute: 'price.' + algoliaData.currencyCode,
                 cssClasses: {
-                    form: 'form-inline flex-nowrap',
+                    form: 'flex-nowrap',
                     input: 'form-control form-control-sm',
                     separator: 'mx-1',
                     submit: 'btn',
@@ -235,6 +236,13 @@ function enableInstantSearch(config) {
                                         </a>
                                     </div>
                                     <div class="tile-body">
+                                        ${displaySwatches && html`
+                                            <div class="color-swatches">
+                                                <div class="swatches">
+                                                    ${renderSwatches(hit, html)}
+                                                </div>
+                                            </div>
+                                        `}
                                         <div class="pdp-link">
                                             <a href="${hit.url}">
                                                 ${components.Highlight({hit, attribute: 'name'})}
@@ -258,7 +266,8 @@ function enableInstantSearch(config) {
                         `
                     },
                 },
-                transformItems: function (items) {
+                transformItems: function (items, helpers) {
+                    displaySwatches = false;
                     return items.map(function (item) {
                         // assign image
                         if (item.image_groups) {
@@ -274,6 +283,11 @@ function enableInstantSearch(config) {
                                 dis_base_link: algoliaData.noImages.large,
                                 alt: item.name + ', large',
                             }
+                        }
+
+                        if (item.color_variations) {
+                            // Display the swatches only if at least one item has some color_variations
+                            displaySwatches = true;
                         }
 
                         // adjusted price in user currency
@@ -372,5 +386,54 @@ function enableInstantSearch(config) {
             }
 
         })
+    }
+
+    /**
+     * Render the color swatches
+     * @param {AlgoliaHit} hit Algolia hit
+     * @param {any} html Tagged template
+     * @return {Object} A color swatch
+     */
+    function renderSwatches(hit, html) {
+        if (hit.swatches) {
+            return hit.swatches.map(swatch => {
+                return html`
+                <a href="${swatch.variationUrl}" aria-label="${swatch.title}">
+                    <span>
+                        <img class="swatch swatch-circle" data-index="0.0" style="background-image: url(${swatch.url})" src="${swatch.url}" alt="${swatch.alt}"/>
+                    </span>
+                </a>
+            `;
+            });
+        }
+        if (hit.color_variations) {
+            return hit.color_variations.map(colorVariation => {
+                let swatch;
+                let variantImage;
+                if (!colorVariation.image_groups) {
+                    return '';
+                }
+                const displayImageGroup = colorVariation.image_groups.find(group => group.view_type === 'large') || colorVariation.image_groups[0];
+                const swatchImageGroup = colorVariation.image_groups.find(group => group.view_type === 'swatch');
+                if (swatchImageGroup && displayImageGroup) {
+                    swatch = swatchImageGroup.images[0];
+                    variantImage = displayImageGroup.images[0];
+                } else {
+                    return '';
+                }
+
+                return html`
+                <a onmouseover="${() => {
+        const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
+        const image = parent.querySelector('.tile-image');
+        image.src = variantImage.dis_base_link;
+    }}" href="${colorVariation.variant_url}" aria-label="${swatch.title}">
+                    <span>
+                        <img class="swatch swatch-circle" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
+                    </span>
+                </a>
+            `;
+            });
+        }
     }
 }
