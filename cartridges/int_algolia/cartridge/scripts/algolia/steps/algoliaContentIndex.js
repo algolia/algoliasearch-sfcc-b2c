@@ -5,7 +5,7 @@ var ContentSearchModel = require('dw/content/ContentSearchModel');
 var logger;
 
 // job step parameters
-var paramAttributeListOverride, paramFailureThresholdPercentage;
+var paramAttributeListOverride, paramFailureThresholdPercentage, indexingMethod;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig;
@@ -45,6 +45,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     /* --- parameters --- */
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
+    indexingMethod = parameters.indexingMethod || 'allContents';
 
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
@@ -150,13 +151,13 @@ exports.process = function(content, parameters, stepExecution) {
 
     var algoliaOperations = [];
     // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-    var baseModel = new AlgoliaLocalizedContent({ content: content, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
+    var baseModel = new AlgoliaLocalizedContent({ content: content, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate, indexingMethod: indexingMethod });
 
     for (let l = 0; l < siteLocales.size(); ++l) {
         var locale = siteLocales[l];
         var indexName = algoliaData.calculateIndexName('contents', locale);
         indexName += '.tmp';
-        let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+        let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate, indexingMethod: indexingMethod });
         let splits = [];
         let splitterTag = parameters.splitterTag;
         if (attributesToSend.indexOf('body') >= 0 && localizedContent.body) {

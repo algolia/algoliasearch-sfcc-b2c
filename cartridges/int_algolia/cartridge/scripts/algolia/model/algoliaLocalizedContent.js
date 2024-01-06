@@ -11,20 +11,19 @@ var ACTION_ENDPOINT_CONTENT = 'Page-Show';
  * Handler complex and calculated Content attributes
  */
 var aggregatedValueHandlers = {
-    url: function (content) {
+    url: function (content, indexingMethod) {
         var pageURL = URLUtils.url(ACTION_ENDPOINT_CONTENT, 'cid', content.ID);
         return pageURL ? pageURL.toString() : null;
     },
-    body: function (content) {
+    body: function (content, indexingMethod) {
         var pageDesignerContent;
-
-        if (content.isPage()) {
+        if (content.isPage() && (indexingMethod === 'allContents' || indexingMethod === 'pageDesignerComponents')) {
             var pageDesignerHelper = require('*/cartridge/scripts/algolia/lib/pageDesignerHelper');
             var body = pageDesignerHelper.getContainerContent(content, 'pages');
             return body;
         }
 
-        if (content && content.custom && content.custom.body) {
+        if (content && content.custom && content.custom.body && (indexingMethod === 'allContents' || indexingMethod === 'contentAssets')) {
             return content.custom.body.source;
         }
         return null;
@@ -52,7 +51,7 @@ function AlgoliaLocalizedContent(parameters) {
                 this[attributeName] = parameters.baseModel[attributeName];
             } else {
                 this[attributeName] = aggregatedValueHandlers[attributeName]
-                    ? aggregatedValueHandlers[attributeName](parameters.content)
+                    ? aggregatedValueHandlers[attributeName](parameters.content, parameters.indexingMethod)
                     : ObjectHelper.getAttributeValue(parameters.content, config.attribute);
             }
         }

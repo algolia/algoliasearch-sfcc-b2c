@@ -26,6 +26,10 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
 
     var sections = content.split(splitterBegin);
 
+    if (sections[0] === '') {
+        sections.shift();
+    }
+
     sections.forEach(function(section) {
         section = StringUtils.trim(splitterBegin + section) || '';
 

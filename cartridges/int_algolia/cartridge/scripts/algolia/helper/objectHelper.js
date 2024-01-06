@@ -15,15 +15,22 @@ var AlgoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 function getAttributeValue(extensibleObject, attributeName) {
     var properties = attributeName.split('.');
     var result = properties.reduce(function (previousValue, currentProperty) {
-        var tempResult = previousValue ? previousValue[currentProperty] : null;
+        if (previousValue === null || !(currentProperty in previousValue)) {
+            return null;
+        }
+
+        var tempResult = previousValue[currentProperty];
+
         if (typeof tempResult === 'string' && !empty(tempResult)) {
             tempResult = StringUtils.trim(AlgoliaUtils.escapeEmoji(tempResult));
         }
+
         return tempResult;
     }, extensibleObject);
 
     return result;
 }
+
 
 /**
  * Safely gets a custom attribute from a System Object.

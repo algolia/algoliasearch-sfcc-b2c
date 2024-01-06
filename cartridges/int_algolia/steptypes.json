@@ -356,6 +356,20 @@
                             "description": "The tag used to split the content into chunks. If not specified, splitment will not work.",
                             "@required": false,
                             "@trim": true
+                        },
+                        {
+                            "@name": "indexingMethod",
+                            "@type": "enum",
+                            "description": "'allContents': indexes content assets and page designer components. 'contentAssets': indexes only content assets. 'pageDesignerComponents': indexes only page designer components.",
+                            "@required": "true",
+                            "enum-values": {
+                                "value": [
+                                    "allContents",
+                                    "contentAssets",
+                                    "pageDesignerComponents"
+                                ]
+                            },
+                            "default-value": "allContents"
                         }
                     ]
                 },

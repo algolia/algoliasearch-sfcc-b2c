@@ -1,10 +1,8 @@
 'use strict';
 
 const PageMgr = require('dw/experience/PageMgr');
-const contentMgr = require('dw/content/ContentMgr');
-const URLUtils = require('dw/web/URLUtils');
 
-const indexOnlySearchables = false;
+const indexOnlySearchables = true;
 
 /* Usable if indexOnlySearchables is set to false because in this case, we are indexing all the components and not only the searchable ones
 * It is already configured for default SFRA components, feel free to add your own
@@ -23,7 +21,11 @@ const ignoredAttributes = ['xsCarouselIndicators', 'xsCarouselControls', 'xsCaro
  * @returns {boolean} Returns true if the component is indexable, otherwise false.
  */
 function isIndexableComponent(component) {
-    return component.searching && component.searching.searchable;
+    if (component && component.searching && component.searching.searchable) {
+        return true;
+    }
+
+    return false;
 }
 
 /**
@@ -35,9 +37,9 @@ function isIndexableComponent(component) {
  */
 function getContainerContent(container, type) {
     var page = PageMgr.getPage(container.ID) || container;
-    var contentArr = [];
+    var indexableContent = '';
 
-    // We are fetching predefined metadata for the page type that is created by developers, 
+    // We are fetching predefined metadata for the page type that is created by developers,
     // for the detail: https://developer.salesforce.com/docs/commerce/b2c-commerce/guide/b2c-dev-for-page-designer.html#create-page-and-component-types
     var pageMetaDefinition = require('*/cartridge/experience/' + type + '/' + page.typeID.replace(/\./g, '/') + '.json');
     var attributeDefinitions = [];
@@ -50,9 +52,9 @@ function getContainerContent(container, type) {
     for (var i = 0; i < attributeDefinitions.length; i++) {
         var attribute_definition = attributeDefinitions[i];
         content = getAttributeContent(page, attribute_definition);
-        if (content && ((indexOnlySearchables && isIndexableComponent(attribute_definition)) ||
+        if (content && content !== ' ' && ((indexOnlySearchables && isIndexableComponent(attribute_definition)) ||
             (!indexOnlySearchables && !isIgnoredAttribute(attribute_definition)))) {
-            contentArr.push(content);
+            indexableContent = indexableContent ? indexableContent + ' ' + content : content;
         }
     }
 
@@ -61,12 +63,10 @@ function getContainerContent(container, type) {
         var regionID = region_definition.id;
         var region = page.getRegion(regionID);
         var regionContent = getRegionContent(region, 'components');
-        if (regionContent) {
-            contentArr.push(regionContent);
+        if (regionContent && regionContent !== ' ') {
+            indexableContent = indexableContent ? indexableContent + ' ' + regionContent : regionContent;
         }
     }
-
-    var indexableContent = contentArr.join(' ');
 
     return indexableContent;
 }
@@ -142,7 +142,7 @@ function isIgnoredAttribute(component) {
  */
 function getRegionContent (region, type) {
     var visibleComponents = region.visibleComponents;
-    var contentArr = [];
+    var indexableContent = '';
 
     if (!visibleComponents.length) {
         return null;
@@ -150,12 +150,18 @@ function getRegionContent (region, type) {
 
     for (var i = 0; i < visibleComponents.length; i++) {
         var content = getContainerContent(visibleComponents[i], type);
-        if (content) {
-            contentArr.push(content);
+        if (content && content !== ' ') {
+            indexableContent = indexableContent ? indexableContent + ' ' + content : content;
         }
     }
 
-    return contentArr;
+    return indexableContent;
 }
 
 exports.getContainerContent = getContainerContent;
+exports.isIgnoredAttribute = isIgnoredAttribute;
+exports.isIndexableComponent = isIndexableComponent;
+exports.getRegionContent = getRegionContent;
+exports.getAttributeDefinitions = getAttributeDefinitions;
+exports.getRegionDefinitons = getRegionDefinitons;
+
