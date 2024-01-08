@@ -359,7 +359,7 @@
                         },
                         {
                             "@name": "indexingMethod",
-                            "@type": "enum",
+                            "@type": "string",
                             "description": "'allContents': indexes content assets and page designer components. 'contentAssets': indexes only content assets. 'pageDesignerComponents': indexes only page designer components.",
                             "@required": "true",
                             "enum-values": {
