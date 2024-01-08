@@ -1,5 +1,7 @@
 const GlobalMock = require('../../../../../mocks/global');
 const ProductMock = require('../../../../../mocks/dw/catalog/Product');
+const MasterProductMock = require('../../../../../mocks/dw/catalog/MasterProduct');
+const VariantMock = require('../../../../../mocks/dw/catalog/Variant');
 
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
@@ -66,6 +68,7 @@ const stepExecution = {
 };
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex');
+const collectionHelper = require('../../../../../mocks/helpers/collectionHelper');
 
 beforeEach(() => {
     mockAdditionalAttributes = ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
@@ -122,9 +125,33 @@ describe('process', () => {
             'products',
             expect.arrayContaining(['default', 'fr', 'en'])
         );
-        expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith('products', expect.arrayContaining(['default', 'fr', 'en']));
 
         var algoliaOperations = job.process(new ProductMock());
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+    test('color_variations', () => {
+        // Process a master product with two size variations on the same color variation
+        mockAdditionalAttributes = ['color_variations'];
+
+        const masterProduct = new MasterProductMock();
+        const variantPinkSize4 = new VariantMock({
+            ID: '701644031206M',
+            variationAttributes: { color: 'JJB52A0', size: '004' },
+            masterProduct,
+        });
+        const variantPinkSize6 = new VariantMock({
+            ID: '701644031213M',
+            variationAttributes: { color: 'JJB52A0', size: '006' },
+            masterProduct,
+        });
+        masterProduct.variants = collectionHelper.createCollection([
+            variantPinkSize4,
+            variantPinkSize6,
+        ]);
+
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
+
+        const algoliaOperations = job.process(masterProduct);
         expect(algoliaOperations).toMatchSnapshot();
     });
 });

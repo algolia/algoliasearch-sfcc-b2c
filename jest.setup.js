@@ -216,6 +216,9 @@ jest.mock('*/cartridge/scripts/algolia/helper/fileHelper', () => {
 jest.mock('*/cartridge/scripts/algolia/helper/jobHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper');
 }, {virtual: true});
+jest.mock('*/cartridge/scripts/algolia/helper/modelHelper', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/modelHelper');
+}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/sendHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/sendHelper');
 }, {virtual: true});
