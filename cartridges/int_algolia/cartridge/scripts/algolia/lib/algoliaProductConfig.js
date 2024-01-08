@@ -2,6 +2,7 @@
 
 var defaultAttributes = ['id', 'primary_category_id', 'in_stock', 'price', 'categories'];
 var defaultAttributes_v2 = ['name', 'primary_category_id', 'categories', 'in_stock', 'price', 'image_groups', 'url'];
+var COLOR_VARIATIONS_FIELD_NAME = 'color_variations';
 
 var attributeConfig = {
     id: {
@@ -243,5 +244,6 @@ module.exports = {
     defaultAttributes: defaultAttributes,
     defaultAttributes_v2: defaultAttributes_v2,
     attributeConfig: attributeConfig,
-    attributeConfig_v2: attributeConfig_v2
+    attributeConfig_v2: attributeConfig_v2,
+    COLOR_VARIATIONS_FIELD_NAME: COLOR_VARIATIONS_FIELD_NAME,
 };

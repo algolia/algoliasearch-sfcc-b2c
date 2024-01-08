@@ -178,50 +178,57 @@ exports.process = function(product, parameters, stepExecution) {
 
     jobReport.processedItems++; // counts towards the total number of products processed
 
-    if (product.isVariant()) {
-        // This variant will be indexed when we treat its master product
-        return [];
-    }
-    if (product.master) {
-        var algoliaOperations = [];
-        var variants = product.getVariants();
-
-        // Fetch all color variation images for each locale, to set them in each variant
-        var colorVariationsPerLocale = {};
-        if (attributesToSend.indexOf('color_variations') >= 0) {
-            for (let l = 0; l < siteLocales.size(); ++l) {
-                var locale = siteLocales[l];
-                colorVariationsPerLocale[locale] = modelHelper.getColorVariations(product, locale);
-            }
+    if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0) {
+        if (product.isVariant()) {
+            // This variant will be indexed when we treat its master product
+            return [];
         }
-        for (let v = 0; v < variants.size(); ++v) {
-            var variant = variants[v];
-            if (!productFilter.isInclude(variant)) {
-                continue;
-            }
-            var baseModel = new AlgoliaLocalizedProduct({ product: variant, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
-            for (let l = 0; l < siteLocales.size(); ++l) {
-                var locale = siteLocales[l];
-                var indexName = algoliaData.calculateIndexName('products', locale);
-                if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
-                let localizedVariant = new AlgoliaLocalizedProduct({
-                    product: variant,
-                    locale: locale,
-                    attributeList: attributesToSend,
-                    baseModel: baseModel,
-                    fullRecordUpdate: fullRecordUpdate,
-                });
-                if (attributesToSend.indexOf('color_variations') >= 0) {
-                    localizedVariant.color_variations = colorVariationsPerLocale[locale];
+        if (product.master) {
+            var algoliaOperations = [];
+            var variants = product.getVariants();
+
+            // Fetch all color variation images for each locale, to set them in each variant
+            var colorVariationsPerLocale = {};
+            if (attributesToSend.indexOf('color_variations') >= 0) {
+                for (let l = 0; l < siteLocales.size(); ++l) {
+                    var locale = siteLocales[l];
+                    colorVariationsPerLocale[locale] = modelHelper.getColorVariations(product, locale);
                 }
-                algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedVariant, indexName));
             }
-            jobReport.processedItemsToSend++;
+            for (let v = 0; v < variants.size(); ++v) {
+                var variant = variants[v];
+                if (!productFilter.isInclude(variant)) {
+                    continue;
+                }
+                var baseModel = new AlgoliaLocalizedProduct({
+                    product: variant,
+                    locale: 'default',
+                    attributeList: nonLocalizedAttributes,
+                    fullRecordUpdate: fullRecordUpdate
+                });
+                for (let l = 0; l < siteLocales.size(); ++l) {
+                    var locale = siteLocales[l];
+                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
+                    let localizedVariant = new AlgoliaLocalizedProduct({
+                        product: variant,
+                        locale: locale,
+                        attributeList: attributesToSend,
+                        baseModel: baseModel,
+                        fullRecordUpdate: fullRecordUpdate,
+                    });
+                    if (attributesToSend.indexOf('color_variations') >= 0) {
+                        localizedVariant.color_variations = colorVariationsPerLocale[locale];
+                    }
+                    algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedVariant, indexName));
+                }
+                jobReport.processedItemsToSend++;
+            }
+
+            jobReport.recordsToSend += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per product)
+
+            return algoliaOperations;
         }
-
-        jobReport.recordsToSend += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per product)
-
-        return algoliaOperations;
     }
 
     // Standalone products
