@@ -3,7 +3,7 @@
 var Bytes = require('dw/util/Bytes');
 var StringUtils = require('dw/util/StringUtils');
 const DEFAULT_MAX_RECORD_BYTES = 10000; // expressed in bytes
-const SAFETY_MARGIN = 250; // expressed in bytes
+const SAFETY_MARGIN = 300; // expressed in bytes
 const IGNORED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 'button',
     'canvas', 'command', 'datalist', 'dialog', 'embed', 'form', 'frame', 'frameset', 'iframe',
     'image', 'input', 'map', 'noembed', 'noscript', 'object', 'picture', 'script', 'style',
@@ -15,7 +15,8 @@ const IGNORED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 
  * @param {string} htmlContent - HTML content to split.
  * @param {number} maxByteSize - Maximum byte size for each split part.
  * @param {string} splitterElement - HTML element to use as the splitter.
- * @returns {string[]} Array of split content pieces.
+ * @returns {string[]} Array of split co
+ * ntent pieces.
  */
 function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
     var split = [];

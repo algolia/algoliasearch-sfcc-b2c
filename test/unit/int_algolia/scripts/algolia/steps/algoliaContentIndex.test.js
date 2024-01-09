@@ -177,7 +177,7 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
 
 describe('Algolia Content Indexing Tests', () => {
     let parameters = {
-        'attributeListOverride': '',
+        'attributeList': '',
     };
     let stepExecution = new mockJobStepExecution();
 

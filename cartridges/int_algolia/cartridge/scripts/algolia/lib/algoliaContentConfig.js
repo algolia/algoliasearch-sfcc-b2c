@@ -1,6 +1,6 @@
 'use strict';
 
-var defaultAttributes = ['id', 'name', 'description', 'url', 'body', 'page']; 
+var defaultAttributes = [];
 
 var attributeConfig = {
     body: {
@@ -46,7 +46,11 @@ var attributeConfig = {
     template: {
         attribute: 'template',
         localized: true
-    }
+    },
+    page: {
+        attribute: 'page',
+        localized: false
+    },
 };
 
 

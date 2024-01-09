@@ -114,7 +114,7 @@ Can perform full records updates or partial records updates. See the 'indexingMe
         <triggers/>
     </job>
 
-    <job job-id="AlgoliaContentIndex" priority="0">
+    <job job-id="AlgoliaContentIndex_v2" priority="0">
         <description>Index all searchable content assets assigned to the selected site to Algolia.</description>
         <parameters/>
         <flow>
@@ -124,6 +124,7 @@ Can perform full records updates or partial records updates. See the 'indexingMe
 It highly depends on the content search index on Salesforce, so do not forget to trigger search index after content update or enable incremental update.</description>
                 <parameters>
                     <parameter name="splitterTag">h1</parameter>
+                    <parameter name="attributeList">id,name,description,url,body,page</parameter>
                 </parameters>
             </step>
         </flow>

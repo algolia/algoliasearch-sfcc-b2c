@@ -5,7 +5,7 @@ var ContentSearchModel = require('dw/content/ContentSearchModel');
 var logger;
 
 // job step parameters
-var paramAttributeListOverride, paramFailureThresholdPercentage, indexingMethod;
+var paramAttributeList, paramFailureThresholdPercentage, indexingMethod;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig;
@@ -43,23 +43,19 @@ exports.beforeStep = function(parameters, stepExecution) {
 
 
     /* --- parameters --- */
-    paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
+    paramAttributeList = algoliaData.csvStringToArray(parameters.attributeList);
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
     indexingMethod = parameters.indexingMethod || 'allContents';
 
-    /* --- attributeListOverride parameter --- */
-    if (empty(paramAttributeListOverride)) {
-        attributesToSend = algoliaContentConfig.defaultAttributes;
-        const additionalAttributes = algoliaData.getSetOfArray('AdditionalContentAttributes');
-        additionalAttributes.map(function(attribute) {
-            if (attributesToSend.indexOf(attribute) < 0) {
-                attributesToSend.push(attribute);
-            }
-        });
-    } else {
-        attributesToSend = paramAttributeListOverride;
-    }
-    logger.info('attributeListOverride parameter: ' + paramAttributeListOverride);
+
+    attributesToSend = algoliaContentConfig.defaultAttributes;
+    paramAttributeList.map(function(attribute) {
+        if (attributesToSend.indexOf(attribute) < 0) {
+            attributesToSend.push(attribute);
+        }
+    });
+
+    logger.info('attributeList parameter: ' + paramAttributeList);
     logger.info('Actual attributes to be sent: ' + JSON.stringify(attributesToSend));
 
     indexingOperation = 'addObject';

@@ -27,6 +27,12 @@ var aggregatedValueHandlers = {
             return content.custom.body.source;
         }
         return null;
+    },
+    page: function (content, indexingMethod) {
+        if (content.isPage()) {
+            return 'page';
+        }
+        return 'content';
     }
 };
 
