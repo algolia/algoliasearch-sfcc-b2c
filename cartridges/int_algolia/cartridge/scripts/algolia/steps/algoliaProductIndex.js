@@ -188,7 +188,7 @@ exports.process = function(product, parameters, stepExecution) {
         if (product.master) {
             var algoliaOperations = [];
             var processedProducts = 0;
-            var recordsPerLocale = modelHelper.generateVariantRecordsWithColorVariations({
+            var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
                 masterProduct: product,
                 locales: siteLocales,
                 attributeList: attributesToSend,

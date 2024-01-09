@@ -1,58 +1,6 @@
 const URLUtils = require('dw/web/URLUtils');
 
-const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
-const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
-
 const COLOR_ATTRIBUTE_ID = 'color';
-
-/**
- * For a given master, generate all variant records with their 'color_variations'
- *
- * @param {Object} parameters - model parameters
- * @param {dw.order.Product} parameters.masterProduct - A master product
- * @param {string} parameters.locales - The requested locales
- * @param {Array} parameters.attributeList - list of attributes to be fetched
- * @param {Array} parameters.nonLocalizedAttributeList - list of non-localized attributes
- * @param {Array} parameters.fullRecordUpdate - specify if the generated records are mean to replace entirely the existing ones
- * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
- */
-function generateVariantRecordsWithColorVariations(parameters) {
-    const algoliaRecordsPerLocale = {};
-    const variants = parameters.masterProduct.getVariants();
-
-    // Fetch all color variation images for each locale, to set them in each variant
-    var colorVariationsPerLocale = {};
-    for (let l = 0; l < parameters.locales.size(); ++l) {
-        var locale = parameters.locales[l];
-        colorVariationsPerLocale[locale] = getColorVariations(parameters.masterProduct, locale);
-        algoliaRecordsPerLocale[locale] = [];
-    }
-    for (let v = 0; v < variants.size(); ++v) {
-        var variant = variants[v];
-        if (!productFilter.isInclude(variant)) {
-            continue;
-        }
-        var baseModel = new AlgoliaLocalizedProduct({
-            product: variant,
-            locale: 'default',
-            attributeList: parameters.nonLocalizedAttributeList,
-            fullRecordUpdate: parameters.fullRecordUpdate
-        });
-        for (let l = 0; l < parameters.locales.size(); ++l) {
-            var locale = parameters.locales[l];
-            let localizedVariant = new AlgoliaLocalizedProduct({
-                product: variant,
-                locale: locale,
-                attributeList: parameters.attributeList,
-                baseModel: baseModel,
-                fullRecordUpdate: parameters.fullRecordUpdate,
-            });
-            localizedVariant.color_variations = colorVariationsPerLocale[locale];
-            algoliaRecordsPerLocale[locale].push(localizedVariant);
-        }
-    }
-    return algoliaRecordsPerLocale;
-}
 
 /**
  * Return color_variations for a product, based on its variation model
@@ -102,40 +50,30 @@ function getColorVariations(product, locale) {
  *
  * @param {dw.catalog.ProductVariationModel} variationModel a variation model
  * @param {dw.catalog.ProductVariationAttributeValue} colorAttributeValue a 'color' variation value
- * @return {*[]|null} An image_group object for the giver color value
+ * @return {*[]|null} An image_groups object for the given color value
  */
 function getColorVariationImagesGroup(variationModel, colorAttributeValue) {
     var imageGroupsArr = [];
 
     variationModel.setSelectedAttributeValue('color', colorAttributeValue.ID);
-    var imagesList = variationModel.getImages('large');
 
-    var imageGroup = getImageGroup(imagesList, 'large');
-    if (!empty(imageGroup)) {
-        imageGroupsArr.push(imageGroup);
-    }
-
-    imagesList = variationModel.getImages('small');
-    imageGroup = getImageGroup(imagesList, 'small');
-    if (!empty(imageGroup)) {
-        imageGroupsArr.push(imageGroup);
-    }
-
-    imagesList = variationModel.getImages('swatch');
-    imageGroup = getImageGroup(imagesList, 'swatch');
-    if (!empty(imageGroup)) {
-        imageGroupsArr.push(imageGroup);
-    }
+    ['large', 'small', 'swatch'].forEach(function(viewtype) {
+        var imagesList = variationModel.getImages(viewtype);
+        var imageGroups = getImageGroups(imagesList, viewtype);
+        if (!empty(imageGroups)) {
+            imageGroupsArr.push(imageGroups);
+        }
+    });
     return imageGroupsArr.length > 0 ? imageGroupsArr : null;
 }
 
 /**
- * Function get Algolia Image Group of Images attributes of Product
+ * Function to generate Algolia Image Group of a list of dw.content.MediaFile
  * @param {dw.util.List} imagesList - a list of dw.content.MediaFile
  * @param {string} viewtype - the current viewtype
  * @returns  {Object} - Algolia Image Group Object
  */
-function getImageGroup(imagesList, viewtype) {
+function getImageGroups(imagesList, viewtype) {
     if (empty(imagesList)) {
         return null;
     }
@@ -167,5 +105,5 @@ function getImageGroup(imagesList, viewtype) {
 
 module.exports = {
     getColorVariations: getColorVariations,
-    generateVariantRecordsWithColorVariations: generateVariantRecordsWithColorVariations,
+    getImageGroups: getImageGroups,
 };

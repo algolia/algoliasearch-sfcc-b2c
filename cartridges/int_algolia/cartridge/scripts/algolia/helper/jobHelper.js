@@ -584,6 +584,59 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
     return resultObj;
 }
 
+/**
+ * For a given master, generate all variant records with their 'color_variations'
+ *
+ * @param {Object} parameters - model parameters
+ * @param {dw.order.Product} parameters.masterProduct - A master product
+ * @param {string} parameters.locales - The requested locales
+ * @param {Array} parameters.attributeList - list of attributes to be fetched
+ * @param {Array} parameters.nonLocalizedAttributeList - list of non-localized attributes
+ * @param {Array} parameters.fullRecordUpdate - specify if the generated records are mean to replace entirely the existing ones
+ * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
+ */
+function generateVariantRecordsWithColorVariations(parameters) {
+    const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+    const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+    const modelHelper = require('./modelHelper');
+
+    const algoliaRecordsPerLocale = {};
+    const variants = parameters.masterProduct.getVariants();
+
+    // Fetch all color variation images for each locale, to set them in each variant
+    var colorVariationsPerLocale = {};
+    for (let l = 0; l < parameters.locales.size(); ++l) {
+        var locale = parameters.locales[l];
+        colorVariationsPerLocale[locale] = modelHelper.getColorVariations(parameters.masterProduct, locale);
+        algoliaRecordsPerLocale[locale] = [];
+    }
+    for (let v = 0; v < variants.size(); ++v) {
+        var variant = variants[v];
+        if (!productFilter.isInclude(variant)) {
+            continue;
+        }
+        var baseModel = new AlgoliaLocalizedProduct({
+            product: variant,
+            locale: 'default',
+            attributeList: parameters.nonLocalizedAttributeList,
+            fullRecordUpdate: parameters.fullRecordUpdate
+        });
+        for (let l = 0; l < parameters.locales.size(); ++l) {
+            var locale = parameters.locales[l];
+            let localizedVariant = new AlgoliaLocalizedProduct({
+                product: variant,
+                locale: locale,
+                attributeList: parameters.attributeList,
+                baseModel: baseModel,
+                fullRecordUpdate: parameters.fullRecordUpdate,
+            });
+            localizedVariant.color_variations = colorVariationsPerLocale[locale];
+            algoliaRecordsPerLocale[locale].push(localizedVariant);
+        }
+    }
+    return algoliaRecordsPerLocale;
+}
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -603,6 +656,8 @@ module.exports = {
     DeleteProductModel: DeleteProductModel,
     writeObjectToXMLStream: writeObjectToXMLStream,
     getNextProductModel: getNextProductModel,
+
+    generateVariantRecordsWithColorVariations: generateVariantRecordsWithColorVariations,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,
