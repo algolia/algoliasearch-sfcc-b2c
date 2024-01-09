@@ -9,7 +9,8 @@ var logger;
 var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, fileHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, CPObjectIterator, AlgoliaJobReport;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
+var fileHelper, jobHelper, modelHelper, reindexHelper, sendHelper;
 
 // logging-related variables and constants
 var jobReport;
@@ -52,6 +53,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+    modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
@@ -265,13 +267,43 @@ exports.process = function(cpObj, parameters, stepExecution) {
     let algoliaOperations = [];
 
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
+        if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0) {
+            if (product.isVariant()) {
+                // This variant will be indexed when we treat its master product
+                return [];
+            }
+            if (product.master) {
+                var processedProducts = 0;
+                var recordsPerLocale = modelHelper.generateVariantRecordsWithColorVariations({
+                    masterProduct: product,
+                    locales: siteLocales,
+                    attributeList: attributesToSend,
+                    nonLocalizedAttributeList: nonLocalizedAttributes,
+                    fullRecordUpdate: fullRecordUpdate,
+                });
+                for (let l = 0; l < siteLocales.size(); ++l) {
+                    var locale = siteLocales[l];
+                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    var records = recordsPerLocale[locale];
+                    processedProducts = records.length;
+                    records.forEach(function(record) {
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
+                    });
+                }
+
+                jobReport.processedItemsToSend += processedProducts;
+                jobReport.recordsToSend += algoliaOperations.length;
+                return algoliaOperations;
+            }
+        }
+
         if (productFilter.isInclude(product)) {
 
             // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
             let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
             for (let l = 0; l < siteLocales.size(); l++) {
-                let locale = siteLocales[l];
-                let indexName = algoliaData.calculateIndexName('products', locale);
+                var locale = siteLocales[l];
+                var indexName = algoliaData.calculateIndexName('products', locale);
                 let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
                 algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
             }

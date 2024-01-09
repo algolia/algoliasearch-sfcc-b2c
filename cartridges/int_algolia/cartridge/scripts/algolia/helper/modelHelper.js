@@ -1,9 +1,61 @@
 const URLUtils = require('dw/web/URLUtils');
 
+const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+
 const COLOR_ATTRIBUTE_ID = 'color';
 
 /**
- * Return all color swatches for a product, based on its variation model
+ * For a given master, generate all variant records with their 'color_variations'
+ *
+ * @param {Object} parameters - model parameters
+ * @param {dw.order.Product} parameters.masterProduct - A master product
+ * @param {string} parameters.locales - The requested locales
+ * @param {Array} parameters.attributeList - list of attributes to be fetched
+ * @param {Array} parameters.nonLocalizedAttributeList - list of non-localized attributes
+ * @param {Array} parameters.fullRecordUpdate - specify if the generated records are mean to replace entirely the existing ones
+ * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
+ */
+function generateVariantRecordsWithColorVariations(parameters) {
+    const algoliaRecordsPerLocale = {};
+    const variants = parameters.masterProduct.getVariants();
+
+    // Fetch all color variation images for each locale, to set them in each variant
+    var colorVariationsPerLocale = {};
+    for (let l = 0; l < parameters.locales.size(); ++l) {
+        var locale = parameters.locales[l];
+        colorVariationsPerLocale[locale] = getColorVariations(parameters.masterProduct, locale);
+        algoliaRecordsPerLocale[locale] = [];
+    }
+    for (let v = 0; v < variants.size(); ++v) {
+        var variant = variants[v];
+        if (!productFilter.isInclude(variant)) {
+            continue;
+        }
+        var baseModel = new AlgoliaLocalizedProduct({
+            product: variant,
+            locale: 'default',
+            attributeList: parameters.nonLocalizedAttributeList,
+            fullRecordUpdate: parameters.fullRecordUpdate
+        });
+        for (let l = 0; l < parameters.locales.size(); ++l) {
+            var locale = parameters.locales[l];
+            let localizedVariant = new AlgoliaLocalizedProduct({
+                product: variant,
+                locale: locale,
+                attributeList: parameters.attributeList,
+                baseModel: baseModel,
+                fullRecordUpdate: parameters.fullRecordUpdate,
+            });
+            localizedVariant.color_variations = colorVariationsPerLocale[locale];
+            algoliaRecordsPerLocale[locale].push(localizedVariant);
+        }
+    }
+    return algoliaRecordsPerLocale;
+}
+
+/**
+ * Return color_variations for a product, based on its variation model
  * @param {dw.catalog.Product} product Product
  * @param {string} locale The desired locale
  * @return {[{title, alt, url, variationUrl}]} An array of swatches
@@ -115,4 +167,5 @@ function getImageGroup(imagesList, viewtype) {
 
 module.exports = {
     getColorVariations: getColorVariations,
+    generateVariantRecordsWithColorVariations: generateVariantRecordsWithColorVariations,
 };
