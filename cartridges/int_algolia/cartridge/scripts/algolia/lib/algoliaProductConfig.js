@@ -220,6 +220,9 @@ var attributeConfig_v2 = {
     in_stock: {
         localized: false
     },
+    master_id: {
+        localized: false,
+    },
     price: {
         localized: false
     },

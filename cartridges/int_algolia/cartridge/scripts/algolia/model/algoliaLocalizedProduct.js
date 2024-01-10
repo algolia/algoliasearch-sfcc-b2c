@@ -168,6 +168,10 @@ function safelyGetCustomAttribute(customAttributes, caKey) {
  * Handler complex and calculated Product attributes
  */
 var aggregatedValueHandlers = {
+    master_id: function(product) {
+        return product.isVariant() || product.isVariationGroup() ?
+            product.masterProduct.ID : null;
+    },
     categories: function (product) {
         var productCategories = product.getOnlineCategories();
         productCategories = empty(productCategories) ? [] : productCategories.toArray();
