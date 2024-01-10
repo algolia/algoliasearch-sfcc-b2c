@@ -392,20 +392,9 @@ function enableInstantSearch(config) {
      * Render the color swatches
      * @param {AlgoliaHit} hit Algolia hit
      * @param {any} html Tagged template
-     * @return {Object} A color swatch
+     * @return {any} A color swatch
      */
     function renderSwatches(hit, html) {
-        if (hit.swatches) {
-            return hit.swatches.map(swatch => {
-                return html`
-                <a href="${swatch.variationUrl}" aria-label="${swatch.title}">
-                    <span>
-                        <img class="swatch swatch-circle" data-index="0.0" style="background-image: url(${swatch.url})" src="${swatch.url}" alt="${swatch.alt}"/>
-                    </span>
-                </a>
-            `;
-            });
-        }
         if (hit.color_variations) {
             return hit.color_variations.map(colorVariation => {
                 let swatch;
