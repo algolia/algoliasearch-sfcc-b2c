@@ -1,5 +1,7 @@
 const URLUtils = require('dw/web/URLUtils');
 
+const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+
 const COLOR_ATTRIBUTE_ID = 'color';
 
 /**
@@ -25,6 +27,9 @@ function getColorVariations(product, locale) {
             colorValue
         );
         if (!hasOrderableVariants) {
+            logger.info(
+                'Product ' + product.ID + ' has no orderable variant for color ' + colorValue.value
+            );
             continue;
         }
         var image_groups = getColorVariationImagesGroup(variationModel, colorValue);
@@ -57,7 +62,7 @@ function getColorVariationImagesGroup(variationModel, colorAttributeValue) {
 
     variationModel.setSelectedAttributeValue('color', colorAttributeValue.ID);
 
-    ['large', 'small', 'swatch'].forEach(function(viewtype) {
+    ['large', 'small', 'swatch'].forEach(function (viewtype) {
         var imagesList = variationModel.getImages(viewtype);
         var imageGroups = getImageGroups(imagesList, viewtype);
         if (!empty(imageGroups)) {

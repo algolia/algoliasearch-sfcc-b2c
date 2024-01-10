@@ -247,14 +247,14 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     // algoliaOperations contains all the returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
     var productCount = algoliaOperationsArray.length;
-    if (!productCount) {
-        return;
-    }
 
     var batch = [];
     for (let i = 0; i < productCount; ++i) {
         // The array returned by the 'process' function is converted to a dw.util.List
         batch = batch.concat(algoliaOperationsArray[i].toArray());
+    }
+    if (!batch.length) {
+        return;
     }
 
     var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
