@@ -304,7 +304,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
             for (let l = 0; l < siteLocales.size(); l++) {
                 var locale = siteLocales[l];
                 var indexName = algoliaData.calculateIndexName('products', locale);
-                let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+                var localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
                 algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
             }
             jobReport.processedItemsToSend++;

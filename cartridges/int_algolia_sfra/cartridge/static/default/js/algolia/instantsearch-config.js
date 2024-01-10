@@ -304,7 +304,7 @@ function enableInstantSearch(config) {
                         item.currencySymbol = algoliaData.currencySymbol;
 
 
-                        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + item.objectID;
+                        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.master_id || item.objectID);
 
                         // originating index
                         item.__indexName = productsIndex;

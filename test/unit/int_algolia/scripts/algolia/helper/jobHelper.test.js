@@ -4,6 +4,7 @@ const collectionHelper = require("../../../../../mocks/helpers/collectionHelper"
 const jobHelper = require("../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper");
 
 test('generateVariantRecordsWithColorVariations', () => {
+    // master product with two size variations on the same color variation
     const masterProduct = new MasterProductMock();
     const variantPinkSize4 = new VariantMock({
         ID: '701644031206M',
