@@ -255,7 +255,7 @@ jest.mock('dw/experience/PageMgr', () => {
                 mockRegion: {
                     visibleComponents: [
                         {
-                            id: 'mockComponent1',
+                            id: 'richText',
                             testAttribute: 'testValue',
                         },
                         { id: 'mockComponent2' },
@@ -268,8 +268,13 @@ jest.mock('dw/experience/PageMgr', () => {
             return this.regions['mockRegion'];
         }
 
-        getAttribute() {
-            return this.regions['mockRegion'].visibleComponents[0].testAttribute;
+        getAttribute(id) {
+            switch(id) {
+                case 'richText':
+                    return 'testValue';
+                default:
+                    return 'default'
+            }
         }
 
         getPage() {
@@ -279,7 +284,6 @@ jest.mock('dw/experience/PageMgr', () => {
 
     return {
         getPage: jest.fn().mockImplementation((id) => {
-            console.log('getPage called with id: ' + id);
             return new PageMock()
         }),
     };

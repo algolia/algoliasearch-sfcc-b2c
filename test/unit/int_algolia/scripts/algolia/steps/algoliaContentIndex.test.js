@@ -158,7 +158,6 @@ describe('Algolia Content Indexing Tests', () => {
         test('should generate Algolia operations for content', () => {
             const content = new mockContent();
             const algoliaOperations = job.process(content, parameters, stepExecution);
-            console.log(algoliaOperations);
             expect(algoliaOperations).toEqual(
                 [
                     {
