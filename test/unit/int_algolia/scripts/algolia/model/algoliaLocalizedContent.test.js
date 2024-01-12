@@ -8,16 +8,6 @@ var ObjectHelper = require('../../../../../../cartridges/int_algolia/cartridge/s
 // Mock global dependencies
 global.request = new GlobalMock.RequestMock();
 
-// Jest mocks for imported modules
-jest.mock('dw/web/URLUtils', () => {
-    return {
-        url: function(endpoint, param, id) {
-            var relURL = '/on/demandware.store/Sites-Algolia_SFRA-Site/';
-            return relURL + global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
-        }
-    }
-}, {virtual: true});
-
 jest.mock('*/cartridge/scripts/algolia/lib/pageDesignerHelper', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/pageDesignerHelper');
 }, {virtual: true});
@@ -28,45 +18,6 @@ jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
 
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaContentConfig', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaContentConfig');
-}, {virtual: true});
-
-jest.mock('dw/experience/PageMgr', () => {
-    class PageMock {
-        constructor() {
-            this.id = 'mockPage';
-            this.typeID = 'storePage';
-            this.regions = {
-                mockRegion: {
-                    visibleComponents: [
-                        {
-                            id: 'mockComponent1',
-                            testAttribute: 'testValue',
-                        },
-                        { id: 'mockComponent2' },
-                    ],
-                },
-            };
-        }
-
-        getRegion() {
-            return this.regions['mockRegion'];
-        }
-
-        getAttribute() {
-            return this.regions['mockRegion'].visibleComponents[0].testAttribute;
-        }
-
-        getPage() {
-            return this;
-        }
-    }
-
-    return {
-        getPage: jest.fn().mockImplementation((id) => {
-            console.log('getPage called with id: ' + id);
-            return new PageMock()
-        }),
-    };
 }, {virtual: true});
 
 jest.mock('*/cartridge/experience/pages/storePage.json', () => {

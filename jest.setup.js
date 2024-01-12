@@ -245,3 +245,42 @@ jest.mock('*/cartridge/scripts/algolia/lib/utils', () => {
 jest.mock('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 }, {virtual: true});
+
+jest.mock('dw/experience/PageMgr', () => {
+    class PageMock {
+        constructor() {
+            this.id = 'mockPage';
+            this.typeID = 'storePage';
+            this.regions = {
+                mockRegion: {
+                    visibleComponents: [
+                        {
+                            id: 'mockComponent1',
+                            testAttribute: 'testValue',
+                        },
+                        { id: 'mockComponent2' },
+                    ],
+                },
+            };
+        }
+
+        getRegion() {
+            return this.regions['mockRegion'];
+        }
+
+        getAttribute() {
+            return this.regions['mockRegion'].visibleComponents[0].testAttribute;
+        }
+
+        getPage() {
+            return this;
+        }
+    }
+
+    return {
+        getPage: jest.fn().mockImplementation((id) => {
+            console.log('getPage called with id: ' + id);
+            return new PageMock()
+        }),
+    };
+}, {virtual: true});

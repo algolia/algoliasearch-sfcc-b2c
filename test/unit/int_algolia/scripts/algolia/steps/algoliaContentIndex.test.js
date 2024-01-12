@@ -1,5 +1,4 @@
 const GlobalMock = require('../../../../../mocks/global');
-const mockSite = require('../../../../../mocks/dw/system/Site');
 const mockContent = require('../../../../../mocks/dw/content/Content');
 const mockContentSearchModel = require('../../../../../mocks/dw/content/ContentSearchModel');
 const mockJobStepExecution = require('../../../../../mocks/dw/job/JobStepExecution');
@@ -11,9 +10,6 @@ global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
 // Mock dependencies
-jest.mock('dw/system/Site', () => mockSite, {
-    virtual: true
-});
 jest.mock('dw/content/ContentSearchModel', () => mockContentSearchModel, {
     virtual: true
 });
@@ -27,29 +23,6 @@ jest.mock('dw/util/HashMap', () => mockHashMap, {
 });
 
 // Additional mocks for your Algolia modules and other dependencies...
-jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
-    return {
-        getSetOfArray: function (id) {
-            return id === 'AdditionalAttributes' ?
-                ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
-                    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups'
-                ] :
-                null;
-        },
-        getPreference: function (id) {
-            return id === 'InStockThreshold' ? 1 : null;
-        },
-        csvStringToArray: function (string) {
-            return string.split(',');
-        },
-        calculateIndexName: function (indexName, localeID) {
-            return indexName + '_' + localeID;
-        }
-    }
-}, {
-    virtual: true
-});
-
 jest.mock('*/cartridge/scripts/algolia/model/algoliaLocalizedContent', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedContent');
 }, {
@@ -99,27 +72,7 @@ jest.mock('dw/util/Bytes', () => {
 });
 
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaSplitter', () => {
-    class BytesMock {
-        constructor(string) {
-            this.string = string;
-        }
-
-        getLength() {
-            return new Blob([this.string]).size;
-        }
-    }
-
-    return {
-        splitHtmlContent: function (content, maxByteSize, splitterElement) {
-            return content.split(splitterElement);
-        },
-
-        getMaxByteSize: function (content) {
-            return 10000 - JSON.stringify({
-                other: 'Other data'
-            }).length - 250;
-        }
-    }
+    return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaSplitter');
 }, {
     virtual: true
 });
@@ -205,13 +158,26 @@ describe('Algolia Content Indexing Tests', () => {
         test('should generate Algolia operations for content', () => {
             const content = new mockContent();
             const algoliaOperations = job.process(content, parameters, stepExecution);
-            expect(algoliaOperations).toEqual([{
-                "action": "addObject",
-                "body": {
-                    "objectID": "mockContentID"
-                },
-                "indexName": "contents_en_US.tmp"
-            }]);
+            console.log(algoliaOperations);
+            expect(algoliaOperations).toEqual(
+                [
+                    {
+                        action: 'addObject',
+                        indexName: 'test_index___contents__default.tmp',
+                        body: { objectID: 'mockContentID' }
+                    },
+                    {
+                        action: 'addObject',
+                        indexName: 'test_index___contents__fr.tmp',
+                        body: { objectID: 'mockContentID' }
+                    },
+                    {
+                        action: 'addObject',
+                        indexName: 'test_index___contents__en.tmp',
+                        body: { objectID: 'mockContentID' }
+                    }
+                ]
+            );
         });
     });
 

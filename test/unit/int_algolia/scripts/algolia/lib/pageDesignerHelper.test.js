@@ -2,50 +2,10 @@ const {
     isIndexableComponent,
     getContainerContent,
     getAttributeDefinitions,
-    getRegionDefinitons,
+    getRegionDefinitions,
     isIgnoredAttribute,
     getRegionContent
 } = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/pageDesignerHelper');
-
-jest.mock('dw/experience/PageMgr', () => {
-    class PageMock {
-        constructor() {
-            this.id = 'mockPage';
-            this.typeID = 'storePage';
-            this.regions = {
-                mockRegion: {
-                    visibleComponents: [{
-                        id: 'mockComponent1',
-                        testAttribute: 'testValue',
-                    },
-                    {
-                        id: 'mockComponent2'
-                    }],
-                },
-            };
-        }
-
-        getRegion(id) {
-            return this.regions['mockRegion'];
-        }
-
-        getAttribute(id) {
-            return this.regions['mockRegion'].visibleComponents[0].testAttribute;
-        }
-
-        getPage(id) {
-            return this;
-        }
-    }
-
-    return {
-        getPage: jest.fn().mockImplementation((id) => {
-            return new PageMock()
-        }),
-    };
-}, {
-    virtual: true
-});
 
 jest.mock('*/cartridge/experience/mockType/storePage.json', () => {
     const originalModule = jest.requireActual('../../../../../mocks/sfra/experiences/storePage.json');
@@ -122,7 +82,7 @@ describe('Attribute and Region Definitions', () => {
         }]);
     });
 
-    test('getRegionDefinitons should return correct definitions', () => {
+    test('getRegionDefinitions should return correct definitions', () => {
         const pageMetaDefinition = {
             region_definitions: {
                 mockRegion: {
@@ -130,7 +90,7 @@ describe('Attribute and Region Definitions', () => {
                 },
             },
         };
-        const result = getRegionDefinitons(pageMetaDefinition);
+        const result = getRegionDefinitions(pageMetaDefinition);
         // Expectations
         expect(result).toEqual({
             mockRegion: {

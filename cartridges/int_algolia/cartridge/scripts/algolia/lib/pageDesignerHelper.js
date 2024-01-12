@@ -47,7 +47,7 @@ function getContainerContent(container, type) {
     var content;
 
     attributeDefinitions = getAttributeDefinitions(pageMetaDefinition);
-    regionDefinitions = getRegionDefinitons(pageMetaDefinition);
+    regionDefinitions = getRegionDefinitions(pageMetaDefinition);
 
     for (var i = 0; i < attributeDefinitions.length; i++) {
         var attribute_definition = attributeDefinitions[i];
@@ -99,7 +99,7 @@ function getAttributeDefinitions(pageMetaDefinition) {
  * @param {Object} pageMetaDefinition - The page meta definition to retrieve region definitions from.
  * @returns {Array} An array of region definitions.
  */
-function getRegionDefinitons (pageMetaDefinition) {
+function getRegionDefinitions (pageMetaDefinition) {
     if (!pageMetaDefinition.region_definitions) {
         return [];
     }
@@ -163,5 +163,5 @@ exports.isIgnoredAttribute = isIgnoredAttribute;
 exports.isIndexableComponent = isIndexableComponent;
 exports.getRegionContent = getRegionContent;
 exports.getAttributeDefinitions = getAttributeDefinitions;
-exports.getRegionDefinitons = getRegionDefinitons;
+exports.getRegionDefinitions = getRegionDefinitions;
 
