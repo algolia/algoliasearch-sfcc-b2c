@@ -7,7 +7,7 @@ const indexOnlySearchables = true;
 /* Usable if indexOnlySearchables is set to false because in this case, we are indexing all the components and not only the searchable ones
 * It is already configured for default SFRA components, feel free to add your own
 */
-const indexableComponents = ['custom', 'cms_record', 'enum', 'markup', 'string', 'text', 'url'];
+const indexableAttributes = ['custom', 'cms_record', 'enum', 'markup', 'string', 'text', 'url'];
 const ignoredAttributes = ['xsCarouselIndicators', 'xsCarouselControls', 'xsCarouselSlidesToDisplay', 'customCategoryName1', 'customCategoryName2', 'customCategoryName3', 'customCategoryName4', 'customCategoryName5', 'customCategoryName6', 'customCategoryName7',
     'customCategoryName8', 'customCategoryName9', 'customCategoryName10', 'customCategoryName11', 'customCategoryName12', 'imagesize', 'offset', 'smCarouselSlidesToDisplay', 'mdCarouselSlidesToDisplay'];
 
@@ -22,6 +22,20 @@ const ignoredAttributes = ['xsCarouselIndicators', 'xsCarouselControls', 'xsCaro
  */
 function isIndexableComponent(component) {
     if (component && component.searching && component.searching.searchable) {
+        return true;
+    }
+
+    return false;
+}
+
+
+/**
+ * Checks if Attribute is Indexable according to value
+ * @param {Object} component - The component to check.
+ * @returns {boolean} Returns true if the component is indexable, otherwise false.
+ */
+function isIndexableAttribute (component) {
+    if (indexableAttributes.indexOf(component.type)) {
         return true;
     }
 
@@ -53,7 +67,7 @@ function getContainerContent(container, type) {
         var attribute_definition = attributeDefinitions[i];
         content = getAttributeContent(page, attribute_definition);
         if (content && content !== ' ' && ((indexOnlySearchables && isIndexableComponent(attribute_definition)) ||
-            (!indexOnlySearchables && !isIgnoredAttribute(attribute_definition)))) {
+            (!indexOnlySearchables && !isIgnoredAttribute(attribute_definition) && isIndexableAttribute(attribute_definition)))) {
             indexableContent = indexableContent ? indexableContent + ' ' + content : content;
         }
     }
@@ -116,7 +130,7 @@ function getRegionDefinitions (pageMetaDefinition) {
  */
 function getAttributeContent (component, attribute_definition) {
     var content = component.getAttribute(attribute_definition.id);
-    return content;
+    return typeof content === 'string' ? content : '';
 }
 
 
