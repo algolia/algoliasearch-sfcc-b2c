@@ -30,9 +30,8 @@ var aggregatedValueHandlers = {
     },
     page: function (content, indexingMethod) {
         if (content.isPage()) {
-            return 'page';
+            return true;
         }
-        return 'content';
     }
 };
 
