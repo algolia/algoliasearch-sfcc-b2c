@@ -338,15 +338,15 @@
                         {
                             "@name": "attributeList",
                             "@type": "string",
-                            "description": "A comma-separated list of attributes will be indexed.",
-                            "@required": false,
+                            "description": "A comma-separated list of attributes to index.",
+                            "@required": true,
                             "@trim": true,
                             "default-value": "id,name,description,url,body,page"
                         },
                         {
                             "@name": "failureThresholdPercentage",
                             "@type": "long",
-                            "description": "Allowed percentage of records that fails to be indexed before marking the job in error. Default: 0. When indexingMethod=fullContentReindex, the temporary index is not moved to production if the failure percentage exceeds this threshold.",
+                            "description": "Allowed percentage of records that fails to be indexed before marking the job in error. Default: 0. The temporary index is not moved to production if the failure percentage exceeds this threshold.",
                             "@required": false,
                             "min-value":"0",
                             "max-value":"100"
@@ -354,7 +354,7 @@
                         {
                             "@name": "splitterTag",
                             "@type": "string",
-                            "description": "The tag used to split the content into chunks. If not specified, tag splitment will not work, but only maximum bytes rule per chunk will be used.",
+                            "description": "The HTML tag used to split the content into chunks. If not specified, the content will be split according to DEFAULT_MAX_RECORD_BYTES.",
                             "@required": false,
                             "@trim": true
                         },
