@@ -129,8 +129,7 @@ Can perform full records updates or partial records updates. See the 'indexingMe
                 </parameters>
             </step>
             <step step-id="algoliaContentIndex" type="custom.algoliaContentIndex" enforce-restart="false">
-                <description>Index all searchable contents assigned to the selected site to Algolia. The list of indexed attributes is configurable.
-It highly depends on the content search index on Salesforce, so do not forget to trigger search index after content update or enable incremental update.</description>
+                <description>Index all searchable contents assigned to the selected site to Algolia. The list of indexed attributes is configurable.</description>
                 <parameters>
                     <parameter name="splitterTag">h1</parameter>
                     <parameter name="attributeList">id,name,description,url,body,page</parameter>
