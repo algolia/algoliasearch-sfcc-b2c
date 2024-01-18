@@ -120,7 +120,7 @@ Can perform full records updates or partial records updates. See the 'indexingMe
         <flow>
             <context site-id="RefArch"/>
             <step step-id="SFCCContentSearchIndex" type="SearchReindex" enforce-restart="false">
-                <description>To ensure that we can rely on SFCC search indexing, it is recommended to reindex all search content indexes. This will help improve the accuracy and relevance of the search results on your website.</description>
+                <description>Rebuilds or updates SFCC search indexes to ensure the job will see the latest version of the content.</description>
                 <parameters>
                     <parameter name="Product related search indexes">false</parameter>
                     <parameter name="Active data search index">false</parameter>
