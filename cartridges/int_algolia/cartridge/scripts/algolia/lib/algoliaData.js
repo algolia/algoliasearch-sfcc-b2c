@@ -64,7 +64,6 @@ const clientSideData = {
 //   SearchApiKey                 ║ Authorization key for Algolia                           ║ String
 //   AdminApiKey                  ║ Authorization Admin key for Algolia                     ║ String
 //   AdditionalAttributes         ║ Any additional Product attributes                       ║ Set-of-string
-//   AdditionalContentAttributes  ║ Any additional Content attributes                       ║ Set-of-string
 //   InStockThreshold             ║ Stock Threshold                                         ║ Double
 //   IndexPrefix                  ║ Optional prefix for the index name                      ║ String
 //   EnableInsights               ║ Enables insights events on the Storefront               ║ Boolean

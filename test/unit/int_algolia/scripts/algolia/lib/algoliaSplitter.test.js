@@ -1,4 +1,4 @@
-const { splitHtmlContent, getMaxByteSize } = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaSplitter');
+const { splitHtmlContent, getMaxBodySize } = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaSplitter');
 
 jest.mock('dw/util/Bytes', () => {
     class BytesMock {
@@ -44,11 +44,11 @@ describe('HTML Content Manipulation', () => {
         });
     });
 
-    describe('getMaxByteSize', () => {
+    describe('getMaxBodySize', () => {
         test('should calculate max byte size correctly', () => {
             const content = { body: 'Example content', other: 'Other data' };
             const expectedMaxByteSize = 10000 - JSON.stringify({ other: 'Other data' }).length - 300; // Adjust based on your DEFAULT_MAX_RECORD_BYTES and SAFETY_MARGIN
-            const result = getMaxByteSize(content);
+            const result = getMaxBodySize(content);
             expect(result).toBe(expectedMaxByteSize);
         });
     });
@@ -76,14 +76,14 @@ describe('Extreme Content Manipulation', () => {
     test('should correctly calculate max byte size with large non-body fields', () => {
         const content = { body: 'Example content', other: 'a'.repeat(5000) };
         const expectedMaxByteSize = 10000 - JSON.stringify({ other: content.other }).length - 300;
-        const result = getMaxByteSize(content);
+        const result = getMaxBodySize(content);
         expect(result).toBe(expectedMaxByteSize);
     });
 
     test('should handle empty content object', () => {
         const content = {};
         const expectedMaxByteSize = 10000 - 300;
-        const result = getMaxByteSize(content);
+        const result = getMaxBodySize(content);
         // expect result near to %2 of expectedMaxByteSize
         expect(result).toBeGreaterThan(expectedMaxByteSize * 0.98);
     });

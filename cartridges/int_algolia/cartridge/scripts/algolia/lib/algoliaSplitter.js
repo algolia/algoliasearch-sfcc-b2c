@@ -111,12 +111,12 @@ function splitLargeContent(content, maxByteSize) {
 }
 
 /**
- * Calculates the max byte size of a record.
+ * Calculates the max byte size of body.
  *
  * @param {Object} content - Content object.
  * @returns {number} Max byte size.
  */
-function getMaxByteSize(content) {
+function getMaxBodySize(content) {
     var tempBody = content.body;
     delete content.body;
     var contentSize = new Bytes(JSON.stringify(content)).getLength() + SAFETY_MARGIN;
@@ -127,5 +127,5 @@ function getMaxByteSize(content) {
 
 module.exports = {
     splitHtmlContent: splitHtmlContent,
-    getMaxByteSize: getMaxByteSize
+    getMaxBodySize: getMaxBodySize
 };
