@@ -338,7 +338,7 @@
                         {
                             "@name": "attributeList",
                             "@type": "string",
-                            "description": "A comma-separated list of attributes will be indexed.",
+                            "description": "A comma-separated list of attributes to index.",
                             "@required": false,
                             "@trim": true,
                             "default-value": "id,name,description,url,body,page"
