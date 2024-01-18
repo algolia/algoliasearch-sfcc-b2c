@@ -346,7 +346,7 @@
                         {
                             "@name": "failureThresholdPercentage",
                             "@type": "long",
-                            "description": "Allowed percentage of records that fails to be indexed before marking the job in error. Default: 0. When indexingMethod=fullContentReindex, the temporary index is not moved to production if the failure percentage exceeds this threshold.",
+                            "description": "Allowed percentage of records that fails to be indexed before marking the job in error. Default: 0. The temporary index is not moved to production if the failure percentage exceeds this threshold.",
                             "@required": false,
                             "min-value":"0",
                             "max-value":"100"
