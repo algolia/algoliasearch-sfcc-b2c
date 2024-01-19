@@ -27,11 +27,6 @@ var aggregatedValueHandlers = {
             return content.custom.body.source;
         }
         return null;
-    },
-    page: function (content, includedContent) {
-        if (content.isPage()) {
-            return true;
-        }
     }
 };
 
@@ -42,7 +37,6 @@ var aggregatedValueHandlers = {
  * @param {string} parameters.locale - The requested locale
  * @param {Array} parameters.attributeList list of attributes to be fetched
  * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
- * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
  * @constructor
  */
 function AlgoliaLocalizedContent(parameters) {

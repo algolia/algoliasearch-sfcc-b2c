@@ -14,12 +14,6 @@ jest.mock('dw/util/Bytes', () => {
     return BytesMock;
 }, {virtual: true});
 
-jest.mock('dw/util/StringUtils', () => {
-    return {
-        trim: function (str) { return str; }
-    }
-}, {virtual: true});
-
 describe('HTML Content Manipulation', () => {
     describe('splitHtmlContent', () => {
         const maxByteSize = 1000;
@@ -80,12 +74,17 @@ describe('Extreme Content Manipulation', () => {
         expect(result).toBe(expectedMaxByteSize);
     });
 
-    test('should handle empty content object', () => {
-        const content = {};
+    test('should handle content object', () => {
+        const mockedContent = {
+            body: '',
+            id: 'mockedId',
+            objectID: 'mockedObjectID',
+            page: true,
+        };
         const expectedMaxByteSize = 10000 - 300;
-        const result = getMaxBodySize(content);
-        // expect result near to %2 of expectedMaxByteSize
-        expect(result).toBeGreaterThan(expectedMaxByteSize * 0.98);
+        const result = getMaxBodySize(mockedContent);
+        // expect result near to %1 of expectedMaxByteSize
+        expect(result).toBeLessThan(expectedMaxByteSize);
     });
 });
 

@@ -15,15 +15,14 @@ const IGNORED_TAGS = ['applet', 'area', 'audio', 'base', 'basefont', 'bgsound', 
  * @param {string} htmlContent - HTML content to split.
  * @param {number} maxByteSize - Maximum byte size for each split part.
  * @param {string} splitterElement - HTML element to use as the splitter.
- * @returns {string[]} Array of split co
- * ntent pieces.
+ * @returns {string[]} Array of split content pieces.
  */
 function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
     var split = [];
     var splitterBegin = '<' + splitterElement + '>';
 
     //remove restricted tags and their content
-    var content = removeRestrictedContent(htmlContent);
+    var content = removeIgnoredContent(htmlContent);
 
     var sections = content.split(splitterBegin);
 
@@ -61,7 +60,7 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
  * @param {string} content - Content will be sanitized
  * @returns {string} Sanitized content
  */
-function removeRestrictedContent(content) {
+function removeIgnoredContent(content) {
     //remove restricted tags and their content
     IGNORED_TAGS.forEach(function(tag) {
         content = content.replace(new RegExp('<' + tag + '.*?' + tag + '>', 'g'), '');

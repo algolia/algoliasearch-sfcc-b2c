@@ -18,9 +18,6 @@ jest.mock('dw/job/JobStepExecution', () => {
 }, {
     virtual: true
 });
-jest.mock('dw/util/HashMap', () => mockHashMap, {
-    virtual: true
-});
 
 // Additional mocks for your Algolia modules and other dependencies...
 jest.mock('*/cartridge/scripts/algolia/model/algoliaLocalizedContent', () => {
@@ -149,7 +146,6 @@ describe('Algolia Content Indexing Tests', () => {
             // Check if Algolia API setup is done
             expect(mockSetJobInfo).toHaveBeenCalledWith(expect.objectContaining({
                 jobID: expect.any(String),
-                includedContent: expect.any(String),
             }));
         });
     });
