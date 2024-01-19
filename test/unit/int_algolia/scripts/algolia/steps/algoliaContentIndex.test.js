@@ -149,7 +149,7 @@ describe('Algolia Content Indexing Tests', () => {
             // Check if Algolia API setup is done
             expect(mockSetJobInfo).toHaveBeenCalledWith(expect.objectContaining({
                 jobID: expect.any(String),
-                indexingMethod: expect.any(String),
+                includedContent: expect.any(String),
             }));
         });
     });

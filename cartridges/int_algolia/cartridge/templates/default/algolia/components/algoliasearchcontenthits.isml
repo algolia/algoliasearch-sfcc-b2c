@@ -1,0 +1,34 @@
+<isif condition="${pdict.contentSearch.hits}">
+    <isif condition="${pdict.contentSearch.hits.lenght === 0}">
+        <div class="result-count col">
+            ${Resource.msg('label.noresultsfor', 'search', null)}
+            <span class="search-keywords">
+                ${pdict.contentSearch.queryPhrase}
+            </span>
+            <isslot id="noresults-help" description="Recommendations for no result search" context="global" />
+    <iselse>
+        <div class="result-count col-sm-8 col-md-6">
+            ${Resource.msgf('label.resultsfor', 'search', null, pdict.contentSearch.contentCount)}
+            <span class="search-keywords">
+                ${pdict.contentSearch.queryPhrase}
+            </span>
+    </isif>
+<iselse>
+<div>
+</isif>
+
+    <isloop items="${pdict.contentSearch.hits}" var="contentAsset">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header clearfix">
+                        <h4><a href="${content.url}">${content.name}</a></h4>
+                    </div>
+                    <div class="card-body card-info-group">
+                        ${content.description}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </isloop>
+</div>

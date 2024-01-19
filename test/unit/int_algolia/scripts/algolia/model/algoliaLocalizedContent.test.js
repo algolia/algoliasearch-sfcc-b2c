@@ -37,7 +37,7 @@ describe('AlgoliaLocalizedContent', () => {
 
     test('should initialize correctly with given parameters', () => {
         const attributeList = ['url', 'body'];
-        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, indexingMethod: 'allContents' });
+        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, includedContent: 'allContents' });
 
         expect(algoliaContent.objectID).toEqual('testContentID');
         expect(algoliaContent.url).toBeDefined();
@@ -48,7 +48,7 @@ describe('AlgoliaLocalizedContent', () => {
         contentMock.isPage = jest.fn().mockReturnValue(true);
 
         const attributeList = ['body'];
-        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, indexingMethod: 'allContents' });
+        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, includedContent: 'allContents' });
 
         expect(algoliaContent.body).toEqual('testValue');
     });
@@ -58,7 +58,7 @@ describe('AlgoliaLocalizedContent', () => {
         contentMock.custom.body = { source: 'mockedCustomBody' };
 
         const attributeList = ['body'];
-        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, indexingMethod: 'allContents' });
+        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, includedContent: 'allContents' });
 
         expect(algoliaContent.body).toEqual('mockedCustomBody');
     });
@@ -68,7 +68,7 @@ describe('AlgoliaLocalizedContent', () => {
         contentMock.custom.body = { source: 'mockedCustomBody' };
 
         const attributeList = ['body'];
-        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, indexingMethod: 'allContents' });
+        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, includedContent: 'allContents' });
 
         expect(algoliaContent.body).toEqual('mockedCustomBody');
     });
@@ -77,7 +77,7 @@ describe('AlgoliaLocalizedContent', () => {
         contentMock.custom.attribute = 'mockedAttribute';
 
         const attributeList = ['custom.attribute'];
-        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, indexingMethod: 'allContents' });
+        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, includedContent: 'allContents' });
 
         expect(ObjectHelper.getAttributeValue(contentMock, attributeList[0])).toEqual('mockedAttribute');
     });

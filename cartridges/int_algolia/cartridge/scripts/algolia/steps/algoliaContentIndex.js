@@ -5,7 +5,7 @@ var ContentSearchModel = require('dw/content/ContentSearchModel');
 var logger;
 
 // job step parameters
-var paramAttributeList, paramFailureThresholdPercentage, indexingMethod;
+var paramAttributeList, paramFailureThresholdPercentage, includedContent;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig;
@@ -45,7 +45,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     /* --- parameters --- */
     paramAttributeList = algoliaData.csvStringToArray(parameters.attributeList);
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
-    indexingMethod = parameters.indexingMethod || 'allContents';
+    includedContent = parameters.includedContent || 'allContents';
 
 
     attributesToSend = algoliaContentConfig.defaultAttributes;
@@ -79,7 +79,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
         stepID: stepExecution.getStepID(),
-        indexingMethod: 'fullContentReindex',
+        includedContent: 'fullContentReindex',
     });
 
     try {
@@ -147,13 +147,13 @@ exports.process = function(content, parameters, stepExecution) {
 
     var algoliaOperations = [];
     // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-    var baseModel = new AlgoliaLocalizedContent({ content: content, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate, indexingMethod: indexingMethod });
+    var baseModel = new AlgoliaLocalizedContent({ content: content, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate, includedContent: includedContent });
 
     for (let l = 0; l < siteLocales.size(); ++l) {
         var locale = siteLocales[l];
         var indexName = algoliaData.calculateIndexName('contents', locale);
         indexName += '.tmp';
-        let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate, indexingMethod: indexingMethod });
+        let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate, includedContent: includedContent });
         let splits = [];
         let splitterTag = parameters.splitterTag;
         if (attributesToSend.indexOf('body') >= 0 && localizedContent.body) {

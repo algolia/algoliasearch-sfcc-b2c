@@ -11,24 +11,24 @@ var ACTION_ENDPOINT_CONTENT = 'Page-Show';
  * Handler complex and calculated Content attributes
  */
 var aggregatedValueHandlers = {
-    url: function (content, indexingMethod) {
+    url: function (content, includedContent) {
         var pageURL = URLUtils.url(ACTION_ENDPOINT_CONTENT, 'cid', content.ID);
         return pageURL ? pageURL.toString() : null;
     },
-    body: function (content, indexingMethod) {
+    body: function (content, includedContent) {
         var pageDesignerContent;
-        if (content.isPage() && (indexingMethod === 'allContents' || indexingMethod === 'pageDesignerComponents')) {
+        if (content.isPage() && (includedContent === 'allContents' || includedContent === 'pageDesignerComponents')) {
             var pageDesignerHelper = require('*/cartridge/scripts/algolia/lib/pageDesignerHelper');
             var body = pageDesignerHelper.getContainerContent(content, 'pages');
             return body;
         }
 
-        if (content && content.custom && content.custom.body && (indexingMethod === 'allContents' || indexingMethod === 'contentAssets')) {
+        if (content && content.custom && content.custom.body && (includedContent === 'allContents' || includedContent === 'contentAssets')) {
             return content.custom.body.source;
         }
         return null;
     },
-    page: function (content, indexingMethod) {
+    page: function (content, includedContent) {
         if (content.isPage()) {
             return true;
         }
@@ -56,7 +56,7 @@ function AlgoliaLocalizedContent(parameters) {
                 this[attributeName] = parameters.baseModel[attributeName];
             } else {
                 this[attributeName] = aggregatedValueHandlers[attributeName]
-                    ? aggregatedValueHandlers[attributeName](parameters.content, parameters.indexingMethod)
+                    ? aggregatedValueHandlers[attributeName](parameters.content, parameters.includedContent)
                     : ObjectHelper.getAttributeValue(parameters.content, config.attribute);
             }
         }
