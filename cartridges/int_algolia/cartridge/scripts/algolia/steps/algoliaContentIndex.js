@@ -155,10 +155,10 @@ exports.process = function(content, parameters, stepExecution) {
         indexName += '.tmp';
         let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate, includedContent: includedContent });
         let splits = [];
-        let splitterTag = parameters.splitterTag;
+        let tagDelimiter = parameters.tagDelimiter;
         if (attributesToSend.indexOf('body') >= 0 && localizedContent.body) {
             let maxRecordBytes = algoliaSplitter.getMaxBodySize(localizedContent);
-            splits = algoliaSplitter.splitHtmlContent(localizedContent.body, maxRecordBytes, splitterTag);
+            splits = algoliaSplitter.splitHtmlContent(localizedContent.body, maxRecordBytes, tagDelimiter);
             for (let i = 0; i < splits.length; i++) {
                 var splittedContent = {};
                 for (var key in localizedContent) {
