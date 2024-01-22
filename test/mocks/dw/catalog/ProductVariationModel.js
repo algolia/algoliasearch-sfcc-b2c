@@ -2,32 +2,36 @@ const collectionHelper = require('../../helpers/collectionHelper');
 
 // https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/api/class_dw_catalog_ProductVariationModel.html
 class ProductVariationModel {
-    constructor({ productID, images, selectedAttributeValue } = {}) {
+    constructor({ productID, images, variationAttributes = {} } = {}) {
         this.productID = productID;
         this.images = images;
-        this.selectedAttributeValue = {};
+        this.variationAttributes = variationAttributes;
     }
 
     getProductVariationAttribute(id) {
         const productVariationAttributes = {
             color: {
-                default: { attributeID: 'color', displayName: 'Color' },
-                en: { attributeID: 'color', displayName: 'Color' },
-                fr: { attributeID: 'color', displayName: 'Coloris' },
+                default: { ID: 'color', displayName: 'Color' },
+                en: { ID: 'color', displayName: 'Color' },
+                fr: { ID: 'color', displayName: 'Coloris' },
             },
             size: {
-                default: { attributeID: 'size', displayName: 'Size' },
-                en: { attributeID: 'size', displayName: 'Size' },
-                fr: { attributeID: 'size', displayName: 'Taille' },
+                default: { ID: 'size', displayName: 'Size' },
+                en: { ID: 'size', displayName: 'Size' },
+                fr: { ID: 'size', displayName: 'Taille' },
             },
         };
         return productVariationAttributes[id][request.getLocale()];
     }
+    getSelectedValue(attribute) {
+        const values = this.getAllValues(attribute);
+        return values.find(val => val.ID === this.variationAttributes[attribute.ID]);
+    }
     setSelectedAttributeValue(variationAttributeID, variationAttributeValueID) {
-        this.selectedAttributeValue[variationAttributeID] = variationAttributeValueID;
+        this.variationAttributes[variationAttributeID] = variationAttributeValueID;
     }
     getAllValues(variationAttribute) {
-        switch (variationAttribute.attributeID) {
+        switch (variationAttribute.ID) {
             case 'color':
                 switch (request.getLocale()) {
                     case 'default':
@@ -44,10 +48,20 @@ class ProductVariationModel {
                             {
                                 ID: 'JJB52A0',
                                 value: 'JJB52A0',
-                                displayValue: 'Mix rose vif',
+                                displayValue: 'Combo rose vif',
                             },
                         ]);
+                    default:
+                        return null;
                 }
+            case 'size':
+                return collectionHelper.createCollection([
+                    {
+                        ID: '004',
+                        value: '4',
+                        displayValue: '4',
+                    },
+                ]);
         }
     }
     hasOrderableVariants(variationAttribute, variationAttributeValue) {
@@ -60,7 +74,7 @@ class ProductVariationModel {
     }
 
     getHtmlName(variationAttribute) {
-        switch (variationAttribute.attributeID) {
+        switch (variationAttribute.ID) {
             case 'color':
                 return 'dwvar_' + this.productID + '_color';
         }

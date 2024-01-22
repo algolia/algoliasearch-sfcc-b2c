@@ -34,26 +34,6 @@ exports[`process color_variations 1`] = `
             "name": "Womens",
           },
         ],
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
       ],
       "color_variations": [
         {
@@ -64,13 +44,13 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -81,14 +61,14 @@ exports[`process color_variations 1`] = `
               "images": [
                 {
                   "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
                 {
                   "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -100,7 +80,7 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, swatch",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -117,13 +97,13 @@ exports[`process color_variations 1`] = `
             {
               "_type": "image",
               "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
             {
               "_type": "image",
               "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
           ],
@@ -134,14 +114,14 @@ exports[`process color_variations 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
           ],
@@ -192,26 +172,6 @@ exports[`process color_variations 1`] = `
             "name": "Womens",
           },
         ],
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
       ],
       "color_variations": [
         {
@@ -222,13 +182,13 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -239,14 +199,14 @@ exports[`process color_variations 1`] = `
               "images": [
                 {
                   "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
                 {
                   "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -258,7 +218,7 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, swatch",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -275,13 +235,13 @@ exports[`process color_variations 1`] = `
             {
               "_type": "image",
               "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
             {
               "_type": "image",
               "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
           ],
@@ -292,14 +252,14 @@ exports[`process color_variations 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
           ],
@@ -350,26 +310,6 @@ exports[`process color_variations 1`] = `
             "name": "Femmes",
           },
         ],
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
       ],
       "color_variations": [
         {
@@ -379,15 +319,15 @@ exports[`process color_variations 1`] = `
               "images": [
                 {
                   "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
+                  "alt": "Robe florale, Combo rose vif, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
                 },
                 {
                   "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
+                  "alt": "Robe florale, Combo rose vif, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
                 },
               ],
               "view_type": "large",
@@ -397,15 +337,15 @@ exports[`process color_variations 1`] = `
               "images": [
                 {
                   "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, small",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw08ea0a24/images/small/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
+                  "alt": "Robe florale, Combo rose vif, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
                 },
                 {
                   "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, small",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwf89d4457/images/small/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
+                  "alt": "Robe florale, Combo rose vif, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
                 },
               ],
               "view_type": "small",
@@ -416,7 +356,7 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Robe fleurie, Mix rose vif, swatch",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
                   "title": "Robe fleurie, Mix rose vif",
                 },
               ],
@@ -432,15 +372,15 @@ exports[`process color_variations 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Robe fleurie, Mix rose vif, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Robe fleurie, Mix rose vif",
+              "alt": "Robe florale, Combo rose vif, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Robe florale, Combo rose vif",
             },
             {
               "_type": "image",
-              "alt": "Robe fleurie, Mix rose vif, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Robe fleurie, Mix rose vif",
+              "alt": "Robe florale, Combo rose vif, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Robe florale, Combo rose vif",
             },
           ],
           "view_type": "large",
@@ -450,15 +390,15 @@ exports[`process color_variations 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Robe fleurie, Mix rose vif, small",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw08ea0a24/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Robe fleurie, Mix rose vif",
+              "alt": "Robe florale, Combo rose vif, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Robe florale, Combo rose vif",
             },
             {
               "_type": "image",
-              "alt": "Robe fleurie, Mix rose vif, small",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwf89d4457/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Robe fleurie, Mix rose vif",
+              "alt": "Robe florale, Combo rose vif, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Robe florale, Combo rose vif",
             },
           ],
           "view_type": "small",
@@ -508,26 +448,6 @@ exports[`process color_variations 1`] = `
             "name": "Femmes",
           },
         ],
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
       ],
       "color_variations": [
         {
@@ -537,15 +457,15 @@ exports[`process color_variations 1`] = `
               "images": [
                 {
                   "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
+                  "alt": "Robe florale, Combo rose vif, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
                 },
                 {
                   "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
+                  "alt": "Robe florale, Combo rose vif, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
                 },
               ],
               "view_type": "large",
@@ -555,15 +475,15 @@ exports[`process color_variations 1`] = `
               "images": [
                 {
                   "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, small",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw08ea0a24/images/small/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
+                  "alt": "Robe florale, Combo rose vif, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
                 },
                 {
                   "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, small",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwf89d4457/images/small/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
+                  "alt": "Robe florale, Combo rose vif, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
                 },
               ],
               "view_type": "small",
@@ -574,7 +494,7 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Robe fleurie, Mix rose vif, swatch",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
                   "title": "Robe fleurie, Mix rose vif",
                 },
               ],
@@ -590,15 +510,15 @@ exports[`process color_variations 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Robe fleurie, Mix rose vif, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Robe fleurie, Mix rose vif",
+              "alt": "Robe florale, Combo rose vif, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Robe florale, Combo rose vif",
             },
             {
               "_type": "image",
-              "alt": "Robe fleurie, Mix rose vif, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Robe fleurie, Mix rose vif",
+              "alt": "Robe florale, Combo rose vif, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Robe florale, Combo rose vif",
             },
           ],
           "view_type": "large",
@@ -608,15 +528,15 @@ exports[`process color_variations 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Robe fleurie, Mix rose vif, small",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw08ea0a24/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Robe fleurie, Mix rose vif",
+              "alt": "Robe florale, Combo rose vif, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Robe florale, Combo rose vif",
             },
             {
               "_type": "image",
-              "alt": "Robe fleurie, Mix rose vif, small",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwf89d4457/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Robe fleurie, Mix rose vif",
+              "alt": "Robe florale, Combo rose vif, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Robe florale, Combo rose vif",
             },
           ],
           "view_type": "small",
@@ -666,26 +586,6 @@ exports[`process color_variations 1`] = `
             "name": "Womens",
           },
         ],
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
       ],
       "color_variations": [
         {
@@ -696,13 +596,13 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -713,14 +613,14 @@ exports[`process color_variations 1`] = `
               "images": [
                 {
                   "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
                 {
                   "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -732,7 +632,7 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, swatch",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -749,13 +649,13 @@ exports[`process color_variations 1`] = `
             {
               "_type": "image",
               "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
             {
               "_type": "image",
               "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
           ],
@@ -766,14 +666,14 @@ exports[`process color_variations 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
           ],
@@ -824,26 +724,6 @@ exports[`process color_variations 1`] = `
             "name": "Womens",
           },
         ],
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
       ],
       "color_variations": [
         {
@@ -854,13 +734,13 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -871,14 +751,14 @@ exports[`process color_variations 1`] = `
               "images": [
                 {
                   "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
                 {
                   "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -890,7 +770,7 @@ exports[`process color_variations 1`] = `
                 {
                   "_type": "image",
                   "alt": "Floral Dress, Hot Pink Combo, swatch",
-                  "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
                   "title": "Floral Dress, Hot Pink Combo",
                 },
               ],
@@ -907,13 +787,13 @@ exports[`process color_variations 1`] = `
             {
               "_type": "image",
               "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
             {
               "_type": "image",
               "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
           ],
@@ -924,14 +804,14 @@ exports[`process color_variations 1`] = `
           "images": [
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwb93d490a/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
             {
               "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzgk-008.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw9a32be45/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
               "title": "Floral Dress, Hot Pink Combo",
             },
           ],

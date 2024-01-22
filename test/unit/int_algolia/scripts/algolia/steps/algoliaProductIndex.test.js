@@ -1,5 +1,5 @@
 const GlobalMock = require('../../../../../mocks/global');
-const ProductMock = require('../../../../../mocks/dw/catalog/Product');
+const ProductMock = require('../../../../../mocks/dw/catalog/Variant');
 const MasterProductMock = require('../../../../../mocks/dw/catalog/MasterProduct');
 const VariantMock = require('../../../../../mocks/dw/catalog/Variant');
 
@@ -97,7 +97,8 @@ describe('process', () => {
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
-        var algoliaOperations = job.process(new ProductMock());
+        const variant = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot(); //  "action" should be "partialUpdateObject" when no indexingMethod is specified
     });
     test('partialRecordUpdate', () => {
@@ -106,7 +107,8 @@ describe('process', () => {
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
-        var algoliaOperations = job.process(new ProductMock());
+        const variant = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('fullRecordUpdate', () => {
@@ -115,7 +117,8 @@ describe('process', () => {
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
-        var algoliaOperations = job.process(new ProductMock());
+        const variant = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('fullCatalogReindex', () => {
@@ -126,7 +129,8 @@ describe('process', () => {
             expect.arrayContaining(['default', 'fr', 'en'])
         );
 
-        var algoliaOperations = job.process(new ProductMock());
+        const variant = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('color_variations', () => {
