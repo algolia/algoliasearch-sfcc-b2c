@@ -24,6 +24,7 @@ const clientSideData = {
     "currencySymbol": request.getSession().getCurrency().getSymbol(),
     "productsIndex": calculateIndexName('products'),
     "categoriesIndex": calculateIndexName('categories'),
+    "contentsIndex": calculateIndexName('contents'),
     "quickViewUrlBase": URLUtils.url('Product-ShowQuickView').toString(),
     "strings": {
         "placeholder": Resource.msg('label.header.searchwatermark', 'common', ''),
@@ -42,6 +43,8 @@ const clientSideData = {
         "categoryPanelTitle": Resource.msg('search.category','algolia',null),
         "products": Resource.msg('search.suggest.products','algolia',null),
         "categories": Resource.msg('search.suggest.categories','algolia',null),
+        "contents": Resource.msg('search.suggest.contents','algolia',null),
+        "articles": Resource.msg('tab.nav.search.artclesresults', 'search', null),
         "priceFilter": {
             "separator": Resource.msg('search.pricefilter.separator','algolia',null),
             "submit": Resource.msg('search.pricefilter.submit','algolia',null),
