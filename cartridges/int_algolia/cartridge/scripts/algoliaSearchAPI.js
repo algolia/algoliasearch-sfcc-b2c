@@ -37,4 +37,37 @@ function getCategoryProductHits(cgid) {
     return [];
 }
 
+/**
+ * Server-side rendering of query search results: retrieves the first page of results from Algolia for the given search
+ * @param {string} q search query to get the search results
+ * @returns {Array} the array of objects containing the search result hits or an empty array in case of error
+ */
+function getQueryHits(q) {
+    var searchService = algoliaSearchService.getService();
+
+    if (!empty(searchService)) {
+        var requestBody = {
+            // unencoded example:
+            // params: "facetFilters=" + encodeURIComponent('["__primary_category.2:Mens > Clothing > Suits"]')
+            params: "query=" + q + "&hitsPerPage=9",
+        };
+
+        // any problems with the request will result in the script simply returning an empty array as server-side rendering
+        // is not vital to the functioning of the site (the results will be replaced by the client-side script anyway)
+        try {
+            var result = searchService.setThrowOnError().call(requestBody);
+            if (result.ok) {
+                return result.object.body.hits;
+            }
+        } catch(e) {
+            Logger.error(e.message + ': ' + e.stack);
+        }
+    }
+
+    // return empty array in case of any error or if the service is disabled
+    return [];
+}
+
 module.exports.getCategoryProductHits = getCategoryProductHits;
+module.exports.getQueryHits = getQueryHits;
+

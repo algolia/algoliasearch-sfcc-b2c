@@ -59,8 +59,8 @@
 
                         <iscomment> Server-Side Rendering of CLP search results if SSR feature switch "Algolia_EnableSSR" and "algolia.http.search" service are both enabled  </iscomment>
                         <iscomment> If SSR is disabled, pdict.categoryProductHits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
-                        <isif condition="${!empty(pdict.categoryProductHits)}">
-                            <isalgoliasearchhits hits="${pdict.categoryProductHits}" />
+                        <isif condition="${!empty(pdict.categoryProductHits) || !empty(pdict.queryHits)}">
+                            <isalgoliasearchhits hits="${pdict.categoryProductHits || pdict.queryHits}" />
                         </isif>
 
                     </div>
