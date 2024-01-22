@@ -1,6 +1,5 @@
 const GlobalMock = require('../../../../../mocks/global');
-const ProductMock = require('../../../../../mocks/dw/catalog/Variant');
-const MasterProductMock = require('../../../../../mocks/dw/catalog/MasterProduct');
+const MasterVariantMock = require('../../../../../mocks/dw/catalog/MasterProduct');
 const VariantMock = require('../../../../../mocks/dw/catalog/Variant');
 
 global.empty = GlobalMock.empty;
@@ -97,7 +96,7 @@ describe('process', () => {
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
-        const variant = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        const variant = new VariantMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
         var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot(); //  "action" should be "partialUpdateObject" when no indexingMethod is specified
     });
@@ -107,7 +106,7 @@ describe('process', () => {
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
-        const variant = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        const variant = new VariantMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
         var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot();
     });
@@ -117,7 +116,7 @@ describe('process', () => {
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
-        const variant = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        const variant = new VariantMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
         var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot();
     });
@@ -129,7 +128,7 @@ describe('process', () => {
             expect.arrayContaining(['default', 'fr', 'en'])
         );
 
-        const variant = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        const variant = new VariantMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
         var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot();
     });
@@ -137,7 +136,7 @@ describe('process', () => {
         // Process a master product with two size variations on the same color variation
         mockAdditionalAttributes = ['color_variations'];
 
-        const masterProduct = new MasterProductMock();
+        const masterProduct = new MasterVariantMock();
         const variantPinkSize4 = new VariantMock({
             ID: '701644031206M',
             variationAttributes: { color: 'JJB52A0', size: '004' },
