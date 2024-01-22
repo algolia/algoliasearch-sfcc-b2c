@@ -21,7 +21,6 @@ class Product {
         return this.getName();
     }
     getName() {
-        var result = null;
         switch (request.getLocale()) {
             case 'fr':
                 return 'Robe florale';
@@ -97,7 +96,7 @@ class Product {
                 },
             };
         }
-        var currency = request.getSession().getCurrency();
+        const currency = request.getSession().getCurrency();
         switch (currency.currencyCode) {
             case 'USD':
                 return {
@@ -170,63 +169,45 @@ class Product {
         return {
             ID: 'womens-clothing-bottoms',
             get displayName() {
-                var name = null;
                 switch (request.getLocale()) {
-                    case 'default':
-                        name = 'Bottoms';
-                        break;
                     case 'fr':
-                        name = 'Bas';
-                        break;
+                        return 'Bas';
                     case 'en':
-                        name = 'Bottoms';
-                        break;
+                    case 'default':
+                        return 'Bottoms';
                     default:
-                        break;
+                        return null;
                 }
-                return name;
             },
             online: true,
             root: false,
             parent: {
                 ID: 'womens-clothing',
                 get displayName() {
-                    var name = null;
                     switch (request.getLocale()) {
-                        case 'default':
-                            name = 'Clothing';
-                            break;
                         case 'fr':
-                            name = 'Vêtements';
-                            break;
+                            return 'Vêtements';
+                        case 'default':
                         case 'en':
-                            name = 'Clothing';
-                            break;
+                            return 'Clothing';
                         default:
-                            break;
+                            return null;
                     }
-                    return name;
                 },
                 online: true,
                 root: false,
                 parent: {
                     ID: 'womens',
                     get displayName() {
-                        var name = null;
                         switch (request.getLocale()) {
-                            case 'default':
-                                name = 'Womens';
-                                break;
                             case 'fr':
-                                name = 'Femmes';
-                                break;
+                                return 'Femmes';
+                            case 'default':
                             case 'en':
-                                name = 'Womens';
-                                break;
+                                return 'Womens';
                             default:
-                                break;
+                                return null;
                         }
-                        return name;
                     },
                     online: true,
                     root: true,
