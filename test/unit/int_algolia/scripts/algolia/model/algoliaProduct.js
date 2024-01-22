@@ -4,7 +4,7 @@ var assert = require('chai').assert;
 var proxyquire = require('proxyquire').noCallThru().noPreserveCache();
 
 var GlobalMock = require('../../../../../mocks/global');
-var ProductMock = require('../../../../../mocks/dw/catalog/Product');
+var ProductMock = require('../../../../../mocks/dw/catalog/Variant');
 var algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var algoliaUtils = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/utils');
 
@@ -68,7 +68,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
 
 describe('algoliaProduct module - Test Algolia Product model', function () {
     it('Check if the Algolia Product model is valid', function () {
-        let product = new ProductMock();
+        let product = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
         let algoliaProductModel = {
             id: '701644031206M',
             in_stock: true,

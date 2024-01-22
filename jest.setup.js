@@ -11,8 +11,8 @@ jest.mock('dw/catalog/ProductMgr', () => {
             close: jest.fn(),
         }),
         getProduct: jest.fn(() => {
-            const ProductMock = require('./test/mocks/dw/catalog/Product');
-            return new ProductMock();
+            const ProductMock = require('./test/mocks/dw/catalog/Variant');
+            return new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
         }),
     }
 }, {virtual: true});
