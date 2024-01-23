@@ -11,8 +11,8 @@ jest.mock('dw/catalog/ProductMgr', () => {
             close: jest.fn(),
         }),
         getProduct: jest.fn(() => {
-            const ProductMock = require('./test/mocks/dw/catalog/Product');
-            return new ProductMock();
+            const ProductMock = require('./test/mocks/dw/catalog/Variant');
+            return new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
         }),
     }
 }, {virtual: true});
@@ -215,6 +215,12 @@ jest.mock('*/cartridge/scripts/algolia/helper/fileHelper', () => {
 }, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/jobHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper');
+}, {virtual: true});
+jest.mock('*/cartridge/scripts/algolia/helper/modelHelper', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/modelHelper');
+}, {virtual: true});
+jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
 }, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/sendHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/sendHelper');

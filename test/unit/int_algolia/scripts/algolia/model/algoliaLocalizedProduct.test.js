@@ -1,7 +1,7 @@
 'use strict';
 
 var GlobalMock = require('../../../../../mocks/global');
-var ProductMock = require('../../../../../mocks/dw/catalog/Product');
+var ProductMock = require('../../../../../mocks/dw/catalog/Variant');
 
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
@@ -86,7 +86,7 @@ const attributes = algoliaProductConfig.defaultAttributes_v2.concat(['url', 'UPC
 
 describe('algoliaLocalizedProduct', function () {
     test('default locale', function () {
-        const product = new ProductMock();
+        const product = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' }});
         const algoliaProductModel = {
             objectID: '701644031206M',
             in_stock: true,
@@ -186,7 +186,7 @@ describe('algoliaLocalizedProduct', function () {
     });
 
     test('fr locale', function () {
-        const product = new ProductMock();
+        const product = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' }});
         const algoliaProductModel = {
             objectID: '701644031206M',
             in_stock: true,

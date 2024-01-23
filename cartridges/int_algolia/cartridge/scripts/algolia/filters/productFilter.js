@@ -7,7 +7,7 @@
  */
 function isInclude(product) {
     // Do not include Master product
-    if (product.master) return false;
+    if (product.master || product.variationGroup) return false;
     // Do not include Option products
     // if (product.optionProduct) return false;
     // Do not include bundled product

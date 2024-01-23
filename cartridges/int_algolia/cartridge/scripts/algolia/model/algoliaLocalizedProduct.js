@@ -5,6 +5,7 @@ var Currency = require('dw/util/Currency');
 var stringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 
+var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
@@ -40,43 +41,6 @@ function getPromotionalPrice(product) {
         });
     }
     return lowestPromoPrice;
-}
-
-/**
- * Function get Algolia Image Group of Images attributes of Product
- * @param {dw.order.Product} product - product
- * @param {string} viewtype - image type ('large' or 'small')
- * @returns  {Object} - Algolia Image Group Object
- */
-function getImagesGroup(product, viewtype) {
-    if (empty(product) || empty(viewtype)) { return null; }
-
-    var imagesList = product.getImages(viewtype);
-    if (empty(imagesList)) { return null; }
-
-    var result = {
-        _type: 'image_group',
-        images: [],
-        view_type: viewtype
-    };
-
-    var imagesListSize = imagesList.size();
-    for (var i = 0; i < imagesListSize; ++i) {
-        var image = {
-            _type: 'image',
-            alt: {},
-            dis_base_link: {},
-            title: {}
-        };
-
-        image.alt = stringUtils.trim(imagesList[i].alt);
-        image.dis_base_link = stringUtils.trim(imagesList[i].absURL.toString());
-        image.title = stringUtils.trim(imagesList[i].title);
-
-        result.images.push(image);
-    }
-
-    return result;
 }
 
 /**
@@ -163,6 +127,10 @@ function computePrimaryCategoryHierarchicalFacets(categories, primaryCategoryId)
  * Handler complex and calculated Product attributes
  */
 var aggregatedValueHandlers = {
+    master_id: function(product) {
+        return product.isVariant() || product.isVariationGroup() ?
+            product.masterProduct.ID : null;
+    },
     categories: function (product) {
         var productCategories = product.getOnlineCategories();
         productCategories = empty(productCategories) ? [] : productCategories.toArray();
@@ -238,12 +206,12 @@ var aggregatedValueHandlers = {
     },
     image_groups: function (product) {
         var imageGroupsArr = [];
-        var imageGroup = getImagesGroup(product, 'large');
+        var imageGroup = modelHelper.getImageGroups(product.getImages('large'), 'large');
         if (!empty(imageGroup)) {
             imageGroupsArr.push(imageGroup);
         }
 
-        imageGroup = getImagesGroup(product, 'small');
+        imageGroup = modelHelper.getImageGroups(product.getImages('small'), 'small');
         if (!empty(imageGroup)) {
             imageGroupsArr.push(imageGroup);
         }

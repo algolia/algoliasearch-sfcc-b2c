@@ -8,7 +8,8 @@ var logger;
 var paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, jobHelper, reindexHelper, algoliaIndexingAPI, sendHelper, productFilter, AlgoliaJobReport;
+var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, AlgoliaJobReport;
+var jobHelper, modelHelper, reindexHelper, sendHelper;
 var indexingOperation;
 var fullRecordUpdate = false;
 
@@ -47,6 +48,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+    modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
@@ -67,7 +69,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
-        attributesToSend = algoliaProductConfig.defaultAttributes_v2;
+        attributesToSend = algoliaProductConfig.defaultAttributes_v2.slice();
         const additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
         additionalAttributes.map(function(attribute) {
             if (attributesToSend.indexOf(attribute) < 0) {
@@ -176,6 +178,42 @@ exports.process = function(product, parameters, stepExecution) {
 
     jobReport.processedItems++; // counts towards the total number of products processed
 
+    if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0) {
+        // We need to use the master products to build the color_variations, using their variation model
+        // We then build records for each variant, in which we add these color_variations
+        if (product.isVariant()) {
+            // This variant will be indexed when we treat its master product
+            return [];
+        }
+        if (product.master) {
+            var algoliaOperations = [];
+            var processedProducts = 0;
+            var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
+                masterProduct: product,
+                locales: siteLocales,
+                attributeList: attributesToSend,
+                nonLocalizedAttributeList: nonLocalizedAttributes,
+                fullRecordUpdate: fullRecordUpdate,
+            });
+            for (let l = 0; l < siteLocales.size(); ++l) {
+                var locale = siteLocales[l];
+                var indexName = algoliaData.calculateIndexName('products', locale);
+                if (paramIndexingMethod === 'fullCatalogReindex') {
+                    indexName += '.tmp';
+                }
+                var records = recordsPerLocale[locale];
+                processedProducts = records.length;
+                records.forEach(function(record) {
+                    algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, record, indexName))
+                });
+            }
+
+            jobReport.processedItemsToSend += processedProducts;
+            jobReport.recordsToSend += algoliaOperations.length;
+            return algoliaOperations;
+        }
+    }
+
     if (productFilter.isInclude(product)) {
         var algoliaOperations = [];
 
@@ -209,14 +247,14 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     // algoliaOperations contains all the returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
     var productCount = algoliaOperationsArray.length;
-    if (!productCount) {
-        return;
-    }
 
     var batch = [];
     for (let i = 0; i < productCount; ++i) {
         // The array returned by the 'process' function is converted to a dw.util.List
         batch = batch.concat(algoliaOperationsArray[i].toArray());
+    }
+    if (!batch.length) {
+        return;
     }
 
     var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
