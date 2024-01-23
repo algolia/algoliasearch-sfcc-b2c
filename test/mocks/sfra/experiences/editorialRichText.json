@@ -1,0 +1,27 @@
+{
+  "name": "Textbox",
+  "description": "This is the Textbox Component, can be used as Help or FAQ pages",
+  "group": "commerce_assets",
+  "attribute_definition_groups": [
+    {
+      "id": "textContent",
+      "name": "Text Content",
+      "description": "The content to show in this component",
+      "attribute_definitions": [
+        {
+          "id": "richText",
+          "name": "content",
+          "description": "This is the rich text content area",
+          "type": "markup",
+          "required": true,
+          "searching": {
+            "searchable": true,
+            "refinable": false,
+            "boost_factor": 2.0
+          }
+        }
+      ]
+    }
+  ],
+  "region_definitions": []
+}

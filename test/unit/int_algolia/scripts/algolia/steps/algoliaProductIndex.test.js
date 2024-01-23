@@ -5,7 +5,13 @@ global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
 jest.mock('*/cartridge/scripts/algolia/helper/logHelper', () => {}, {virtual: true});
-
+jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
+    return {
+        getAttributeValue: originalModule.getAttributeValue,
+        safelyGetCustomAttribute: originalModule.safelyGetCustomAttribute,
+    }
+}, {virtual: true});
 const mockDeleteTemporaryIndices = jest.fn();
 const mockCopySettingsFromProdIndices = jest.fn();
 const mockMoveTemporaryIndices = jest.fn();

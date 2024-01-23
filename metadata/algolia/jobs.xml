@@ -114,4 +114,30 @@ Can perform full records updates or partial records updates. See the 'indexingMe
         <triggers/>
     </job>
 
+    <job job-id="AlgoliaContentIndex_v2" priority="0">
+        <description>Index all searchable content assets assigned to the selected site to Algolia.</description>
+        <parameters/>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="SFCCContentSearchIndex" type="SearchReindex" enforce-restart="false">
+                <description>Rebuilds or updates SFCC search indexes to ensure the job will see the latest version of the content.</description>
+                <parameters>
+                    <parameter name="Product related search indexes">false</parameter>
+                    <parameter name="Active data search index">false</parameter>
+                    <parameter name="Content search index">true</parameter>
+                    <parameter name="Indexer Type">Full Index Rebuild</parameter>
+                </parameters>
+            </step>
+            <step step-id="algoliaContentIndex" type="custom.algoliaContentIndex" enforce-restart="false">
+                <description>Index all searchable contents assigned to the selected site to Algolia. The list of indexed attributes is configurable.</description>
+                <parameters>
+                    <parameter name="tagDelimiter">h1</parameter>
+                    <parameter name="attributeList">id,name,description,url,body,page</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers/>
+    </job>
+
 </jobs>

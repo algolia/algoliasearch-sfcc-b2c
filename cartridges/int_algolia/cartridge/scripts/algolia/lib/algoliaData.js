@@ -57,18 +57,18 @@ const clientSideData = {
 
 //  Script for getting Algolia preferences
 //
-//             ID           ║                    description                          ║ type of preference
-//   ═══════════════════════╬═════════════════════════════════════════════════════════╬═══════════════════════════
-//   Enable                 ║ Enable/disable all Algolia                              ║ Boolean
-//   ApplicationID          ║ Identifies the application for this site                ║ String
-//   SearchApiKey           ║ Authorization key for Algolia                           ║ String
-//   AdminApiKey            ║ Authorization Admin key for Algolia                     ║ String
-//   AdditionalAttributes   ║ Any additional Product attributes                       ║ Set-of-string
-//   InStockThreshold       ║ Stock Threshold                                         ║ Double
-//   IndexPrefix            ║ Optional prefix for the index name                      ║ String
-//   EnableInsights         ║ Enables insights events on the Storefront               ║ Boolean
-//   EnableSSR              ║ Enables server-side rendering of CLP results on SFRA    ║ Boolean
-//  ════════════════════════╩═════════════════════════════════════════════════════════╩═══════════════════════════
+//             ID                 ║                    description                          ║ type of preference
+//   ═════════════════════════════╬═════════════════════════════════════════════════════════╬════════════════════
+//   Enable                       ║ Enable/disable all Algolia                              ║ Boolean
+//   ApplicationID                ║ Identifies the application for this site                ║ String
+//   SearchApiKey                 ║ Authorization key for Algolia                           ║ String
+//   AdminApiKey                  ║ Authorization Admin key for Algolia                     ║ String
+//   AdditionalAttributes         ║ Any additional Product attributes                       ║ Set-of-string
+//   InStockThreshold             ║ Stock Threshold                                         ║ Double
+//   IndexPrefix                  ║ Optional prefix for the index name                      ║ String
+//   EnableInsights               ║ Enables insights events on the Storefront               ║ Boolean
+//   EnableSSR                    ║ Enables server-side rendering of CLP results on SFRA    ║ Boolean
+//  ══════════════════════════════╩═════════════════════════════════════════════════════════╩════════════════════
 //  Preferences stored in the XML file
 //
 //             ID                ║                       description                        ║ type of preference

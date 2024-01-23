@@ -9,6 +9,7 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
+var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 
@@ -90,27 +91,6 @@ function getImagesGroup(product, viewtype) {
 }
 
 /**
- * Function get value of product property by attribute name.
- * An attribute name can be complex and consist of several levels.
- * Attribute names must be separated by dots.
- * Examle: primaryCategory.ID
- * @param {dw.catalog.Product} product - product
- * @param {string} productAttributeName - product attribute name
- * @returns {string|boolean|number|null} - value
- */
-function getAttributeValue(product, productAttributeName) {
-    var properties = productAttributeName.split('.');
-    var result = properties.reduce(function (previousValue, currentProperty) {
-        return previousValue ? previousValue[currentProperty] : null;
-    }, product);
-
-    if ((typeof result) === 'string') {
-        result = empty(result) ? null : stringUtils.trim(algoliaUtils.escapeEmoji(result.toString()));
-    }
-    return result;
-}
-
-/**
  * Function get localazed value of product property by attribute name.
  * An attribute name can be complex and consist of several levels.
  * Attribute names must be separated by dots.
@@ -129,7 +109,7 @@ function getAttributeLocalizedValues(product, productAttributeName) {
     for (var l = 0; l < siteLocalesSize; l += 1) {
         var localeName = siteLocales[l];
         request.setLocale(localeName);
-        value[localeName] = getAttributeValue(product, productAttributeName);
+        value[localeName] = ObjectHelper.getAttributeValue(product, productAttributeName);
     }
     request.setLocale(currentLocale);
     return value;
@@ -163,27 +143,6 @@ function getCategoryFlatTree(category) {
 
     return categoryTree;
 }
-
-/**
- * Safely gets a custom attribute from a System Object.
- * Since attempting to return a nonexistent custom attribute throws an error in SFCC,
- * this is the safest way to check whether an attribute exists.
- * @param {dw.object.CustomAttributes} customAttributes The CustomAttributes object, e.g. product.getCustom()
- * @param {string} caKey The custom attribute's key whose value we want to return
- * @returns {*} The custom attribute value if exists,
- *              null if the custom attribute is defined but it has no value for this specific SO,
- *              undefined if the custom attribute is not defined at all in BM
- */
-function safelyGetCustomAttribute(customAttributes, caKey) {
-    let customAttributeValue;
-    try {
-        customAttributeValue = customAttributes[caKey];
-    } catch(e) {
-        customAttributeValue = undefined;
-    } finally {
-        return customAttributeValue;
-    }
-};
 
 /**
  * Handler complex and calculated Product attributes
@@ -222,7 +181,7 @@ var aggregatedValueHandlers = {
             : null;
     },
     refinementColor: function (product) {
-        return safelyGetCustomAttribute(product.custom, 'refinementColor')
+        return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementColor')
             ? product.custom.refinementColor.displayValue
             : null;
     },
@@ -234,7 +193,7 @@ var aggregatedValueHandlers = {
             : null;
     },
     refinementSize: function (product) {
-        return safelyGetCustomAttribute(product.custom, 'refinementSize')
+        return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementSize')
             ? product.custom.refinementSize
             : null;
     },
@@ -344,13 +303,13 @@ function algoliaProduct(product, fieldListOverride) {
                         request.setLocale(localeName);
                         value[localeName] = aggregatedValueHandlers[attributeName]
                             ? aggregatedValueHandlers[attributeName](product)
-                            : getAttributeValue(product, config.attribute);
+                            : ObjectHelper.getAttributeValue(product, config.attribute);
                     }
                     request.setLocale(currentLocale);
                 } else {
                     value = aggregatedValueHandlers[attributeName]
                         ? aggregatedValueHandlers[attributeName](product)
-                        : getAttributeValue(product, config.attribute);
+                        : ObjectHelper.getAttributeValue(product, config.attribute);
                 }
 
                 if (!empty(value)) { this[attributeName] = value; }
