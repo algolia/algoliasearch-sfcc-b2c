@@ -65,6 +65,13 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
 jest.mock('*/cartridge/scripts/algolia/lib/utils', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/utils');
 }, {virtual: true});
+jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
+    return {
+        getAttributeValue: originalModule.getAttributeValue,
+        safelyGetCustomAttribute: originalModule.safelyGetCustomAttribute,
+    }
+}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
 }, {virtual: true});

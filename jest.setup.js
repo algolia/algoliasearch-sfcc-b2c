@@ -219,6 +219,9 @@ jest.mock('*/cartridge/scripts/algolia/helper/jobHelper', () => {
 jest.mock('*/cartridge/scripts/algolia/helper/modelHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/modelHelper');
 }, {virtual: true});
+jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
+}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/sendHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/sendHelper');
 }, {virtual: true});
@@ -247,4 +250,47 @@ jest.mock('*/cartridge/scripts/algolia/lib/utils', () => {
 
 jest.mock('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+}, {virtual: true});
+
+jest.mock('dw/experience/PageMgr', () => {
+    class PageMock {
+        constructor() {
+            this.id = 'mockPage';
+            this.typeID = 'storePage';
+            this.regions = {
+                mockRegion: {
+                    visibleComponents: [
+                        {
+                            id: 'richText',
+                            testAttribute: 'testValue',
+                        },
+                        { id: 'mockComponent2' },
+                    ],
+                },
+            };
+        }
+
+        getRegion() {
+            return this.regions['mockRegion'];
+        }
+
+        getAttribute(id) {
+            switch(id) {
+                case 'richText':
+                    return 'testValue';
+                default:
+                    return 'default'
+            }
+        }
+
+        getPage() {
+            return this;
+        }
+    }
+
+    return {
+        getPage: jest.fn().mockImplementation((id) => {
+            return new PageMock()
+        }),
+    };
 }, {virtual: true});

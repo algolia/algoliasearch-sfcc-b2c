@@ -314,6 +314,78 @@
                         }
                     ]
                 }
+            },
+            {
+                "@type-id": "custom.algoliaContentIndex",
+                "@supports-parallel-execution": true,
+                "@supports-site-context": true,
+                "@supports-organization-context": false,
+                "description": "Index all contents. The list of indexed attributes is configurable.",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/algoliaContentIndex.js",
+                "read-function": "read",
+                "process-function": "process",
+                "write-function": "send",
+                "total-count-function": "getTotalCount",
+                "before-step-function": "beforeStep",
+                "before-chunk-function": "",
+                "after-chunk-function": "",
+                "after-step-function": "afterStep",
+                "chunk-size": 500,
+                "transactional": false,
+                "timeout-in-seconds": "7200",
+                "parameters": {
+                    "parameter": [
+                        {
+                            "@name": "attributeList",
+                            "@type": "string",
+                            "description": "A comma-separated list of attributes to index.",
+                            "@required": true,
+                            "@trim": true,
+                            "default-value": "id,name,description,url,body,page"
+                        },
+                        {
+                            "@name": "failureThresholdPercentage",
+                            "@type": "long",
+                            "description": "Allowed percentage of records that fails to be indexed before marking the job in error. Default: 0. The temporary index is not moved to production if the failure percentage exceeds this threshold.",
+                            "@required": false,
+                            "min-value":"0",
+                            "max-value":"100"
+                        },
+                        {
+                            "@name": "tagDelimiter",
+                            "@type": "string",
+                            "description": "The HTML tag used to split the content into chunks. If not specified, the content will be split according to DEFAULT_MAX_RECORD_BYTES.",
+                            "@required": false,
+                            "@trim": true
+                        },
+                        {
+                            "@name": "includedContent",
+                            "@type": "string",
+                            "description": "'allContents': indexes content assets and page designer components. 'contentAssets': indexes only content assets. 'pageDesignerComponents': indexes only page designer components.",
+                            "@required": "true",
+                            "enum-values": {
+                                "value": [
+                                    "allContents",
+                                    "contentAssets",
+                                    "pageDesignerComponents"
+                                ]
+                            },
+                            "default-value": "allContents"
+                        }
+                    ]
+                },
+                "status-codes": {
+                    "status": [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when the step finished successfully."
+                        }
+                    ]
+                }
             }
         ]
     }
