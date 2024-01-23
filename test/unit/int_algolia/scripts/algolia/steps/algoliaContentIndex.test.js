@@ -32,12 +32,6 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaContentConfig', () => {
     virtual: true
 });
 
-jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
-    return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
-}, {
-    virtual: true
-});
-
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
     return {
@@ -108,7 +102,7 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
                 body: "OK"
             }
         }),
-        setIndexSettings: jest.fn().mockReturnValue({
+        copyIndexSettings: jest.fn().mockReturnValue({
             ok: true,
             object: {
                 body: "OK"
