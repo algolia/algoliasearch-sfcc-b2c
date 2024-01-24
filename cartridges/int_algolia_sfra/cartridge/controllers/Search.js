@@ -19,6 +19,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
     if (algoliaData.getPreference('Enable')) {
         useAlgolia = true;
         var cgid = req.querystring.cgid;
+        var q = req.querystring.q;
         var category = null;
         var categoryBannerUrl;
         var categoryDisplayNamePath = '';
@@ -45,15 +46,18 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
 
         if (useAlgolia) {
             var categoryProductHits;
+            var queryHits;
 
             // server-side rendering to improve SEO - makes a server-side request to Algolia to return CLP search results
             if (algoliaData.getPreference('EnableSSR')) {
-                // server-side results rendering for CLPs
-                categoryProductHits = require('*/cartridge/scripts/algoliaSearchAPI').getCategoryProductHits(cgid);
-                // transforms search hit results before rendering them (similarly to InstantSearch's transformItems() method)
-                categoryProductHits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(categoryProductHits);
-            } else {
-                categoryProductHits = null;
+                // We use the 'cgid' and 'q' parameters to identify if we're on a category page or normal search.
+                var type = cgid ? 'category' : q ? 'query' : null;
+                // Then, we are fetching server-side results and transform them prior to rendering according to search type.
+                if (type) {
+                    var query = type === 'category' ? cgid : q;
+                    var hits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, type);
+                    hits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(hits);
+                }
             }
 
             res.render('search/searchResults', {
@@ -62,7 +66,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 categoryDisplayNamePath: categoryDisplayNamePath,
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
-                categoryProductHits: categoryProductHits,
+                hits: hits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q
             });

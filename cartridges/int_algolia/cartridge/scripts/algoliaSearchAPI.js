@@ -4,21 +4,23 @@ var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 var Logger = require('dw/system/Logger');
 
 /**
- * Server-side rendering of CLP search results: retrieves the first page of results from Algolia for the given category
- * @param {string} cgid categoryID to get the search results for
+ * Server-side rendering of query search results: retrieves the first page of results from Algolia for the given search
+ * @param {string} query search query to get the search results
+ * @param {string} type search type (category or query)
  * @returns {Array} the array of objects containing the search result hits or an empty array in case of error
  */
-function getCategoryProductHits(cgid) {
-    var facetFiltersParamValue = require('*/cartridge/scripts/algolia/helper/ssrHelper').facetFiltersParamValueFromBreadcrumbs(cgid);
-
+function getServerSideHits(query, type) {
     var searchService = algoliaSearchService.getService();
 
     if (!empty(searchService)) {
+        var params = '';
+        if (type === 'category') {
+            var facetFiltersParamValue = require('*/cartridge/scripts/algolia/helper/ssrHelper').facetFiltersParamValueFromBreadcrumbs(query);
+        }
+
+        var params = type === 'category' ? "facetFilters=" + encodeURIComponent(facetFiltersParamValue) : "query=" + query;
         var requestBody = {
-            // unencoded example:
-            // params: "facetFilters=" + encodeURIComponent('["__primary_category.2:Mens > Clothing > Suits"]')
-            params: "facetFilters=" + encodeURIComponent(facetFiltersParamValue)
-                + "&hitsPerPage=9",
+            params: params + "&hitsPerPage=9",
         };
 
         // any problems with the request will result in the script simply returning an empty array as server-side rendering
@@ -37,4 +39,5 @@ function getCategoryProductHits(cgid) {
     return [];
 }
 
-module.exports.getCategoryProductHits = getCategoryProductHits;
+module.exports.getServerSideHits = getServerSideHits;
+

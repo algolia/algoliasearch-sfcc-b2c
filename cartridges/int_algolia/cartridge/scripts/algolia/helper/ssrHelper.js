@@ -15,12 +15,18 @@ function transformItems(items) {
 
         // assign image
         if (item.image_groups) {
-            var imageGroup = item.image_groups.find(function (i) {
-                i.view_type === 'large'
-            }) || item.image_groups[0];
+            var imageGroup = (function() {
+                for (var i = 0; i < item.image_groups.length; i++) {
+                    if (item.image_groups[i].view_type === 'large') {
+                        return item.image_groups[i];
+                    }
+                }
+                return item.image_groups[0];
+            })();
+
             if (imageGroup) {
                 var firstImageInGroup = imageGroup.images[0];
-                item.image = firstImageInGroup
+                item.image = firstImageInGroup;
             }
         } else {
             item.image = {
@@ -60,7 +66,9 @@ function transformItems(items) {
  */
 function facetFiltersParamValueFromBreadcrumbs(cgid) {
     var breadcrumbs = require('*/cartridge/scripts/helpers/productHelpers').getAllBreadcrumbs(cgid, null, []);
-    var breadcrumbArray = breadcrumbs.map((breadcrumb) => breadcrumb.htmlValue);
+    var breadcrumbArray = breadcrumbs.map(function (breadcrumb) {
+        return breadcrumb.htmlValue;
+    });
 
     // example: ["__primary_category.2:Mens > Clothing > Suits"]
     var facetFiltersParamValue = '["__primary_category.' + (breadcrumbArray.length - 1) + ':' + breadcrumbArray.reverse().join(' > ') + '"]'
