@@ -352,7 +352,7 @@
                             "max-value":"100"
                         },
                         {
-                            "@name": "tagDelimiter",
+                            "@name": "splittingTag",
                             "@type": "string",
                             "description": "The HTML tag used to split the content into chunks. If not specified, the content will be split according to DEFAULT_MAX_RECORD_BYTES.",
                             "@required": false,
