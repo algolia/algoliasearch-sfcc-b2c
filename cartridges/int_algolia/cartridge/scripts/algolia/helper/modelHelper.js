@@ -1,3 +1,5 @@
+const Site = require('dw/system/Site');
+const Currency = require('dw/util/Currency');
 const URLUtils = require('dw/web/URLUtils');
 
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
@@ -44,6 +46,7 @@ function getColorVariations(product, locale) {
                     variationModel.getHtmlName(colorVariationAttribute), // returns 'dwvar_' + product.ID + '_color',
                     colorValue.value
                 ).toString(),
+                color: colorValue.displayValue,
             });
         }
     }
@@ -108,7 +111,40 @@ function getImageGroups(imagesList, viewtype) {
     return result;
 }
 
+/**
+ * Return a price object containing price, minPrice and maxPrice
+ * @param {dw.catalog.Product} product Product
+ * @return {{price: {}, minPrice: {}, maxPrice: {}}} The product prices
+ */
+function getPrices(product) {
+    // Get price for all currencies
+    var price = {};
+    var minPrice = {};
+    var maxPrice = {};
+    var siteCurrencies = Site.getCurrent().getAllowedCurrencies();
+    var siteCurrenciesSize = siteCurrencies.size();
+    var currentSession = request.getSession();
+
+    for (let c = 0; c < siteCurrenciesSize; ++c) {
+        var currency = Currency.getCurrency(siteCurrencies[c]);
+        currentSession.setCurrency(currency);
+        var min = product.priceModel.minPrice;
+        var max = product.priceModel.maxPrice;
+        if (min.available) {
+            price[min.currencyCode] = min.value;
+            minPrice[min.currencyCode] = min.value;
+            maxPrice[max.currencyCode] = max.value;
+        }
+    }
+    return {
+        price: price,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+    };
+}
+
 module.exports = {
     getColorVariations: getColorVariations,
     getImageGroups: getImageGroups,
+    getPrices: getPrices,
 };

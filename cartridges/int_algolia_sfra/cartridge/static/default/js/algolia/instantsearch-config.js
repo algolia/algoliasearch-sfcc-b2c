@@ -169,37 +169,35 @@ function enableInstantSearch(config) {
                 }
             }),
 
+            /* Size and color refinement lists for variant-level model */
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
                 attribute: 'size',
-                templates: {
-                    item(data, { html }) {
-                        return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
-                            </a>
-                        `
-                    },
-                },
+                templates: SIZE_REFINEMENT_TEMPLATES,
                 panelTitle: algoliaData.strings.sizePanelTitle
             }),
 
             refinementListWithPanel({
                 container: '#algolia-color-list-placeholder',
                 attribute: 'color',
-                templates: {
-                    item(data, { html }) {
-                        return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
-                            </a>
-                        `
-                    },
-                },
+                templates: COLOR_REFINEMENT_TEMPLATES,
                 panelTitle: algoliaData.strings.colorPanelTitle
             }),
+
+            /* Size and color refinement lists for master-level model */
+            // refinementListWithPanel({
+            //     container: '#algolia-size-list-placeholder',
+            //     attribute: 'variants.size',
+            //     templates: SIZE_REFINEMENT_TEMPLATES,
+            //     panelTitle: algoliaData.strings.sizePanelTitle
+            // }),
+
+            // refinementListWithPanel({
+            //     container: '#algolia-color-list-placeholder',
+            //     attribute: 'variants.color',
+            //     templates: COLOR_REFINEMENT_TEMPLATES,
+            //     panelTitle: algoliaData.strings.colorPanelTitle
+            // }),
 
             instantsearch.widgets.infiniteHits({
                 container: '#algolia-hits-placeholder',
@@ -266,13 +264,13 @@ function enableInstantSearch(config) {
                         `
                     },
                 },
-                transformItems: function (items, helpers) {
+                transformItems: function (items, { results }) {
                     displaySwatches = false;
                     return items.map(function (item) {
                         // assign image
                         if (item.image_groups) {
-                            var imageGroup = item.image_groups.find(function (i) {
-                                i.view_type === 'large'
+                            const imageGroup = item.image_groups.find(function (i) {
+                                return i.view_type === 'large'
                             }) || item.image_groups[0];
                             if (imageGroup) {
                                 var firstImageInGroup = imageGroup.images[0];
@@ -282,6 +280,29 @@ function enableInstantSearch(config) {
                             item.image = {
                                 dis_base_link: algoliaData.noImages.large,
                                 alt: item.name + ', large',
+                            }
+                        }
+
+                        if (item.variants) {
+                            // Master-level indexing: find the variant matching the selected facets
+                            let selectedVariant;
+                            const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'];
+                            if (colorFacets && colorFacets.length > 0) {
+                                selectedVariant = item.variants.find(variant => {
+                                    return colorFacets.includes(variant.color)
+                                }) || item.variants.find(variant => {
+                                    return variant.variantID === item.default_variant_id;
+                                });
+                            }
+
+                            const colorVariation = item.color_variations.find(i => {
+                                return selectedVariant && i.color === selectedVariant.color
+                            }) || item.color_variations[0];
+                            const imageGroup = colorVariation.image_groups.find(i => {
+                                return i.view_type === 'large'
+                            }) || colorVariation.image_groups[0];
+                            if (imageGroup) {
+                                item.image = imageGroup.images[0];
                             }
                         }
 
@@ -425,4 +446,26 @@ function enableInstantSearch(config) {
             });
         }
     }
+}
+
+const SIZE_REFINEMENT_TEMPLATES = {
+    item(data, { html }) {
+        return html`
+            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
+                <span class="${data.cssClasses.label}"> ${data.label}</span>
+            </a>
+        `
+    },
+}
+
+const COLOR_REFINEMENT_TEMPLATES = {
+    item(data, { html }) {
+        return html`
+            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
+                <span class="${data.cssClasses.label}"> ${data.label}</span>
+            </a>
+        `
+    },
 }

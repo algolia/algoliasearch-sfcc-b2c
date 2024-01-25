@@ -637,6 +637,86 @@ function generateVariantRecordsWithColorVariations(parameters) {
     return algoliaRecordsPerLocale;
 }
 
+/**
+ * Build a main product, i.e. a Master or VariationGroup based product.
+ * A main product has a `variants` attribute, which is an array containing its variants
+ *
+ * @param {Object} parameters - model parameters
+ * @param {dw.order.Product} parameters.product - Product
+ * @param {dw.util.List} parameters.locales - The requested locales
+ * @param {Array} parameters.masterAttributes list of attributes of the main record
+ * @param {Array} parameters.variantAttributes list of variants attributes to store in the variant records
+ * @param {Array} parameters.nonLocalizedAttributes list of localized attributes of the variant records
+ * @returns {Object} object containing localized main products
+ */
+function generateLocalizedMasterProducts(parameters) {
+    const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+    const modelHelper = require('./modelHelper');
+
+    const localizedMasterProducts = {};
+    const defaultVariant = parameters.product.getVariationModel().getDefaultVariant();
+
+    // Color swatches
+    // Fetch all color variation images for each locale, to set them in each variant
+    var colorVariationsPerLocale = {};
+    for (let l = 0; l < parameters.locales.size(); ++l) {
+        var locale = parameters.locales[l];
+        colorVariationsPerLocale[locale] = modelHelper.getColorVariations(
+            parameters.product,
+            locale
+        );
+    }
+
+    var prices = modelHelper.getPrices(parameters.product);
+
+    for (let l = 0; l < parameters.locales.size(); ++l) {
+        var locale = parameters.locales[l];
+
+        let localizedMaster = new AlgoliaLocalizedProduct({
+            product: parameters.product,
+            locale: locale,
+            attributeList: parameters.masterAttributes,
+        });
+        localizedMaster.default_variant_id = defaultVariant.ID;
+        localizedMaster.variants = [];
+        localizedMaster.color_variations = colorVariationsPerLocale[locale];
+        localizedMaster.price = prices.price;
+        localizedMaster.minPrice = prices.minPrice;
+        localizedMaster.maxPrice = prices.maxPrice;
+        localizedMasterProducts[locale] = localizedMaster;
+    }
+
+    var variants = parameters.product.variants;
+    var variantsIt = variants.iterator();
+
+    while (variantsIt.hasNext()) {
+        var variant = variantsIt.next();
+        // Pre-fetch a partial model containing all non-localized attributes of the variant, to avoid re-fetching them for each locale
+        var variantBaseModel = new AlgoliaLocalizedProduct({
+            product: variant,
+            locale: 'default',
+            attributeList: parameters.nonLocalizedAttributes,
+            isVariant: true,
+        });
+        for (let l = 0; l < parameters.locales.size(); ++l) {
+            var locale = parameters.locales[l];
+            let localizedVariant = new AlgoliaLocalizedProduct({
+                product: variant,
+                locale: locale,
+                attributeList: parameters.variantAttributes,
+                baseModel: variantBaseModel,
+                isVariant: true,
+            });
+            localizedMasterProducts[locale].variants.push(localizedVariant);
+            if (localizedVariant.in_stock) {
+                // If at least one variant is in stock, the master product is marked in stock
+                localizedMasterProducts[locale].in_stock = true;
+            }
+        }
+    }
+    return localizedMasterProducts;
+}
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -658,6 +738,7 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     generateVariantRecordsWithColorVariations: generateVariantRecordsWithColorVariations,
+    generateLocalizedMasterProducts: generateLocalizedMasterProducts,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,

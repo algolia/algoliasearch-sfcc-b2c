@@ -252,6 +252,7 @@ var aggregatedValueHandlers = {
  * @param {Array} parameters.attributeList list of attributes to be fetched
  * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
  * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
+ * @param {boolean?} parameters.isVariant - (optional) Indicate if the model is meant to live in a parent record
  * @constructor
  */
 function algoliaLocalizedProduct(parameters) {
@@ -264,7 +265,12 @@ function algoliaLocalizedProduct(parameters) {
     if (empty(product) || empty(attributeList)) {
         this.id = null;
     } else {
-        this.objectID = product.ID;
+        if (parameters.isVariant) {
+            this.variantID = product.ID;
+        } else {
+            this.objectID = product.ID;
+        }
+
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
             var config = algoliaProductConfig.attributeConfig_v2[attributeName];
