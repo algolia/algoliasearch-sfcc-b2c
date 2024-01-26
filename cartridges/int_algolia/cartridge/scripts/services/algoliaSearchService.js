@@ -7,13 +7,15 @@ const version = require('*/algoliaconfig').version;
 
 /**
  * Algolia Search Service definition file
+ * @param {string} indexType - index type (products or contents)
  * @returns {dw.svc.HTTPService} - HTTPService object
  */
-function getService() {
+function getService(indexType) {
 
     const applicationID = algoliaData.getPreference('ApplicationID');
     const searchAPIKey = algoliaData.getPreference('SearchApiKey');
-    const indexName = algoliaData.calculateIndexName('products');
+    const index = indexType ? indexType : 'products';
+    const indexName = algoliaData.calculateIndexName(index);
 
     if (empty(applicationID) || empty(searchAPIKey)) return null;
 

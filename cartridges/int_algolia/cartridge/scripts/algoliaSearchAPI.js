@@ -7,10 +7,11 @@ var Logger = require('dw/system/Logger');
  * Server-side rendering of query search results: retrieves the first page of results from Algolia for the given search
  * @param {string} query search query to get the search results
  * @param {string} type search type (category or query)
+ * @param {string} indexType index type (products or contents)
  * @returns {Array} the array of objects containing the search result hits or an empty array in case of error
  */
-function getServerSideHits(query, type) {
-    var searchService = algoliaSearchService.getService();
+function getServerSideHits(query, type, indexType) {
+    var searchService = algoliaSearchService.getService(indexType);
 
     if (!empty(searchService)) {
         var params = '';
