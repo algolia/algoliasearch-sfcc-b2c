@@ -286,36 +286,6 @@ function enableInstantSearch(config) {
                             }
                         }
 
-                        if (item.variants) {
-                            // Master-level indexing
-                            // 1. Find the variant matching the selected facets, or the default variant
-                            let selectedVariant;
-                            const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'];
-                            if (colorFacets && colorFacets.length > 0) {
-                                selectedVariant = item.variants.find(variant => {
-                                    return colorFacets.includes(variant.color)
-                                }) || item.variants.find(variant => {
-                                    return variant.variantID === item.default_variant_id;
-                                });
-                            }
-
-                            // 2. Get the corresponding color_variation and its image
-                            const colorVariation = item.color_variations.find(i => {
-                                return selectedVariant && i.color === selectedVariant.color
-                            }) || item.color_variations[0];
-                            const imageGroup = colorVariation.image_groups.find(i => {
-                                return i.view_type === 'large'
-                            }) || colorVariation.image_groups[0];
-                            if (imageGroup) {
-                                item.image = imageGroup.images[0];
-                            }
-                        }
-
-                        if (item.color_variations) {
-                            // Display the swatches only if at least one item has some color_variations
-                            displaySwatches = true;
-                        }
-
                         // adjusted price in user currency
                         if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
                             item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
@@ -337,11 +307,74 @@ function enableInstantSearch(config) {
 
                         // url with queryID (used for analytics)
                         if (item.url) {
-                            var url = new URL(item.url, window.location.origin);
-                            url.searchParams.append('queryID', item.__queryID);
-                            url.searchParams.append('objectID', item.objectID);
-                            url.searchParams.append('indexName', item.__indexName);
-                            item.url = url.href;
+                            item.url = generateProductUrl({
+                                objectID: item.objectID,
+                                productUrl: item.url,
+                                queryID: item.__queryID,
+                                indexName: item.__indexName,
+                            });
+                        }
+
+                        if (item.color_variations) {
+                            // Display the swatches only if at least one item has some color_variations
+                            displaySwatches = true;
+                            item.color_variations.forEach(colorVariation => {
+                                colorVariation.variant_url = generateProductUrl({
+                                    objectID: item.objectID,
+                                    productUrl: colorVariation.variant_url,
+                                    queryID: item.__queryID,
+                                    indexName: item.__indexName,
+                                });
+                            });
+                        }
+
+                        // Master-level indexing
+                        if (item.variants) {
+                            let price;
+                            item.variants.forEach(variant => {
+                                price = variant.price[algoliaData.currencyCode]
+                                variant.url = generateProductUrl({
+                                    objectID: item.objectID,
+                                    productUrl: variant.url,
+                                    queryID: item.__queryID,
+                                    indexName: item.__indexName,
+                                });
+                            });
+
+                            // 1. Find the variant matching the selected facets, or the default variant
+                            let selectedVariant = item.variants.find(variant => {
+                                return variant.variantID === item.default_variant_id;
+                            });
+                            const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'];
+                            if (colorFacets && colorFacets.length > 0) {
+                                selectedVariant = item.variants.find(variant => {
+                                    return colorFacets.includes(variant.color)
+                                }) || selectedVariant;
+                            }
+
+                            // 2. Get the color_variation corresponding to the selected variant, to display its image
+                            if (item.color_variations) {
+                                const colorVariation = item.color_variations.find(i => {
+                                    return selectedVariant && i.color === selectedVariant.color
+                                }) || item.color_variations[0];
+                                const imageGroup = colorVariation.image_groups.find(i => {
+                                    return i.view_type === 'large'
+                                }) || colorVariation.image_groups[0];
+                                if (imageGroup) {
+                                    item.image = imageGroup.images[0];
+                                }
+                            }
+
+                            // 3. Get the variant price
+                            if (selectedVariant) {
+                                if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
+                                    item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
+                                }
+                                if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
+                                    item.price = selectedVariant.price[algoliaData.currencyCode]
+                                }
+                                item.url = selectedVariant.url;
+                            }
                         }
 
                         return item;
@@ -441,7 +474,9 @@ function enableInstantSearch(config) {
                 <a onmouseover="${() => {
         const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
         const image = parent.querySelector('.tile-image');
+        const link = parent.querySelector('.image-container > a');
         image.src = variantImage.dis_base_link;
+        link.href = colorVariation.variant_url;
     }}" href="${colorVariation.variant_url}" aria-label="${swatch.title}">
                     <span>
                         <img class="swatch swatch-circle" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
@@ -451,4 +486,20 @@ function enableInstantSearch(config) {
             });
         }
     }
+}
+
+/**
+ * Build a product URL with Algolia query parameters
+ * @param {string} objectID objectID
+ * @param {string} productUrl url of the product
+ * @param {string} queryID queryID
+ * @param {string} indexName indexName
+ * @return {string} Final URL of the product
+ */
+function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
+    const url = new URL(productUrl, window.location.origin);
+    url.searchParams.append('queryID', queryID);
+    url.searchParams.append('objectID', objectID);
+    url.searchParams.append('indexName', indexName);
+    return url.href;
 }
