@@ -668,8 +668,6 @@ function generateMasterRecords(parameters) {
         );
     }
 
-    var prices = modelHelper.getPrices(parameters.product);
-
     for (let l = 0; l < parameters.locales.size(); ++l) {
         var locale = parameters.locales[l];
 
@@ -681,9 +679,6 @@ function generateMasterRecords(parameters) {
         localizedMaster.default_variant_id = defaultVariant.ID;
         localizedMaster.variants = [];
         localizedMaster.color_variations = colorVariationsPerLocale[locale];
-        localizedMaster.price = prices.price;
-        localizedMaster.minPrice = prices.minPrice;
-        localizedMaster.maxPrice = prices.maxPrice;
         localizedMasterProducts[locale] = localizedMaster;
     }
 

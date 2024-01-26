@@ -88,20 +88,8 @@ exports[`generateMasterRecords 1`] = `
     ],
     "default_variant_id": "701644031206M",
     "in_stock": true,
-    "maxPrice": {
-      "EUR": 92.88,
-      "USD": 129,
-    },
-    "minPrice": {
-      "EUR": 92.88,
-      "USD": 129,
-    },
     "name": "Floral Dress",
     "objectID": "25592581M",
-    "price": {
-      "EUR": 92.88,
-      "USD": 129,
-    },
     "primary_category_id": "womens-clothing-bottoms",
     "variants": [
       algoliaLocalizedProduct {
