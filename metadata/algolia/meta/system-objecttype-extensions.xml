@@ -163,6 +163,26 @@ Setting this preference replaces the first two segments, the final index name be
                 <min-length>0</min-length>
             </attribute-definition>
 
+            <attribute-definition attribute-id="Algolia_RecordModel">
+                <display-name xml:lang="x-default">Record model</display-name>
+                <description xml:lang="x-default">Define the model used to store products in Algolia. 'variant-level': create one record per variant.
+                    'master-level': create one record per master product, containing all variants in a 'variants' attribute."</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <value-definitions>
+                    <value-definition>
+                        <display xml:lang="x-default">Variant-level</display>
+                        <value>variant-level</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Master-level</display>
+                        <value>master-level</value>
+                    </value-definition>
+                </value-definitions>
+                <default-value>variant-level</default-value>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_EnableInsights">
                 <display-name xml:lang="x-default">Enable Insights Events</display-name>
                 <description xml:lang="x-default">When enabled, the Storefront sends insights events to Algolia: views, clicks, addToCart and purchases</description>
@@ -212,6 +232,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_InStockThreshold"/>
                 <attribute attribute-id="Algolia_AdditionalAttributes"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
+                <attribute attribute-id="Algolia_RecordModel"/>
                 <attribute attribute-id="Algolia_EnableInsights"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
 

@@ -172,32 +172,35 @@ function enableInstantSearch(config) {
             /* Size and color refinement lists for variant-level model */
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
-                attribute: 'size',
-                templates: SIZE_REFINEMENT_TEMPLATES,
+                attribute: algoliaData.recordModel === 'master-level' ? 'variants.size' : 'size',
+                templates: {
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
+                },
                 panelTitle: algoliaData.strings.sizePanelTitle
             }),
 
             refinementListWithPanel({
                 container: '#algolia-color-list-placeholder',
-                attribute: 'color',
-                templates: COLOR_REFINEMENT_TEMPLATES,
+                attribute: algoliaData.recordModel === 'master-level' ? 'variants.color' : 'color',
+                templates: {
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
+                },
                 panelTitle: algoliaData.strings.colorPanelTitle
             }),
-
-            /* Size and color refinement lists for master-level model */
-            // refinementListWithPanel({
-            //     container: '#algolia-size-list-placeholder',
-            //     attribute: 'variants.size',
-            //     templates: SIZE_REFINEMENT_TEMPLATES,
-            //     panelTitle: algoliaData.strings.sizePanelTitle
-            // }),
-
-            // refinementListWithPanel({
-            //     container: '#algolia-color-list-placeholder',
-            //     attribute: 'variants.color',
-            //     templates: COLOR_REFINEMENT_TEMPLATES,
-            //     panelTitle: algoliaData.strings.colorPanelTitle
-            // }),
 
             instantsearch.widgets.infiniteHits({
                 container: '#algolia-hits-placeholder',
@@ -284,7 +287,8 @@ function enableInstantSearch(config) {
                         }
 
                         if (item.variants) {
-                            // Master-level indexing: find the variant matching the selected facets
+                            // Master-level indexing
+                            // 1. Find the variant matching the selected facets, or the default variant
                             let selectedVariant;
                             const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'];
                             if (colorFacets && colorFacets.length > 0) {
@@ -295,6 +299,7 @@ function enableInstantSearch(config) {
                                 });
                             }
 
+                            // 2. Get the corresponding color_variation and its image
                             const colorVariation = item.color_variations.find(i => {
                                 return selectedVariant && i.color === selectedVariant.color
                             }) || item.color_variations[0];
@@ -446,26 +451,4 @@ function enableInstantSearch(config) {
             });
         }
     }
-}
-
-const SIZE_REFINEMENT_TEMPLATES = {
-    item(data, { html }) {
-        return html`
-            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
-                <span class="${data.cssClasses.label}"> ${data.label}</span>
-            </a>
-        `
-    },
-}
-
-const COLOR_REFINEMENT_TEMPLATES = {
-    item(data, { html }) {
-        return html`
-            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-circle-o'}"></i>
-                <span class="${data.cssClasses.label}"> ${data.label}</span>
-            </a>
-        `
-    },
 }

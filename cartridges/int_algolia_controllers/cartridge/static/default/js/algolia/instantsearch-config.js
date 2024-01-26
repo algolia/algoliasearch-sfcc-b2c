@@ -73,7 +73,7 @@ function enableInstantSearch(config) {
                 templates: {
                     text(data) {
                         if (data.hasManyResults) {
-                            return `${data.nbHits} ${algoliaData.strings.results}zzz`;
+                            return `${data.nbHits} ${algoliaData.strings.results}`;
                         } else if (data.hasOneResult) {
                             return `1 ${algoliaData.strings.result}`;
                         } else {

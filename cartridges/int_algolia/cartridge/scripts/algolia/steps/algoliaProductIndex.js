@@ -69,7 +69,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     /* --- parameters --- */
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullCatalogReindex'
-    paramRecordModel = VARIANT_LEVEL; // 'variant-level' (default), 'master-level'
+    paramRecordModel = algoliaData.getPreference('RecordModel') || VARIANT_LEVEL; // 'variant-level' (default), 'master-level'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
 
     /* --- attributeListOverride parameter --- */
@@ -198,18 +198,19 @@ exports.process = function(product, parameters, stepExecution) {
 
     jobReport.processedItems++; // counts towards the total number of products processed
 
-    if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0) {
-        // We need to use the master products to build the color_variations, using their variation model
-        // We then build records for each variant, in which we add these color_variations
+    if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0 ||
+        paramRecordModel === MASTER_LEVEL) {
         if (product.isVariant()) {
-            // This variant will be indexed when we treat its master product
+            // To generate 'color_variations' or for master-level indexing, we need to work with the master products.
+            // This variant will be indexed when we treat its master product, skip it.
             return [];
         }
         if (product.master) {
             var algoliaOperations = [];
             var processedVariantsToSend = 0;
 
-            if (paramRecordModel === VARIANT_LEVEL) {
+            if (paramRecordModel !== MASTER_LEVEL) {
+                // Variant-level indexing
                 var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
                     masterProduct: product,
                     locales: siteLocales,
@@ -230,6 +231,7 @@ exports.process = function(product, parameters, stepExecution) {
                     });
                 }
             } else {
+                // Master-level indexing
                 var masterRecordPerLocale = jobHelper.generateLocalizedMasterProducts({
                     product: product,
                     locales: siteLocales,

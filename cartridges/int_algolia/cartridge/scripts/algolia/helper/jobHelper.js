@@ -586,6 +586,7 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
 
 /**
  * For a given master, generate all variant records with their 'color_variations'
+ * The color_variations are built using the master's variation model
  *
  * @param {Object} parameters - model parameters
  * @param {dw.order.Product} parameters.masterProduct - A master product
