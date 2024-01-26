@@ -3,6 +3,7 @@
 exports[`getColorVariations en locale 1`] = `
 [
   {
+    "color": "Hot Pink Combo",
     "image_groups": [
       {
         "_type": "image_group",
@@ -61,6 +62,7 @@ exports[`getColorVariations en locale 1`] = `
 exports[`getColorVariations fr locale 1`] = `
 [
   {
+    "color": "Combo rose vif",
     "image_groups": [
       {
         "_type": "image_group",

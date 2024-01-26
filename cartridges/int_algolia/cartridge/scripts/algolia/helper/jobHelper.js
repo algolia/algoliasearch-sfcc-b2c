@@ -592,7 +592,7 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
  * @param {dw.order.Product} parameters.masterProduct - A master product
  * @param {string} parameters.locales - The requested locales
  * @param {Array} parameters.attributeList - list of attributes to be fetched
- * @param {Array} parameters.nonLocalizedAttributeList - list of non-localized attributes
+ * @param {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
  * @param {Array} parameters.fullRecordUpdate - specify if the generated records are mean to replace entirely the existing ones
  * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
  */
@@ -619,7 +619,7 @@ function generateVariantRecordsWithColorVariations(parameters) {
         var baseModel = new AlgoliaLocalizedProduct({
             product: variant,
             locale: 'default',
-            attributeList: parameters.nonLocalizedAttributeList,
+            attributeList: parameters.nonLocalizedAttributes,
             fullRecordUpdate: parameters.fullRecordUpdate
         });
         for (let l = 0; l < parameters.locales.size(); ++l) {
@@ -650,7 +650,7 @@ function generateVariantRecordsWithColorVariations(parameters) {
  * @param {Array} parameters.nonLocalizedAttributes list of localized attributes of the variant records
  * @returns {Object} object containing localized main products
  */
-function generateLocalizedMasterProducts(parameters) {
+function generateMasterRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     const modelHelper = require('./modelHelper');
 
@@ -739,7 +739,7 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     generateVariantRecordsWithColorVariations: generateVariantRecordsWithColorVariations,
-    generateLocalizedMasterProducts: generateLocalizedMasterProducts,
+    generateMasterRecords: generateMasterRecords,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,

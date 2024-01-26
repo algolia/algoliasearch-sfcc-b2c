@@ -215,7 +215,7 @@ exports.process = function(product, parameters, stepExecution) {
                     masterProduct: product,
                     locales: siteLocales,
                     attributeList: attributesToSend,
-                    nonLocalizedAttributeList: nonLocalizedAttributes,
+                    nonLocalizedAttributes: nonLocalizedAttributes,
                     fullRecordUpdate: fullRecordUpdate,
                 });
                 for (let l = 0; l < siteLocales.size(); ++l) {
@@ -232,7 +232,7 @@ exports.process = function(product, parameters, stepExecution) {
                 }
             } else {
                 // Master-level indexing
-                var masterRecordPerLocale = jobHelper.generateLocalizedMasterProducts({
+                var masterRecordPerLocale = jobHelper.generateMasterRecords({
                     product: product,
                     locales: siteLocales,
                     masterAttributes: masterAttributes,

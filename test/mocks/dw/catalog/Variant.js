@@ -32,6 +32,30 @@ class Variant extends MasterProduct {
         return []; // Categories are assigned on the master
     }
 
+    getPriceModel() {
+        const currency = request.getSession().getCurrency();
+        switch (currency.currencyCode) {
+            case 'USD':
+                return {
+                    price: {
+                        available: true,
+                        currencyCode: 'USD',
+                        value: 129,
+                    },
+                };
+            case 'EUR':
+                return {
+                    price: {
+                        available: true,
+                        currencyCode: 'EUR',
+                        value: 92.88,
+                    },
+                };
+            default:
+                return null;
+        }
+    }
+
     getVariationModel() {
         return new ProductVariationModel({
             productID: this.ID,

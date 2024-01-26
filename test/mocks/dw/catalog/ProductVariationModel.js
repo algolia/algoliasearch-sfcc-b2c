@@ -2,10 +2,11 @@ const collectionHelper = require('../../helpers/collectionHelper');
 
 // https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/api/class_dw_catalog_ProductVariationModel.html
 class ProductVariationModel {
-    constructor({ productID, images, variationAttributes = {} } = {}) {
+    constructor({ productID, images, variationAttributes = {}, variants } = {}) {
         this.productID = productID;
         this.images = images;
         this.variationAttributes = variationAttributes;
+        this.variants = variants;
     }
 
     getProductVariationAttribute(id) {
@@ -63,6 +64,9 @@ class ProductVariationModel {
                     },
                 ]);
         }
+    }
+    getDefaultVariant() {
+        return this.variants[0];
     }
     hasOrderableVariants(variationAttribute, variationAttributeValue) {
         return true;

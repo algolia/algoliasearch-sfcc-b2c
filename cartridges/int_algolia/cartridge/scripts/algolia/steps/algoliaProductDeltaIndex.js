@@ -278,7 +278,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     masterProduct: product,
                     locales: siteLocales,
                     attributeList: attributesToSend,
-                    nonLocalizedAttributeList: nonLocalizedAttributes,
+                    nonLocalizedAttributes: nonLocalizedAttributes,
                     fullRecordUpdate: fullRecordUpdate,
                 });
                 for (let l = 0; l < siteLocales.size(); ++l) {
