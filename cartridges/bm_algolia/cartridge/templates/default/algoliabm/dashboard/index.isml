@@ -136,11 +136,11 @@
                     <td class="table_detail w e s">
                         <select name="RecordModel" id="RecordModel">
                             <isif condition="${pdict.algoliaData.getPreference('RecordModel') === 'variant-level'}">
-                                <option value="variant-level" selected="selected">Variant-level</option>
-                                <option value="master-level">Master-level</option>
+                                <option value="variant-level" selected="selected">Variation Product</option>
+                                <option value="master-level">Base Product</option>
                             <iselse>
-                                <option value="variant-level">Variant-level</option>
-                                <option value="master-level" selected="selected">Master-level</option>
+                                <option value="variant-level">Variation Product</option>
+                                <option value="master-level" selected="selected">Base Product</option>
                             </iselse>
                             </isif>
                         </select>

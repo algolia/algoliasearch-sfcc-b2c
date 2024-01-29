@@ -639,8 +639,8 @@ function generateVariantRecordsWithColorVariations(parameters) {
 }
 
 /**
- * Build a main product, i.e. a Master or VariationGroup based product.
- * A main product has a `variants` attribute, which is an array containing its variants
+ * Build a base product record.
+ * A base product record has a `variants` attribute, which is an array containing all its variants
  *
  * @param {Object} parameters - model parameters
  * @param {dw.order.Product} parameters.product - Product
@@ -648,7 +648,7 @@ function generateVariantRecordsWithColorVariations(parameters) {
  * @param {Array} parameters.masterAttributes list of attributes of the main record
  * @param {Array} parameters.variantAttributes list of variants attributes to store in the variant records
  * @param {Array} parameters.nonLocalizedAttributes list of localized attributes of the variant records
- * @returns {Object} object containing localized main products
+ * @returns {Object} object containing the localized base products
  */
 function generateMasterRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');

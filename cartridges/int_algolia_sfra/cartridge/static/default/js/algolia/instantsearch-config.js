@@ -169,7 +169,6 @@ function enableInstantSearch(config) {
                 }
             }),
 
-            /* Size and color refinement lists for variant-level model */
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
                 attribute: algoliaData.recordModel === 'master-level' ? 'variants.size' : 'size',
