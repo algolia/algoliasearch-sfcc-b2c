@@ -186,7 +186,11 @@ jest.mock('dw/web/URLUtils', () => {
         },
         url: function(endpoint, param, id) {
             var relURL = '/on/demandware.store/Sites-Algolia_SFRA-Site/';
-            return relURL + global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
+            relURL += global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
+            if (arguments[3] && arguments[4]) {
+                relURL += '&' + arguments[3] + '=' + arguments[4];
+            }
+            return relURL;
         },
         staticURL: function(url) {
             return url;
