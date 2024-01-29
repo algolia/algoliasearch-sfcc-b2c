@@ -142,6 +142,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     if (paramRecordModel === MASTER_LEVEL) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
+        if (paramIndexingMethod === 'partialRecordUpdate' && variantAttributes.length > 0) {
+            jobReport.endTime = new Date();
+            jobReport.error = true;
+            jobReport.errorMessage = 'partialRecordUpdate is not compatible with Base Product level indexing';
+            jobReport.writeToCustomObject();
+            throw new Error(jobReport.errorMessage);
+        }
     }
 
     /* --- site locales --- */
