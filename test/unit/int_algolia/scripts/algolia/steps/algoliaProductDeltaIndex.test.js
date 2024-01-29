@@ -44,11 +44,29 @@ const stepExecution = {
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
 
-test('process', () => {
-    job.beforeStep(parameters, stepExecution);
-    expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullRecordUpdate' });
-    var algoliaOperations = job.process({ productID: '701644031206M', available: true });
-    expect(algoliaOperations).toMatchSnapshot();
+describe('process', () => {
+    test('default', () => {
+        job.beforeStep(parameters, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({
+            jobID: 'TestJobID',
+            stepID: 'TestStepID',
+            indexingMethod: 'fullRecordUpdate'
+        });
+        var algoliaOperations = job.process({productID: '701644031206M', available: true});
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+
+    test('master-level indexing', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'master-level';
+        job.beforeStep(parameters, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({
+            jobID: 'TestJobID',
+            stepID: 'TestStepID',
+            indexingMethod: 'fullRecordUpdate'
+        });
+        var algoliaOperations = job.process({productID: '25592581M', available: true});
+        expect(algoliaOperations).toMatchSnapshot();
+    });
 });
 
 test('send', () => {

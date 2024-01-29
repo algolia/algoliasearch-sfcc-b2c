@@ -1718,6 +1718,479 @@ exports[`process fullRecordUpdate 1`] = `
 ]
 `;
 
+exports[`process master-level indexing 1`] = `
+[
+  AlgoliaOperation {
+    "action": "addObject",
+    "body": {
+      "__primary_category": {
+        "0": "Womens",
+        "1": "Womens > Clothing",
+        "2": "Womens > Clothing > Bottoms",
+      },
+      "categories": [
+        [
+          {
+            "id": "newarrivals-womens",
+            "name": "Womens",
+          },
+        ],
+        [
+          {
+            "id": "womens-clothing-bottoms",
+            "name": "Bottoms",
+          },
+          {
+            "id": "womens-clothing",
+            "name": "Clothing",
+          },
+          {
+            "id": "womens",
+            "name": "Womens",
+          },
+        ],
+      ],
+      "color_variations": [
+        {
+          "color": "Hot Pink Combo",
+          "image_groups": [
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+              ],
+              "view_type": "large",
+            },
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+              ],
+              "view_type": "small",
+            },
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, swatch",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+              ],
+              "view_type": "swatch",
+            },
+          ],
+          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M",
+        },
+      ],
+      "default_variant_id": "701644031206M",
+      "image_groups": [
+        {
+          "_type": "image_group",
+          "images": [
+            {
+              "_type": "image",
+              "alt": "Floral Dress, Hot Pink Combo, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Floral Dress, Hot Pink Combo",
+            },
+            {
+              "_type": "image",
+              "alt": "Floral Dress, Hot Pink Combo, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Floral Dress, Hot Pink Combo",
+            },
+          ],
+          "view_type": "large",
+        },
+        {
+          "_type": "image_group",
+          "images": [
+            {
+              "_type": "image",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Floral Dress, Hot Pink Combo",
+            },
+            {
+              "_type": "image",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Floral Dress, Hot Pink Combo",
+            },
+          ],
+          "view_type": "small",
+        },
+      ],
+      "in_stock": true,
+      "name": "Floral Dress",
+      "objectID": "25592581M",
+      "primary_category_id": "womens-clothing-bottoms",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": null,
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031213M",
+          "variantID": "701644031213M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default.tmp",
+  },
+  AlgoliaOperation {
+    "action": "addObject",
+    "body": {
+      "__primary_category": {
+        "0": "Femmes",
+        "1": "Femmes > Vêtements",
+        "2": "Femmes > Vêtements > Bas",
+      },
+      "categories": [
+        [
+          {
+            "id": "newarrivals-womens",
+            "name": "Femmes",
+          },
+        ],
+        [
+          {
+            "id": "womens-clothing-bottoms",
+            "name": "Bas",
+          },
+          {
+            "id": "womens-clothing",
+            "name": "Vêtements",
+          },
+          {
+            "id": "womens",
+            "name": "Femmes",
+          },
+        ],
+      ],
+      "color_variations": [
+        {
+          "color": "Combo rose vif",
+          "image_groups": [
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Robe florale, Combo rose vif, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
+                },
+                {
+                  "_type": "image",
+                  "alt": "Robe florale, Combo rose vif, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
+                },
+              ],
+              "view_type": "large",
+            },
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Robe florale, Combo rose vif, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
+                },
+                {
+                  "_type": "image",
+                  "alt": "Robe florale, Combo rose vif, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Robe florale, Combo rose vif",
+                },
+              ],
+              "view_type": "small",
+            },
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Robe fleurie, Mix rose vif, swatch",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "title": "Robe fleurie, Mix rose vif",
+                },
+              ],
+              "view_type": "swatch",
+            },
+          ],
+          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M",
+        },
+      ],
+      "default_variant_id": "701644031206M",
+      "image_groups": [
+        {
+          "_type": "image_group",
+          "images": [
+            {
+              "_type": "image",
+              "alt": "Robe florale, Combo rose vif, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Robe florale, Combo rose vif",
+            },
+            {
+              "_type": "image",
+              "alt": "Robe florale, Combo rose vif, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Robe florale, Combo rose vif",
+            },
+          ],
+          "view_type": "large",
+        },
+        {
+          "_type": "image_group",
+          "images": [
+            {
+              "_type": "image",
+              "alt": "Robe florale, Combo rose vif, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Robe florale, Combo rose vif",
+            },
+            {
+              "_type": "image",
+              "alt": "Robe florale, Combo rose vif, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Robe florale, Combo rose vif",
+            },
+          ],
+          "view_type": "small",
+        },
+      ],
+      "in_stock": true,
+      "name": "Robe florale",
+      "objectID": "25592581M",
+      "primary_category_id": "womens-clothing-bottoms",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": null,
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031213M",
+          "variantID": "701644031213M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr.tmp",
+  },
+  AlgoliaOperation {
+    "action": "addObject",
+    "body": {
+      "__primary_category": {
+        "0": "Womens",
+        "1": "Womens > Clothing",
+        "2": "Womens > Clothing > Bottoms",
+      },
+      "categories": [
+        [
+          {
+            "id": "newarrivals-womens",
+            "name": "Womens",
+          },
+        ],
+        [
+          {
+            "id": "womens-clothing-bottoms",
+            "name": "Bottoms",
+          },
+          {
+            "id": "womens-clothing",
+            "name": "Clothing",
+          },
+          {
+            "id": "womens",
+            "name": "Womens",
+          },
+        ],
+      ],
+      "color_variations": [
+        {
+          "color": "Hot Pink Combo",
+          "image_groups": [
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, large",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+              ],
+              "view_type": "large",
+            },
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, small",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+              ],
+              "view_type": "small",
+            },
+            {
+              "_type": "image_group",
+              "images": [
+                {
+                  "_type": "image",
+                  "alt": "Floral Dress, Hot Pink Combo, swatch",
+                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                  "title": "Floral Dress, Hot Pink Combo",
+                },
+              ],
+              "view_type": "swatch",
+            },
+          ],
+          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M",
+        },
+      ],
+      "default_variant_id": "701644031206M",
+      "image_groups": [
+        {
+          "_type": "image_group",
+          "images": [
+            {
+              "_type": "image",
+              "alt": "Floral Dress, Hot Pink Combo, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Floral Dress, Hot Pink Combo",
+            },
+            {
+              "_type": "image",
+              "alt": "Floral Dress, Hot Pink Combo, large",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Floral Dress, Hot Pink Combo",
+            },
+          ],
+          "view_type": "large",
+        },
+        {
+          "_type": "image_group",
+          "images": [
+            {
+              "_type": "image",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+              "title": "Floral Dress, Hot Pink Combo",
+            },
+            {
+              "_type": "image",
+              "alt": "Floral Dress, Hot Pink Combo, small",
+              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+              "title": "Floral Dress, Hot Pink Combo",
+            },
+          ],
+          "view_type": "small",
+        },
+      ],
+      "in_stock": true,
+      "name": "Floral Dress",
+      "objectID": "25592581M",
+      "primary_category_id": "womens-clothing-bottoms",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": null,
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031213M",
+          "variantID": "701644031213M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__en.tmp",
+  },
+]
+`;
+
 exports[`process partialRecordUpdate 1`] = `
 [
   AlgoliaOperation {

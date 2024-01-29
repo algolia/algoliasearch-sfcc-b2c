@@ -1,8 +1,14 @@
 // Initialize some default mocks for all tests.
 
 const GlobalMock = require('./test/mocks/global');
+const ProductMock = require("./test/mocks/dw/catalog/Variant");
+const MasterProductMock = require("./test/mocks/dw/catalog/MasterProduct");
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
+global.customPreferences = {
+    Algolia_IndexPrefix: 'test_index_',
+    Algolia_RecordModel: 'variant-level',
+}
 
 // System classes, alphabetical order
 jest.mock('dw/catalog/ProductMgr', () => {
@@ -10,9 +16,21 @@ jest.mock('dw/catalog/ProductMgr', () => {
         queryAllSiteProducts: jest.fn().mockReturnValue({
             close: jest.fn(),
         }),
-        getProduct: jest.fn(() => {
-            const ProductMock = require('./test/mocks/dw/catalog/Variant');
-            return new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+        getProduct: jest.fn((id) => {
+            const VariantMock = require('./test/mocks/dw/catalog/Variant');
+            const variant = new VariantMock({ variationAttributes: { color: 'JJB52A0', size: '004' } });
+            if (id === '25592581M') {
+                const collectionHelper = require("./test/mocks/helpers/collectionHelper");
+                const MasterProductMock = require('./test/mocks/dw/catalog/MasterProduct');
+                const masterProduct = new MasterProductMock({
+                    variationAttributes: { color: 'JJB52A0', size: '004' }
+                });
+                masterProduct.variants = collectionHelper.createCollection([
+                    variant,
+                ]);
+                return masterProduct;
+            }
+            return variant;
         }),
     }
 }, {virtual: true});
@@ -86,12 +104,8 @@ jest.mock('dw/system/Site', () => {
                     return arr;
                 },
                 getCustomPreferenceValue: function(id) {
-                    switch(id) {
-                        case 'Algolia_IndexPrefix':
-                        return 'test_index_';
-                        default:
-                        return null;
-                    }
+                    const value = global.customPreferences[id];
+                    return value ? value : null;
                 },
                 getTimezone: function() {
                     return 'Europe/Paris';

@@ -7,6 +7,7 @@ var logger;
 
 // job step parameters
 var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
+var paramRecordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
@@ -18,10 +19,14 @@ var jobReport;
 var l0_deltaExportDir, l1_processingDir, l1_completedDir;
 var changedProducts = [], changedProductsIterator;
 var deltaExportZips, siteLocales, nonLocalizedAttributes = [], attributesToSend;
+var masterAttributes = [], variantAttributes = [];
 
 var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on the step parameter 'indexingMethod'
 const deleteIndexingOperation = 'deleteObject';
 var fullRecordUpdate = false;
+
+const VARIANT_LEVEL = 'variant-level';
+const MASTER_LEVEL = 'master-level';
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -73,6 +78,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramDeltaExportJobName = parameters.deltaExportJobName.trim();
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'fullRecordUpdate'; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
+    paramRecordModel = algoliaData.getPreference('RecordModel') || VARIANT_LEVEL; // 'variant-level' (default), 'master-level'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
 
     /* --- B2C delta job parameters --- */
@@ -119,6 +125,24 @@ exports.beforeStep = function(parameters, stepExecution) {
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
 
+    /* --- master/variant attributes --- */
+    variantAttributes = [];
+    masterAttributes = [];
+    attributesToSend.forEach(function(attribute) {
+        if (!algoliaProductConfig.attributeConfig_v2[attribute]) {
+            return;
+        }
+        if (algoliaProductConfig.defaultVariantAttributes_v2.indexOf(attribute) >= 0) {
+            variantAttributes.push(attribute);
+        } else {
+            masterAttributes.push(attribute);
+        }
+    });
+    logger.info('Record model: ' + paramRecordModel);
+    if (paramRecordModel === MASTER_LEVEL) {
+        logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
+        logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
+    }
 
     /* --- site locales --- */
     siteLocales = Site.getCurrent().getAllowedLocales();
@@ -267,31 +291,51 @@ exports.process = function(cpObj, parameters, stepExecution) {
     let algoliaOperations = [];
 
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
-        if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0) {
+        if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0 ||
+            paramRecordModel === MASTER_LEVEL) {
             if (product.isVariant()) {
                 // This variant will be indexed when we treat its master product
                 return [];
             }
             if (product.master) {
-                var processedProducts = 0;
-                var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
-                    masterProduct: product,
-                    locales: siteLocales,
-                    attributeList: attributesToSend,
-                    nonLocalizedAttributes: nonLocalizedAttributes,
-                    fullRecordUpdate: fullRecordUpdate,
-                });
-                for (let l = 0; l < siteLocales.size(); ++l) {
-                    var locale = siteLocales[l];
-                    var indexName = algoliaData.calculateIndexName('products', locale);
-                    var records = recordsPerLocale[locale];
-                    processedProducts = records.length;
-                    records.forEach(function(record) {
-                        algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
+                var processedVariantsToSend = 0;
+
+                if (paramRecordModel !== MASTER_LEVEL) {
+                    // Variant-level indexing
+                    var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
+                        masterProduct: product,
+                        locales: siteLocales,
+                        attributeList: attributesToSend,
+                        nonLocalizedAttributes: nonLocalizedAttributes,
+                        fullRecordUpdate: fullRecordUpdate,
                     });
+                    for (let l = 0; l < siteLocales.size(); ++l) {
+                        var locale = siteLocales[l];
+                        var indexName = algoliaData.calculateIndexName('products', locale);
+                        var records = recordsPerLocale[locale];
+                        processedVariantsToSend = records.length;
+                        records.forEach(function(record) {
+                            algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
+                        });
+                    }
+                } else {
+                    // Master-level indexing
+                    var masterRecordPerLocale = jobHelper.generateMasterRecords({
+                        product: product,
+                        locales: siteLocales,
+                        masterAttributes: masterAttributes,
+                        variantAttributes: algoliaProductConfig.defaultVariantAttributes_v2,
+                        nonLocalizedAttributes: nonLocalizedAttributes,
+                    });
+                    for (let l = 0; l < siteLocales.size(); ++l) {
+                        var locale = siteLocales[l];
+                        var indexName = algoliaData.calculateIndexName('products', locale);
+                        processedVariantsToSend = masterRecordPerLocale[locale].variants.length;
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, masterRecordPerLocale[locale], indexName))
+                    }
                 }
 
-                jobReport.processedItemsToSend += processedProducts;
+                jobReport.processedItemsToSend += processedVariantsToSend;
                 jobReport.recordsToSend += algoliaOperations.length;
                 return algoliaOperations;
             }
