@@ -213,7 +213,7 @@ exports.process = function(product, parameters, stepExecution) {
     if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0 ||
         paramRecordModel === MASTER_LEVEL) {
         if (product.isVariant()) {
-            // To generate 'color_variations' or for master-level indexing, we need to work with the master products.
+            // To generate 'colorVariations' or for master-level indexing, we need to work with the master products.
             // This variant will be indexed when we treat its master product, skip it.
             return [];
         }

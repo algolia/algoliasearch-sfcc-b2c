@@ -127,7 +127,7 @@ function computePrimaryCategoryHierarchicalFacets(categories, primaryCategoryId)
  * Handler complex and calculated Product attributes
  */
 var aggregatedValueHandlers = {
-    master_id: function(product) {
+    masterID: function(product) {
         return product.isVariant() || product.isVariationGroup() ?
             product.masterProduct.ID : null;
     },

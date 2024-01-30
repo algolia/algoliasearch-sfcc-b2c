@@ -139,9 +139,9 @@ describe('process', () => {
         var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot();
     });
-    test('color_variations', () => {
+    test('colorVariations', () => {
         // Process a master product with two size variations on the same color variation
-        mockAdditionalAttributes = ['color_variations'];
+        mockAdditionalAttributes = ['colorVariations'];
 
         const masterProduct = new MasterVariantMock();
         const variantPinkSize4 = new VariantMock({

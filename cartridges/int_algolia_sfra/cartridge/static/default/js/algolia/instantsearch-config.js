@@ -299,7 +299,7 @@ function enableInstantSearch(config) {
                         item.currencySymbol = algoliaData.currencySymbol;
 
 
-                        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.master_id || item.objectID);
+                        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
 
                         // originating index
                         item.__indexName = productsIndex;
@@ -314,13 +314,13 @@ function enableInstantSearch(config) {
                             });
                         }
 
-                        if (item.color_variations) {
-                            // Display the swatches only if at least one item has some color_variations
+                        if (item.colorVariations) {
+                            // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
-                            item.color_variations.forEach(colorVariation => {
-                                colorVariation.variant_url = generateProductUrl({
+                            item.colorVariations.forEach(colorVariation => {
+                                colorVariation.variantURL = generateProductUrl({
                                     objectID: item.objectID,
-                                    productUrl: colorVariation.variant_url,
+                                    productUrl: colorVariation.variantURL,
                                     queryID: item.__queryID,
                                     indexName: item.__indexName,
                                 });
@@ -365,15 +365,15 @@ function enableInstantSearch(config) {
                             if (!selectedVariant) {
                                 // 1.4 No facets selected, use the default variant
                                 selectedVariant = item.variants.find(variant => {
-                                    return variant.variantID === item.default_variant_id;
+                                    return variant.variantID === item.defaultVariantID;
                                 }) || item.variants[0];
                             }
 
-                            // 2. Get the color_variation corresponding to the selected variant, to display its image
-                            if (item.color_variations) {
-                                const colorVariation = item.color_variations.find(i => {
+                            // 2. Get the colorVariation corresponding to the selected variant, to display its image
+                            if (item.colorVariations) {
+                                const colorVariation = item.colorVariations.find(i => {
                                     return selectedVariant && i.color === selectedVariant.color
-                                }) || item.color_variations[0];
+                                }) || item.colorVariations[0];
                                 const imageGroup = colorVariation.image_groups.find(i => {
                                     return i.view_type === 'large'
                                 }) || colorVariation.image_groups[0];
@@ -471,8 +471,8 @@ function enableInstantSearch(config) {
      * @return {any} A color swatch
      */
     function renderSwatches(hit, html) {
-        if (hit.color_variations) {
-            return hit.color_variations.map(colorVariation => {
+        if (hit.colorVariations) {
+            return hit.colorVariations.map(colorVariation => {
                 let swatch;
                 let variantImage;
                 if (!colorVariation.image_groups) {
@@ -493,8 +493,8 @@ function enableInstantSearch(config) {
         const image = parent.querySelector('.tile-image');
         const link = parent.querySelector('.image-container > a');
         image.src = variantImage.dis_base_link;
-        link.href = colorVariation.variant_url;
-    }}" href="${colorVariation.variant_url}" aria-label="${swatch.title}">
+        link.href = colorVariation.variantURL;
+    }}" href="${colorVariation.variantURL}" aria-label="${swatch.title}">
                     <span>
                         <img class="swatch swatch-circle" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                     </span>

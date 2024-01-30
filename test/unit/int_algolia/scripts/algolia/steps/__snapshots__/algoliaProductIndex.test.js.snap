@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`process color_variations 1`] = `
+exports[`process colorVariations 1`] = `
 [
   AlgoliaOperation {
     "action": "addObject",
@@ -35,7 +35,7 @@ exports[`process color_variations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Hot Pink Combo",
           "image_groups": [
@@ -88,7 +88,7 @@ exports[`process color_variations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "image_groups": [
@@ -174,7 +174,7 @@ exports[`process color_variations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Hot Pink Combo",
           "image_groups": [
@@ -227,7 +227,7 @@ exports[`process color_variations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "image_groups": [
@@ -313,7 +313,7 @@ exports[`process color_variations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Combo rose vif",
           "image_groups": [
@@ -366,7 +366,7 @@ exports[`process color_variations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "image_groups": [
@@ -452,7 +452,7 @@ exports[`process color_variations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Combo rose vif",
           "image_groups": [
@@ -505,7 +505,7 @@ exports[`process color_variations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "image_groups": [
@@ -591,7 +591,7 @@ exports[`process color_variations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Hot Pink Combo",
           "image_groups": [
@@ -644,7 +644,7 @@ exports[`process color_variations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "image_groups": [
@@ -730,7 +730,7 @@ exports[`process color_variations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Hot Pink Combo",
           "image_groups": [
@@ -783,7 +783,7 @@ exports[`process color_variations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "image_groups": [
@@ -1750,7 +1750,7 @@ exports[`process master-level indexing 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Hot Pink Combo",
           "image_groups": [
@@ -1803,10 +1803,10 @@ exports[`process master-level indexing 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
-      "default_variant_id": "701644031206M",
+      "defaultVariantID": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -1906,7 +1906,7 @@ exports[`process master-level indexing 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Combo rose vif",
           "image_groups": [
@@ -1959,10 +1959,10 @@ exports[`process master-level indexing 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
-      "default_variant_id": "701644031206M",
+      "defaultVariantID": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -2062,7 +2062,7 @@ exports[`process master-level indexing 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Hot Pink Combo",
           "image_groups": [
@@ -2115,10 +2115,10 @@ exports[`process master-level indexing 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
-      "default_variant_id": "701644031206M",
+      "defaultVariantID": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",

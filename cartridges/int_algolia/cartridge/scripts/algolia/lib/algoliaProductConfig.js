@@ -3,7 +3,7 @@
 var defaultAttributes = ['id', 'primary_category_id', 'in_stock', 'price', 'categories'];
 var defaultAttributes_v2 = ['name', 'primary_category_id', 'categories', 'in_stock', 'price', 'image_groups', 'url'];
 var defaultVariantAttributes_v2 = ['in_stock', 'price', 'color', 'size', 'url'];
-var COLOR_VARIATIONS_FIELD_NAME = 'color_variations';
+var COLOR_VARIATIONS_FIELD_NAME = 'colorVariations';
 
 var attributeConfig = {
     id: {
@@ -221,7 +221,7 @@ var attributeConfig_v2 = {
     in_stock: {
         localized: false
     },
-    master_id: {
+    masterID: {
         localized: false,
     },
     price: {

@@ -30,7 +30,7 @@ exports[`generateMasterRecords 1`] = `
         },
       ],
     ],
-    "color_variations": [
+    "colorVariations": [
       {
         "color": "Hot Pink Combo",
         "image_groups": [
@@ -83,10 +83,10 @@ exports[`generateMasterRecords 1`] = `
             "view_type": "swatch",
           },
         ],
-        "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+        "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
       },
     ],
-    "default_variant_id": "701644031206M",
+    "defaultVariantID": "701644031206M",
     "in_stock": true,
     "name": "Floral Dress",
     "objectID": "25592581M",
@@ -146,7 +146,7 @@ exports[`generateVariantRecordsWithColorVariations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Combo rose vif",
           "image_groups": [
@@ -199,7 +199,7 @@ exports[`generateVariantRecordsWithColorVariations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "in_stock": true,
@@ -240,7 +240,7 @@ exports[`generateVariantRecordsWithColorVariations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
           "color": "Combo rose vif",
           "image_groups": [
@@ -293,7 +293,7 @@ exports[`generateVariantRecordsWithColorVariations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "in_stock": true,

@@ -585,8 +585,8 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
 }
 
 /**
- * For a given master, generate all variant records with their 'color_variations'
- * The color_variations are built using the master's variation model
+ * For a given master, generate all variant records with their 'colorVariations'
+ * The colorVariations are built using the master's variation model
  *
  * @param {Object} parameters - model parameters
  * @param {dw.order.Product} parameters.masterProduct - A master product
@@ -631,7 +631,7 @@ function generateVariantRecordsWithColorVariations(parameters) {
                 baseModel: baseModel,
                 fullRecordUpdate: parameters.fullRecordUpdate,
             });
-            localizedVariant.color_variations = colorVariationsPerLocale[locale];
+            localizedVariant.colorVariations = colorVariationsPerLocale[locale];
             algoliaRecordsPerLocale[locale].push(localizedVariant);
         }
     }
@@ -676,9 +676,9 @@ function generateMasterRecords(parameters) {
             locale: locale,
             attributeList: parameters.masterAttributes,
         });
-        localizedMaster.default_variant_id = defaultVariant.ID;
+        localizedMaster.defaultVariantID = defaultVariant.ID;
         localizedMaster.variants = [];
-        localizedMaster.color_variations = colorVariationsPerLocale[locale];
+        localizedMaster.colorVariations = colorVariationsPerLocale[locale];
         localizedMasterProducts[locale] = localizedMaster;
     }
 
