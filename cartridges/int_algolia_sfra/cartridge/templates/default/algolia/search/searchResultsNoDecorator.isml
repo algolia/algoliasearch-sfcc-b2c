@@ -74,9 +74,7 @@
                     </div>
                     <div class="col-sm-12 col-md-9">
                         <div id="algolia-hits-placeholder" class="row product-grid">
-
-                            <iscomment> Server-Side Rendering of CLP search results if SSR feature switch "Algolia_EnableSSR" and "algolia.http.search" service are both enabled  </iscomment>
-                            <iscomment> If SSR is disabled, pdict.categoryProductHits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
+                            <iscomment> Server-Side Rendering of CLP search results, If SSR is disabled, pdict.hits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
                             <isif condition="${!empty(pdict.hits)}">
                                 <isalgoliasearchhits hits="${pdict.hits}" />
                             </isif>
@@ -90,8 +88,7 @@
         <div class="tab-pane container" id="content-search-results-pane" role="tabpanel" aria-labelledby="articles-tab">
             <div id="content-search-results" class="content-grid-header">
                 <div id="algolia-content-hits-placeholder" class="row product-grid">
-                    <iscomment> Server-Side Rendering of CLP search results if SSR feature switch "Algolia_EnableSSR" and "algolia.http.search" service are both enabled  </iscomment>
-                    <iscomment> If SSR is disabled, pdict.categoryProductHits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
+                    <iscomment> Server-Side Rendering of query search results, If SSR is disabled, pdict.contentHits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
                     <isif condition="${!empty(pdict.contentHits)}">
                         <isalgoliasearchhits hits="${pdict.contentHits}" />
                     </isif>
