@@ -1,5 +1,3 @@
-const Site = require('dw/system/Site');
-const Currency = require('dw/util/Currency');
 const URLUtils = require('dw/web/URLUtils');
 
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();

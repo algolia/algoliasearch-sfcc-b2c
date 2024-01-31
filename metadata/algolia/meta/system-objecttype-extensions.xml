@@ -165,13 +165,14 @@ Setting this preference replaces the first two segments, the final index name be
 
             <attribute-definition attribute-id="Algolia_RecordModel">
                 <display-name xml:lang="x-default">Record model</display-name>
-                <description xml:lang="x-default">Define the model used to store products in Algolia. 'Variation Product': create one record per variation product.
-                    'Base Product': create one record per base product, containing all variants in a 'variants' attribute."</description>
+                <description xml:lang="x-default">Define the model used to store products in Algolia.
+'Variation Product': create one record per variation product.
+'Base Product': create one record per base product, containing all variants in a 'variants' attribute.</description>
                 <type>enum-of-string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <value-definitions>
-                    <value-definition>
+                    <value-definition default="true">
                         <display xml:lang="x-default">Variation Product</display>
                         <value>variant-level</value>
                     </value-definition>
@@ -180,7 +181,6 @@ Setting this preference replaces the first two segments, the final index name be
                         <value>master-level</value>
                     </value-definition>
                 </value-definitions>
-                <default-value>variant-level</default-value>
             </attribute-definition>
 
             <attribute-definition attribute-id="Algolia_EnableInsights">
