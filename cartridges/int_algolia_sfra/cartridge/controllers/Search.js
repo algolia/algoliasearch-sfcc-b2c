@@ -45,7 +45,8 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         }
 
         if (useAlgolia) {
-            var categoryProductHits;
+            var hits;
+            var contentHits;
             var queryHits;
 
             // server-side rendering to improve SEO - makes a server-side request to Algolia to return CLP search results
@@ -55,9 +56,15 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 // Then, we are fetching server-side results and transform them prior to rendering according to search type.
                 if (type) {
                     var query = type === 'category' ? cgid : q;
-                    var hits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, type);
+                    hits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, type, 'products');
                     hits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(hits);
                 }
+
+                if (algoliaData.getPreference('EnableContentSearch')) {
+                    contentHits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, type, 'contents');
+                    contentHits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(contentHits);
+                }
+
             }
 
             res.render('search/searchResults', {
@@ -67,6 +74,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
                 categoryBannerUrl: categoryBannerUrl,
                 hits: hits,
+                contentHits: contentHits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q
             });

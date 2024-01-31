@@ -5,8 +5,13 @@
  */
 function enableInstantSearch(config) {
     const productsIndex = algoliaData.productsIndex;
+    const contentsIndex = algoliaData.contentsIndex;
+    const enableContentSearch = algoliaData.enableContentSearch;
     const productsIndexPriceAsc = productsIndex + '__price_' + algoliaData.currencyCode + '_asc';
     const productsIndexPriceDesc = productsIndex + '__price_' + algoliaData.currencyCode + '_desc';
+    const contentResultEl = document.querySelector('#algolia-content-hits-placeholder');
+    const contentSearchbarTab = document.querySelector('#content-search-bar-button');
+    const navbar = document.querySelector('.search-nav');
 
     let displaySwatches = false;
     var initialUiState = {};
@@ -23,6 +28,10 @@ function enableInstantSearch(config) {
     initialUiState[productsIndex] = {
         query: config.urlQuery,
         hierarchicalMenu: hierarchicalMenuValue,
+    };
+
+    initialUiState[contentsIndex] = {
+        query: config.urlQuery,
     };
 
     var search = instantsearch({
@@ -72,6 +81,11 @@ function enableInstantSearch(config) {
                 container: '#algolia-stats-placeholder',
                 templates: {
                     text(data) {
+                        if (contentSearchbarTab) {
+                            const productLength = data.nbHits;
+                            const productCountEl = document.querySelector('#ai-product-count');
+                            productCountEl.innerHTML = ' (' + productLength + ')';
+                        }
                         if (data.hasManyResults) {
                             return `${data.nbHits} ${algoliaData.strings.results}`;
                         } else if (data.hasOneResult) {
@@ -323,6 +337,60 @@ function enableInstantSearch(config) {
                 }
             })
         ]);
+
+        if (contentResultEl && contentSearchbarTab && enableContentSearch) {
+            search.addWidgets([
+                instantsearch.widgets
+                    .index({
+                        indexName: contentsIndex
+                    })
+                    .addWidgets([
+                        instantsearch.widgets.infiniteHits({
+                            container: '#algolia-content-hits-placeholder',
+                            cssClasses: {
+                                loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto'
+                            },
+                            templates: {
+                                item: `
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="card">
+                                                <div class="card-header clearfix">
+                                                    <h4><a href="{{url}}">{{#helpers.highlight}}{ "attribute": "name" }{{/helpers.highlight}}</a></h4>
+                                                </div>
+                                                <div class="card-body card-info-group">
+                                                    {{description}}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `,
+                            },
+                            transformItems: function (items) {
+                                if (items.length === 0) {
+                                    navbar.style.visibility = 'hidden';
+                                } else {
+                                    navbar.style.visibility = 'visible';
+                                }
+                                return items;
+                            }
+                        }),
+                        instantsearch.widgets.stats({
+                            container: '#ai-content-count',
+                            templates: {
+                                text(data) {
+                                    return ' (' + data.nbHits + ')';
+                                },
+                            },
+                            cssClasses: {
+                                root: 'd-inline',
+                            },
+                        }),
+                    ]),
+            ]);
+        } else {
+            navbar.style.visibility = 'hidden';
+        }
     }
 
     search.start();
