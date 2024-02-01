@@ -21,12 +21,42 @@ jobs:
         with:
           fetch-depth: '0'
 
-      - name: Merge develop
+      - name: branch change
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
-          git checkout master
-          git merge origin/develop
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git checkout develop
+
+      - name: Modify README.md
+        uses: jaywcjlove/github-action-modify-file-content@main
+        with:
+          path: README.md
+          body: "Version ${{ inputs.next_version }}"
+
+      - name: update version name
+        uses: jaywcjlove/github-action-package@main
+        with:
+          path: 'package.json'
+          version: ${{ inputs.next_version }}
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Update version to ${{ inputs.next_version }}"
+          git push
+
+      - name: Merge develop into main
+        run: |
+          set -e
+          echo "Checking out develop branch..."
+          git checkout develop
+          git pull --ff-only
+          echo "Switching to main branch..."
+          git checkout main
+          git pull --ff-only
+          echo "Merging develop into main..."
+          git merge --no-ff origin/develop
+          echo "Pushing changes..."
           git push
 
       - name: Draft release

@@ -1,3 +1,5 @@
+<isinclude template="/util/modules" />
+
 <isdecorate template="application/MenuFrame">
     <iscontent type="text/html" charset="UTF-8" />
     <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
@@ -173,6 +175,7 @@
                         </button>
                     </td>
                 </tr>
+                <isversion></isversion>
             </tbody>
         </table>
         </form>
