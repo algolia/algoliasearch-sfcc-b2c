@@ -45,16 +45,16 @@ jobs:
           git commit -m "Update version to ${{ inputs.next_version }}"
           git push
 
-      - name: Merge develop into main
+      - name: Merge develop into master
         run: |
           set -e
           echo "Checking out develop branch..."
           git checkout develop
           git pull --ff-only
-          echo "Switching to main branch..."
-          git checkout main
+          echo "Switching to master branch..."
+          git checkout master
           git pull --ff-only
-          echo "Merging develop into main..."
+          echo "Merging develop into master..."
           git merge --no-ff origin/develop
           echo "Pushing changes..."
           git push
