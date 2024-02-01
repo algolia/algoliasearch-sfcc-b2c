@@ -131,7 +131,7 @@ Can perform full records updates or partial records updates. See the 'indexingMe
             <step step-id="algoliaContentIndex" type="custom.algoliaContentIndex" enforce-restart="false">
                 <description>Index all searchable contents assigned to the selected site to Algolia. The list of indexed attributes is configurable.</description>
                 <parameters>
-                    <parameter name="tagDelimiter">h1</parameter>
+                    <parameter name="splittingTag">h1</parameter>
                     <parameter name="attributeList">id,name,description,url,body,page</parameter>
                 </parameters>
             </step>

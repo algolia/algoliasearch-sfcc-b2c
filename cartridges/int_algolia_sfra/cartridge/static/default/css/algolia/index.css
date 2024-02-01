@@ -10,3 +10,7 @@
 .aa-Autocomplete label {
     margin-bottom: 0;
 }
+
+.algolia-results-tab {
+    cursor: pointer;
+}

@@ -25,48 +25,75 @@
     <isslot id="search-result-banner-m" description="Banner for search results" context="global" />
 </isif>
 
-
-<div class="row">
-    <div class="tab-content col-12">
-        <div class="ais-InstantSearch tab-pane container active"  id="product-search-results" role="tabpanel" aria-labelledby="product-tab">
-            <div class="row grid-header">
-                    <div id="algolia-searchbox-placeholder" ></div>
-                    <div id="algolia-stats-placeholder" class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2"></div>
-                    <div id="algolia-sort-by-placeholder" class="col-6 col-sm-3 order-sm-1"></div>
-
-                    <div class="col-6 col-sm-3 text-right d-md-none order-sm-3">
-                        <button type="button" class="btn btn-primary filter-results col-12">
-                            <isprint value="${Resource.msg('button.filter','search',null)}" encoding="htmlcontent" />
-                        </button>
-                    </div>
+<div class="container search-results">
+    <div class="row search-nav">
+        <isif condition="${!pdict.category}">
+            <div class="nav-tabs-wrapper algolia-results-tab">
+                <ul class="nav nav-tabs nav-fill" id="algolia-search-tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link active product-search" id="product-search-bar-button" aria-controls="product-search-results" data-toggle="tab" role="tab" aria-selected="true" id="product-tab">
+                            ${Resource.msg('tab.nav.search.productsresults', 'search', null)}<span class="ai-nb-hits" id="ai-product-count"></span>
+                        </a>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <a class="nav-link content-search" id="content-search-bar-button" aria-controls="content-search-results-pane" data-toggle="tab" role="tab" aria-selected="false" id="articles-tab">
+                            ${Resource.msg('tab.nav.search.artclesresults', 'search', null)}<span class="ai-nb-hits" id="ai-content-count"></span>
+                        </a>
+                    </li>
+                </ul>
             </div>
-            <div class="row">
-                <div class="refinement-bar col-md-3">
+        </isif>
+    </div>
+    <div class="row">
+        <div class="tab-content col-12">
+            <div class="ais-InstantSearch tab-pane container active"  id="product-search-results" role="tabpanel" aria-labelledby="product-tab">
+                <div class="row grid-header">
+                        <div id="algolia-searchbox-placeholder" ></div>
+                        <div id="algolia-stats-placeholder" class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2"></div>
+                        <div id="algolia-sort-by-placeholder" class="col-6 col-sm-3 order-sm-1"></div>
 
-                    <div id="algolia-clear-refinements-placeholder"></div>
+                        <div class="col-6 col-sm-3 text-right d-md-none order-sm-3">
+                            <button type="button" class="btn btn-primary filter-results col-12">
+                                <isprint value="${Resource.msg('button.filter','search',null)}" encoding="htmlcontent" />
+                            </button>
+                        </div>
+                </div>
+                <div class="row">
+                    <div class="refinement-bar col-md-3">
 
-                    <div class="refinements">
-                        <div id="algolia-categories-list-placeholder"></div>
-                        <div id="algolia-newarrivals-list-placeholder"></div>
-                        <div id="algolia-brand-list-placeholder"></div>
-                        <div id="algolia-size-list-placeholder"></div>
-                        <div id="algolia-color-list-placeholder"></div>
-                        <div id="algolia-price-filter-placeholder"></div>
+                        <div id="algolia-clear-refinements-placeholder"></div>
+
+                        <div class="refinements">
+                            <div id="algolia-categories-list-placeholder"></div>
+                            <div id="algolia-newarrivals-list-placeholder"></div>
+                            <div id="algolia-brand-list-placeholder"></div>
+                            <div id="algolia-size-list-placeholder"></div>
+                            <div id="algolia-color-list-placeholder"></div>
+                            <div id="algolia-price-filter-placeholder"></div>
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-md-9">
+                        <div id="algolia-hits-placeholder" class="row product-grid">
+                            <iscomment> Server-Side Rendering of CLP search results, If SSR is disabled, pdict.hits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
+                            <isif condition="${!empty(pdict.hits)}">
+                                <isalgoliasearchhits hits="${pdict.hits}" />
+                            </isif>
+
+                        </div>
                     </div>
                 </div>
-                <div class="col-sm-12 col-md-9">
-                    <div id="algolia-hits-placeholder" class="row product-grid">
 
-                        <iscomment> Server-Side Rendering of CLP search results if SSR feature switch "Algolia_EnableSSR" and "algolia.http.search" service are both enabled  </iscomment>
-                        <iscomment> If SSR is disabled, pdict.categoryProductHits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
-                        <isif condition="${!empty(pdict.hits)}">
-                            <isalgoliasearchhits hits="${pdict.hits}" />
-                        </isif>
-
-                    </div>
+            </div>
+        </div>
+        <div class="tab-pane container" id="content-search-results-pane" role="tabpanel" aria-labelledby="articles-tab">
+            <div id="content-search-results" class="content-grid-header">
+                <div id="algolia-content-hits-placeholder" class="row product-grid">
+                    <iscomment> Server-Side Rendering of query search results, If SSR is disabled, pdict.contentHits is null. If there are no results, the service is disabled or there's any error, the returned value is falsy. </iscomment>
+                    <isif condition="${!empty(pdict.contentHits)}">
+                        <isalgoliasearchhits hits="${pdict.contentHits}" />
+                    </isif>
                 </div>
             </div>
-
         </div>
     </div>
 </div>

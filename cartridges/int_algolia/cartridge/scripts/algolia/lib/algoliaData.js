@@ -19,11 +19,13 @@ const clientSideData = {
     "enableInsights": getPreference('EnableInsights'),
     "applicationID": getPreference('ApplicationID'),
     "searchApiKey": getPreference('SearchApiKey'),
+    "enableContentSearch": getPreference('EnableContentSearch'),
     "locale": request.getLocale(),
     "currencyCode": request.getSession().getCurrency().getCurrencyCode(),
     "currencySymbol": request.getSession().getCurrency().getSymbol(),
     "productsIndex": calculateIndexName('products'),
     "categoriesIndex": calculateIndexName('categories'),
+    "contentsIndex": calculateIndexName('contents'),
     "recordModel": getPreference('RecordModel'),
     "quickViewUrlBase": URLUtils.url('Product-ShowQuickView').toString(),
     "strings": {
@@ -43,6 +45,8 @@ const clientSideData = {
         "categoryPanelTitle": Resource.msg('search.category','algolia',null),
         "products": Resource.msg('search.suggest.products','algolia',null),
         "categories": Resource.msg('search.suggest.categories','algolia',null),
+        "contents": Resource.msg('search.suggest.contents','algolia',null),
+        "articles": Resource.msg('tab.nav.search.artclesresults', 'search', null),
         "priceFilter": {
             "separator": Resource.msg('search.pricefilter.separator','algolia',null),
             "submit": Resource.msg('search.pricefilter.submit','algolia',null),
@@ -69,6 +73,7 @@ const clientSideData = {
 //   IndexPrefix                  ║ Optional prefix for the index name                      ║ String
 //   EnableInsights               ║ Enables insights events on the Storefront               ║ Boolean
 //   EnableSSR                    ║ Enables server-side rendering of CLP results on SFRA    ║ Boolean
+//   EnableContentSearch          ║ Enable/disable Algolia Content Search                   ║ Boolean
 //  ══════════════════════════════╩═════════════════════════════════════════════════════════╩════════════════════
 //  Preferences stored in the XML file
 //

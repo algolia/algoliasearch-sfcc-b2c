@@ -32,6 +32,7 @@ function handleSettings() {
     var params = request.httpParameterMap;
     try {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
+        var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', params.ApplicationID.value);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
@@ -42,6 +43,7 @@ function handleSettings() {
         algoliaData.setPreference('RecordModel', params.RecordModel.value);
         algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
+        algoliaData.setPreference('EnableContentSearch', algoliaEnableContentSearch);
     } catch (error) {
         Logger.error(error);
     }

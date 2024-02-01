@@ -1,0 +1,14 @@
+<isloop items="${pdict.contentHits.hits}" var="content">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header clearfix">
+                    <h4><a href="${content.url}">${content.name}</a></h4>
+                </div>
+                <div class="card-body card-info-group">
+                    ${content.description}
+                </div>
+            </div>
+        </div>
+    </div>
+</isloop>
