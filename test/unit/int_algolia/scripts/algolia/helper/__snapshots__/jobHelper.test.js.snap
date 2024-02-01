@@ -1,5 +1,120 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`generateMasterRecords 1`] = `
+{
+  "en": algoliaLocalizedProduct {
+    "__primary_category": {
+      "0": "Womens",
+      "1": "Womens > Clothing",
+      "2": "Womens > Clothing > Bottoms",
+    },
+    "categories": [
+      [
+        {
+          "id": "newarrivals-womens",
+          "name": "Womens",
+        },
+      ],
+      [
+        {
+          "id": "womens-clothing-bottoms",
+          "name": "Bottoms",
+        },
+        {
+          "id": "womens-clothing",
+          "name": "Clothing",
+        },
+        {
+          "id": "womens",
+          "name": "Womens",
+        },
+      ],
+    ],
+    "colorVariations": [
+      {
+        "color": "Hot Pink Combo",
+        "image_groups": [
+          {
+            "_type": "image_group",
+            "images": [
+              {
+                "_type": "image",
+                "alt": "Floral Dress, Hot Pink Combo, large",
+                "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
+                "title": "Floral Dress, Hot Pink Combo",
+              },
+              {
+                "_type": "image",
+                "alt": "Floral Dress, Hot Pink Combo, large",
+                "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
+                "title": "Floral Dress, Hot Pink Combo",
+              },
+            ],
+            "view_type": "large",
+          },
+          {
+            "_type": "image_group",
+            "images": [
+              {
+                "_type": "image",
+                "alt": "Floral Dress, Hot Pink Combo, small",
+                "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
+                "title": "Floral Dress, Hot Pink Combo",
+              },
+              {
+                "_type": "image",
+                "alt": "Floral Dress, Hot Pink Combo, small",
+                "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
+                "title": "Floral Dress, Hot Pink Combo",
+              },
+            ],
+            "view_type": "small",
+          },
+          {
+            "_type": "image_group",
+            "images": [
+              {
+                "_type": "image",
+                "alt": "Floral Dress, Hot Pink Combo, swatch",
+                "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
+                "title": "Floral Dress, Hot Pink Combo",
+              },
+            ],
+            "view_type": "swatch",
+          },
+        ],
+        "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
+      },
+    ],
+    "defaultVariantID": "701644031206M",
+    "in_stock": true,
+    "name": "Floral Dress",
+    "objectID": "25592581M",
+    "primary_category_id": "womens-clothing-bottoms",
+    "variants": [
+      algoliaLocalizedProduct {
+        "in_stock": true,
+        "price": {
+          "EUR": 92.88,
+          "USD": 129,
+        },
+        "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+        "variantID": "701644031206M",
+      },
+      algoliaLocalizedProduct {
+        "in_stock": true,
+        "price": {
+          "EUR": 92.88,
+          "USD": 129,
+        },
+        "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031213M",
+        "variantID": "701644031213M",
+      },
+    ],
+  },
+}
+`;
+
 exports[`generateVariantRecordsWithColorVariations 1`] = `
 {
   "fr": [
@@ -31,8 +146,9 @@ exports[`generateVariantRecordsWithColorVariations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
+          "color": "Combo rose vif",
           "image_groups": [
             {
               "_type": "image_group",
@@ -83,7 +199,7 @@ exports[`generateVariantRecordsWithColorVariations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "in_stock": true,
@@ -124,8 +240,9 @@ exports[`generateVariantRecordsWithColorVariations 1`] = `
           },
         ],
       ],
-      "color_variations": [
+      "colorVariations": [
         {
+          "color": "Combo rose vif",
           "image_groups": [
             {
               "_type": "image_group",
@@ -176,7 +293,7 @@ exports[`generateVariantRecordsWithColorVariations 1`] = `
               "view_type": "swatch",
             },
           ],
-          "variant_url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M",
+          "variantURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
         },
       ],
       "in_stock": true,

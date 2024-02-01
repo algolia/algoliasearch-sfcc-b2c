@@ -185,7 +185,7 @@ function enableInstantSearch(config) {
 
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
-                attribute: 'size',
+                attribute: algoliaData.recordModel === 'master-level' ? 'variants.size' : 'size',
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -201,7 +201,7 @@ function enableInstantSearch(config) {
 
             refinementListWithPanel({
                 container: '#algolia-color-list-placeholder',
-                attribute: 'color',
+                attribute: algoliaData.recordModel === 'master-level' ? 'variants.color' : 'color',
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -280,13 +280,13 @@ function enableInstantSearch(config) {
                         `
                     },
                 },
-                transformItems: function (items, helpers) {
+                transformItems: function (items, { results }) {
                     displaySwatches = false;
                     return items.map(function (item) {
                         // assign image
                         if (item.image_groups) {
-                            var imageGroup = item.image_groups.find(function (i) {
-                                i.view_type === 'large'
+                            const imageGroup = item.image_groups.find(function (i) {
+                                return i.view_type === 'large'
                             }) || item.image_groups[0];
                             if (imageGroup) {
                                 var firstImageInGroup = imageGroup.images[0];
@@ -297,11 +297,6 @@ function enableInstantSearch(config) {
                                 dis_base_link: algoliaData.noImages.large,
                                 alt: item.name + ', large',
                             }
-                        }
-
-                        if (item.color_variations) {
-                            // Display the swatches only if at least one item has some color_variations
-                            displaySwatches = true;
                         }
 
                         // adjusted price in user currency
@@ -318,18 +313,99 @@ function enableInstantSearch(config) {
                         item.currencySymbol = algoliaData.currencySymbol;
 
 
-                        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.master_id || item.objectID);
+                        item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
 
                         // originating index
                         item.__indexName = productsIndex;
 
                         // url with queryID (used for analytics)
                         if (item.url) {
-                            var url = new URL(item.url, window.location.origin);
-                            url.searchParams.append('queryID', item.__queryID);
-                            url.searchParams.append('objectID', item.objectID);
-                            url.searchParams.append('indexName', item.__indexName);
-                            item.url = url.href;
+                            item.url = generateProductUrl({
+                                objectID: item.objectID,
+                                productUrl: item.url,
+                                queryID: item.__queryID,
+                                indexName: item.__indexName,
+                            });
+                        }
+
+                        if (item.colorVariations) {
+                            // Display the swatches only if at least one item has some colorVariations
+                            displaySwatches = true;
+                            item.colorVariations.forEach(colorVariation => {
+                                colorVariation.variantURL = generateProductUrl({
+                                    objectID: item.objectID,
+                                    productUrl: colorVariation.variantURL,
+                                    queryID: item.__queryID,
+                                    indexName: item.__indexName,
+                                });
+                            });
+                        }
+
+                        // Master-level indexing
+                        if (item.variants) {
+                            let price;
+                            item.variants.forEach(variant => {
+                                price = variant.price[algoliaData.currencyCode]
+                                variant.url = generateProductUrl({
+                                    objectID: item.objectID,
+                                    productUrl: variant.url,
+                                    queryID: item.__queryID,
+                                    indexName: item.__indexName,
+                                });
+                            });
+
+                            // 1. Find the variant matching the selected facets, or use the default variant
+                            let selectedVariant;
+                            const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
+                            const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
+                            if (colorFacets.length > 0 && sizeFacets.length > 0) {
+                                // 1.1 If both facets are selected, find the variant that match both
+                                selectedVariant = item.variants.find(variant => {
+                                    return sizeFacets.includes(variant.size) && colorFacets.includes(variant.color);
+                                });
+                            }
+                            if (!selectedVariant && colorFacets.length > 0) {
+                                // 1.2 If we have color refinement, find one that match the selected color
+                                selectedVariant = item.variants.find(variant => {
+                                    return colorFacets.includes(variant.color)
+                                });
+                            }
+                            if (!selectedVariant && sizeFacets.length > 0) {
+                                // 1.3 Otherwise if we have size refinement, find one that match the selected size
+                                selectedVariant = item.variants.find(variant => {
+                                    return sizeFacets.includes(variant.size)
+                                });
+                            }
+                            if (!selectedVariant) {
+                                // 1.4 No facets selected, use the default variant
+                                selectedVariant = item.variants.find(variant => {
+                                    return variant.variantID === item.defaultVariantID;
+                                }) || item.variants[0];
+                            }
+
+                            // 2. Get the colorVariation corresponding to the selected variant, to display its image
+                            if (item.colorVariations) {
+                                const colorVariation = item.colorVariations.find(i => {
+                                    return selectedVariant && i.color === selectedVariant.color
+                                }) || item.colorVariations[0];
+                                const imageGroup = colorVariation.image_groups.find(i => {
+                                    return i.view_type === 'large'
+                                }) || colorVariation.image_groups[0];
+                                if (imageGroup) {
+                                    item.image = imageGroup.images[0];
+                                }
+                            }
+
+                            // 3. Get the variant price
+                            if (selectedVariant) {
+                                if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
+                                    item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
+                                }
+                                if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
+                                    item.price = selectedVariant.price[algoliaData.currencyCode]
+                                }
+                                item.url = selectedVariant.url;
+                            }
                         }
 
                         return item;
@@ -463,8 +539,8 @@ function enableInstantSearch(config) {
      * @return {any} A color swatch
      */
     function renderSwatches(hit, html) {
-        if (hit.color_variations) {
-            return hit.color_variations.map(colorVariation => {
+        if (hit.colorVariations) {
+            return hit.colorVariations.map(colorVariation => {
                 let swatch;
                 let variantImage;
                 if (!colorVariation.image_groups) {
@@ -483,8 +559,10 @@ function enableInstantSearch(config) {
                 <a onmouseover="${() => {
         const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
         const image = parent.querySelector('.tile-image');
+        const link = parent.querySelector('.image-container > a');
         image.src = variantImage.dis_base_link;
-    }}" href="${colorVariation.variant_url}" aria-label="${swatch.title}">
+        link.href = colorVariation.variantURL;
+    }}" href="${colorVariation.variantURL}" aria-label="${swatch.title}">
                     <span>
                         <img class="swatch swatch-circle" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                     </span>
@@ -493,4 +571,20 @@ function enableInstantSearch(config) {
             });
         }
     }
+}
+
+/**
+ * Build a product URL with Algolia query parameters
+ * @param {string} objectID objectID
+ * @param {string} productUrl url of the product
+ * @param {string} queryID queryID
+ * @param {string} indexName indexName
+ * @return {string} Final URL of the product
+ */
+function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
+    const url = new URL(productUrl, window.location.origin);
+    url.searchParams.append('queryID', queryID);
+    url.searchParams.append('objectID', objectID);
+    url.searchParams.append('indexName', indexName);
+    return url.href;
 }

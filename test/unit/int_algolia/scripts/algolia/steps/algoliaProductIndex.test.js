@@ -76,6 +76,7 @@ const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/
 const collectionHelper = require('../../../../../mocks/helpers/collectionHelper');
 
 beforeEach(() => {
+    global.customPreferences['Algolia_RecordModel'] = 'variant-level';
     mockAdditionalAttributes = ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
         'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
 });
@@ -138,10 +139,36 @@ describe('process', () => {
         var algoliaOperations = job.process(variant);
         expect(algoliaOperations).toMatchSnapshot();
     });
-    test('color_variations', () => {
+    test('colorVariations', () => {
         // Process a master product with two size variations on the same color variation
-        mockAdditionalAttributes = ['color_variations'];
+        mockAdditionalAttributes = ['colorVariations'];
 
+        const masterProduct = new MasterVariantMock();
+        const variantPinkSize4 = new VariantMock({
+            ID: '701644031206M',
+            variationAttributes: { color: 'JJB52A0', size: '004' },
+            masterProduct,
+        });
+        const variantPinkSize6 = new VariantMock({
+            ID: '701644031213M',
+            variationAttributes: { color: 'JJB52A0', size: '006' },
+            masterProduct,
+        });
+        masterProduct.variants = collectionHelper.createCollection([
+            variantPinkSize4,
+            variantPinkSize6,
+        ]);
+
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
+
+        const algoliaOperations = job.process(masterProduct);
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+    test('master-level indexing', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'master-level';
+        mockAdditionalAttributes = [];
+
+        // Process a master product with two size variations on the same color variation
         const masterProduct = new MasterVariantMock();
         const variantPinkSize4 = new VariantMock({
             ID: '701644031206M',

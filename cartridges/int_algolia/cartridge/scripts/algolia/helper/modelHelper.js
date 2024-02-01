@@ -5,7 +5,7 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 const COLOR_ATTRIBUTE_ID = 'color';
 
 /**
- * Return color_variations for a product, based on its variation model
+ * Return colorVariations for a product, based on its variation model
  * @param {dw.catalog.Product} product Product
  * @param {string} locale The desired locale
  * @return {[{title, alt, url, variationUrl}]} An array of swatches
@@ -37,13 +37,14 @@ function getColorVariations(product, locale) {
         if (image_groups) {
             colorVariations.push({
                 image_groups: image_groups,
-                variant_url: URLUtils.url(
+                variantURL: URLUtils.url(
                     'Product-Show',
                     'pid',
                     product.ID,
                     variationModel.getHtmlName(colorVariationAttribute), // returns 'dwvar_' + product.ID + '_color',
                     colorValue.value
                 ).toString(),
+                color: colorValue.displayValue,
             });
         }
     }

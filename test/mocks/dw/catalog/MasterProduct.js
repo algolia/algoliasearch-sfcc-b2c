@@ -14,6 +14,7 @@ class Product {
         this.master = true;
         this.pageKeywords = null;
         this.variant = false;
+        this.defaultVariant = null;
         this.variants = collectionHelper.createCollection([]);
     }
 
@@ -87,6 +88,11 @@ class Product {
         return this.getPriceModel();
     }
     getPriceModel() {
+        const prices = this.variants.map(variant => {
+            return variant.getPriceModel().price.value;
+        });
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
         if (this.master) {
             return {
                 price: {
@@ -94,28 +100,17 @@ class Product {
                     currencyCode: 'N/A',
                     value: 0,
                 },
+                minPrice: {
+                    available: true,
+                    currencyCode: request.getSession().getCurrency().currencyCode,
+                    value: minPrice,
+                },
+                maxPrice: {
+                    available: true,
+                    currencyCode: request.getSession().getCurrency().currencyCode,
+                    value: maxPrice,
+                }
             };
-        }
-        const currency = request.getSession().getCurrency();
-        switch (currency.currencyCode) {
-            case 'USD':
-                return {
-                    price: {
-                        available: true,
-                        currencyCode: 'USD',
-                        value: 129,
-                    },
-                };
-            case 'EUR':
-                return {
-                    price: {
-                        available: true,
-                        currencyCode: 'EUR',
-                        value: 92.88,
-                    },
-                };
-            default:
-                return null;
         }
     }
 
@@ -274,6 +269,7 @@ class Product {
         return new ProductVariationModel({
             productID: this.ID,
             images: this.images,
+            variants: this.variants,
         });
     }
 

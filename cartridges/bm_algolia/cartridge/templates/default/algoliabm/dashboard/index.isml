@@ -126,6 +126,27 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_RecordModel </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.recordmodel', 'algolia', null)}" encoding="jshtml" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.recordmodel.help', 'algolia', null)}</div>
+                    </td>
+                    <td class="table_detail w e s">
+                        <select name="RecordModel" id="RecordModel">
+                            <isif condition="${pdict.algoliaData.getPreference('RecordModel') === 'variant-level'}">
+                                <option value="variant-level" selected="selected">Variation Product</option>
+                                <option value="master-level">Base Product</option>
+                            <iselse>
+                                <option value="variant-level">Variation Product</option>
+                                <option value="master-level" selected="selected">Base Product</option>
+                            </iselse>
+                            </isif>
+                        </select>
+                    </td>
+                </tr>
+
                 <iscomment> Algolia_EnableInsights </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">

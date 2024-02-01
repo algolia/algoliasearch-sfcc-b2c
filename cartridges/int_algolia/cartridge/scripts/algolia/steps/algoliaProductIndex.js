@@ -6,6 +6,7 @@ var logger;
 
 // job step parameters
 var paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
+var paramRecordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, AlgoliaJobReport;
@@ -17,7 +18,11 @@ var fullRecordUpdate = false;
 var jobReport;
 
 var products = [], siteLocales, nonLocalizedAttributes = [], attributesToSend;
+var masterAttributes = [], variantAttributes = [];
 var lastIndexingTasks = {};
+
+const VARIANT_LEVEL = 'variant-level';
+const MASTER_LEVEL = 'master-level';
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -66,6 +71,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullCatalogReindex'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
+    paramRecordModel = algoliaData.getPreference('RecordModel') || VARIANT_LEVEL; // 'variant-level' (default), 'master-level'
 
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
@@ -99,6 +105,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
 
     /* --- non-localized attributes --- */
+    nonLocalizedAttributes = [];
     Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
         if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized &&
           attributesToSend.indexOf(attributeName) >= 0) {
@@ -107,6 +114,31 @@ exports.beforeStep = function(parameters, stepExecution) {
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
 
+    /* --- master/variant attributes --- */
+    variantAttributes = [];
+    masterAttributes = [];
+    attributesToSend.forEach(function(attribute) {
+        if (!algoliaProductConfig.attributeConfig_v2[attribute]) {
+            return;
+        }
+        if (algoliaProductConfig.defaultVariantAttributes_v2.indexOf(attribute) >= 0) {
+            variantAttributes.push(attribute);
+        } else {
+            masterAttributes.push(attribute);
+        }
+    });
+    logger.info('Record model: ' + paramRecordModel);
+    if (paramRecordModel === MASTER_LEVEL) {
+        logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
+        logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
+        if (paramIndexingMethod === 'partialRecordUpdate' && variantAttributes.length > 0) {
+            jobReport.endTime = new Date();
+            jobReport.error = true;
+            jobReport.errorMessage = 'partialRecordUpdate is not compatible with Base Product level indexing';
+            jobReport.writeToCustomObject();
+            throw new Error(jobReport.errorMessage);
+        }
+    }
 
     /* --- site locales --- */
     siteLocales = Site.getCurrent().getAllowedLocales();
@@ -178,37 +210,59 @@ exports.process = function(product, parameters, stepExecution) {
 
     jobReport.processedItems++; // counts towards the total number of products processed
 
-    if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0) {
-        // We need to use the master products to build the color_variations, using their variation model
-        // We then build records for each variant, in which we add these color_variations
+    if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0 ||
+        paramRecordModel === MASTER_LEVEL) {
         if (product.isVariant()) {
-            // This variant will be indexed when we treat its master product
+            // To generate 'colorVariations' or for master-level indexing, we need to work with the master products.
+            // This variant will be indexed when we treat its master product, skip it.
             return [];
         }
         if (product.master) {
             var algoliaOperations = [];
-            var processedProducts = 0;
-            var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
-                masterProduct: product,
-                locales: siteLocales,
-                attributeList: attributesToSend,
-                nonLocalizedAttributeList: nonLocalizedAttributes,
-                fullRecordUpdate: fullRecordUpdate,
-            });
-            for (let l = 0; l < siteLocales.size(); ++l) {
-                var locale = siteLocales[l];
-                var indexName = algoliaData.calculateIndexName('products', locale);
-                if (paramIndexingMethod === 'fullCatalogReindex') {
-                    indexName += '.tmp';
-                }
-                var records = recordsPerLocale[locale];
-                processedProducts = records.length;
-                records.forEach(function(record) {
-                    algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, record, indexName))
+            var processedVariantsToSend = 0;
+
+            if (paramRecordModel !== MASTER_LEVEL) {
+                // Variant-level indexing
+                var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
+                    masterProduct: product,
+                    locales: siteLocales,
+                    attributeList: attributesToSend,
+                    nonLocalizedAttributes: nonLocalizedAttributes,
+                    fullRecordUpdate: fullRecordUpdate,
                 });
+                for (let l = 0; l < siteLocales.size(); ++l) {
+                    var locale = siteLocales[l];
+                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    if (paramIndexingMethod === 'fullCatalogReindex') {
+                        indexName += '.tmp';
+                    }
+                    var records = recordsPerLocale[locale];
+                    processedVariantsToSend = records.length;
+                    records.forEach(function(record) {
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, record, indexName));
+                    });
+                }
+            } else {
+                // Master-level indexing
+                var masterRecordPerLocale = jobHelper.generateMasterRecords({
+                    product: product,
+                    locales: siteLocales,
+                    masterAttributes: masterAttributes,
+                    variantAttributes: algoliaProductConfig.defaultVariantAttributes_v2,
+                    nonLocalizedAttributes: nonLocalizedAttributes,
+                });
+                for (let l = 0; l < siteLocales.size(); ++l) {
+                    var locale = siteLocales[l];
+                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    if (paramIndexingMethod === 'fullCatalogReindex') {
+                        indexName += '.tmp';
+                    }
+                    processedVariantsToSend = masterRecordPerLocale[locale].variants.length;
+                    algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, masterRecordPerLocale[locale], indexName));
+                }
             }
 
-            jobReport.processedItemsToSend += processedProducts;
+            jobReport.processedItemsToSend += processedVariantsToSend;
             jobReport.recordsToSend += algoliaOperations.length;
             return algoliaOperations;
         }

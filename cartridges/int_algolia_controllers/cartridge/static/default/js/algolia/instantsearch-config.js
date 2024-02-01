@@ -73,7 +73,7 @@ function enableInstantSearch(config) {
                 templates: {
                     text(data) {
                         if (data.hasManyResults) {
-                            return `${data.nbHits} ${algoliaData.strings.results}zzz`;
+                            return `${data.nbHits} ${algoliaData.strings.results}`;
                         } else if (data.hasOneResult) {
                             return `1 ${algoliaData.strings.result}`;
                         } else {
@@ -262,8 +262,8 @@ function enableInstantSearch(config) {
                             }
                         }
 
-                        if (item.color_variations) {
-                            // Display the swatches only if at least one item has some color_variations
+                        if (item.colorVariations) {
+                            // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
                         }
 
@@ -372,8 +372,8 @@ function enableInstantSearch(config) {
      * @return {any} A color swatch
      */
     function renderSwatches(hit, html) {
-        if (hit.color_variations) {
-            return hit.color_variations.map(colorVariation => {
+        if (hit.colorVariations) {
+            return hit.colorVariations.map(colorVariation => {
                 let swatch;
                 let variantImage;
                 if (!colorVariation.image_groups) {
@@ -393,7 +393,7 @@ function enableInstantSearch(config) {
         const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
         const image = parent.querySelector('.product-image img');
         image.src = variantImage.dis_base_link;
-    }}" href="${colorVariation.variant_url}" class="swatch" title="${swatch.title}">
+    }}" href="${colorVariation.variantURL}" class="swatch" title="${swatch.title}">
                             <img class="swatch-image" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                         </a>
                     </li>

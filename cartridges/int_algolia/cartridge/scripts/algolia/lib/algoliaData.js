@@ -26,6 +26,7 @@ const clientSideData = {
     "productsIndex": calculateIndexName('products'),
     "categoriesIndex": calculateIndexName('categories'),
     "contentsIndex": calculateIndexName('contents'),
+    "recordModel": getPreference('RecordModel'),
     "quickViewUrlBase": URLUtils.url('Product-ShowQuickView').toString(),
     "strings": {
         "placeholder": Resource.msg('label.header.searchwatermark', 'common', ''),
@@ -102,7 +103,13 @@ const clientSideData = {
  */
 function getPreference(id) {
     let value = currentSite.getCustomPreferenceValue('Algolia_' + id);
-    return value === null ? '' : value;
+    if (value === null) {
+        return '';
+    } else if (value.getValue) {
+        // For e.g. enum-of-string (https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/index.html?target=class_dw_object_CustomAttributes.html)
+        return value.getValue();
+    }
+    return value;
 }
 
 /**
