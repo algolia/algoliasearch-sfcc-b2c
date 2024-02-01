@@ -3,7 +3,3 @@
     attribute="hits"
 />
 
-<ismodule template="/algolia/components/algoliasearchcontenthits"
-    name="algoliasearchcontenthits"
-    attribute="hits"
-/>

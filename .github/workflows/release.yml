@@ -26,12 +26,11 @@ jobs:
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
           git checkout develop
+          npm version --no-git-tag-version --no-commit-hooks ${{ inputs.next_version }}
 
-      - name: Modify version.isml file
-        uses: jaywcjlove/github-action-modify-file-content@5120c9654acef8702340eda094f789030ab09275
-        with:
-          path: cartridges/bm_algolia/cartridge/templates/default/algoliabm/dashboard/version.isml
-          body: "Cartridge Version: ${{ inputs.next_version }}"
+      - name: Modify algoliaconfig file
+        run: |
+          sed -i 's/"version": ".*"/"version": "${{ inputs.next_version }}"/' cartridges/int_algolia/algoliaconfig.json
 
       - name: update version name
         uses: jaywcjlove/github-action-package@ca1d500dad275ea9f0d34aedc647ec8563b618c6

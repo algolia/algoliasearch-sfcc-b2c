@@ -175,7 +175,8 @@
                         </button>
                     </td>
                 </tr>
-                <isversion></isversion>
+                    <isprint value="${Resource.msg('algolia.label.util.version', 'algolia', null)}" encoding="jshtml" />
+                    <isprint value="${require('*/cartridge/scripts/algolia/lib/algoliaData').clientSideData.version}" encoding="jshtml" />
             </tbody>
         </table>
         </form>
