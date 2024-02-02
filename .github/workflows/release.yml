@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: '0'
 
-      - name: branch change
+      - name: branch change and package version update
         run: |
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
@@ -31,12 +31,6 @@ jobs:
       - name: Modify algoliaconfig file
         run: |
           sed -i 's/"version": ".*"/"version": "${{ inputs.next_version }}"/' cartridges/int_algolia/algoliaconfig.json
-
-      - name: update version name
-        uses: jaywcjlove/github-action-package@ca1d500dad275ea9f0d34aedc647ec8563b618c6
-        with:
-          path: 'package.json'
-          version: ${{ inputs.next_version }}
 
       - name: Commit changes
         run: |
