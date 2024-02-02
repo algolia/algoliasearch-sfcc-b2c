@@ -193,7 +193,7 @@ function getSourcesArray(config) {
                 }) {
                     return html `
                           <div class="header row justify-content-end">
-                            <div class="col-xs-12 col-sm-10">${algoliaData.strings.contents}</div>
+                            <div class="col-xs-12 col-sm-10">${algoliaData.strings.content}</div>
                           </div>`;
                 },
                 item({
