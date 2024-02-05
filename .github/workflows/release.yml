@@ -1,6 +1,4 @@
 name: Draft release
-run-name: Draft release ${{ inputs.next_version }}
-
 on:
   workflow_dispatch:
     inputs:
@@ -17,11 +15,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: '0'
+          fetch-depth: 0
 
-      - name: branch change and package version update
+      - name: Branch change and package version update
         run: |
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
@@ -40,16 +39,9 @@ jobs:
 
       - name: Merge develop into master
         run: |
-          set -e
-          echo "Checking out develop branch..."
-          git checkout develop
-          git pull --ff-only
-          echo "Switching to master branch..."
           git checkout master
-          git pull --ff-only
-          echo "Merging develop into master..."
-          git merge --no-ff origin/develop
-          echo "Pushing changes..."
+          git pull
+          git merge origin/develop
           git push
 
       - name: Draft release
