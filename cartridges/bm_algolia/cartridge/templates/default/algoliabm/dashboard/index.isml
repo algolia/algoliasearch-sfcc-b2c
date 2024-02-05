@@ -1,3 +1,5 @@
+<isinclude template="/util/modules" />
+
 <isdecorate template="application/MenuFrame">
     <iscontent type="text/html" charset="UTF-8" />
     <script src="https://code.jquery.com/ui/1.11.1/jquery-ui.min.js"></script>
@@ -194,6 +196,8 @@
                         </button>
                     </td>
                 </tr>
+                    <isprint value="${Resource.msg('algolia.label.util.version', 'algolia', null)}" encoding="jshtml" />
+                    <isprint value="${require('*/cartridge/scripts/algolia/lib/algoliaData').clientSideData.version}" encoding="jshtml" />
             </tbody>
         </table>
         </form>

@@ -17,15 +17,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          fetch-depth: '0'
+          fetch-depth: 0
 
-      - name: Merge develop
+      - name: Branch change and package version update
         run: |
-          git config user.name github-actions
-          git config user.email github-actions@github.com
+          git config --local user.email "github-actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git checkout develop
+          npm version --no-git-tag-version --no-commit-hooks ${{ inputs.next_version }}
+
+      - name: Modify algoliaconfig file
+        run: |
+          sed -i 's/"version": ".*"/"version": "${{ inputs.next_version }}"/' cartridges/int_algolia/algoliaconfig.json
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Update version to ${{ inputs.next_version }}"
+          git push
+
+      - name: Merge develop into master
+        run: |
           git checkout master
+          git pull
           git merge origin/develop
           git push
 
