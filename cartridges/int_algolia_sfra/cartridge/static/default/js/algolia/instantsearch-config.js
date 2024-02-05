@@ -424,6 +424,7 @@ function enableInstantSearch(config) {
                         instantsearch.widgets.infiniteHits({
                             container: '#algolia-content-hits-placeholder',
                             cssClasses: {
+                                root: 'w-100',
                                 loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto'
                             },
                             templates: {

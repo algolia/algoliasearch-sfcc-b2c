@@ -45,7 +45,7 @@ const clientSideData = {
         "categoryPanelTitle": Resource.msg('search.category','algolia',null),
         "products": Resource.msg('search.suggest.products','algolia',null),
         "categories": Resource.msg('search.suggest.categories','algolia',null),
-        "contents": Resource.msg('search.suggest.contents','algolia',null),
+        "content": Resource.msg('search.suggest.content','algolia',null),
         "articles": Resource.msg('tab.nav.search.artclesresults', 'search', null),
         "priceFilter": {
             "separator": Resource.msg('search.pricefilter.separator','algolia',null),
