@@ -1,5 +1,6 @@
 name: Draft release
 run-name: Draft release ${{ inputs.next_version }}
+
 on:
   workflow_dispatch:
     inputs:
