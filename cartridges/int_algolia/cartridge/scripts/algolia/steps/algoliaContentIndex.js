@@ -8,7 +8,7 @@ var logger;
 var paramAttributeList, paramFailureThresholdPercentage, includedContent;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig;
+var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig, ContentUtil;
 var indexingOperation;
 
 // logging-related variables
@@ -16,7 +16,7 @@ var jobReport;
 
 var contents = [], siteLocales, nonLocalizedAttributes = [], attributesToSend, count;
 var lastIndexingTasks = {};
-
+var enableContentFunctionHandler = false; // This feature has a big impact on performance, so it is disabled by default
 
 /**
  * before-step-function (steptypes.json)
@@ -35,6 +35,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaContentConfig = require('*/cartridge/scripts/algolia/lib/algoliaContentConfig');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
     algoliaSplitter = require('*/cartridge/scripts/algolia/lib/algoliaSplitter');
+    ContentUtil = require('*/cartridge/scripts/algolia/lib/contentUtil');
 
     /* --- initializing custom object logging --- */
     jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'content');
@@ -166,6 +167,9 @@ exports.process = function(content, parameters, stepExecution) {
                 splittedContent.objectID = localizedContent.objectID + '_' + i;
                 splittedContent.id = localizedContent.id;
                 splittedContent.algolia_chunk_order = i;
+                if (enableContentFunctionHandler)   {
+                    splits[i] = ContentUtil.contentLinkHandler(splits[i]);
+                }
                 splittedContent.body = splits[i];
                 algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, splittedContent, indexName));
             }

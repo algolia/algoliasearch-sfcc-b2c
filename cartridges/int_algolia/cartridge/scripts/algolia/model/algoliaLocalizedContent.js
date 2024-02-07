@@ -4,8 +4,6 @@ var URLUtils = require('dw/web/URLUtils');
 var AlgoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var AlgoliaContentConfig = require('*/cartridge/scripts/algolia/lib/algoliaContentConfig');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
-var ContentUtil = require('*/cartridge/scripts/algolia/lib/contentUtil');
-var enableContentFunctionHandler = false; // This feature has a big impact on performance, so it is disabled by default
 
 var ACTION_ENDPOINT_CONTENT = 'Page-Show';
 
@@ -28,10 +26,6 @@ var aggregatedValueHandlers = {
 
         if (content && content.custom && content.custom.body && (includedContent === 'allContents' || includedContent === 'contentAssets')) {
             body = content.custom.body.source;
-        }
-
-        if (enableContentFunctionHandler) {
-            body = ContentUtil.contentLinkHandler(body);
         }
 
         return body;
