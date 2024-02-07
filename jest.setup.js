@@ -184,6 +184,13 @@ jest.mock('dw/web/URLUtils', () => {
             var absURL = 'https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/';
             return absURL + global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
         },
+        http: function(endpoint, param, id) {
+            var absURL = 'http://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/';
+            return absURL + global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
+        },
+        httpsStatic: function(url) {
+            return 'https://test.commercecloud.salesforce.com/on/demandware.static/-/Library-Sites-test/default/testversion/' + url;
+        },
         url: function(endpoint, param, id) {
             var relURL = '/on/demandware.store/Sites-Algolia_SFRA-Site/';
             relURL += global.request.getLocale() + '/' + endpoint + '?' + param + '=' + id;
@@ -268,6 +275,10 @@ jest.mock('*/cartridge/scripts/algolia/lib/utils', () => {
 
 jest.mock('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+}, {virtual: true});
+
+jest.mock('*/cartridge/scripts/algolia/lib/contentUtil', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/lib/contentUtil');
 }, {virtual: true});
 
 jest.mock('dw/experience/PageMgr', () => {

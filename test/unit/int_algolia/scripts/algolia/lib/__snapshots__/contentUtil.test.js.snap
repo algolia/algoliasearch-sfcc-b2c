@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`contentLinkHandler should return changed body 1`] = `
+"<!DOCTYPE html>
+            <html>
+            <head>
+                <title>Test Page</title>
+            </head>
+            <body>
+                <p>This is a test page.</p>
+                <a href="$staticlink$">Static Link</a>
+                <a href="/on/demandware.store/Sites-Algolia_SFRA-Site/default/action?arg1=arg2">URL Token</a>
+                <a href="http://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/action?arg1=arg2">HTTP URL Token</a>
+                <a href="https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/action?arg1=arg2">HTTPS URL Token</a>
+            </body>
+            </html>"
+`;
