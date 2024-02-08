@@ -55,26 +55,26 @@ function contentLinkHandler(body) {
     }
 
     // Replace static links in the body text
-    body = body.replace(/(\()?([^"']+)\?\$staticlink\$/g, function(match, p1, path) {
+    body = body.replace(/(\()?([^"']+)\?\$staticlink\$/gi, function(match, p1, path) {
         return contentAssetFunctions.staticURL(path);
     });
 
     // Replace URL functions in the body text
-    body = body.replace(/\$Url\((.*?)\)\$/g, function(match, argsStr) {
+    body = body.replace(/\$Url\((.*?)\)\$/gi, function(match, argsStr) {
         var args = splitAndTrim(argsStr);
         var action = args.shift();
         return contentAssetFunctions.url.apply(null, [action].concat(args));
     });
 
     // Replace HTTP URL functions in the body text
-    body = body.replace(/\$httpUrl\((.*?)\)\$/g, function(match, argsStr) {
+    body = body.replace(/\$httpUrl\((.*?)\)\$/gi, function(match, argsStr) {
         var args = splitAndTrim(argsStr);
         var action = args.shift();
         return contentAssetFunctions.http.apply(null, [action].concat(args));
     });
 
     // Replace HTTPS URL functions in the body text
-    body = body.replace(/\$httpsUrl\((.*?)\)\$/g, function(match, argsStr) {
+    body = body.replace(/\$httpsUrl\((.*?)\)\$/gi, function(match, argsStr) {
         var args = splitAndTrim(argsStr);
         var action = args.shift();
         return contentAssetFunctions.https.apply(null, [action].concat(args));

@@ -45,7 +45,7 @@ describe('contentLinkHandler', () => {
             <body>
                 <p>This is a test page.</p>
                 <a href="test$staticlink$">Static Link</a>
-                <a href="$Url(action, arg1, arg2)$">URL Token</a>
+                <a href="$url(action, arg1, arg2)$">URL Token</a>
                 <a href="$httpUrl(action, arg1, arg2)$">HTTP URL Token</a>
                 <a href="$httpsUrl(action, arg1, arg2)$">HTTPS URL Token</a>
             </body>
