@@ -8,7 +8,7 @@ const COLOR_ATTRIBUTE_ID = 'color';
  * Return colorVariations for a product, based on its variation model
  * @param {dw.catalog.Product} product Product
  * @param {string} locale The desired locale
- * @return {[{title, alt, url, variationUrl}]} An array of swatches
+ * @return {[{title, alt, url, variationURL}]} An array of swatches
  */
 function getColorVariations(product, locale) {
     request.setLocale(locale);
@@ -37,7 +37,7 @@ function getColorVariations(product, locale) {
         if (image_groups) {
             colorVariations.push({
                 image_groups: image_groups,
-                variantURL: URLUtils.url(
+                variationURL: URLUtils.url(
                     'Product-Show',
                     'pid',
                     product.ID,

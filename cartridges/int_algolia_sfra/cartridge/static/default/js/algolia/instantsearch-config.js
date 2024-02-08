@@ -332,9 +332,9 @@ function enableInstantSearch(config) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
                             item.colorVariations.forEach(colorVariation => {
-                                colorVariation.variantURL = generateProductUrl({
+                                colorVariation.variationURL = generateProductUrl({
                                     objectID: item.objectID,
-                                    productUrl: colorVariation.variantURL,
+                                    productUrl: colorVariation.variationURL,
                                     queryID: item.__queryID,
                                     indexName: item.__indexName,
                                 });
@@ -562,8 +562,8 @@ function enableInstantSearch(config) {
         const image = parent.querySelector('.tile-image');
         const link = parent.querySelector('.image-container > a');
         image.src = variantImage.dis_base_link;
-        link.href = colorVariation.variantURL;
-    }}" href="${colorVariation.variantURL}" aria-label="${swatch.title}">
+        link.href = colorVariation.variationURL;
+    }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
                     <span>
                         <img class="swatch swatch-circle" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                     </span>

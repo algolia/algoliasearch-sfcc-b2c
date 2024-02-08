@@ -393,7 +393,7 @@ function enableInstantSearch(config) {
         const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
         const image = parent.querySelector('.product-image img');
         image.src = variantImage.dis_base_link;
-    }}" href="${colorVariation.variantURL}" class="swatch" title="${swatch.title}">
+    }}" href="${colorVariation.variationURL}" class="swatch" title="${swatch.title}">
                             <img class="swatch-image" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                         </a>
                     </li>
