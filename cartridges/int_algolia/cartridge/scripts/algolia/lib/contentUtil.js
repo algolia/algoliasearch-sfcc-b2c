@@ -44,41 +44,48 @@ function splitAndTrim(argsStr) {
 }
 
 /**
-* Handles content links in the body text
-* @param {string} body - The body text to handle
-* @returns {string} The body text with content links handled
-*/
+ * Handles content links in the body text
+ * @param {string} body - The body text to handle
+ * @returns {string} The body text with content links handled
+ */
 function contentLinkHandler(body) {
-
     if (!body) {
         return '';
     }
 
-    // Replace static links in the body text
-    body = body.replace(/(\()?([^"']+)\?\$staticlink\$/gi, function(match, p1, path) {
-        return contentAssetFunctions.staticURL(path);
-    });
+    // Check and Replace static links in the body text
+    if (body.indexOf('$staticlink$') !== -1) {
+        body = body.replace(/(\()?([^"']+)\?\$staticlink\$/gi, function(match, p1, path) {
+            return contentAssetFunctions.staticURL(path);
+        });
+    }
 
-    // Replace URL functions in the body text
-    body = body.replace(/\$Url\((.*?)\)\$/gi, function(match, argsStr) {
-        var args = splitAndTrim(argsStr);
-        var action = args.shift();
-        return contentAssetFunctions.url.apply(null, [action].concat(args));
-    });
+    // Check and Replace URL functions in the body text
+    if (body.indexOf('$Url(') !== -1) {
+        body = body.replace(/\$Url\((.*?)\)\$/gi, function(match, argsStr) {
+            var args = splitAndTrim(argsStr);
+            var action = args.shift();
+            return contentAssetFunctions.url.apply(null, [action].concat(args));
+        });
+    }
 
-    // Replace HTTP URL functions in the body text
-    body = body.replace(/\$httpUrl\((.*?)\)\$/gi, function(match, argsStr) {
-        var args = splitAndTrim(argsStr);
-        var action = args.shift();
-        return contentAssetFunctions.http.apply(null, [action].concat(args));
-    });
+    // Check and Replace HTTP URL functions in the body text
+    if (body.indexOf('$httpUrl(') !== -1) {
+        body = body.replace(/\$httpUrl\((.*?)\)\$/gi, function(match, argsStr) {
+            var args = splitAndTrim(argsStr);
+            var action = args.shift();
+            return contentAssetFunctions.http.apply(null, [action].concat(args));
+        });
+    }
 
-    // Replace HTTPS URL functions in the body text
-    body = body.replace(/\$httpsUrl\((.*?)\)\$/gi, function(match, argsStr) {
-        var args = splitAndTrim(argsStr);
-        var action = args.shift();
-        return contentAssetFunctions.https.apply(null, [action].concat(args));
-    });
+    // Check and Replace HTTPS URL functions in the body text
+    if (body.indexOf('$httpsUrl(') !== -1) {
+        body = body.replace(/\$httpsUrl\((.*?)\)\$/gi, function(match, argsStr) {
+            var args = splitAndTrim(argsStr);
+            var action = args.shift();
+            return contentAssetFunctions.https.apply(null, [action].concat(args));
+        });
+    }
 
     return body;
 }

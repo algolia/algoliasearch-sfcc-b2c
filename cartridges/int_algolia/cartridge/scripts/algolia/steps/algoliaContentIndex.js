@@ -16,8 +16,7 @@ var jobReport;
 
 var contents = [], siteLocales, nonLocalizedAttributes = [], attributesToSend, count;
 var lastIndexingTasks = {};
-var enableContentFunctionHandler = false; // This feature has a big impact on performance, so it is disabled by default
-
+var enableContentFunctionHandler = true;
 /**
  * before-step-function (steptypes.json)
  * Any returns from this function result in skipping to the afterStep() function (omitting read-process-writealtogether)
