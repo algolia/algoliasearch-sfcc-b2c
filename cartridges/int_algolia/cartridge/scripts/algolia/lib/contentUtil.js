@@ -61,7 +61,7 @@ function contentLinkHandler(body) {
     }
 
     // Check and Replace URL functions in the body text
-    if (body.indexOf('$Url(') !== -1) {
+    if (body.indexOf('$Url(') !== -1 || body.indexOf('$url(') !== -1){
         body = body.replace(/\$Url\((.*?)\)\$/gi, function(match, argsStr) {
             var args = splitAndTrim(argsStr);
             var action = args.shift();
