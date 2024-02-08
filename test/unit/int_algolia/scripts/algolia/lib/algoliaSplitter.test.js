@@ -1,4 +1,4 @@
-const { splitHtmlContent, getMaxBodySize } = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaSplitter');
+const { splitHtmlContent, getMaxBodySize, removeHtmlTagsAndFormat } = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaSplitter');
 
 jest.mock('dw/util/Bytes', () => {
     class BytesMock {
@@ -85,6 +85,14 @@ describe('Extreme Content Manipulation', () => {
         const result = getMaxBodySize(mockedContent);
         // expect result near to %1 of expectedMaxByteSize
         expect(result).toBeLessThan(expectedMaxByteSize);
+    });
+
+    describe('removeHtmlTagsAndFormat', () => {
+        test('removes HTML tags, &nbsp;, and replaces \\r\\n, \\n, and \\r with spaces', () => {
+            const input = '<div><a href="test.com">This</a> is a test&nbsp;string with <b>HTML</b> tags,\r\nnew lines, and \nmore \rbreaks.</div>';
+            const expectedOutput = 'This is a test string with HTML tags, new lines, and more breaks.';
+            expect(removeHtmlTagsAndFormat(input)).toBe(expectedOutput);
+        });
     });
 });
 
