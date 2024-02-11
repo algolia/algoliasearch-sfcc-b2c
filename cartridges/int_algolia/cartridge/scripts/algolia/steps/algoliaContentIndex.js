@@ -16,7 +16,6 @@ var jobReport;
 
 var contents = [], siteLocales, nonLocalizedAttributes = [], attributesToSend, count;
 var lastIndexingTasks = {};
-var enableContentFunctionHandler = true;
 /**
  * before-step-function (steptypes.json)
  * Any returns from this function result in skipping to the afterStep() function (omitting read-process-writealtogether)
@@ -166,9 +165,8 @@ exports.process = function(content, parameters, stepExecution) {
                 splittedContent.objectID = localizedContent.objectID + '_' + i;
                 splittedContent.id = localizedContent.id;
                 splittedContent.algolia_chunk_order = i;
-                if (enableContentFunctionHandler)   {
-                    splits[i] = ContentUtil.contentLinkHandler(splits[i]);
-                }
+                splits[i] = ContentUtil.contentLinkHandler(splits[i]);
+
                 splittedContent.body = splits[i];
                 algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, splittedContent, indexName));
             }
