@@ -17,6 +17,7 @@ Here are some helpful documentation to help with your issue:
 - [Algolia Support Articles](https://support.algolia.com/hc/en-us)
 - [General FAQs](https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/troubleshooting/faq/)
 - [Monitoring](https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/troubleshooting/monitoring/)
-- [Indexing](https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/how-it-works/indexing/)
+- [Product Indexing](https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/indexing/product-indexing/overview/)
+- [Content Indexing](https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/indexing/content-indexing/fundamentals/)
 
 For feedback, bug reporting, or unresolved issues with the cartridge, please contact us at [support@algolia.com](mailto:support@algolia.com). Please include your cartridge version, application ID, and steps to reproducing your issue. Add additional information like screenshots, screencasts, and error messages to help our team better troubleshoot your issues.
