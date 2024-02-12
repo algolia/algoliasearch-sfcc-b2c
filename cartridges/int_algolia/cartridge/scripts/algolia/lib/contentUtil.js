@@ -13,7 +13,6 @@ var contentAssetFunctions = {
     createUrlFunction: function(method) {
         return function() {
             var args = Array.prototype.slice.call(arguments);
-            var action = args.shift();
             try {
                 return URLUtils[method].apply(URLUtils, args);
             } catch (e) {
