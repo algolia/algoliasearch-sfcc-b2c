@@ -53,13 +53,6 @@ function contentLinkHandler(body) {
         return '';
     }
 
-    // Check and Replace static links in the body text
-    if (body.indexOf('$staticlink$') !== -1) {
-        body = body.replace(/(\()?([^"']+)\?\$staticlink\$/gi, function(match, p1, path) {
-            return contentAssetFunctions.staticURL(path);
-        });
-    }
-
     // Check and Replace URL functions in the body text
     if (body.indexOf('$Url(') !== -1 || body.indexOf('$url(') !== -1){
         body = body.replace(/\$Url\((.*?)\)\$/gi, function(match, argsStr) {

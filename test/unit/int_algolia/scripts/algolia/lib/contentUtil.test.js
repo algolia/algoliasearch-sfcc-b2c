@@ -6,16 +6,6 @@ const URLUtils = require('dw/web/URLUtils');
 
 describe('contentLinkHandler', () => {
 
-    it('should replace static links in the body text with quote', () => {
-        const result = contentLinkHandler('path?$staticlink$');
-        expect(result).toBe('https://test.commercecloud.salesforce.com/on/demandware.static/-/Library-Sites-test/default/testversion/path');
-    });
-
-    it('should replace static links in the body text with parwenthesis', () => {
-        const result = contentLinkHandler('(path?$staticlink$');
-        expect(result).toBe('https://test.commercecloud.salesforce.com/on/demandware.static/-/Library-Sites-test/default/testversion/path');
-    });
-
     it('should replace URL tokens in the body text', () => {
         const result = contentLinkHandler('$Url(action, arg1, arg2)$');
         expect(result).toBe('/on/demandware.store/Sites-Algolia_SFRA-Site/default/action?arg1=arg2');
@@ -44,7 +34,6 @@ describe('contentLinkHandler', () => {
             </head>
             <body>
                 <p>This is a test page.</p>
-                <a href="test$staticlink$">Static Link</a>
                 <a href="$url(action, arg1, arg2)$">URL Token</a>
                 <a href="$httpUrl(action, arg1, arg2)$">HTTP URL Token</a>
                 <a href="$httpsUrl(action, arg1, arg2)$">HTTPS URL Token</a>
