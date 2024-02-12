@@ -212,7 +212,7 @@ function moveIndex(indexNameSrc, indexNameDest) {
  */
 function waitTask(indexName, taskID) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
-    var maxWait = 5 * 60 * 1000;
+    var maxWait = 10 * 60 * 1000;
     var start = Date.now();
     var nbRequestsSent = 0;
 
