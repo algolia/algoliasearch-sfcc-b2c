@@ -15,7 +15,7 @@ var contentAssetFunctions = {
             var args = Array.prototype.slice.call(arguments);
             var action = args.shift();
             try {
-                return URLUtils[method].apply(URLUtils, [action].concat(args));
+                return URLUtils[method].apply(URLUtils, args);
             } catch (e) {
                 // Log or handle the error as appropriate for your application
                 logger.error('Error calling URLUtils.: ' + method + ': ', e);
