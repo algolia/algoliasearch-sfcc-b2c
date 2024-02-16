@@ -25,4 +25,6 @@ Here is some helpful documentation that might answer some of your questions:
 - Frontend
 - Events
 
-For feedback, bug reporting, or unresolved issues with the cartridge, please contact us via our [support portal](https://support.algolia.com/hc/en-us/requests/new) or email [support@algolia.com](mailto:support@algolia.com). Please include your cartridge version, Salesforce B2C version, application ID, steps to reproduce your issue and some indication of the severity. Add additional information like error messages, downloaded log files, screenshots, screencasts or details about customizations to help our team better troubleshoot your issues.
+For feedback, bug reporting, or unresolved issues with the cartridge, please contact us via our [support portal](https://support.algolia.com/hc/en-us/requests/new).
+Include your cartridge version, Salesforce B2C version, application ID, steps to reproduce your issue and some indication of the severity.
+Add additional information like error messages, log files, screenshots, screencasts or details about customizations to help our team better troubleshoot your issues.
