@@ -39,7 +39,7 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
 
 
         //remove all HTML tags
-        section = removeHtmlTags(section);
+        section = removeHtmlTagsAndFormat(section);
 
         var sectionSize = new Bytes(section).getLength();
         if (sectionSize > maxByteSize) {
@@ -70,12 +70,16 @@ function removeIgnoredContent(content) {
 }
 
 /**
- * removes all HTML tags
+ * removes all HTML tags and formats
  * @param {string} content - Content will be sanitized
  * @returns {string} Sanitized content
  */
-function removeHtmlTags(content) {
-    return content.replace(/<[^>]*>/g, '');
+function removeHtmlTagsAndFormat(content) {
+    return content
+        .replace(/<[^>]*>/g, '') // Removes HTML tags
+        .replace(/&nbsp;/g, ' ') // Replaces non-breaking spaces with a space
+        .replace(/\r\n/g, ' ') // Replaces carriage returns and newlines with spaces
+        .replace(/\s+/g, ' '); // Condenses multiple consecutive spaces into a single space
 }
 
 /**
@@ -126,5 +130,6 @@ function getMaxBodySize(content) {
 
 module.exports = {
     splitHtmlContent: splitHtmlContent,
-    getMaxBodySize: getMaxBodySize
+    getMaxBodySize: getMaxBodySize,
+    removeHtmlTagsAndFormat: removeHtmlTagsAndFormat
 };
