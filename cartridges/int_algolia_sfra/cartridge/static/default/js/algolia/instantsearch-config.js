@@ -169,7 +169,8 @@ function enableInstantSearch(config) {
 
             rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
-                attribute: 'price.' + algoliaData.currencyCode,
+                attribute: (algoliaData.recordModel === 'master-level' ? 'variants.price.' : 'price.') +
+                    algoliaData.currencyCode,
                 cssClasses: {
                     form: 'flex-nowrap',
                     input: 'form-control form-control-sm',
