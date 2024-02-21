@@ -17,8 +17,9 @@ var fullRecordUpdate = false;
 // logging-related variables
 var jobReport;
 
-var products = [], siteLocales, nonLocalizedAttributes = [], attributesToSend;
+var products = [], siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
+var nonLocalizedAttributes = [], nonLocalizedMasterAttributes = [];
 var lastIndexingTasks = {};
 
 const VARIANT_LEVEL = 'variant-level';
@@ -102,17 +103,7 @@ exports.beforeStep = function(parameters, stepExecution) {
             break;
     }
     logger.info('indexingMethod parameter: ' + paramIndexingMethod);
-
-
-    /* --- non-localized attributes --- */
-    nonLocalizedAttributes = [];
-    Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
-        if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized &&
-          attributesToSend.indexOf(attributeName) >= 0) {
-            nonLocalizedAttributes.push(attributeName);
-        }
-    });
-    logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
+    logger.info('Record model: ' + paramRecordModel);
 
     /* --- master/variant attributes --- */
     variantAttributes = [];
@@ -124,9 +115,25 @@ exports.beforeStep = function(parameters, stepExecution) {
             masterAttributes.push(attribute);
         }
     });
-    logger.info('Record model: ' + paramRecordModel);
+
+    /* --- non-localized attributes --- */
+    nonLocalizedAttributes = [];
+    nonLocalizedMasterAttributes = [];
+    Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
+        if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized) {
+            if (attributesToSend.indexOf(attributeName) >= 0) {
+                nonLocalizedAttributes.push(attributeName);
+            }
+            if (masterAttributes.indexOf(attributeName) >= 0) {
+                nonLocalizedMasterAttributes.push(attributeName);
+            }
+        }
+    });
+    logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
+
     if (paramRecordModel === MASTER_LEVEL) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
+        logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
         if (paramIndexingMethod === 'partialRecordUpdate' && variantAttributes.length > 0) {
             jobReport.endTime = new Date();
@@ -241,13 +248,14 @@ exports.process = function(product, parameters, stepExecution) {
                 }
             } else {
                 // Master-level indexing
+                var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                 for (let l = 0; l < siteLocales.size(); ++l) {
                     var locale = siteLocales[l];
                     var indexName = algoliaData.calculateIndexName('products', locale);
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         indexName += '.tmp';
                     }
-                    var localizedMaster = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: masterAttributes });
+                    var localizedMaster = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: masterAttributes, baseModel: baseModel });
                     processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
                     algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedMaster, indexName));
                 }
