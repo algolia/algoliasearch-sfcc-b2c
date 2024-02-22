@@ -46,7 +46,7 @@ function customizeProductModel(productModel) {
     /*
     * Add New arrivals
     */
-    var CATEGORY_ATTRIBUTE = 'CATEGORIES_NEW_ARRIVALS';
+    var CATEGORY_ATTRIBUTE = 'newArrivals';
     var CATEGORY_ID = 'newarrivals';
 
     var customizedProductModel = productModel;
@@ -102,7 +102,7 @@ function createAlgoliaLocalizedCategoryObject(category) {
  * @param {Array} algoliaAttributes - The attributes to index
  */
 function customizeLocalizedProductModel(productModel, algoliaAttributes) {
-    var CATEGORY_ATTRIBUTE = 'CATEGORIES_NEW_ARRIVALS';
+    var CATEGORY_ATTRIBUTE = 'newArrivals';
     var CATEGORY_ID = 'newarrivals';
 
     if (algoliaAttributes.indexOf(CATEGORY_ATTRIBUTE) >= 0) {

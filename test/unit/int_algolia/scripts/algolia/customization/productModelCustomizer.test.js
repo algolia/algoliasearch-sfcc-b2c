@@ -23,10 +23,10 @@ describe('customizeProductModel (jobs v1)', () => {
         };
     });
 
-    test('CATEGORIES_NEW_ARRIVALS in the additional attributes list', () => {
-        productModelCustomizer.customizeProductModel(product, ['CATEGORIES_NEW_ARRIVALS']);
-        expect(product).toHaveProperty('CATEGORIES_NEW_ARRIVALS');
-        expect(product.CATEGORIES_NEW_ARRIVALS).toEqual({
+    test('newArrivals in the additional attributes list', () => {
+        productModelCustomizer.customizeProductModel(product, ['newArrivals']);
+        expect(product).toHaveProperty('newArrivals');
+        expect(product.newArrivals).toEqual({
             level_0: {
                 en: 'New Arrivals',
                 fr: 'Nouveautés',
@@ -38,10 +38,10 @@ describe('customizeProductModel (jobs v1)', () => {
         });
     });
 
-    test('CATEGORIES_NEW_ARRIVALS not in the additional attributes list', () => {
+    test('newArrivals not in the additional attributes list', () => {
         productModelCustomizer.customizeProductModel(product, []);
         // Property is present, but won't be read by the indexing pipeline
-        expect(product).toHaveProperty('CATEGORIES_NEW_ARRIVALS');
+        expect(product).toHaveProperty('newArrivals');
     });
 });
 
@@ -62,17 +62,17 @@ describe('customizeLocalizedProductModel (jobs v2)', () => {
         };
     });
 
-    test('CATEGORIES_NEW_ARRIVALS in the additional attributes list', () => {
-        productModelCustomizer.customizeLocalizedProductModel(product, ['CATEGORIES_NEW_ARRIVALS']);
-        expect(product).toHaveProperty('CATEGORIES_NEW_ARRIVALS');
-        expect(product.CATEGORIES_NEW_ARRIVALS).toEqual({
+    test('newArrivals in the additional attributes list', () => {
+        productModelCustomizer.customizeLocalizedProductModel(product, ['newArrivals']);
+        expect(product).toHaveProperty('newArrivals');
+        expect(product.newArrivals).toEqual({
             level_0: 'New Arrivals',
             level_1: 'New Arrivals > Electronics',
         });
     });
 
-    test('CATEGORIES_NEW_ARRIVALS not in the additional attributes list', () => {
+    test('newArrivals not in the additional attributes list', () => {
         productModelCustomizer.customizeLocalizedProductModel(product, []);
-        expect(product).not.toHaveProperty('CATEGORIES_NEW_ARRIVALS');
+        expect(product).not.toHaveProperty('newArrivals');
     });
 });
