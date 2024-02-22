@@ -131,6 +131,10 @@ var aggregatedValueHandlers = {
         return product.isVariant() || product.isVariationGroup() ?
             product.masterProduct.ID : null;
     },
+    defaultVariantID: function(product) {
+        const defaultVariant = product.getVariationModel().getDefaultVariant();
+        return defaultVariant ? defaultVariant.ID : null;
+    },
     categories: function (product) {
         var productCategories = product.getOnlineCategories();
         productCategories = empty(productCategories) ? [] : productCategories.toArray();
@@ -168,6 +172,12 @@ var aggregatedValueHandlers = {
             ? product.custom.refinementColor.displayValue
             : null;
     },
+    colorVariations: function(product) {
+        if (product.isMaster() || product.isVariationGroup()) {
+            return modelHelper.getColorVariations(product);
+        }
+        return null;
+    },
     size: function (product) {
         var variationModel = product.getVariationModel();
         var sizeAttribute = variationModel.getProductVariationAttribute('size');
@@ -201,6 +211,9 @@ var aggregatedValueHandlers = {
         return productPrice;
     },
     in_stock: function (product) {
+        if (product.isMaster() || product.isVariationGroup()) {
+            return undefined;
+        }
         let inventoryRecord = product.getAvailabilityModel().getInventoryRecord(); // can be null
         return (inventoryRecord ? inventoryRecord.getATS().getValue() >= ALGOLIA_IN_STOCK_THRESHOLD : false);
     },
@@ -241,6 +254,25 @@ var aggregatedValueHandlers = {
         }
         currentSession.setCurrency(currentCurrency);
         return promotionalPrice;
+    },
+    variants: function(product) {
+        if (!product.isMaster() && !product.isVariationGroup()) {
+            return null;
+        }
+
+        const variants = [];
+        const variantsIt = product.variants.iterator();
+        while (variantsIt.hasNext()) {
+            var variant = variantsIt.next();
+            var localizedVariant = new algoliaLocalizedProduct({
+                product: variant,
+                locale: request.getLocale(),
+                attributeList: algoliaProductConfig.defaultVariantAttributes_v2,
+                isVariant: true,
+            });
+            variants.push(localizedVariant);
+        }
+        return variants;
     }
 }
 
@@ -273,15 +305,17 @@ function algoliaLocalizedProduct(parameters) {
 
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
-            var config = algoliaProductConfig.attributeConfig_v2[attributeName];
 
-            if (!empty(config)) {
-                if (baseModel && baseModel[attributeName]) {
-                    this[attributeName] = baseModel[attributeName];
+            if (baseModel && baseModel[attributeName]) {
+                this[attributeName] = baseModel[attributeName];
+            } else {
+                if (aggregatedValueHandlers[attributeName]) {
+                    this[attributeName] = aggregatedValueHandlers[attributeName](product);
                 } else {
-                    this[attributeName] = aggregatedValueHandlers[attributeName]
-                        ? aggregatedValueHandlers[attributeName](product)
-                        : ObjectHelper.getAttributeValue(product, config.attribute);
+                    var config = algoliaProductConfig.attributeConfig_v2[attributeName];
+                    if (!empty(config)) {
+                        this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
+                    }
                 }
             }
         }

@@ -604,7 +604,7 @@ function generateVariantRecordsWithColorVariations(parameters) {
     const algoliaRecordsPerLocale = {};
     const variants = parameters.masterProduct.getVariants();
 
-    // Fetch all color variation images for each locale, to set them in each variant
+    // Fetch colorVariations for each locale, to set them in each variant
     var colorVariationsPerLocale = {};
     for (let l = 0; l < parameters.locales.size(); ++l) {
         var locale = parameters.locales[l];
@@ -638,81 +638,6 @@ function generateVariantRecordsWithColorVariations(parameters) {
     return algoliaRecordsPerLocale;
 }
 
-/**
- * Build a base product record.
- * A base product record has a `variants` attribute, which is an array containing all its variants
- *
- * @param {Object} parameters - model parameters
- * @param {dw.order.Product} parameters.product - Product
- * @param {dw.util.List} parameters.locales - The requested locales
- * @param {Array} parameters.masterAttributes list of attributes of the main record
- * @param {Array} parameters.variantAttributes list of variants attributes to store in the variant records
- * @param {Array} parameters.nonLocalizedAttributes list of localized attributes of the variant records
- * @returns {Object} object containing the localized base products
- */
-function generateMasterRecords(parameters) {
-    const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
-    const modelHelper = require('./modelHelper');
-
-    const localizedMasterProducts = {};
-    const defaultVariant = parameters.product.getVariationModel().getDefaultVariant();
-
-    // Color swatches
-    // Fetch all color variation images for each locale, to set them in each variant
-    var colorVariationsPerLocale = {};
-    for (let l = 0; l < parameters.locales.size(); ++l) {
-        var locale = parameters.locales[l];
-        colorVariationsPerLocale[locale] = modelHelper.getColorVariations(
-            parameters.product,
-            locale
-        );
-    }
-
-    for (let l = 0; l < parameters.locales.size(); ++l) {
-        var locale = parameters.locales[l];
-
-        let localizedMaster = new AlgoliaLocalizedProduct({
-            product: parameters.product,
-            locale: locale,
-            attributeList: parameters.masterAttributes,
-        });
-        localizedMaster.defaultVariantID = defaultVariant.ID;
-        localizedMaster.variants = [];
-        localizedMaster.colorVariations = colorVariationsPerLocale[locale];
-        localizedMasterProducts[locale] = localizedMaster;
-    }
-
-    var variants = parameters.product.variants;
-    var variantsIt = variants.iterator();
-
-    while (variantsIt.hasNext()) {
-        var variant = variantsIt.next();
-        // Pre-fetch a partial model containing all non-localized attributes of the variant, to avoid re-fetching them for each locale
-        var variantBaseModel = new AlgoliaLocalizedProduct({
-            product: variant,
-            locale: 'default',
-            attributeList: parameters.nonLocalizedAttributes,
-            isVariant: true,
-        });
-        for (let l = 0; l < parameters.locales.size(); ++l) {
-            var locale = parameters.locales[l];
-            let localizedVariant = new AlgoliaLocalizedProduct({
-                product: variant,
-                locale: locale,
-                attributeList: parameters.variantAttributes,
-                baseModel: variantBaseModel,
-                isVariant: true,
-            });
-            localizedMasterProducts[locale].variants.push(localizedVariant);
-            if (localizedVariant.in_stock) {
-                // If at least one variant is in stock, the master product is marked in stock
-                localizedMasterProducts[locale].in_stock = true;
-            }
-        }
-    }
-    return localizedMasterProducts;
-}
-
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -734,7 +659,6 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     generateVariantRecordsWithColorVariations: generateVariantRecordsWithColorVariations,
-    generateMasterRecords: generateMasterRecords,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,

@@ -11,7 +11,9 @@ const COLOR_ATTRIBUTE_ID = 'color';
  * @return {[{title, alt, url, variationURL}]} An array of swatches
  */
 function getColorVariations(product, locale) {
-    request.setLocale(locale);
+    if (locale) {
+        request.setLocale(locale);
+    }
 
     var colorVariations = [];
     var variationModel = product.getVariationModel();

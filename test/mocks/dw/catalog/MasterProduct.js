@@ -123,6 +123,9 @@ class Product {
     isVariant() {
         return this.variant;
     }
+    isVariationGroup() {
+        return false;
+    }
 
     get availabilityModel() {
         return this.getAvailabilityModel();

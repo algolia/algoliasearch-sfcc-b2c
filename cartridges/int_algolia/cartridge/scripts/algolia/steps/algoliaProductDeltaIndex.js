@@ -18,8 +18,9 @@ var jobReport;
 
 var l0_deltaExportDir, l1_processingDir, l1_completedDir;
 var changedProducts = [], changedProductsIterator;
-var deltaExportZips, siteLocales, nonLocalizedAttributes = [], attributesToSend;
+var deltaExportZips, siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
+var nonLocalizedAttributes = [], nonLocalizedMasterAttributes = [];
 
 var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on the step parameter 'indexingMethod'
 const deleteIndexingOperation = 'deleteObject';
@@ -52,7 +53,7 @@ const MASTER_LEVEL = 'master-level';
  * with the "success" parameter passed to it set to false.
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
-*/
+ */
 exports.beforeStep = function(parameters, stepExecution) {
     algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
@@ -114,33 +115,36 @@ exports.beforeStep = function(parameters, stepExecution) {
             break;
     }
     logger.info('indexingMethod parameter: ' + paramIndexingMethod);
+    logger.info('Record model: ' + paramRecordModel);
 
-
-    /* --- non-localized attributes --- */
-    Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
-        if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized &&
-            attributesToSend.indexOf(attributeName) >= 0) {
-            nonLocalizedAttributes.push(attributeName);
-        }
-    });
-    logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
 
     /* --- master/variant attributes --- */
     variantAttributes = [];
-    masterAttributes = [];
+    masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
     attributesToSend.forEach(function(attribute) {
-        if (!algoliaProductConfig.attributeConfig_v2[attribute]) {
-            return;
-        }
         if (algoliaProductConfig.defaultVariantAttributes_v2.indexOf(attribute) >= 0) {
             variantAttributes.push(attribute);
         } else {
             masterAttributes.push(attribute);
         }
     });
-    logger.info('Record model: ' + paramRecordModel);
+
+    /* --- non-localized attributes --- */
+    Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
+        if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized) {
+            if (attributesToSend.indexOf(attributeName) >= 0) {
+                nonLocalizedAttributes.push(attributeName);
+            }
+            if (masterAttributes.indexOf(attributeName) >= 0) {
+                nonLocalizedMasterAttributes.push(attributeName);
+            }
+        }
+    });
+    logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
+
     if (paramRecordModel === MASTER_LEVEL) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
+        logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
         if (paramIndexingMethod === 'partialRecordUpdate' && variantAttributes.length > 0) {
             jobReport.endTime = new Date();
@@ -327,18 +331,13 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     }
                 } else {
                     // Master-level indexing
-                    var masterRecordPerLocale = jobHelper.generateMasterRecords({
-                        product: product,
-                        locales: siteLocales,
-                        masterAttributes: masterAttributes,
-                        variantAttributes: algoliaProductConfig.defaultVariantAttributes_v2,
-                        nonLocalizedAttributes: nonLocalizedAttributes,
-                    });
+                    var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                     for (let l = 0; l < siteLocales.size(); ++l) {
                         var locale = siteLocales[l];
                         var indexName = algoliaData.calculateIndexName('products', locale);
-                        processedVariantsToSend = masterRecordPerLocale[locale].variants.length;
-                        algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, masterRecordPerLocale[locale], indexName))
+                        var localizedMaster = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: masterAttributes, baseModel: baseModel });
+                        processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
                     }
                 }
 
@@ -351,7 +350,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
         if (productFilter.isInclude(product)) {
 
             // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-            let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
+            var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
             for (let l = 0; l < siteLocales.size(); l++) {
                 var locale = siteLocales[l];
                 var indexName = algoliaData.calculateIndexName('products', locale);
