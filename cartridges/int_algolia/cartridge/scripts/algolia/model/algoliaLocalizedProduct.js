@@ -2,15 +2,23 @@
 
 var Site = require('dw/system/Site');
 var Currency = require('dw/util/Currency');
-var stringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
+const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+const logger = jobHelper.getAlgoliaLogger();
+
+var extendedProductAttributesConfig;
+try {
+    extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
+    logger.info('Configuration file "productAttributesConfig.js" loaded')
+} catch(e) {
+    extendedProductAttributesConfig = {};
+}
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 
@@ -308,14 +316,19 @@ function algoliaLocalizedProduct(parameters) {
 
             if (baseModel && baseModel[attributeName]) {
                 this[attributeName] = baseModel[attributeName];
+            } else if (extendedProductAttributesConfig[attributeName]) {
+                var attributeConfig = extendedProductAttributesConfig[attributeName];
+                if (typeof attributeConfig.attribute === 'function') {
+                    this[attributeName] = attributeConfig.attribute(product);
+                } else if (attributeConfig.attribute) {
+                    this[attributeName] = ObjectHelper.getAttributeValue(product, attributeConfig.attribute);
+                }
+            } else if (aggregatedValueHandlers[attributeName]) {
+                this[attributeName] = aggregatedValueHandlers[attributeName](product);
             } else {
-                if (aggregatedValueHandlers[attributeName]) {
-                    this[attributeName] = aggregatedValueHandlers[attributeName](product);
-                } else {
-                    var config = algoliaProductConfig.attributeConfig_v2[attributeName];
-                    if (!empty(config)) {
-                        this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
-                    }
+                var config = algoliaProductConfig.attributeConfig_v2[attributeName];
+                if (!empty(config)) {
+                    this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
                 }
             }
         }
