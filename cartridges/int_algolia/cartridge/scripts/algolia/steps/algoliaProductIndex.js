@@ -22,6 +22,8 @@ var masterAttributes = [], variantAttributes = [];
 var nonLocalizedAttributes = [], nonLocalizedMasterAttributes = [];
 var lastIndexingTasks = {};
 
+var extendedProductAttributesConfig;
+
 const VARIANT_LEVEL = 'variant-level';
 const MASTER_LEVEL = 'master-level';
 
@@ -62,6 +64,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+
+    try {
+        extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
+        logger.info('Configuration file "productAttributesConfig.js" loaded')
+    } catch(e) {
+        extendedProductAttributesConfig = {};
+    }
 
     /* --- initializing custom object logging --- */
     jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'product');
@@ -109,7 +118,8 @@ exports.beforeStep = function(parameters, stepExecution) {
     variantAttributes = [];
     masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
     attributesToSend.forEach(function(attribute) {
-        if (algoliaProductConfig.defaultVariantAttributes_v2.indexOf(attribute) >= 0) {
+        if (algoliaProductConfig.defaultVariantAttributes_v2.indexOf(attribute) >= 0 &&
+            !extendedProductAttributesConfig[attribute]) {
             variantAttributes.push(attribute);
         } else {
             masterAttributes.push(attribute);

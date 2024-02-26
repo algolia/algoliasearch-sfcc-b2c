@@ -9,13 +9,10 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
-const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-const logger = jobHelper.getAlgoliaLogger();
 
 var extendedProductAttributesConfig;
 try {
     extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
-    logger.info('Configuration file "productAttributesConfig.js" loaded')
 } catch(e) {
     extendedProductAttributesConfig = {};
 }
