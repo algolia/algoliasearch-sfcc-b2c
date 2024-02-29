@@ -18,7 +18,7 @@ function enableInstantSearch(config) {
     var hierarchicalMenuValue = {};
     if (config.categoryDisplayNamePath && config.categoryDisplayNamePath.indexOf('New Arrivals') > -1) {
         hierarchicalMenuValue = {
-            "newArrivals.level_0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
+            "newArrivalsCategory.level_0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
         }
     } else {
         hierarchicalMenuValue = {
@@ -137,7 +137,7 @@ function enableInstantSearch(config) {
 
             hierarchicalMenuWithPanel({
                 container: '#algolia-newarrivals-list-placeholder',
-                attributes: ['newArrivals.level_0', 'newArrivals.level_1'],
+                attributes: ['newArrivalsCategory.level_0', 'newArrivalsCategory.level_1'],
                 templates: {
                     item(data, { html }) {
                         return html`
