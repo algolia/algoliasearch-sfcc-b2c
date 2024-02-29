@@ -25,8 +25,8 @@ describe('customizeProductModel (jobs v1)', () => {
 
     test('newArrivals in the additional attributes list', () => {
         productModelCustomizer.customizeProductModel(product, ['newArrivals']);
-        expect(product).toHaveProperty('newArrivals');
-        expect(product.newArrivals).toEqual({
+        expect(product).toHaveProperty('newArrivalsCategory');
+        expect(product.newArrivalsCategory).toEqual({
             level_0: {
                 en: 'New Arrivals',
                 fr: 'Nouveautés',
@@ -41,7 +41,7 @@ describe('customizeProductModel (jobs v1)', () => {
     test('newArrivals not in the additional attributes list', () => {
         productModelCustomizer.customizeProductModel(product, []);
         // Property is present, but won't be read by the indexing pipeline
-        expect(product).toHaveProperty('newArrivals');
+        expect(product).toHaveProperty('newArrivalsCategory');
     });
 });
 
@@ -63,9 +63,9 @@ describe('customizeLocalizedProductModel (jobs v2)', () => {
     });
 
     test('newArrivals in the additional attributes list', () => {
-        productModelCustomizer.customizeLocalizedProductModel(product, ['newArrivals']);
-        expect(product).toHaveProperty('newArrivals');
-        expect(product.newArrivals).toEqual({
+        productModelCustomizer.customizeLocalizedProductModel(product, ['newArrivalsCategory']);
+        expect(product).toHaveProperty('newArrivalsCategory');
+        expect(product.newArrivalsCategory).toEqual({
             level_0: 'New Arrivals',
             level_1: 'New Arrivals > Electronics',
         });
@@ -73,6 +73,6 @@ describe('customizeLocalizedProductModel (jobs v2)', () => {
 
     test('newArrivals not in the additional attributes list', () => {
         productModelCustomizer.customizeLocalizedProductModel(product, []);
-        expect(product).not.toHaveProperty('newArrivals');
+        expect(product).not.toHaveProperty('newArrivalsCategory');
     });
 });
