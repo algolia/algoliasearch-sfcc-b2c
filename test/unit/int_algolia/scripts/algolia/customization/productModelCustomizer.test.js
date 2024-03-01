@@ -27,11 +27,11 @@ describe('customizeProductModel (jobs v1)', () => {
         productModelCustomizer.customizeProductModel(product, ['newArrivalsCategory']);
         expect(product).toHaveProperty('newArrivalsCategory');
         expect(product.newArrivalsCategory).toEqual({
-            level_0: {
+            0: {
                 en: 'New Arrivals',
                 fr: 'Nouveautés',
             },
-            level_1: {
+            1: {
                 en: 'New Arrivals > Electronics',
                 fr: 'Nouveautés > Electronique',
             },
@@ -66,8 +66,8 @@ describe('customizeLocalizedProductModel (jobs v2)', () => {
         productModelCustomizer.customizeLocalizedProductModel(product, ['newArrivalsCategory']);
         expect(product).toHaveProperty('newArrivalsCategory');
         expect(product.newArrivalsCategory).toEqual({
-            level_0: 'New Arrivals',
-            level_1: 'New Arrivals > Electronics',
+            0: 'New Arrivals',
+            1: 'New Arrivals > Electronics',
         });
     });
 

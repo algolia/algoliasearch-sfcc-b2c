@@ -11,23 +11,22 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
  *   ]
  * Will generate:
  *   {
- *      level_0: { en: 'New Arrivals', fr: 'Nouveautés' },
- *      level_1: { en: 'New Arrivals > Electronics', fr: 'Nouveautés > Electronique' }
+ *      0: { en: 'New Arrivals', fr: 'Nouveautés' },
+ *      1: { en: 'New Arrivals > Electronics', fr: 'Nouveautés > Electronique' }
  *   }
  * @param {Array} category - array of categories tree
  * @returns {Object} - secondary category Algolia object
  */
 function createAlgoliaCategoryObject(category) {
-    var CATEGORIES_LEVEL_PREFIX = 'level_';
     var result = {};
 
     category
         .concat()
         .reverse()
         .reduce(function (parentCategory, childCategory, index) {
-            result[CATEGORIES_LEVEL_PREFIX + index] = {};
+            result[index] = {};
             Object.keys(childCategory.name).forEach(function (locale) {
-                result[CATEGORIES_LEVEL_PREFIX + index][locale] = parentCategory
+                result[index][locale] = parentCategory
                     ? parentCategory.name[locale] + algoliaData.CATEGORIES_SEPARATOR + childCategory.name[locale]
                     : childCategory.name[locale];
             });
@@ -72,21 +71,20 @@ function customizeProductModel(productModel) {
  *   ]
  * Will generate:
  *   {
- *      level_0: 'New Arrivals',
- *      level_1: 'New Arrivals > Electronics'
+ *      0: 'New Arrivals',
+ *      1: 'New Arrivals > Electronics'
  *   }
  * @param {Array} category - array of categories tree
  * @returns {Object} - secondary category Algolia object
  */
 function createAlgoliaLocalizedCategoryObject(category) {
-    var CATEGORIES_LEVEL_PREFIX = 'level_';
     var result = {};
 
     category
         .concat()
         .reverse()
         .reduce(function (parentCategory, childCategory, index) {
-            result[CATEGORIES_LEVEL_PREFIX + index] = parentCategory
+            result[index] = parentCategory
                 ? parentCategory.name + algoliaData.CATEGORIES_SEPARATOR + childCategory.name
                 : childCategory.name
             return childCategory;

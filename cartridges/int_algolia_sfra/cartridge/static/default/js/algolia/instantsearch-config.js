@@ -18,7 +18,7 @@ function enableInstantSearch(config) {
     var hierarchicalMenuValue = {};
     if (config.categoryDisplayNamePath && config.categoryDisplayNamePath.indexOf('New Arrivals') > -1) {
         hierarchicalMenuValue = {
-            "newArrivalsCategory.level_0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
+            "newArrivalsCategory.0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
         }
     } else {
         hierarchicalMenuValue = {
@@ -137,7 +137,7 @@ function enableInstantSearch(config) {
 
             hierarchicalMenuWithPanel({
                 container: '#algolia-newarrivals-list-placeholder',
-                attributes: ['newArrivalsCategory.level_0', 'newArrivalsCategory.level_1'],
+                attributes: ['newArrivalsCategory.0', 'newArrivalsCategory.1'],
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -473,12 +473,12 @@ function enableInstantSearch(config) {
 
     search.start();
 
-    search.on('render', function () {
-        var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
-        $(emptyFacetSelector).each(function () {
-            $(this).parents().eq(2).hide();
-        });
-    });
+    //search.on('render', function () {
+    //    var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
+    //    $(emptyFacetSelector).each(function () {
+    //        $(this).parents().eq(2).hide();
+    //    });
+    //});
 
     /**
      * Generates a menu with the Panel widget
