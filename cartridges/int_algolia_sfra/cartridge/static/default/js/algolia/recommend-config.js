@@ -4,6 +4,7 @@ const { frequentlyBoughtTogether, relatedProducts, trendingItems, trendingFacets
 
 /**
  * Enable recommendations
+ * @param {Object} config - Configuration object
  * @returns {void}
  */
 function enableRecommendations(config) {
@@ -51,8 +52,8 @@ function createRecommendationWidget(options) {
 
 /**
  * Parse Object IDs from data attribute
- * @param {HTMLElement} container
- * @returns {Array|null}
+ * @param {HTMLElement} container - Container element
+ * @returns {Array|null} Object IDs
  */
 function getObjectIds(container) {
     try {
@@ -67,7 +68,7 @@ function getObjectIds(container) {
 /**
  * Item component used in widgets
  * @param {Object} param0 - Item and HTML from Algolia widget
- * @returns {String} HTML string
+ * @returns {string} HTML string
  */
 function itemComponent({ item, html }) {
 
@@ -93,6 +94,12 @@ function itemComponent({ item, html }) {
     `;
 }
 
+/**
+ * This function is used to transform the item before it is displayed in the widget.
+ * It is used to add or modify properties of the item.
+ * @param {Object} item - Item to transform
+ * @returns {Object} Transformed item
+ */
 function transformItem(item) {
     if (item.image_groups) {
         const imageGroup = item.image_groups.find(function (i) {
@@ -126,7 +133,7 @@ function transformItem(item) {
     item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
 
     // originating index
-    item.__indexName = productsIndex;
+    item.__indexName = algoliaData.productsIndex;
 
     // url with queryID (used for analytics)
     if (item.url) {
@@ -223,7 +230,7 @@ function transformItem(item) {
 
 /**
  * Get item image
- * @param {Object} item
+ * @param {Object} item - Item object
  * @returns {Object} Image object
  */
 function getItemImage(item) {
@@ -247,9 +254,9 @@ function getDefaultImage() {
 
 /**
  * Get quick view HTML
- * @param {Object} item
+ * @param {Object} item - Item object
  * @param {Function} html - Tagged template function
- * @returns {String} HTML string
+ * @returns {string} HTML string
  */
 function getQuickViewHtml(item, html) {
     return html`
@@ -268,9 +275,9 @@ function getQuickViewHtml(item, html) {
 
 /**
  * Get price HTML
- * @param {Object} item
+ * @param {Object} item - Item object
  * @param {Function} html - Tagged template function
- * @returns {String} HTML string
+ * @returns {string} HTML string
  */
 function getPriceHtml(item, html) {
     return html`

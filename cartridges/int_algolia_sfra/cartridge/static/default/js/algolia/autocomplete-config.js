@@ -4,39 +4,41 @@ const trendingItemsArr = [];
 
 /**
  * Maps Algolia hit to a trending item object.
- * @param {object} hit - The Algolia hit object.
- * @returns {object} - The mapped trending item object.
+ * @param {Object} hit - The Algolia hit object.
+ * @returns {Object} - The mapped trending item object.
  */
 function mapHitToTrendingItem(hit) {
-  return {
-    label: hit.name,
-    objectID: hit.objectID,
-    disBaseLink: hit.image_groups[0].images[0].dis_base_link,
-  };
+    return {
+        label: hit.name,
+        objectID: hit.objectID,
+        disBaseLink: hit.image_groups[0].images[0].dis_base_link,
+    };
 }
 
 /**
  * Fetches and processes trending items.
- * @param {object} RecommendConfig - The configuration object.
+ * @param {Object} RecommendConfig - The configuration object.
+ * @returns {Promise} - The promise object.
  */
-async function fetchTrendingItems(RecommendConfig) {
-  try {
-    const recommendClient = RecommendConfig.recommendClient;
-    const indexName = RecommendConfig.productsIndex;
-    const maxRecommendations = RecommendConfig.maxRecommendations;
+function fetchTrendingItems(RecommendConfig) {
+    return new Promise((resolve, reject) => {
+        const recommendClient = RecommendConfig.recommendClient;
+        const indexName = RecommendConfig.productsIndex;
+        const maxRecommendations = RecommendConfig.maxRecommendations;
 
-    const response = await recommendClient.getTrendingItems([{
-        indexName,
-        maxRecommendations,
-    }]);
-
-    const results = response.results[0].hits;
-    const trendingItemsArrMap = results.map(mapHitToTrendingItem);
-
-    trendingItemsArr.push(...trendingItemsArrMap);
-  } catch (err) {
-    console.error('Failed to fetch trending items:', err);
-  }
+        recommendClient.getTrendingItems([{
+            indexName,
+            maxRecommendations,
+        }]).then(response => {
+            const results = response.results[0].hits;
+            const trendingItemsArrMap = results.map(mapHitToTrendingItem);
+            trendingItemsArr.push(...trendingItemsArrMap);
+            resolve(trendingItemsArr); // Assuming `trendingItemsArr` is accessible and should be the resolved value
+        }).catch(err => {
+            console.error('Failed to fetch trending items:', err);
+            reject(err);
+        });
+    });
 }
 
 /**
