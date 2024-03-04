@@ -1,5 +1,44 @@
 /* global autocomplete, getAlgoliaResults, algoliaData  */
 
+const trendingItemsArr = [];
+
+/**
+ * Maps Algolia hit to a trending item object.
+ * @param {object} hit - The Algolia hit object.
+ * @returns {object} - The mapped trending item object.
+ */
+function mapHitToTrendingItem(hit) {
+  return {
+    label: hit.name,
+    objectID: hit.objectID,
+    disBaseLink: hit.image_groups[0].images[0].dis_base_link,
+  };
+}
+
+/**
+ * Fetches and processes trending items.
+ * @param {object} RecommendConfig - The configuration object.
+ */
+async function fetchTrendingItems(RecommendConfig) {
+  try {
+    const recommendClient = RecommendConfig.recommendClient;
+    const indexName = RecommendConfig.productsIndex;
+    const maxRecommendations = RecommendConfig.maxRecommendations;
+
+    const response = await recommendClient.getTrendingItems([{
+        indexName,
+        maxRecommendations,
+    }]);
+
+    const results = response.results[0].hits;
+    const trendingItemsArrMap = results.map(mapHitToTrendingItem);
+
+    trendingItemsArr.push(...trendingItemsArrMap);
+  } catch (err) {
+    console.error('Failed to fetch trending items:', err);
+  }
+}
+
 /**
  * Enables autocomplete
  * @param {Object} config configuration object
@@ -8,8 +47,17 @@ function enableAutocomplete(config) {
     const inputElements = document.querySelectorAll('#aa-search-input');
     const contentSearchbarTab = $('#content-search-bar-button');
     const productSearchbarTab = $('#product-search-bar-button');
-    const contentTabPane = $('#content-search-results-pane')
-    const productTabPane = $('#product-search-results')
+    const contentTabPane = $('#content-search-results-pane');
+    const productTabPane = $('#product-search-results');
+    const recommendClient = config.recommendClient;
+
+    const RecommendConfig = {
+        productsIndex: algoliaData.productsIndex,
+        maxRecommendations: 5,
+        recommendClient: recommendClient,
+    };
+
+    fetchTrendingItems(RecommendConfig);
 
     contentTabPane.hide();
 
@@ -22,10 +70,17 @@ function enableAutocomplete(config) {
             },
             placeholder: algoliaData.strings.placeholder,
             getSources(query) {
-                return getSourcesArray(config);
+                let sources = getTrendingItemsArray(config); 
+
+                if (query && query.query) {
+                    sources.push(...getSourcesArray(config));
+                }
+
+                return sources;
             },
             // If insights is not enabled in the BM, let the value undefined, to rely on the Dashboard setting
             insights: algoliaData.enableInsights ? true : undefined,
+            openOnFocus: true,
         });
 
         inputElement.addEventListener('keypress', function (event) {
@@ -51,6 +106,48 @@ function enableAutocomplete(config) {
         });
 
     });
+}
+
+
+/**
+ * @description Get Trending items array for autocomplete
+ * @param {Object} config configuration object
+ * @returns {Array} sources array
+ */
+function getTrendingItemsArray(config) {
+
+    var sourcesArray = [];
+
+    sourcesArray.push({
+        sourceId: 'trendingProducts',
+        getItems() {
+            return trendingItemsArr;
+        },
+        templates: {
+            header({
+                html
+            }) {
+                return html `
+                        <div class="header row justify-content-end">
+                            <div class="col-xs-12 col-sm-10">${algoliaData.strings.trending}</div>
+                        </div>`;
+            },
+            item({
+                item,
+                components,
+                html,
+            }) {
+                var a = item;
+                return html `
+                        <div class="text-truncate text-nowrap">
+                            <img class="swatch-circle hidden-xs-down" src=${item.disBaseLink}></img>
+                            <a href=${item.url}>${item.label}</a>
+                        </div>`;
+            },
+        },
+    });
+
+    return sourcesArray;
 }
 
 /**

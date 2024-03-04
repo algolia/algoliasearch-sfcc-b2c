@@ -14,3 +14,19 @@
 .algolia-results-tab {
     cursor: pointer;
 }
+
+.auc-Recommend-container {
+    margin-top: 20px;
+}
+
+.auc-Recommend-item {
+    width: 100%;
+    margin-bottom: 20px;
+    list-style-type: none;
+}
+
+.auc-Recommend-list {
+    display: flex;
+    flex-wrap: no-wrap;
+    justify-content: space-between;
+}

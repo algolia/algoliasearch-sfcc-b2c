@@ -1,0 +1,13 @@
+<isscript>
+    var productIds = [];
+    if (pdict.contextAUID) {
+        productIds.push(pdict.contextAUID);
+    } else {
+        for (var i = 0; i < slotcontent.content.length; i++) {
+            var product = slotcontent.content[i];
+            productIds.push(product.ID);
+        }
+    }
+</isscript>
+
+<div class="row" id="frequentlyBoughtTogether" data-object-ids="${JSON.stringify(productIds)}"></div>

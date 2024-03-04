@@ -1,4 +1,5 @@
 /* global algoliasearch */
+const algoliarecommend = window['@algolia/recommend'];
 
 document.addEventListener('DOMContentLoaded', function () {
     var $suggestionsWrapper = $('#suggestions-wrapper');
@@ -11,9 +12,13 @@ document.addEventListener('DOMContentLoaded', function () {
     var searchClient = algoliasearch(algoliaData.applicationID, algoliaData.searchApiKey);
     searchClient.addAlgoliaAgent('Algolia Salesforce B2C (SFRA)', 'v' + algoliaData.version);
 
+    const recommendClient = algoliarecommend(algoliaData.applicationID, algoliaData.searchApiKey);
+    recommendClient.addAlgoliaAgent('Algolia Salesforce B2C (SFRA)', 'v' + algoliaData.version);
+
     enableAutocomplete({
         searchClient: searchClient,
         searchPageRoot: searchPageRoot,
+        recommendClient: recommendClient,
     });
 
     // FIXME: only enable on search and category page
@@ -23,6 +28,8 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryDisplayNamePath: categoryDisplayNamePath,
         categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
     });
+
+    enableRecommendations({recommendClient});
 
     if (algoliaData.enableInsights) {
         enableInsights(algoliaData.applicationID, algoliaData.searchApiKey, algoliaData.productsIndex);
