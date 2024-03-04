@@ -34,6 +34,31 @@ jest.mock('dw/catalog/ProductMgr', () => {
         }),
     }
 }, {virtual: true});
+jest.mock('dw/catalog/PriceBookMgr', () => {
+    return {
+        getSitePriceBooks: jest.fn(() => {
+            const collectionHelper = require("./test/mocks/helpers/collectionHelper");
+            return collectionHelper.createCollection([
+                {
+                    ID: 'list-prices-usd',
+                    currencyCode: 'USD',
+                },
+                {
+                    ID: 'sale-prices-usd',
+                    currencyCode: 'USD',
+                },
+                {
+                    ID: 'list-prices-eur',
+                    currencyCode: 'EUR',
+                },
+                {
+                    ID: 'sale-prices-eur',
+                    currencyCode: 'EUR',
+                },
+            ]);
+        }),
+    }
+}, { virtual: true });
 jest.mock('dw/io/File', () => {
     class MockedFile {
         constructor() {
@@ -94,10 +119,7 @@ jest.mock('dw/system/Site', () => {
                     return arr;
                 },
                 getAllowedCurrencies: function () {
-                    var arr = [
-                        { currencyCode: 'USD' },
-                        { currencyCode: 'EUR' }
-                    ];
+                    var arr = ['USD', 'EUR'];
                     arr.size = function () {
                         return arr.length;
                     };
@@ -155,8 +177,12 @@ jest.mock('dw/util/Calendar', () => {
     }
 }, {virtual: true});
 jest.mock('dw/util/Currency', () => {
+    const currencies = {
+        USD: { currencyCode: 'USD' },
+        EUR: { currencyCode: 'EUR' },
+    }
     return {
-        getCurrency: function (currency) { return currency; }
+        getCurrency: function (currency) { return currencies[currency]; }
     }
 }, {virtual: true});
 

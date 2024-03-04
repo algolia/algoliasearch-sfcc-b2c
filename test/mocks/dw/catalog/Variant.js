@@ -26,6 +26,29 @@ class Variant extends MasterProduct {
             },
             refinementSize: '4',
         };
+
+        this.prices = {
+            'sale-prices-usd': {
+                available: true,
+                currencyCode: 'USD',
+                value: 129,
+            },
+            'list-prices-usd': {
+                available: true,
+                currencyCode: 'USD',
+                value: 132,
+            },
+            'sale-prices-eur': {
+                available: true,
+                currencyCode: 'EUR',
+                value: 92.88,
+            },
+            'list-prices-eur': {
+                available: true,
+                currencyCode: 'EUR',
+                value: 94,
+            }
+        }
     }
 
     getOnlineCategories() {
@@ -37,19 +60,21 @@ class Variant extends MasterProduct {
         switch (currency.currencyCode) {
             case 'USD':
                 return {
-                    price: {
-                        available: true,
-                        currencyCode: 'USD',
-                        value: 129,
-                    },
+                    price: this.prices['sale-prices-usd'],
+                    getPriceBookPriceInfo: (priceBookID) => {
+                        return {
+                            price: this.prices[priceBookID],
+                        }
+                    }
                 };
             case 'EUR':
                 return {
-                    price: {
-                        available: true,
-                        currencyCode: 'EUR',
-                        value: 92.88,
-                    },
+                    price: this.prices['sale-prices-eur'],
+                    getPriceBookPriceInfo: (priceBookID) => {
+                        return {
+                            price: this.prices[priceBookID],
+                        }
+                    }
                 };
             default:
                 return null;

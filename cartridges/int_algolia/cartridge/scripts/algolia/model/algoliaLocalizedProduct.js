@@ -214,7 +214,7 @@ var aggregatedValueHandlers = {
     pricebooks: function (product) {
         const pricebooks = {};
         const siteCurrencies = Site.getCurrent().getAllowedCurrencies();
-        const sitePriceBooks = PriceBookMgr.sitePriceBooks.iterator();
+        const sitePriceBooks = PriceBookMgr.getSitePriceBooks().iterator();
 
         while (sitePriceBooks.hasNext()) {
             var pricebook = sitePriceBooks.next();
