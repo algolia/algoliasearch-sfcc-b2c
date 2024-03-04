@@ -473,12 +473,12 @@ function enableInstantSearch(config) {
 
     search.start();
 
-    //search.on('render', function () {
-    //    var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
-    //    $(emptyFacetSelector).each(function () {
-    //        $(this).parents().eq(2).hide();
-    //    });
-    //});
+    search.on('render', function () {
+        var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
+        $(emptyFacetSelector).each(function () {
+            $(this).parents().eq(2).hide();
+        });
+    });
 
     /**
      * Generates a menu with the Panel widget
