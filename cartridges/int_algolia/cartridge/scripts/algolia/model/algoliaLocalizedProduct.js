@@ -2,6 +2,7 @@
 
 var Site = require('dw/system/Site');
 var Currency = require('dw/util/Currency');
+var PriceBookMgr = require('dw/catalog/PriceBookMgr');
 var stringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 
@@ -209,6 +210,31 @@ var aggregatedValueHandlers = {
         }
         currentSession.setCurrency(currentCurrency);
         return productPrice;
+    },
+    pricebooks: function (product) {
+        const pricebooks = {};
+        const siteCurrencies = Site.getCurrent().getAllowedCurrencies();
+        const sitePriceBooks = PriceBookMgr.sitePriceBooks.iterator();
+
+        while (sitePriceBooks.hasNext()) {
+            var pricebook = sitePriceBooks.next();
+            if (siteCurrencies.indexOf(pricebook.currencyCode) < 0) {
+                continue;
+            }
+            var priceInfo = product.priceModel.getPriceBookPriceInfo(pricebook.ID);
+            if (priceInfo) {
+                if (!pricebooks[pricebook.currencyCode]) {
+                    pricebooks[pricebook.currencyCode] = [];
+                }
+                pricebooks[pricebook.currencyCode].push({
+                    price: priceInfo.price.value,
+                    onlineFrom: priceInfo.onlineFrom ? priceInfo.onlineFrom.getTime() : undefined,
+                    onlineTo: priceInfo.onlineTo ? priceInfo.onlineTo.getTime() : undefined,
+                    pricebookID: pricebook.ID,
+                });
+            }
+        }
+        return pricebooks;
     },
     in_stock: function (product) {
         if (product.isMaster() || product.isVariationGroup()) {

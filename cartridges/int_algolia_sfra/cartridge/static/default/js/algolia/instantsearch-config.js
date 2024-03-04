@@ -310,6 +310,30 @@ function enableInstantSearch(config) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
 
+                        // If no promotionalPrice, use the pricebooks to display the strikeout price
+                        if (!item.promotionalPrice &&
+                            item.pricebooks &&
+                            item.pricebooks[algoliaData.currencyCode] &&
+                            item.pricebooks[algoliaData.currencyCode].length > 0
+                        ) {
+                            const prices = item.pricebooks[algoliaData.currencyCode].filter(pricebook => {
+                                if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
+                                    return false;
+                                }
+                                if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
+                                    return false;
+                                }
+                                return true;
+                            }).map(pricebook => pricebook.price);
+                            const maxPrice = prices.reduce((acc, currentValue) => {
+                                return Math.max(acc, currentValue);
+                            });
+                            if (maxPrice > item.price) {
+                                item.promotionalPrice = item.price;
+                                item.price = maxPrice;
+                            }
+                        }
+
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
 
