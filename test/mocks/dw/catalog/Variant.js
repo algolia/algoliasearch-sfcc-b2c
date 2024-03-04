@@ -57,27 +57,30 @@ class Variant extends MasterProduct {
 
     getPriceModel() {
         const currency = request.getSession().getCurrency();
+        let price;
         switch (currency.currencyCode) {
             case 'USD':
-                return {
-                    price: this.prices['sale-prices-usd'],
-                    getPriceBookPriceInfo: (priceBookID) => {
-                        return {
-                            price: this.prices[priceBookID],
-                        }
-                    }
-                };
+                price = this.prices['sale-prices-usd'];
+                break;
             case 'EUR':
-                return {
-                    price: this.prices['sale-prices-eur'],
-                    getPriceBookPriceInfo: (priceBookID) => {
-                        return {
-                            price: this.prices[priceBookID],
-                        }
-                    }
-                };
+                price = this.prices['sale-prices-eur'];
+                break;
             default:
                 return null;
+        }
+        return {
+            price,
+            getPriceBookPriceInfo: (priceBookID) => {
+                const priceInfo = {
+                    price: this.prices[priceBookID],
+                }
+                if (priceBookID === 'sale-prices-eur') {
+                    priceInfo.onlineFrom = {
+                        getTime: () => 1704067200000,
+                    }
+                }
+                return priceInfo;
+            }
         }
     }
 

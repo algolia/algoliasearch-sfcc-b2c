@@ -335,7 +335,7 @@ describe('algoliaLocalizedProduct', function () {
                 }, {
                     price: 92.88,
                     pricebookID: 'sale-prices-eur',
-                    onlineFrom: undefined,
+                    onlineFrom: 1704067200000,
                     onlineTo: undefined,
                 }],
             },
