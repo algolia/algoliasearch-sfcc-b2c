@@ -77,7 +77,7 @@ function enableInstantSearch(config) {
                     root: 'refinement',
                     input: 'form-control',
                 },
-                placeholder: 'Search...',
+                placeholder: algoliaData.strings.placeholder,
                 showSubmit: false,
             }),
             instantsearch.widgets.stats({
