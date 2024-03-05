@@ -48,7 +48,6 @@
         <div class="tab-content col-12">
             <div class="ais-InstantSearch tab-pane container active"  id="product-search-results" role="tabpanel" aria-labelledby="product-tab">
                 <div class="row grid-header">
-                        <div id="algolia-searchbox-placeholder" ></div>
                         <div id="algolia-stats-placeholder" class="result-count text-center col-12 col-md-9 col-sm-6 order-sm-2"></div>
                         <div id="algolia-sort-by-placeholder" class="col-6 col-sm-3 order-sm-1"></div>
 
@@ -60,6 +59,7 @@
                 </div>
                 <div class="row">
                     <div class="refinement-bar col-md-3">
+                        <div id="algolia-searchbox-placeholder"></div>
 
                         <div id="algolia-clear-refinements-placeholder"></div>
 

@@ -74,8 +74,11 @@ function enableInstantSearch(config) {
             instantsearch.widgets.searchBox({
                 container: '#algolia-searchbox-placeholder',
                 cssClasses: {
-                    root: 'd-none'
-                }
+                    root: 'refinement',
+                    input: 'form-control',
+                },
+                placeholder: 'Search...',
+                showSubmit: false,
             }),
             instantsearch.widgets.stats({
                 container: '#algolia-stats-placeholder',
