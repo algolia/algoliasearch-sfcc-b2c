@@ -38,6 +38,7 @@ function enableInstantSearch(config) {
         indexName: productsIndex,
         searchClient: config.searchClient,
         initialUiState: initialUiState,
+        routing: true,
     });
 
     if (algoliaData.enableInsights) {
