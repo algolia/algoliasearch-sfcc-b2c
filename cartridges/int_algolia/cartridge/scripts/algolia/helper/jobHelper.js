@@ -589,7 +589,7 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
  * The colorVariations are built using the master's variation model
  *
  * @param {Object} parameters - model parameters
- * @param {dw.order.Product} parameters.masterProduct - A master product
+ * @param {dw.catalog.Product} parameters.masterProduct - A master product
  * @param {string} parameters.locales - The requested locales
  * @param {Array} parameters.attributeList - list of attributes to be fetched
  * @param {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
