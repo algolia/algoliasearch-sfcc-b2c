@@ -38,6 +38,7 @@ function enableInstantSearch(config) {
         indexName: productsIndex,
         searchClient: config.searchClient,
         initialUiState: initialUiState,
+        routing: true,
     });
 
     if (algoliaData.enableInsights) {
@@ -74,8 +75,11 @@ function enableInstantSearch(config) {
             instantsearch.widgets.searchBox({
                 container: '#algolia-searchbox-placeholder',
                 cssClasses: {
-                    root: 'd-none'
-                }
+                    root: 'refinement',
+                    input: 'form-control',
+                },
+                placeholder: algoliaData.strings.placeholder,
+                showSubmit: false,
             }),
             instantsearch.widgets.stats({
                 container: '#algolia-stats-placeholder',
