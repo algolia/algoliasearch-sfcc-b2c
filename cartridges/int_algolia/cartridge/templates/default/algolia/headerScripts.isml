@@ -31,7 +31,7 @@
     <script src="${URLUtils.staticURL('js/lib/algolia/instantsearch.production.min.js')}"></script>
 
     <iscomment>--- Algolia Recommend.js ---</iscomment>
-    <script src="${URLUtils.staticURL('js/lib/algolia/recommend-index.js')}"></script>
+    <script src="${URLUtils.staticURL('js/lib/algolia/recommend-js.js')}"></script>
     <script src="${URLUtils.staticURL('js/lib/algolia/recommend.js')}"></script>
 
     <script src="${URLUtils.staticURL('js/algolia/recommend-config.js')}"></script>

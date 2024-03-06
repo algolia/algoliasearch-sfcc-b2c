@@ -65,7 +65,7 @@
 		},
 		{
 			"from": "node_modules/@algolia/recommend-js/dist/umd/index.js",
-			"to" : "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/recommend-index.js"
+			"to" : "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/recommend-js.js"
 		},
 		{
 			"from": "node_modules/@algolia/recommend/dist/recommend.umd.js",

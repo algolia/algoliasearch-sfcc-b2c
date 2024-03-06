@@ -1,45 +1,7 @@
 /* global autocomplete, getAlgoliaResults, algoliaData  */
 
+var recommendClient;
 const trendingItemsArr = [];
-
-/**
- * Maps Algolia hit to a trending item object.
- * @param {Object} hit - The Algolia hit object.
- * @returns {Object} - The mapped trending item object.
- */
-function mapHitToTrendingItem(hit) {
-    return {
-        label: hit.name,
-        objectID: hit.objectID,
-        disBaseLink: hit.image_groups[0].images[0].dis_base_link,
-    };
-}
-
-/**
- * Fetches and processes trending items.
- * @param {Object} RecommendConfig - The configuration object.
- * @returns {Promise} - The promise object.
- */
-function fetchTrendingItems(RecommendConfig) {
-    return new Promise((resolve, reject) => {
-        const recommendClient = RecommendConfig.recommendClient;
-        const indexName = RecommendConfig.productsIndex;
-        const maxRecommendations = RecommendConfig.maxRecommendations;
-
-        recommendClient.getTrendingItems([{
-            indexName,
-            maxRecommendations,
-        }]).then(response => {
-            const results = response.results[0].hits;
-            const trendingItemsArrMap = results.map(mapHitToTrendingItem);
-            trendingItemsArr.push(...trendingItemsArrMap);
-            resolve(trendingItemsArr); // Assuming `trendingItemsArr` is accessible and should be the resolved value
-        }).catch(err => {
-            console.error('Failed to fetch trending items:', err);
-            reject(err);
-        });
-    });
-}
 
 /**
  * Enables autocomplete
@@ -51,15 +13,7 @@ function enableAutocomplete(config) {
     const productSearchbarTab = $('#product-search-bar-button');
     const contentTabPane = $('#content-search-results-pane');
     const productTabPane = $('#product-search-results');
-    const recommendClient = config.recommendClient;
-
-    const RecommendConfig = {
-        productsIndex: algoliaData.productsIndex,
-        maxRecommendations: 5,
-        recommendClient: recommendClient,
-    };
-
-    fetchTrendingItems(RecommendConfig);
+    recommendClient = config.recommendClient;
 
     contentTabPane.hide();
 
@@ -72,7 +26,7 @@ function enableAutocomplete(config) {
             },
             placeholder: algoliaData.strings.placeholder,
             getSources(query) {
-                let sources = getTrendingItemsArray(config); 
+                let sources = getTrendingItemsArray();
 
                 if (query && query.query) {
                     sources.push(...getSourcesArray(config));
@@ -110,15 +64,62 @@ function enableAutocomplete(config) {
     });
 }
 
+/**
+ * Maps Algolia hit to a trending item object.
+ * @param {Object} hit - The Algolia hit object.
+ * @returns {Object} - The mapped trending item object.
+ */
+function mapHitToTrendingItem(hit) {
+    return {
+        label: hit.name,
+        objectID: hit.objectID,
+        disBaseLink: hit.image_groups[0].images[0].dis_base_link,
+    };
+}
+
+/**
+ * Fetches and processes trending items.
+ * @param {Object} RecommendConfig - The configuration object.
+ * @returns {Promise} - The promise object.
+ */
+function fetchTrendingItems(RecommendConfig) {
+    return new Promise((resolve, reject) => {
+        const indexName = RecommendConfig.productsIndex;
+        const maxRecommendations = RecommendConfig.maxRecommendations;
+
+        recommendClient.getTrendingItems([{
+            indexName,
+            maxRecommendations,
+        }]).then(response => {
+            const results = response.results[0].hits;
+            const trendingItemsArrMap = results.map(mapHitToTrendingItem);
+            trendingItemsArr.push(...trendingItemsArrMap);
+            resolve(trendingItemsArr);
+        }).catch(err => {
+            console.error('Failed to fetch trending items:', err);
+            reject(err);
+        });
+    });
+}
+
 
 /**
  * @description Get Trending items array for autocomplete
  * @param {Object} config configuration object
  * @returns {Array} sources array
  */
-function getTrendingItemsArray(config) {
+function getTrendingItemsArray() {
 
     var sourcesArray = [];
+
+    if (trendingItemsArr.length === 0) {
+        const RecommendConfig = {
+            productsIndex: algoliaData.productsIndex,
+            maxRecommendations: 5,
+            recommendClient: recommendClient,
+        };
+        fetchTrendingItems(RecommendConfig);
+    }
 
     sourcesArray.push({
         sourceId: 'trendingProducts',
