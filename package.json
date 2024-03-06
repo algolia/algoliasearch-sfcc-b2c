@@ -26,7 +26,7 @@
     "devDependencies": {
         "@algolia/autocomplete-js": "1.12.1",
         "@algolia/autocomplete-theme-classic": "1.12.1",
-        "@algolia/recommend-js": "^1.14.0",
+        "@algolia/recommend-js": "1.14.0",
         "algoliasearch": "4.20.0",
         "chai": "^4.3.7",
         "copy-files-from-to": "^3.8.0",
