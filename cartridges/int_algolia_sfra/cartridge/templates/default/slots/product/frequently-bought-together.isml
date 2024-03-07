@@ -1,6 +1,7 @@
 <isscript>
     var productIds = [];
-    if (pdict.contextAUID) {
+    //We implemented a similar approach with Einstein here, where we are using products defined in the content slot configuration on the BM by utilizing pdict.contextAUID.
+    if (pdict.contextAUID) { 
         productIds.push(pdict.contextAUID);
     } else {
         for (var i = 0; i < slotcontent.content.length; i++) {
