@@ -26,6 +26,29 @@ class Variant extends MasterProduct {
             },
             refinementSize: '4',
         };
+
+        this.prices = {
+            'sale-prices-usd': {
+                available: true,
+                currencyCode: 'USD',
+                value: 129,
+            },
+            'list-prices-usd': {
+                available: true,
+                currencyCode: 'USD',
+                value: 132,
+            },
+            'sale-prices-eur': {
+                available: true,
+                currencyCode: 'EUR',
+                value: 92.88,
+            },
+            'list-prices-eur': {
+                available: true,
+                currencyCode: 'EUR',
+                value: 94,
+            }
+        }
     }
 
     getOnlineCategories() {
@@ -34,25 +57,30 @@ class Variant extends MasterProduct {
 
     getPriceModel() {
         const currency = request.getSession().getCurrency();
+        let price;
         switch (currency.currencyCode) {
             case 'USD':
-                return {
-                    price: {
-                        available: true,
-                        currencyCode: 'USD',
-                        value: 129,
-                    },
-                };
+                price = this.prices['sale-prices-usd'];
+                break;
             case 'EUR':
-                return {
-                    price: {
-                        available: true,
-                        currencyCode: 'EUR',
-                        value: 92.88,
-                    },
-                };
+                price = this.prices['sale-prices-eur'];
+                break;
             default:
                 return null;
+        }
+        return {
+            price,
+            getPriceBookPriceInfo: (priceBookID) => {
+                const priceInfo = {
+                    price: this.prices[priceBookID],
+                }
+                if (priceBookID === 'sale-prices-eur') {
+                    priceInfo.onlineFrom = {
+                        getTime: () => 1704067200000,
+                    }
+                }
+                return priceInfo;
+            }
         }
     }
 

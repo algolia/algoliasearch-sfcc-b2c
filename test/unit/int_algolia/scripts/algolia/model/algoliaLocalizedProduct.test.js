@@ -18,10 +18,7 @@ jest.mock('dw/system/Site', () => {
                     return arr;
                 },
                 getAllowedCurrencies: function () {
-                    var arr = [
-                        { currencyCode: 'USD' },
-                        { currencyCode: 'EUR' }
-                    ];
+                    var arr = ['USD', 'EUR'];
                     arr.size = function () {
                         return arr.length;
                     };
@@ -29,11 +26,6 @@ jest.mock('dw/system/Site', () => {
                 }
             };
         }
-    }
-}, {virtual: true});
-jest.mock('dw/util/Currency', () => {
-    return {
-        getCurrency: function (currency) { return currency; }
     }
 }, {virtual: true});
 jest.mock('dw/util/StringUtils', () => {
@@ -317,5 +309,37 @@ describe('algoliaLocalizedProduct', function () {
             name: 'Test name',
         };
         expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: ['price', 'UPC', 'name'], baseModel: baseModel })).toEqual(expectedProductModel);
+    });
+
+    test('pricebooks', function () {
+        const product = new ProductMock();
+        const expected = {
+            objectID: '701644031206M',
+            pricebooks: {
+                USD: [{
+                    price: 132,
+                    pricebookID: 'list-prices-usd',
+                    onlineFrom: undefined,
+                    onlineTo: undefined,
+                }, {
+                    price: 129,
+                    pricebookID: 'sale-prices-usd',
+                    onlineFrom: undefined,
+                    onlineTo: undefined,
+                }],
+                EUR: [{
+                    price: 94,
+                    pricebookID: 'list-prices-eur',
+                    onlineFrom: undefined,
+                    onlineTo: undefined,
+                }, {
+                    price: 92.88,
+                    pricebookID: 'sale-prices-eur',
+                    onlineFrom: 1704067200000,
+                    onlineTo: undefined,
+                }],
+            },
+        };
+        expect(new AlgoliaLocalizedProduct({ product: product, attributeList: ['pricebooks'] })).toEqual(expected);
     });
 });

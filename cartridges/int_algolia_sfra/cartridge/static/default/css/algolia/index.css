@@ -38,3 +38,11 @@
 .auc-Recommend {
     margin: 0 5% 0 5%;
 }
+
+.ais-SearchBox-reset {
+    position: absolute;
+    border: none;
+    top: 0.5625em;
+    right: 0.5625em;
+    padding: 0 1em;
+}

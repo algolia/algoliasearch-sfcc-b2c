@@ -38,6 +38,7 @@ function enableInstantSearch(config) {
         indexName: productsIndex,
         searchClient: config.searchClient,
         initialUiState: initialUiState,
+        routing: true,
     });
 
     if (algoliaData.enableInsights) {
@@ -74,8 +75,11 @@ function enableInstantSearch(config) {
             instantsearch.widgets.searchBox({
                 container: '#algolia-searchbox-placeholder',
                 cssClasses: {
-                    root: 'd-none'
-                }
+                    root: 'refinement',
+                    input: 'form-control',
+                },
+                placeholder: algoliaData.strings.placeholder,
+                showSubmit: false,
             }),
             instantsearch.widgets.stats({
                 container: '#algolia-stats-placeholder',
@@ -308,6 +312,30 @@ function enableInstantSearch(config) {
                         // price in user currency
                         if (item.price && item.price[algoliaData.currencyCode] !== null) {
                             item.price = item.price[algoliaData.currencyCode]
+                        }
+
+                        // If no promotionalPrice, use the pricebooks to display the strikeout price
+                        if (!item.promotionalPrice &&
+                            item.pricebooks &&
+                            item.pricebooks[algoliaData.currencyCode] &&
+                            item.pricebooks[algoliaData.currencyCode].length > 0
+                        ) {
+                            const prices = item.pricebooks[algoliaData.currencyCode].filter(pricebook => {
+                                if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
+                                    return false;
+                                }
+                                if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
+                                    return false;
+                                }
+                                return true;
+                            }).map(pricebook => pricebook.price);
+                            const maxPrice = prices.reduce((acc, currentValue) => {
+                                return Math.max(acc, currentValue);
+                            });
+                            if (maxPrice > item.price) {
+                                item.promotionalPrice = item.price;
+                                item.price = maxPrice;
+                            }
                         }
 
                         // currency symbol
