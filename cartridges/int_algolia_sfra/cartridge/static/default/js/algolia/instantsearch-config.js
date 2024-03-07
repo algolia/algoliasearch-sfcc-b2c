@@ -18,7 +18,7 @@ function enableInstantSearch(config) {
     var hierarchicalMenuValue = {};
     if (config.categoryDisplayNamePath && config.categoryDisplayNamePath.indexOf('New Arrivals') > -1) {
         hierarchicalMenuValue = {
-            "CATEGORIES_NEW_ARRIVALS.level_0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
+            "newArrivalsCategory.0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
         }
     } else {
         hierarchicalMenuValue = {
@@ -38,6 +38,7 @@ function enableInstantSearch(config) {
         indexName: productsIndex,
         searchClient: config.searchClient,
         initialUiState: initialUiState,
+        routing: true,
     });
 
     if (algoliaData.enableInsights) {
@@ -74,8 +75,11 @@ function enableInstantSearch(config) {
             instantsearch.widgets.searchBox({
                 container: '#algolia-searchbox-placeholder',
                 cssClasses: {
-                    root: 'd-none'
-                }
+                    root: 'refinement',
+                    input: 'form-control',
+                },
+                placeholder: algoliaData.strings.placeholder,
+                showSubmit: false,
             }),
             instantsearch.widgets.stats({
                 container: '#algolia-stats-placeholder',
@@ -137,7 +141,7 @@ function enableInstantSearch(config) {
 
             hierarchicalMenuWithPanel({
                 container: '#algolia-newarrivals-list-placeholder',
-                attributes: ['CATEGORIES_NEW_ARRIVALS.level_0', 'CATEGORIES_NEW_ARRIVALS.level_1'],
+                attributes: ['newArrivalsCategory.0', 'newArrivalsCategory.1'],
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -310,6 +314,30 @@ function enableInstantSearch(config) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
 
+                        // If no promotionalPrice, use the pricebooks to display the strikeout price
+                        if (!item.promotionalPrice &&
+                            item.pricebooks &&
+                            item.pricebooks[algoliaData.currencyCode] &&
+                            item.pricebooks[algoliaData.currencyCode].length > 0
+                        ) {
+                            const prices = item.pricebooks[algoliaData.currencyCode].filter(pricebook => {
+                                if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
+                                    return false;
+                                }
+                                if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
+                                    return false;
+                                }
+                                return true;
+                            }).map(pricebook => pricebook.price);
+                            const maxPrice = prices.reduce((acc, currentValue) => {
+                                return Math.max(acc, currentValue);
+                            });
+                            if (maxPrice > item.price) {
+                                item.promotionalPrice = item.price;
+                                item.price = maxPrice;
+                            }
+                        }
+
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
 
@@ -472,6 +500,13 @@ function enableInstantSearch(config) {
     }
 
     search.start();
+
+    search.on('render', function () {
+        var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
+        $(emptyFacetSelector).each(function () {
+            $(this).parents().eq(2).hide();
+        });
+    });
 
     /**
      * Generates a menu with the Panel widget

@@ -71,7 +71,7 @@
                 <iscomment> Algolia_SearchApiKey </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" /><span class="red b">
+                        <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" />
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.searchkey.help', 'algolia', null)}</div>
                     </td>
