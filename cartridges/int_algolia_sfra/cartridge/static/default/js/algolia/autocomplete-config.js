@@ -26,13 +26,11 @@ function enableAutocomplete(config) {
             },
             placeholder: algoliaData.strings.placeholder,
             getSources(query) {
-                let sources = getTrendingItemsArray();
+                return getTrendingItemsArray().then((trendingItems) => {
+                    let sources = trendingItems;
 
-                if (query && query.query) {
-                    sources.push(...getSourcesArray(config));
-                }
-
-                return sources;
+                    return getSourcesArray(config);
+                });
             },
             // If insights is not enabled in the BM, let the value undefined, to rely on the Dashboard setting
             insights: algoliaData.enableInsights ? true : undefined,
@@ -106,20 +104,29 @@ function fetchTrendingItems(RecommendConfig) {
 /**
  * @description Get Trending items array for autocomplete
  * @param {Object} config configuration object
- * @returns {Array} sources array
+ * @returns {Promise} Promise that resolves with the trending items array
  */
 function getTrendingItemsArray() {
-
-    var sourcesArray = [];
-
     if (trendingItemsArr.length === 0) {
         const RecommendConfig = {
             productsIndex: algoliaData.productsIndex,
-            maxRecommendations: 5,
+            maxRecommendations: 3,
             recommendClient: recommendClient,
         };
-        fetchTrendingItems(RecommendConfig);
+        return fetchTrendingItems(RecommendConfig);
     }
+
+    return Promise.resolve(trendingItemsArr);
+}
+
+/**
+ * @description Get sources array for autocomplete
+ * @param {Object} config configuration object
+ * @returns {Array} sources array
+ */
+function getSourcesArray(config) {
+
+    var sourcesArray = [];
 
     sourcesArray.push({
         sourceId: 'trendingProducts',
@@ -150,23 +157,15 @@ function getTrendingItemsArray() {
         },
     });
 
-    return sourcesArray;
-}
-
-/**
- * @description Get sources array for autocomplete
- * @param {Object} config configuration object
- * @returns {Array} sources array
- */
-function getSourcesArray(config) {
-
-    var sourcesArray = [];
 
     sourcesArray.push({
         sourceId: 'products',
         getItems({
             query
-        }) { // eslint-disable-line no-shadow
+        }) {
+            if (!query) {
+                return [];
+            }
             return getAlgoliaResults({
                 searchClient: config.searchClient,
                 queries: [{
@@ -225,7 +224,10 @@ function getSourcesArray(config) {
         sourceId: 'categories',
         getItems({
             query
-        }) { // eslint-disable-line no-shadow
+        }) {
+            if (!query) {
+                return [];
+            }
             return getAlgoliaResults({
                 searchClient: config.searchClient,
                 queries: [{
@@ -273,7 +275,10 @@ function getSourcesArray(config) {
             sourceId: 'contents',
             getItems({
                 query
-            }) { // eslint-disable-line no-shadow
+            }) {
+                if (!query) {
+                    return [];
+                }
                 return getAlgoliaResults({
                     searchClient: config.searchClient,
                     queries: [{
