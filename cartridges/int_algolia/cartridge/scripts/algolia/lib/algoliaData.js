@@ -47,6 +47,8 @@ const clientSideData = {
         "categories": Resource.msg('search.suggest.categories','algolia',null),
         "content": Resource.msg('search.suggest.content','algolia',null),
         "trending": Resource.msg('search.suggest.trending','algolia',null),
+        "relatedContent": Resource.msg('recommendation.related.content','algolia',null),
+        "relatedProducts": Resource.msg('recommendation.related.products','algolia',null),
         "articles": Resource.msg('tab.nav.search.artclesresults', 'search', null),
         "priceFilter": {
             "separator": Resource.msg('search.pricefilter.separator','algolia',null),

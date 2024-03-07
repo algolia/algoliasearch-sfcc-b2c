@@ -30,3 +30,11 @@
     flex-wrap: no-wrap;
     justify-content: space-between;
 }
+
+#similarContents .auc-Recommend-list {
+    display: block;
+}
+
+.auc-Recommend {
+    margin: 0 5% 0 5%;
+}

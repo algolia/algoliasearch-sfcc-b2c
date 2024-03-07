@@ -18,6 +18,11 @@ function enableRecommendations(config) {
         containerId: 'trendingItems',
         recommendClient: config.recommendClient
     });
+    createRecommendationWidget({
+        type: 'similarContents',
+        containerId: 'similarContents',
+        recommendClient: config.recommendClient
+    });
 }
 
 /**
@@ -40,6 +45,7 @@ function createRecommendationWidget(options) {
         recommendClient,
         indexName,
         objectIDs,
+        maxRecommendations: 5,
         itemComponent: ({ item, html }) => itemComponent({ item, html })
     };
 
@@ -47,7 +53,54 @@ function createRecommendationWidget(options) {
         frequentlyBoughtTogether(widgetOptions);
     } else if (type === 'trendingItems') {
         trendingItems(widgetOptions);
+    } else if (type === 'similarContents') {
+        widgetOptions.indexName = algoliaData.contentsIndex;
+        widgetOptions.itemComponent = ({ item, html }) => contentComponent({ item, html });
+        relatedProducts(widgetOptions);
+        const observerConfig = {
+            containerId,
+            type: 'childList',
+            observationTarget: '.auc-Recommend-title',
+            observationText: algoliaData.strings.relatedProducts,
+            observationReplacement: algoliaData.strings.relatedContent
+        }
+        widgetObserver(observerConfig);
     }
+}
+
+/**
+ * Widget observer for modifiying the widgets default appearance
+ * @param {Object} observerConfig - Configuration object
+ * @returns {void}
+ */
+function widgetObserver(observerConfig) {
+    // Select the element you want to observe for mutations
+    const targetNode = document.getElementById(observerConfig.containerId);
+
+    // Options for the observer (which mutations to observe)
+    const config = {
+        attributes: true,
+        childList: true,
+        subtree: true
+    };
+
+    // Callback function to execute when mutations are observed
+    const callback = function (mutationsList, observer) {
+        for (const mutation of mutationsList) {
+            if (mutation.type === observerConfig.type) {
+                const widgetTitle = targetNode.querySelector(observerConfig.observationTarget);
+                if (widgetTitle && widgetTitle.textContent === observerConfig.observationText) {
+                    widgetTitle.textContent = observerConfig.observationReplacement;
+                }
+            }
+        }
+    };
+
+    // Create an instance of MutationObserver with the callback
+    const observer = new MutationObserver(callback);
+
+    // Start observing the target node for configured mutations
+    observer.observe(targetNode, config);
 }
 
 /**
@@ -58,11 +111,36 @@ function createRecommendationWidget(options) {
 function getObjectIds(container) {
     try {
         const objectIDs = container.getAttribute('data-object-ids');
-        return JSON.parse(objectIDs);
+        dataObjectIds = objectIDs.replace(/'/g, '"');
+        return JSON.parse(dataObjectIds);
     } catch (e) {
         console.error('Parsing error on objectIDs:', e);
         return null;
     }
+}
+
+/**
+ * Content component used in content widgets
+ * @param {Object} param0 - Item and HTML from Algolia widget
+ * @returns {string} HTML string
+ */
+function contentComponent({ item, html }) {
+
+    return html`
+        <a href="${item.url}" alt="${item.name}" title="${item.name}">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header clearfix">
+                            <h4><a href="${item.url}">${item.name}</a></h4>
+                        </div>
+                        <div class="card-body card-info-group">
+                            ${item.description}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </a>`;
 }
 
 /**
