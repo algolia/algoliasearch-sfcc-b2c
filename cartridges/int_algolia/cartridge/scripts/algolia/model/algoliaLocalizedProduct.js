@@ -310,7 +310,7 @@ var aggregatedValueHandlers = {
 /**
  * AlgoliaLocalizedProduct class that represents a localized algoliaProduct ready to be indexed
  * @param {Object} parameters - model parameters
- * @param {dw.order.Product} parameters.product - Product
+ * @param {dw.catalog.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
  * @param {Array} parameters.attributeList list of attributes to be fetched
  * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
