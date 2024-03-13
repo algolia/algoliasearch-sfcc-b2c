@@ -2,6 +2,7 @@
 
 var recommendClient;
 const trendingItemsArr = [];
+const maxRecommendations = 3;
 
 /**
  * Enables autocomplete
@@ -83,7 +84,6 @@ function mapHitToTrendingItem(hit) {
 function fetchTrendingItems(RecommendConfig) {
     return new Promise((resolve, reject) => {
         const indexName = RecommendConfig.productsIndex;
-        const maxRecommendations = RecommendConfig.maxRecommendations;
 
         recommendClient.getTrendingItems([{
             indexName,
@@ -110,7 +110,6 @@ function getTrendingItemsArray() {
     if (trendingItemsArr.length === 0) {
         const RecommendConfig = {
             productsIndex: algoliaData.productsIndex,
-            maxRecommendations: 3,
             recommendClient: recommendClient,
         };
         return fetchTrendingItems(RecommendConfig);
@@ -193,7 +192,7 @@ function getSourcesArray(config) {
     sourcesArray.push({
         sourceId: 'trendingProducts',
         getItems() {
-            return trendingItemsArr;
+            return trendingItemsArr.slice(0, maxRecommendations);
         },
         templates: {
             header({
