@@ -8,6 +8,10 @@ const { frequentlyBoughtTogether, relatedProducts, trendingItems, trendingFacets
  * @returns {void}
  */
 function enableRecommendations(config) {
+    var categoryHierarchy = config.categoryDisplayNamePath;
+    var categoryArray = categoryHierarchy.split(config.categoryDisplayNamePathSeparator);
+    var categoryHierarchy = categoryArray.join(' > ');
+    var categoryDepth = categoryArray.length - 1;
     createRecommendationWidget({
         type: 'frequentlyBoughtTogether',
         containerId: 'frequentlyBoughtTogether',
@@ -16,11 +20,18 @@ function enableRecommendations(config) {
     createRecommendationWidget({
         type: 'trendingItems',
         containerId: 'trendingItems',
-        recommendClient: config.recommendClient
+        recommendClient: config.recommendClient,
+        facetName: '__primary_category.' + categoryDepth,
+        facetValue: categoryHierarchy
     });
     createRecommendationWidget({
         type: 'similarContents',
         containerId: 'similarContents',
+        recommendClient: config.recommendClient
+    });
+    createRecommendationWidget({
+        type: 'relatedProducts',
+        containerId: 'relatedProducts',
         recommendClient: config.recommendClient
     });
 }
@@ -31,27 +42,33 @@ function enableRecommendations(config) {
  * @returns {void}
  */
 function createRecommendationWidget(options) {
-    const { type, containerId, recommendClient } = options;
+    const { type, containerId, recommendClient, facetName, facetValue } = options;
     const container = document.getElementById(containerId);
     if (!container) return;
 
     const indexName = algoliaData.productsIndex;
     const objectIDs = getObjectIds(container);
 
-    if (type == 'frequentlyBoughtTogether' && !objectIDs) return;
+    if (type === 'frequentlyBoughtTogether' && !objectIDs) return;
+
+    if (type === 'relatedProducts' && !objectIDs) return;
 
     const widgetOptions = {
         container: `#${containerId}`,
         recommendClient,
         indexName,
         objectIDs,
-        maxRecommendations: 5,
+        maxRecommendations: 4,
         itemComponent: ({ item, html }) => itemComponent({ item, html })
     };
 
     if (type === 'frequentlyBoughtTogether') {
         frequentlyBoughtTogether(widgetOptions);
     } else if (type === 'trendingItems') {
+        if (facetValue && facetValue !== '' && facetValue !== ' > ') {
+            widgetOptions.facetName = facetName;
+            widgetOptions.facetValue = facetValue;
+        }
         trendingItems(widgetOptions);
     } else if (type === 'similarContents') {
         widgetOptions.indexName = algoliaData.contentsIndex;
@@ -65,6 +82,8 @@ function createRecommendationWidget(options) {
             observationReplacement: algoliaData.strings.relatedContent
         }
         widgetObserver(observerConfig);
+    } else if (type === 'relatedProducts') {
+        relatedProducts(widgetOptions);
     }
 }
 
@@ -111,6 +130,7 @@ function widgetObserver(observerConfig) {
 function getObjectIds(container) {
     try {
         const objectIDs = container.getAttribute('data-object-ids');
+        if (!objectIDs) return null;
         dataObjectIds = objectIDs.replace(/'/g, '"');
         return JSON.parse(dataObjectIds);
     } catch (e) {

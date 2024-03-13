@@ -16,20 +16,24 @@ document.addEventListener('DOMContentLoaded', function () {
     recommendClient.addAlgoliaAgent('Algolia Salesforce B2C (SFRA)', 'v' + algoliaData.version);
 
     enableAutocomplete({
-        searchClient: searchClient,
-        searchPageRoot: searchPageRoot,
-        recommendClient: recommendClient,
+        searchClient,
+        searchPageRoot,
+        recommendClient,
     });
 
     // FIXME: only enable on search and category page
     enableInstantSearch({
-        searchClient: searchClient,
-        urlQuery: urlQuery,
-        categoryDisplayNamePath: categoryDisplayNamePath,
-        categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
+        searchClient,
+        urlQuery,
+        categoryDisplayNamePath,
+        categoryDisplayNamePathSeparator,
     });
 
-    enableRecommendations({recommendClient});
+    enableRecommendations({
+        recommendClient,
+        categoryDisplayNamePath,
+        categoryDisplayNamePathSeparator,
+    });
 
     if (algoliaData.enableInsights) {
         enableInsights(algoliaData.applicationID, algoliaData.searchApiKey, algoliaData.productsIndex);

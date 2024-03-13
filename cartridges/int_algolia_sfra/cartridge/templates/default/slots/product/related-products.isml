@@ -14,4 +14,4 @@
     delete session.privacy.algoliaProducts;
 </isscript>
 
-<div class="row" id="frequentlyBoughtTogether" data-object-ids="${productIdsString}"></div>
+<div class="row" id="relatedProducts" data-object-ids="${productIdsString}"></div>

@@ -129,36 +129,6 @@ function getSourcesArray(config) {
     var sourcesArray = [];
 
     sourcesArray.push({
-        sourceId: 'trendingProducts',
-        getItems() {
-            return trendingItemsArr;
-        },
-        templates: {
-            header({
-                html
-            }) {
-                return html `
-                        <div class="header row justify-content-end">
-                            <div class="col-xs-12 col-sm-10">${algoliaData.strings.trending}</div>
-                        </div>`;
-            },
-            item({
-                item,
-                components,
-                html,
-            }) {
-                var a = item;
-                return html `
-                        <div class="text-truncate text-nowrap">
-                            <img class="swatch-circle hidden-xs-down" src=${item.disBaseLink}></img>
-                            <a href=${item.url}>${item.label}</a>
-                        </div>`;
-            },
-        },
-    });
-
-
-    sourcesArray.push({
         sourceId: 'products',
         getItems({
             query
@@ -215,6 +185,35 @@ function getSourcesArray(config) {
                         <div class="text-truncate text-nowrap">
                             <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
                             <a href="${newURL.href}">${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
+                        </div>`;
+            },
+        },
+    });
+
+    sourcesArray.push({
+        sourceId: 'trendingProducts',
+        getItems() {
+            return trendingItemsArr;
+        },
+        templates: {
+            header({
+                html
+            }) {
+                return html `
+                        <div class="header row justify-content-end">
+                            <div class="col-xs-12 col-sm-10">${algoliaData.strings.trending}</div>
+                        </div>`;
+            },
+            item({
+                item,
+                components,
+                html,
+            }) {
+                var a = item;
+                return html `
+                        <div class="text-truncate text-nowrap">
+                            <img class="swatch-circle hidden-xs-down" src=${item.disBaseLink}></img>
+                            <a href=${item.url}>${item.label}</a>
                         </div>`;
             },
         },
