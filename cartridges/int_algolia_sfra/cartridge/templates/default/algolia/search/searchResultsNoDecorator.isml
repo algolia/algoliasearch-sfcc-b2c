@@ -25,12 +25,6 @@
     <isslot id="search-result-banner-m" description="Banner for search results" context="global" />
 </isif>
 
-<div class="container">
-    <isslot id="algolia-trending-products-clp" description="Algolia Trending Products" context="global" />
-</div>
-
-<hr class="mt-0"/>
-
 <div class="container search-results">
     <div class="row search-nav">
         <isif condition="${!pdict.category}">
