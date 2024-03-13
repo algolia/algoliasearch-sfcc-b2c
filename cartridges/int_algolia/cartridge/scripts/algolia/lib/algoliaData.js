@@ -326,11 +326,6 @@ function csvStringToArray(string, separator) {
     }
 }
 
-
-function test() {
-    return 'algoliaData';
-}
-
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
@@ -350,5 +345,4 @@ module.exports = {
     csvStringToArray: csvStringToArray,
     CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR,
     clientSideData: clientSideData,
-    test: test
 };
