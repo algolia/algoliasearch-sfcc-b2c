@@ -27,9 +27,7 @@ function enableAutocomplete(config) {
             },
             placeholder: algoliaData.strings.placeholder,
             getSources(query) {
-                return getTrendingItemsArray().then((trendingItems) => {
-                    let sources = trendingItems;
-
+                return getTrendingItemsArray().then(() => {
                     return getSourcesArray(config);
                 });
             },
@@ -107,6 +105,10 @@ function fetchTrendingItems(RecommendConfig) {
  * @returns {Promise} Promise that resolves with the trending items array
  */
 function getTrendingItemsArray() {
+    if (algoliaData.enableRecommend === false) {
+        return Promise.resolve([]);
+    }
+
     if (trendingItemsArr.length === 0) {
         const RecommendConfig = {
             productsIndex: algoliaData.productsIndex,

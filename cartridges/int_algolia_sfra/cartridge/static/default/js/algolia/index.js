@@ -29,11 +29,13 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryDisplayNamePathSeparator,
     });
 
-    enableRecommendations({
-        recommendClient,
-        categoryDisplayNamePath,
-        categoryDisplayNamePathSeparator,
-    });
+    if (algoliaData.enableRecommend) {
+        enableRecommendations({
+            recommendClient,
+            categoryDisplayNamePath,
+            categoryDisplayNamePathSeparator,
+        });
+    }
 
     if (algoliaData.enableInsights) {
         enableInsights(algoliaData.applicationID, algoliaData.searchApiKey, algoliaData.productsIndex);

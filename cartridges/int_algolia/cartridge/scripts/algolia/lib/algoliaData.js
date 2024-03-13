@@ -20,6 +20,7 @@ const clientSideData = {
     "applicationID": getPreference('ApplicationID'),
     "searchApiKey": getPreference('SearchApiKey'),
     "enableContentSearch": getPreference('EnableContentSearch'),
+    "enableRecommend": getPreference('EnableRecommend'),
     "locale": request.getLocale(),
     "currencyCode": request.getSession().getCurrency().getCurrencyCode(),
     "currencySymbol": request.getSession().getCurrency().getSymbol(),
@@ -77,6 +78,7 @@ const clientSideData = {
 //   EnableInsights               ║ Enables insights events on the Storefront               ║ Boolean
 //   EnableSSR                    ║ Enables server-side rendering of CLP results on SFRA    ║ Boolean
 //   EnableContentSearch          ║ Enable/disable Algolia Content Search                   ║ Boolean
+//   EnableRecommend              ║ Enable/disable Algolia Recommends                       ║ Boolean
 //  ══════════════════════════════╩═════════════════════════════════════════════════════════╩════════════════════
 //  Preferences stored in the XML file
 //
@@ -324,6 +326,11 @@ function csvStringToArray(string, separator) {
     }
 }
 
+
+function test() {
+    return 'algoliaData';
+}
+
 module.exports = {
     getPreference: getPreference,
     setPreference: setPreference,
@@ -343,4 +350,5 @@ module.exports = {
     csvStringToArray: csvStringToArray,
     CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR,
     clientSideData: clientSideData,
+    test: test
 };
