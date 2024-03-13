@@ -12,6 +12,7 @@ function enableRecommendations(config) {
     var categoryArray = categoryHierarchy.split(config.categoryDisplayNamePathSeparator);
     var categoryHierarchy = categoryArray.join(' > ');
     var categoryDepth = categoryArray.length - 1;
+
     createRecommendationWidget({
         type: 'frequentlyBoughtTogether',
         containerId: 'frequentlyBoughtTogether',
