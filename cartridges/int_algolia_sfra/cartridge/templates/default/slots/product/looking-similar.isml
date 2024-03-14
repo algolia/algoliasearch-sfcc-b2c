@@ -1,0 +1,17 @@
+<isscript>
+    productIds = [];
+    var productIdsString = "";
+
+    if (session.privacy.algoliaAnchorProducts) {
+        productIdsString = session.privacy.algoliaAnchorProducts;
+    } else {
+        for (var i = 0; i < slotcontent.content.length; i++) {
+            var product = slotcontent.content[i];
+            productIds.push(product.ID);
+        }
+        productIdsString = productIds.join(',');
+    }
+    delete session.privacy.algoliaProducts;
+</isscript>
+
+<div class="row" id="lookingSimilar" data-object-ids="${productIdsString}"></div>

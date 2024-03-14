@@ -220,6 +220,9 @@ var attributeConfig_v2 = {
     image_groups: {
         localized: true
     },
+    ls_image: {
+        localized: false
+    },
     in_stock: {
         localized: false
     },

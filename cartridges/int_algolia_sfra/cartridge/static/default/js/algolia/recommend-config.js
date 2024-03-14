@@ -1,6 +1,6 @@
 /* global instantsearch */
 
-const { frequentlyBoughtTogether, relatedProducts, trendingItems, trendingFacets } = window['@algolia/recommend-js'];
+const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
 
 /**
  * Enable recommendations
@@ -35,6 +35,11 @@ function enableRecommendations(config) {
         containerId: 'relatedProducts',
         recommendClient: config.recommendClient
     });
+    createRecommendationWidget({
+        type: 'lookingSimilar',
+        containerId: 'lookingSimilar',
+        recommendClient: config.recommendClient
+    });
 }
 
 /**
@@ -53,6 +58,8 @@ function createRecommendationWidget(options) {
     if (type === 'frequentlyBoughtTogether' && !objectIDs) return;
 
     if (type === 'relatedProducts' && !objectIDs) return;
+
+    if (type === 'lookingSimilar' && !objectIDs) return;
 
     const widgetOptions = {
         container: `#${containerId}`,
@@ -85,6 +92,8 @@ function createRecommendationWidget(options) {
         widgetObserver(observerConfig);
     } else if (type === 'relatedProducts') {
         relatedProducts(widgetOptions);
+    } else if (type === 'lookingSimilar') {
+        lookingSimilar(widgetOptions);
     }
 }
 
