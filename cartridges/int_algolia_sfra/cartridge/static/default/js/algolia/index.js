@@ -1,5 +1,4 @@
 /* global algoliasearch */
-const algoliarecommend = window['@algolia/recommend'];
 
 document.addEventListener('DOMContentLoaded', function () {
     var $suggestionsWrapper = $('#suggestions-wrapper');
@@ -12,8 +11,19 @@ document.addEventListener('DOMContentLoaded', function () {
     var searchClient = algoliasearch(algoliaData.applicationID, algoliaData.searchApiKey);
     searchClient.addAlgoliaAgent('Algolia Salesforce B2C (SFRA)', 'v' + algoliaData.version);
 
-    const recommendClient = algoliarecommend(algoliaData.applicationID, algoliaData.searchApiKey);
-    recommendClient.addAlgoliaAgent('Algolia Salesforce B2C (SFRA)', 'v' + algoliaData.version);
+    var recommendClient = null;
+
+    if (algoliaData.enableRecommend) {
+        const algoliarecommend = window['@algolia/recommend'];
+        recommendClient = algoliarecommend(algoliaData.applicationID, algoliaData.searchApiKey);
+        recommendClient.addAlgoliaAgent('Algolia Salesforce B2C (SFRA)', 'v' + algoliaData.version);
+
+        enableRecommendations({
+            recommendClient,
+            categoryDisplayNamePath,
+            categoryDisplayNamePathSeparator,
+        });
+    }
 
     enableAutocomplete({
         searchClient,
@@ -28,14 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryDisplayNamePath,
         categoryDisplayNamePathSeparator,
     });
-
-    if (algoliaData.enableRecommend) {
-        enableRecommendations({
-            recommendClient,
-            categoryDisplayNamePath,
-            categoryDisplayNamePathSeparator,
-        });
-    }
 
     if (algoliaData.enableInsights) {
         enableInsights(algoliaData.applicationID, algoliaData.searchApiKey, algoliaData.productsIndex);

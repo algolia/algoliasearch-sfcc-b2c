@@ -26,9 +26,15 @@ function enableAutocomplete(config) {
                 panel: "algolia-autocomplete suggestions p-2 d-block",
             },
             placeholder: algoliaData.strings.placeholder,
-            getSources(query) {
-                return getTrendingItemsArray().then(() => {
-                    return getSourcesArray(config);
+            getSources() {
+                const trendingItemsPromise = getTrendingItemsArray();
+
+                // Immediately return other sources that do not depend on trending items
+                const sources = getSourcesArray(config);
+            
+                // Combine all sources with the trending items once they are fetched
+                return Promise.all([trendingItemsPromise]).then(([trendingItems]) => {
+                    return sources;
                 });
             },
             // If insights is not enabled in the BM, let the value undefined, to rely on the Dashboard setting
