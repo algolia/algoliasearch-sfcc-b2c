@@ -3,7 +3,7 @@ const VariantMock = require("../../../../../mocks/dw/catalog/Variant");
 const collectionHelper = require("../../../../../mocks/helpers/collectionHelper");
 const jobHelper = require("../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper");
 
-test('generateVariantRecordsWithColorVariations', () => {
+test('generateVariantRecords', () => {
     // master product with two size variations on the same color variation
     const masterProduct = new MasterProductMock();
     const variantPinkSize4 = new VariantMock({
@@ -21,10 +21,10 @@ test('generateVariantRecordsWithColorVariations', () => {
         variantPinkSize6,
     ]);
 
-    const variantRecords = jobHelper.generateVariantRecordsWithColorVariations({
+    const variantRecords = jobHelper.generateVariantRecords({
         masterProduct,
         locales: collectionHelper.createCollection(['fr']),
-        attributeList: ['name', 'primary_category_id', 'categories', 'in_stock', 'price', 'url'],
+        attributeList: ['name', 'primary_category_id', 'categories', 'in_stock', 'price', 'url', 'colorVariations'],
         nonLocalizedAttributes: [],
     });
     expect(variantRecords).toMatchSnapshot();

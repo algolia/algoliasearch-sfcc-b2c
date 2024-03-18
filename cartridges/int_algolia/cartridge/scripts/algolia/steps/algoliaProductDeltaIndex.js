@@ -313,7 +313,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
                 if (paramRecordModel !== MASTER_LEVEL) {
                     // Variant-level indexing
-                    var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
+                    var recordsPerLocale = jobHelper.generateVariantRecords({
                         masterProduct: product,
                         locales: siteLocales,
                         attributeList: attributesToSend,

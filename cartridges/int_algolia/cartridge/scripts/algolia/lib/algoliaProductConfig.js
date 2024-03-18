@@ -217,6 +217,9 @@ var attributeConfig_v2 = {
     color: {
         localized: true
     },
+    colorVariations: {
+        localized: true,
+    },
     image_groups: {
         localized: true
     },

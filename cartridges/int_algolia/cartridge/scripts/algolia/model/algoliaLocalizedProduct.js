@@ -177,7 +177,11 @@ var aggregatedValueHandlers = {
         if (product.isMaster() || product.isVariationGroup()) {
             return modelHelper.getColorVariations(product);
         }
-        return null;
+        const masterProduct = product.getVariationModel().master;
+        if (!masterProduct) {
+            return null;
+        }
+        return modelHelper.getColorVariations(masterProduct);
     },
     size: function (product) {
         var variationModel = product.getVariationModel();

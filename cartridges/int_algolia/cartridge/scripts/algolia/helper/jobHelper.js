@@ -596,19 +596,15 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
  * @param {Array} parameters.fullRecordUpdate - specify if the generated records are mean to replace entirely the existing ones
  * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
  */
-function generateVariantRecordsWithColorVariations(parameters) {
+function generateVariantRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
-    const modelHelper = require('./modelHelper');
 
     const algoliaRecordsPerLocale = {};
     const variants = parameters.masterProduct.getVariants();
 
-    // Fetch colorVariations for each locale, to set them in each variant
-    var colorVariationsPerLocale = {};
     for (let l = 0; l < parameters.locales.size(); ++l) {
         var locale = parameters.locales[l];
-        colorVariationsPerLocale[locale] = modelHelper.getColorVariations(parameters.masterProduct, locale);
         algoliaRecordsPerLocale[locale] = [];
     }
     for (let v = 0; v < variants.size(); ++v) {
@@ -631,7 +627,6 @@ function generateVariantRecordsWithColorVariations(parameters) {
                 baseModel: baseModel,
                 fullRecordUpdate: parameters.fullRecordUpdate,
             });
-            localizedVariant.colorVariations = colorVariationsPerLocale[locale];
             algoliaRecordsPerLocale[locale].push(localizedVariant);
         }
     }
@@ -658,7 +653,7 @@ module.exports = {
     writeObjectToXMLStream: writeObjectToXMLStream,
     getNextProductModel: getNextProductModel,
 
-    generateVariantRecordsWithColorVariations: generateVariantRecordsWithColorVariations,
+    generateVariantRecords: generateVariantRecords,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,

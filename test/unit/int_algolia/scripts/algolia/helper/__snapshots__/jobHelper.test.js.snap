@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateVariantRecordsWithColorVariations 1`] = `
+exports[`generateVariantRecords 1`] = `
 {
   "fr": [
     algoliaLocalizedProduct {
