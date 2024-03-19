@@ -600,13 +600,14 @@ function generateVariantRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
-    const algoliaRecordsPerLocale = {};
     const variants = parameters.masterProduct.getVariants();
 
+    const algoliaRecordsPerLocale = {};
     for (let l = 0; l < parameters.locales.size(); ++l) {
         var locale = parameters.locales[l];
         algoliaRecordsPerLocale[locale] = [];
     }
+    
     for (let v = 0; v < variants.size(); ++v) {
         var variant = variants[v];
         if (!productFilter.isInclude(variant)) {

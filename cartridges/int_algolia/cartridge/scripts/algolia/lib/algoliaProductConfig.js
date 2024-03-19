@@ -215,7 +215,8 @@ var attributeConfig_v2 = {
         localized: true
     },
     color: {
-        localized: true
+        localized: true,
+        variantAttribute: true,
     },
     colorVariations: {
         localized: true,
@@ -224,28 +225,39 @@ var attributeConfig_v2 = {
         localized: true
     },
     in_stock: {
-        localized: false
+        localized: false,
+        variantAttribute: true,
     },
     masterID: {
         localized: false,
     },
     price: {
-        localized: false
+        localized: false,
+        variantAttribute: true,
     },
     promotionalPrice: {
-        localized: false
+        localized: false,
+        variantAttribute: true,
+    },
+    pricebooks: {
+        localized: false,
+        variantAttribute: true,
     },
     refinementColor: {
-        localized: true
+        localized: true,
+        variantAttribute: true,
     },
     refinementSize: {
-        localized: true
+        localized: true,
+        variantAttribute: true,
     },
     size: {
-        localized: true
+        localized: true,
+        variantAttribute: true,
     },
     url: {
-        localized: true
+        localized: true,
+        variantAttribute: true,
     },
 };
 
