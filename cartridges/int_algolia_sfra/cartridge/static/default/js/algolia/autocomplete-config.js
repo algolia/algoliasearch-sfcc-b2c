@@ -51,6 +51,11 @@ function enableAutocomplete(config) {
             }
         });
 
+        /**
+         * Closes the autocomplete panel if the click is outside the input.
+         * @param {Object} event - The event object.
+         * @returns {void}
+         */
         function onClickOutside(event) {
             if (!inputElement.contains(event.target)) {
                 setIsOpen(false);
