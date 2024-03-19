@@ -111,7 +111,7 @@ function fetchTrendingItems(RecommendConfig) {
  * @returns {Promise} Promise that resolves with the trending items array
  */
 function getTrendingItemsArray() {
-    if (algoliaData.enableRecommend === false) {
+    if (!algoliaData.enableRecommend) {
         return Promise.resolve([]);
     }
 
