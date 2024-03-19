@@ -1,7 +1,7 @@
 /* global autocomplete, getAlgoliaResults, algoliaData  */
 
 var recommendClient;
-const trendingItemsArr = [];
+var trendingItemsArr = [];
 const maxRecommendations = 3;
 
 /**
@@ -105,7 +105,7 @@ function fetchTrendingItems(RecommendConfig) {
             maxRecommendations,
         }]).then(response => {
             const results = response.results[0].hits;
-            const trendingItemsArr = results.map(mapHitToTrendingItem);
+            trendingItemsArr = results.map(mapHitToTrendingItem);
             resolve(trendingItemsArr);
         }).catch(err => {
             console.error('Failed to fetch trending items:', err);
