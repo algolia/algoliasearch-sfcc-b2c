@@ -19,7 +19,9 @@ function enableAutocomplete(config) {
     contentTabPane.hide();
 
     inputElements.forEach(function(inputElement) {
-        autocomplete({
+        const {
+            setIsOpen
+        } = autocomplete({
             container: inputElement,
             classNames: {
                 // d-block permits to force "display: block", because SFCC's main.js script sets our panel to "display: none" when clicking again in the input
@@ -31,7 +33,7 @@ function enableAutocomplete(config) {
 
                 // Immediately return other sources that do not depend on trending items
                 const sources = getSourcesArray(config);
-            
+
                 // Combine all sources with the trending items once they are fetched
                 return Promise.all([trendingItemsPromise]).then(([trendingItems]) => {
                     return sources;
@@ -48,6 +50,17 @@ function enableAutocomplete(config) {
                 window.location.href = config.searchPageRoot + urlParams;
             }
         });
+
+        function onClickOutside(event) {
+            if (!inputElement.contains(event.target)) {
+                setIsOpen(false);
+            }
+        }
+
+        //Listen for click events and close the panel if the click is outside the input 
+        document.addEventListener('click', onClickOutside, true);
+        document.addEventListener('touchstart', onClickOutside, true);
+
 
         //change this code with jquery
         contentSearchbarTab.on('click', function (event) {
@@ -77,6 +90,7 @@ function mapHitToTrendingItem(hit) {
         label: hit.name,
         objectID: hit.objectID,
         disBaseLink: hit.image_groups[0].images[0].dis_base_link,
+        url: hit.url,
     };
 }
 
