@@ -29,15 +29,7 @@ function enableAutocomplete(config) {
             },
             placeholder: algoliaData.strings.placeholder,
             getSources() {
-                const trendingItemsPromise = getTrendingItemsArray();
-
-                // Immediately return other sources that do not depend on trending items
-                const sources = getSourcesArray(config);
-
-                // Combine all sources with the trending items once they are fetched
-                return Promise.all([trendingItemsPromise]).then(([trendingItems]) => {
-                    return sources;
-                });
+                return getSourcesArray(config);
             },
             // If insights is not enabled in the BM, let the value undefined, to rely on the Dashboard setting
             insights: algoliaData.enableInsights ? true : undefined,
@@ -113,8 +105,7 @@ function fetchTrendingItems(RecommendConfig) {
             maxRecommendations,
         }]).then(response => {
             const results = response.results[0].hits;
-            const trendingItemsArrMap = results.map(mapHitToTrendingItem);
-            trendingItemsArr.push(...trendingItemsArrMap);
+            const trendingItemsArr = results.map(mapHitToTrendingItem);
             resolve(trendingItemsArr);
         }).catch(err => {
             console.error('Failed to fetch trending items:', err);
@@ -219,7 +210,7 @@ function getSourcesArray(config) {
     sourcesArray.push({
         sourceId: 'trendingProducts',
         getItems() {
-            return trendingItemsArr.slice(0, maxRecommendations);
+            return getTrendingItemsArray();
         },
         templates: {
             header({

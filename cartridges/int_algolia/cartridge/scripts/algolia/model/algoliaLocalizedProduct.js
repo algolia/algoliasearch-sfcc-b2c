@@ -257,7 +257,7 @@ var aggregatedValueHandlers = {
         return imageGroupsArr.length > 0 ? imageGroupsArr : null;
     },
     // @FIXME: This is a temporary solution to get the first image of the first image group for looking similar model, needs to be improved in the future
-    ls_image: function (product) {
+    lsImage: function (product) {
         var imageGroups = product.getImages('large');
         if (empty(imageGroups)) {
             return null;
