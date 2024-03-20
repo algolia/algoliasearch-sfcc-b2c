@@ -21,6 +21,7 @@ var changedProducts = [], changedProductsIterator;
 var deltaExportZips, siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
 var nonLocalizedAttributes = [], nonLocalizedMasterAttributes = [];
+var attributesComputedFromBaseProduct = [];
 
 var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on the step parameter 'indexingMethod'
 const deleteIndexingOperation = 'deleteObject';
@@ -132,9 +133,13 @@ exports.beforeStep = function(parameters, stepExecution) {
         }
     });
 
-    /* --- non-localized attributes --- */
+    /* --- non-localized/shared attributes --- */
     Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
-        if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized) {
+        if (algoliaProductConfig.attributeConfig_v2[attributeName].computedFromBaseProduct) {
+            if (attributesToSend.indexOf(attributeName) >= 0) {
+                attributesComputedFromBaseProduct.push(attributeName);
+            }
+        } else if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized) {
             if (attributesToSend.indexOf(attributeName) >= 0) {
                 nonLocalizedAttributes.push(attributeName);
             }
@@ -144,6 +149,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         }
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
+    logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
     if (paramRecordModel === MASTER_LEVEL) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
@@ -305,8 +311,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
     let algoliaOperations = [];
 
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
-        if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0 ||
-            paramRecordModel === MASTER_LEVEL) {
+        if (paramRecordModel === MASTER_LEVEL || attributesComputedFromBaseProduct.length > 0) {
             if (product.isVariant()) {
                 // This variant will be indexed when we treat its master product
                 return [];
@@ -321,6 +326,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         locales: siteLocales,
                         attributeList: attributesToSend,
                         nonLocalizedAttributes: nonLocalizedAttributes,
+                        attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
                         fullRecordUpdate: fullRecordUpdate,
                     });
                     for (let l = 0; l < siteLocales.size(); ++l) {
@@ -331,6 +337,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         records.forEach(function(record) {
                             algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
                         });
+                        logger.info('Sending ' + JSON.stringify(algoliaOperations));
                     }
                 } else {
                     // Master-level indexing

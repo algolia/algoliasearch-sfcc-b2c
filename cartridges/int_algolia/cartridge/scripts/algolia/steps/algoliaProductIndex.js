@@ -20,6 +20,7 @@ var jobReport;
 var products = [], siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
 var nonLocalizedAttributes = [], nonLocalizedMasterAttributes = [];
+var attributesComputedFromBaseProduct = [];
 var lastIndexingTasks = {};
 
 const VARIANT_LEVEL = 'variant-level';
@@ -119,11 +120,15 @@ exports.beforeStep = function(parameters, stepExecution) {
         }
     });
 
-    /* --- non-localized attributes --- */
+    /* --- non-localized/shared attributes --- */
     nonLocalizedAttributes = [];
     nonLocalizedMasterAttributes = [];
     Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
-        if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized) {
+        if (algoliaProductConfig.attributeConfig_v2[attributeName].computedFromBaseProduct) {
+            if (attributesToSend.indexOf(attributeName) >= 0) {
+                attributesComputedFromBaseProduct.push(attributeName);
+            }
+        } else if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized) {
             if (attributesToSend.indexOf(attributeName) >= 0) {
                 nonLocalizedAttributes.push(attributeName);
             }
@@ -133,6 +138,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         }
     });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
+    logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
     if (paramRecordModel === MASTER_LEVEL) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
@@ -217,8 +223,7 @@ exports.process = function(product, parameters, stepExecution) {
 
     jobReport.processedItems++; // counts towards the total number of products processed
 
-    if (attributesToSend.indexOf(algoliaProductConfig.COLOR_VARIATIONS_FIELD_NAME) >= 0 ||
-        paramRecordModel === MASTER_LEVEL) {
+    if (paramRecordModel === MASTER_LEVEL || attributesComputedFromBaseProduct.length > 0) {
         if (product.isVariant()) {
             // To generate 'colorVariations' or for master-level indexing, we need to work with the master products.
             // This variant will be indexed when we treat its master product, skip it.
@@ -235,6 +240,7 @@ exports.process = function(product, parameters, stepExecution) {
                     locales: siteLocales,
                     attributeList: attributesToSend,
                     nonLocalizedAttributes: nonLocalizedAttributes,
+                    attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
                     fullRecordUpdate: fullRecordUpdate,
                 });
                 for (let l = 0; l < siteLocales.size(); ++l) {

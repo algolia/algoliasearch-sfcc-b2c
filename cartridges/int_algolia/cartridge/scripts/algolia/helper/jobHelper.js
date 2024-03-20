@@ -593,6 +593,7 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
  * @param {string} parameters.locales - The requested locales
  * @param {Array} parameters.attributeList - list of attributes to be fetched
  * @param {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
+ * @param {Array} parameters.attributesComputedFromBaseProduct - list of attributes computed from the masterProduct and shared in all variants
  * @param {Array} parameters.fullRecordUpdate - specify if the generated records are mean to replace entirely the existing ones
  * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
  */
@@ -600,14 +601,22 @@ function generateVariantRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
+    const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
     const variants = parameters.masterProduct.getVariants();
 
+    // Fetch shared attributes such as 'colorVariations' only once (for each locale), to set them later in each variant
+    const sharedAttributesPerLocale = {};
     const algoliaRecordsPerLocale = {};
     for (let l = 0; l < parameters.locales.size(); ++l) {
         var locale = parameters.locales[l];
+        sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
+            product: parameters.masterProduct,
+            locale: locale,
+            attributeList: attributesComputedFromBaseProduct,
+        });
         algoliaRecordsPerLocale[locale] = [];
     }
-    
+
     for (let v = 0; v < variants.size(); ++v) {
         var variant = variants[v];
         if (!productFilter.isInclude(variant)) {
@@ -621,6 +630,10 @@ function generateVariantRecords(parameters) {
         });
         for (let l = 0; l < parameters.locales.size(); ++l) {
             var locale = parameters.locales[l];
+            // Add shared attributes in the base model
+            attributesComputedFromBaseProduct.forEach(function(sharedAttribute) {
+                baseModel[sharedAttribute] = sharedAttributesPerLocale[locale][sharedAttribute];
+            });
             let localizedVariant = new AlgoliaLocalizedProduct({
                 product: variant,
                 locale: locale,
