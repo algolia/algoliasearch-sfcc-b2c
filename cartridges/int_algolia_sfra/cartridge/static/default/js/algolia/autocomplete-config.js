@@ -93,12 +93,11 @@ function mapHitToTrendingItem(hit) {
 
 /**
  * Fetches and processes trending items.
- * @param {Object} RecommendConfig - The configuration object.
  * @returns {Promise} - The promise object.
  */
-function fetchTrendingItems(RecommendConfig) {
+function fetchTrendingItems() {
     return new Promise((resolve, reject) => {
-        const indexName = RecommendConfig.productsIndex;
+        const indexName = algoliaData.productsIndex;
 
         recommendClient.getTrendingItems([{
             indexName,
@@ -126,11 +125,7 @@ function getTrendingItemsArray() {
     }
 
     if (trendingItemsArr.length === 0) {
-        const RecommendConfig = {
-            productsIndex: algoliaData.productsIndex,
-            recommendClient: recommendClient,
-        };
-        return fetchTrendingItems(RecommendConfig);
+        return fetchTrendingItems();
     }
 
     return Promise.resolve(trendingItemsArr);
