@@ -224,8 +224,9 @@ exports.process = function(product, parameters, stepExecution) {
     jobReport.processedItems++; // counts towards the total number of products processed
 
     if (paramRecordModel === MASTER_LEVEL || attributesComputedFromBaseProduct.length > 0) {
+        // When there are attributes shared in all variants (such as 'colorVariations')
+        // or for master-level indexing, we work with the master products.
         if (product.isVariant()) {
-            // To generate 'colorVariations' or for master-level indexing, we need to work with the master products.
             // This variant will be indexed when we treat its master product, skip it.
             return [];
         }

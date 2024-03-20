@@ -312,6 +312,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
         if (paramRecordModel === MASTER_LEVEL || attributesComputedFromBaseProduct.length > 0) {
+            // When there are attributes shared in all variants (such as 'colorVariations')
+            // or for master-level indexing, we work with the master products.
             if (product.isVariant()) {
                 // This variant will be indexed when we treat its master product
                 return [];
