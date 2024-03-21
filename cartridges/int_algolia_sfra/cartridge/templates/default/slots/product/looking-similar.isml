@@ -11,7 +11,7 @@
         }
         productIdsString = productIds.join(',');
     }
-    delete session.privacy.algoliaProducts;
+    delete session.privacy.algoliaAnchorProducts;
 </isscript>
 
 <div class="row" id="lookingSimilar" data-object-ids="${productIdsString}"></div>
