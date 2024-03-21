@@ -279,7 +279,7 @@ function transformItem(item) {
             });
         });
 
-        // 1. Find the variant matching the selected facets, or use the default variant
+        // 1. Use the default varian
         let selectedVariant;
         if (!selectedVariant) {
             // 1.4 No facets selected, use the default variant

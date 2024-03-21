@@ -1,11 +1,18 @@
 <isscript>
+    var MASTER_LEVEL = 'master-level';
     productIds = [];
     var productIdsString = "";
 
     if (session.privacy.algoliaAnchorProducts) {
         var recommendUtils = require('*/cartridge/scripts/algolia/recommend/utils');
-        recommendUtils.anchorProductSetter();
-        productIdsString = session.privacy.algoliaAnchorProducts;
+        var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+        var recordModel = algoliaData.getPreference('RecordModel');
+        if (recordModel === MASTER_LEVEL) {
+            productIds = recommendUtils.getMasterProductIds(JSON.parse(session.privacy.algoliaAnchorProducts));
+            productIdsString = JSON.stringify(productIds);
+        } else {
+            productIdsString = session.privacy.algoliaAnchorProducts;
+        }
     } else {
         for (var i = 0; i < slotcontent.content.length; i++) {
             var product = slotcontent.content[i];

@@ -3,23 +3,18 @@
 var MASTER_LEVEL = 'master-level';
 
 /**
- * @description Set anchor products for the current session based on the current record model
+ * @description - Get master product IDs for the given product IDs
+ * @param {Array} productIDs - List of product IDs
  * @returns {void}
  */
-function anchorProductSetter() {
+function getMasterProductIds(productIDs) {
+    var masterProductIDs = [];
     var productIds = session.privacy.algoliaAnchorProducts;
     if (!productIds || productIds.length === 0) {
         return;
     }
 
-    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    var recordModel = algoliaData.getPreference('RecordModel');
-    if (recordModel !== MASTER_LEVEL) {
-        return;
-    }
-
     var productMgr = require('dw/catalog/ProductMgr');
-    var algoliaAnchorProducts = [];
 
     productIds = JSON.parse(productIds);
     for (var i = 0; i < productIds.length; i++) {
@@ -27,13 +22,13 @@ function anchorProductSetter() {
         var product = productMgr.getProduct(productId);
         if (product) {
             var masterProduct = product.isVariant() ? product.getMasterProduct() : product;
-            algoliaAnchorProducts.push(masterProduct.ID);
+            masterProductIDs.push(masterProduct.ID);
         }
     }
 
-    session.privacy.algoliaAnchorProducts = JSON.stringify(algoliaAnchorProducts);
+    return masterProductIDs;
 }
 
 module.exports = {
-    anchorProductSetter: anchorProductSetter
+    getMasterProductIds: getMasterProductIds
 };
