@@ -119,12 +119,15 @@ exports.beforeStep = function(parameters, stepExecution) {
 
 
     /* --- master/variant attributes --- */
-    variantAttributes = [];
+    variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
     masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
     attributesToSend.forEach(function(attribute) {
-        if (algoliaProductConfig.defaultVariantAttributes_v2.indexOf(attribute) >= 0) {
-            variantAttributes.push(attribute);
-        } else {
+        if (algoliaProductConfig.attributeConfig_v2[attribute] &&
+            algoliaProductConfig.attributeConfig_v2[attribute].variantAttribute) {
+            if (variantAttributes.indexOf(attribute) < 0) {
+                variantAttributes.push(attribute);
+            }
+        } else if (masterAttributes.indexOf(attribute) < 0) {
             masterAttributes.push(attribute);
         }
     });
@@ -313,7 +316,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
                 if (paramRecordModel !== MASTER_LEVEL) {
                     // Variant-level indexing
-                    var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
+                    var recordsPerLocale = jobHelper.generateVariantRecords({
                         masterProduct: product,
                         locales: siteLocales,
                         attributeList: attributesToSend,
@@ -335,7 +338,13 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     for (let l = 0; l < siteLocales.size(); ++l) {
                         var locale = siteLocales[l];
                         var indexName = algoliaData.calculateIndexName('products', locale);
-                        var localizedMaster = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: masterAttributes, baseModel: baseModel });
+                        var localizedMaster = new AlgoliaLocalizedProduct({
+                            product: product,
+                            locale: locale,
+                            attributeList: masterAttributes,
+                            variantAttributes: variantAttributes,
+                            baseModel: baseModel,
+                        });
                         processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
                         algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
                     }

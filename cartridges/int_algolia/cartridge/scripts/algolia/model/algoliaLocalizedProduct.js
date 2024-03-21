@@ -182,7 +182,11 @@ var aggregatedValueHandlers = {
         if (product.isMaster() || product.isVariationGroup()) {
             return modelHelper.getColorVariations(product);
         }
-        return null;
+        const masterProduct = product.getVariationModel().master;
+        if (!masterProduct) {
+            return null;
+        }
+        return modelHelper.getColorVariations(masterProduct);
     },
     size: function (product) {
         var variationModel = product.getVariationModel();
@@ -286,7 +290,7 @@ var aggregatedValueHandlers = {
         currentSession.setCurrency(currentCurrency);
         return promotionalPrice;
     },
-    variants: function(product) {
+    variants: function(product, parameters) {
         if (!product.isMaster() && !product.isVariationGroup()) {
             return null;
         }
@@ -298,7 +302,7 @@ var aggregatedValueHandlers = {
             var localizedVariant = new algoliaLocalizedProduct({
                 product: variant,
                 locale: request.getLocale(),
-                attributeList: algoliaProductConfig.defaultVariantAttributes_v2,
+                attributeList: parameters.variantAttributes,
                 isVariant: true,
             });
             variants.push(localizedVariant);
@@ -313,6 +317,7 @@ var aggregatedValueHandlers = {
  * @param {dw.catalog.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
  * @param {Array} parameters.attributeList list of attributes to be fetched
+ * @param {Array} parameters.variantAttributes list of variant attributes (for product-level model)
  * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
  * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
  * @param {boolean?} parameters.isVariant - (optional) Indicate if the model is meant to live in a parent record
@@ -347,7 +352,7 @@ function algoliaLocalizedProduct(parameters) {
                     this[attributeName] = ObjectHelper.getAttributeValue(product, attributeConfig.attribute);
                 }
             } else if (aggregatedValueHandlers[attributeName]) {
-                this[attributeName] = aggregatedValueHandlers[attributeName](product);
+                this[attributeName] = aggregatedValueHandlers[attributeName](product, parameters);
             } else {
                 var config = algoliaProductConfig.attributeConfig_v2[attributeName];
                 if (!empty(config)) {

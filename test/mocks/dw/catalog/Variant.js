@@ -87,6 +87,7 @@ class Variant extends MasterProduct {
     getVariationModel() {
         return new ProductVariationModel({
             productID: this.ID,
+            master: this.masterProduct,
             images: this.images,
             variationAttributes: this.variationAttributes,
         });

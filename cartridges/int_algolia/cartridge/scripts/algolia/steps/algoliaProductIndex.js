@@ -115,13 +115,16 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Record model: ' + paramRecordModel);
 
     /* --- master/variant attributes --- */
-    variantAttributes = [];
+    variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
     masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
     attributesToSend.forEach(function(attribute) {
-        if (algoliaProductConfig.defaultVariantAttributes_v2.indexOf(attribute) >= 0 &&
-            !extendedProductAttributesConfig[attribute]) {
-            variantAttributes.push(attribute);
-        } else {
+        var attributeConfig = extendedProductAttributesConfig[attribute] ||
+            algoliaProductConfig.attributeConfig_v2[attribute];
+        if (attributeConfig && attributeConfig.variantAttribute) {
+            if (variantAttributes.indexOf(attribute) < 0) {
+                variantAttributes.push(attribute);
+            }
+        } else if (masterAttributes.indexOf(attribute) < 0) {
             masterAttributes.push(attribute);
         }
     });
@@ -237,7 +240,7 @@ exports.process = function(product, parameters, stepExecution) {
 
             if (paramRecordModel !== MASTER_LEVEL) {
                 // Variant-level indexing
-                var recordsPerLocale = jobHelper.generateVariantRecordsWithColorVariations({
+                var recordsPerLocale = jobHelper.generateVariantRecords({
                     masterProduct: product,
                     locales: siteLocales,
                     attributeList: attributesToSend,
@@ -265,7 +268,13 @@ exports.process = function(product, parameters, stepExecution) {
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         indexName += '.tmp';
                     }
-                    var localizedMaster = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: masterAttributes, baseModel: baseModel });
+                    var localizedMaster = new AlgoliaLocalizedProduct({
+                        product: product,
+                        locale: locale,
+                        attributeList: masterAttributes,
+                        variantAttributes: variantAttributes,
+                        baseModel: baseModel,
+                    });
                     processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
                     algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedMaster, indexName));
                 }
