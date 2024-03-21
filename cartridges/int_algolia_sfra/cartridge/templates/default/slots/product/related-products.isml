@@ -3,6 +3,8 @@
     var productIdsString = "";
 
     if (session.privacy.algoliaAnchorProducts) {
+        var recommendUtils = require('*/cartridge/scripts/algolia/recommend/utils');
+        recommendUtils.anchorProductSetter();
         productIdsString = session.privacy.algoliaAnchorProducts;
     } else {
         for (var i = 0; i < slotcontent.content.length; i++) {
@@ -11,7 +13,6 @@
         }
         productIdsString = productIds.join(',');
     }
-    delete session.privacy.algoliaAnchorProducts;
 </isscript>
 
 <div class="row" id="relatedProducts" data-object-ids="${productIdsString}"></div>

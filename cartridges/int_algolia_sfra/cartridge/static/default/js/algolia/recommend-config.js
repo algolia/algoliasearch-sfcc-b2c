@@ -281,26 +281,6 @@ function transformItem(item) {
 
         // 1. Find the variant matching the selected facets, or use the default variant
         let selectedVariant;
-        const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
-        const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
-        if (colorFacets.length > 0 && sizeFacets.length > 0) {
-            // 1.1 If both facets are selected, find the variant that match both
-            selectedVariant = item.variants.find(variant => {
-                return sizeFacets.includes(variant.size) && colorFacets.includes(variant.color);
-            });
-        }
-        if (!selectedVariant && colorFacets.length > 0) {
-            // 1.2 If we have color refinement, find one that match the selected color
-            selectedVariant = item.variants.find(variant => {
-                return colorFacets.includes(variant.color)
-            });
-        }
-        if (!selectedVariant && sizeFacets.length > 0) {
-            // 1.3 Otherwise if we have size refinement, find one that match the selected size
-            selectedVariant = item.variants.find(variant => {
-                return sizeFacets.includes(variant.size)
-            });
-        }
         if (!selectedVariant) {
             // 1.4 No facets selected, use the default variant
             selectedVariant = item.variants.find(variant => {
