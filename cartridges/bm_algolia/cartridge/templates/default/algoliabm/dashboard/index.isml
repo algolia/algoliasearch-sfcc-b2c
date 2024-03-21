@@ -191,7 +191,10 @@
                 <iscomment> Algolia_EnableRecommend </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.enablerecommend', 'algolia', null)}" />
+                        <isprint value="${Resource.msg('algolia.label.enable', 'algolia', null)}" />
+                        <a href="https://www.algolia.com/doc/guides/algolia-recommend/overview/ " target="_blank">
+                            <isprint value="${Resource.msg('algolia.label.preference.enablerecommend', 'algolia', null)}" />
+                        </a>
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.enablerecommend.help', 'algolia', null)}</div>
                     </td>
