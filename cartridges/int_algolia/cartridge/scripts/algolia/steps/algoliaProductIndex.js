@@ -106,37 +106,28 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('indexingMethod parameter: ' + paramIndexingMethod);
     logger.info('Record model: ' + paramRecordModel);
 
-    /* --- master/variant attributes --- */
+    /* --- categorize attributes (master/variant, non-localized, shared) --- */
     variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
     masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
     attributesToSend.forEach(function(attribute) {
-        if (algoliaProductConfig.attributeConfig_v2[attribute] &&
-            algoliaProductConfig.attributeConfig_v2[attribute].variantAttribute) {
-            if (variantAttributes.indexOf(attribute) < 0) {
-                variantAttributes.push(attribute);
-            }
-        } else if (masterAttributes.indexOf(attribute) < 0) {
+        var attributeConfig = algoliaProductConfig.attributeConfig_v2[attribute] || {};
+
+        if (attributeConfig.variantAttribute) {
+            variantAttributes.push(attribute);
+        } else {
             masterAttributes.push(attribute);
+        }
+
+        if (attributeConfig.computedFromBaseProduct) {
+            attributesComputedFromBaseProduct.push(attribute);
+        } else if (!attributeConfig.localized) {
+            nonLocalizedAttributes.push(attribute);
+            if (!attributeConfig.variantAttribute) {
+                nonLocalizedMasterAttributes.push(attribute);
+            }
         }
     });
 
-    /* --- non-localized/shared attributes --- */
-    nonLocalizedAttributes = [];
-    nonLocalizedMasterAttributes = [];
-    Object.keys(algoliaProductConfig.attributeConfig_v2).forEach(function(attributeName) {
-        if (algoliaProductConfig.attributeConfig_v2[attributeName].computedFromBaseProduct) {
-            if (attributesToSend.indexOf(attributeName) >= 0) {
-                attributesComputedFromBaseProduct.push(attributeName);
-            }
-        } else if (!algoliaProductConfig.attributeConfig_v2[attributeName].localized) {
-            if (attributesToSend.indexOf(attributeName) >= 0) {
-                nonLocalizedAttributes.push(attributeName);
-            }
-            if (masterAttributes.indexOf(attributeName) >= 0) {
-                nonLocalizedMasterAttributes.push(attributeName);
-            }
-        }
-    });
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
