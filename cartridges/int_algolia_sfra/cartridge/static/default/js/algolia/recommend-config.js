@@ -279,14 +279,10 @@ function transformItem(item) {
             });
         });
 
-        // 1. Use the default varian
-        let selectedVariant;
-        if (!selectedVariant) {
-            // 1.4 No facets selected, use the default variant
-            selectedVariant = item.variants.find(variant => {
-                return variant.variantID === item.defaultVariantID;
-            }) || item.variants[0];
-        }
+        // 1. Use the default variant
+        let selectedVariant = item.variants.find(variant => {
+            return variant.variantID === item.defaultVariantID;
+        }) || item.variants[0];
 
         // 2. Get the colorVariation corresponding to the selected variant, to display its image
         if (item.colorVariations) {
