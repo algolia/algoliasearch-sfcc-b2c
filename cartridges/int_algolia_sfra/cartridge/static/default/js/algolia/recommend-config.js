@@ -81,55 +81,15 @@ function createRecommendationWidget(options) {
     } else if (type === 'similarContents') {
         widgetOptions.indexName = algoliaData.contentsIndex;
         widgetOptions.itemComponent = ({ item, html }) => contentComponent({ item, html });
+        widgetOptions.headerComponent = ({ html }) => html`
+            <div class="auc-Recommend-title">${algoliaData.strings.relatedContent}</div>
+        `;
         relatedProducts(widgetOptions);
-        const observerConfig = {
-            containerId,
-            type: 'childList',
-            observationTarget: '.auc-Recommend-title',
-            observationText: algoliaData.strings.relatedProducts,
-            observationReplacement: algoliaData.strings.relatedContent
-        }
-        widgetObserver(observerConfig);
     } else if (type === 'relatedProducts') {
         relatedProducts(widgetOptions);
     } else if (type === 'lookingSimilar') {
         lookingSimilar(widgetOptions);
     }
-}
-
-/**
- * Widget observer for modifiying the widgets default appearance
- * @param {Object} observerConfig - Configuration object
- * @returns {void}
- */
-function widgetObserver(observerConfig) {
-    // Select the element you want to observe for mutations
-    const targetNode = document.getElementById(observerConfig.containerId);
-
-    // Options for the observer (which mutations to observe)
-    const config = {
-        attributes: true,
-        childList: true,
-        subtree: true
-    };
-
-    // Callback function to execute when mutations are observed
-    const callback = function (mutationsList, observer) {
-        for (const mutation of mutationsList) {
-            if (mutation.type === observerConfig.type) {
-                const widgetTitle = targetNode.querySelector(observerConfig.observationTarget);
-                if (widgetTitle && widgetTitle.textContent === observerConfig.observationText) {
-                    widgetTitle.textContent = observerConfig.observationReplacement;
-                }
-            }
-        }
-    };
-
-    // Create an instance of MutationObserver with the callback
-    const observer = new MutationObserver(callback);
-
-    // Start observing the target node for configured mutations
-    observer.observe(targetNode, config);
 }
 
 /**
