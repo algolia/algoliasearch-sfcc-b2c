@@ -210,6 +210,16 @@ Setting this preference replaces the first two segments, the final index name be
                 <default-value>false</default-value>
             </attribute-definition>
 
+
+            <attribute-definition attribute-id="Algolia_EnableRecommend">
+                <display-name xml:lang="x-default">Enable Recommend</display-name>
+                <description xml:lang="x-default">When enabled, the Algolia recommendations in Storefront becomes available</description> 
+                <type>boolean</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
             <!-- Deprecated, will be removed soon -->
             <attribute-definition attribute-id="Algolia_OCAPIClientID">
                 <display-name xml:lang="x-default">OCAPI client ID</display-name>
@@ -245,6 +255,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_EnableInsights"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
                 <attribute attribute-id="Algolia_EnableContentSearch"/>
+                <attribute attribute-id="Algolia_EnableRecommend"/>
             </attribute-group>
         </group-definitions>
 

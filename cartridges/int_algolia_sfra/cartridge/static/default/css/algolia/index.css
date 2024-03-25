@@ -15,10 +15,47 @@
     cursor: pointer;
 }
 
+.auc-Recommend-container {
+    margin-top: 20px;
+}
+
+.auc-Recommend-item {
+    width: 100%;
+    margin-bottom: 20px;
+    list-style-type: none;
+}
+
+.auc-Recommend-list {
+    display: flex;
+    flex-wrap: no-wrap;
+    justify-content: space-between;
+    padding-left: 0%;
+}
+
+#similarContents .auc-Recommend-list {
+    display: block;
+}
+
+#trendingItems .auc-Recommend {
+    margin: 0 2% 0 2%;
+}
+
+#relatedProducts .auc-Recommend {
+    margin-left: 1%;
+}
+
 .ais-SearchBox-reset {
     position: absolute;
     border: none;
     top: 0.5625em;
     right: 0.5625em;
     padding: 0 1em;
+}
+
+.auc-Recommend-item .col-12 {
+    padding: 0;
+}
+
+.auc-Recommend-title {
+    font-size: 32px;
 }

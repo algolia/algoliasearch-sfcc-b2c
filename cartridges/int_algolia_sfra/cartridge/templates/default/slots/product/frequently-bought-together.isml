@@ -1,0 +1,1 @@
+<div class="row" id="frequentlyBoughtTogether" data-object-ids="${require('*/cartridge/scripts/algolia/recommend/utils').getAnchorProductIds(slotcontent)}"></div>

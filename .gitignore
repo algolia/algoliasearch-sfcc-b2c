@@ -5,6 +5,7 @@ workspace/
 cartridges/app_storefront_controllers/
 cartridges/app_storefront_core/
 cartridges/app_storefront_base/
+cartridges/app_algolia_demo/
 cartridges/modules/
 cartridges/bm_app_storefront_base/
 dw.json

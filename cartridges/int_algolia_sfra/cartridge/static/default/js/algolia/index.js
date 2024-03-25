@@ -11,17 +11,32 @@ document.addEventListener('DOMContentLoaded', function () {
     var searchClient = algoliasearch(algoliaData.applicationID, algoliaData.searchApiKey);
     searchClient.addAlgoliaAgent('Algolia Salesforce B2C (SFRA)', 'v' + algoliaData.version);
 
+    var recommendClient = null;
+
+    if (algoliaData.enableRecommend) {
+        const algoliarecommend = window['@algolia/recommend'];
+        recommendClient = algoliarecommend(algoliaData.applicationID, algoliaData.searchApiKey);
+        recommendClient.addAlgoliaAgent('Algolia Salesforce B2C (SFRA)', 'v' + algoliaData.version);
+
+        enableRecommendations({
+            recommendClient,
+            categoryDisplayNamePath,
+            categoryDisplayNamePathSeparator,
+        });
+    }
+
     enableAutocomplete({
-        searchClient: searchClient,
-        searchPageRoot: searchPageRoot,
+        searchClient,
+        searchPageRoot,
+        recommendClient,
     });
 
     // FIXME: only enable on search and category page
     enableInstantSearch({
-        searchClient: searchClient,
-        urlQuery: urlQuery,
-        categoryDisplayNamePath: categoryDisplayNamePath,
-        categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
+        searchClient,
+        urlQuery,
+        categoryDisplayNamePath,
+        categoryDisplayNamePathSeparator,
     });
 
     if (algoliaData.enableInsights) {
