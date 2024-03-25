@@ -17,6 +17,11 @@ try {
 } catch(e) {
     extendedProductAttributesConfig = {};
 }
+var extendedProductRecordCustomizer;
+try {
+    extendedProductRecordCustomizer = require('*/cartridge/configuration/productRecordCustomizer.js');
+} catch(e) {
+}
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 
@@ -377,6 +382,9 @@ function algoliaLocalizedProduct(parameters) {
             this['__primary_category'] = computePrimaryCategoryHierarchicalFacets(this.categories, this.primary_category_id);
         }
         productModelCustomizer.customizeLocalizedProductModel(this, attributeList);
+        if (extendedProductRecordCustomizer) {
+            extendedProductRecordCustomizer(this);
+        }
     }
 }
 
