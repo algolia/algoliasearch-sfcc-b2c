@@ -20,6 +20,7 @@ const clientSideData = {
     "applicationID": getPreference('ApplicationID'),
     "searchApiKey": getPreference('SearchApiKey'),
     "enableContentSearch": getPreference('EnableContentSearch'),
+    "enableRecommend": getPreference('EnableRecommend'),
     "locale": request.getLocale(),
     "currencyCode": request.getSession().getCurrency().getCurrencyCode(),
     "currencySymbol": request.getSession().getCurrency().getSymbol(),
@@ -46,6 +47,9 @@ const clientSideData = {
         "products": Resource.msg('search.suggest.products','algolia',null),
         "categories": Resource.msg('search.suggest.categories','algolia',null),
         "content": Resource.msg('search.suggest.content','algolia',null),
+        "trending": Resource.msg('recommendation.suggest.trending','algolia',null),
+        "relatedContent": Resource.msg('recommendation.related.content','algolia',null),
+        "relatedProducts": Resource.msg('recommendation.related.products','algolia',null),
         "articles": Resource.msg('tab.nav.search.artclesresults', 'search', null),
         "priceFilter": {
             "separator": Resource.msg('search.pricefilter.separator','algolia',null),
@@ -74,6 +78,7 @@ const clientSideData = {
 //   EnableInsights               ║ Enables insights events on the Storefront               ║ Boolean
 //   EnableSSR                    ║ Enables server-side rendering of CLP results on SFRA    ║ Boolean
 //   EnableContentSearch          ║ Enable/disable Algolia Content Search                   ║ Boolean
+//   EnableRecommend              ║ Enable/disable Algolia Recommends                       ║ Boolean
 //  ══════════════════════════════╩═════════════════════════════════════════════════════════╩════════════════════
 //  Preferences stored in the XML file
 //

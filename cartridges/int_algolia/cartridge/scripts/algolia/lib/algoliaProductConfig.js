@@ -224,6 +224,9 @@ var attributeConfig_v2 = {
     image_groups: {
         localized: true
     },
+    lsImage: {
+        localized: false
+    },
     in_stock: {
         localized: false,
         variantAttribute: true,
