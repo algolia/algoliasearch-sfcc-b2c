@@ -3,15 +3,28 @@
 var Site = require('dw/system/Site');
 var Currency = require('dw/util/Currency');
 var PriceBookMgr = require('dw/catalog/PriceBookMgr');
-var stringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
+var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+
+var extendedProductAttributesConfig;
+try {
+    extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
+    logger.info('Extension file "productAttributesConfig.js" loaded');
+} catch(e) {
+    extendedProductAttributesConfig = {};
+}
+var extendedProductRecordCustomizer;
+try {
+    extendedProductRecordCustomizer = require('*/cartridge/configuration/productRecordCustomizer.js');
+    logger.info('Extension file "productRecordCustomizer.js" loaded');
+} catch(e) {
+}
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 
@@ -319,7 +332,7 @@ var aggregatedValueHandlers = {
 /**
  * AlgoliaLocalizedProduct class that represents a localized algoliaProduct ready to be indexed
  * @param {Object} parameters - model parameters
- * @param {dw.order.Product} parameters.product - Product
+ * @param {dw.catalog.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
  * @param {Array} parameters.attributeList list of attributes to be fetched
  * @param {Array} parameters.variantAttributes list of variant attributes (for product-level model)
@@ -349,14 +362,19 @@ function algoliaLocalizedProduct(parameters) {
 
             if (baseModel && baseModel[attributeName]) {
                 this[attributeName] = baseModel[attributeName];
+            } else if (extendedProductAttributesConfig[attributeName]) {
+                var attributeConfig = extendedProductAttributesConfig[attributeName];
+                if (typeof attributeConfig.attribute === 'function') {
+                    this[attributeName] = attributeConfig.attribute(product);
+                } else if (attributeConfig.attribute) {
+                    this[attributeName] = ObjectHelper.getAttributeValue(product, attributeConfig.attribute);
+                }
+            } else if (aggregatedValueHandlers[attributeName]) {
+                this[attributeName] = aggregatedValueHandlers[attributeName](product, parameters);
             } else {
-                if (aggregatedValueHandlers[attributeName]) {
-                    this[attributeName] = aggregatedValueHandlers[attributeName](product, parameters);
-                } else {
-                    var config = algoliaProductConfig.attributeConfig_v2[attributeName];
-                    if (!empty(config)) {
-                        this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
-                    }
+                var config = algoliaProductConfig.attributeConfig_v2[attributeName];
+                if (!empty(config)) {
+                    this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
                 }
             }
         }
@@ -367,6 +385,9 @@ function algoliaLocalizedProduct(parameters) {
             this['__primary_category'] = computePrimaryCategoryHierarchicalFacets(this.categories, this.primary_category_id);
         }
         productModelCustomizer.customizeLocalizedProductModel(this, attributeList);
+        if (extendedProductRecordCustomizer) {
+            extendedProductRecordCustomizer(this);
+        }
     }
 }
 
