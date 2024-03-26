@@ -10,16 +10,19 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
+var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
 var extendedProductAttributesConfig;
 try {
     extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
+    logger.info('Extension file "productAttributesConfig.js" loaded');
 } catch(e) {
     extendedProductAttributesConfig = {};
 }
 var extendedProductRecordCustomizer;
 try {
     extendedProductRecordCustomizer = require('*/cartridge/configuration/productRecordCustomizer.js');
+    logger.info('Extension file "productRecordCustomizer.js" loaded');
 } catch(e) {
 }
 
