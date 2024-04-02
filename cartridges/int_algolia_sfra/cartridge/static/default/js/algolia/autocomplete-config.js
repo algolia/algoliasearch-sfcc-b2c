@@ -107,8 +107,8 @@ function fetchTrendingItems() {
             trendingItemsArr = results.map(mapHitToTrendingItem);
             resolve(trendingItemsArr);
         }).catch(err => {
-            console.error('Failed to fetch trending items:', err);
-            reject(err);
+            console.error('Please configure the "Trending items" recommend model on Algolia Dashboard:', err);
+            resolve([]);
         });
     });
 }
