@@ -107,7 +107,7 @@ function fetchTrendingItems() {
             trendingItemsArr = results.map(mapHitToTrendingItem);
             resolve(trendingItemsArr);
         }).catch(err => {
-            console.error('Please configure the recommend model on Algolia Dashboard:', err);
+            console.error('Please configure the "Trending items" recommend model on Algolia Dashboard:', err);
             resolve([]);
         });
     });
