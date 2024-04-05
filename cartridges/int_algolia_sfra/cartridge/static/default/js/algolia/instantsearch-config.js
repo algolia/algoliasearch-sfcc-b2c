@@ -601,7 +601,7 @@ function enableInstantSearch(config) {
         link.href = colorVariation.variationURL;
     }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
                     <span>
-                        <img class="swatch swatch-circle" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
+                        <img class="swatch swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                     </span>
                 </a>
             `;

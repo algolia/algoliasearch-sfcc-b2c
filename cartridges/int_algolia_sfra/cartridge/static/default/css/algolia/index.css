@@ -20,9 +20,10 @@
 }
 
 .auc-Recommend-item {
-    width: 100%;
     margin-bottom: 20px;
     list-style-type: none;
+    max-width: 100% !important;
+    width: 267px !important;
 }
 
 .auc-Recommend-list {

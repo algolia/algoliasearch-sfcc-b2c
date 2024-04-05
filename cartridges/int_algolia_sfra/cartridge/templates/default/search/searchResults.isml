@@ -4,6 +4,7 @@
         var assets = require('*/cartridge/scripts/assets');
         assets.addJs('/js/search.js');
         assets.addCss('/css/search.css');
+        assets.addJs('/js/utils/productTileUtils.js');
     </isscript>
 
     <isif condition="${pdict.algoliaEnable}">

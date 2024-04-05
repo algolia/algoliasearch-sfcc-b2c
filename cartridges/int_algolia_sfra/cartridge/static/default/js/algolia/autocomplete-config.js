@@ -3,7 +3,7 @@
 var recommendClient;
 var trendingItemsArr = [];
 const maxRecommendations = 3;
-const useTrendingItems = true;
+const useTrendingItems = false;
 
 /**
  * Enables autocomplete
