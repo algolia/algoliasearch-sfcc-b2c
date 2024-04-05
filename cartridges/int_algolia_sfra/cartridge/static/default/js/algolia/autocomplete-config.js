@@ -3,6 +3,7 @@
 var recommendClient;
 var trendingItemsArr = [];
 const maxRecommendations = 3;
+const useTrendingItems = true;
 
 /**
  * Enables autocomplete
@@ -120,7 +121,7 @@ function fetchTrendingItems() {
  * @returns {Promise} Promise that resolves with the trending items array
  */
 function getTrendingItemsArray() {
-    if (!algoliaData.enableRecommend) {
+    if (!algoliaData.enableRecommend || !useTrendingItems) {
         return Promise.resolve([]);
     }
 
