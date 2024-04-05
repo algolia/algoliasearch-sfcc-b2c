@@ -16,13 +16,15 @@ document.addEventListener('DOMContentLoaded', function () {
         searchPageRoot: searchPageRoot
     });
 
-    // FIXME: only enable on search and category page
-    enableInstantSearch({
-        searchClient: searchClient,
-        urlQuery: urlQuery,
-        categoryDisplayNamePath: categoryDisplayNamePath,
-        categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
-    });
+    if (document.querySelector('.cat-banner h1') ||
+        document.querySelector('#algolia-searchbox-placeholder')) {
+        enableInstantSearch({
+            searchClient: searchClient,
+            urlQuery: urlQuery,
+            categoryDisplayNamePath: categoryDisplayNamePath,
+            categoryDisplayNamePathSeparator: categoryDisplayNamePathSeparator,
+        });
+    }
 
     if (algoliaData.enableInsights) {
         enableInsights(algoliaData.applicationID, algoliaData.searchApiKey, algoliaData.productsIndex);

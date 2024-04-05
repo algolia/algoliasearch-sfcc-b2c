@@ -31,13 +31,15 @@ document.addEventListener('DOMContentLoaded', function () {
         recommendClient,
     });
 
-    // FIXME: only enable on search and category page
-    enableInstantSearch({
-        searchClient,
-        urlQuery,
-        categoryDisplayNamePath,
-        categoryDisplayNamePathSeparator,
-    });
+    if (document.querySelector('#algolia-category-title-placeholder') ||
+        document.querySelector('#algolia-searchbox-placeholder')) {
+        enableInstantSearch({
+            searchClient,
+            urlQuery,
+            categoryDisplayNamePath,
+            categoryDisplayNamePathSeparator,
+        });
+    }
 
     if (algoliaData.enableInsights) {
         enableInsights(algoliaData.applicationID, algoliaData.searchApiKey, algoliaData.productsIndex);
