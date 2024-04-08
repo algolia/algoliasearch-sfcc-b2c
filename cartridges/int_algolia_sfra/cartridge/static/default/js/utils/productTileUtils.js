@@ -3,7 +3,7 @@ var lastRequestTime = '';
 
 // Listen for AJAX requests
 // If the request is an add-to-cart request, check if the last request was less than 4 milliseconds ago
-// If it was, abort the request 
+// If it was, abort the request, pupose is to prevent multiple add-to-cart requests because we are adding productTile to the PDP, cart page and causing the registering of multiple listeners for the add-to-cart and add-to-cart-global button
 // Workaround to not modifying original cartridge code to fix the issue with multiple add-to-cart requests because of adding productTile to the PDP page
 $(document).ajaxSend(function(event, jqxhr, settings) {
 
