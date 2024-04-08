@@ -2,9 +2,9 @@ var lastRequestTime = '';
 
 
 // Listen for AJAX requests
-// If the request is an add to cart request, check if the last request was less than 4 seconds ago
+// If the request is an add-to-cart request, check if the last request was less than 4 milliseconds ago
 // If it was, abort the request 
-// Workaround to not modifying orginal cartridge code to fix issue with multiple add to cart requests because of adding productTile to PDP page
+// Workaround to not modifying original cartridge code to fix the issue with multiple add-to-cart requests because of adding productTile to the PDP page
 $(document).ajaxSend(function(event, jqxhr, settings) {
 
     if (settings.url.indexOf('Cart-AddProduct') === -1) {
@@ -23,7 +23,7 @@ $(document).ajaxSend(function(event, jqxhr, settings) {
 // Listen for AJAX requests
 // If the request is a quick view request, check if the product is not available or not ready to order
 // If it is, disable the add to cart button
-// Workaround to not modifying orginal cartridge code to fix issue with add to cart button being enabled when product is not available or not ready to order
+// Workaround to not modifying original cartridge code to fix the issue with add to cart button is enabled when the product is not available or not ready to order
 $(document).ajaxComplete(function(event, jqxhr, settings) { 
     if (settings.url.indexOf('Product-ShowQuickView') === -1) {
         return;
