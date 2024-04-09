@@ -149,7 +149,6 @@ function itemComponent({ item, html }) {
                     <a href="${hit.url}">
                         <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
                     </a>
-                    ${getQuickViewHtml(hit, html)}
                 </div>
                 <div class="tile-body">
                     <div class="pdp-link">
@@ -294,27 +293,6 @@ function getDefaultImage() {
         dis_base_link: algoliaData.noImages.large,
         alt: 'Product image, large'
     };
-}
-
-/**
- * Get quick view HTML
- * @param {Object} item - Item object
- * @param {Function} html - Tagged template function
- * @returns {string} HTML string
- */
-function getQuickViewHtml(item, html) {
-    return html`
-        <a class="quickview hidden-sm-down" href="${item.quickShowUrl}"
-           data-toggle="modal" data-target="#quickViewModal" title="${item.name}"
-           aria-label="${item.name}" data-query-id="${item.__queryID}"
-           data-object-id="${item.objectID}" data-index-name="${item.__indexName}"
-        >
-            <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-inverse fa-stack-2x"></i>
-                <i class="fa fa-expand fa-stack-1x"></i>
-            </span>
-        </a>
-    `;
 }
 
 /**
