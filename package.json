@@ -1,6 +1,6 @@
 {
     "name": "int_algolia_sfra",
-    "version": "24.3.0",
+    "version": "24.3.1",
     "description": "Algolia SFRA Link Cartridge",
     "scripts": {
         "test": "sgmf-scripts --test test/unit/**/model/algoliaProduct.js",
