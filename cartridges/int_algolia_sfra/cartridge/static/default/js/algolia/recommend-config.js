@@ -1,7 +1,6 @@
 /* global instantsearch */
 
 const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
-var counter = 0;
 /**
  * Enable recommendations
  * @param {Object} config - Configuration object
@@ -140,11 +139,6 @@ function contentComponent({ item, html }) {
  */
 function itemComponent({ item, html }) {
 
-    counter++;
-
-    if (counter > 8) {
-        console.log('counter', counter);
-    }
     const hit = transformItem(item);
 
     return html`
