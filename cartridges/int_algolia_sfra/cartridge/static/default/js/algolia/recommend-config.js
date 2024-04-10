@@ -184,7 +184,7 @@ function transformItem(item) {
 
     // adjusted price in user currency
     if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
-        item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
+        item.promotionalDisplayPrice = item.promotionalPrice[algoliaData.currencyCode]
     }
 
     // price in user currency
@@ -258,7 +258,7 @@ function transformItem(item) {
         // 3. Get the variant price
         if (selectedVariant) {
             if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
-                item.promotionaPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
+                item.promotionalDisplayPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
             }
             if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
                 item.displayPrice = selectedVariant.price[algoliaData.currencyCode]
@@ -302,14 +302,14 @@ function getDefaultImage() {
  */
 function getPriceHtml(item, html) {
     return html`
-        ${item.promotionalPrice && html`
+        ${item.promotionalDisplayPrice && html`
             <span class="strike-through list">
                 <span class="value"> ${item.currencySymbol} ${item.displayPrice} </span>
             </span>
         `}
         <span class="sales">
             <span class="value">
-                ${item.currencySymbol} ${item.promotionalPrice ? item.promotionalPrice : item.displayPrice}
+                ${item.currencySymbol} ${item.promotionalDisplayPrice ? item.promotionalDisplayPrice : item.displayPrice}
             </span>
         </span>
     `;
