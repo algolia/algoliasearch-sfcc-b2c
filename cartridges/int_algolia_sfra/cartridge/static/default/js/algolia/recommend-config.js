@@ -1,7 +1,6 @@
 /* global instantsearch */
 
 const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
-
 /**
  * Enable recommendations
  * @param {Object} config - Configuration object
@@ -185,12 +184,12 @@ function transformItem(item) {
 
     // adjusted price in user currency
     if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
-        item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
+        item.promotionalDisplayPrice = item.promotionalPrice[algoliaData.currencyCode]
     }
 
     // price in user currency
     if (item.price && item.price[algoliaData.currencyCode] !== null) {
-        item.price = item.price[algoliaData.currencyCode]
+        item.displayPrice = item.price[algoliaData.currencyCode]
     }
 
     // currency symbol
@@ -259,10 +258,10 @@ function transformItem(item) {
         // 3. Get the variant price
         if (selectedVariant) {
             if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
-                item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
+                item.promotionalDisplayPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
             }
             if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
-                item.price = selectedVariant.price[algoliaData.currencyCode]
+                item.displayPrice = selectedVariant.price[algoliaData.currencyCode]
             }
             item.url = selectedVariant.url;
         }
@@ -303,14 +302,14 @@ function getDefaultImage() {
  */
 function getPriceHtml(item, html) {
     return html`
-        ${item.promotionalPrice && html`
+        ${item.promotionalDisplayPrice && html`
             <span class="strike-through list">
-                <span class="value"> ${item.currencySymbol} ${item.price} </span>
+                <span class="value"> ${item.currencySymbol} ${item.displayPrice} </span>
             </span>
         `}
         <span class="sales">
             <span class="value">
-                ${item.currencySymbol} ${item.promotionalPrice ? item.promotionalPrice : item.price}
+                ${item.currencySymbol} ${item.promotionalDisplayPrice ? item.promotionalDisplayPrice : item.displayPrice}
             </span>
         </span>
     `;
