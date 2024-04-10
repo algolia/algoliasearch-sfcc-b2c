@@ -29,7 +29,7 @@
 .auc-Recommend-list {
     display: flex;
     flex-wrap: no-wrap;
-    justify-content: space-between;
+    justify-content: flex-start;
     padding-left: 0%;
 }
 
