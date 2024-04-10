@@ -1,7 +1,7 @@
 /* global instantsearch */
 
 const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
-
+const itemComponentCache = new Map();
 /**
  * Enable recommendations
  * @param {Object} config - Configuration object
@@ -132,33 +132,41 @@ function contentComponent({ item, html }) {
             </div>
         </a>`;
 }
-
 /**
  * Item component used in widgets
  * @param {Object} param0 - Item and HTML from Algolia widget
  * @returns {string} HTML string
  */
 function itemComponent({ item, html }) {
+    const cacheKey = JSON.stringify(item.objectID);
+
+    if (itemComponentCache.has(cacheKey)) {
+        return itemComponentCache.get(cacheKey);
+    }
 
     const hit = transformItem(item);
 
-    return html`
+    const renderedHtml = html `
         <div class="col-12" data-pid="${hit.objectID}" data-query-id="${hit.__queryID}" data-index-name="${hit.__indexName}">
-            <div class="product-tile">
-                <div class="image-container">
-                    <a href="${hit.url}">
-                        <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
-                    </a>
-                </div>
-                <div class="tile-body">
-                    <div class="pdp-link">
-                        <a href="${hit.url}">${hit.name}</a>
-                    </div>
-                    <div class="price">${getPriceHtml(hit, html)}</div>
-                </div>
+          <div class="product-tile">
+            <div class="image-container">
+              <a href="${hit.url}">
+                <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
+              </a>
             </div>
+            <div class="tile-body">
+              <div class="pdp-link">
+                <a href="${hit.url}">${hit.name}</a>
+              </div>
+              <div class="price">${getPriceHtml(hit, html)}</div>
+            </div>
+          </div>
         </div>
     `;
+
+    itemComponentCache.set(cacheKey, renderedHtml);
+
+    return renderedHtml;
 }
 
 /**
