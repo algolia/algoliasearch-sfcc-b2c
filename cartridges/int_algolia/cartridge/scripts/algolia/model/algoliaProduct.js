@@ -109,7 +109,7 @@ function getAttributeLocalizedValues(product, productAttributeName) {
     for (var l = 0; l < siteLocalesSize; l += 1) {
         var localeName = siteLocales[l];
         request.setLocale(localeName);
-        value[localeName] = ObjectHelper.getAttributeValue(product, productAttributeName);
+        value[localeName] = ObjectHelper.getAttributeValue(product, productAttributeName, true);
     }
     request.setLocale(currentLocale);
     return value;
@@ -303,13 +303,13 @@ function algoliaProduct(product, fieldListOverride) {
                         request.setLocale(localeName);
                         value[localeName] = aggregatedValueHandlers[attributeName]
                             ? aggregatedValueHandlers[attributeName](product)
-                            : ObjectHelper.getAttributeValue(product, config.attribute);
+                            : ObjectHelper.getAttributeValue(product, config.attribute, true);
                     }
                     request.setLocale(currentLocale);
                 } else {
                     value = aggregatedValueHandlers[attributeName]
                         ? aggregatedValueHandlers[attributeName](product)
-                        : ObjectHelper.getAttributeValue(product, config.attribute);
+                        : ObjectHelper.getAttributeValue(product, config.attribute, true);
                 }
 
                 if (!empty(value)) { this[attributeName] = value; }
