@@ -10,9 +10,10 @@ var AlgoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
  * Example: primaryCategory.ID
  * @param {dw.object.ExtensibleObject} extensibleObject - business object
  * @param {string} attributeName - object attribute name
+ * @param {boolean} escapeEmoji - for jobs v1 only: manually escape some emojis chars which can break XML
  * @returns {string|boolean|number|null} - value
  */
-function getAttributeValue(extensibleObject, attributeName) {
+function getAttributeValue(extensibleObject, attributeName, escapeEmoji) {
     var properties = attributeName.split('.');
     var result = properties.reduce(function (previousValue, currentProperty) {
         if (previousValue === null || !(currentProperty in previousValue)) {
@@ -21,7 +22,7 @@ function getAttributeValue(extensibleObject, attributeName) {
 
         var tempResult = previousValue[currentProperty];
 
-        if (typeof tempResult === 'string' && !empty(tempResult)) {
+        if (escapeEmoji && typeof tempResult === 'string' && !empty(tempResult)) {
             tempResult = StringUtils.trim(AlgoliaUtils.escapeEmoji(tempResult));
         }
 

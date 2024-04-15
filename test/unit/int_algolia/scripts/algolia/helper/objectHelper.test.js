@@ -19,6 +19,13 @@ describe('getAttributeValue', () => {
         const extensibleObject = { someAttribute: 'value' };
         expect(getAttributeValue(extensibleObject, 'nonExisting')).toBeNull();
     });
+
+    test('encoding', () => {
+        const object1 = { japaneseAttribute: '春 - ルック' };
+        expect(getAttributeValue(object1, 'japaneseAttribute')).toBe('春 - ルック');
+        const object2 = { emojiAttribute: 'Hi 🐣' };
+        expect(getAttributeValue(object2, 'emojiAttribute')).toBe('Hi 🐣');
+    });
 });
 
 describe('safelyGetCustomAttribute', () => {
