@@ -61,11 +61,19 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
  * @returns {string} Sanitized content
  */
 function removeIgnoredContent(content) {
-    //remove restricted tags and their content
-    IGNORED_TAGS.forEach(function(tag) {
-        content = content.replace(new RegExp('<' + tag + '.*?' + tag + '>', 'g'), '');
-    });
-
+    for (let i = 0; i < IGNORED_TAGS.length; i++) {
+        let tag = IGNORED_TAGS[i];
+        let startIndex = content.indexOf('<' + tag);
+        while (startIndex !== -1) {
+            let endIndex = content.indexOf('</' + tag + '>', startIndex);
+            if (endIndex !== -1) {
+                content = content.substring(0, startIndex) + content.substring(endIndex + tag.length + 3); // +3 for </tag>
+            } else {
+                break;
+            }
+            startIndex = content.indexOf('<' + tag);
+        }
+    }
     return content;
 }
 
