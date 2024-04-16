@@ -1,62 +1,83 @@
 'use strict';
 
-var MASTER_LEVEL = 'master-level';
+const MASTER_LEVEL = 'master-level';
 
 /**
- * @description - Get master product IDs for the given product IDs
- * @param {Array} productIDs - List of product IDs
- * @returns {void}
+ * Get the product type
+ * @param {dw.catalog.Product} product - Product
+ * @returns {string} The product type
  */
-function getMasterProductIds(productIDs) {
-    var masterProductIDs = [];
-    var productIds = session.privacy.algoliaAnchorProducts;
-    if (!productIds || productIds.length === 0) {
-        return;
+function getProductType(product) {
+    if (product.isVariationGroup()) {
+        return 'Variation Group';
+    } else if (product.isVariant()) {
+        return 'Variant';
+    } else {
+        return 'Master';
     }
-
-    var productMgr = require('dw/catalog/ProductMgr');
-
-    productIds = JSON.parse(productIds);
-    for (var i = 0; i < productIds.length; i++) {
-        var productId = productIds[i];
-        var product = productMgr.getProduct(productId);
-        if (product) {
-            var masterProduct = product.isVariant() ? product.getMasterProduct() : product;
-            masterProductIDs.push(masterProduct.ID);
-        }
-    }
-
-    return masterProductIDs;
 }
 
 /**
- * @description - Get anchor products for the given slot content
+ * Get the appropriate product
+ * @param {dw.catalog.Product} product - Product
+ * @param {string} recordModel - Record model
+ * @returns {dw.catalog.Product} The appropriate product
+ */
+function getAppropriateProduct(product, recordModel) {
+    const productType = getProductType(product);
+    if (recordModel === MASTER_LEVEL && productType !== 'Master') {
+        return product.masterProduct;
+    } else if (recordModel === MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
+        return product;
+    } else if (recordModel !== MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
+        return product.variationModel.defaultVariant;
+    } else if (recordModel !== MASTER_LEVEL && productType === 'Variant') {
+        return product;
+    }
+    return product;
+}
+
+/**
+ * Get the anchor product IDs
  * @param {Object} slotcontent - Slot content
- * @returns {string} - Product IDs
+ * @returns {string} The anchor product IDs
  */
 function getAnchorProductIds(slotcontent) {
-    productIds = [];
-    var productIdsString = "";
+    const anchorProductIds = session.privacy.algoliaAnchorProducts;
+    let productIds = [];
 
-    if (session.privacy.algoliaAnchorProducts) {
-        var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-        var recordModel = algoliaData.getPreference('RecordModel');
-        if (recordModel === MASTER_LEVEL) {
-            productIds = getMasterProductIds(JSON.parse(session.privacy.algoliaAnchorProducts));
-        } else {
-            return session.privacy.algoliaAnchorProducts;
-        }
+    if (anchorProductIds) {
+        productIds = JSON.parse(anchorProductIds);
     } else {
-        for (var i = 0; i < slotcontent.content.length; i++) {
+        for (let i = 0; i < slotcontent.content.length; i++) {
             var product = slotcontent.content[i];
             productIds.push(product.ID);
         }
     }
 
-    return JSON.stringify(productIds);
+    if (productIds.length === 0) {
+        return '';
+    }
+
+    const productMgr = require('dw/catalog/ProductMgr');
+    const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+    const recordModel = algoliaData.getPreference('RecordModel');
+
+    const anchorProductIdsArr = [];
+
+    for (let i = 0; i < productIds.length; i++) {
+        var productId = productIds[i];
+        var product = productMgr.getProduct(productId);
+        var appropriateProduct = getAppropriateProduct(product, recordModel);
+
+        if (appropriateProduct) {
+            anchorProductIdsArr.push(appropriateProduct.ID);
+        }
+    }
+
+    return JSON.stringify(anchorProductIdsArr);
 }
 
 module.exports = {
-    getMasterProductIds: getMasterProductIds,
     getAnchorProductIds: getAnchorProductIds
 };
