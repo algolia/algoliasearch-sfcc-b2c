@@ -36,6 +36,24 @@ describe('HTML Content Manipulation', () => {
             const result = splitHtmlContent(htmlContent, maxByteSize, splitterElement);
             expect(result).toEqual(['Bold Text and normal text']);
         });
+
+        test('should remove self-closing ignored tags', () => {
+            const htmlContent = '<div>Content with image<img src="image.jpg" alt="Image"> more content</div>';
+            const result = splitHtmlContent(htmlContent, maxByteSize, splitterElement);
+            expect(result).toEqual(['Content with image more content']);
+        });
+
+        test('should remove nested ignored tags', () => {
+            const htmlContent = '<div>Content <p><script>Some script</script>Nested content</p> more content</div>';
+            const result = splitHtmlContent(htmlContent, maxByteSize, splitterElement);
+            expect(result).toEqual(['Content Nested content more content']);
+        });
+
+        test('should handle ignored tags without closing tags', () => {
+            const htmlContent = '<div>Content <img src="image.jpg" alt="Image"></div>';
+            const result = splitHtmlContent(htmlContent, maxByteSize, splitterElement);
+            expect(result).toEqual(['Content ']);
+        });
     });
 
     describe('getMaxBodySize', () => {
@@ -95,5 +113,4 @@ describe('Extreme Content Manipulation', () => {
         });
     });
 });
-
 
