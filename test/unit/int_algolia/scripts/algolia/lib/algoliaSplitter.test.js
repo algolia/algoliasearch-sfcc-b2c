@@ -38,7 +38,7 @@ describe('HTML Content Manipulation', () => {
         });
 
         test('should remove self-closing ignored tags', () => {
-            const htmlContent = '<div>Content with image<img src="image.jpg" alt="Image"> more content</div>';
+            const htmlContent = '<div>Content with image<img src="image.jpg" alt="Image"/> more content</div>';
             const result = splitHtmlContent(htmlContent, maxByteSize, splitterElement);
             expect(result).toEqual(['Content with image more content']);
         });
