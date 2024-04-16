@@ -80,7 +80,7 @@ describe('getAnchorProductIds', () => {
         expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1', 'product1']));
     });
 
-    it('should return appropriate product IDs based on record model (variant model/variant product)', () => {
+    it('should return a variant when we use variant-model and anchor product is a variant product', () => {
         global.session.privacy.algoliaAnchorProducts = JSON.stringify(['product1']);
         const slotcontent = {
             content: []
@@ -89,8 +89,8 @@ describe('getAnchorProductIds', () => {
         expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1']));
     });
 
-    it('should return appropriate product IDs based on record model (variant model/master product)', () => {
-        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['product1']);
+    it('should return a variant when we use variant-model and anchor product is a master product', () => {
+        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['masterProduct1']);
         const slotcontent = {
             content: []
         };
@@ -98,8 +98,8 @@ describe('getAnchorProductIds', () => {
         expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1']));
     });
 
-    it('should return appropriate product IDs based on record model(variant model/variant group product)', () => {
-        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['product1']);
+    it('should return a variant when we use variant-model and anchor product is a VG product', () => {
+        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['variantGroupProduct1']);
         const slotcontent = {
             content: []
         };
@@ -107,8 +107,8 @@ describe('getAnchorProductIds', () => {
         expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1']));
     });
 
-    it('should return appropriate product IDs based on record model(base model/base product)', () => {
-        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['product1']);
+    it('should return a master when we use master-model and anchor product is a master product', () => {
+        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['masterProduct1']);
         const slotcontent = {
             content: []
         };
@@ -117,8 +117,8 @@ describe('getAnchorProductIds', () => {
         expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['masterProduct1']));
     });
 
-    it('should return appropriate product IDs based on record model(base model/variant group product)', () => {
-        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['product1']);
+    it('should return a master when we use master-model and anchor product is a VG product', () => {
+        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['variantGroupProduct1']);
         const slotcontent = {
             content: []
         };
@@ -128,7 +128,7 @@ describe('getAnchorProductIds', () => {
     });
 
 
-    it('should return appropriate product IDs based on record model(base model/variant product)', () => {
+    it('should return a master when we use variant-model and anchor product is a variant product', () => {
         global.session.privacy.algoliaAnchorProducts = JSON.stringify(['product1']);
         const slotcontent = {
             content: []
