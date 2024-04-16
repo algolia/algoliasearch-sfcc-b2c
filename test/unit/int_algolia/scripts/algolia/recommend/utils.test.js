@@ -2,12 +2,6 @@ describe('getAnchorProductIds', () => {
     const productMgrMock = require('dw/catalog/ProductMgr');
     const algoliaDataMock = jest.mock('*/cartridge/scripts/algolia/lib/algoliaData');
 
-    const session = {
-        privacy: {
-            algoliaAnchorProducts: null,
-        },
-    }
-
     const variantProduct = {
         ID: 'product1',
         isVariationGroup: jest.fn(() => false),
