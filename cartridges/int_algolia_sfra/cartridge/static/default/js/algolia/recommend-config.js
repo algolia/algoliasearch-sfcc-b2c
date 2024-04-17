@@ -1,6 +1,8 @@
 /* global instantsearch */
 
 const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
+
+var registeredWidgets = new Map();
 /**
  * Enable recommendations
  * @param {Object} config - Configuration object
@@ -68,6 +70,12 @@ function createRecommendationWidget(options) {
         maxRecommendations: 4,
         itemComponent: ({ item, html }) => itemComponent({ item, html })
     };
+
+    if (options.algoliaAnchorProduct) {
+        widgetOptions.objectIDs = [options.algoliaAnchorProduct];
+    } else {
+        registeredWidgets.set(containerId, options);
+    }
 
     if (type === 'frequentlyBoughtTogether') {
         frequentlyBoughtTogether(widgetOptions);
@@ -313,4 +321,16 @@ function getPriceHtml(item, html) {
             </span>
         </span>
     `;
+}
+
+if (algoliaData.enableRecommend) {
+    document.addEventListener('DOMContentLoaded', function() {
+        // Re-render the recommendation widgets when an variation is selected
+        $('body').on('product:afterAttributeSelect', function (e, response) {
+            registeredWidgets.forEach(widget => {
+                widget.algoliaAnchorProduct = response.data.algoliaAnchorProduct;
+                createRecommendationWidget(widget);
+            });
+        });
+    });
 }
