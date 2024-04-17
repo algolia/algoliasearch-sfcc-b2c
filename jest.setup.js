@@ -9,6 +9,11 @@ global.customPreferences = {
     Algolia_IndexPrefix: 'test_index_',
     Algolia_RecordModel: 'variant-level',
 }
+global.session = {
+    privacy: {
+        algoliaAnchorProducts: null,
+    }
+};
 
 // System classes, alphabetical order
 jest.mock('dw/catalog/ProductMgr', () => {
