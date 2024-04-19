@@ -37,13 +37,6 @@ function enableAutocomplete(config) {
             openOnFocus: true,
         });
 
-        inputElement.addEventListener('keypress', function (event) {
-            if (event.key === 'Enter') {
-                var urlParams = config.searchPageRoot.indexOf("?") > -1 ? '&q=' + event.target.value : '?q=' + event.target.value;
-                window.location.href = config.searchPageRoot + urlParams;
-            }
-        });
-
         /**
          * Closes the autocomplete panel if the click is outside the input.
          * @param {Object} event - The event object.
@@ -57,8 +50,6 @@ function enableAutocomplete(config) {
 
         //Listen for click events and close the panel if the click is outside the input 
         document.addEventListener('click', onClickOutside, true);
-        document.addEventListener('touchstart', onClickOutside, true);
-
 
         //change this code with jquery
         contentSearchbarTab.on('click', function (event) {
@@ -195,10 +186,12 @@ function getSourcesArray(config) {
                 }
 
                 return html `
-                        <div class="text-truncate text-nowrap">
-                            <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
-                            <a href="${newURL.href}">${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</a>
-                        </div>`;
+                        <a href="${newURL.href}">
+                            <div class="text-truncate text-nowrap">
+                                <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
+                                <span>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</span>
+                            </div>
+                        </a>`;
             },
         },
     });
@@ -224,10 +217,12 @@ function getSourcesArray(config) {
             }) {
                 var a = item;
                 return html `
+                    <a href=${item.url}>
                         <div class="text-truncate text-nowrap">
                             <img class="swatch-circle hidden-xs-down" src=${item.disBaseLink}></img>
-                            <a href=${item.url}>${item.label}</a>
-                        </div>`;
+                            <span>${item.label}</span>
+                        </div>
+                    </a>`;
             },
         },
     });
@@ -268,16 +263,18 @@ function getSourcesArray(config) {
                 html,
             }) {
                 return html `
-                      <div class="text-truncate text-nowrap">
-                        <img class="swatch-circle hidden-xs-down" src=${item.image}></img>
-                        <a href=${item.url}>
-        ${components.Highlight(
-        {
-            hit: item,
-            attribute: "name",
-            tagName: "em"
-        })}</a>
-                      </div>`;
+                    <a href=${item.url}>
+                        <div class="text-truncate text-nowrap">
+                            <img class="swatch-circle hidden-xs-down" src=${item.image}></img>
+                            <span>
+                            ${components.Highlight(
+                            {
+                                hit: item,
+                                attribute: "name",
+                                tagName: "em"
+                            })}</span>
+                        </div>
+                    </a`;
             },
         },
     });
@@ -319,15 +316,17 @@ function getSourcesArray(config) {
                     html,
                 }) {
                     return html `
-                          <div class="text-truncate text-nowrap">
-                            <a class="ml-5" href=${item.url}>
-        ${components.Highlight(
-        {
-            hit: item,
-            attribute: "name",
-            tagName: "em"
-        })}</a>
-                          </div>`;
+                        <a href=${item.url}>
+                            <div class="text-truncate text-nowrap">
+                                <span class="ml-sm-0 ml-md-5">
+                                ${components.Highlight(
+                                {
+                                    hit: item,
+                                    attribute: "name",
+                                    tagName: "em"
+                                })}</span>
+                            </div>
+                        </a>`;
                 },
             },
         });
@@ -335,3 +334,16 @@ function getSourcesArray(config) {
 
     return sourcesArray;
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter' && (e.target.id.indexOf('autocomplete-') > -1)){
+            console.log('Enter key pressed');
+            var $suggestionsWrapper = $('#suggestions-wrapper');
+            var searchPageRoot = $suggestionsWrapper?.attr('data-search-page-root');
+            var urlParams = searchPageRoot.indexOf("?") > -1 ? '&q=' + e.target.value : '?q=' + e.target.value;
+            window.location.href = searchPageRoot + urlParams;
+            console.log('URL: ' + searchPageRoot + urlParams);
+        }
+    });
+});
