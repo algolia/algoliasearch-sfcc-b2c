@@ -338,12 +338,10 @@ function getSourcesArray(config) {
 document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('keypress', function (e) {
         if (e.key === 'Enter' && (e.target.id.indexOf('autocomplete-') > -1)){
-            console.log('Enter key pressed');
             var $suggestionsWrapper = $('#suggestions-wrapper');
             var searchPageRoot = $suggestionsWrapper.attr('data-search-page-root');
             var urlParams = searchPageRoot.indexOf("?") > -1 ? '&q=' + e.target.value : '?q=' + e.target.value;
             window.location.href = searchPageRoot + urlParams;
-            console.log('URL: ' + searchPageRoot + urlParams);
         }
     });
 });
