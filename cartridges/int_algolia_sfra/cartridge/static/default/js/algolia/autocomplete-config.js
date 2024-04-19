@@ -268,11 +268,11 @@ function getSourcesArray(config) {
                             <img class="swatch-circle hidden-xs-down" src=${item.image}></img>
                             <span>
                             ${components.Highlight(
-                            {
-                                hit: item,
-                                attribute: "name",
-                                tagName: "em"
-                            })}</span>
+        {
+            hit: item,
+            attribute: "name",
+            tagName: "em"
+        })}</span>
                         </div>
                     </a`;
             },
@@ -319,12 +319,12 @@ function getSourcesArray(config) {
                         <a href=${item.url}>
                             <div class="text-truncate text-nowrap">
                                 <span class="ml-sm-0 ml-md-5">
-                                ${components.Highlight(
-                                {
-                                    hit: item,
-                                    attribute: "name",
-                                    tagName: "em"
-                                })}</span>
+        ${components.Highlight(
+        {
+            hit: item,
+            attribute: "name",
+            tagName: "em"
+        })}</span>
                             </div>
                         </a>`;
                 },
@@ -340,7 +340,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (e.key === 'Enter' && (e.target.id.indexOf('autocomplete-') > -1)){
             console.log('Enter key pressed');
             var $suggestionsWrapper = $('#suggestions-wrapper');
-            var searchPageRoot = $suggestionsWrapper?.attr('data-search-page-root');
+            var searchPageRoot = $suggestionsWrapper.attr('data-search-page-root');
             var urlParams = searchPageRoot.indexOf("?") > -1 ? '&q=' + e.target.value : '?q=' + e.target.value;
             window.location.href = searchPageRoot + urlParams;
             console.log('URL: ' + searchPageRoot + urlParams);
