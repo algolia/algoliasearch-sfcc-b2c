@@ -50,7 +50,9 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             var queryHits;
 
             // server-side rendering to improve SEO - makes a server-side request to Algolia to return CLP search results
-            if (algoliaData.getPreference('EnableSSR')) {
+            // only triggered when the user-agent looks like a bot, as we want it triggered only for search engines bots (DuckDuckBot, GoogleBot, BingBot, YandexBot, Baiduspider, ...)
+            var searchenginesbots = /bot|crawler|spider/i;
+            if (algoliaData.getPreference('EnableSSR') && searchenginesbots.test(req.httpHeaders.get('user-agent'))) {
                 // We use the 'cgid' and 'q' parameters to identify if we're on a category page or normal search.
                 var type = cgid ? 'category' : q ? 'query' : null;
                 // Then, we are fetching server-side results and transform them prior to rendering according to search type.
@@ -60,11 +62,10 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                     hits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(hits);
                 }
 
-                if (algoliaData.getPreference('EnableContentSearch')) {
+                if (type === 'query' && algoliaData.getPreference('EnableContentSearch')) {
                     contentHits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, type, 'contents');
                     contentHits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(contentHits);
                 }
-
             }
 
             res.render('search/searchResults', {
@@ -76,7 +77,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 hits: hits,
                 contentHits: contentHits,
                 cgid: req.querystring.cgid,
-                q: req.querystring.q
+                q: req.querystring.q,
             });
         }
     }
