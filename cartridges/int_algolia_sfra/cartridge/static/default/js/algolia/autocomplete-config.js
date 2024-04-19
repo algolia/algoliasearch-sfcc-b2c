@@ -339,9 +339,11 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('keypress', function (e) {
         if (e.key === 'Enter' && (e.target.id.indexOf('autocomplete-') > -1)){
             var $suggestionsWrapper = $('#suggestions-wrapper');
-            var searchPageRoot = $suggestionsWrapper.attr('data-search-page-root');
-            var urlParams = searchPageRoot.indexOf("?") > -1 ? '&q=' + e.target.value : '?q=' + e.target.value;
-            window.location.href = searchPageRoot + urlParams;
+            if ($suggestionsWrapper && $suggestionsWrapper.length > 0) {
+                var searchPageRoot = $suggestionsWrapper.attr('data-search-page-root');
+                var urlParams = searchPageRoot.indexOf("?") > -1 ? '&q=' + e.target.value : '?q=' + e.target.value;
+                window.location.href = searchPageRoot + urlParams;
+            }
         }
     });
 });
