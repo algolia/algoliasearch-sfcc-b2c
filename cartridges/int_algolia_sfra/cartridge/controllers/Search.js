@@ -62,11 +62,10 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                     hits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(hits);
                 }
 
-                if (algoliaData.getPreference('EnableContentSearch')) {
+                if (type === 'query' && algoliaData.getPreference('EnableContentSearch')) {
                     contentHits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, type, 'contents');
                     contentHits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(contentHits);
                 }
-
             }
 
             res.render('search/searchResults', {
