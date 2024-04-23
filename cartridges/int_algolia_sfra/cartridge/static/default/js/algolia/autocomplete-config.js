@@ -70,12 +70,11 @@ function enableAutocomplete(config) {
 
     document.addEventListener('keypress', function (e) {
         if (e.key === 'Enter' && (e.target.id.indexOf('autocomplete-') > -1)) {
-                var searchPageRoot = config.searchPageRoot;
-                var urlParams = searchPageRoot.indexOf("?") > -1 ? '&q=' + e.target.value : '?q=' + e.target.value;
-                window.location.href = searchPageRoot + urlParams;
-            }
+            var searchPageRoot = config.searchPageRoot;
+            var urlParams = searchPageRoot.indexOf("?") > -1 ? '&q=' + e.target.value : '?q=' + e.target.value;
+            window.location.href = searchPageRoot + urlParams;
         }
-    );
+    });
 }
 
 /**
