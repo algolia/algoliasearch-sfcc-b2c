@@ -4,6 +4,8 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 const COLOR_ATTRIBUTE_ID = 'color';
 
+const IS_PWA = true; // You can set this to false if you are not using PWA, this is used to determine if we should return the variantID that necessary for PWA
+
 /**
  * Return colorVariations for a product, based on its variation model
  * @param {dw.catalog.Product} product Product
@@ -36,8 +38,11 @@ function getColorVariations(product, locale) {
         }
         var image_groups = getColorVariationImagesGroup(variationModel, colorValue);
 
+        var variantID = getVariantID(variationModel, colorVariationAttribute, colorValue);
+
         if (image_groups) {
-            colorVariations.push({
+
+            var variationObject = {
                 image_groups: image_groups,
                 variationURL: URLUtils.url(
                     'Product-Show',
@@ -47,7 +52,13 @@ function getColorVariations(product, locale) {
                     colorValue.value
                 ).toString(),
                 color: colorValue.displayValue,
-            });
+            };
+
+            if (variantID && IS_PWA) {
+                variationObject.variantID = variantID;
+            }
+
+            colorVariations.push(variationObject);
         }
     }
     return colorVariations;
@@ -109,6 +120,28 @@ function getImageGroups(imagesList, viewtype) {
     }
 
     return result;
+}
+
+/**
+ * Function returning the color variations of a product
+ * @param {dw.catalog.ProductVariationModel} variationModel a variation model
+ * @param {string} colorVariationAttribute a 'color' variation attribute
+ * @param {dw.catalog.ProductVariationAttributeValue} colorAttributeValue a 'color' variation value
+ * @param {string} productID the product ID
+ */
+function getVariantID(variationModel, colorVariationAttribute, colorAttributeValue) {
+    var variants = variationModel.getVariants();
+
+    var variantArr = variants.toArray();
+
+    for (var i = 0; i < variantArr.length; i++) {
+        var variant = variantArr[i];
+        if (variant.custom.color === colorAttributeValue.value) {
+            return variant.ID;
+        }
+    }
+
+    return null;
 }
 
 module.exports = {
