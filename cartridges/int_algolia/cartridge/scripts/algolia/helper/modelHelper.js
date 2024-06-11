@@ -4,7 +4,7 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 const COLOR_ATTRIBUTE_ID = 'color';
 
-const IS_PWA = true; // You can set this to false if you are not using PWA, this is used to determine if we should return the variantID that necessary for PWA
+const IS_PWA = false; // You can set this to true if you are using PWA, this is used to determine if we should return the variantID that necessary for PWA
 
 /**
  * Return colorVariations for a product, based on its variation model
@@ -38,7 +38,6 @@ function getColorVariations(product, locale) {
         }
         var image_groups = getColorVariationImagesGroup(variationModel, colorValue);
 
-        var variantID = getVariantID(variationModel, colorVariationAttribute, colorValue);
 
         if (image_groups) {
 
@@ -54,7 +53,9 @@ function getColorVariations(product, locale) {
                 color: colorValue.displayValue,
             };
 
-            if (variantID && IS_PWA) {
+            if (IS_PWA) {
+                var variantID = getVariantID(variationModel, colorVariationAttribute, colorValue);
+
                 variationObject.variantID = variantID;
             }
 
