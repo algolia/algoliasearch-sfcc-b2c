@@ -129,6 +129,7 @@ function getImageGroups(imagesList, viewtype) {
  * @param {string} colorVariationAttribute a 'color' variation attribute
  * @param {dw.catalog.ProductVariationAttributeValue} colorAttributeValue a 'color' variation value
  * @param {string} productID the product ID
+ * @returns {string|null} the variant ID of the product
  */
 function getVariantID(variationModel, colorVariationAttribute, colorAttributeValue) {
     var variants = variationModel.getVariants();
