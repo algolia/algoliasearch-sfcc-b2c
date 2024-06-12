@@ -56,7 +56,7 @@ function getColorVariations(product, locale) {
             if (IS_PWA) {
                 var variantID = getVariantID(variationModel, colorVariationAttribute, colorValue);
 
-                variationObject.variantID = variantID;
+                variationObject.variantID = variantID; // This used for generating PWA URL structure.
             }
 
             colorVariations.push(variationObject);
