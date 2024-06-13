@@ -54,9 +54,7 @@ function getColorVariations(product, locale) {
             };
 
             if (IS_PWA) {
-                var variantID = getVariantID(variationModel, colorVariationAttribute, colorValue);
-
-                variationObject.variantID = variantID; // Required to create product detail page URL in PWA
+                variationObject.colorCode = colorValue.value; // Required to create product detail page URL in PWA
             }
 
             colorVariations.push(variationObject);
@@ -121,29 +119,6 @@ function getImageGroups(imagesList, viewtype) {
     }
 
     return result;
-}
-
-/**
- * Function returning the color variations of a product
- * @param {dw.catalog.ProductVariationModel} variationModel a variation model
- * @param {string} colorVariationAttribute a 'color' variation attribute
- * @param {dw.catalog.ProductVariationAttributeValue} colorAttributeValue a 'color' variation value
- * @param {string} productID the product ID
- * @returns {string|null} the variant ID of the product
- */
-function getVariantID(variationModel, colorVariationAttribute, colorAttributeValue) {
-    var variants = variationModel.getVariants();
-
-    var variantArr = variants.toArray();
-
-    for (var i = 0; i < variantArr.length; i++) {
-        var variant = variantArr[i];
-        if (variant.custom.color === colorAttributeValue.value) {
-            return variant.ID;
-        }
-    }
-
-    return null;
 }
 
 module.exports = {
