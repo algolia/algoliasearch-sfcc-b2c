@@ -205,6 +205,10 @@ exports[`runCategoryExport 1`] = `
           },
           "indexName": "test_index___categories__default.tmp",
         },
+      ],
+    ],
+    [
+      [
         AlgoliaOperation {
           "action": "addObject",
           "body": {
@@ -279,6 +283,10 @@ exports[`runCategoryExport 1`] = `
           },
           "indexName": "test_index___categories__fr.tmp",
         },
+      ],
+    ],
+    [
+      [
         AlgoliaOperation {
           "action": "addObject",
           "body": {
@@ -357,6 +365,34 @@ exports[`runCategoryExport 1`] = `
     ],
   ],
   "results": [
+    {
+      "type": "return",
+      "value": {
+        "object": {
+          "body": {
+            "taskID": {
+              "test_index_en": 42,
+              "test_index_fr": 33,
+            },
+          },
+        },
+        "ok": true,
+      },
+    },
+    {
+      "type": "return",
+      "value": {
+        "object": {
+          "body": {
+            "taskID": {
+              "test_index_en": 42,
+              "test_index_fr": 33,
+            },
+          },
+        },
+        "ok": true,
+      },
+    },
     {
       "type": "return",
       "value": {
