@@ -49,8 +49,6 @@ function runCategoryExport(parameters, stepExecution) {
     var siteCatalog = catalogMgr.getSiteCatalog();
     var siteCatalogID = siteCatalog.getID();
     var siteRootCategory = siteCatalog.getRoot();
-    var topLevelCategories = siteRootCategory.hasOnlineSubCategories()
-        ? siteRootCategory.getOnlineSubCategories().iterator() : null;
 
     var jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'category');
     jobReport.startTime = new Date();
@@ -79,12 +77,14 @@ function runCategoryExport(parameters, stepExecution) {
     }
 
     var lastIndexingTasks = {};
-    while (topLevelCategories.hasNext()) {
+    for (let l = 0; l < siteLocales.size(); ++l) {
+        var locale = siteLocales[l];
+        var topLevelCategories = siteRootCategory.getOnlineSubCategories().iterator();
+        var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
         var batch = [];
-        var category = topLevelCategories.next();
-        for (let l = 0; l < siteLocales.size(); ++l) {
-            var locale = siteLocales[l];
-            var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
+
+        while (topLevelCategories.hasNext()) {
+            var category = topLevelCategories.next();
             var localizedCategories = getSubCategoryModels(category, siteCatalogID, locale);
 
             for (let i = 0; i < localizedCategories.length; ++i) {
@@ -92,16 +92,14 @@ function runCategoryExport(parameters, stepExecution) {
             }
         }
 
-        jobReport.processedItemsToSend += (batch.length / siteLocales.size()); // number of categories for one locale
-        jobReport.processedItems = jobReport.processedItemsToSend; // same value, there's no filtering for categories
+        // We only count the number of items processed for the first locale
+        if (l === 0) {
+            jobReport.processedItemsToSend += batch.length; // number of categories for the first locale
+            jobReport.processedItems = jobReport.processedItemsToSend; // same value, there's no filtering for categories
+        }
         jobReport.recordsToSend += batch.length;
 
-        if (batch.length === 0) {
-            logger.info('No records generated for category: ' + category.getID() + ', continuing...');
-            continue;
-        }
-
-        logger.info('Sending a batch of ' + batch.length + ' records for top-level category ID: ' + category.getID());
+        logger.info('Sending a batch of ' + batch.length + ' records for locale ' + locale);
 
         var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
         var result = retryableBatchRes.result;
