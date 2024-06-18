@@ -4,6 +4,8 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 const COLOR_ATTRIBUTE_ID = 'color';
 
+const IS_PWA = false; // You can set this to true if you are using PWA, this is used to determine if we should return the colorCode that is necessary for PWA
+
 /**
  * Return colorVariations for a product, based on its variation model
  * @param {dw.catalog.Product} product Product
@@ -36,8 +38,10 @@ function getColorVariations(product, locale) {
         }
         var image_groups = getColorVariationImagesGroup(variationModel, colorValue);
 
+
         if (image_groups) {
-            colorVariations.push({
+
+            var variationObject = {
                 image_groups: image_groups,
                 variationURL: URLUtils.url(
                     'Product-Show',
@@ -47,7 +51,13 @@ function getColorVariations(product, locale) {
                     colorValue.value
                 ).toString(),
                 color: colorValue.displayValue,
-            });
+            };
+
+            if (IS_PWA) {
+                variationObject.colorCode = colorValue.value; // Required to create product detail page URL in PWA
+            }
+
+            colorVariations.push(variationObject);
         }
     }
     return colorVariations;
