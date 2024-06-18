@@ -12,6 +12,8 @@ var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants
 
 var LOG_NODE_NAME = 'logger';
 
+var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+
 /**
  * Log Data Object
  */
@@ -158,8 +160,66 @@ function setLogData(id, productLog) {
     return true;
 }
 
+/**
+ * Logs the object IDs of problematic objects.
+ *
+ * If the input is an array, it logs the object IDs of all objects in the array that have a `body.objectID` property.
+ * If the input is an object, it logs the object's `objectID` property if it exists.
+ *
+ * @param {Object|Object[]} object - The object or array of objects to log the object IDs of.
+ * @param {Error} error - The error that occurred while processing the object.
+ */
+function customLogger(object, error) {
+    var Logger = require('dw/system/Logger');
+    var logger = Logger.getLogger('customLogger');
+
+    if (!object) {
+        logger.error('Error: ' + error);
+        return;
+    }
+
+    var requests = object.requests;
+    var problematicObjectIDs = [];
+
+    if (Array.isArray(requests)) {
+        requests.forEach(function (item) {
+            if (item && item.body && item.body.objectID) {
+                problematicObjectIDs.push(item.body.objectID);
+            }
+            logAttributes(item);
+        });
+    } else if (requests && requests.objectID) {
+        problematicObjectIDs.push(requests.objectID);
+        logAttributes(requests);
+    } else {
+        logger.error('Error: ' + error);
+        return;
+    }
+
+    logger.error('Error: ' + error + 
+        ' Invalid request body. Problematic objectIDs: ' + problematicObjectIDs.join(', '));
+}
+
+/**
+ * Logs the attributes of an object.
+ * @param {Object} item - The object to log the attributes of.
+ */
+function logAttributes(item) {
+    var Logger = require('dw/system/Logger');
+    var logger = Logger.getLogger('customLogger');
+
+    var objAttr = [];
+    for (var key in item) {
+        if (item.hasOwnProperty(key)) {
+            objAttr.push(key + ': ' + item[key]);
+        }
+    }
+    logger.error('Invalid request body. Problematic Object attributes: ' + objAttr.join(', '));
+}
+
 module.exports = {
     getLogDataAllSites: getLogDataAllSites,
     getLogData: getLogData,
-    setLogData: setLogData
+    setLogData: setLogData,
+    customLogger: customLogger
 };

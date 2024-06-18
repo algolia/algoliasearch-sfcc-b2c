@@ -3,6 +3,7 @@
 const LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 const System = require('dw/system/System');
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+const logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
 const version = require('*/algoliaconfig').version;
 
@@ -26,7 +27,16 @@ function getService(jobInfo) {
             if (parameters) {
                 service.setRequestMethod(parameters.method || 'POST');
                 service.setURL(parameters.url);
-                return JSON.stringify(parameters.body);
+                var strParamBody;
+
+                try {
+                    strParamBody = JSON.stringify(parameters.body);
+                } catch (error) {
+                    logHelper.customLogger(parameters.body, error);
+                    throw new Error('JSON stringify issue');
+                }
+
+                return strParamBody;
             }
         },
         parseResponse: function (service, response) {
