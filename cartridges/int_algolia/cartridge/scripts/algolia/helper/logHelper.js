@@ -170,9 +170,6 @@ function setLogData(id, productLog) {
  * @param {Error} error - The error that occurred while processing the object.
  */
 function customLogger(object, error) {
-    var Logger = require('dw/system/Logger');
-    var logger = Logger.getLogger('customLogger');
-
     if (!object) {
         logger.error('Error: ' + error);
         return;
@@ -205,8 +202,6 @@ function customLogger(object, error) {
  * @param {Object} item - The object to log the attributes of.
  */
 function logAttributes(item) {
-    var Logger = require('dw/system/Logger');
-    var logger = Logger.getLogger('customLogger');
 
     var objAttr = [];
     for (var key in item) {
