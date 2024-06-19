@@ -185,9 +185,6 @@ function customLogger(object, error) {
             }
             logAttributes(item);
         });
-    } else if (requests && requests.objectID) {
-        problematicObjectIDs.push(requests.objectID);
-        logAttributes(requests);
     } else {
         logger.error('Error: ' + error);
         return;
