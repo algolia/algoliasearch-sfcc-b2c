@@ -126,7 +126,7 @@ exports[`getSubCategoryModels french locale 1`] = `
 ]
 `;
 
-exports[`runCategoryExport 1`] = `
+exports[`runCategoryExport default 1`] = `
 [MockFunction] {
   "calls": [
     [
