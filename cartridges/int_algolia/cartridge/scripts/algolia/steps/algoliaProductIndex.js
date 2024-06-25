@@ -1,5 +1,6 @@
 'use strict';
 
+var ArrayList = require('dw/util/ArrayList');
 var Site = require('dw/system/Site');
 var ProductMgr = require('dw/catalog/ProductMgr');
 var logger;
@@ -156,8 +157,17 @@ exports.beforeStep = function(parameters, stepExecution) {
     }
 
     /* --- site locales --- */
+    const localesForIndexing = algoliaData.getSetOfArray('LocalesForIndexing');
     siteLocales = Site.getCurrent().getAllowedLocales();
-    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
+    localesForIndexing.forEach(function(locale) {
+        if (siteLocales.indexOf(locale) < 0) {
+            throw new Error('Locale "' + locale + '" is not enabled on ' + Site.getCurrent().getName());
+        }
+    })
+    if (localesForIndexing.length > 0) {
+        siteLocales = new ArrayList(localesForIndexing);
+    }
+    logger.info('Will index ' + siteLocales.size() + ' locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
     jobReport.siteLocales = siteLocales.size();
 
     algoliaIndexingAPI.setJobInfo({
@@ -413,6 +423,9 @@ exports.__setLastIndexingTasks = function(indexingTasks) {
 };
 exports.__getAttributesToSend = function() {
     return attributesToSend;
+}
+exports.__getLocalesForIndexing = function() {
+    return siteLocales.toArray();
 }
 exports.__getJobReport = function() {
     return jobReport;

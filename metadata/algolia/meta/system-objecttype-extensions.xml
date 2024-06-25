@@ -183,6 +183,14 @@ Setting this preference replaces the first two segments, the final index name be
                 </value-definitions>
             </attribute-definition>
 
+            <attribute-definition attribute-id="Algolia_LocalesForIndexing">
+                <display-name xml:lang="x-default">Locales for indexing</display-name>
+                <description xml:lang="x-default">List of locales that will be used by the indexing jobs</description>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_EnableInsights">
                 <display-name xml:lang="x-default">Enable Insights Events</display-name>
                 <description xml:lang="x-default">When enabled, the Storefront sends insights events to Algolia: views, clicks, addToCart and purchases</description>
@@ -203,7 +211,7 @@ Setting this preference replaces the first two segments, the final index name be
 
             <attribute-definition attribute-id="Algolia_EnableContentSearch">
                 <display-name xml:lang="x-default">Enable Content Search</display-name>
-                <description xml:lang="x-default">When enabled, the content search in Storefront becomes available</description> 
+                <description xml:lang="x-default">When enabled, the content search in Storefront becomes available</description>
                 <type>boolean</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -213,7 +221,7 @@ Setting this preference replaces the first two segments, the final index name be
 
             <attribute-definition attribute-id="Algolia_EnableRecommend">
                 <display-name xml:lang="x-default">Enable Recommend</display-name>
-                <description xml:lang="x-default">When enabled, the Algolia recommendations in Storefront becomes available</description> 
+                <description xml:lang="x-default">When enabled, the Algolia recommendations in Storefront becomes available</description>
                 <type>boolean</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -252,6 +260,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_AdditionalAttributes"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
                 <attribute attribute-id="Algolia_RecordModel"/>
+                <attribute attribute-id="Algolia_LocalesForIndexing"/>
                 <attribute attribute-id="Algolia_EnableInsights"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
                 <attribute attribute-id="Algolia_EnableContentSearch"/>
