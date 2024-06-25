@@ -113,6 +113,9 @@ jest.mock('dw/system/Site', () => {
                 },
                 getAllowedLocales: function () {
                     var arr = ['default', 'fr', 'en'];
+                    arr.get = function (i) {
+                        return arr[i];
+                    };
                     arr.size = function () {
                         return arr.length;
                     };

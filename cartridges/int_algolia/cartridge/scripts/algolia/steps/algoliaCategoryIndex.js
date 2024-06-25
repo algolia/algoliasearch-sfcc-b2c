@@ -89,7 +89,7 @@ function runCategoryExport(parameters, stepExecution) {
 
     var lastIndexingTasks = {};
     for (let l = 0; l < siteLocales.size(); ++l) {
-        var locale = siteLocales[l];
+        var locale = siteLocales.get(l);
         var topLevelCategories = siteRootCategory.getOnlineSubCategories().iterator();
         var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
         var batch = [];

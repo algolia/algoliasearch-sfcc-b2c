@@ -149,5 +149,6 @@ describe('runCategoryExport', () => {
         expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
         expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith('categories', ['fr']);
         expect(mockCopySettingsFromProdIndices).toHaveBeenCalledWith('categories', ['fr']);
+        expect(mockSendMultiIndexBatch).toMatchSnapshot();
     });
 });
