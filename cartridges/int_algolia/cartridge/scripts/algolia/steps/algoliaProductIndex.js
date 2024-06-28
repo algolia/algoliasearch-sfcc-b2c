@@ -370,11 +370,19 @@ exports.afterStep = function(success, parameters, stepExecution) {
         jobReport.errorMessage = 'An error occurred during the job. Please see the error log for more details.';
     }
 
-    logger.info('Total number of products: {0}', jobReport.processedItems);
+    logger.info('Total number of processed products: {0} / {1}', jobReport.processedItems, products.count);
     logger.info('Number of products marked for sending: {0}', jobReport.processedItemsToSend);
     logger.info('Number of locales configured for the site: {0}', jobReport.siteLocales);
     logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
     logger.info('Chunks sent: {0}; Chunks failed: {1}', jobReport.chunksSent, jobReport.chunksFailed);
+
+    if (jobReport.error) {
+        jobReport.endTime = new Date();
+        jobReport.writeToCustomObject();
+        logger.error(jobReport.errorMessage);
+        // Don't try to finish the indexing and show the job in ERROR in the history
+        throw new Error(jobReport.errorMessage);
+    }
 
     const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
 
