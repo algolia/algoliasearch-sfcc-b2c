@@ -199,11 +199,16 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         batch = batch.concat(contentOperations);
     }
 
-    var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-    var result = retryableBatchRes.result;
-    jobReport.recordsFailed += retryableBatchRes.failedRecords;
+    var result;
+    try {
+        var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+        result = retryableBatchRes.result;
+        jobReport.recordsFailed += retryableBatchRes.failedRecords;
+    } catch (e) {
+        logger.error('Error while sending batch to Algolia: ' + e);
+    }
 
-    if (result.ok) {
+    if (result && result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
 
@@ -239,11 +244,19 @@ exports.afterStep = function(success, parameters, stepExecution) {
         jobReport.errorMessage = 'An error occurred during the job. Please see the error log for more details.';
     }
 
-    logger.info('Total number of contents: {0}', jobReport.processedItems);
+    logger.info('Total number of contents: {0} / {1}', jobReport.processedItems, count);
     logger.info('Number of contents marked for sending: {0}', jobReport.processedItemsToSend);
     logger.info('Number of locales configured for the site: {0}', jobReport.siteLocales);
     logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
     logger.info('Chunks sent: {0}; Chunks failed: {1}', jobReport.chunksSent, jobReport.chunksFailed);
+
+    if (jobReport.error) {
+        jobReport.endTime = new Date();
+        jobReport.writeToCustomObject();
+        logger.error(jobReport.errorMessage);
+        // Don't try to finish the indexing and show the job in ERROR in the history
+        throw new Error(jobReport.errorMessage);
+    }
 
     const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
 
