@@ -101,11 +101,16 @@ function runCategoryExport(parameters, stepExecution) {
 
         logger.info('Sending a batch of ' + batch.length + ' records for locale ' + locale);
 
-        var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-        var result = retryableBatchRes.result;
-        jobReport.recordsFailed += retryableBatchRes.failedRecords;
+        var result;
+        try {
+            var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+            result = retryableBatchRes.result;
+            jobReport.recordsFailed += retryableBatchRes.failedRecords;
+        } catch (e) {
+            logger.error('Error while sending batch to Algolia: ' + e);
+        }
 
-        if (result.ok) {
+        if (result && result.ok) {
             jobReport.recordsSent += batch.length;
             jobReport.chunksSent++;
 

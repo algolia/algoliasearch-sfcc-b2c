@@ -328,11 +328,16 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         return;
     }
 
-    var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-    var result = retryableBatchRes.result;
-    jobReport.recordsFailed += retryableBatchRes.failedRecords;
+    var result;
+    try {
+        var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+        result = retryableBatchRes.result;
+        jobReport.recordsFailed += retryableBatchRes.failedRecords;
+    } catch (e) {
+        logger.error('Error while sending batch to Algolia: ' + e);
+    }
 
-    if (result.ok) {
+    if (result && result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
 
