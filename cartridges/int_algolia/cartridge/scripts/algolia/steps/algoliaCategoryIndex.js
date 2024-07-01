@@ -1,3 +1,4 @@
+const ArrayList = require('dw/util/ArrayList');
 const catalogMgr = require('dw/catalog/CatalogMgr');
 const Site = require('dw/system/Site');
 const Status = require('dw/system/Status');
@@ -50,11 +51,21 @@ function runCategoryExport(parameters, stepExecution) {
     var siteCatalogID = siteCatalog.getID();
     var siteRootCategory = siteCatalog.getRoot();
 
+    const localesForIndexing = algoliaData.getSetOfArray('LocalesForIndexing');
+    localesForIndexing.forEach(function(locale) {
+        if (siteLocales.indexOf(locale) < 0) {
+            throw new Error('Locale "' + locale + '" is not enabled on ' + currentSite.getName());
+        }
+    })
+    if (localesForIndexing.length > 0) {
+        siteLocales = new ArrayList(localesForIndexing);
+    }
+
     var jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'category');
     jobReport.startTime = new Date();
     jobReport.siteLocales = siteLocales.size();
 
-    logger.info('Site: ' + currentSite.getName() +'. Enabled locales: ' + siteLocales.toArray());
+    logger.info('Will index ' + siteLocales.size() + ' locales for ' + currentSite.getName() + ': ' + siteLocales.toArray());
     logger.info('CatalogID: ' + siteCatalogID);
 
     algoliaIndexingAPI.setJobInfo({
@@ -78,7 +89,7 @@ function runCategoryExport(parameters, stepExecution) {
 
     var lastIndexingTasks = {};
     for (let l = 0; l < siteLocales.size(); ++l) {
-        var locale = siteLocales[l];
+        var locale = siteLocales.get(l);
         var topLevelCategories = siteRootCategory.getOnlineSubCategories().iterator();
         var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
         var batch = [];

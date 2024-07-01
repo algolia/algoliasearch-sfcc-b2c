@@ -1,8 +1,6 @@
 // Initialize some default mocks for all tests.
 
 const GlobalMock = require('./test/mocks/global');
-const ProductMock = require("./test/mocks/dw/catalog/Variant");
-const MasterProductMock = require("./test/mocks/dw/catalog/MasterProduct");
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 global.customPreferences = {
@@ -115,11 +113,14 @@ jest.mock('dw/system/Site', () => {
                 },
                 getAllowedLocales: function () {
                     var arr = ['default', 'fr', 'en'];
+                    arr.get = function (i) {
+                        return arr[i];
+                    };
                     arr.size = function () {
                         return arr.length;
                     };
                     arr.toArray = function () {
-                        return arr;
+                        return arr.slice();
                     };
                     return arr;
                 },
@@ -197,6 +198,9 @@ jest.mock('dw/web/CSRFProtection', () => {
             return 'csrfToken';
         }
     }
+}, {virtual: true});
+jest.mock('dw/util/ArrayList', () => {
+    return jest.requireActual('./test/mocks/dw/util/ArrayList');
 }, {virtual: true});
 jest.mock('dw/util/StringUtils', () => {
     return {
@@ -293,7 +297,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
             return id === 'AdditionalAttributes'
                 ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
                     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
-                : null;
+                : [];
         },
     }
 }, {virtual: true});

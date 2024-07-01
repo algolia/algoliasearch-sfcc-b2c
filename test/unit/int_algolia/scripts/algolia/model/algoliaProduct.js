@@ -60,7 +60,7 @@ var AlgoliaProduct = proxyquire('../../../../../../cartridges/int_algolia/cartri
             return id === 'CustomFields'
                 ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
                     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
-                : null;
+                : [];
         },
         getPreference: function (id) {
             return id === 'InStockThreshold' ? 1 : null;

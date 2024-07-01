@@ -51,14 +51,20 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
 }, {virtual: true});
 
 let mockAdditionalAttributes;
+let mockLocalesForIndexing;
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
     return {
         ...originalModule,
         getSetOfArray: function (id) {
-            return id === 'AdditionalAttributes'
-                ? mockAdditionalAttributes
-                : null;
+            switch (id) {
+                case 'AdditionalAttributes':
+                    return mockAdditionalAttributes;
+                case 'LocalesForIndexing':
+                    return mockLocalesForIndexing;
+                default:
+                    return [];
+            }
         },
     }
 }, {virtual: true});
@@ -78,7 +84,8 @@ const collectionHelper = require('../../../../../mocks/helpers/collectionHelper'
 beforeEach(() => {
     global.customPreferences['Algolia_RecordModel'] = 'variant-level';
     mockAdditionalAttributes = ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
-        'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
+        'pageTitle', 'short_description', 'name', 'long_description', 'image_groups'];
+    mockLocalesForIndexing = [];
 });
 
 describe('beforeStep', () => {
@@ -93,6 +100,19 @@ describe('beforeStep', () => {
         job.beforeStep({}, stepExecution);
         expect(job.__getAttributesToSend()).toStrictEqual(['name', 'primary_category_id',
             'categories', 'in_stock', 'price', 'image_groups', 'url']);
+    });
+    test('locales for indexing', () => {
+        job.beforeStep({}, stepExecution);
+        const test = job.__getLocalesForIndexing()
+        expect(job.__getLocalesForIndexing()).toStrictEqual(['default', 'fr', 'en']);
+
+        mockLocalesForIndexing = ['fr'];
+        job.beforeStep({}, stepExecution);
+        expect(job.__getLocalesForIndexing()).toStrictEqual(['fr']);
+
+        mockLocalesForIndexing = ['fr_FR'];
+        expect(() =>  job.beforeStep({}, stepExecution))
+            .toThrow(new Error('Locale "fr_FR" is not enabled on Name of the Test-Site'));
     });
 });
 

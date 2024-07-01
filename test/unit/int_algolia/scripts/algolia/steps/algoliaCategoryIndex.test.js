@@ -44,6 +44,22 @@ jest.mock('dw/catalog/CatalogMgr', () => {
     }
 }, {virtual: true});
 
+let mockLocalesForIndexing;
+jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
+    return {
+        ...originalModule,
+        getSetOfArray: function (id) {
+            switch (id) {
+                case 'LocalesForIndexing':
+                    return mockLocalesForIndexing;
+                default:
+                    return [];
+            }
+        },
+    }
+}, {virtual: true});
+
 jest.mock('*/cartridge/scripts/algolia/model/algoliaLocalizedCategory', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedCategory');
 }, {virtual: true});
@@ -92,6 +108,10 @@ const stepExecution = {
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaCategoryIndex');
 
+beforeEach(() => {
+    mockLocalesForIndexing = [];
+});
+
 describe('getSubCategoryModels', () => {
     test('default locale', () => {
         var categoriesModels = job.getSubCategoryModels(category, catalogId, 'default');
@@ -103,22 +123,32 @@ describe('getSubCategoryModels', () => {
     });
 });
 
-test('runCategoryExport', () => {
+describe('runCategoryExport', () => {
+    test('default', () => {
+        job.runCategoryExport({}, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
+        expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith(
+            'categories',
+            ['default', 'fr', 'en']
+        );
+        expect(mockCopySettingsFromProdIndices).toHaveBeenCalledWith(
+            'categories',
+            ['default', 'fr', 'en']
+        );
+        expect(mockSendMultiIndexBatch).toMatchSnapshot();
+        expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
+            'categories',
+            ['default', 'fr', 'en'],
+            { "test_index_fr": 33, "test_index_en": 42 }
+        );
+    });
 
-    job.runCategoryExport({}, stepExecution);
-    expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
-    expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith(
-        'categories',
-        expect.arrayContaining(['default', 'fr', 'en'])
-    );
-    expect(mockCopySettingsFromProdIndices).toHaveBeenCalledWith(
-        'categories',
-        expect.arrayContaining(['default', 'fr', 'en'])
-    );
-    expect(mockSendMultiIndexBatch).toMatchSnapshot();
-    expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
-        'categories',
-        expect.arrayContaining(['default', 'fr', 'en']),
-        { "test_index_fr": 33, "test_index_en": 42 }
-    );
+    test('with LocalesForIndexing=["fr"]', () => {
+        mockLocalesForIndexing = ['fr'];
+        job.runCategoryExport({}, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
+        expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith('categories', ['fr']);
+        expect(mockCopySettingsFromProdIndices).toHaveBeenCalledWith('categories', ['fr']);
+        expect(mockSendMultiIndexBatch).toMatchSnapshot();
+    });
 });

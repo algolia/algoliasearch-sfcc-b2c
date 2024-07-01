@@ -47,7 +47,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
             return id === 'AdditionalAttributes'
                 ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
                     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
-                : null;
+                : [];
         },
         getPreference: function (id) {
             return id === 'InStockThreshold' ? 1 : null;
