@@ -21,7 +21,7 @@ function getServerSideHits(query, type, indexType) {
 
         var params = type === 'category' ? "facetFilters=" + encodeURIComponent(facetFiltersParamValue) : "query=" + query;
 
-        var additionalSSRParams = "hitsPerPage=9&analytics=false";
+        var additionalSSRParams = "hitsPerPage=9&analytics=false&enableABTest=false";
 
         var requestBody = {
             params: params + "&" + additionalSSRParams,
