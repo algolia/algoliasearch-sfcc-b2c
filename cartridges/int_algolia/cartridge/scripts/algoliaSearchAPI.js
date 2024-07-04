@@ -20,8 +20,11 @@ function getServerSideHits(query, type, indexType) {
         }
 
         var params = type === 'category' ? "facetFilters=" + encodeURIComponent(facetFiltersParamValue) : "query=" + query;
+
+        var additionalSSRParams = "hitsPerPage=9&analytics=false";
+
         var requestBody = {
-            params: params + "&hitsPerPage=9",
+            params: params + "&" + additionalSSRParams,
         };
 
         // any problems with the request will result in the script simply returning an empty array as server-side rendering
