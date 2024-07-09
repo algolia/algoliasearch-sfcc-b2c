@@ -85,9 +85,13 @@ AlgoliaJobReport.prototype.formatCustomObject = function(customObject) {
     startTime.setTimeZone(timeZone);
     this.startTime = StringUtils.formatCalendar(startTime);
 
-    let endTime = new Calendar(customObject.custom.endTime);
-    endTime.setTimeZone(timeZone);
-    this.endTime = StringUtils.formatCalendar(endTime);
+    if (customObject.custom.endTime) {
+        let endTime = new Calendar(customObject.custom.endTime);
+        endTime.setTimeZone(timeZone);
+        this.endTime = StringUtils.formatCalendar(endTime);
+    } else {
+        this.endTime = 'N/A';
+    }
 
     this.processedItems = customObject.custom.processedItems.toFixed();
     this.processedItemsToSend = customObject.custom.processedItemsToSend.toFixed();
