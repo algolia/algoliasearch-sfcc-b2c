@@ -504,3 +504,6 @@ exports.afterStep = function(success, parameters, stepExecution) {
 exports.__getJobReport = function() {
     return jobReport;
 }
+exports.__getLocalesForIndexing = function() {
+    return siteLocales.toArray();
+}

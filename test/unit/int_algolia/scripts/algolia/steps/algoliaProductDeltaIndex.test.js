@@ -26,6 +26,25 @@ jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
     }
 }, {virtual: true});
 
+let mockLocalesForIndexing;
+jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
+    return {
+        ...originalModule,
+        getSetOfArray: function (id) {
+            switch (id) {
+                case 'AdditionalAttributes':
+                    return ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
+                        'pageTitle', 'short_description', 'name', 'long_description', 'image_groups'];
+                case 'LocalesForIndexing':
+                    return mockLocalesForIndexing;
+                default:
+                    return [];
+            }
+        },
+    }
+}, {virtual: true});
+
 const parameters = {
     consumer: 'algolia',
     deltaExportJobName: 'productDeltaExport',
@@ -43,6 +62,30 @@ const stepExecution = {
 };
 
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
+
+beforeEach(() => {
+    mockLocalesForIndexing = [];
+});
+
+describe('beforeStep', () => {
+    test('locales for indexing', () => {
+        job.beforeStep(parameters, stepExecution);
+        expect(job.__getLocalesForIndexing()).toStrictEqual(['default', 'fr', 'en']);
+
+        mockLocalesForIndexing = ['fr'];
+        job.beforeStep(parameters, stepExecution);
+        expect(job.__getLocalesForIndexing()).toStrictEqual(['fr']);
+
+        mockLocalesForIndexing = ['fr_FR'];
+        expect(() =>  job.beforeStep(parameters, stepExecution))
+            .toThrow(new Error('Locale "fr_FR" is not enabled on Name of the Test-Site'));
+
+        // Job-step level overrides the global custom preference
+        mockLocalesForIndexing = ['fr'];
+        job.beforeStep({ localesForIndexing: 'en, fr', ...parameters }, stepExecution);
+        expect(job.__getLocalesForIndexing()).toStrictEqual(['en', 'fr']);
+    });
+});
 
 describe('process', () => {
     test('default', () => {
