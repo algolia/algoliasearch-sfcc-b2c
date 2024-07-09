@@ -1,12 +1,13 @@
 'use strict';
 
+var ArrayList = require('dw/util/ArrayList');
 var ProductMgr = require('dw/catalog/ProductMgr');
 var Site = require('dw/system/Site');
 var File = require('dw/io/File');
 var logger;
 
 // job step parameters
-var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
+var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage, paramLocalesForIndexing;
 var paramRecordModel;
 
 // Algolia requires
@@ -91,6 +92,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramIndexingMethod = parameters.indexingMethod || 'fullRecordUpdate'; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
     paramRecordModel = algoliaData.getPreference('RecordModel') || VARIANT_LEVEL; // 'variant-level' (default), 'master-level'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
+    paramLocalesForIndexing = algoliaData.csvStringToArray(parameters.localesForIndexing);
 
     /* --- B2C delta job parameters --- */
     logger.info('consumer parameter: ' + paramConsumer);
@@ -170,7 +172,19 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- site locales --- */
     siteLocales = Site.getCurrent().getAllowedLocales();
-    logger.info('Enabled locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
+    logger.info('localesForIndexing parameter: ' + paramLocalesForIndexing);
+    const localesForIndexing = paramLocalesForIndexing.length > 0 ?
+        paramLocalesForIndexing :
+        algoliaData.getSetOfArray('LocalesForIndexing');
+    localesForIndexing.forEach(function(locale) {
+        if (siteLocales.indexOf(locale) < 0) {
+            throw new Error('Locale "' + locale + '" is not enabled on ' + Site.getCurrent().getName());
+        }
+    })
+    if (localesForIndexing.length > 0) {
+        siteLocales = new ArrayList(localesForIndexing);
+    }
+    logger.info('Will index ' + siteLocales.size() + ' locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
     jobReport.siteLocales = siteLocales.size();
 
 
@@ -343,7 +357,6 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         records.forEach(function(record) {
                             algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
                         });
-                        logger.info('Sending ' + JSON.stringify(algoliaOperations));
                     }
                 } else {
                     // Master-level indexing
