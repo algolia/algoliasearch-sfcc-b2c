@@ -6,7 +6,7 @@ var ContentSearchModel = require('dw/content/ContentSearchModel');
 var logger;
 
 // job step parameters
-var paramAttributeList, paramFailureThresholdPercentage, includedContent;
+var paramAttributeList, paramFailureThresholdPercentage, includedContent, paramLocalesForIndexing;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig, ContentUtil;
@@ -45,6 +45,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramAttributeList = algoliaData.csvStringToArray(parameters.attributeList);
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
     includedContent = parameters.includedContent || 'allContents';
+    paramLocalesForIndexing = algoliaData.csvStringToArray(parameters.localesForIndexing);
 
 
     attributesToSend = algoliaContentConfig.defaultAttributes;
@@ -70,8 +71,11 @@ exports.beforeStep = function(parameters, stepExecution) {
 
 
     /* --- site locales --- */
-    const localesForIndexing = algoliaData.getSetOfArray('LocalesForIndexing');
     siteLocales = Site.getCurrent().getAllowedLocales();
+    logger.info('localesForIndexing parameter: ' + paramLocalesForIndexing);
+    const localesForIndexing = paramLocalesForIndexing.length > 0 ?
+        paramLocalesForIndexing :
+        algoliaData.getSetOfArray('LocalesForIndexing');
     localesForIndexing.forEach(function(locale) {
         if (siteLocales.indexOf(locale) < 0) {
             throw new Error('Locale "' + locale + '" is not enabled on ' + Site.getCurrent().getName());

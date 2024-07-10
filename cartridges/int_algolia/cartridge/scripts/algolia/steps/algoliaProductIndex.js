@@ -6,7 +6,7 @@ var ProductMgr = require('dw/catalog/ProductMgr');
 var logger;
 
 // job step parameters
-var paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage;
+var paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage, paramLocalesForIndexing;
 var paramRecordModel;
 
 // Algolia requires
@@ -84,6 +84,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullCatalogReindex'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
     paramRecordModel = algoliaData.getPreference('RecordModel') || VARIANT_LEVEL; // 'variant-level' (default), 'master-level'
+    paramLocalesForIndexing = algoliaData.csvStringToArray(parameters.localesForIndexing);
 
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
@@ -157,8 +158,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     }
 
     /* --- site locales --- */
-    const localesForIndexing = algoliaData.getSetOfArray('LocalesForIndexing');
     siteLocales = Site.getCurrent().getAllowedLocales();
+    logger.info('localesForIndexing parameter: ' + paramLocalesForIndexing);
+    const localesForIndexing = paramLocalesForIndexing.length > 0 ?
+        paramLocalesForIndexing :
+        algoliaData.getSetOfArray('LocalesForIndexing');
     localesForIndexing.forEach(function(locale) {
         if (siteLocales.indexOf(locale) < 0) {
             throw new Error('Locale "' + locale + '" is not enabled on ' + Site.getCurrent().getName());
@@ -375,7 +379,9 @@ exports.afterStep = function(success, parameters, stepExecution) {
     // "success" conveys whether an error occurred in any previous chunks or not.
     // Any prior return statements will set success to false (even if it returns Status.OK).
 
-    products.close();
+    if (products.close) {
+        products.close();
+    }
 
     if (success) {
         jobReport.error = false;

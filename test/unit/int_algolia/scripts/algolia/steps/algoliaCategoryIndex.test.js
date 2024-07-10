@@ -151,4 +151,11 @@ describe('runCategoryExport', () => {
         expect(mockCopySettingsFromProdIndices).toHaveBeenCalledWith('categories', ['fr']);
         expect(mockSendMultiIndexBatch).toMatchSnapshot();
     });
+
+    test('with localesForIndexing at step level', () => {
+        job.runCategoryExport({ localesForIndexing: 'en' }, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID' });
+        expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith('categories', ['en']);
+        expect(mockCopySettingsFromProdIndices).toHaveBeenCalledWith('categories', ['en']);
+    });
 });

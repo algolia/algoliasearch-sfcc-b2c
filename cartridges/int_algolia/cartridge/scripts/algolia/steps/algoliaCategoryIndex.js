@@ -51,21 +51,29 @@ function runCategoryExport(parameters, stepExecution) {
     var siteCatalogID = siteCatalog.getID();
     var siteRootCategory = siteCatalog.getRoot();
 
-    const localesForIndexing = algoliaData.getSetOfArray('LocalesForIndexing');
+    var jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'category');
+    jobReport.startTime = new Date();
+
+    const paramLocalesForIndexing = algoliaData.csvStringToArray(parameters.localesForIndexing);
+    logger.info('localesForIndexing parameter: ' + paramLocalesForIndexing);
+    const localesForIndexing = paramLocalesForIndexing.length > 0 ?
+        paramLocalesForIndexing :
+        algoliaData.getSetOfArray('LocalesForIndexing');
     localesForIndexing.forEach(function(locale) {
         if (siteLocales.indexOf(locale) < 0) {
-            throw new Error('Locale "' + locale + '" is not enabled on ' + currentSite.getName());
+            jobReport.endTime = new Date();
+            jobReport.error = true;
+            jobReport.errorMessage = 'Locale "' + locale + '" is not enabled on ' + currentSite.getName();
+            jobReport.writeToCustomObject();
+            throw new Error(jobReport.errorMessage);
         }
     })
     if (localesForIndexing.length > 0) {
         siteLocales = new ArrayList(localesForIndexing);
     }
 
-    var jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'category');
-    jobReport.startTime = new Date();
-    jobReport.siteLocales = siteLocales.size();
-
     logger.info('Will index ' + siteLocales.size() + ' locales for ' + currentSite.getName() + ': ' + siteLocales.toArray());
+    jobReport.siteLocales = siteLocales.size();
     logger.info('CatalogID: ' + siteCatalogID);
 
     algoliaIndexingAPI.setJobInfo({
