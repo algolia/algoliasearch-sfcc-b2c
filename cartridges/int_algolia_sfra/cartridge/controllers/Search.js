@@ -48,7 +48,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             var hits;
             var contentHits;
             var queryHits;
-            // For algolia, we don't need personalized cache, as thereal  results fetched on the front-end
+            //For Algolia, we don't need personalized cache, as the real results are fetched on the front-end.
             res.cachePeriod = 24; // eslint-disable-line no-param-reassign
             res.cachePeriodUnit = 'hours'; // eslint-disable-line no-param-reassign
 
