@@ -48,6 +48,9 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             var hits;
             var contentHits;
             var queryHits;
+            // For algolia, we don't need personalized cache, as thereal  results fetched on the front-end
+            res.cachePeriod = 24; // eslint-disable-line no-param-reassign
+            res.cachePeriodUnit = 'hours'; // eslint-disable-line no-param-reassign
 
             // server-side rendering to improve SEO - makes a server-side request to Algolia to return CLP search results
             // only triggered when the user-agent looks like a bot, as we want it triggered only for search engines bots (DuckDuckBot, GoogleBot, BingBot, YandexBot, Baiduspider, ...)
