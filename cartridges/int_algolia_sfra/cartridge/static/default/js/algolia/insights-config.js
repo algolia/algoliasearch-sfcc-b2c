@@ -1,5 +1,12 @@
 /* global aa */
 
+if (sessionStorage.getItem('ALGOLIA_insights-parameters') === null || sessionStorage.getItem('ALGOLIA_insights-parameters') === localStorage.getItem('ALGOLIA_insights-parameters')) {
+  if (localStorage.getItem('ALGOLIA_insights-parameters') !== null) {
+    sessionStorage.setItem('ALGOLIA_insights-parameters', localStorage.getItem('ALGOLIA_insights-parameters'));
+  }
+  localStorage.removeItem('ALGOLIA_insights-parameters');
+}
+
 /**
  * Configures Insights
  * Relies on the objects and events created by SFRA's addToCart handler:
@@ -68,8 +75,8 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     $('body').on('product:afterAddToCart', function (event, data) {
         const objectIDs = [];
         const objectData = [];
-        const queryID = getUrlParameter('queryID') || lastQueryID;
-        const index = getUrlParameter('indexName') || lastIndexName || productsIndex;
+        const queryID = getInsightsParametersSessionStorage('queryID') || getUrlParameter('queryID') || lastQueryID;
+        const index = getInsightsParametersSessionStorage('indexName') || getUrlParameter('indexName') || lastIndexName || productsIndex;
         let currency;
 
         lastPidsObj.forEach((pidObj) => {
@@ -220,5 +227,23 @@ function enableInsights(appId, searchApiKey, productsIndex) {
                     : decodeURIComponent(currentParameterName[1]);
             }
         }
+    }
+
+    /**
+     * Returns the value of search related insights parameters stored in sessionStorage
+     * @param {string} parameterName The parameter name whose value should be returned
+     * @returns {string} The value of the parameter
+     */
+    function getInsightsParametersSessionStorage(parameterName) {
+        const pageUrl = window.location.href.replace(`${window.location.protocol}//${window.location.host}`, '');
+        const insightsParameters = JSON.parse(sessionStorage.getItem('ALGOLIA_insights-parameters')) || [];
+        
+        for(let iterator = insightsParameters.length - 1; iterator >= 0; iterator--) {
+            if (insightsParameters[iterator]['pageUrl'] === pageUrl) {
+                return insightsParameters[iterator][parameterName];
+            }
+        }
+
+        return null;
     }
 }

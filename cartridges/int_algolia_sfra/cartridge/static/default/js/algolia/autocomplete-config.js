@@ -35,6 +35,39 @@ function enableAutocomplete(config) {
             // If insights is not enabled in the BM, let the value undefined, to rely on the Dashboard setting
             insights: algoliaData.enableInsights ? true : undefined,
             openOnFocus: true,
+            onStateChange({ state }) {
+                document.querySelectorAll('.details-page-link').forEach(function(linkElement) {
+                    linkElement.addEventListener('click', function (event) {
+                        if (event.currentTarget.dataset.queryid == undefined || event.currentTarget.dataset.queryid == "" || event.currentTarget.dataset.queryid == null) {
+                            return true;
+                        } 
+
+                        const pageUrl = event.currentTarget.href.replace(`${window.location.protocol}//${window.location.host}`, '');
+                        let insightsParameters = JSON.parse(sessionStorage.getItem('ALGOLIA_insights-parameters')) || [];
+                        
+                        // Searching if the target PDP page has already queryID/objectID/indexName attached, if yes, remove them to replace them by fresh ones after
+                        for(let iterator = insightsParameters.length - 1; iterator >= 0; iterator--) {
+                            if (insightsParameters[iterator]['pageUrl'] === pageUrl) {
+                                insightsParameters.splice(iterator, 1);
+                                break;
+                            }
+                        }
+                        
+                        insightsParameters.push({
+                            "pageUrl": pageUrl,
+                            "queryID": event.currentTarget.dataset.queryid,
+                            "objectID": event.currentTarget.dataset.objectid,
+                            "indexName": event.currentTarget.dataset.indexname
+                        });
+
+                        const jsonStringInsightsParameters = JSON.stringify(insightsParameters);
+
+                        localStorage.setItem('ALGOLIA_insights-parameters', jsonStringInsightsParameters);
+                        sessionStorage.setItem('ALGOLIA_insights-parameters', jsonStringInsightsParameters);
+                    });
+                    linkElement.classList.remove('details-page-link');
+                });
+            },
         });
 
         /**
@@ -188,13 +221,13 @@ function getSourcesArray(config) {
                 let newURL = '';
                 if (item.url) {
                     newURL = new URL(item.url, window.location.origin);
-                    newURL.searchParams.append('objectID', item.objectID);
+                    /*newURL.searchParams.append('objectID', item.objectID);
                     newURL.searchParams.append('queryID', item.__autocomplete_queryID);
-                    newURL.searchParams.append('indexName', item.__autocomplete_indexName);
+                    newURL.searchParams.append('indexName', item.__autocomplete_indexName);*/
                 }
 
                 return html `
-                        <a href="${newURL.href}">
+                        <a href="${newURL.href}" class="details-page-link" data-queryid="${item.__autocomplete_queryID}" data-objectid="${item.objectID}" data-indexname="${item.__autocomplete_indexName}">
                             <div class="text-truncate text-nowrap">
                                 <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
                                 <span>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</span>

@@ -240,7 +240,7 @@ function enableInstantSearch(config) {
                             >
                                 <div class="product-tile">
                                     <div class="image-container">
-                                        <a href="${hit.url}">
+                                        <a href="${hit.url}" class="details-page-link" data-queryid="${hit.__queryID}" data-objectid="${hit.objectID}" data-indexname="${hit.__indexName}">
                                             <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
                                         </a>
                                         <a class="quickview hidden-sm-down" href="${hit.quickShowUrl}"
@@ -263,7 +263,7 @@ function enableInstantSearch(config) {
                                             </div>
                                         `}
                                         <div class="pdp-link">
-                                            <a href="${hit.url}">
+                                            <a href="${hit.url}" class="details-page-link" data-queryid="${hit.__queryID}" data-objectid="${hit.objectID}" data-indexname="${hit.__indexName}">
                                                 ${components.Highlight({hit, attribute: 'name'})}
                                             </a>
                                         </div>
@@ -506,6 +506,38 @@ function enableInstantSearch(config) {
         $(emptyFacetSelector).each(function () {
             $(this).parents().eq(2).hide();
         });
+
+        document.querySelectorAll('.details-page-link').forEach(function(linkElement) {
+            linkElement.addEventListener('click', function (event) {
+                if (event.currentTarget.dataset.queryid == undefined || event.currentTarget.dataset.queryid == "" || event.currentTarget.dataset.queryid == null) {
+                    return true;
+                } 
+
+                const pageUrl = event.currentTarget.href.replace(`${window.location.protocol}//${window.location.host}`, '');
+                let insightsParameters = JSON.parse(sessionStorage.getItem('ALGOLIA_insights-parameters')) || [];
+                
+                // Searching if the target PDP page has already queryID/objectID/indexName attached, if yes, remove them to replace them by fresh ones
+                for(let iterator = insightsParameters.length - 1; iterator >= 0; iterator--) {
+                    if (insightsParameters[iterator]['pageUrl'] === pageUrl) {
+                        insightsParameters.splice(iterator, 1);
+                        break;
+                    }
+                }
+                
+                insightsParameters.push({
+                    "pageUrl": pageUrl,
+                    "queryID": event.currentTarget.dataset.queryid,
+                    "objectID": event.currentTarget.dataset.objectid,
+                    "indexName": event.currentTarget.dataset.indexname
+                });
+
+                const jsonStringInsightsParameters = JSON.stringify(insightsParameters);
+
+                localStorage.setItem('ALGOLIA_insights-parameters', jsonStringInsightsParameters);
+                sessionStorage.setItem('ALGOLIA_insights-parameters', jsonStringInsightsParameters);
+            });
+            linkElement.classList.remove('details-page-link');
+        });
     });
 
     /**
@@ -599,7 +631,7 @@ function enableInstantSearch(config) {
         const link = parent.querySelector('.image-container > a');
         image.src = variantImage.dis_base_link;
         link.href = colorVariation.variationURL;
-    }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
+    }}" href="${colorVariation.variationURL}" class="details-page-link" data-queryid="${hit.__queryID}" data-objectid="${hit.objectID}" data-indexname="${hit.__indexName}" aria-label="${swatch.title}">
                     <span>
                         <img class="swatch swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                     </span>
