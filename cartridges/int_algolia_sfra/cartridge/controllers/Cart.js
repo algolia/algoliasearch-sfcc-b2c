@@ -37,7 +37,10 @@ server.append('AddProduct', function (req, res, next) {
 
         if (algoliaData.getPreference('RecordModel') === MASTER_LEVEL) {
             var product = ProductMgr.getProduct(productId);
-            algoliaProductData.pid = product.masterProduct.ID;
+
+            if (product && (product.isMaster() || product.isVariationGroup())) {
+                algoliaProductData.pid = product.ID;
+            }
         }
 
         var viewData = res.getViewData();
@@ -45,7 +48,6 @@ server.append('AddProduct', function (req, res, next) {
         algoliaProductData.qty = req.form.quantity;
         var items = viewData.cart.items;
         var pli;
-        //find the item in the cart by using the product id with for loop
         for (var i = 0; i < items.length; i++) {
             if (items[i].id === productId) {
                 pli = items[i];

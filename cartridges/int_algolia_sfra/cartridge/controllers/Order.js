@@ -17,8 +17,8 @@ server.append('Confirm', function (req, res, next) {
 
         var viewData = res.getViewData();
         var order = viewData.order;
-        var Order = OrderMgr.getOrder(order.orderNumber);
-        var plis = Order.getAllProductLineItems();
+        var fullOrder = OrderMgr.getOrder(order.orderNumber);
+        var plis = fullOrder.getAllProductLineItems();
         var algoliaProducts = [];
         var currency;
         var isBaseRecordModel = algoliaData.getPreference('RecordModel') === MASTER_LEVEL;
@@ -28,7 +28,7 @@ server.append('Confirm', function (req, res, next) {
         for (var i = 0; i < pliArr.length; i++) {
             var product = pliArr[i].getProduct();
 
-            if (product && !product.optionProduct) {
+            if (!product.optionProduct) {
                 var algoliaProduct = {};
 
                 if (isBaseRecordModel) {
