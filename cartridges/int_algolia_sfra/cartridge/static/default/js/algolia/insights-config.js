@@ -132,17 +132,15 @@ function enableInsights(appId, searchApiKey, productsIndex) {
                 price: product.price.sales.value,
                 quantity: product.qty,
             };
-            if (product.price.list) {
-                // Operation needs to be rounded to avoid "Discount must be a decimal number" errors
-                productInfo.discount = +(
-                    product.price.list.value - product.price.sales.value
-                ).toFixed(2);
+
+            if (product.discount) {
+                productInfo.discount = product.discount;
             }
+
             if (trackingAllowed) {
                 productInfo.queryID = trackedQueryIDs[product.id];
                 delete trackedQueryIDs[product.id];
             }
-            currency = product.price.sales.currency;
 
             objectIDs.push(product.pid);
             objectData.push(productInfo);

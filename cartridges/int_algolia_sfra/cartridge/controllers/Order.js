@@ -21,21 +21,31 @@ server.append('Confirm', function (req, res, next) {
         var plis = Order.getAllProductLineItems();
         var algoliaProducts = [];
         var currency;
+        var isBaseRecordModel = algoliaData.getPreference('RecordModel') === MASTER_LEVEL;
 
         var pliArr = plis.toArray();
 
         for (var i = 0; i < pliArr.length; i++) {
             var product = pliArr[i].getProduct();
-            var algoliaProduct = {};
-            algoliaProduct.pid = algoliaData.getPreference('RecordModel') === MASTER_LEVEL ? product.masterProduct.ID : product.ID;
-            var price = priceFactory.getPrice(product);
-            algoliaProduct.price = priceFactory.getPrice(product);
-            if (price.list) {
-                algoliaProduct.discount = (price.list.value - price.sales.value).toFixed(2);
+
+            if (product && !product.optionProduct) {
+                var algoliaProduct = {};
+
+                if (isBaseRecordModel) {
+                    algoliaProduct.pid = product.isMaster() || product.isVariationGroup() ? product.ID : product.masterProduct.ID;
+                } else {
+                    algoliaProduct.pid = product.ID;
+                }
+
+                var price = priceFactory.getPrice(product);
+                algoliaProduct.price = price;
+                if (price.list) {
+                    algoliaProduct.discount = +(price.list.value - price.sales.value).toFixed(2);
+                }
+                currency = price.sales.currency;
+                algoliaProduct.qty = pliArr[i].quantityValue;
+                algoliaProducts.push(algoliaProduct);
             }
-            currency = price.sales.currency;
-            algoliaProduct.qty = pliArr[i].quantityValue;
-            algoliaProducts.push(algoliaProduct);
         };
 
         const algoliaObj = {
