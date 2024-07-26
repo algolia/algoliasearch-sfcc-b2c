@@ -28,12 +28,12 @@ server.append('Confirm', function (req, res, next) {
         for (var i = 0; i < pliArr.length; i++) {
             var product = pliArr[i].getProduct();
 
-            if (!product.optionProduct) {
+            if (product) {
                 var algoliaProduct = {};
 
-                if (isBaseRecordModel) {
-                    algoliaProduct.pid = product.isMaster() || product.isVariationGroup() ? product.ID : product.masterProduct.ID;
-                } else {
+                try {
+                    algoliaProduct.pid = algoliaData.getPreference('RecordModel') === MASTER_LEVEL ? product.masterProduct.ID : product.ID;
+                } catch (e) {
                     algoliaProduct.pid = product.ID;
                 }
 
