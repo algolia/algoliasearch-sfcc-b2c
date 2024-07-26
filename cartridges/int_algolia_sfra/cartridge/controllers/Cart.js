@@ -39,7 +39,7 @@ server.append('AddProduct', function (req, res, next) {
             var product = ProductMgr.getProduct(productId);
 
             if (product && (product.isMaster() || product.isVariationGroup())) {
-                algoliaProductData.pid = product.ID;
+                algoliaProductData.pid = product.masterProduct.ID;
             }
         }
 
