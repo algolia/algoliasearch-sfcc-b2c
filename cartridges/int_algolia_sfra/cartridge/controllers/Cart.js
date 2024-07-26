@@ -30,10 +30,8 @@ server.append('Show', function (req, res, next) {
 server.append('AddProduct', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableInsights')) {
 
-        var productId = req.form.pid;
-
         var isBaseRecordModel = algoliaData.getPreference('RecordModel') === MASTER_LEVEL;
-
+        var productId = req.form.pid;
         var viewData = res.getViewData();
         var algoliaProductData = {};
 
