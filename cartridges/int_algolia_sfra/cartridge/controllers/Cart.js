@@ -31,37 +31,43 @@ server.append('AddProduct', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableInsights')) {
 
         var productId = req.form.pid;
-        var product = ProductMgr.getProduct(productId);
 
-        if (product) {
-            var viewData = res.getViewData();
-            var algoliaProductData = {};
-            try {
-                algoliaProductData.pid = algoliaData.getPreference('RecordModel') === MASTER_LEVEL ? product.masterProduct.ID : productId;
-            } catch (e) {
+        var isBaseRecordModel = algoliaData.getPreference('RecordModel') === MASTER_LEVEL;
+
+        var viewData = res.getViewData();
+        var algoliaProductData = {};
+
+        try {
+            if (isBaseRecordModel) {
+                var product = ProductMgr.getProduct(productId);
+                algoliaProductData.pid = product.masterProduct.ID;
+            } else {
                 algoliaProductData.pid = productId;
             }
-            algoliaProductData.qty = req.form.quantity;
-            var items = viewData.cart.items;
-            var pli;
-            //find the item in the cart by using the product id with for loop
-            for (var i = 0; i < items.length; i++) {
-                if (items[i].id === productId) {
-                    pli = items[i];
-                    break;
-                }
-            }
-            algoliaProductData.price = pli.price.sales.value;
-
-            if (pli.price.list) {
-                algoliaProductData.discount = +(
-                    pli.price.list.value - pli.price.sales.value
-                ).toFixed(2);
-            }
-            algoliaProductData.currency = pli.price.sales.currency;
-
-            viewData.algoliaProductData = algoliaProductData;
+        } catch (e) {
+            algoliaProductData.pid = productId;
         }
+
+        algoliaProductData.qty = req.form.quantity;
+        var items = viewData.cart.items;
+        var pli;
+        //find the item in the cart by using the product id with for loop
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].id === productId) {
+                pli = items[i];
+                break;
+            }
+        }
+        algoliaProductData.price = pli.price.sales.value;
+
+        if (pli.price.list) {
+            algoliaProductData.discount = +(
+                pli.price.list.value - pli.price.sales.value
+            ).toFixed(2);
+        }
+        algoliaProductData.currency = pli.price.sales.currency;
+
+        viewData.algoliaProductData = algoliaProductData;
     }
 
     next();
