@@ -620,8 +620,8 @@ function enableInstantSearch(config) {
  */
 function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
     const url = new URL(productUrl, window.location.origin);
-    url.searchParams.append('queryID', queryID);
+    /*url.searchParams.append('queryID', queryID);
     url.searchParams.append('objectID', objectID);
-    url.searchParams.append('indexName', indexName);
+    url.searchParams.append('indexName', indexName);*/
     return url.href;
 }
