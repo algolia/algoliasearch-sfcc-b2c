@@ -1,10 +1,10 @@
 /* global aa */
 
 if (sessionStorage.getItem('ALGOLIA_insights-parameters') === null || sessionStorage.getItem('ALGOLIA_insights-parameters') === localStorage.getItem('ALGOLIA_insights-parameters')) {
-  if (localStorage.getItem('ALGOLIA_insights-parameters') !== null) {
-    sessionStorage.setItem('ALGOLIA_insights-parameters', localStorage.getItem('ALGOLIA_insights-parameters'));
-  }
-  localStorage.removeItem('ALGOLIA_insights-parameters');
+    if (localStorage.getItem('ALGOLIA_insights-parameters') !== null) {
+        sessionStorage.setItem('ALGOLIA_insights-parameters', localStorage.getItem('ALGOLIA_insights-parameters'));
+    }
+    localStorage.removeItem('ALGOLIA_insights-parameters');
 }
 
 /**
