@@ -6,4 +6,7 @@
     <isif condition="${pdict.orderUUID}">
         data-order="${JSON.stringify(pdict.order)}"
     </isif>
+    <isif condition="${pdict.algoliaObj}">
+        data-algoliaobj="${JSON.stringify(pdict.algoliaObj)}"
+    </isif>
 ></span>

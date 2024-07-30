@@ -44,25 +44,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
 
     let lastQueryID = null;
     let lastIndexName = null;
-    let lastPidsObj = [];
 
-    // Event defined at https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L668
-    $(document).on('updateAddToCartFormData', function (event, data) {
-        // The 'product:afterAddToCart' event returns the current cart, without a way to identify
-        // the product(s) just added. We store temporarily the added products and their quantity.
-        if (data.pidsObj) {
-            // product set
-            lastPidsObj = JSON.parse(data.pidsObj);
-        } else {
-            // For a single product, the information is at the top level. We recreate the same pidsObj as for a product set.
-            lastPidsObj = [
-                {
-                    pid: data.pid,
-                    qty: data.quantity,
-                },
-            ];
-        }
-    });
     // Event defined at https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L676
     // The data in the callback comes from the Cart-AddProduct controller: https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/controllers/Cart.js#L144
     $('body').on('product:afterAddToCart', function (event, data) {
@@ -72,29 +54,27 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         const index = getUrlParameter('indexName') || lastIndexName || productsIndex;
         let currency;
 
-        lastPidsObj.forEach((pidObj) => {
-            const product = data.cart.items.find((item) => item.id === pidObj.pid);
-            const productInfo = {
-                queryID: queryID,
-                price: product.price.sales.value,
-                quantity: parseInt(pidObj.qty),
-            };
-            if (product.price.list) {
-                // Operation needs to be rounded to avoid "Discount must be a decimal number" errors
-                productInfo.discount = +(
-                    product.price.list.value - product.price.sales.value
-                ).toFixed(2);
-            }
-            currency = product.price.sales.currency;
+        const algoliaProductData = data.algoliaProductData;
+        const productInfo = {
+            price: algoliaProductData.price,
+            quantity: parseInt(algoliaProductData.qty),
+        };
 
-            objectIDs.push('' + product.id);
-            objectData.push(productInfo);
-            if (trackingAllowed) {
-                trackedQueryIDs[product.id] = queryID;
-            }
-        });
+        if (queryID && queryID !== 'undefined') {
+            productInfo.queryID = queryID;
+        }
+
+        if (algoliaProductData.discount) {
+            productInfo.discount = algoliaProductData.discount;
+        }
+
+        currency = algoliaProductData.currency;
+
+        objectIDs.push('' + algoliaProductData.pid);
+        objectData.push(productInfo);
 
         if (trackingAllowed) {
+            trackedQueryIDs[algoliaProductData.pid] = queryID;
             // Clean up products that were removed from the cart and save the new trackedQueryIDs
             for (const key in trackedQueryIDs) {
                 if (!data.cart.items.find((item) => item.id === key)) {
@@ -138,33 +118,30 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     // https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/controllers/Order.js#L87
     // Our 'algolia-insights' tag exposes its "data-order" attribute only in that case. When it is present, we can send the purchase event.
 
-    const order = insightsData && insightsData.dataset.order;
-    if (order) {
-        const orderObj = JSON.parse(order);
-        const products = orderObj.items.items.slice(0, 20); // The Insights API accepts up to 20 objectID
-
+    const algoliaObj = insightsData && insightsData.dataset.algoliaobj;
+    if (algoliaObj) {
+        const productsObj = JSON.parse(algoliaObj);
+        const products = productsObj.items.slice(0, 20); // The Insights API accepts up to 20 objectID
         const objectIDs = [];
         const objectData = [];
-        let currency;
+        let currency = productsObj.currency;
 
         products.forEach((product) => {
             const productInfo = {
                 price: product.price.sales.value,
-                quantity: product.quantity,
+                quantity: product.qty,
             };
-            if (product.price.list) {
-                // Operation needs to be rounded to avoid "Discount must be a decimal number" errors
-                productInfo.discount = +(
-                    product.price.list.value - product.price.sales.value
-                ).toFixed(2);
+
+            if (product.discount) {
+                productInfo.discount = product.discount;
             }
+
             if (trackingAllowed) {
                 productInfo.queryID = trackedQueryIDs[product.id];
                 delete trackedQueryIDs[product.id];
             }
-            currency = product.price.sales.currency;
 
-            objectIDs.push(product.id);
+            objectIDs.push(product.pid);
             objectData.push(productInfo);
         });
         if (trackingAllowed) {
