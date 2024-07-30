@@ -188,9 +188,6 @@ function getSourcesArray(config) {
                 let newURL = '';
                 if (item.url) {
                     newURL = new URL(item.url, window.location.origin);
-                    /*newURL.searchParams.append('objectID', item.objectID);
-                    newURL.searchParams.append('queryID', item.__autocomplete_queryID);
-                    newURL.searchParams.append('indexName', item.__autocomplete_indexName);*/
                 }
 
                 return html `

@@ -349,24 +349,14 @@ function enableInstantSearch(config) {
 
                         // url with queryID (used for analytics)
                         if (item.url) {
-                            item.url = generateProductUrl({
-                                objectID: item.objectID,
-                                productUrl: item.url,
-                                queryID: item.__queryID,
-                                indexName: item.__indexName,
-                            });
+                            item.url = new URL(item.url, window.location.origin).href;
                         }
 
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
                             item.colorVariations.forEach(colorVariation => {
-                                colorVariation.variationURL = generateProductUrl({
-                                    objectID: item.objectID,
-                                    productUrl: colorVariation.variationURL,
-                                    queryID: item.__queryID,
-                                    indexName: item.__indexName,
-                                });
+                                colorVariation.variationURL = new URL(colorVariation.variationURL, window.location.origin).href;
                             });
                         }
 
@@ -375,12 +365,7 @@ function enableInstantSearch(config) {
                             let price;
                             item.variants.forEach(variant => {
                                 price = variant.price[algoliaData.currencyCode]
-                                variant.url = generateProductUrl({
-                                    objectID: item.objectID,
-                                    productUrl: variant.url,
-                                    queryID: item.__queryID,
-                                    indexName: item.__indexName,
-                                });
+                                variant.url = new URL(variant.url, window.location.origin).href;
                             });
 
                             // 1. Find the variant matching the selected facets, or use the default variant
@@ -608,20 +593,4 @@ function enableInstantSearch(config) {
             });
         }
     }
-}
-
-/**
- * Build a product URL with Algolia query parameters
- * @param {string} objectID objectID
- * @param {string} productUrl url of the product
- * @param {string} queryID queryID
- * @param {string} indexName indexName
- * @return {string} Final URL of the product
- */
-function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
-    const url = new URL(productUrl, window.location.origin);
-    /*url.searchParams.append('queryID', queryID);
-    url.searchParams.append('objectID', objectID);
-    url.searchParams.append('indexName', indexName);*/
-    return url.href;
 }
