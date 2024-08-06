@@ -48,7 +48,7 @@ function enableAutocomplete(config) {
             }
         }
 
-        //Listen for click events and close the panel if the click is outside the input 
+        //Listen for click events and close the panel if the click is outside the input
         document.addEventListener('click', onClickOutside, true);
 
         //change this code with jquery
@@ -184,14 +184,8 @@ function getSourcesArray(config) {
                     item.firstImage = smallImageGroup.images[0];
                 }
 
-                // add queryID, objectID and indexName to the URL (analytics)
-                let newURL = '';
-                if (item.url) {
-                    newURL = new URL(item.url, window.location.origin);
-                }
-
                 return html `
-                        <a href="${newURL.href}">
+                        <a href="${item.url}">
                             <div class="text-truncate text-nowrap">
                                 <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
                                 <span>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</span>

@@ -347,27 +347,13 @@ function enableInstantSearch(config) {
                         // originating index
                         item.__indexName = productsIndex;
 
-                        // url with queryID (used for analytics)
-                        if (item.url) {
-                            item.url = new URL(item.url, window.location.origin).href;
-                        }
-
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
-                            item.colorVariations.forEach(colorVariation => {
-                                colorVariation.variationURL = new URL(colorVariation.variationURL, window.location.origin).href;
-                            });
                         }
 
                         // Master-level indexing
                         if (item.variants) {
-                            let price;
-                            item.variants.forEach(variant => {
-                                price = variant.price[algoliaData.currencyCode]
-                                variant.url = new URL(variant.url, window.location.origin).href;
-                            });
-
                             // 1. Find the variant matching the selected facets, or use the default variant
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
