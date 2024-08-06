@@ -97,8 +97,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
             objectData,
             currency,
         };
-
-        window.aa(algoliaEventType, algoliaEvent);
+        window.aa(algoliaEventType, algoliaEvent, { inferQueryID: true });
     });
 
     // when on search page
@@ -159,8 +158,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         const algoliaEventType = trackingAllowed
             ? 'purchasedObjectIDsAfterSearch'
             : 'purchasedObjectIDs';
-
-        window.aa(algoliaEventType, algoliaEvent);
+        window.aa(algoliaEventType, algoliaEvent, { inferQueryID: true });
     }
 
     /**
