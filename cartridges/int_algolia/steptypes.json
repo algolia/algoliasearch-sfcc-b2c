@@ -10,7 +10,7 @@
                 "module": "int_algolia/cartridge/scripts/algolia/steps/algoliaCategoryIndex.js",
                 "function": "runCategoryExport",
                 "transactional": "false",
-                "timeout-in-seconds": "600",
+                "timeout-in-seconds": "3600",
                 "parameters": {
                     "parameter": [
                         {
@@ -44,7 +44,7 @@
                 "module": "int_algolia/cartridge/scripts/algolia/steps/sendDeltaExportProducts.js",
                 "function": "sendDeltaExportProducts",
                 "transactional": "false",
-                "timeout-in-seconds": "7200",
+                "timeout-in-seconds": "3600",
                 "parameters": {
                     "parameter": [
                         {
@@ -103,7 +103,7 @@
                 "after-step-function": "afterStep",
                 "chunk-size": 100,
                 "transactional": false,
-                "timeout-in-seconds": "14400",
+                "timeout-in-seconds": "3600",
                 "parameters": {
                     "parameter": [
                         {
@@ -174,7 +174,7 @@
                 "after-step-function": "afterStep",
                 "chunk-size": 100,
                 "transactional": false,
-                "timeout-in-seconds": "14400",
+                "timeout-in-seconds": "3600",
                 "parameters": {
                     "parameter": [
                         {
@@ -231,7 +231,7 @@
                 "after-step-function": "afterStep",
                 "chunk-size": 100,
                 "transactional": false,
-                "timeout-in-seconds": "14400",
+                "timeout-in-seconds": "3600",
                 "parameters": {
                     "parameter": [
                         {
@@ -313,7 +313,7 @@
                 "after-step-function": "afterStep",
                 "chunk-size": 500,
                 "transactional": false,
-                "timeout-in-seconds": "600",
+                "timeout-in-seconds": "3600",
                 "parameters": {
                     "parameter": [
                         {
@@ -363,7 +363,7 @@
                 "after-step-function": "afterStep",
                 "chunk-size": 500,
                 "transactional": false,
-                "timeout-in-seconds": "7200",
+                "timeout-in-seconds": "3600",
                 "parameters": {
                     "parameter": [
                         {
