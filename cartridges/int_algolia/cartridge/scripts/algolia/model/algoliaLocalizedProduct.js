@@ -373,6 +373,17 @@ function algoliaLocalizedProduct(parameters) {
                 this[attributeName] = aggregatedValueHandlers[attributeName](product, parameters);
             } else {
                 var config = algoliaProductConfig.attributeConfig_v2[attributeName];
+
+                // if there is no config for the attribute, but it's a custom or activeData attribute, we assume some defaults
+                if (!config && (attributeName.indexOf('custom.') > -1 || attributeName.indexOf('activeData.') > -1)) {
+                    // if the attribute is a custom attribute, we assume it's localized, you can override this behavior by adding a config for the attribute
+                    config = {
+                        attribute: attributeName,
+                        localized: true,
+                        variantAttribute: true
+                    };
+                }
+
                 if (!empty(config)) {
                     this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
                 }
