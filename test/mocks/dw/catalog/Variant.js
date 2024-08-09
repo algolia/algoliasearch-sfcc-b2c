@@ -25,6 +25,17 @@ class Variant extends MasterProduct {
                 }
             },
             refinementSize: '4',
+            get algoliaTest() {
+                switch (request.getLocale()) {
+                    case 'fr':
+                        return 'fr locale';
+                    case 'default':
+                        return 'default locale';
+                    case 'en':
+                    default:
+                        return '';
+                }
+            }
         };
 
         this.prices = {
