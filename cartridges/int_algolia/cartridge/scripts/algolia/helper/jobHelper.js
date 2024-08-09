@@ -647,6 +647,24 @@ function generateVariantRecords(parameters) {
     return algoliaRecordsPerLocale;
 }
 
+
+/**
+ * Returns the default configuration for a given attribute.
+ * You can override this behavior by adding a specific configuration for the attribute.
+ * @param {string} attributeName - The name of the attribute to get the default configuration for.
+ * @returns {Object} The default configuration object for the attribute.
+ * @returns {string} return.attributeName - The name of the attribute.
+ * @returns {boolean} return.localized - Indicates if the attribute is localized.
+ * @returns {boolean} return.variantAttribute - Indicates if the attribute is a variant attribute.
+ */
+function getCustomAttributeConfig(attributeName) {
+    return {
+        attribute: attributeName,
+        localized: false,
+        variantAttribute: true
+    };
+}
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -673,4 +691,6 @@ module.exports = {
     isObjectsArrayEmpty: isObjectsArrayEmpty,
     getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,
+
+    getCustomAttributeConfig: getCustomAttributeConfig
 };

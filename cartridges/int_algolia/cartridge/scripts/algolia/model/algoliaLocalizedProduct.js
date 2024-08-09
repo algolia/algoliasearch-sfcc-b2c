@@ -10,6 +10,7 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
+var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
 var extendedProductAttributesConfig;
@@ -359,9 +360,18 @@ function algoliaLocalizedProduct(parameters) {
 
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
+            var attributeNameObj = attributeName.split('.');
+            if (attributeNameObj.length > 1) {
+                var parentAttribute = attributeNameObj[0];
+                var subAttribute = attributeNameObj[1];
+            }
 
             if (baseModel && baseModel[attributeName]) {
                 this[attributeName] = baseModel[attributeName];
+            } else if (baseModel && parentAttribute && subAttribute && baseModel[parentAttribute] && baseModel[parentAttribute][subAttribute]) {
+                var tempObj = this[parentAttribute] || {};
+                tempObj[subAttribute] = baseModel[parentAttribute][subAttribute];
+                this[parentAttribute] = tempObj;
             } else if (extendedProductAttributesConfig[attributeName]) {
                 var attributeConfig = extendedProductAttributesConfig[attributeName];
                 if (typeof attributeConfig.attribute === 'function') {
@@ -374,17 +384,23 @@ function algoliaLocalizedProduct(parameters) {
             } else {
                 var config = algoliaProductConfig.attributeConfig_v2[attributeName];
 
-                // if there is no config for the attribute, but it's a custom or activeData attribute, we assume some defaults
-                if (!config && (attributeName.indexOf('custom.') > -1 || attributeName.indexOf('activeData.') > -1)) {
-                    // if the attribute is a custom attribute, we assume it's localized, you can override this behavior by adding a config for the attribute
-                    config = {
-                        attribute: attributeName,
-                        localized: true,
-                        variantAttribute: true
-                    };
-                }
+                if (empty(config)) {
+                    config = jobHelper.getCustomAttributeConfig(attributeName);
 
-                if (!empty(config)) {
+                    if (attributeNameObj.length > 1) {
+                        var tempObj;
+                        if (this[parentAttribute]) {
+                            tempObj = this[parentAttribute];
+                            tempObj[subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
+                        } else {
+                            tempObj = {};
+                            tempObj[subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
+                        }
+                        this[parentAttribute] = tempObj;
+                    } else {
+                        this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
+                    }
+                } else {
                     this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
                 }
             }
