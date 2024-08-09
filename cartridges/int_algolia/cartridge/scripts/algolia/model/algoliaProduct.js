@@ -343,8 +343,8 @@ function algoliaProduct(product, fieldListOverride) {
                     value[parentAttribute] = tempObj;
                 } else {
                     value = aggregatedValueHandlers[attributeName]
-                    ? aggregatedValueHandlers[attributeName](product)
-                    : ObjectHelper.getAttributeValue(product, config.attribute, true);
+                        ? aggregatedValueHandlers[attributeName](product)
+                        : ObjectHelper.getAttributeValue(product, config.attribute, true);
                 }
             }
 

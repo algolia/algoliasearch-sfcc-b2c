@@ -168,8 +168,9 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Pink',
             size: '4',
             refinementSize: '4',
-            'custom.algoliaTest': 'default locale'
-
+            custom: {
+                algoliaTest: 'default locale'
+            }
         };
         expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: attributes })).toEqual(algoliaProductModel);
         // Tags are added in case of fullRecordUpdate
@@ -270,7 +271,9 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Rose',
             size: '4',
             refinementSize: '4',
-            'custom.algoliaTest': 'fr locale'
+            custom: {
+                algoliaTest: 'fr locale'
+            }
         };
         expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: attributes })).toEqual(algoliaProductModel);
         // Tags are added in case of fullRecordUpdate
