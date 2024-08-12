@@ -72,6 +72,15 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 }
             }
 
+            var PromotionMgr = require('dw/campaign/PromotionMgr');
+            var getActivePromotions = PromotionMgr.getActiveCustomerPromotions().promotions;
+
+            var activePromotions = '';
+
+            for (var i = 0; i < getActivePromotions.length; i++) {
+                activePromotions += getActivePromotions[i].ID + ',';
+            }
+
             res.render('search/searchResults', {
                 algoliaEnable: true,
                 category: category,
@@ -82,6 +91,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 contentHits: contentHits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q,
+                activePromotions: activePromotions
             });
         }
     }

@@ -297,15 +297,15 @@
                 }
             },
             {
-                "@type-id": "custom.sendChunkOrientedProductUpdates",
+                "@type-id": "custom.algoliaPromotionTest",
                 "@supports-parallel-execution": true,
                 "@supports-site-context": true,
                 "@supports-organization-context": false,
                 "description": "DEPRECATED. Use 'custom.algoliaProductIndex' instead. Sends updates of all products assigned to the selected site to Algolia. The list of indexed attributes is configurable. Can perform partial records updates or full records updates.",
-                "module": "int_algolia/cartridge/scripts/algolia/steps/sendChunkOrientedProductUpdates.js",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/algoliaPromoTest.js",
                 "read-function": "read",
                 "process-function": "process",
-                "write-function": "send",
+                "write-function": "write",
                 "total-count-function": "getTotalCount",
                 "before-step-function": "beforeStep",
                 "before-chunk-function": "",
@@ -313,26 +313,7 @@
                 "after-step-function": "afterStep",
                 "chunk-size": 500,
                 "transactional": false,
-                "timeout-in-seconds": "3600",
-                "parameters": {
-                    "parameter": [
-                        {
-                            "@name": "resourceType",
-                            "@type": "string",
-                            "@required": true
-                        },
-                        {
-                            "@name": "fieldListOverride",
-                            "@type": "string",
-                            "@required": false
-                        },
-                        {
-                            "@name": "fullRecordUpdate",
-                            "@type": "boolean",
-                            "@required": false
-                        }
-                    ]
-                },
+                "timeout-in-seconds": "600",
                 "status-codes": {
                     "status": [
                         {

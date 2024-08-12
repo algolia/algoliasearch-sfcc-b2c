@@ -12,6 +12,14 @@ function enableInstantSearch(config) {
     const contentResultEl = document.querySelector('#algolia-content-hits-placeholder');
     const contentSearchbarTab = document.querySelector('#content-search-bar-button');
     const navbar = document.querySelector('.search-nav');
+    const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
+    try {
+        // First, try to parse it as JSON
+        activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
+    } catch (e) {
+        // If that fails, split the string by comma
+        activeCustomerPromotions = activeCustomerPromotionsEl.dataset.promotions.split(',').map(item => item.trim());
+    }
 
     let displaySwatches = false;
     var initialUiState = {};
@@ -232,6 +240,31 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
+
+                        getPrice = function (hitObj) {
+                            if (hitObj.promotionalPrices && hitObj.promotionalPrices[algoliaData.currencyCode]) {
+                                var productPromos = hitObj.promotionalPrices[algoliaData.currencyCode];
+                                //get values from data-promotions
+                                var minPrice = hitObj.price;
+                                for (var i = 0; i < activeCustomerPromotions.length; i++) {
+                                    for (var j = 0; i < productPromos.length; i++) {
+                                        if (productPromos[j].promoId === activeCustomerPromotions[i] && productPromos[j].price < minPrice) {
+                                            minPrice = productPromos[j].price;
+                                        }
+                                    }
+                                }
+
+                                return minPrice;
+                            }
+
+                            if (hitObj.promotionalPrice) {
+                                return hitObj.promotionalPrice;
+                            }
+
+                            return hitObj.price;
+                        }
+
+
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -268,14 +301,14 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${hit.promotionalPrice && html`
+                                            ${ getPrice(hit) < hit.price && html`
                                                 <span class="strike-through list">
                                                      <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
                                                 </span>
                                             `}
                                             <span class="sales">
                                                 <span class="value">
-                                                    ${hit.currencySymbol} ${hit.promotionalPrice ? hit.promotionalPrice : hit.price}
+                                                    ${hit.currencySymbol} ${getPrice(hit)}
                                                 </span>
                                             </span>
                                         </div>
