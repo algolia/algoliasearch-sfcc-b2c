@@ -657,7 +657,7 @@ function generateVariantRecords(parameters) {
  * @returns {boolean} return.localized - Indicates if the attribute is localized.
  * @returns {boolean} return.variantAttribute - Indicates if the attribute is a variant attribute.
  */
-function getCustomAttributeConfig(attributeName) {
+function getDefaultAttributeConfig(attributeName) {
     return {
         attribute: attributeName,
         localized: false,
@@ -692,5 +692,5 @@ module.exports = {
     getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,
 
-    getCustomAttributeConfig: getCustomAttributeConfig
+    getDefaultAttributeConfig: getDefaultAttributeConfig
 };

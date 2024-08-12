@@ -123,7 +123,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     attributesToSend.forEach(function(attribute) {
         var attributeConfig = extendedProductAttributesConfig[attribute] ||
             algoliaProductConfig.attributeConfig_v2[attribute] ||
-            jobHelper.getCustomAttributeConfig(attribute);
+            jobHelper.getDefaultAttributeConfig(attribute);
 
         if (attributeConfig.variantAttribute) {
             variantAttributes.push(attribute);

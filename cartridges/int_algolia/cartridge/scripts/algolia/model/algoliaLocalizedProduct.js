@@ -360,10 +360,10 @@ function algoliaLocalizedProduct(parameters) {
 
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
-            var attributeNameObj = attributeName.split('.');
-            if (attributeNameObj.length > 1) {
-                var parentAttribute = attributeNameObj[0];
-                var subAttribute = attributeNameObj[1];
+            var attributeNameArr = attributeName.split('.');
+            if (attributeNameArr.length > 1) {
+                var parentAttribute = attributeNameArr[0];
+                var subAttribute = attributeNameArr[1];
             }
 
             if (baseModel && baseModel[attributeName]) {
@@ -385,18 +385,13 @@ function algoliaLocalizedProduct(parameters) {
                 var config = algoliaProductConfig.attributeConfig_v2[attributeName];
 
                 if (empty(config)) {
-                    config = jobHelper.getCustomAttributeConfig(attributeName);
+                    config = jobHelper.getDefaultAttributeConfig(attributeName);
 
-                    if (attributeNameObj.length > 1) {
-                        var tempObj;
-                        if (this[parentAttribute]) {
-                            tempObj = this[parentAttribute];
-                            tempObj[subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
-                        } else {
-                            tempObj = {};
-                            tempObj[subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
+                    if (attributeNameArr.length > 1) {
+                        if (!this[parentAttribute]) {
+                            this[parentAttribute] = {};
                         }
-                        this[parentAttribute] = tempObj;
+                        this[parentAttribute][subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
                     } else {
                         this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
                     }

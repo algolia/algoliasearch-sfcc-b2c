@@ -287,37 +287,16 @@ function algoliaProduct(product, fieldListOverride) {
     } else {
         for (var i = 0; i < algoliaFields.length; i += 1) {
             var attributeName = algoliaFields[i];
-            var config = algoliaProductConfig.attributeConfig[attributeName]
-            var attributeNameObj = attributeName.split('.');
+            var config = algoliaProductConfig.attributeConfig[attributeName];
 
-            if (empty(config)) {
-                config = jobHelper.getDefaultConfig(attributeName);
-            }
+            if (!empty(config)) {
+                var value = null;
+                if (config.localized) {
+                    var currentSites = Site.getCurrent();
+                    var siteLocales = currentSites.getAllowedLocales();
+                    var siteLocalesSize = siteLocales.size();
+                    var currentLocale = request.getLocale();
 
-            var value = null;
-            if (config.localized) {
-                var currentSites = Site.getCurrent();
-                var siteLocales = currentSites.getAllowedLocales();
-                var siteLocalesSize = siteLocales.size();
-                var currentLocale = request.getLocale();
-                if (attributeNameObj.length > 1) {
-                    var parentAttributeName = attributeNameObj[0];
-                    var childAttributeName = attributeNameObj[1];
-                    value = {};
-                    for (var l = 0; l < siteLocalesSize; l += 1) {
-                        var localeName = siteLocales[l];
-                        request.setLocale(localeName);
-                        if (this[parentAttribute][localeName]) {
-                            tempObj = this[parentAttribute][localeName];
-                            tempObj[subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
-                        } else {
-                            tempObj = {};
-                            tempObj[subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
-                        }
-                        value[parentAttributeName][localeName] = tempObj;
-                    }
-                    request.setLocale(currentLocale);
-                } else {
                     value = {};
                     for (var l = 0; l < siteLocalesSize; l += 1) {
                         var localeName = siteLocales[l];
@@ -326,29 +305,15 @@ function algoliaProduct(product, fieldListOverride) {
                             ? aggregatedValueHandlers[attributeName](product)
                             : ObjectHelper.getAttributeValue(product, config.attribute, true);
                     }
-                }
-                request.setLocale(currentLocale);
-            } else {
-                if (attributeNameObj.length > 1) {
-                    var parentAttribute = attributeNameObj[0];
-                    var subAttribute = attributeNameObj[1];
-                    var tempObj;
-                    if (this[parentAttribute]) {
-                        tempObj = this[parentAttribute];
-                        tempObj[subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
-                    } else {
-                        tempObj = {};
-                        tempObj[subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
-                    }
-                    value[parentAttribute] = tempObj;
+                    request.setLocale(currentLocale);
                 } else {
                     value = aggregatedValueHandlers[attributeName]
                         ? aggregatedValueHandlers[attributeName](product)
                         : ObjectHelper.getAttributeValue(product, config.attribute, true);
                 }
-            }
 
-            if (!empty(value)) { this[attributeName] = value; }
+                if (!empty(value)) { this[attributeName] = value; }
+            }
         }
         productModelCustomizer.customizeProductModel(this);
     }
