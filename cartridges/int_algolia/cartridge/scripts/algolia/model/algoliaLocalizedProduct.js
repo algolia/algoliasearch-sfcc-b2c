@@ -57,6 +57,39 @@ function getPromotionalPrice(product) {
     return lowestPromoPrice;
 }
 
+
+/**
+ * Retrieves the promotional prices for a given product.
+ *
+ * This function fetches all active promotions for the specified product,
+ * extracts the promotional prices, and returns them as an array of objects.
+ * Promotions without a price are filtered out.
+ *
+ * @param {dw.catalog.Product} product - The product for which to get promotional prices.
+ * @returns {Array<Object>} An array of promotional price objects.
+ * @returns {number} return[].price - The promotional price value.
+ * @returns {string} return[].promoId - The ID of the promotion.
+ */
+function getPromotionalPrices(product) {
+    var promotions = dw.campaign.PromotionMgr.getActivePromotions().getProductPromotions(product);
+    var promotionObjects = promotions
+        .toArray()
+        .map(function (promotion) {
+            // get all promotions for this product
+            let price = promotion.getPromotionalPrice(product);
+            let promoId = promotion.ID;
+            return {
+                price: price.getValue(),
+                promoId: promoId
+            };
+        })
+        .filter(function (promotionObj) {
+            // skip promotions without price
+            return promotionObj.price;
+        });
+    return promotionObjects;
+}
+
 /**
  * Create category tree of Product
  * @param {dw.catalog.Category} category - category
@@ -307,6 +340,27 @@ var aggregatedValueHandlers = {
         }
         currentSession.setCurrency(currentCurrency);
         return promotionalPrice;
+    },
+    promotionalPrices: function (product) {
+        // Get promotional price for all currencies
+        var promotionalPrices = null;
+        var currentSession = request.getSession();
+        var siteCurrencies = Site.getCurrent().getAllowedCurrencies();
+        var siteCurrenciesSize = siteCurrencies.size();
+        var currentCurrency = currentSession.getCurrency();
+        var promotions = [];
+        for (var k = 0; k < siteCurrenciesSize; k += 1) {
+            var currency = Currency.getCurrency(siteCurrencies[k]);
+            currentSession.setCurrency(currency);
+            var promotionObjects = getPromotionalPrices(product);
+
+            if (promotionObjects.length > 0) {
+                if (!promotionalPrices) { promotionalPrices = {}; }
+                promotionalPrices[siteCurrencies[k]] = promotionObjects;
+            }
+        }
+        currentSession.setCurrency(currentCurrency);
+        return promotionalPrices;
     },
     variants: function(product, parameters) {
         if (!product.isMaster() && !product.isVariationGroup()) {

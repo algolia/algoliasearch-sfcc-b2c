@@ -4,6 +4,8 @@
     <isinclude template="reporting/reportingUrls" />
 </isif>
 
+<div id="algolia-activePromos" data-promotions="${pdict.activePromotions}"></div>
+
 <iscomment> Search Results Banner </iscomment>
 <isif condition="${pdict.category}">
     <div class="hero slant-down search-banner"
