@@ -3,6 +3,7 @@
 var Site = require('dw/system/Site');
 var Currency = require('dw/util/Currency');
 var PriceBookMgr = require('dw/catalog/PriceBookMgr');
+var PromotionMgr = require('dw/campaign/PromotionMgr');
 var URLUtils = require('dw/web/URLUtils');
 
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
@@ -36,7 +37,7 @@ const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold')
  * @returns {dw.value.Money|null} lowest price or null if no price available
  */
 function getPromotionalPrice(product) {
-    var promotions = dw.campaign.PromotionMgr.getActivePromotions().getProductPromotions(product);
+    var promotions = PromotionMgr.getActivePromotions().getProductPromotions(product);
     var lowestPromoPrice = null;
     var promoPrices = promotions
         .toArray()
@@ -66,27 +67,38 @@ function getPromotionalPrice(product) {
  * Promotions without a price are filtered out.
  *
  * @param {dw.catalog.Product} product - The product for which to get promotional prices.
+ * @param {dw.campaign.Campaign[]} campaigns - The campaigns to consider.
  * @returns {Array<Object>} An array of promotional price objects.
  * @returns {number} return[].price - The promotional price value.
  * @returns {string} return[].promoId - The ID of the promotion.
  */
-function getPromotionalPrices(product) {
-    var promotions = dw.campaign.PromotionMgr.getActivePromotions().getProductPromotions(product);
-    var promotionObjects = promotions
-        .toArray()
-        .map(function (promotion) {
-            // get all promotions for this product
-            let price = promotion.getPromotionalPrice(product);
-            let promoId = promotion.ID;
-            return {
-                price: price.getValue(),
-                promoId: promoId
-            };
-        })
-        .filter(function (promotionObj) {
-            // skip promotions without price
-            return promotionObj.price;
-        });
+function getPromotionalPrices(product, campaigns) {
+    var promotions = [];
+    var now = new Date();
+    var oneyearlater = new Date();
+    oneyearlater.setFullYear(oneyearlater.getFullYear() + 1);
+    var promotionObjects = [];
+
+    for (var i = 0; i < campaigns.length; i++) {
+        var campaignPromos = PromotionMgr.getActivePromotionsForCampaign(campaigns[i], now, oneyearlater).getProductPromotions(product);
+
+        campPromotionObj = campaignPromos
+            .toArray()
+            .map(function (promotion) {
+                // get all promotions for this product
+                let price = promotion.getPromotionalPrice(product);
+                let promoId = promotion.ID;
+                return {
+                    price: price.getValue(),
+                    promoId: promoId,
+                    startDate: campaigns[i].startDate,
+                    endDate: campaigns[i].endDate
+                };
+            });
+
+            promotionObjects = promotionObjects.concat(campPromotionObj);
+    }
+
     return promotionObjects;
 }
 
@@ -349,10 +361,11 @@ var aggregatedValueHandlers = {
         var siteCurrenciesSize = siteCurrencies.size();
         var currentCurrency = currentSession.getCurrency();
         var promotions = [];
+        var campaigns = PromotionMgr.getCampaigns().toArray();
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
             var currency = Currency.getCurrency(siteCurrencies[k]);
             currentSession.setCurrency(currency);
-            var promotionObjects = getPromotionalPrices(product);
+            var promotionObjects = getPromotionalPrices(product, campaigns);
 
             if (promotionObjects.length > 0) {
                 if (!promotionalPrices) { promotionalPrices = {}; }
