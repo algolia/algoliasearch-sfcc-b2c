@@ -360,11 +360,6 @@ function algoliaLocalizedProduct(parameters) {
 
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
-            var attributeNameArr = attributeName.split('.');
-            if (attributeNameArr.length > 1) {
-                var parentAttribute = attributeNameArr[0];
-                var subAttribute = attributeNameArr[1];
-            }
 
             if (baseModel && baseModel[attributeName]) {
                 this[attributeName] = baseModel[attributeName];
@@ -386,15 +381,17 @@ function algoliaLocalizedProduct(parameters) {
 
                 if (empty(config)) {
                     config = jobHelper.getDefaultAttributeConfig(attributeName);
+                }
 
-                    if (attributeNameArr.length > 1) {
-                        if (!this[parentAttribute]) {
-                            this[parentAttribute] = {};
-                        }
-                        this[parentAttribute][subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
-                    } else {
-                        this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
+                var attributeNameArr = attributeName.split('.');
+
+                if (attributeNameArr.length > 1) {
+                    var parentAttribute = attributeNameArr[0];
+                    var subAttribute = attributeNameArr[1];
+                    if (!this[parentAttribute]) {
+                        this[parentAttribute] = {};
                     }
+                    this[parentAttribute][subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
                 } else {
                     this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
                 }
