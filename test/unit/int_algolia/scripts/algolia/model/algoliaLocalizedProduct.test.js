@@ -76,6 +76,22 @@ const algoliaProductConfig = require('../../../../../../cartridges/int_algolia/c
 const attributes = algoliaProductConfig.defaultAttributes_v2.concat(['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
     'pageTitle', 'short_description', 'name', 'long_description', 'image_groups', 'custom.algoliaTest']);
 
+function setupMockConfig(customAttributes) {
+    jest.resetModules();
+
+    jest.doMock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
+        const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
+        const modifiedAttributeConfig_v2 = { ...originalModule.attributeConfig_v2 };
+
+        Object.assign(modifiedAttributeConfig_v2, customAttributes);
+
+        return {
+            ...originalModule,
+            attributeConfig_v2: modifiedAttributeConfig_v2
+        };
+    });
+}
+
 describe('algoliaLocalizedProduct', function () {
     test('default locale', function () {
         const product = new ProductMock({ variationAttributes: { color: 'JJB52A0', size: '004' }});
@@ -349,3 +365,95 @@ describe('algoliaLocalizedProduct', function () {
         expect(new AlgoliaLocalizedProduct({ product: product, attributeList: ['pricebooks'] })).toEqual(expected);
     });
 });
+
+
+describe('algoliaLocalizedProduct default custom attribute logic', function () {
+    test('Base Product default custom attribute logic', function () {
+        const product = new ProductMock();
+        const expected = {
+            objectID: '701644031206M',
+            custom: {
+                algoliaTest: 'default locale',
+                displaySize: '14cm'
+            }
+        };
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: ['custom.algoliaTest', 'custom.displaySize'] })).toEqual(expected);
+    });
+
+    test('algoliaLocalizedProduct default custom attribute logic for fr locale', function () {
+        const product = new ProductMock();
+        const baseModel = {
+            objectID: '701644031206M',
+            custom: {
+                algoliaTest: 'default locale',
+                displaySize: '14cm'
+            }
+        }
+
+        const expected = {
+            objectID: '701644031206M',
+            name: 'Robe florale',
+            custom: {
+                algoliaTest: 'default locale',
+                displaySize: '14cm'
+            }
+        }
+
+        // Because default logic is non localized we are expecting it should 
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: ['custom.algoliaTest', 'custom.displaySize', 'name'], baseModel: baseModel})).toEqual(expected);
+    });
+});
+
+
+describe('algoliaLocalizedProduct overriding custom attributes', function () {
+    afterEach(() => {
+        jest.resetModules();
+    });
+
+    test('algoliaLocalizedProduct overrided custom attribute logic for fr locale (Nested attributes)', function () {
+        setupMockConfig({
+            'custom.algoliaTest': {
+                attribute: 'custom.algoliaTest',
+                localized: true,
+                variantAttribute: false
+            }
+        });
+        const AlgoliaLocalizedProductModel = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+
+        const product = new ProductMock();
+        const baseModel =  new AlgoliaLocalizedProductModel({ product: product, locale: 'default', attributeList: ['custom.displaySize'] });
+        const expectedProductModel = {
+            objectID: '701644031206M',
+            custom: {
+                algoliaTest: 'fr locale',
+                displaySize: '14cm'
+            }
+        };
+
+        expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['custom.algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
+    });
+
+    test('algoliaLocalizedProduct overrided custom attribute logic for fr locale (Non-nested attributes)', function () {
+        setupMockConfig({
+            'algoliaTest': {
+                attribute: 'custom.algoliaTest',
+                localized: true,
+                variantAttribute: true
+            }
+        });
+        const AlgoliaLocalizedProductModel = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+
+        const product = new ProductMock();
+        const baseModel =  new AlgoliaLocalizedProductModel({ product: product, locale: 'default', attributeList: ['custom.displaySize'] });
+        const expectedProductModel = {
+            objectID: '701644031206M',
+            custom: {
+                displaySize: '14cm'
+            },
+            algoliaTest: 'fr locale',
+        };
+
+        expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
+    });
+});
+

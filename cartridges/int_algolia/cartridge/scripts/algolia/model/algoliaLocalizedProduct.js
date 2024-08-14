@@ -361,6 +361,14 @@ function algoliaLocalizedProduct(parameters) {
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
 
+            var attributeNameArr = attributeName.split('.');
+            var parentAttribute = null;
+            var subAttribute = null;
+            if (attributeNameArr.length > 1) {
+                parentAttribute = attributeNameArr[0];
+                subAttribute = attributeNameArr[1];
+            }
+
             if (baseModel && baseModel[attributeName]) {
                 this[attributeName] = baseModel[attributeName];
             } else if (baseModel && parentAttribute && subAttribute && baseModel[parentAttribute] && baseModel[parentAttribute][subAttribute]) {
@@ -383,11 +391,7 @@ function algoliaLocalizedProduct(parameters) {
                     config = jobHelper.getDefaultAttributeConfig(attributeName);
                 }
 
-                var attributeNameArr = attributeName.split('.');
-
                 if (attributeNameArr.length > 1) {
-                    var parentAttribute = attributeNameArr[0];
-                    var subAttribute = attributeNameArr[1];
                     if (!this[parentAttribute]) {
                         this[parentAttribute] = {};
                     }

@@ -24,6 +24,7 @@ class Variant extends MasterProduct {
                     }
                 }
             },
+            displaySize: '14cm',
             refinementSize: '4',
             get algoliaTest() {
                 switch (request.getLocale()) {
