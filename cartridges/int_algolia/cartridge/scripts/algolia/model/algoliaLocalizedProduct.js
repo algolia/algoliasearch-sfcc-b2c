@@ -10,6 +10,7 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
+var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
 var extendedProductAttributesConfig;
@@ -360,8 +361,20 @@ function algoliaLocalizedProduct(parameters) {
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
 
+            var attributeNameArr = attributeName.split('.');
+            var parentAttribute = null;
+            var subAttribute = null;
+            if (attributeNameArr.length > 1) {
+                parentAttribute = attributeNameArr[0];
+                subAttribute = attributeNameArr[1];
+            }
+
             if (baseModel && baseModel[attributeName]) {
                 this[attributeName] = baseModel[attributeName];
+            } else if (baseModel && parentAttribute && subAttribute && baseModel[parentAttribute] && baseModel[parentAttribute][subAttribute]) {
+                var tempObj = this[parentAttribute] || {};
+                tempObj[subAttribute] = baseModel[parentAttribute][subAttribute];
+                this[parentAttribute] = tempObj;
             } else if (extendedProductAttributesConfig[attributeName]) {
                 var attributeConfig = extendedProductAttributesConfig[attributeName];
                 if (typeof attributeConfig.attribute === 'function') {
@@ -373,7 +386,17 @@ function algoliaLocalizedProduct(parameters) {
                 this[attributeName] = aggregatedValueHandlers[attributeName](product, parameters);
             } else {
                 var config = algoliaProductConfig.attributeConfig_v2[attributeName];
-                if (!empty(config)) {
+
+                if (empty(config)) {
+                    config = jobHelper.getDefaultAttributeConfig(attributeName);
+                }
+
+                if (attributeNameArr.length > 1) {
+                    if (!this[parentAttribute]) {
+                        this[parentAttribute] = {};
+                    }
+                    this[parentAttribute][subAttribute] = ObjectHelper.getAttributeValue(product, config.attribute);
+                } else {
                     this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
                 }
             }
