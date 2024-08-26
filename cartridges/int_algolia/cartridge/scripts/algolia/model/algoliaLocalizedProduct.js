@@ -90,9 +90,7 @@ function getPromotionalPrices(product, campaigns) {
                 let promoId = promotion.ID;
                 return {
                     price: price.getValue(),
-                    promoId: promoId,
-                    startDate: campaigns[i].startDate,
-                    endDate: campaigns[i].endDate
+                    promoId: promoId
                 };
             });
 
