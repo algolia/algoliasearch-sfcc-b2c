@@ -496,17 +496,16 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
-    var catalogID;
     var resultObj = {
         nrProductsRead: 0,
-        success: false
+        success: false,
+        errorMessage: ''
     };
 
     try {
         if (xmlFile.exists()) {
             var fileReader = new FileReader(xmlFile);
             var xmlStreamReader = new XMLStreamReader(fileReader);
-            var success = false;
 
             switch (resourceType) {
                 case 'catalog':
@@ -575,9 +574,15 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
             }
 
             xmlStreamReader.close();
-        };
+        }
     } catch (error) {
+        algoliaLogger.error('Error while reading from file: ' + xmlFile.getFullPath());
+        algoliaLogger.error(error);
         resultObj.success = false;
+        resultObj.errorMessage =
+            'Error while reading from file: ' + xmlFile.getFullPath() + '\n' +
+            error.message + '\n' +
+            'If your product attributes have special characters such as emojis, you must enable "Filter Invalid XML Characters during Export" in Administration >  Global Preferences >  Import & Export';
         return resultObj;
     }
 

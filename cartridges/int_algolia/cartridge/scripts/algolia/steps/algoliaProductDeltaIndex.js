@@ -268,13 +268,9 @@ exports.beforeStep = function(parameters, stepExecution) {
                 if (result.success) {
                     jobReport.processedItems += result.nrProductsRead;
                 } else {
-                    // abort if error reading from any of the delta export zips
-                    let errorMessage = 'Error reading from file: ' + catalogFile.getFullPath();
-                    jobHelper.logError(errorMessage);
-
+                    // Mark the job in error if an error occurred while reading from any of the delta export zips
                     jobReport.error = true;
-                    jobReport.errorMessage = errorMessage;
-                    jobReport.writeToCustomObject();
+                    jobReport.errorMessage = result.errorMessage;
                 }
             });
         }
@@ -287,8 +283,10 @@ exports.beforeStep = function(parameters, stepExecution) {
     // cleanup - removing "_processing" dir
     fileHelper.removeFolderRecursively(l1_processingDir);
 
-    changedProductsIterator = new CPObjectIterator(changedProducts);
-    logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
+    if (!jobReport.error) {
+        changedProductsIterator = new CPObjectIterator(changedProducts);
+        logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
+    }
 }
 
 /**
