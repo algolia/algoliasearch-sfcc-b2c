@@ -240,31 +240,7 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
-
-                        getPrice = function (hitObj) {
-                            if (hitObj.promotionalPrices && hitObj.promotionalPrices[algoliaData.currencyCode]) {
-                                var productPromos = hitObj.promotionalPrices[algoliaData.currencyCode];
-                                //get values from data-promotions
-                                var minPrice = hitObj.price;
-                                for (var i = 0; i < activeCustomerPromotions.length; i++) {
-                                    for (var j = 0; i < productPromos.length; i++) {
-                                        if (productPromos[j].promoId === activeCustomerPromotions[i] && productPromos[j].price < minPrice) {
-                                            minPrice = productPromos[j].price;
-                                        }
-                                    }
-                                }
-
-                                return minPrice;
-                            }
-
-                            if (hitObj.promotionalPrice) {
-                                return hitObj.promotionalPrice;
-                            }
-
-                            return hitObj.price;
-                        }
-
-
+                        console.log('hit', hit);
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -272,6 +248,9 @@ function enableInstantSearch(config) {
                                  data-index-name="${hit.__indexName}"
                             >
                                 <div class="product-tile">
+                                    ${hit.calloutMsg && html`
+                                        <small class="callout-msg">${hit.calloutMsg}</small>
+                                    `}
                                     <div class="image-container">
                                         <a href="${hit.url}">
                                             <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
@@ -301,21 +280,22 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${ getPrice(hit) < hit.price && html`
+                                            ${ algoliaData.recordModel === 'master-level' && html`<small class='text-sm'>${algoliaData.strings.from} </small>` }
+                                            ${ hit.displayPrice < hit.price && html`
                                                 <span class="strike-through list">
                                                      <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
                                                 </span>
                                             `}
                                             <span class="sales">
                                                 <span class="value">
-                                                    ${hit.currencySymbol} ${getPrice(hit)}
+                                                    ${hit.currencySymbol} ${hit.displayPrice}
                                                 </span>
                                             </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        `
+                        `;
                     },
                 },
                 transformItems: function (items, { results }) {
@@ -336,17 +316,17 @@ function enableInstantSearch(config) {
                                 alt: item.name + ', large',
                             }
                         }
-
+            
                         // adjusted price in user currency
                         if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
                             item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
                         }
-
+            
                         // price in user currency
                         if (item.price && item.price[algoliaData.currencyCode] !== null) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
-
+            
                         // If no promotionalPrice, use the pricebooks to display the strikeout price
                         if (!item.promotionalPrice &&
                             item.pricebooks &&
@@ -370,16 +350,15 @@ function enableInstantSearch(config) {
                                 item.price = maxPrice;
                             }
                         }
-
+            
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
-
-
+            
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
-
+            
                         // originating index
                         item.__indexName = productsIndex;
-
+            
                         // url with queryID (used for analytics)
                         if (item.url) {
                             item.url = generateProductUrl({
@@ -389,7 +368,7 @@ function enableInstantSearch(config) {
                                 indexName: item.__indexName,
                             });
                         }
-
+            
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
@@ -402,10 +381,14 @@ function enableInstantSearch(config) {
                                 });
                             });
                         }
+            
+                        // Calculate displayPrice
+                        var { price, calloutMsg } = calculateDisplayPrice(item);
+                        item.displayPrice = price;
+                        item.calloutMsg = calloutMsg;
 
                         // Master-level indexing
                         if (item.variants) {
-                            let price;
                             item.variants.forEach(variant => {
                                 price = variant.price[algoliaData.currencyCode]
                                 variant.url = generateProductUrl({
@@ -415,7 +398,7 @@ function enableInstantSearch(config) {
                                     indexName: item.__indexName,
                                 });
                             });
-
+            
                             // 1. Find the variant matching the selected facets, or use the default variant
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
@@ -444,7 +427,7 @@ function enableInstantSearch(config) {
                                     return variant.variantID === item.defaultVariantID;
                                 }) || item.variants[0];
                             }
-
+            
                             // 2. Get the colorVariation corresponding to the selected variant, to display its image
                             if (item.colorVariations) {
                                 const colorVariation = item.colorVariations.find(i => {
@@ -457,19 +440,21 @@ function enableInstantSearch(config) {
                                     item.image = imageGroup.images[0];
                                 }
                             }
-
+            
                             // 3. Get the variant price
                             if (selectedVariant) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
                                 }
                                 if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
-                                    item.price = selectedVariant.price[algoliaData.currencyCode]
+                                    item.price = selectedVariant.price[algoliaData.currencyCode];
                                 }
                                 item.url = selectedVariant.url;
+                                // Recalculate displayPrice for the selected variant
+                                item.displayPrice = calculateDisplayPrice(item);
                             }
                         }
-
+            
                         return item;
                     });
                 }
@@ -657,4 +642,45 @@ function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
     url.searchParams.append('objectID', objectID);
     url.searchParams.append('indexName', indexName);
     return url.href;
+}
+
+
+/**
+ * Calculate the display price for an item
+ * @param {Object} item The item object
+ * @return {number} The calculated sales price
+ */
+function calculateDisplayPrice(item) {
+    var promotions = algoliaData.recordModel === 'master-level' ? item.variants[0].promotions : item.promotions;
+    var calloutMsg = '';
+
+    if (promotions && promotions[algoliaData.currencyCode]) {
+        var productPromos = promotions[algoliaData.currencyCode];
+        var minPrice = algoliaData.recordModel === 'master-level' ? item.variants[0].price[algoliaData.currencyCode] : item.price;
+        for (var i = 0; i < activeCustomerPromotions.length; i++) {
+            for (var j = 0; j < productPromos.length; j++) {
+                if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < minPrice) {
+                    minPrice = productPromos[j].price;
+                    calloutMsg = activeCustomerPromotions[i].calloutMsg;
+                }
+            }
+        }
+
+        return {
+            price: minPrice,
+            calloutMsg: calloutMsg,
+        }
+    }
+
+    if (item.promotionalPrice) {
+        return {
+            price: item.promotionalPrice,
+            calloutMsg: '',
+        }
+    }
+
+    return {
+        price: item.price,
+        calloutMsg: '',
+    }
 }

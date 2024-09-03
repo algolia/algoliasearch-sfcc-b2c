@@ -55,7 +55,8 @@ const clientSideData = {
             "separator": Resource.msg('search.pricefilter.separator','algolia',null),
             "submit": Resource.msg('search.pricefilter.submit','algolia',null),
         },
-        "newArrivals": Resource.msg('panel.newarrivals','algolia',null)
+        "newArrivals": Resource.msg('panel.newarrivals','algolia',null),
+        "from": Resource.msg('label.from','algolia',null),
     },
     "noImages": {
         "large": URLUtils.staticURL('/images/noimagelarge.png').toString(),

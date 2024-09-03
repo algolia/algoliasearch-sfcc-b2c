@@ -52,3 +52,23 @@
 .auc-Recommend-title {
     font-size: 32px;
 }
+
+.product-tile {
+    position: relative;
+}
+
+.callout-msg {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ff6b6b;
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.4rem;
+    font-weight: bold;
+    border-radius: 3px;
+    z-index: 1;
+    max-width: 33%;
+    text-align: center;
+    box-shadow: 1px 4px 6px rgba(0, 0, 0, 0.1);
+}

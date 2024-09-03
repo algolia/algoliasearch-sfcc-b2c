@@ -73,13 +73,21 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             }
 
             var PromotionMgr = require('dw/campaign/PromotionMgr');
-            var getActivePromotions = PromotionMgr.getActiveCustomerPromotions().promotions;
+            var promotionPlan = PromotionMgr.getActiveCustomerPromotions();
+            var getActivePromotions = promotionPlan.productPromotions;
+            var basket = require('dw/order/BasketMgr').currentOrNewBasket;
+            var getActiveDiscounts = PromotionMgr.getDiscounts(basket);
 
-            var activePromotions = '';
+            var activePromotionsArr = [];
 
             for (var i = 0; i < getActivePromotions.length; i++) {
-                activePromotions += getActivePromotions[i].ID + ',';
+                activePromotionsArr.push({
+                    id: getActivePromotions[i].ID,
+                    calloutMsg: getActivePromotions[i].calloutMsg ? getActivePromotions[i].calloutMsg.markup : '',
+                });
             }
+
+            var activePromotions = JSON.stringify(activePromotionsArr);
 
             res.render('search/searchResults', {
                 algoliaEnable: true,

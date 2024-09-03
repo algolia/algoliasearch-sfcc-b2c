@@ -75,12 +75,12 @@ function getPromotionalPrice(product) {
 function getPromotionalPrices(product, campaigns) {
     var promotions = [];
     var now = new Date();
-    var oneyearlater = new Date();
-    oneyearlater.setFullYear(oneyearlater.getFullYear() + 1);
+    var oneMonthLater = new Date();
+    oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
     var promotionObjects = [];
 
     for (var i = 0; i < campaigns.length; i++) {
-        var campaignPromos = PromotionMgr.getActivePromotionsForCampaign(campaigns[i], now, oneyearlater).getProductPromotions(product);
+        var campaignPromos = PromotionMgr.getActivePromotionsForCampaign(campaigns[i], now, oneMonthLater).getProductPromotions(product);
 
         campPromotionObj = campaignPromos
             .toArray()
@@ -94,7 +94,7 @@ function getPromotionalPrices(product, campaigns) {
                 };
             });
 
-            promotionObjects = promotionObjects.concat(campPromotionObj);
+        promotionObjects = promotionObjects.concat(campPromotionObj);
     }
 
     return promotionObjects;
@@ -351,7 +351,7 @@ var aggregatedValueHandlers = {
         currentSession.setCurrency(currentCurrency);
         return promotionalPrice;
     },
-    promotionalPrices: function (product) {
+    promotions: function (product) {
         // Get promotional price for all currencies
         var promotionalPrices = null;
         var currentSession = request.getSession();

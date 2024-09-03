@@ -242,7 +242,7 @@ var attributeConfig_v2 = {
         localized: false,
         variantAttribute: true,
     },
-    promotionalPrices: {
+    promotions: {
         localized: false,
         variantAttribute: true,
     },
