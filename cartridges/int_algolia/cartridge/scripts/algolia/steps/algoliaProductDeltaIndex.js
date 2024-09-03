@@ -17,7 +17,7 @@ var fileHelper, jobHelper, modelHelper, reindexHelper, sendHelper;
 // logging-related variables and constants
 var jobReport;
 
-var l0_deltaExportDir, l1_processingDir, l1_completedDir;
+var l0_deltaExportDir, l1_processingDir, l1_completedDir, l1_failedDir;
 var changedProducts = [], changedProductsIterator;
 var deltaExportZips, siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
@@ -233,6 +233,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     l1_completedDir = new File(l0_deltaExportDir, '_completed');
     l1_completedDir.mkdir(); // creating "_completed" folder -- does no harm if it already exists
 
+    l1_failedDir = new File(l0_deltaExportDir, '_failed');
+    l1_failedDir.mkdir();
+
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
         logger.info('Processing ' + filename + '...');
@@ -268,13 +271,9 @@ exports.beforeStep = function(parameters, stepExecution) {
                 if (result.success) {
                     jobReport.processedItems += result.nrProductsRead;
                 } else {
-                    // abort if error reading from any of the delta export zips
-                    let errorMessage = 'Error reading from file: ' + catalogFile.getFullPath();
-                    jobHelper.logError(errorMessage);
-
+                    // Mark the job in error if an error occurred while reading from any of the delta export zips
                     jobReport.error = true;
-                    jobReport.errorMessage = errorMessage;
-                    jobReport.writeToCustomObject();
+                    jobReport.errorMessage = result.errorMessage;
                 }
             });
         }
@@ -287,8 +286,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     // cleanup - removing "_processing" dir
     fileHelper.removeFolderRecursively(l1_processingDir);
 
-    changedProductsIterator = new CPObjectIterator(changedProducts);
-    logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
+    if (!jobReport.error) {
+        changedProductsIterator = new CPObjectIterator(changedProducts);
+        logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
+    } else {
+        logger.info('Moving the Delta export files to the "' + l1_failedDir.getName() + '" directory...')
+        fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_failedDir);
+    }
 }
 
 /**
@@ -467,15 +471,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
             // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
             if (!empty(deltaExportZips)) {
                 logger.info('Moving the Delta export files to the "_completed" directory...')
-                deltaExportZips.forEach(function (filename) {
-                    let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
-                    let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
-                    fileHelper.moveFile(currentZipFile, targetZipFile);
-
-                    let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
-                    let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
-                    fileHelper.moveFile(currentMetaFile, targetMetaFile);
-                });
+                fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_completedDir);
             }
         } else {
             jobReport.error = true;
