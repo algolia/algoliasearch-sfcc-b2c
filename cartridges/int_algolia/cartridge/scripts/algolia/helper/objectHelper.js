@@ -14,6 +14,9 @@ var AlgoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
  * @returns {string|boolean|number|null} - value
  */
 function getAttributeValue(extensibleObject, attributeName, escapeEmoji) {
+    if (!extensibleObject) {
+        return null;
+    }
     var properties = attributeName.split('.');
     var result = properties.reduce(function (previousValue, currentProperty) {
         if (previousValue === null || !(currentProperty in previousValue)) {
@@ -30,6 +33,25 @@ function getAttributeValue(extensibleObject, attributeName, escapeEmoji) {
     }, extensibleObject);
 
     return result;
+}
+
+/**
+ * Set a value to an object attribute.
+ * If the attributeName is a path, the function builds the intermediate objects.
+ * @param {Object} obj - JavaScript object
+ * @param {string} attributeName - object attribute name or path
+ * @param {any} attributeValue - value to set
+ */
+function setAttributeValue(obj, attributeName, attributeValue) {
+    const attributeNameArr = attributeName.split('.');
+    attributeNameArr.reduce(function (res, currentValue, index) {
+        if (index === attributeNameArr.length - 1) {
+            res[currentValue] = attributeValue;
+        } else if (!res[currentValue]) {
+            res[currentValue] = {};
+        }
+        return res[currentValue];
+    }, obj);
 }
 
 
@@ -52,4 +74,5 @@ function safelyGetCustomAttribute(customAttributes, caKey) {
 }
 
 module.exports.getAttributeValue = getAttributeValue;
+module.exports.setAttributeValue = setAttributeValue;
 module.exports.safelyGetCustomAttribute = safelyGetCustomAttribute;

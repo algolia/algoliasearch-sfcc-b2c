@@ -57,13 +57,6 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
 jest.mock('*/cartridge/scripts/algolia/lib/utils', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/utils');
 }, {virtual: true});
-jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
-    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
-    return {
-        getAttributeValue: originalModule.getAttributeValue,
-        safelyGetCustomAttribute: originalModule.safelyGetCustomAttribute,
-    }
-}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
 }, {virtual: true});
@@ -374,10 +367,39 @@ describe('algoliaLocalizedProduct default custom attribute logic', function () {
             objectID: '701644031206M',
             custom: {
                 algoliaTest: 'default locale',
-                displaySize: '14cm'
+                displaySize: '14cm',
+                deeply: { nested: 'nestedValue' },
             }
         };
-        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: ['custom.algoliaTest', 'custom.displaySize'] })).toEqual(expected);
+        expect(new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['custom.algoliaTest', 'custom.displaySize', 'custom.deeply.nested']
+        })).toEqual(expected);
+    });
+
+    test('default attribute configuration logic with baseModel', function () {
+        const product = new ProductMock();
+        const baseModel = {
+            custom: {
+                algoliaTest: 'value from base model',
+                deeply: {
+                    nested: 'value from base model',
+                }
+            }
+        }
+        const expected = {
+            objectID: '701644031206M',
+            custom: {
+                algoliaTest: 'value from base model',
+                deeply: { nested: 'value from base model' },
+            }
+        };
+        expect(new AlgoliaLocalizedProduct({
+            product: product,
+            baseModel: baseModel,
+            attributeList: ['custom.algoliaTest', 'custom.deeply.nested'],
+        })).toEqual(expected);
     });
 
     test('algoliaLocalizedProduct default custom attribute logic for fr locale', function () {
@@ -399,7 +421,7 @@ describe('algoliaLocalizedProduct default custom attribute logic', function () {
             }
         }
 
-        // Because default logic is non localized we are expecting it should 
+        // Because default config is localized:false, we are expecting to have the default locale in the record
         expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: ['custom.algoliaTest', 'custom.displaySize', 'name'], baseModel: baseModel})).toEqual(expected);
     });
 });
@@ -456,4 +478,3 @@ describe('algoliaLocalizedProduct overriding custom attributes', function () {
         expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
     });
 });
-

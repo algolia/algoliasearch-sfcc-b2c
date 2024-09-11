@@ -36,7 +36,10 @@ class Variant extends MasterProduct {
                     default:
                         return '';
                 }
-            }
+            },
+            deeply: {
+                nested: 'nestedValue',
+            },
         };
 
         this.prices = {
