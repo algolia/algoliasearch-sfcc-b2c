@@ -13,6 +13,8 @@ function enableInstantSearch(config) {
     const contentSearchbarTab = document.querySelector('#content-search-bar-button');
     const navbar = document.querySelector('.search-nav');
     const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
+    const isPricingLazyLoad = algoliaData.EnablePricingLazyLoad;
+
     try {
         // First, try to parse it as JSON
         activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
@@ -240,7 +242,6 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
-                        console.log('hit', hit);
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -248,9 +249,10 @@ function enableInstantSearch(config) {
                                  data-index-name="${hit.__indexName}"
                             >
                                 <div class="product-tile">
-                                    ${hit.calloutMsg && html`
-                                        <small class="callout-msg">${hit.calloutMsg}</small>
-                                    `}
+                                
+                                    <small class="callout-msg ${(isPricingLazyLoad && html`d-none`) || (!isPricingLazyLoad && (!hit.calloutMsg && html`d-none`)) } callout-msg-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}">
+                                     ${hit.calloutMsg}
+                                    </small>
                                     <div class="image-container">
                                         <a href="${hit.url}">
                                             <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
@@ -280,17 +282,19 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${ algoliaData.recordModel === 'master-level' && html`<small class='text-sm'>${algoliaData.strings.from} </small>` }
-                                            ${ hit.displayPrice < hit.price && html`
-                                                <span class="strike-through list">
-                                                     <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
+                                            ${isPricingLazyLoad && html`<span class="price-placeholder" id="price-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}"></span>`}
+                                            ${!isPricingLazyLoad && html`
+                                                ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
+                                                    <span class="strike-through list">
+                                                         <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
+                                                    </span>
+                                                `}
+                                                <span class="sales">
+                                                    <span class="value">
+                                                        ${hit.currencySymbol} ${hit.displayPrice}
+                                                    </span>
                                                 </span>
                                             `}
-                                            <span class="sales">
-                                                <span class="value">
-                                                    ${hit.currencySymbol} ${hit.displayPrice}
-                                                </span>
-                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -300,6 +304,13 @@ function enableInstantSearch(config) {
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
+                    var productIDs = items.map( (item) => item.objectID);
+                    if (isPricingLazyLoad) {
+                        if (algoliaData.recordModel === 'master-level') {
+                            productIDs = items.map( (item) => item.defaultVariantID);
+                        }
+                        getPromoPrices(productIDs);
+                    }
                     return items.map(function (item) {
                         // assign image
                         if (item.image_groups) {
@@ -450,8 +461,11 @@ function enableInstantSearch(config) {
                                     item.price = selectedVariant.price[algoliaData.currencyCode];
                                 }
                                 item.url = selectedVariant.url;
+                                let { price, calloutMsg } = calculateDisplayPrice(selectedVariant);
+
+                                item.displayPrice = price;
+                                item.calloutMsg = calloutMsg;
                                 // Recalculate displayPrice for the selected variant
-                                item.displayPrice = calculateDisplayPrice(item);
                             }
                         }
             
@@ -628,6 +642,45 @@ function enableInstantSearch(config) {
     }
 }
 
+function getPromoPrices(productIDs) {
+    $.ajax({
+        url: algoliaData.priceEndpoint,
+        type: 'GET',
+        data: {
+            pids: productIDs.toString(),
+        },
+        success: function(data) {
+            let products = data.products;
+            for (let product of products) {
+                //find the productTile price span and update the price
+                let priceSpan = document.getElementById(`price-placeholder-${product.id}`);
+                priceSpan.innerHTML = getPriceHtml(product);
+
+                if (product?.activePromotion?.price) {
+                    let calloutMsg = document.querySelector(`.callout-msg-placeholder-${product.id}`);
+                    calloutMsg.classList.remove('d-none');
+                    calloutMsg.innerHTML = `${product.activePromotion.promotion.calloutMsg}`;
+                }
+            }
+        }
+    });
+}
+
+
+function getPriceHtml(product) {
+    let priceObj = product.price;
+
+    if (product?.activePromotion?.price || product?.price?.list?.value) {
+        return `<span class="strike-through list">
+                    <span class="value"> ${algoliaData.currencySymbol} ${priceObj?.list?.value || priceObj?.sales?.value} </span>
+                </span>
+                <span class="sales">
+                    <span class="value"> ${algoliaData.currencySymbol} ${product?.activePromotion?.price || priceObj?.sales?.value} </span>
+                </span>`;
+    }
+
+    return `<span class="value"> ${algoliaData.currencySymbol} ${priceObj.sales.value} </span>`;
+}
 /**
  * Build a product URL with Algolia query parameters
  * @param {string} objectID objectID
@@ -651,12 +704,20 @@ function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
  * @return {number} The calculated sales price
  */
 function calculateDisplayPrice(item) {
-    var promotions = algoliaData.recordModel === 'master-level' ? item.variants[0].promotions : item.promotions;
+    var promotions;
     var calloutMsg = '';
+    var variants;
+
+    if (algoliaData.recordModel === 'master-level') {
+        promotions = item.variants && item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
+        variant = item.variants && item.variants.length > 0 ? item.variants[0] : item;
+    } else {
+        promotions = item.promotions;
+    }
 
     if (promotions && promotions[algoliaData.currencyCode]) {
         var productPromos = promotions[algoliaData.currencyCode];
-        var minPrice = algoliaData.recordModel === 'master-level' ? item.variants[0].price[algoliaData.currencyCode] : item.price;
+        var minPrice = algoliaData.recordModel === 'master-level' ? variant.price[algoliaData.currencyCode] : item.price;
         for (var i = 0; i < activeCustomerPromotions.length; i++) {
             for (var j = 0; j < productPromos.length; j++) {
                 if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < minPrice) {

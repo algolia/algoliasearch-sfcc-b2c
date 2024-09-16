@@ -75,8 +75,6 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             var PromotionMgr = require('dw/campaign/PromotionMgr');
             var promotionPlan = PromotionMgr.getActiveCustomerPromotions();
             var getActivePromotions = promotionPlan.productPromotions;
-            var basket = require('dw/order/BasketMgr').currentOrNewBasket;
-            var getActiveDiscounts = PromotionMgr.getDiscounts(basket);
 
             var activePromotionsArr = [];
 

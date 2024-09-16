@@ -154,4 +154,32 @@
         </group-definitions>
     </custom-type>
 
+     <custom-type type-id="RuleBasedPromos">
+        <display-name xml:lang="x-default">RuleBasedPromos</display-name>
+        <staging-mode>no-staging</staging-mode>
+        <storage-scope>site</storage-scope>
+        <key-definition attribute-id="ruleBasedPromosId">
+            <type>string</type>
+            <min-length>0</min-length>
+        </key-definition>
+        <attribute-definitions>
+            <attribute-definition attribute-id="promotions">
+                <display-name xml:lang="x-default">promotions</display-name>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+        </attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="custom">
+                <display-name xml:lang="x-default">custom</display-name>
+                <attribute attribute-id="ruleBasedPromosId"/>
+                <attribute attribute-id="promotions"/>
+            </attribute-group>
+        </group-definitions>
+    </custom-type>
+
+
 </metadata>

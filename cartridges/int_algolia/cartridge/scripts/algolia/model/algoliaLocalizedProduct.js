@@ -4,6 +4,7 @@ var Site = require('dw/system/Site');
 var Currency = require('dw/util/Currency');
 var PriceBookMgr = require('dw/catalog/PriceBookMgr');
 var PromotionMgr = require('dw/campaign/PromotionMgr');
+var CustomObjectMgr = require('dw/object/CustomObjectMgr');
 var URLUtils = require('dw/web/URLUtils');
 
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
@@ -25,6 +26,18 @@ try {
     extendedProductRecordCustomizer = require('*/cartridge/configuration/productRecordCustomizer.js');
     logger.info('Extension file "productRecordCustomizer.js" loaded');
 } catch(e) {
+}
+
+var RuleBasedPromos = [];
+
+var customObjects = CustomObjectMgr.getAllCustomObjects('RuleBasedPromos');
+var count = customObjects.getCount();
+
+if (count > 0) {
+    //finds the latest custom object
+    var latestCustomObjectIt = customObjects.forward(count - 1)
+    var latestCustomObject = customObjects.next();
+    RuleBasedPromos = JSON.parse(latestCustomObject.custom.promotions);
 }
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
@@ -78,6 +91,7 @@ function getPromotionalPrices(product, campaigns) {
     var oneMonthLater = new Date();
     oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
     var promotionObjects = [];
+    var campaigns = PromotionMgr.getCampaigns().toArray();
 
     for (var i = 0; i < campaigns.length; i++) {
         var campaignPromos = PromotionMgr.getActivePromotionsForCampaign(campaigns[i], now, oneMonthLater).getProductPromotions(product);
@@ -86,13 +100,17 @@ function getPromotionalPrices(product, campaigns) {
             .toArray()
             .map(function (promotion) {
                 // get all promotions for this product
-                let price = promotion.getPromotionalPrice(product);
-                let promoId = promotion.ID;
-                return {
-                    price: price.getValue(),
-                    promoId: promoId
-                };
-            });
+                if (RuleBasedPromos.indexOf(promotion.ID) === -1) {
+                    let price = promotion.getPromotionalPrice(product);
+                    let promoId = promotion.ID;
+                    return {
+                        price: price.getValue(),
+                        promoId: promoId
+                    };
+                }
+                return null; // Return null for promotions that don't meet the condition
+            })
+            .filter(Boolean); // Remove null values from the array
 
         promotionObjects = promotionObjects.concat(campPromotionObj);
     }

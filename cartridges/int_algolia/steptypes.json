@@ -424,7 +424,39 @@
                         }
                     ]
                 }
-            }
+            },
+            {
+                "@type-id": "custom.findRuleBasedPromotions",
+                "@supports-parallel-execution": false,
+                "@supports-site-context": true,
+                "@supports-organization-context": false,
+                "description": "Finds all rule based promotions and writes them to a custom object",
+                "module": "int_algolia/cartridge/scripts/algolia/steps/findRuleBasedPromotions.js",
+                "read-function": "read",
+                "process-function": "process",
+                "write-function": "send",
+                "total-count-function": "getTotalCount",
+                "before-step-function": "beforeStep",
+                "before-chunk-function": "",
+                "after-chunk-function": "",
+                "after-step-function": "afterStep",
+                "chunk-size": 100,
+                "transactional": true,
+                "timeout-in-seconds": "3600",
+                "parameters": {},
+                "status-codes": {
+                    "status": [
+                        {
+                            "@code": "ERROR",
+                            "description": "Used when the step failed with an error."
+                        },
+                        {
+                            "@code": "OK",
+                            "description": "Used when the step finished successfully."
+                        }
+                    ]
+                }
+            },
         ]
     }
 }

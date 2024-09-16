@@ -21,6 +21,7 @@ const clientSideData = {
     "searchApiKey": getPreference('SearchApiKey'),
     "enableContentSearch": getPreference('EnableContentSearch'),
     "enableRecommend": getPreference('EnableRecommend'),
+    "EnablePricingLazyLoad": getPreference('EnablePricingLazyLoad'),
     "locale": request.getLocale(),
     "currencyCode": request.getSession().getCurrency().getCurrencyCode(),
     "currencySymbol": request.getSession().getCurrency().getSymbol(),
@@ -28,6 +29,7 @@ const clientSideData = {
     "categoriesIndex": calculateIndexName('categories'),
     "contentsIndex": calculateIndexName('contents'),
     "recordModel": getPreference('RecordModel'),
+    "priceEndpoint": URLUtils.url('Algolia-Price').toString(),
     "quickViewUrlBase": URLUtils.url('Product-ShowQuickView').toString(),
     "strings": {
         "placeholder": Resource.msg('label.header.searchwatermark', 'common', ''),
