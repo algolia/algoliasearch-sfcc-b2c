@@ -461,10 +461,10 @@ function enableInstantSearch(config) {
                                     item.price = selectedVariant.price[algoliaData.currencyCode];
                                 }
                                 item.url = selectedVariant.url;
-                                let { price, calloutMsg } = calculateDisplayPrice(selectedVariant);
+                                let { price: variantPrice, calloutMsg: variantCalloutMsg } = calculateDisplayPrice(selectedVariant);
 
-                                item.displayPrice = price;
-                                item.calloutMsg = calloutMsg;
+                                item.displayPrice = variantPrice;
+                                item.calloutMsg = variantCalloutMsg;
                                 // Recalculate displayPrice for the selected variant
                             }
                         }
@@ -641,7 +641,10 @@ function enableInstantSearch(config) {
         }
     }
 }
-
+/**
+ * Fetches promotional prices for given product IDs and updates the DOM with the new prices and callout messages.
+ * @param {string[]} productIDs - An array of product IDs to fetch promotional prices for.
+ */
 function getPromoPrices(productIDs) {
     $.ajax({
         url: algoliaData.priceEndpoint,
@@ -656,7 +659,7 @@ function getPromoPrices(productIDs) {
                 let priceSpan = document.getElementById(`price-placeholder-${product.id}`);
                 priceSpan.innerHTML = getPriceHtml(product);
 
-                if (product?.activePromotion?.price) {
+                if (product && product.activePromotion && product.activePromotion.price) {
                     let calloutMsg = document.querySelector(`.callout-msg-placeholder-${product.id}`);
                     calloutMsg.classList.remove('d-none');
                     calloutMsg.innerHTML = `${product.activePromotion.promotion.calloutMsg}`;
@@ -666,21 +669,27 @@ function getPromoPrices(productIDs) {
     });
 }
 
-
+/**
+ * Generates HTML for displaying product prices, including promotional prices if applicable.
+ * @param {Object} product - The product object containing price information.
+ * @returns {string} HTML string representing the price display.
+ */
 function getPriceHtml(product) {
     let priceObj = product.price;
 
-    if (product?.activePromotion?.price || product?.price?.list?.value) {
+    if ((product && product.activePromotion && product.activePromotion.price) || 
+        (product && product.price && product.price.list && product.price.list.value)) {
         return `<span class="strike-through list">
-                    <span class="value"> ${algoliaData.currencySymbol} ${priceObj?.list?.value || priceObj?.sales?.value} </span>
+                    <span class="value"> ${algoliaData.currencySymbol} ${(priceObj && priceObj.list && priceObj.list.value) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
                 </span>
                 <span class="sales">
-                    <span class="value"> ${algoliaData.currencySymbol} ${product?.activePromotion?.price || priceObj?.sales?.value} </span>
+                    <span class="value"> ${algoliaData.currencySymbol} ${(product && product.activePromotion && product.activePromotion.price) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
                 </span>`;
     }
 
-    return `<span class="value"> ${algoliaData.currencySymbol} ${priceObj.sales.value} </span>`;
+    return `<span class="value"> ${algoliaData.currencySymbol} ${priceObj && priceObj.sales && priceObj.sales.value} </span>`;
 }
+
 /**
  * Build a product URL with Algolia query parameters
  * @param {string} objectID objectID

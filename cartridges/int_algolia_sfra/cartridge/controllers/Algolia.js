@@ -56,7 +56,7 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
     }
 
     res.json({
-       products : productsArr
+        products : productsArr
     });
     next();
 });

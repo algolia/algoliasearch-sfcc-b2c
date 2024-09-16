@@ -118,6 +118,7 @@ exports.process = function(product, parameters, stepExecution) {
 /**
  * write-function (steptypes.json)
  * Any returns from this function result in the "success" parameter of "afterStep()" to become false.
+ * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
 exports.send = function(parameters, stepExecution) {
