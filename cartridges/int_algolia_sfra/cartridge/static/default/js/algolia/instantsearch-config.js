@@ -242,6 +242,9 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
+                        const displayCalloutMsg = (isPricingLazyLoad && 'd-none') || (!isPricingLazyLoad && (!hit.calloutMsg && 'd-none'));
+                        const callOutMsgClassname = `callout-msg-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}`;
+                        const pricePlaceholderId = `price-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}`;
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -249,8 +252,7 @@ function enableInstantSearch(config) {
                                  data-index-name="${hit.__indexName}"
                             >
                                 <div class="product-tile">
-                                
-                                    <small class="callout-msg ${(isPricingLazyLoad && html`d-none`) || (!isPricingLazyLoad && (!hit.calloutMsg && html`d-none`)) } callout-msg-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}">
+                                    <small class="callout-msg ${displayCalloutMsg} ${callOutMsgClassname}">
                                      ${hit.calloutMsg}
                                     </small>
                                     <div class="image-container">
@@ -282,7 +284,7 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${isPricingLazyLoad && html`<span class="price-placeholder" id="price-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}"></span>`}
+                                            ${isPricingLazyLoad && html`<span class="price-placeholder" id="${pricePlaceholderId}"></span>`}
                                             ${!isPricingLazyLoad && html`
                                                 ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
                                                     <span class="strike-through list">
@@ -307,6 +309,7 @@ function enableInstantSearch(config) {
                     var productIDs = items.map( (item) => item.objectID);
                     if (isPricingLazyLoad) {
                         if (algoliaData.recordModel === 'master-level') {
+                            // when using master-level indexing, we are using defaultVariantID instead of objectID (masterID)
                             productIDs = items.map( (item) => item.defaultVariantID);
                         }
                         getPromoPrices(productIDs);
@@ -327,17 +330,14 @@ function enableInstantSearch(config) {
                                 alt: item.name + ', large',
                             }
                         }
-            
                         // adjusted price in user currency
                         if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
                             item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
                         }
-            
                         // price in user currency
                         if (item.price && item.price[algoliaData.currencyCode] !== null) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
-            
                         // If no promotionalPrice, use the pricebooks to display the strikeout price
                         if (!item.promotionalPrice &&
                             item.pricebooks &&
@@ -361,15 +361,11 @@ function enableInstantSearch(config) {
                                 item.price = maxPrice;
                             }
                         }
-            
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
-            
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
-            
                         // originating index
                         item.__indexName = productsIndex;
-            
                         // url with queryID (used for analytics)
                         if (item.url) {
                             item.url = generateProductUrl({
@@ -379,7 +375,6 @@ function enableInstantSearch(config) {
                                 indexName: item.__indexName,
                             });
                         }
-            
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
@@ -392,7 +387,6 @@ function enableInstantSearch(config) {
                                 });
                             });
                         }
-            
                         // Calculate displayPrice
                         var { price, calloutMsg } = calculateDisplayPrice(item);
                         item.displayPrice = price;
@@ -409,7 +403,6 @@ function enableInstantSearch(config) {
                                     indexName: item.__indexName,
                                 });
                             });
-            
                             // 1. Find the variant matching the selected facets, or use the default variant
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
@@ -438,7 +431,6 @@ function enableInstantSearch(config) {
                                     return variant.variantID === item.defaultVariantID;
                                 }) || item.variants[0];
                             }
-            
                             // 2. Get the colorVariation corresponding to the selected variant, to display its image
                             if (item.colorVariations) {
                                 const colorVariation = item.colorVariations.find(i => {
@@ -451,7 +443,6 @@ function enableInstantSearch(config) {
                                     item.image = imageGroup.images[0];
                                 }
                             }
-            
                             // 3. Get the variant price
                             if (selectedVariant) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
@@ -465,10 +456,8 @@ function enableInstantSearch(config) {
 
                                 item.displayPrice = variantPrice;
                                 item.calloutMsg = variantCalloutMsg;
-                                // Recalculate displayPrice for the selected variant
                             }
                         }
-            
                         return item;
                     });
                 }
@@ -677,7 +666,8 @@ function getPromoPrices(productIDs) {
 function getPriceHtml(product) {
     let priceObj = product.price;
 
-    if ((product && product.activePromotion && product.activePromotion.price) || 
+    // All these conditions mean that the product is on sale, and we should display the list price crossed out
+    if ((product && product.activePromotion && product.activePromotion.price) ||
         (product && product.price && product.price.list && product.price.list.value)) {
         return `<span class="strike-through list">
                     <span class="value"> ${algoliaData.currencySymbol} ${(priceObj && priceObj.list && priceObj.list.value) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
@@ -708,14 +698,13 @@ function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
 
 
 /**
- * Calculate the display price for an item
+ * Calculate the display price for an item when lazy loading pricing is disabled
  * @param {Object} item The item object
  * @return {number} The calculated sales price
  */
 function calculateDisplayPrice(item) {
     var promotions;
     var calloutMsg = '';
-    var variants;
 
     if (algoliaData.recordModel === 'master-level') {
         promotions = item.variants && item.variants.length > 0 ? item.variants[0].promotions : item.promotions;

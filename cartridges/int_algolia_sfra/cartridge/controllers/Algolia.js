@@ -5,14 +5,15 @@ var server = require('server');
 var cache = require('*/cartridge/scripts/middleware/cache');
 
 server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res, next) {
-    var priceHelper = require('*/cartridge/scripts/helpers/pricing');
-    var ProductFactory = require('*/cartridge/scripts/factories/product');
     var PromotionMgr = require('dw/campaign/PromotionMgr');
     var Promotion = require('dw/campaign/Promotion');
     var ProductMgr = require('dw/catalog/ProductMgr');
     var BasketMgr = require('dw/order/BasketMgr');
-    var cartHelper = require('*/cartridge/scripts/cart/cartHelpers');
     var Transaction = require('dw/system/Transaction');
+
+    var priceHelper = require('*/cartridge/scripts/helpers/pricing');
+    var ProductFactory = require('*/cartridge/scripts/factories/product');
+    var cartHelper = require('*/cartridge/scripts/cart/cartHelpers');
 
     var params = req.querystring;
     var productIds = params.pids;
@@ -26,7 +27,7 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
             }
         );
 
-        //find the minimum price for an active promotion
+        //find the minimum price and the promotion
         var minPrice = 99999999999999999999; //set to a high number
         var activePromotion = null;
 
@@ -60,35 +61,5 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
     });
     next();
 });
-
-
-server.get('Test', function (req, res, next) {
-
-    var ProductMgr = require('dw/catalog/ProductMgr');
-    var PromotionMgr = require('dw/campaign/PromotionMgr');
-
-    var discountedProduct = ProductMgr.getProduct('22962004M');
-
-    var qualifyingProduct = ProductMgr.getProduct('701642842682M');
-
-    var randomProduct = ProductMgr.getProduct('25501785M');
-
-    var promoPlan = PromotionMgr.getActiveCustomerPromotions();
-
-    var Discountedpromos = promoPlan.getProductPromotionsForDiscountedProduct(discountedProduct);
-
-    var randomPromos = promoPlan.getProductPromotionsForDiscountedProduct(randomProduct);
-
-    var qualifyingPromos = promoPlan.getProductPromotionsForQualifyingProduct(qualifyingProduct);
-
-    res.json({
-        Discountedpromos: JSON.stringify(Discountedpromos.toArray()),
-        randomPromos: JSON.stringify(randomPromos.toArray()),
-        qualifyingPromos: JSON.stringify(qualifyingPromos.toArray()),
-        promoPlanPromos: JSON.stringify(promoPlan.getPromotions().toArray())
-    });
-    next();
-});
-
 
 module.exports = server.exports();
