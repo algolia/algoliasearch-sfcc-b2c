@@ -2,6 +2,8 @@ const MasterProductMock = require("../../../../../mocks/dw/catalog/MasterProduct
 const VariantMock = require("../../../../../mocks/dw/catalog/Variant");
 const collectionHelper = require("../../../../../mocks/helpers/collectionHelper");
 const jobHelper = require("../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper");
+const PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr');
+const CustomObjectMgrMock = require('../../../../../mocks/dw/object/CustomObjectMgr');
 
 test('generateVariantRecords', () => {
     // master product with two size variations on the same color variation

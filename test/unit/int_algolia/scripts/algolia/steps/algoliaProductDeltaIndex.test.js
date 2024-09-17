@@ -1,5 +1,6 @@
 const GlobalMock = require('../../../../../mocks/global');
-
+const PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr');
+const CustomObjectMgrMock = require('../../../../../mocks/dw/object/CustomObjectMgr');
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
