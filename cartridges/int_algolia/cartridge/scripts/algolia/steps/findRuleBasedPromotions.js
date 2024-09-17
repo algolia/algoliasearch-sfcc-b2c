@@ -1,7 +1,5 @@
 'use strict';
 
-var ArrayList = require('dw/util/ArrayList');
-var Site = require('dw/system/Site');
 var ProductMgr = require('dw/catalog/ProductMgr');
 var PromotionMgr = require('dw/campaign/PromotionMgr');
 var CustomObjectMgr = require('dw/object/CustomObjectMgr');
@@ -47,6 +45,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     var customObjectID = 'promos__' + StringUtils.formatCalendar(System.getCalendar(), 'yyMMdd-HHmmss');
     var customObjects = CustomObjectMgr.getAllCustomObjects('RuleBasedPromos');
     var i = 0;
+    // We are archiving the old promotions objects
     Transaction.wrap(function() {
         while (customObjects.hasNext()) {
             i++;
@@ -122,15 +121,13 @@ exports.process = function(product, parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
 exports.send = function(parameters, stepExecution) {
-    algoliaLogger.info('send: RuleBasedPromos count: {0}', RuleBasedPromos.size());
-    algoliaLogger.info('send: RuleBasedPromos: {0}', JSON.stringify(RuleBasedPromos.values().toArray()));
-    //stringify the RuleBasedPromos
-    var x =  RuleBasedPromos.keySet();
-    var y = x.toArray();
-    algoliaLogger.info('send: set: {0}', JSON.stringify(y));
-    var promos = JSON.stringify(RuleBasedPromos.values().toArray());
-    // Write the RuleBasedPromos to the custom Object
-    customObject.custom.promotions = JSON.stringify(y);
+    var promoCount = RuleBasedPromos.size();
+    var promoIds = RuleBasedPromos.keySet().toArray();
+
+    algoliaLogger.info('send: RuleBasedPromos count: {0}', promoCount);
+    algoliaLogger.info('send: RuleBasedPromos IDs: {0}', JSON.stringify(promoIds));
+
+    customObject.custom.promotions = JSON.stringify(promoIds);
 }
 
 /**

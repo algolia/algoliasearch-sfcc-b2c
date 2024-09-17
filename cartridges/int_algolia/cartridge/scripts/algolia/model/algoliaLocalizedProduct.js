@@ -74,11 +74,9 @@ function getPromotionalPrice(product) {
 
 /**
  * Retrieves the promotional prices for a given product.
- *
  * This function fetches all active promotions for the specified product,
  * extracts the promotional prices, and returns them as an array of objects.
  * Promotions without a price are filtered out.
- *
  * @param {dw.catalog.Product} product - The product for which to get promotional prices.
  * @param {dw.campaign.Campaign[]} campaigns - The campaigns to consider.
  * @returns {Array<Object>} An array of promotional price objects.
