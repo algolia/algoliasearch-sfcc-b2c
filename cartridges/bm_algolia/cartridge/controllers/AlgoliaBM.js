@@ -34,7 +34,7 @@ function handleSettings() {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
         var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
         var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
-        var EnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
+        var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', params.ApplicationID.value);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
@@ -48,7 +48,7 @@ function handleSettings() {
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
         algoliaData.setPreference('EnableContentSearch', algoliaEnableContentSearch);
         algoliaData.setPreference('EnableRecommend', algoliaEnableRecommend);
-        algoliaData.setPreference('EnablePricingLazyLoad', EnablePricingLazyLoad);
+        algoliaData.setPreference('EnablePricingLazyLoad', algoliaEnablePricingLazyLoad);
     } catch (error) {
         Logger.error(error);
     }
