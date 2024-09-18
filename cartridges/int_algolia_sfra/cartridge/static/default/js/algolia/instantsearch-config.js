@@ -245,7 +245,6 @@ function enableInstantSearch(config) {
                         const displayCalloutMsg = (isPricingLazyLoad && 'd-none') || (!isPricingLazyLoad && (!hit.calloutMsg && 'd-none'));
                         const callOutMsgClassname = `callout-msg-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}`;
                         const pricePlaceholderId = `price-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}`;
-                        console.log('hit', hit);
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
