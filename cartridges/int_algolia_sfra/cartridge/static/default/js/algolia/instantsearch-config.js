@@ -245,6 +245,7 @@ function enableInstantSearch(config) {
                         const displayCalloutMsg = (isPricingLazyLoad && 'd-none') || (!isPricingLazyLoad && (!hit.calloutMsg && 'd-none'));
                         const callOutMsgClassname = `callout-msg-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}`;
                         const pricePlaceholderId = `price-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}`;
+                        console.log('hit', hit);
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -253,7 +254,7 @@ function enableInstantSearch(config) {
                             >
                                 <div class="product-tile">
                                     <small class="callout-msg ${displayCalloutMsg} ${callOutMsgClassname}">
-                                     ${hit.calloutMsg}
+                                     ${!isPricingLazyLoad && hit.calloutMsg }
                                     </small>
                                     <div class="image-container">
                                         <a href="${hit.url}">
@@ -630,32 +631,55 @@ function enableInstantSearch(config) {
         }
     }
 }
+
+// Add this at the top of the file, outside of any function
+const fetchedPrices = new Set();
+
 /**
- * Fetches promotional prices for given product IDs and updates the DOM with the new prices and callout messages.
- * @param {string[]} productIDs - An array of product IDs to fetch promotional prices for.
+ * Fetches promotional prices for a list of product IDs
+ * @param {Array} productIDs - An array of product IDs.
  */
 function getPromoPrices(productIDs) {
-    $.ajax({
-        url: algoliaData.priceEndpoint,
-        type: 'GET',
-        data: {
-            pids: productIDs.toString(),
-        },
-        success: function(data) {
-            let products = data.products;
-            for (let product of products) {
-                //find the productTile price span and update the price
-                let priceSpan = document.getElementById(`price-placeholder-${product.id}`);
-                priceSpan.innerHTML = getPriceHtml(product);
+    if (productIDs.length === 0) return;
 
-                if (product && product.activePromotion && product.activePromotion.price) {
-                    let calloutMsg = document.querySelector(`.callout-msg-placeholder-${product.id}`);
-                    calloutMsg.classList.remove('d-none');
-                    calloutMsg.innerHTML = `${product.activePromotion.promotion.calloutMsg}`;
+    // Filter out already fetched product IDs
+    const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
+    productIDs.forEach(id => fetchedPrices.add(id));
+    if (unfetchedProductIDs.length > 0) {
+        $.ajax({
+            url: algoliaData.priceEndpoint,
+            type: 'GET',
+            data: {
+                pids: unfetchedProductIDs.toString(),
+            },
+            success: function(data) {
+                let products = data.products;
+                for (let product of products) {
+                    updateProductPrice(product);
                 }
             }
+        });
+    }
+}
+
+/**
+ * Updates the price display for a product
+ * @param {Object} product - The product object containing price information.
+ */
+function updateProductPrice(product) {
+    let priceSpan = document.getElementById(`price-placeholder-${product.id}`);
+    if (priceSpan) {
+        priceSpan.innerHTML = getPriceHtml(product);
+
+        if (product && product.activePromotion && product.activePromotion.price) {
+            let calloutMsg = document.querySelector(`.callout-msg-placeholder-${product.id}`);
+            if (calloutMsg) {
+                calloutMsg.innerHTML = '';
+                calloutMsg.classList.remove('d-none');
+                calloutMsg.innerHTML = `${product.activePromotion.promotion.calloutMsg}`;
+            }
         }
-    });
+    }
 }
 
 /**
