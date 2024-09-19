@@ -32,7 +32,6 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
         var activePromotion = null;
 
         var promotions = product.promotions || [];
-        var promotionPlan = PromotionMgr.getActiveCustomerPromotions();
         var apiProduct = ProductMgr.getProduct(product.id);
 
         for (var j = 0; j < promotions.length; j++) {

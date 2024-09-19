@@ -158,6 +158,7 @@
         <display-name xml:lang="x-default">RuleBasedPromos</display-name>
         <staging-mode>no-staging</staging-mode>
         <storage-scope>site</storage-scope>
+        <retention-days>30</retention-days>
         <key-definition attribute-id="ruleBasedPromosId">
             <type>string</type>
             <min-length>0</min-length>

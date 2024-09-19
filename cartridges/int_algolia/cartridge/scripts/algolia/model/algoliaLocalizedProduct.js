@@ -29,9 +29,15 @@ try {
 }
 
 var RuleBasedPromos = [];
+var count;
 
-var customObjects = CustomObjectMgr.getAllCustomObjects('RuleBasedPromos');
-var count = customObjects.getCount();
+try {
+    var customObjects = CustomObjectMgr.getAllCustomObjects('RuleBasedPromosX');
+} catch (e) {
+    count = 0;
+}
+
+count = customObjects && customObjects.getCount();
 
 if (count > 0) {
     //finds the latest custom object
@@ -74,7 +80,7 @@ function getPromotionalPrice(product) {
 
 /**
  * Retrieves the promotional prices for a given product.
- * This function fetches all active promotions for the specified product,
+ * This function fetches that active promotions from now to one month later for the specified product, (not including rule based promotions)
  * extracts the promotional prices, and returns them as an array of objects.
  * Promotions without a price are filtered out.
  * @param {dw.catalog.Product} product - The product for which to get promotional prices.
@@ -84,12 +90,10 @@ function getPromotionalPrice(product) {
  * @returns {string} return[].promoId - The ID of the promotion.
  */
 function getPromotionalPrices(product, campaigns) {
-    var promotions = [];
     var now = new Date();
     var oneMonthLater = new Date();
     oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
     var promotionObjects = [];
-    var campaigns = PromotionMgr.getCampaigns().toArray();
 
     for (var i = 0; i < campaigns.length; i++) {
         var campaignPromos = PromotionMgr.getActivePromotionsForCampaign(campaigns[i], now, oneMonthLater).getProductPromotions(product);
