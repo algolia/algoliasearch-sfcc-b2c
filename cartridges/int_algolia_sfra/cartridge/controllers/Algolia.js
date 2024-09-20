@@ -6,14 +6,8 @@ var cache = require('*/cartridge/scripts/middleware/cache');
 
 server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res, next) {
     var PromotionMgr = require('dw/campaign/PromotionMgr');
-    var Promotion = require('dw/campaign/Promotion');
     var ProductMgr = require('dw/catalog/ProductMgr');
-    var BasketMgr = require('dw/order/BasketMgr');
-    var Transaction = require('dw/system/Transaction');
-
-    var priceHelper = require('*/cartridge/scripts/helpers/pricing');
     var ProductFactory = require('*/cartridge/scripts/factories/product');
-    var cartHelper = require('*/cartridge/scripts/cart/cartHelpers');
 
     var params = req.querystring;
     var productIds = params.pids;
