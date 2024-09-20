@@ -284,7 +284,7 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${isPricingLazyLoad && html`<span class="price-placeholder" id="${pricePlaceholderId}"></span>`}
+                                            ${isPricingLazyLoad && html`<span class="price-placeholder" data-product-id="${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}"></span>`}
                                             ${!isPricingLazyLoad && html`
                                                 ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
                                                     <span class="strike-through list">
@@ -302,18 +302,20 @@ function enableInstantSearch(config) {
                                 </div>
                             </div>
                         `;
-                    },
+                    }, 
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
-                    var productIDs = items.map( (item) => item.objectID);
+                    var productIDs = items.map((item) => algoliaData.recordModel === 'master-level' ? item.defaultVariantID : item.objectID);
+                    
                     if (isPricingLazyLoad) {
-                        if (algoliaData.recordModel === 'master-level') {
-                            // when using master-level indexing, we are using defaultVariantID instead of objectID (masterID)
-                            productIDs = items.map( (item) => item.defaultVariantID);
-                        }
-                        getPromoPrices(productIDs);
+                        fetchPromoPrices(productIDs).then(() => {
+                            setTimeout(() => {
+                                updateAllProductPrices();
+                            }, 0);
+                        });
                     }
+                    
                     return items.map(function (item) {
                         // assign image
                         if (item.image_groups) {
@@ -523,6 +525,10 @@ function enableInstantSearch(config) {
     search.start();
 
     search.on('render', function () {
+        if (isPricingLazyLoad && search.status === 'idle') {
+            updateAllProductPrices();
+        }
+
         var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
         $(emptyFacetSelector).each(function () {
             $(this).parents().eq(2).hide();
@@ -632,53 +638,58 @@ function enableInstantSearch(config) {
 }
 
 // Add this at the top of the file, outside of any function
-const fetchedPrices = new Set();
+const fetchedPrices = new Map();
 
 /**
  * Fetches promotional prices for a list of product IDs
  * @param {Array} productIDs - An array of product IDs.
+ * @returns {Promise} A promise that resolves when prices are fetched
  */
-function getPromoPrices(productIDs) {
-    if (productIDs.length === 0) return;
+function fetchPromoPrices(productIDs) {
+    if (productIDs.length === 0) return Promise.resolve();
 
     // Filter out already fetched product IDs
     const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
-    productIDs.forEach(id => fetchedPrices.add(id));
-    if (unfetchedProductIDs.length > 0) {
-        $.ajax({
-            url: algoliaData.priceEndpoint,
-            type: 'GET',
-            data: {
-                pids: unfetchedProductIDs.toString(),
-            },
-            success: function(data) {
-                let products = data.products;
-                for (let product of products) {
-                    updateProductPrice(product);
-                }
-            }
-        });
-    }
+    
+    if (unfetchedProductIDs.length === 0) return Promise.resolve();
+
+    return $.ajax({
+        url: algoliaData.priceEndpoint,
+        type: 'GET',
+        data: {
+            pids: unfetchedProductIDs.toString(),
+        },
+    }).then(function(data) {
+        let products = data.products;
+        for (let product of products) {
+            fetchedPrices.set(product.id, product);
+        }
+    });
 }
 
 /**
- * Updates the price display for a product
- * @param {Object} product - The product object containing price information.
+ * Updates the price display for all products on the page
  */
-function updateProductPrice(product) {
-    let priceSpan = document.getElementById(`price-placeholder-${product.id}`);
-    if (priceSpan) {
-        priceSpan.innerHTML = getPriceHtml(product);
+function updateAllProductPrices() {
+    const pricePlaceholders = document.querySelectorAll('.price-placeholder');
 
-        if (product && product.activePromotion && product.activePromotion.price) {
-            let calloutMsg = document.querySelector(`.callout-msg-placeholder-${product.id}`);
-            if (calloutMsg) {
-                calloutMsg.innerHTML = '';
-                calloutMsg.classList.remove('d-none');
-                calloutMsg.innerHTML = `${product.activePromotion.promotion.calloutMsg}`;
+    pricePlaceholders.forEach(placeholder => {
+        const productId = placeholder.getAttribute('data-product-id');
+        const product = fetchedPrices.get(productId);
+
+        if (product) {
+            let priceHtml = getPriceHtml(product);
+            placeholder.innerHTML = priceHtml;
+
+            if (product.activePromotion && product.activePromotion.price) {
+                const calloutMsg = document.querySelector(`.callout-msg-placeholder-${productId}`);
+                if (calloutMsg) {
+                    calloutMsg.innerHTML = product.activePromotion.promotion.calloutMsg;
+                    calloutMsg.classList.remove('d-none');
+                }
             }
         }
-    }
+    });
 }
 
 /**
@@ -696,7 +707,7 @@ function getPriceHtml(product) {
                     <span class="value"> ${algoliaData.currencySymbol} ${(priceObj && priceObj.list && priceObj.list.value) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
                 </span>
                 <span class="sales">
-                    <span class="value"> ${algoliaData.currencySymbol} ${(product && product.activePromotion && product.activePromotion.price) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
+                    <span class="value"> ${algoliaData.currencySymbol} ${(product.activePromotion && product.activePromotion.price) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
                 </span>`;
     }
 
