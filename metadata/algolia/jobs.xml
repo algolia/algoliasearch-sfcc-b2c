@@ -1,29 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jobs xmlns="http://www.demandware.com/xml/impex/jobs/2015-07-01">
 
-    <job job-id="AlgoliaFindRuleBasedPromos">
-        <description/>
-        <parameters/>
-        <split sequential="false">
-            <contexts template-ref="template_57">
-                <all-storefront-sites/>
-            </contexts>
-            <flow-template template-id="template_57">
-                <step step-id="FindRuleBasedPromos" type="custom.findRuleBasedPromotions" enforce-restart="false">
-                    <description/>
-                    <parameters/>
-                </step>
-            </flow-template>
-        </split>
-        <rules/>
-        <triggers>
-            <run-once enabled="false">
-                <date>2024-09-05Z</date>
-                <time>12:25:00.000Z</time>
-            </run-once>
-        </triggers>
-    </job>
-
     <job job-id="AlgoliaCategoryIndex_v2" priority="0">
         <description>Reindex all categories (incl. categories structures) assigned to the selected site to Algolia.</description>
         <parameters/>
@@ -42,10 +19,6 @@
         <parameters/>
         <flow>
             <context site-id="RefArch"/>
-            <step step-id="FindRuleBasedPromos" type="custom.findRuleBasedPromotions" enforce-restart="false">
-                <description/>
-                <parameters/>
-            </step>
             <step step-id="algoliaProductIndex" type="custom.algoliaProductIndex" enforce-restart="false">
                 <description>Index all products assigned to the selected site to Algolia. The list of indexed attributes is configurable, and by default contains related price and inventory data for each product. Can perform partial records updates, full records updates or a full catalog reindex, depending on the 'indexingMethod':
 - 'partialRecordUpdate': only the specified attributes are updated/added for each record (without affecting other attributes). If the record doesn't exist, a new one will be created.

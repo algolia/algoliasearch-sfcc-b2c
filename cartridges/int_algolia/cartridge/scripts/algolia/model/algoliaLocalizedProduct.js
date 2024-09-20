@@ -28,24 +28,6 @@ try {
 } catch(e) {
 }
 
-var RuleBasedPromos = [];
-var count;
-
-try {
-    var customObjects = CustomObjectMgr.getAllCustomObjects('RuleBasedPromosX');
-} catch (e) {
-    count = 0;
-}
-
-count = customObjects && customObjects.getCount();
-
-if (count > 0) {
-    //finds the latest custom object
-    var latestCustomObjectIt = customObjects.forward(count - 1)
-    var latestCustomObject = customObjects.next();
-    RuleBasedPromos = JSON.parse(latestCustomObject.custom.promotions);
-}
-
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 
 /**
@@ -102,15 +84,15 @@ function getPromotionalPrices(product, campaigns) {
             .toArray()
             .map(function (promotion) {
                 // get all promotions for this product
-                if (RuleBasedPromos.indexOf(promotion.ID) === -1) {
-                    let price = promotion.getPromotionalPrice(product);
+                let price = promotion.getPromotionalPrice(product);
+                    if (price === dw.value.Money.NOT_AVAILABLE) {
+                        return null;
+                    }
                     let promoId = promotion.ID;
                     return {
                         price: price.getValue(),
                         promoId: promoId
                     };
-                }
-                return null; // Return null for promotions that don't meet the condition
             })
             .filter(Boolean); // Remove null values from the array
 
