@@ -80,7 +80,7 @@ function getPromotionalPrices(product, campaigns) {
     for (var i = 0; i < campaigns.length; i++) {
         var campaignPromos = PromotionMgr.getActivePromotionsForCampaign(campaigns[i], now, oneMonthLater).getProductPromotions(product);
 
-        campPromotionObj = campaignPromos
+        var campPromotionObj = campaignPromos
             .toArray()
             .map(function (promotion) {
                 // get all promotions for this product
