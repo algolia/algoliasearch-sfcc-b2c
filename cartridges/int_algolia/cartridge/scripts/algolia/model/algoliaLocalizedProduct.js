@@ -85,14 +85,14 @@ function getPromotionalPrices(product, campaigns) {
             .map(function (promotion) {
                 // get all promotions for this product
                 let price = promotion.getPromotionalPrice(product);
-                    if (price === dw.value.Money.NOT_AVAILABLE) {
-                        return null;
-                    }
-                    let promoId = promotion.ID;
-                    return {
-                        price: price.getValue(),
-                        promoId: promoId
-                    };
+                if (price === dw.value.Money.NOT_AVAILABLE) {
+                    return null;
+                }
+                let promoId = promotion.ID;
+                return {
+                    price: price.getValue(),
+                    promoId: promoId
+                };
             })
             .filter(Boolean); // Remove null values from the array
 
