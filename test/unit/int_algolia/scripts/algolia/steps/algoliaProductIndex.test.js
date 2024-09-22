@@ -82,7 +82,6 @@ const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/
 const collectionHelper = require('../../../../../mocks/helpers/collectionHelper');
 
 const PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr');
-const CustomObjectMgrMock = require('../../../../../mocks/dw/object/CustomObjectMgr');
 
 beforeEach(() => {
     global.customPreferences['Algolia_RecordModel'] = 'variant-level';

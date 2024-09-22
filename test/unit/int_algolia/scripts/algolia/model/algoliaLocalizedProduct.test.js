@@ -3,7 +3,6 @@
 var GlobalMock = require('../../../../../mocks/global');
 var ProductMock = require('../../../../../mocks/dw/catalog/Variant');
 var PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr');
-var CustomObjectMgrMock = require('../../../../../mocks/dw/object/CustomObjectMgr');
 
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();

@@ -622,83 +622,6 @@ function enableInstantSearch(config) {
     }
 }
 
-// Add this at the top of the file, outside of any function
-const fetchedPrices = new Map();
-
-/**
- * Fetches promotional prices for a list of product IDs
- * @param {Array} productIDs - An array of product IDs.
- * @returns {Promise} A promise that resolves when prices are fetched
- */
-function fetchPromoPrices(productIDs) {
-    if (productIDs.length === 0) return Promise.resolve();
-
-    // Filter out already fetched product IDs
-    const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
-    
-    if (unfetchedProductIDs.length === 0) return Promise.resolve();
-
-    return $.ajax({
-        url: algoliaData.priceEndpoint,
-        type: 'GET',
-        data: {
-            pids: unfetchedProductIDs.toString(),
-        },
-    }).then(function(data) {
-        let products = data.products;
-        for (let product of products) {
-            fetchedPrices.set(product.id, product);
-        }
-    });
-}
-
-/**
- * Updates the price display for all products on the page
- */
-function updateAllProductPrices() {
-    const pricePlaceholders = document.querySelectorAll('.price-placeholder');
-
-    pricePlaceholders.forEach(placeholder => {
-        const productId = placeholder.getAttribute('data-product-id');
-        const product = fetchedPrices.get(productId);
-
-        if (product) {
-            let priceHtml = getPriceHtml(product);
-            placeholder.innerHTML = priceHtml;
-
-            if (product.activePromotion && product.activePromotion.price) {
-                const calloutMsg = document.querySelector(`.callout-msg-placeholder-${productId}`);
-                if (calloutMsg) {
-                    calloutMsg.innerHTML = product.activePromotion.promotion.calloutMsg;
-                    calloutMsg.classList.remove('d-none');
-                }
-            }
-        }
-    });
-}
-
-/**
- * Generates HTML for displaying product prices, including promotional prices if applicable.
- * @param {Object} product - The product object containing price information.
- * @returns {string} HTML string representing the price display.
- */
-function getPriceHtml(product) {
-    let priceObj = product.price;
-
-    // All these conditions mean that the product is on sale, and we should display the list price crossed out
-    if ((product && product.activePromotion && product.activePromotion.price) ||
-        (product && product.price && product.price.list && product.price.list.value)) {
-        return `<span class="strike-through list">
-                    <span class="value"> ${algoliaData.currencySymbol} ${(priceObj && priceObj.list && priceObj.list.value) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
-                </span>
-                <span class="sales">
-                    <span class="value"> ${algoliaData.currencySymbol} ${(product.activePromotion && product.activePromotion.price) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
-                </span>`;
-    }
-
-    return `<span class="value"> ${algoliaData.currencySymbol} ${priceObj && priceObj.sales && priceObj.sales.value} </span>`;
-}
-
 /**
  * Build a product URL with Algolia query parameters
  * @param {string} objectID objectID
@@ -715,18 +638,13 @@ function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
     return url.href;
 }
 
-counter=0;
 /**
  * Calculate the display price for an item when lazy loading pricing is disabled
  * @param {Object} item The item object
  * @return {number} The calculated sales price
  */
 function calculateDisplayPrice(item) {
-    counter++;
-    if (counter === 2) {
-        debugger;
-    }
-    console.log('item', item)
+
     var promotions;
     var calloutMsg = '';
 

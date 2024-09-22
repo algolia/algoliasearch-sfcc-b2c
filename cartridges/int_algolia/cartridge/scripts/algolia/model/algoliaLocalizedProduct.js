@@ -4,7 +4,6 @@ var Site = require('dw/system/Site');
 var Currency = require('dw/util/Currency');
 var PriceBookMgr = require('dw/catalog/PriceBookMgr');
 var PromotionMgr = require('dw/campaign/PromotionMgr');
-var CustomObjectMgr = require('dw/object/CustomObjectMgr');
 var URLUtils = require('dw/web/URLUtils');
 
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
