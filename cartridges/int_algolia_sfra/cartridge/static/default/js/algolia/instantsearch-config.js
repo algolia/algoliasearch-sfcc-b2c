@@ -243,8 +243,8 @@ function enableInstantSearch(config) {
                     empty: '',
                     item(hit, { html, components }) {
                         const displayCalloutMsg = (isPricingLazyLoad && 'd-none') || (!isPricingLazyLoad && (!hit.calloutMsg && 'd-none'));
-                        const callOutMsgClassname = `callout-msg-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}`;
-                        const pricePlaceholderId = `price-placeholder-${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}`;
+                        const productId = algoliaData.recordModel === 'master-level' ? (hit.defaultVariantID ? hit.defaultVariantID : hit.objectID) : hit.objectID;
+                        const callOutMsgClassname = `callout-msg-placeholder-${productId}`;
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -284,7 +284,7 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${isPricingLazyLoad && html`<span class="price-placeholder" data-product-id="${algoliaData.recordModel === 'master-level' ? hit.defaultVariantID : hit.objectID}"></span>`}
+                                            ${isPricingLazyLoad && html`<span class="price-placeholder" data-product-id="${productId}"></span>`}
                                             ${!isPricingLazyLoad && html`
                                                 ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
                                                     <span class="strike-through list">
@@ -306,16 +306,7 @@ function enableInstantSearch(config) {
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
-                    var productIDs = items.map((item) => algoliaData.recordModel === 'master-level' ? item.defaultVariantID : item.objectID);
-                    
-                    if (isPricingLazyLoad) {
-                        fetchPromoPrices(productIDs).then(() => {
-                            setTimeout(() => {
-                                updateAllProductPrices();
-                            }, 0);
-                        });
-                    }
-                    
+
                     return items.map(function (item) {
                         // assign image
                         if (item.image_groups) {
@@ -526,7 +517,11 @@ function enableInstantSearch(config) {
 
     search.on('render', function () {
         if (isPricingLazyLoad && search.status === 'idle') {
-            updateAllProductPrices();
+            var items = search.renderState[algoliaData.productsIndex].infiniteHits.hits;
+            var productIDs = items.map((item) => algoliaData.recordModel === 'master-level' ? (item.defaultVariantID ? item.defaultVariantID : item.objectID) : item.objectID);
+            fetchPromoPrices(productIDs).then(() => {
+                updateAllProductPrices();
+            });
         }
 
         var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
