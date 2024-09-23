@@ -51,15 +51,25 @@ function getColorVariations(product, locale) {
                     colorValue.value
                 ).toString(),
                 color: colorValue.displayValue,
+                colorCode: colorValue.value,
             };
-
-            if (IS_PWA) {
-                variationObject.colorCode = colorValue.value; // Required to create product detail page URL in PWA
-            }
 
             colorVariations.push(variationObject);
         }
     }
+
+    var defaultVariant = product.getVariationModel().getDefaultVariant();
+    if (defaultVariant && colorVariations.length) {
+        var defaultColorValue = variationModel.getSelectedValue(colorVariationAttribute);
+        for (var i = 0; i < colorVariations.length; i++) {
+            if (colorVariations[i].colorCode === defaultColorValue.value) {
+                var defaultVariation = colorVariations.splice(i, 1)[0];
+                colorVariations.unshift(defaultVariation);
+                break;
+            }
+        }
+    }
+
     return colorVariations;
 }
 

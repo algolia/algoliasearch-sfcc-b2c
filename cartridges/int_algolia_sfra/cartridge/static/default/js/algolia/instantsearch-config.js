@@ -295,7 +295,10 @@ function enableInstantSearch(config) {
                             }) || item.image_groups[0];
                             if (imageGroup) {
                                 var firstImageInGroup = imageGroup.images[0];
-                                item.image = firstImageInGroup
+                                item.image = {
+                                    dis_base_link: firstImageInGroup.dis_base_link,
+                                    alt: firstImageInGroup.alt,
+                                };
                             }
                         } else {
                             item.image = {
@@ -341,7 +344,6 @@ function enableInstantSearch(config) {
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
 
-
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
 
                         // originating index
@@ -360,6 +362,7 @@ function enableInstantSearch(config) {
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
+                            let firstVariationimage = '';
                             item.colorVariations.forEach(colorVariation => {
                                 colorVariation.variationURL = generateProductUrl({
                                     objectID: item.objectID,
@@ -368,6 +371,17 @@ function enableInstantSearch(config) {
                                     indexName: item.__indexName,
                                 });
                             });
+
+                            if (item.colorVariations.length > 0 && item.colorVariations[0]?.image_groups?.length > 0) {
+                                var firstImageInGroup = item.colorVariations[0]?.image_groups[0];
+                                if (firstImageInGroup) {
+                                    firstVariationimage = {
+                                        dis_base_link: firstImageInGroup.images[0]?.dis_base_link,
+                                        alt: firstImageInGroup.images[0]?.alt,
+                                    }
+                                    item.image = firstVariationimage;
+                                }
+                            }
                         }
 
                         // Master-level indexing
@@ -577,7 +591,7 @@ function enableInstantSearch(config) {
      */
     function renderSwatches(hit, html) {
         if (hit.colorVariations) {
-            return hit.colorVariations.map(colorVariation => {
+            return hit.colorVariations.map((colorVariation, index) => {
                 let swatch;
                 let variantImage;
                 if (!colorVariation.image_groups) {
@@ -593,15 +607,25 @@ function enableInstantSearch(config) {
                 }
 
                 return html`
-                <a onmouseover="${() => {
+                <a onmouseover="${(e) => {
         const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
         const image = parent.querySelector('.tile-image');
         const link = parent.querySelector('.image-container > a');
         image.src = variantImage.dis_base_link;
         link.href = colorVariation.variationURL;
+        // Remove existing border effects
+        const existingSelectedSwatches = parent.querySelectorAll('.swatch-selected');
+        if (existingSelectedSwatches.length > 0) {
+            existingSelectedSwatches.forEach(selectedSwatch => {
+                selectedSwatch.classList.remove('swatch-selected');
+            });
+        }
+        const swatchContainer = e.target.parentElement;
+        // Add border effect to selected swatch
+        swatchContainer.classList.add('swatch-selected');
     }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
-                    <span>
-                        <img class="swatch swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
+                    <span class="${index === 0 ? 'swatch-selected' : ''} swatch-link">
+                        <img class="swatch  swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                     </span>
                 </a>
             `;

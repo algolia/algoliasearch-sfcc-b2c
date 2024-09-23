@@ -333,6 +333,7 @@ exports[`process master-level indexing 1`] = `
       "colorVariations": [
         {
           "color": "Hot Pink Combo",
+          "colorCode": "JJB52A0",
           "image_groups": [
             {
               "_type": "image_group",
@@ -489,6 +490,7 @@ exports[`process master-level indexing 1`] = `
       "colorVariations": [
         {
           "color": "Combo rose vif",
+          "colorCode": "JJB52A0",
           "image_groups": [
             {
               "_type": "image_group",
@@ -645,6 +647,7 @@ exports[`process master-level indexing 1`] = `
       "colorVariations": [
         {
           "color": "Hot Pink Combo",
+          "colorCode": "JJB52A0",
           "image_groups": [
             {
               "_type": "image_group",

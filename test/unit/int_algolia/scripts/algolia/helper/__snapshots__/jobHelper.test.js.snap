@@ -34,6 +34,7 @@ exports[`generateVariantRecords 1`] = `
       "colorVariations": [
         {
           "color": "Combo rose vif",
+          "colorCode": "JJB52A0",
           "image_groups": [
             {
               "_type": "image_group",
@@ -128,6 +129,7 @@ exports[`generateVariantRecords 1`] = `
       "colorVariations": [
         {
           "color": "Combo rose vif",
+          "colorCode": "JJB52A0",
           "image_groups": [
             {
               "_type": "image_group",
