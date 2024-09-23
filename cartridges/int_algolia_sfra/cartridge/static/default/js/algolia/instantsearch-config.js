@@ -363,24 +363,24 @@ function enableInstantSearch(config) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
                             let firstVariationimage = '';
-                            item.colorVariations.forEach(colorVariation => {
+                            item.colorVariations.forEach((colorVariation, index) => {
                                 colorVariation.variationURL = generateProductUrl({
                                     objectID: item.objectID,
                                     productUrl: colorVariation.variationURL,
                                     queryID: item.__queryID,
                                     indexName: item.__indexName,
                                 });
+
+                                if (index === 0 && colorVariation.image_groups && colorVariation.image_groups[0].images) {
+                                    firstVariationimage = {
+                                        dis_base_link: colorVariation.image_groups[0].images[0].dis_base_link,
+                                        alt: colorVariation.image_groups[0].images[0].alt,
+                                    }
+                                }
                             });
 
-                            if (item.colorVariations.length > 0 && item.colorVariations[0]?.image_groups?.length > 0) {
-                                var firstImageInGroup = item.colorVariations[0]?.image_groups[0];
-                                if (firstImageInGroup) {
-                                    firstVariationimage = {
-                                        dis_base_link: firstImageInGroup.images[0]?.dis_base_link,
-                                        alt: firstImageInGroup.images[0]?.alt,
-                                    }
-                                    item.image = firstVariationimage;
-                                }
+                            if (firstVariationimage) {
+                                item.image = firstVariationimage;
                             }
                         }
 
@@ -426,20 +426,7 @@ function enableInstantSearch(config) {
                                 }) || item.variants[0];
                             }
 
-                            // 2. Get the colorVariation corresponding to the selected variant, to display its image
-                            if (item.colorVariations) {
-                                const colorVariation = item.colorVariations.find(i => {
-                                    return selectedVariant && i.color === selectedVariant.color
-                                }) || item.colorVariations[0];
-                                const imageGroup = colorVariation.image_groups.find(i => {
-                                    return i.view_type === 'large'
-                                }) || colorVariation.image_groups[0];
-                                if (imageGroup) {
-                                    item.image = imageGroup.images[0];
-                                }
-                            }
-
-                            // 3. Get the variant price
+                            // 2. Get the variant price
                             if (selectedVariant) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
