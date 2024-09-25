@@ -414,8 +414,8 @@ function enableInstantSearch(config) {
 
                             ({selectedVariant} = selectVariantBasedOnFacets(item, colorFacets, sizeFacets));
 
-                             // 2. Get the colorVariation corresponding to the selected variant, to display its image
-                             if (item.colorVariations) {
+                            // 2. Get the colorVariation corresponding to the selected variant, to display its image
+                            if (item.colorVariations) {
                                 const colorVariation = item.colorVariations.find(i => {
                                     return selectedVariant && i.color === selectedVariant.color
                                 }) || item.colorVariations[0];
@@ -650,7 +650,7 @@ function enableInstantSearch(config) {
             if (item.variants) {
                 if (colorFacets.length > 0 && sizeFacets.length > 0) {
                     selectedVariant = item.variants.find(variant => 
-                    sizeFacets.includes(variant.size) && colorFacets.includes(variant.color)
+                        sizeFacets.includes(variant.size) && colorFacets.includes(variant.color)
                     );
                 }
                 if (!selectedVariant && colorFacets.length > 0) {
@@ -666,7 +666,7 @@ function enableInstantSearch(config) {
                 if (!selectedVariant) {
                     selectedVariant = item.variants.find(variant => 
                         variant.variantID === item.defaultVariantID
-                        ) || item.variants[0];
+                    ) || item.variants[0];
                 }
             }
 
