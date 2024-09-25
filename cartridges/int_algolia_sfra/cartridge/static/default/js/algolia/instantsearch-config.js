@@ -1,4 +1,5 @@
-/* global instantsearch */
+
+var algoliaResults;
 /**
  * Initializes InstantSearch
  * @param {Object} config Configuration object
@@ -286,19 +287,26 @@ function enableInstantSearch(config) {
                     },
                 },
                 transformItems: function (items, { results }) {
+                    algoliaResults = results;
                     displaySwatches = false;
                     return items.map(function (item) {
+                        let colorFacets = [];
+                        let sizeFacets = [];
+                        if (algoliaData.recordModel === 'master-level') {
+                            colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
+                            sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
+                        } else {
+                            colorFacets = results._state.disjunctiveFacetsRefinements['color'] || [];
+                            sizeFacets = results._state.disjunctiveFacetsRefinements['size'] || [];
+                        }
+
                         // assign image
                         if (item.image_groups) {
                             const imageGroup = item.image_groups.find(function (i) {
                                 return i.view_type === 'large'
                             }) || item.image_groups[0];
                             if (imageGroup) {
-                                var firstImageInGroup = imageGroup.images[0];
-                                item.image = {
-                                    dis_base_link: firstImageInGroup.dis_base_link,
-                                    alt: firstImageInGroup.alt,
-                                };
+                                item.image = imageGroup.images[0];
                             }
                         } else {
                             item.image = {
@@ -362,7 +370,6 @@ function enableInstantSearch(config) {
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
-                            let firstVariationimage = '';
                             item.colorVariations.forEach((colorVariation, index) => {
                                 colorVariation.variationURL = generateProductUrl({
                                     objectID: item.objectID,
@@ -370,17 +377,22 @@ function enableInstantSearch(config) {
                                     queryID: item.__queryID,
                                     indexName: item.__indexName,
                                 });
-
-                                if (index === 0 && colorVariation.image_groups && colorVariation.image_groups[0].images) {
-                                    firstVariationimage = {
-                                        dis_base_link: colorVariation.image_groups[0].images[0].dis_base_link,
-                                        alt: colorVariation.image_groups[0].images[0].alt,
+                            });
+                            if (colorFacets.length > 0) {
+                                const selectedColorVariation = item.colorVariations.find(i => {
+                                    return colorFacets.includes(i.color);
+                                });
+                                if (selectedColorVariation) {
+                                    item.image = {
+                                        dis_base_link: selectedColorVariation.image_groups[0].images[0].dis_base_link,
+                                        alt: selectedColorVariation.image_groups[0].images[0].alt,
                                     }
                                 }
-                            });
-
-                            if (firstVariationimage) {
-                                item.image = firstVariationimage;
+                            } else if (item.colorVariations.length > 0 && item.colorVariations[0].image_groups && item.colorVariations[0].image_groups[0].images && item.colorVariations[0].image_groups[0].images.length > 0) {
+                                item.image = {
+                                    dis_base_link: item.colorVariations[0].image_groups[0].images[0].dis_base_link,
+                                    alt: item.colorVariations[0].image_groups[0].images[0].alt,
+                                }
                             }
                         }
 
@@ -399,34 +411,23 @@ function enableInstantSearch(config) {
 
                             // 1. Find the variant matching the selected facets, or use the default variant
                             let selectedVariant;
-                            const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
-                            const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
-                            if (colorFacets.length > 0 && sizeFacets.length > 0) {
-                                // 1.1 If both facets are selected, find the variant that match both
-                                selectedVariant = item.variants.find(variant => {
-                                    return sizeFacets.includes(variant.size) && colorFacets.includes(variant.color);
-                                });
-                            }
-                            if (!selectedVariant && colorFacets.length > 0) {
-                                // 1.2 If we have color refinement, find one that match the selected color
-                                selectedVariant = item.variants.find(variant => {
-                                    return colorFacets.includes(variant.color)
-                                });
-                            }
-                            if (!selectedVariant && sizeFacets.length > 0) {
-                                // 1.3 Otherwise if we have size refinement, find one that match the selected size
-                                selectedVariant = item.variants.find(variant => {
-                                    return sizeFacets.includes(variant.size)
-                                });
-                            }
-                            if (!selectedVariant) {
-                                // 1.4 No facets selected, use the default variant
-                                selectedVariant = item.variants.find(variant => {
-                                    return variant.variantID === item.defaultVariantID;
-                                }) || item.variants[0];
+
+                            ({selectedVariant} = selectVariantBasedOnFacets(item, colorFacets, sizeFacets));
+
+                             // 2. Get the colorVariation corresponding to the selected variant, to display its image
+                             if (item.colorVariations) {
+                                const colorVariation = item.colorVariations.find(i => {
+                                    return selectedVariant && i.color === selectedVariant.color
+                                }) || item.colorVariations[0];
+                                const imageGroup = colorVariation.image_groups.find(i => {
+                                    return i.view_type === 'large'
+                                }) || colorVariation.image_groups[0];
+                                if (imageGroup) {
+                                    item.image = imageGroup.images[0];
+                                }
                             }
 
-                            // 2. Get the variant price
+                            // 3. Get the variant price
                             if (selectedVariant) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
@@ -577,6 +578,20 @@ function enableInstantSearch(config) {
      * @return {any} A color swatch
      */
     function renderSwatches(hit, html) {
+        let colorFacets = [];
+        let sizeFacets = [];
+        if (algoliaResults && algoliaResults._state) {
+            if (algoliaData.recordModel === 'master-level') {
+                colorFacets = algoliaResults._state.disjunctiveFacetsRefinements['variants.color'] || [];
+                sizeFacets = algoliaResults._state.disjunctiveFacetsRefinements['variants.size'] || [];
+            } else {
+                colorFacets = algoliaResults._state.disjunctiveFacetsRefinements['color'] || [];
+                sizeFacets = algoliaResults._state.disjunctiveFacetsRefinements['size'] || [];
+            }
+        }
+
+        const { selectedVariantIndex } = selectVariantBasedOnFacets(hit, colorFacets, sizeFacets);
+
         if (hit.colorVariations) {
             return hit.colorVariations.map((colorVariation, index) => {
                 let swatch;
@@ -611,13 +626,78 @@ function enableInstantSearch(config) {
         // Add border effect to selected swatch
         swatchContainer.classList.add('swatch-selected');
     }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
-                    <span class="${index === 0 ? 'swatch-selected' : ''} swatch-link">
+                    <span class="${index === selectedVariantIndex ? 'swatch-selected' : ''} swatch-link">
                         <img class="swatch  swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                     </span>
                 </a>
             `;
             });
         }
+    }
+
+    /**
+     * Selects a variant or color variation based on facets
+     * @param {Object} item - The product item
+     * @param {Array} colorFacets - Array of selected color facets
+     * @param {Array} sizeFacets - Array of selected size facets
+     * @returns {Object} - Selected variant and index
+     */
+    function selectVariantBasedOnFacets(item, colorFacets, sizeFacets) {
+        let selectedVariant;
+        let selectedVariantIndex = -1;
+
+        if (algoliaData.recordModel === 'master-level') {
+            if (item.variants) {
+                if (colorFacets.length > 0 && sizeFacets.length > 0) {
+                    selectedVariant = item.variants.find(variant => 
+                    sizeFacets.includes(variant.size) && colorFacets.includes(variant.color)
+                    );
+                }
+                if (!selectedVariant && colorFacets.length > 0) {
+                    selectedVariant = item.variants.find(variant => 
+                        colorFacets.includes(variant.color)
+                    );
+                }
+                if (!selectedVariant && sizeFacets.length > 0) {
+                    selectedVariant = item.variants.find(variant => 
+                        sizeFacets.includes(variant.size)
+                    );
+                }
+                if (!selectedVariant) {
+                    selectedVariant = item.variants.find(variant => 
+                        variant.variantID === item.defaultVariantID
+                        ) || item.variants[0];
+                }
+            }
+
+            if (item.colorVariations) {
+                const selectedColorVariation = item.colorVariations.find(i => {
+                    return selectedVariant && i.color === selectedVariant.color
+                }) || item.colorVariations[0];
+                selectedVariantIndex = item.colorVariations.indexOf(selectedColorVariation);
+            }
+
+            if (selectedVariantIndex === -1) {
+                selectedVariantIndex = 0;
+            }
+        } else {
+            var selectedColorVariation;
+
+            if (colorFacets.length > 0) {
+                selectedColorVariation = item.colorVariations.find(i => {
+                    return colorFacets.includes(i.color)
+                }) || item.colorVariations[0];
+            }
+
+            if (!selectedColorVariation) {
+                selectedColorVariation = item.colorVariations[0];
+            }
+
+            selectedVariantIndex = item.colorVariations.indexOf(selectedColorVariation) || 0;
+
+        }
+
+        return { selectedVariant, selectedVariantIndex };
     }
 }
 
