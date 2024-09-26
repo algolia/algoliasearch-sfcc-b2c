@@ -644,8 +644,8 @@ function calculateDisplayPrice(item) {
     var calloutMsg = '';
 
     if (algoliaData.recordModel === 'master-level' && item.variants) {
-        promotions = item.variants && item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
-        variant = item.variants && item.variants.length > 0 ? item.variants[0] : item;
+        promotions = item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
+        variant = item.variants.length > 0 ? item.variants[0] : item;
     } else {
         promotions = item.promotions;
         variant = item;
