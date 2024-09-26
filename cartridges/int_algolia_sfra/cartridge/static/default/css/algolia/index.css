@@ -52,3 +52,20 @@
 .auc-Recommend-title {
     font-size: 32px;
 }
+
+.swatch-link {
+    display: inline-block;
+    margin-right: 5px;
+}
+
+.swatch-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+}
+
+.swatch-selected .swatch-circle {
+    border: 2px solid #0070d2 !important;
+}
