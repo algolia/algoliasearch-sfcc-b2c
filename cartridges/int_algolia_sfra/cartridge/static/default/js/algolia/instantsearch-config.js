@@ -1,5 +1,5 @@
+/* global instantsearch */
 
-var algoliaResults;
 /**
  * Initializes InstantSearch
  * @param {Object} config Configuration object
@@ -287,7 +287,6 @@ function enableInstantSearch(config) {
                     },
                 },
                 transformItems: function (items, { results }) {
-                    algoliaResults = results;
                     displaySwatches = false;
                     return items.map(function (item) {
                         let colorFacets = [];
@@ -299,6 +298,9 @@ function enableInstantSearch(config) {
                             colorFacets = results._state.disjunctiveFacetsRefinements['color'] || [];
                             sizeFacets = results._state.disjunctiveFacetsRefinements['size'] || [];
                         }
+
+                        item.selectedColors = colorFacets;
+                        item.selectedSizes = sizeFacets;
 
                         // assign image
                         if (item.image_groups) {
@@ -573,17 +575,8 @@ function enableInstantSearch(config) {
      * @return {any} A color swatch
      */
     function renderSwatches(hit, html) {
-        let colorFacets = [];
-        let sizeFacets = [];
-        if (algoliaResults && algoliaResults._state) {
-            if (algoliaData.recordModel === 'master-level') {
-                colorFacets = algoliaResults._state.disjunctiveFacetsRefinements['variants.color'] || [];
-                sizeFacets = algoliaResults._state.disjunctiveFacetsRefinements['variants.size'] || [];
-            } else {
-                colorFacets = algoliaResults._state.disjunctiveFacetsRefinements['color'] || [];
-                sizeFacets = algoliaResults._state.disjunctiveFacetsRefinements['size'] || [];
-            }
-        }
+        let colorFacets = hit.selectedColors || [];
+        let sizeFacets = hit.selectedSizes || [];
 
         const { selectedVariantIndex } = selectVariantBasedOnFacets(hit, colorFacets, sizeFacets);
 
@@ -617,12 +610,15 @@ function enableInstantSearch(config) {
                 selectedSwatch.classList.remove('swatch-selected');
             });
         }
-        const swatchContainer = e.target.parentElement;
-        // Add border effect to selected swatch
-        swatchContainer.classList.add('swatch-selected');
+        // Find the closest ancestor that is an 'a' tag
+        const swatchLink = e.target.closest('a');
+        if (swatchLink) {
+            // Add border effect to selected swatch
+            swatchLink.querySelector('.swatch-link').classList.add('swatch-selected');
+        }
     }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
                     <span class="${index === selectedVariantIndex ? 'swatch-selected' : ''} swatch-link">
-                        <img class="swatch  swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
+                        <img class="swatch swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
                     </span>
                 </a>
             `;
@@ -676,21 +672,25 @@ function enableInstantSearch(config) {
                 selectedVariantIndex = 0;
             }
         } else {
-            var selectedColorVariation;
+            if (item.colorVariations) {
+                var selectedColorVariation;
 
-            if (colorFacets.length > 0) {
-                selectedColorVariation = item.colorVariations.find(i => {
-                    return colorFacets.includes(i.color)
-                });
+                if (colorFacets.length > 0) {
+                    selectedColorVariation = item.colorVariations.find(i => {
+                        return colorFacets.includes(i.color)
+                    });
+                }
+
+                if (!selectedColorVariation) {
+                    selectedColorVariation = item.colorVariations.find(i => {
+                        return item.color === i.color;
+                    }) || item.colorVariations[0];
+                }
+
+                selectedVariantIndex = item.colorVariations.indexOf(selectedColorVariation) || 0;
+            } else {
+                selectedVariantIndex = 0;
             }
-
-            if (!selectedColorVariation) {
-                selectedColorVariation = item.colorVariations.find(i => {
-                    return item.color === i.color;
-                }) || item.colorVariations[0];
-            }
-
-            selectedVariantIndex = item.colorVariations.indexOf(selectedColorVariation) || 0;
 
         }
 
