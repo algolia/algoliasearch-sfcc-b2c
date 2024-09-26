@@ -388,11 +388,6 @@ function enableInstantSearch(config) {
                                         alt: selectedColorVariation.image_groups[0].images[0].alt,
                                     }
                                 }
-                            } else if (item.colorVariations.length > 0 && item.colorVariations[0].image_groups && item.colorVariations[0].image_groups[0].images && item.colorVariations[0].image_groups[0].images.length > 0) {
-                                item.image = {
-                                    dis_base_link: item.colorVariations[0].image_groups[0].images[0].dis_base_link,
-                                    alt: item.colorVariations[0].image_groups[0].images[0].alt,
-                                }
                             }
                         }
 
@@ -686,11 +681,13 @@ function enableInstantSearch(config) {
             if (colorFacets.length > 0) {
                 selectedColorVariation = item.colorVariations.find(i => {
                     return colorFacets.includes(i.color)
-                }) || item.colorVariations[0];
+                });
             }
 
             if (!selectedColorVariation) {
-                selectedColorVariation = item.colorVariations[0];
+                selectedColorVariation = item.colorVariations.find(i => {
+                    return item.color === i.color;
+                }) || item.colorVariations[0];
             }
 
             selectedVariantIndex = item.colorVariations.indexOf(selectedColorVariation) || 0;
