@@ -372,7 +372,7 @@ function enableInstantSearch(config) {
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
-                            item.colorVariations.forEach((colorVariation, index) => {
+                            item.colorVariations.forEach(colorVariation => {
                                 colorVariation.variationURL = generateProductUrl({
                                     objectID: item.objectID,
                                     productUrl: colorVariation.variationURL,
