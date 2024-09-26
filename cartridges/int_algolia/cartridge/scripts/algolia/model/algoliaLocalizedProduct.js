@@ -359,7 +359,6 @@ var aggregatedValueHandlers = {
         var siteCurrencies = Site.getCurrent().getAllowedCurrencies();
         var siteCurrenciesSize = siteCurrencies.size();
         var currentCurrency = currentSession.getCurrency();
-        var promotions = [];
         var campaigns = PromotionMgr.getCampaigns().toArray();
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
             var currency = Currency.getCurrency(siteCurrencies[k]);
