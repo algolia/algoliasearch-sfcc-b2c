@@ -3,6 +3,9 @@
  * Initializes InstantSearch
  * @param {Object} config Configuration object
  */
+
+var activeCustomerPromotions = [];
+
 function enableInstantSearch(config) {
     const productsIndex = algoliaData.productsIndex;
     const contentsIndex = algoliaData.contentsIndex;
@@ -13,14 +16,7 @@ function enableInstantSearch(config) {
     const contentSearchbarTab = document.querySelector('#content-search-bar-button');
     const navbar = document.querySelector('.search-nav');
     const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
-
-    try {
-        // First, try to parse it as JSON
-        activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
-    } catch (e) {
-        // If that fails, split the string by comma
-        activeCustomerPromotions = activeCustomerPromotionsEl.dataset.promotions.split(',').map(item => item.trim());
-    }
+    activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
 
     let displaySwatches = false;
     var initialUiState = {};
@@ -386,7 +382,6 @@ function enableInstantSearch(config) {
                         // Master-level indexing
                         if (item.variants) {
                             item.variants.forEach(variant => {
-                                price = variant.price[algoliaData.currencyCode]
                                 variant.url = generateProductUrl({
                                     objectID: item.objectID,
                                     productUrl: variant.url,
