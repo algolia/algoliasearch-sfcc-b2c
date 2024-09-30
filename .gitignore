@@ -12,3 +12,7 @@ dw.json
 .idea/
 .vscode/
 bin/*
+cypress/screenshots/*
+cypress/videos/*
+act-secrets.env
+act.variables

@@ -25,3 +25,11 @@ Add additional information like error messages, log files, screenshots, screenca
 Cartridge versions 23.4.x and lower ("Gen 1") are deprecated and will be ["sunsetted"](https://www.algolia.com/blog/algolia/sunsetting-salesforce-b2c-commerce-cartridge-gen-1/) on October 31, 2024.
 To take advantage of the improvements in the latest version, upgrade to the "Gen 2" cartridges (>23.5.x).
 For more information, see the [release notes](https://github.com/algolia/algoliasearch-sfcc-b2c/releases) and the [migration guide](https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/guides/migrating-to-23-5-0/).
+
+
+## Running Tests
+- Create API key on account manager.
+- Add WebDAV access and necessary Ocapi resources for this key. 
+
+
+`act pull_request --container-architecture linux/amd64 --secret-file act-secrets.env  --var-file act.variables`
