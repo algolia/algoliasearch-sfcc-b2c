@@ -1,0 +1,55 @@
+name: Main Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_CLIENT_ID }}
+  SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_CLIENT_SECRET }}
+  ALGOLIA_APP_ID: ${{ secrets.ALGOLIA_APP_ID }}
+  ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+  SANDBOX_HOST: ${{ secrets.SANDBOX_HOST }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_AUTH_TOKEN }}
+  CODE_VERSION: ${{ vars.CODE_VERSION }}
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-22.04
+    container:
+      image: cypress/included:11.2.0
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          command: npm run cypress:run
+          browser: chrome
+          headless: true
+          record: true
+          parallel: false
+          config-file: cypress.config.js
+          spec: "cypress/e2e/**/*.cy.{js,jsx,ts,tsx}"
+        env:
+          CYPRESS_RECORD_KEY: ${{secrets.CYPRESS_RECORD_KEY}}
+          DEBUG: cypress:*
+
+      - name: Upload Cypress screenshots
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+
+      - name: Upload Cypress videos
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
