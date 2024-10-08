@@ -496,17 +496,16 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
-    var catalogID;
     var resultObj = {
         nrProductsRead: 0,
-        success: false
+        success: false,
+        errorMessage: ''
     };
 
     try {
         if (xmlFile.exists()) {
             var fileReader = new FileReader(xmlFile);
             var xmlStreamReader = new XMLStreamReader(fileReader);
-            var success = false;
 
             switch (resourceType) {
                 case 'catalog':
@@ -575,9 +574,15 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
             }
 
             xmlStreamReader.close();
-        };
+        }
     } catch (error) {
+        algoliaLogger.error('Error while reading from file: ' + xmlFile.getFullPath());
+        algoliaLogger.error(error);
         resultObj.success = false;
+        resultObj.errorMessage =
+            'Error while reading from file: ' + xmlFile.getFullPath() + '\n' +
+            error.message + '\n' +
+            'If your product attributes have special characters such as emojis, you must enable "Filter Invalid XML Characters during Export" in Administration >  Global Preferences >  Import & Export';
         return resultObj;
     }
 
@@ -647,6 +652,24 @@ function generateVariantRecords(parameters) {
     return algoliaRecordsPerLocale;
 }
 
+
+/**
+ * Returns the default configuration for a given attribute.
+ * You can override this behavior by adding a specific configuration for the attribute.
+ * @param {string} attributeName - The name of the attribute to get the default configuration for.
+ * @returns {Object} The default configuration object for the attribute.
+ * @returns {string} return.attributeName - The name of the attribute.
+ * @returns {boolean} return.localized - Indicates if the attribute is localized.
+ * @returns {boolean} return.variantAttribute - Indicates if the attribute is a variant attribute.
+ */
+function getDefaultAttributeConfig(attributeName) {
+    return {
+        attribute: attributeName,
+        localized: false,
+        variantAttribute: true
+    };
+}
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -673,4 +696,6 @@ module.exports = {
     isObjectsArrayEmpty: isObjectsArrayEmpty,
     getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,
+
+    getDefaultAttributeConfig: getDefaultAttributeConfig
 };

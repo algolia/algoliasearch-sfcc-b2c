@@ -3,6 +3,7 @@
  *  https://www.algolia.com/doc/rest-api/search/#objects-endpoints
  **/
 
+const waitTaskTimeout = require('*/algoliaconfig').waitTaskTimeout;
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
 const retryableCall = require('*/cartridge/scripts/algolia/helper/retryStrategy').retryableCall;
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
@@ -212,7 +213,7 @@ function moveIndex(indexNameSrc, indexNameDest) {
  */
 function waitTask(indexName, taskID) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
-    var maxWait = 10 * 60 * 1000;
+    var maxWait = waitTaskTimeout || 10 * 60 * 1000;
     var start = Date.now();
     var nbRequestsSent = 0;
 
