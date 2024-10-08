@@ -1,4 +1,5 @@
 /* global instantsearch */
+/* exported enableInstantSearch */
 /**
  * Initializes InstantSearch
  * @param {Object} config Configuration object
@@ -372,9 +373,7 @@ function enableInstantSearch(config) {
 
                         // Master-level indexing
                         if (item.variants) {
-                            let price;
                             item.variants.forEach(variant => {
-                                price = variant.price[algoliaData.currencyCode]
                                 variant.url = generateProductUrl({
                                     objectID: item.objectID,
                                     productUrl: variant.url,

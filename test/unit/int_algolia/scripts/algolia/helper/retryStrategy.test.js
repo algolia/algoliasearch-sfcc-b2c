@@ -109,7 +109,6 @@ test('retryableCall - success on 3rd server', () => {
 });
 
 test('retryableCall - error', () => {
-    let serverNumber = 1;
     const serverErrorResult = {
         ok: false,
         getUnavailableReason: jest.fn(),
@@ -130,4 +129,3 @@ test('retryableCall - error', () => {
     // All hosts have been marked down, getAvailableHosts() reset them all at the next call
     expect(retryStrategy.getAvailableHosts()).toHaveLength(4);
 });
-

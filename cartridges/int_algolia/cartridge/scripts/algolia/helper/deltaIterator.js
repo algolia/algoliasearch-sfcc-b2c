@@ -110,7 +110,7 @@ DeltaIterator.prototype.getRecordSize = function () {
     if (this.dataBuffer) {
         try {
             recordSize = JSON.stringify(this.dataBuffer).length;
-        } catch (error) {
+        } catch (e) { // eslint-disable-line no-unused-vars
             recordSize = 0;
         }
     }
