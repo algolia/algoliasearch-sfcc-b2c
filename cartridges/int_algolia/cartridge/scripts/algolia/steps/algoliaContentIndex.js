@@ -9,7 +9,7 @@ var logger;
 var paramAttributeList, paramFailureThresholdPercentage, includedContent, paramLocalesForIndexing;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, contentFilter, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig, ContentUtil;
+var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig, ContentUtil;
 var indexingOperation;
 
 // logging-related variables
@@ -125,6 +125,7 @@ exports.beforeStep = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {number} total number of contents
  */
+// eslint-disable-next-line no-unused-vars
 exports.getTotalCount = function(parameters, stepExecution) {
     return count;
 
@@ -136,6 +137,7 @@ exports.getTotalCount = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {dw.content.Content} B2C Content object
  */
+// eslint-disable-next-line no-unused-vars
 exports.read = function(parameters, stepExecution) {
     if (contents.hasNext()) {
         return contents.next();
@@ -151,6 +153,7 @@ exports.read = function(parameters, stepExecution) {
  *                  [ "action": "addObject", "indexName": "sfcc_contents_en_US", body: { "id": "terms_1", "name": "Terms" },
  *                    "action": "addObject", "indexName": "sfcc_contents_fr_FR", body: { "id": "new_sales", "name": "New Sales" } ]
  */
+// eslint-disable-next-line no-unused-vars
 exports.process = function(content, parameters, stepExecution) {
 
     jobReport.processedItems++; // counts towards the total number of contents processed
@@ -202,6 +205,7 @@ exports.process = function(content, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.send = function(algoliaOperations, parameters, stepExecution) {
     // algoliaOperations contains all the returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
@@ -244,6 +248,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.afterStep = function(success, parameters, stepExecution) {
     // An exit status cannot be defined for a chunk-oriented script module.
     // Chunk modules always finish with either OK or ERROR.

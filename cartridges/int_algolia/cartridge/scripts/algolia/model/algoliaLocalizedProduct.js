@@ -17,14 +17,14 @@ var extendedProductAttributesConfig;
 try {
     extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
     logger.info('Extension file "productAttributesConfig.js" loaded');
-} catch(e) {
+} catch (e) { // eslint-disable-line no-unused-vars
     extendedProductAttributesConfig = {};
 }
 var extendedProductRecordCustomizer;
 try {
     extendedProductRecordCustomizer = require('*/cartridge/configuration/productRecordCustomizer.js');
     logger.info('Extension file "productRecordCustomizer.js" loaded');
-} catch(e) {
+} catch (e) { // eslint-disable-line no-unused-vars
 }
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');

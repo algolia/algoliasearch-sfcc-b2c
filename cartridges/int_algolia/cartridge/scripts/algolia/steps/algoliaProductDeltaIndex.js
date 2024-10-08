@@ -12,7 +12,7 @@ var paramRecordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
-var fileHelper, jobHelper, modelHelper, reindexHelper, sendHelper;
+var fileHelper, jobHelper, reindexHelper;
 
 // logging-related variables and constants
 var jobReport;
@@ -63,13 +63,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
-    sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
 
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
@@ -77,7 +75,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
         logger.info('Configuration file "productAttributesConfig.js" loaded')
-    } catch(e) {
+    } catch (e) { // eslint-disable-line no-unused-vars
         extendedProductAttributesConfig = {};
     }
 
@@ -301,6 +299,7 @@ exports.beforeStep = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {number} total number of products
  */
+// eslint-disable-next-line no-unused-vars
 exports.getTotalCount = function(parameters, stepExecution) {
     return jobHelper.getObjectsArrayLength(changedProducts);
 }
@@ -311,6 +310,7 @@ exports.getTotalCount = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {string} productID
  */
+// eslint-disable-next-line no-unused-vars
 exports.read = function(parameters, stepExecution) {
     let cpObject;
     if (changedProductsIterator && (cpObject = changedProductsIterator.next()) !== null) {
@@ -327,6 +327,7 @@ exports.read = function(parameters, stepExecution) {
  *                  [ "action": "addObject", "indexName": "sfcc_products_en_US", body: { "id": "008884303989M", "name": "Fitted Shirt" },
  *                    "action": "addObject", "indexName": "sfcc_products_fr_FR", body: { "id": "008884303989M", "name": "Chemise ajustée" } ]
  */
+// eslint-disable-next-line no-unused-vars
 exports.process = function(cpObj, parameters, stepExecution) {
     var product = ProductMgr.getProduct(cpObj.productID);
 
@@ -418,6 +419,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.send = function(algoliaOperations, parameters, stepExecution) {
     // algoliaOperations contains all returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
@@ -448,6 +450,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.afterStep = function(success, parameters, stepExecution) {
     // An exit status cannot be defined for a chunk-oriented script module.
     // Chunk modules always finish with either OK or ERROR.

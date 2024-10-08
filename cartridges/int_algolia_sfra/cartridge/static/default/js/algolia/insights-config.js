@@ -1,4 +1,4 @@
-/* global aa */
+/* exported enableInsights */
 
 /**
  * Configures Insights
@@ -28,7 +28,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         trackingAllowed = true;
         try {
             trackedQueryIDs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        } catch (e) {
+        } catch (e) { // eslint-disable-line no-unused-vars
             localStorage.removeItem(LOCAL_STORAGE_KEY);
         }
     } else {

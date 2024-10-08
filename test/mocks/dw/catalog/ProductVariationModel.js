@@ -69,6 +69,7 @@ class ProductVariationModel {
     getDefaultVariant() {
         return this.variants[0];
     }
+    // eslint-disable-next-line no-unused-vars
     hasOrderableVariants(variationAttribute, variationAttributeValue) {
         return true;
     }

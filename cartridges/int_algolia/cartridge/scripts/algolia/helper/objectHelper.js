@@ -68,7 +68,7 @@ function setAttributeValue(obj, attributeName, attributeValue) {
 function safelyGetCustomAttribute(customAttributes, caKey) {
     try {
         return customAttributes[caKey];
-    } catch (e) {
+    } catch (e) { // eslint-disable-line no-unused-vars
         return undefined;
     }
 }

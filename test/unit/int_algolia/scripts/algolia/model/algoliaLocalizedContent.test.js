@@ -73,7 +73,6 @@ describe('AlgoliaLocalizedContent', () => {
         contentMock.custom.attribute = 'mockedAttribute';
 
         const attributeList = ['custom.attribute'];
-        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, includedContent: 'allContents' });
 
         expect(ObjectHelper.getAttributeValue(contentMock, attributeList[0])).toEqual('mockedAttribute');
     });

@@ -2,7 +2,6 @@ const GlobalMock = require('../../../../../mocks/global');
 const mockContent = require('../../../../../mocks/dw/content/Content');
 const mockContentSearchModel = require('../../../../../mocks/dw/content/ContentSearchModel');
 const mockJobStepExecution = require('../../../../../mocks/dw/job/JobStepExecution');
-const mockHashMap = require('../../../../../mocks/dw/util/HashMap');
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaContentIndex');
 
 // Mocking global objects

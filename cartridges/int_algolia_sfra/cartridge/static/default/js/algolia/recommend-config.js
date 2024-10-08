@@ -1,4 +1,4 @@
-/* global instantsearch */
+/* exported enableRecommendations */
 
 const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
 
@@ -234,9 +234,7 @@ function transformItem(item) {
 
     // Master-level indexing
     if (item.variants) {
-        let price;
         item.variants.forEach(variant => {
-            price = variant.price[algoliaData.currencyCode]
             variant.url = generateProductUrl({
                 objectID: item.objectID,
                 productUrl: variant.url,
@@ -283,6 +281,7 @@ function transformItem(item) {
  * @param {Object} item - Item object
  * @returns {Object} Image object
  */
+// eslint-disable-next-line no-unused-vars
 function getItemImage(item) {
     if (item.image_groups) {
         const imageGroup = item.image_groups.find(i => i.view_type === 'large') || item.image_groups[0];

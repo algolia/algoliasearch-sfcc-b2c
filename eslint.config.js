@@ -59,6 +59,7 @@ module.exports = [
                     allow: ['err', 'callback'],
                 },
             ],
+            'no-unused-vars': 'error',
 
             'max-len': 'off',
         },
