@@ -3,6 +3,7 @@
 * @param {Object} obj object
 * @returns {boolean} true if object is empty
 */
+// eslint-disable-next-line no-redeclare
 function empty(obj) {
     return (obj === null || obj === undefined || obj === '' || (typeof (obj) !== 'function' && obj.length !== undefined && obj.length === 0));
 }

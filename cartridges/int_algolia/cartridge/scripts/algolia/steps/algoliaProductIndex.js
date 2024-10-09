@@ -247,7 +247,7 @@ exports.process = function(product, parameters, stepExecution) {
             return [];
         }
         if (product.master) {
-            var algoliaOperations = [];
+            let algoliaOperations = [];
             var processedVariantsToSend = 0;
 
             if (paramRecordModel !== MASTER_LEVEL) {
@@ -261,8 +261,8 @@ exports.process = function(product, parameters, stepExecution) {
                     fullRecordUpdate: fullRecordUpdate,
                 });
                 for (let l = 0; l < siteLocales.size(); ++l) {
-                    var locale = siteLocales[l];
-                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    let locale = siteLocales[l];
+                    let indexName = algoliaData.calculateIndexName('products', locale);
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         indexName += '.tmp';
                     }
@@ -274,10 +274,10 @@ exports.process = function(product, parameters, stepExecution) {
                 }
             } else {
                 // Master-level indexing
-                var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                 for (let l = 0; l < siteLocales.size(); ++l) {
-                    var locale = siteLocales[l];
-                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    let locale = siteLocales[l];
+                    let indexName = algoliaData.calculateIndexName('products', locale);
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         indexName += '.tmp';
                     }
