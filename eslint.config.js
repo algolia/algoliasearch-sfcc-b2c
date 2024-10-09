@@ -53,6 +53,7 @@ module.exports = [
             'vars-on-top': 'off',
             'global-require': 'off',
 
+            'no-redeclare': 'error',
             'no-shadow': [
                 'error',
                 {

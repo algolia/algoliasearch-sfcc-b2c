@@ -14,7 +14,6 @@ function getServerSideHits(query, type, indexType) {
     var searchService = algoliaSearchService.getService(indexType);
 
     if (!empty(searchService)) {
-        var params = '';
         if (type === 'category') {
             var facetFiltersParamValue = require('*/cartridge/scripts/algolia/helper/ssrHelper').facetFiltersParamValueFromBreadcrumbs(query);
         }
@@ -44,4 +43,3 @@ function getServerSideHits(query, type, indexType) {
 }
 
 module.exports.getServerSideHits = getServerSideHits;
-
