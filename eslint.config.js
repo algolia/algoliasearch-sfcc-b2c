@@ -24,11 +24,14 @@ module.exports = [
 
         languageOptions: {
             globals: {
+                ...globals.browser,
+                ...globals.node,
                 empty: true,
                 request: true,
                 dw: true,
                 XML: true,
                 $: true,
+                session: true,
             },
 
             ecmaVersion: 2015,
@@ -59,15 +62,17 @@ module.exports = [
                     allow: ['err', 'callback'],
                 },
             ],
+            'no-undef': 'error',
 
             'max-len': 'off',
         },
     },
     {
-        files: ['eslint.config.js', 'test/**/*.js'],
+        files: ['eslint.config.js', 'jest.config.js', 'test/**/*.js'],
         languageOptions: {
             globals: {
-                ...globals.mocha,
+                ...globals.jest,
+                ...globals.node,
             },
 
             ecmaVersion: 'latest',

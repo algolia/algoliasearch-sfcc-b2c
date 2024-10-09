@@ -1,4 +1,4 @@
-/* global instantsearch */
+/* global instantsearch, algoliaData */
 
 const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
 
@@ -108,7 +108,7 @@ function getObjectIds(container) {
     try {
         const objectIDs = container.getAttribute('data-object-ids');
         if (!objectIDs) return null;
-        dataObjectIds = objectIDs.replace(/'/g, '"');
+        var dataObjectIds = objectIDs.replace(/'/g, '"');
         return JSON.parse(dataObjectIds);
     } catch (e) {
         console.error('Parsing error on objectIDs:', e);
@@ -220,8 +220,6 @@ function transformItem(item) {
     }
 
     if (item.colorVariations) {
-        // Display the swatches only if at least one item has some colorVariations
-        displaySwatches = true;
         item.colorVariations.forEach(colorVariation => {
             colorVariation.variationURL = generateProductUrl({
                 objectID: item.objectID,
@@ -333,4 +331,20 @@ if (algoliaData.enableRecommend) {
             });
         });
     });
+}
+
+/**
+ * Build a product URL with Algolia query parameters
+ * @param {string} objectID objectID
+ * @param {string} productUrl url of the product
+ * @param {string} queryID queryID
+ * @param {string} indexName indexName
+ * @return {string} Final URL of the product
+ */
+function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
+    const url = new URL(productUrl, window.location.origin);
+    url.searchParams.append('queryID', queryID);
+    url.searchParams.append('objectID', objectID);
+    url.searchParams.append('indexName', indexName);
+    return url.href;
 }
