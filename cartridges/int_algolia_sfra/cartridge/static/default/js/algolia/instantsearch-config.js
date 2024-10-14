@@ -1,4 +1,4 @@
-/* global instantsearch */
+/* global instantsearch, algoliaData */
 /* exported enableInstantSearch */
 /**
  * Initializes InstantSearch
