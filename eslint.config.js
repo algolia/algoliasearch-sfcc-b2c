@@ -56,7 +56,6 @@ module.exports = [
             'jsdoc/require-jsdoc': 'error',
 
             'vars-on-top': 'off',
-            'global-require': 'off',
 
             'no-redeclare': 'error',
             'no-shadow': [
@@ -65,8 +64,6 @@ module.exports = [
                     allow: ['err', 'callback'],
                 },
             ],
-
-            'max-len': 'off',
         },
     },
     {

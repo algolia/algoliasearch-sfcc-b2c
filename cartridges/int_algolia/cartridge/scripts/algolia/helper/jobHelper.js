@@ -14,7 +14,6 @@ function _arrayToXML(arr) {
         var childXML = null;
         if (element instanceof Object) {
             childXML = new XML('<value id="' + index + '"></value>');
-            // eslint-disable-next-line no-use-before-define
             appendObjToXML(childXML, element);
         } else {
             childXML = new XML('<value id="' + index + '">' + element + '</value>');
@@ -38,7 +37,6 @@ function _xmlToArray(xmlArray) {
         if (child[i].hasSimpleContent()) {
             result.push(child[i].toString());
         } else {
-            // eslint-disable-next-line no-use-before-define
             result.push(xmlToObject(child[i].elements()));
         }
     }
