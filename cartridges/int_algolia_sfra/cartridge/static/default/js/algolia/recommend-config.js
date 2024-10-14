@@ -1,4 +1,4 @@
-/* global instantsearch, algoliaData */
+/* global algoliaData */
 /* exported enableRecommendations */
 
 const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
