@@ -3,7 +3,7 @@
 var ArrayList = require('dw/util/ArrayList');
 var ProductMgr = require('dw/catalog/ProductMgr');
 var Site = require('dw/system/Site');
-var File = require('dw/io/File');
+var File = require('dw/io/File'); // eslint-disable-line no-redeclare
 var logger;
 
 // job step parameters
