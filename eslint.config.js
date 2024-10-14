@@ -63,6 +63,7 @@ module.exports = [
                 },
             ],
             'no-undef': 'error',
+            'no-unused-vars': 'error',
 
             'max-len': 'off',
         },

@@ -1,4 +1,5 @@
 /* global instantsearch, algoliaData */
+/* exported enableInstantSearch */
 /**
  * Initializes InstantSearch
  * @param {Object} config Configuration object
