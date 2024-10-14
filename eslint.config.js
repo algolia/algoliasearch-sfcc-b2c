@@ -57,7 +57,6 @@ module.exports = [
 
             'vars-on-top': 'off',
 
-            'no-redeclare': 'error',
             'no-shadow': [
                 'error',
                 {
