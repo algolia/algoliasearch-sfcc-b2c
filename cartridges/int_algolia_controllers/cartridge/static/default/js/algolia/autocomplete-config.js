@@ -1,4 +1,5 @@
 /* global autocomplete, getAlgoliaResults, algoliaData */
+/* exported enableAutocomplete */
 
 /**
  * Enables autocomplete

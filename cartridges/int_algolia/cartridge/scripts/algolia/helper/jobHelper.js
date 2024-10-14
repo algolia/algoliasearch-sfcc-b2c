@@ -121,7 +121,7 @@ function _compareTopLevelProperties(compareObj, baseObj) {
         try {
             baseObjString = JSON.stringify({ obj: baseObj[property] });
             compareObjString = JSON.stringify({ obj: compareObj[property] });
-        } catch (error) {
+        } catch (error) { // eslint-disable-line no-unused-vars
             result[property] = _cloneObject(baseObj[property]);
             return result;
         }
