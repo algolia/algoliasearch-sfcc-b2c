@@ -355,9 +355,9 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         fullRecordUpdate: fullRecordUpdate,
                     });
                     for (let l = 0; l < siteLocales.size(); ++l) {
-                        var locale = siteLocales[l];
-                        var indexName = algoliaData.calculateIndexName('products', locale);
-                        var records = recordsPerLocale[locale];
+                        let locale = siteLocales[l];
+                        let indexName = algoliaData.calculateIndexName('products', locale);
+                        let records = recordsPerLocale[locale];
                         processedVariantsToSend = records.length;
                         records.forEach(function(record) {
                             algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
@@ -365,11 +365,11 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     }
                 } else {
                     // Master-level indexing
-                    var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                    let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                     for (let l = 0; l < siteLocales.size(); ++l) {
-                        var locale = siteLocales[l];
-                        var indexName = algoliaData.calculateIndexName('products', locale);
-                        var localizedMaster = new AlgoliaLocalizedProduct({
+                        let locale = siteLocales[l];
+                        let indexName = algoliaData.calculateIndexName('products', locale);
+                        let localizedMaster = new AlgoliaLocalizedProduct({
                             product: product,
                             locale: locale,
                             attributeList: masterAttributes,
@@ -392,9 +392,9 @@ exports.process = function(cpObj, parameters, stepExecution) {
             // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
             var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
             for (let l = 0; l < siteLocales.size(); l++) {
-                var locale = siteLocales[l];
-                var indexName = algoliaData.calculateIndexName('products', locale);
-                var localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+                let locale = siteLocales[l];
+                let indexName = algoliaData.calculateIndexName('products', locale);
+                let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
                 algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
             }
             jobReport.processedItemsToSend++;
