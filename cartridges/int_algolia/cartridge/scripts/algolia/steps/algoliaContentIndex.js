@@ -175,6 +175,7 @@ exports.process = function(content, parameters, stepExecution) {
             for (let i = 0; i < splits.length; i++) {
                 var splittedContent = {};
                 for (var key in localizedContent) {
+                    // eslint-disable-next-line no-prototype-builtins
                     if (localizedContent.hasOwnProperty(key)) {
                         splittedContent[key] = localizedContent[key];
                     }

@@ -433,6 +433,7 @@ function _updateOrAddValue(objectsArray, key, value) {
     for (var i = 0; i < objectsArray.length; i++) {
         var object = objectsArray[i];
 
+        // eslint-disable-next-line no-prototype-builtins
         if (object.hasOwnProperty(key)) {
             object[key] = value;
             return; // exit the function after updating the value
