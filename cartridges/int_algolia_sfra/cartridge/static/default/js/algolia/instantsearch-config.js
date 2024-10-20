@@ -6,6 +6,7 @@
 
 var activeCustomerPromotions = [];
 
+
 function enableInstantSearch(config) {
     const productsIndex = algoliaData.productsIndex;
     const contentsIndex = algoliaData.contentsIndex;

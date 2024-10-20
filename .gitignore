@@ -12,3 +12,6 @@ dw.json
 .idea/
 .vscode/
 bin/*
+cypress/screenshots/*
+cypress/videos/*
+.env
