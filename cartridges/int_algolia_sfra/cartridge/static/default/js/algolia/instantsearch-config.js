@@ -6,7 +6,10 @@
 
 var activeCustomerPromotions = [];
 
-
+/**
+ * Initializes and configures InstantSearch for product and content search.
+ * @param {Object} config - Configuration object for InstantSearch
+ */
 function enableInstantSearch(config) {
     const productsIndex = algoliaData.productsIndex;
     const contentsIndex = algoliaData.contentsIndex;
