@@ -45,7 +45,8 @@ jobs:
       - run:
           name: Checkout Code
           command: |
-            git clone https://$GITHUB_TOKEN@github.com/algolia/storefront-reference-architecture.git .
+            echo "Starting clone..."
+            git clone https://${GITHUB_TOKEN}@github.com/algolia/storefront-reference-architecture.git .
             git checkout master
       - run:
           name: Install required packages
@@ -225,7 +226,6 @@ workflows:
               only:
                 - master
                 - develop
-                - feat/e2e-tests
       - deployment-and-jobs:
           requires:
             - prepare-site-import
@@ -234,7 +234,6 @@ workflows:
               only:
                 - master
                 - develop
-                - feat/e2e-tests
       - index-tests:
           requires:
             - deployment-and-jobs
@@ -243,7 +242,6 @@ workflows:
               only:
                 - master
                 - develop
-                - feat/e2e-tests
       - e2e-tests:
           requires:
             - index-tests
@@ -252,4 +250,3 @@ workflows:
               only:
                 - master
                 - develop
-                - feat/e2e-tests
