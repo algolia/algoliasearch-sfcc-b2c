@@ -20,7 +20,10 @@ jobs:
     executor: *node_executor
     steps:
       - checkout
-      - node/install-packages
+      - node/install-packages:
+          pkg-manager: npm
+          include-branch-in-cache-key: false
+          override-ci-command: npm ci --legacy-peer-deps
       - run: npm run lint:js
       - persist_to_workspace: *persist_work_dir
 
