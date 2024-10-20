@@ -20,20 +20,7 @@ jobs:
     executor: *node_executor
     steps:
       - checkout
-      - restore_cache:
-          keys:
-            - npm-packages-{{ checksum "package-lock.json" }}
-      - run:
-          name: Install NPM packages
-          command: |
-            npm --version
-            node --version
-            npm cache clean --force
-            npm ci --prefer-offline --no-audit
-      - save_cache:
-          paths:
-            - ~/.npm
-          key: npm-packages-{{ checksum "package-lock.json" }}
+      - node/install-packages
       - run: npm run lint:js
       - persist_to_workspace: *persist_work_dir
 
