@@ -6,10 +6,6 @@ describe('Algolia Integration', () => {
     let consoleLogSpy;
 
     beforeEach(() => {
-        // Replace hardcoded values with environment variables
-        process.env.ALGOLIA_APP_ID = process.env.ALGOLIA_APP_ID;
-        process.env.ALGOLIA_API_KEY = process.env.ALGOLIA_API_KEY;
-
         client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY);
         index = client.initIndex('varx__products__en_US');
 
