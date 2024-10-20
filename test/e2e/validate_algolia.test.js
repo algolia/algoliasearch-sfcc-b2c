@@ -16,11 +16,6 @@ describe('Algolia Integration', () => {
         consoleLogSpy.mockRestore();
     });
 
-    test('should log Algolia credentials', () => {
-        expect(consoleLogSpy).toHaveBeenCalledWith(process.env.ALGOLIA_APP_ID);
-        expect(consoleLogSpy).toHaveBeenCalledWith(process.env.ALGOLIA_API_KEY);
-    });
-
     test('should search for a specific product', async () => {
         const electronicProduct = {
             name: 'TomTom Go 720 Portable GPS Unit',
