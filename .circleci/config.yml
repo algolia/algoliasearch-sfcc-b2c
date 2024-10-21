@@ -39,7 +39,6 @@ jobs:
       ALGOLIA_APP_ID: $ALGOLIA_APP_ID
       ALGOLIA_API_KEY: $ALGOLIA_API_KEY
       SANDBOX_HOST: $SANDBOX_HOST
-      GITHUB_TOKEN: $GITHUB_TOKEN
       CODE_VERSION: $CODE_VERSION
     steps:
       - add_ssh_keys:
@@ -49,9 +48,7 @@ jobs:
           name: Checkout Code
           command: |
             echo "Starting clone..."
-            echo "GITHUB_TOKEN is set: $([[ -n $GITHUB_TOKEN ]] && echo 'Yes' || echo 'No')"
-            git clone https://${GITHUB_TOKEN}@github.com/algolia/sfra-e2e-reference.git .
-            git checkout master
+            git clone git@github.com:algolia/sfra-e2e-reference.git .
       - run:
           name: Install required packages
           command: |
