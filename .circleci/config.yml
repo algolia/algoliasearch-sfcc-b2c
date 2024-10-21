@@ -47,11 +47,8 @@ jobs:
           command: |
             echo "Starting clone..."
             echo "GITHUB_TOKEN is set: $([[ -n $GITHUB_TOKEN ]] && echo 'Yes' || echo 'No')"
-            git config --global credential.helper store
-            echo "https://oauth2:${GITHUB_TOKEN}@github.com" > ~/.git-credentials
-            git clone https://github.com/algolia/storefront-reference-architecture.git .
+            git clone https://${GITHUB_TOKEN}@github.com/algolia/sfra-e2e-reference.git .
             git checkout master
-            rm ~/.git-credentials  # Clean up after cloning
       - run:
           name: Install required packages
           command: |
