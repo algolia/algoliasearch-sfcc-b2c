@@ -46,7 +46,13 @@ jobs:
           name: Checkout Code
           command: |
             echo "Starting clone..."
-            echo "GITHUB_TOKEN is set: $([[ -n $GITHUB_TOKEN ]] && echo 'Yes' || echo 'No')"
+            echo "GITHUB_TOKEN is set: $( [[ -n "$GITHUB_TOKEN" ]] && echo 'Yes' || echo 'No' )"
+
+            # Configure Git to use the token for authentication
+            git config --global credential.helper store
+            echo "https://${GITHUB_TOKEN}:x-oauth-basic@github.com" > ~/.git-credentials
+
+            # Clone the repository without embedding the token in the URL
             git clone https://${GITHUB_TOKEN}@github.com/algolia/sfra-e2e-reference.git .
             git checkout master
       - run:
