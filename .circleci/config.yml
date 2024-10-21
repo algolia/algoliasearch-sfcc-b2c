@@ -65,11 +65,26 @@ jobs:
           name: Install sfcc-ci
           command: sudo npm install -g sfcc-ci
       - run:
+          name: Verify Environment Variables
+          command: |
+            if [[ -z "$SFCC_OAUTH_CLIENT_ID" ]]; then
+              echo "Error: SFCC_OAUTH_CLIENT_ID is not set."
+              exit 1
+            else
+              echo "SFCC_OAUTH_CLIENT_ID is set."
+            fi
+            if [[ -z "$SFCC_OAUTH_CLIENT_SECRET" ]]; then
+              echo "Error: SFCC_OAUTH_CLIENT_SECRET is not set."
+              exit 1
+            else
+              echo "SFCC_OAUTH_CLIENT_SECRET is set."
+            fi
+      - run:
           name: Authenticate with SFCC and get access token
           command: |
-            sfcc-ci client:auth $SFCC_OAUTH_CLIENT_ID $SFCC_OAUTH_CLIENT_SECRET
+            sudo sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
             echo "Raw output of sfcc-ci client:auth:token:"
-            ACCESS_TOKEN=$(sfcc-ci client:auth:token)
+            ACCESS_TOKEN=$(sudo sfcc-ci client:auth:token)
             echo "export ACCESS_TOKEN=$ACCESS_TOKEN" >> $BASH_ENV
       - run:
           name: Create Code Version Directory
