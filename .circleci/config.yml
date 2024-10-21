@@ -45,6 +45,11 @@ jobs:
           fingerprints:
             - "SHA256:+YAoJE+qx7vPelPYwf8b94dbroGaCKp//ZrJ/aGDKjg"
       - run:
+          name: Add GitHub to known hosts
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
           name: Checkout Code
           command: |
             echo "Starting clone..."
