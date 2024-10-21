@@ -70,7 +70,7 @@ jobs:
           command: npm run compile:scss
       - run:
           name: Install sfcc-ci
-          command: npm install -g sfcc-ci
+          command: sudo npm install -g sfcc-ci
       - run:
           name: Authenticate with SFCC and get access token
           command: |
