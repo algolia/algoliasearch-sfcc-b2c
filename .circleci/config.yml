@@ -65,26 +65,11 @@ jobs:
           name: Install sfcc-ci
           command: sudo npm install -g sfcc-ci
       - run:
-          name: Verify Environment Variables
-          command: |
-            if [[ -z "$SFCC_OAUTH_CLIENT_ID" ]]; then
-              echo "Error: SFCC_OAUTH_CLIENT_ID is not set."
-              exit 1
-            else
-              echo "SFCC_OAUTH_CLIENT_ID is set."
-            fi
-            if [[ -z "$SFCC_OAUTH_CLIENT_SECRET" ]]; then
-              echo "Error: SFCC_OAUTH_CLIENT_SECRET is not set."
-              exit 1
-            else
-              echo "SFCC_OAUTH_CLIENT_SECRET is set."
-            fi
-      - run:
           name: Authenticate with SFCC and get access token
           command: |
             sudo sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
             echo "Raw output of sfcc-ci client:auth:token:"
-            ACCESS_TOKEN=$(sudo sfcc-ci client:auth:token)
+            ACCESS_TOKEN=$(sfcc-ci client:auth:token)
             echo "export ACCESS_TOKEN=$ACCESS_TOKEN" >> $BASH_ENV
       - run:
           name: Create Code Version Directory
@@ -102,7 +87,7 @@ jobs:
           command: zip -r $CODE_VERSION.zip $CODE_VERSION
       - run:
           name: Deploy Code to Sandbox
-          command: sfcc-ci code:deploy $CODE_VERSION.zip --instance $SANDBOX_HOST
+          command: sfcc-ci code:deploy "$CODE_VERSION.zip" --instance "$SANDBOX_HOST" --token "$ACCESS_TOKEN"
       - run:
           name: Prepare Site Import Directory
           command: |
@@ -128,10 +113,10 @@ jobs:
           command: zip -r site_import.zip site_import
       - run:
           name: Upload Site Preferences
-          command: sfcc-ci instance:upload site_import.zip --instance $SANDBOX_HOST
+          command: sfcc-ci instance:upload site_import.zip --instance "$SANDBOX_HOST" --token "$ACCESS_TOKEN"
       - run:
           name: Import Site Preferences
-          command: sfcc-ci instance:import site_import.zip --instance $SANDBOX_HOST --sync
+          command: sfcc-ci instance:import site_import.zip --instance "$SANDBOX_HOST" --sync --token "$ACCESS_TOKEN"
       - run:
           name: Clean up
           command: rm -rf site_import site_import.zip
