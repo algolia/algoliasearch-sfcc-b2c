@@ -43,7 +43,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            - "SHA256:+YAoJE+qx7vPelPYwf8b94dbroGaCKp//ZrJ/aGDKjg"
+            - "SHA256:s+i0QBzZp3EQiY4DKt4/VjZtxHUfw2gRGeI0RAnzpyw"
       - run:
           name: Add GitHub to known hosts
           command: |
