@@ -123,11 +123,6 @@ jobs:
 
   deployment-and-jobs:
     executor: *node_executor
-    environment:
-      SFCC_OAUTH_CLIENT_ID: $SFCC_OAUTH_CLIENT_ID
-      SFCC_OAUTH_CLIENT_SECRET: $SFCC_OAUTH_CLIENT_SECRET
-      SANDBOX_HOST: $SANDBOX_HOST
-      CODE_VERSION: $CODE_VERSION
     steps:
       - checkout
       - run:
@@ -145,7 +140,7 @@ jobs:
       - run:
           name: Authenticate with SFCC and get access token
           command: |
-            sfcc-ci client:auth $SFCC_OAUTH_CLIENT_ID $SFCC_OAUTH_CLIENT_SECRET
+            sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
             echo "Raw output of sfcc-ci client:auth:token:"
             ACCESS_TOKEN=$(sfcc-ci client:auth:token)
             echo "export ACCESS_TOKEN=$ACCESS_TOKEN" >> $BASH_ENV
@@ -180,9 +175,6 @@ jobs:
 
   index-tests:
     executor: *node_executor
-    environment:
-      ALGOLIA_APP_ID: $ALGOLIA_APP_ID
-      ALGOLIA_API_KEY: $ALGOLIA_API_KEY
     steps:
       - checkout
       - run:
@@ -197,9 +189,6 @@ jobs:
 
   e2e-tests:
     executor: cypress/default
-    environment:
-      ALGOLIA_APP_ID: $ALGOLIA_APP_ID
-      ALGOLIA_API_KEY: $ALGOLIA_API_KEY
     steps:
       - checkout
       - run:
