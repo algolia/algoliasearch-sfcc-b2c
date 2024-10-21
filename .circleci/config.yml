@@ -33,13 +33,6 @@ jobs:
 
   prepare-site-import:
     executor: *node_executor
-    environment:
-      SFCC_OAUTH_CLIENT_ID: $SFCC_OAUTH_CLIENT_ID
-      SFCC_OAUTH_CLIENT_SECRET: $SFCC_OAUTH_CLIENT_SECRET
-      ALGOLIA_APP_ID: $ALGOLIA_APP_ID
-      ALGOLIA_API_KEY: $ALGOLIA_API_KEY
-      SANDBOX_HOST: $SANDBOX_HOST
-      CODE_VERSION: $CODE_VERSION
     steps:
       - add_ssh_keys:
           fingerprints:
