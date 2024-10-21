@@ -1,8 +1,10 @@
 const globals = require('globals');
+const js = require('@eslint/js');
 const jquery = require('eslint-plugin-jquery');
 const jsdoc = require('eslint-plugin-jsdoc');
 
 module.exports = [
+    js.configs.recommended,
     {
         ignores: [
             '**/doc/',
@@ -54,19 +56,13 @@ module.exports = [
             'jsdoc/require-jsdoc': 'error',
 
             'vars-on-top': 'off',
-            'global-require': 'off',
 
-            'no-redeclare': 'error',
             'no-shadow': [
                 'error',
                 {
                     allow: ['err', 'callback'],
                 },
             ],
-            'no-undef': 'error',
-            'no-unused-vars': 'error',
-
-            'max-len': 'off',
         },
     },
     {

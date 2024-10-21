@@ -14,7 +14,6 @@ function _arrayToXML(arr) {
         var childXML = null;
         if (element instanceof Object) {
             childXML = new XML('<value id="' + index + '"></value>');
-            // eslint-disable-next-line no-use-before-define
             appendObjToXML(childXML, element);
         } else {
             childXML = new XML('<value id="' + index + '">' + element + '</value>');
@@ -38,7 +37,6 @@ function _xmlToArray(xmlArray) {
         if (child[i].hasSimpleContent()) {
             result.push(child[i].toString());
         } else {
-            // eslint-disable-next-line no-use-before-define
             result.push(xmlToObject(child[i].elements()));
         }
     }
@@ -433,6 +431,7 @@ function _updateOrAddValue(objectsArray, key, value) {
     for (var i = 0; i < objectsArray.length; i++) {
         var object = objectsArray[i];
 
+        // eslint-disable-next-line no-prototype-builtins
         if (object.hasOwnProperty(key)) {
             object[key] = value;
             return; // exit the function after updating the value

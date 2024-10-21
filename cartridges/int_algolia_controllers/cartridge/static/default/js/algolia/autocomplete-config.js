@@ -44,7 +44,7 @@ function getSourcesArray(config) {
     sourcesArray.push(
         {
             sourceId: 'products',
-            getItems({ query }) { // eslint-disable-line no-shadow
+            getItems({ query }) {
                 return getAlgoliaResults({
                     searchClient: config.searchClient,
                     queries: [
@@ -115,7 +115,7 @@ function getSourcesArray(config) {
     sourcesArray.push(
         {
             sourceId: 'categories',
-            getItems({ query }) { // eslint-disable-line no-shadow
+            getItems({ query }) {
                 return getAlgoliaResults({
                     searchClient: config.searchClient,
                     queries: [
@@ -160,7 +160,7 @@ function getSourcesArray(config) {
         sourcesArray.push(
             {
                 sourceId: 'contents',
-                getItems({ query }) { // eslint-disable-line no-shadow
+                getItems({ query }) {
                     return getAlgoliaResults({
                         searchClient: config.searchClient,
                         queries: [
