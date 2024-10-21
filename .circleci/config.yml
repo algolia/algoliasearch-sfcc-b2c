@@ -47,7 +47,7 @@ jobs:
           command: |
             echo "Starting clone..."
             echo "GITHUB_TOKEN is set: $([[ -n $GITHUB_TOKEN ]] && echo 'Yes' || echo 'No')"
-            git clone https://${GITHUB_TOKEN}@github.com/algolia/storefront-reference-architecture.git .
+            git clone https://oauth2:${GITHUB_TOKEN}@github.com/algolia/storefront-reference-architecture.git .
             git checkout master
       - run:
           name: Install required packages
