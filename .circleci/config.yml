@@ -42,6 +42,9 @@ jobs:
       GITHUB_TOKEN: $GITHUB_TOKEN
       CODE_VERSION: $CODE_VERSION
     steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:+YAoJE+qx7vPelPYwf8b94dbroGaCKp//ZrJ/aGDKjg"
       - run:
           name: Checkout Code
           command: |
