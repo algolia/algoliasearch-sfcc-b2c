@@ -52,3 +52,7 @@
 .auc-Recommend-title {
     font-size: 32px;
 }
+
+.swatch-selected {
+    border: 2px solid #0070d2 !important;
+}
