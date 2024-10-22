@@ -1,10 +1,10 @@
 'use strict';
 /** @deprecated */
 
-var File = require('dw/io/File');
+var File = require('dw/io/File'); // eslint-disable-line no-redeclare
 var FileWriter = require('dw/io/FileWriter');
 var XMLStreamWriter = require('dw/io/XMLIndentingStreamWriter');
-var FileReader = require('dw/io/FileReader');
+var FileReader = require('dw/io/FileReader'); // eslint-disable-line no-redeclare
 var XMLStreamReader = require('dw/io/XMLStreamReader');
 
 var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');

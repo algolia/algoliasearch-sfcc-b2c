@@ -11,20 +11,21 @@ var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
+var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
 var extendedProductAttributesConfig;
 try {
     extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
     logger.info('Extension file "productAttributesConfig.js" loaded');
-} catch(e) {
+} catch (e) { // eslint-disable-line no-unused-vars
     extendedProductAttributesConfig = {};
 }
 var extendedProductRecordCustomizer;
 try {
     extendedProductRecordCustomizer = require('*/cartridge/configuration/productRecordCustomizer.js');
     logger.info('Extension file "productRecordCustomizer.js" loaded');
-} catch(e) {
+} catch (e) { // eslint-disable-line no-unused-vars
 }
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
@@ -425,8 +426,9 @@ function algoliaLocalizedProduct(parameters) {
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
 
-            if (baseModel && baseModel[attributeName]) {
-                this[attributeName] = baseModel[attributeName];
+            var baseAttributeValue = ObjectHelper.getAttributeValue(baseModel, attributeName);
+            if (baseAttributeValue) {
+                ObjectHelper.setAttributeValue(this, attributeName, baseAttributeValue);
             } else if (extendedProductAttributesConfig[attributeName]) {
                 var attributeConfig = extendedProductAttributesConfig[attributeName];
                 if (typeof attributeConfig.attribute === 'function') {
@@ -438,9 +440,16 @@ function algoliaLocalizedProduct(parameters) {
                 this[attributeName] = aggregatedValueHandlers[attributeName](product, parameters);
             } else {
                 var config = algoliaProductConfig.attributeConfig_v2[attributeName];
-                if (!empty(config)) {
-                    this[attributeName] = ObjectHelper.getAttributeValue(product, config.attribute);
+
+                if (empty(config)) {
+                    config = jobHelper.getDefaultAttributeConfig(attributeName);
                 }
+
+                ObjectHelper.setAttributeValue(
+                    this,
+                    attributeName,
+                    ObjectHelper.getAttributeValue(product, config.attribute)
+                );
             }
         }
         if (parameters.fullRecordUpdate) {

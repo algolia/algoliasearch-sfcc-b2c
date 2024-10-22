@@ -21,7 +21,6 @@ server.append('Confirm', function (req, res, next) {
         var plis = fullOrder.getAllProductLineItems();
         var algoliaProducts = [];
         var currency;
-        var isBaseRecordModel = algoliaData.getPreference('RecordModel') === MASTER_LEVEL;
 
         var pliArr = plis.toArray();
 
@@ -33,7 +32,7 @@ server.append('Confirm', function (req, res, next) {
 
                 try {
                     algoliaProduct.pid = algoliaData.getPreference('RecordModel') === MASTER_LEVEL ? product.masterProduct.ID : product.ID;
-                } catch (e) {
+                } catch (e) { // eslint-disable-line no-unused-vars
                     algoliaProduct.pid = product.ID;
                 }
 

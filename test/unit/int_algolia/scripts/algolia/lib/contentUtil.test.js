@@ -2,8 +2,6 @@ const {
     contentLinkHandler
 } = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/contentUtil');
 
-const URLUtils = require('dw/web/URLUtils');
-
 describe('contentLinkHandler', () => {
 
     it('should replace URL tokens in the body text', () => {

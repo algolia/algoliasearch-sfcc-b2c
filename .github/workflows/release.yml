@@ -21,15 +21,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: 'develop'
+          ssh-key: ${{ secrets.DEPLOY_KEY }}
 
-      - name: Branch change and package version update
+      - name: Configure git
         run: |
           git config --local user.email "github-actions@github.com"
           git config --local user.name "GitHub Actions"
-          git checkout develop
+
+      - name: Bump version in package.json
+        run: |
           npm version --no-git-tag-version --no-commit-hooks ${{ inputs.next_version }}
 
-      - name: Modify algoliaconfig file
+      - name: Bump version in algoliaconfig file
         run: |
           sed -i 's/"version": ".*"/"version": "${{ inputs.next_version }}"/' cartridges/int_algolia/algoliaconfig.json
 

@@ -44,18 +44,6 @@
                     </td>
                 </tr>
 
-                <iscomment> Algolia_Enable </iscomment>
-                <tr>
-                    <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.enable', 'algolia', null)}" encoding="jshtml" />
-                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
-                        <div class="tooltip">${Resource.msg('algolia.label.preference.enable.help', 'algolia', null)}</div>
-                    </td>
-                    <td class="table_detail w e s">
-                        <input type="checkbox" ${pdict.algoliaData.getPreference('Enable') ? "checked": ""} id="Enable" name="Enable" />
-                    </td>
-                </tr>
-
                 <iscomment> Algolia_ApplicationID </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
@@ -158,6 +146,18 @@
                     </td>
                     <td class="table_detail w e s">
                         <input type="text" value="${pdict.algoliaData.getSetOfStrings('LocalesForIndexing') ? pdict.algoliaData.getSetOfStrings('LocalesForIndexing') : ''}" id="LocalesForIndexing" name="LocalesForIndexing" placeholder="${Resource.msg('algolia.label.util.optional', 'algolia', null)}"/>
+                    </td>
+                </tr>
+
+                <iscomment> Algolia_Enable </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.enable', 'algolia', null)}" encoding="jshtml" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.enable.help', 'algolia', null)}</div>
+                    </td>
+                    <td class="table_detail w e s">
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('Enable') ? "checked": ""} id="Enable" name="Enable" onclick="updateStorefrontCheckboxes();" />
                     </td>
                 </tr>
 
@@ -369,5 +369,16 @@
         <isinclude template="algoliabm/dashboard/productInventoryLog" />
         <isinclude template="algoliabm/dashboard/categoryLog" />
     </isloop>
+
+    <script>
+        function updateStorefrontCheckboxes() {
+            const storefrontEnabled = document.getElementById("Enable").checked;
+            document.getElementById("EnableInsights").disabled = !storefrontEnabled;
+            document.getElementById("EnableSSR").disabled = !storefrontEnabled;
+            document.getElementById("EnableContentSearch").disabled = !storefrontEnabled;
+            document.getElementById("EnableRecommend").disabled = !storefrontEnabled;
+        }
+        updateStorefrontCheckboxes();
+    </script>
 
 </isdecorate>

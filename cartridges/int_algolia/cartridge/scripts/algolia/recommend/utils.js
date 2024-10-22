@@ -50,7 +50,7 @@ function getAnchorProductIds(slotcontent) {
         productIds = JSON.parse(anchorProductIds);
     } else {
         for (let i = 0; i < slotcontent.content.length; i++) {
-            var product = slotcontent.content[i];
+            let product = slotcontent.content[i];
             productIds.push(product.ID);
         }
     }

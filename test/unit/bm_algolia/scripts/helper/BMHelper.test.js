@@ -103,9 +103,6 @@ describe('getLatestCOReportsByJob', () => {
 
 describe('getJobBMLink', () => {
     it('should return the Business Manager link for a job', () => {
-        const URLUtils = require('dw/web/URLUtils');
-        const CSRFProtection = require('dw/web/CSRFProtection');
-
         const result = BMHelper.getJobBMLink('AlgoliaProductIndex_v2');
 
         expect(result).toBe('https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/ViewApplication-BM?csrf_token=csrfToken#/?job#editor!id!AlgoliaProductIndex_v2!config!AlgoliaProductIndex_v2!domain!Sites!tab!schedule-and-history');

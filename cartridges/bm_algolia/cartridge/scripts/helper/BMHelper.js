@@ -13,7 +13,7 @@ function getLatestCOReportsByJob() {
 
     try {
         allJobReports = CustomObjectMgr.getAllCustomObjects('AlgoliaJobReport').asList().toArray();
-    } catch (e) {
+    } catch (e) { // eslint-disable-line no-unused-vars
         return false; // false indicates that the custom object type does not exist
     }
 

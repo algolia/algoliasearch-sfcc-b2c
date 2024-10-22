@@ -9,7 +9,7 @@ var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
 const version = require('*/algoliaconfig').version;
 
-var currentSite = getCurrentSite(); // eslint-disable-line no-use-before-define
+var currentSite = getCurrentSite();
 
 // exported properties
 const CATEGORIES_SEPARATOR = ' > ';

@@ -3,7 +3,7 @@
 var ArrayList = require('dw/util/ArrayList');
 var ProductMgr = require('dw/catalog/ProductMgr');
 var Site = require('dw/system/Site');
-var File = require('dw/io/File');
+var File = require('dw/io/File'); // eslint-disable-line no-redeclare
 var logger;
 
 // job step parameters
@@ -12,12 +12,12 @@ var paramRecordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
-var fileHelper, jobHelper, modelHelper, reindexHelper, sendHelper;
+var fileHelper, jobHelper, reindexHelper;
 
 // logging-related variables and constants
 var jobReport;
 
-var l0_deltaExportDir, l1_processingDir, l1_completedDir;
+var l0_deltaExportDir, l1_processingDir, l1_completedDir, l1_failedDir;
 var changedProducts = [], changedProductsIterator;
 var deltaExportZips, siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
@@ -63,13 +63,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
-    sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
 
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
@@ -77,7 +75,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
         logger.info('Configuration file "productAttributesConfig.js" loaded')
-    } catch(e) {
+    } catch (e) { // eslint-disable-line no-unused-vars
         extendedProductAttributesConfig = {};
     }
 
@@ -136,7 +134,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     attributesToSend.forEach(function(attribute) {
         var attributeConfig = extendedProductAttributesConfig[attribute] ||
             algoliaProductConfig.attributeConfig_v2[attribute] ||
-            {};
+            jobHelper.getDefaultAttributeConfig(attribute);
 
         if (attributeConfig.variantAttribute) {
             variantAttributes.push(attribute);
@@ -233,6 +231,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     l1_completedDir = new File(l0_deltaExportDir, '_completed');
     l1_completedDir.mkdir(); // creating "_completed" folder -- does no harm if it already exists
 
+    l1_failedDir = new File(l0_deltaExportDir, '_failed');
+    l1_failedDir.mkdir();
+
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
         logger.info('Processing ' + filename + '...');
@@ -268,13 +269,9 @@ exports.beforeStep = function(parameters, stepExecution) {
                 if (result.success) {
                     jobReport.processedItems += result.nrProductsRead;
                 } else {
-                    // abort if error reading from any of the delta export zips
-                    let errorMessage = 'Error reading from file: ' + catalogFile.getFullPath();
-                    jobHelper.logError(errorMessage);
-
+                    // Mark the job in error if an error occurred while reading from any of the delta export zips
                     jobReport.error = true;
-                    jobReport.errorMessage = errorMessage;
-                    jobReport.writeToCustomObject();
+                    jobReport.errorMessage = result.errorMessage;
                 }
             });
         }
@@ -287,8 +284,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     // cleanup - removing "_processing" dir
     fileHelper.removeFolderRecursively(l1_processingDir);
 
-    changedProductsIterator = new CPObjectIterator(changedProducts);
-    logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
+    if (!jobReport.error) {
+        changedProductsIterator = new CPObjectIterator(changedProducts);
+        logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
+    } else {
+        logger.info('Moving the Delta export files to the "' + l1_failedDir.getName() + '" directory...')
+        fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_failedDir);
+    }
 }
 
 /**
@@ -297,6 +299,7 @@ exports.beforeStep = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {number} total number of products
  */
+// eslint-disable-next-line no-unused-vars
 exports.getTotalCount = function(parameters, stepExecution) {
     return jobHelper.getObjectsArrayLength(changedProducts);
 }
@@ -307,6 +310,7 @@ exports.getTotalCount = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {string} productID
  */
+// eslint-disable-next-line no-unused-vars
 exports.read = function(parameters, stepExecution) {
     let cpObject;
     if (changedProductsIterator && (cpObject = changedProductsIterator.next()) !== null) {
@@ -323,6 +327,7 @@ exports.read = function(parameters, stepExecution) {
  *                  [ "action": "addObject", "indexName": "sfcc_products_en_US", body: { "id": "008884303989M", "name": "Fitted Shirt" },
  *                    "action": "addObject", "indexName": "sfcc_products_fr_FR", body: { "id": "008884303989M", "name": "Chemise ajustée" } ]
  */
+// eslint-disable-next-line no-unused-vars
 exports.process = function(cpObj, parameters, stepExecution) {
     var product = ProductMgr.getProduct(cpObj.productID);
 
@@ -350,9 +355,9 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         fullRecordUpdate: fullRecordUpdate,
                     });
                     for (let l = 0; l < siteLocales.size(); ++l) {
-                        var locale = siteLocales[l];
-                        var indexName = algoliaData.calculateIndexName('products', locale);
-                        var records = recordsPerLocale[locale];
+                        let locale = siteLocales[l];
+                        let indexName = algoliaData.calculateIndexName('products', locale);
+                        let records = recordsPerLocale[locale];
                         processedVariantsToSend = records.length;
                         records.forEach(function(record) {
                             algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
@@ -360,11 +365,11 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     }
                 } else {
                     // Master-level indexing
-                    var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                    let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                     for (let l = 0; l < siteLocales.size(); ++l) {
-                        var locale = siteLocales[l];
-                        var indexName = algoliaData.calculateIndexName('products', locale);
-                        var localizedMaster = new AlgoliaLocalizedProduct({
+                        let locale = siteLocales[l];
+                        let indexName = algoliaData.calculateIndexName('products', locale);
+                        let localizedMaster = new AlgoliaLocalizedProduct({
                             product: product,
                             locale: locale,
                             attributeList: masterAttributes,
@@ -387,9 +392,9 @@ exports.process = function(cpObj, parameters, stepExecution) {
             // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
             var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
             for (let l = 0; l < siteLocales.size(); l++) {
-                var locale = siteLocales[l];
-                var indexName = algoliaData.calculateIndexName('products', locale);
-                var localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+                let locale = siteLocales[l];
+                let indexName = algoliaData.calculateIndexName('products', locale);
+                let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
                 algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
             }
             jobReport.processedItemsToSend++;
@@ -414,6 +419,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.send = function(algoliaOperations, parameters, stepExecution) {
     // algoliaOperations contains all returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
@@ -444,6 +450,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.afterStep = function(success, parameters, stepExecution) {
     // An exit status cannot be defined for a chunk-oriented script module.
     // Chunk modules always finish with either OK or ERROR.
@@ -467,15 +474,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
             // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
             if (!empty(deltaExportZips)) {
                 logger.info('Moving the Delta export files to the "_completed" directory...')
-                deltaExportZips.forEach(function (filename) {
-                    let currentZipFile = new File(l0_deltaExportDir, filename); // 000001.zip, 000002.zip, etc.
-                    let targetZipFile = new File(l1_completedDir, currentZipFile.getName());
-                    fileHelper.moveFile(currentZipFile, targetZipFile);
-
-                    let currentMetaFile = new File(l0_deltaExportDir, filename.replace('.zip', '.meta')); // each .zip has a corresponding .meta file as well, we'll need to delete these later
-                    let targetMetaFile = new File(l1_completedDir, currentMetaFile.getName());
-                    fileHelper.moveFile(currentMetaFile, targetMetaFile);
-                });
+                fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_completedDir);
             }
         } else {
             jobReport.error = true;

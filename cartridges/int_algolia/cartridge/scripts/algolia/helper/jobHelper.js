@@ -14,7 +14,6 @@ function _arrayToXML(arr) {
         var childXML = null;
         if (element instanceof Object) {
             childXML = new XML('<value id="' + index + '"></value>');
-            // eslint-disable-next-line no-use-before-define
             appendObjToXML(childXML, element);
         } else {
             childXML = new XML('<value id="' + index + '">' + element + '</value>');
@@ -38,7 +37,6 @@ function _xmlToArray(xmlArray) {
         if (child[i].hasSimpleContent()) {
             result.push(child[i].toString());
         } else {
-            // eslint-disable-next-line no-use-before-define
             result.push(xmlToObject(child[i].elements()));
         }
     }
@@ -121,7 +119,7 @@ function _compareTopLevelProperties(compareObj, baseObj) {
         try {
             baseObjString = JSON.stringify({ obj: baseObj[property] });
             compareObjString = JSON.stringify({ obj: compareObj[property] });
-        } catch (error) {
+        } catch (error) { // eslint-disable-line no-unused-vars
             result[property] = _cloneObject(baseObj[property]);
             return result;
         }
@@ -433,6 +431,7 @@ function _updateOrAddValue(objectsArray, key, value) {
     for (var i = 0; i < objectsArray.length; i++) {
         var object = objectsArray[i];
 
+        // eslint-disable-next-line no-prototype-builtins
         if (object.hasOwnProperty(key)) {
             object[key] = value;
             return; // exit the function after updating the value
@@ -496,26 +495,25 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
-    var catalogID;
     var resultObj = {
         nrProductsRead: 0,
-        success: false
+        success: false,
+        errorMessage: ''
     };
 
     try {
         if (xmlFile.exists()) {
             var fileReader = new FileReader(xmlFile);
             var xmlStreamReader = new XMLStreamReader(fileReader);
-            var success = false;
 
             switch (resourceType) {
                 case 'catalog':
                     while (xmlStreamReader.hasNext()) {
-                        var xmlEvent = xmlStreamReader.next();
+                        let xmlEvent = xmlStreamReader.next();
 
                         if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
                             if (xmlStreamReader.getLocalName() === 'product') { // <product> start element
-                                var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <product product-id="">
+                                let productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <product product-id="">
                                 var mode = xmlStreamReader.getAttributeValue(null, 'mode'); // <product mode="delete">
                                 var isAvailable = mode !== 'delete';
 
@@ -533,12 +531,12 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
                     break;
                 case 'inventory':
                     while (xmlStreamReader.hasNext()) {
-                        var xmlEvent = xmlStreamReader.next();
+                        let xmlEvent = xmlStreamReader.next();
 
                         if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
 
                             if (xmlStreamReader.getLocalName() === 'record') { // <record> start element
-                                var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <record product-id="">
+                                let productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <record product-id="">
 
                                 // adding new productID to structure or updating it if key already exists, always true
                                 _updateOrAddValue(changedProducts, productID, true);
@@ -575,9 +573,15 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
             }
 
             xmlStreamReader.close();
-        };
+        }
     } catch (error) {
+        algoliaLogger.error('Error while reading from file: ' + xmlFile.getFullPath());
+        algoliaLogger.error(error);
         resultObj.success = false;
+        resultObj.errorMessage =
+            'Error while reading from file: ' + xmlFile.getFullPath() + '\n' +
+            error.message + '\n' +
+            'If your product attributes have special characters such as emojis, you must enable "Filter Invalid XML Characters during Export" in Administration >  Global Preferences >  Import & Export';
         return resultObj;
     }
 
@@ -608,7 +612,7 @@ function generateVariantRecords(parameters) {
     const sharedAttributesPerLocale = {};
     const algoliaRecordsPerLocale = {};
     for (let l = 0; l < parameters.locales.size(); ++l) {
-        var locale = parameters.locales[l];
+        let locale = parameters.locales[l];
         sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
             product: parameters.masterProduct,
             locale: locale,
@@ -629,7 +633,7 @@ function generateVariantRecords(parameters) {
             fullRecordUpdate: parameters.fullRecordUpdate
         });
         for (let l = 0; l < parameters.locales.size(); ++l) {
-            var locale = parameters.locales[l];
+            let locale = parameters.locales[l];
             // Add shared attributes in the base model
             attributesComputedFromBaseProduct.forEach(function(sharedAttribute) {
                 baseModel[sharedAttribute] = sharedAttributesPerLocale[locale][sharedAttribute];
@@ -645,6 +649,24 @@ function generateVariantRecords(parameters) {
         }
     }
     return algoliaRecordsPerLocale;
+}
+
+
+/**
+ * Returns the default configuration for a given attribute.
+ * You can override this behavior by adding a specific configuration for the attribute.
+ * @param {string} attributeName - The name of the attribute to get the default configuration for.
+ * @returns {Object} The default configuration object for the attribute.
+ * @returns {string} return.attributeName - The name of the attribute.
+ * @returns {boolean} return.localized - Indicates if the attribute is localized.
+ * @returns {boolean} return.variantAttribute - Indicates if the attribute is a variant attribute.
+ */
+function getDefaultAttributeConfig(attributeName) {
+    return {
+        attribute: attributeName,
+        localized: false,
+        variantAttribute: true
+    };
 }
 
 module.exports = {
@@ -673,4 +695,6 @@ module.exports = {
     isObjectsArrayEmpty: isObjectsArrayEmpty,
     getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,
+
+    getDefaultAttributeConfig: getDefaultAttributeConfig
 };
