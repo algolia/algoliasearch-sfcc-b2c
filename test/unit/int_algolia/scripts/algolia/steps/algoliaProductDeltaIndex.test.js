@@ -18,14 +18,6 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     }
 }, {virtual: true});
 
-jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
-    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
-    return {
-        getAttributeValue: originalModule.getAttributeValue,
-        safelyGetCustomAttribute: originalModule.safelyGetCustomAttribute,
-    }
-}, {virtual: true});
-
 let mockLocalesForIndexing;
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');

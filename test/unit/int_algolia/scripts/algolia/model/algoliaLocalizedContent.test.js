@@ -12,10 +12,6 @@ jest.mock('*/cartridge/scripts/algolia/lib/pageDesignerHelper', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/pageDesignerHelper');
 }, {virtual: true});
 
-jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
-    return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
-}, {virtual: true});
-
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaContentConfig', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaContentConfig');
 }, {virtual: true});
@@ -77,7 +73,6 @@ describe('AlgoliaLocalizedContent', () => {
         contentMock.custom.attribute = 'mockedAttribute';
 
         const attributeList = ['custom.attribute'];
-        const algoliaContent = new AlgoliaLocalizedContent({ content: contentMock, locale: 'en', attributeList, includedContent: 'allContents' });
 
         expect(ObjectHelper.getAttributeValue(contentMock, attributeList[0])).toEqual('mockedAttribute');
     });

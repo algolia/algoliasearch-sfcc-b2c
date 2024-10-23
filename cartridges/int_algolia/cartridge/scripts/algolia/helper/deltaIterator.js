@@ -1,7 +1,7 @@
 'use strict';
 
-var File = require('dw/io/File');
-var FileReader = require('dw/io/FileReader');
+var File = require('dw/io/File'); // eslint-disable-line no-redeclare
+var FileReader = require('dw/io/FileReader'); // eslint-disable-line no-redeclare
 var XMLStreamReader = require('dw/io/XMLStreamReader');
 var XMLStreamConstants = require('dw/io/XMLStreamConstants');
 
@@ -110,7 +110,7 @@ DeltaIterator.prototype.getRecordSize = function () {
     if (this.dataBuffer) {
         try {
             recordSize = JSON.stringify(this.dataBuffer).length;
-        } catch (error) {
+        } catch (e) { // eslint-disable-line no-unused-vars
             recordSize = 0;
         }
     }

@@ -6,7 +6,6 @@ var stringUtils = require('dw/util/StringUtils');
 var URLUtils = require('dw/web/URLUtils');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var algoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');

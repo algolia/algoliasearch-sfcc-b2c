@@ -102,14 +102,6 @@
     <type-extension type-id="SitePreferences">
         <custom-attribute-definitions>
 
-            <attribute-definition attribute-id="Algolia_Enable">
-                <display-name xml:lang="x-default">Enable Algolia</display-name>
-                <description xml:lang="x-default">Enable/disable all Algolia</description>
-                <type>boolean</type>
-                <mandatory-flag>true</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>
-
             <attribute-definition attribute-id="Algolia_ApplicationID">
                 <display-name xml:lang="x-default">Application ID</display-name>
                 <description xml:lang="x-default">This is your unique application identifier. If you haven't already, please signup to Algolia and create an Algolia application on the Algolia Dashboard.</description>
@@ -188,6 +180,14 @@ Setting this preference replaces the first two segments, the final index name be
                 <description xml:lang="x-default">List of locales that will be used by the indexing jobs</description>
                 <type>set-of-string</type>
                 <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_Enable">
+                <display-name xml:lang="x-default">Enable Algolia frontend cartridge</display-name>
+                <description xml:lang="x-default">Enable the SFRA or SiteGenesis cartridge on your Storefront</description>
+                <type>boolean</type>
+                <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 

@@ -1,14 +1,13 @@
 'use strict';
 
 var ProductMgr = require('dw/catalog/ProductMgr');
-var Status = require('dw/system/Status');
 var logger;
 
 // job step parameters
 var resourceType, fieldListOverride, fullRecordUpdate;
 
 // Algolia requires
-var algoliaData, AlgoliaProduct, jobHelper, algoliaExportAPI, sendHelper, productFilter;
+var algoliaData, AlgoliaProduct, jobHelper, sendHelper, productFilter;
 
 // logging-related variables
 var logData, updateLogType;
@@ -43,11 +42,11 @@ const MAX_TRIES = 5;
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.beforeStep = function(parameters, stepExecution) {
     algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     AlgoliaProduct = require('*/cartridge/scripts/algolia/model/algoliaProduct');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
     sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -97,6 +96,7 @@ exports.beforeStep = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {number} total number of products
  */
+// eslint-disable-next-line no-unused-vars
 exports.getTotalCount = function(parameters, stepExecution) {
     return products.count;
 }
@@ -107,6 +107,7 @@ exports.getTotalCount = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {dw.catalog.Product} B2C Product object
  */
+// eslint-disable-next-line no-unused-vars
 exports.read = function(parameters, stepExecution) {
     if (products.hasNext()) {
         return products.next();
@@ -120,6 +121,7 @@ exports.read = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {UpdateProductModel} the product object in the form in which it will be sent to Algolia
  */
+// eslint-disable-next-line no-unused-vars
 exports.process = function(product, parameters, stepExecution) {
 
     if (productFilter.isInclude(product)) {
@@ -148,6 +150,7 @@ exports.process = function(product, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.send = function(algoliaProducts, parameters, stepExecution) {
     var status;
 
@@ -182,6 +185,7 @@ exports.send = function(algoliaProducts, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.afterStep = function(success, parameters, stepExecution) {
     // You can't define the exit status for a chunk-oriented script module.
     // Chunk modules always finish with either OK or ERROR.

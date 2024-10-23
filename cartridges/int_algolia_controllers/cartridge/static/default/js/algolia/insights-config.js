@@ -1,4 +1,4 @@
-/* global aa */
+/* exported enableInsights */
 
 /**
  * Configures Insights

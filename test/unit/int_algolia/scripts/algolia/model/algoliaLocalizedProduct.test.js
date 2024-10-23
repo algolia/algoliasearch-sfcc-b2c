@@ -58,13 +58,6 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
 jest.mock('*/cartridge/scripts/algolia/lib/utils', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/utils');
 }, {virtual: true});
-jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
-    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
-    return {
-        getAttributeValue: originalModule.getAttributeValue,
-        safelyGetCustomAttribute: originalModule.safelyGetCustomAttribute,
-    }
-}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
 }, {virtual: true});
@@ -75,7 +68,23 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 const AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 const algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig')
 const attributes = algoliaProductConfig.defaultAttributes_v2.concat(['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
-    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']);
+    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups', 'custom.algoliaTest']);
+
+function setupMockConfig(customAttributes) {
+    jest.resetModules();
+
+    jest.doMock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
+        const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
+        const modifiedAttributeConfig_v2 = { ...originalModule.attributeConfig_v2 };
+
+        Object.assign(modifiedAttributeConfig_v2, customAttributes);
+
+        return {
+            ...originalModule,
+            attributeConfig_v2: modifiedAttributeConfig_v2
+        };
+    });
+}
 
 describe('algoliaLocalizedProduct', function () {
     test('default locale', function () {
@@ -169,6 +178,9 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Pink',
             size: '4',
             refinementSize: '4',
+            custom: {
+                algoliaTest: 'default locale'
+            }
         };
         expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: attributes })).toEqual(algoliaProductModel);
         // Tags are added in case of fullRecordUpdate
@@ -269,6 +281,9 @@ describe('algoliaLocalizedProduct', function () {
             refinementColor: 'Rose',
             size: '4',
             refinementSize: '4',
+            custom: {
+                algoliaTest: 'fr locale'
+            }
         };
         expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: attributes })).toEqual(algoliaProductModel);
         // Tags are added in case of fullRecordUpdate
@@ -342,5 +357,125 @@ describe('algoliaLocalizedProduct', function () {
             },
         };
         expect(new AlgoliaLocalizedProduct({ product: product, attributeList: ['pricebooks'] })).toEqual(expected);
+    });
+});
+
+
+describe('algoliaLocalizedProduct default custom attribute logic', function () {
+    test('Base Product default custom attribute logic', function () {
+        const product = new ProductMock();
+        const expected = {
+            objectID: '701644031206M',
+            custom: {
+                algoliaTest: 'default locale',
+                displaySize: '14cm',
+                deeply: { nested: 'nestedValue' },
+            }
+        };
+        expect(new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['custom.algoliaTest', 'custom.displaySize', 'custom.deeply.nested']
+        })).toEqual(expected);
+    });
+
+    test('default attribute configuration logic with baseModel', function () {
+        const product = new ProductMock();
+        const baseModel = {
+            custom: {
+                algoliaTest: 'value from base model',
+                deeply: {
+                    nested: 'value from base model',
+                }
+            }
+        }
+        const expected = {
+            objectID: '701644031206M',
+            custom: {
+                algoliaTest: 'value from base model',
+                deeply: { nested: 'value from base model' },
+            }
+        };
+        expect(new AlgoliaLocalizedProduct({
+            product: product,
+            baseModel: baseModel,
+            attributeList: ['custom.algoliaTest', 'custom.deeply.nested'],
+        })).toEqual(expected);
+    });
+
+    test('algoliaLocalizedProduct default custom attribute logic for fr locale', function () {
+        const product = new ProductMock();
+        const baseModel = {
+            objectID: '701644031206M',
+            custom: {
+                algoliaTest: 'default locale',
+                displaySize: '14cm'
+            }
+        }
+
+        const expected = {
+            objectID: '701644031206M',
+            name: 'Robe florale',
+            custom: {
+                algoliaTest: 'default locale',
+                displaySize: '14cm'
+            }
+        }
+
+        // Because default config is localized:false, we are expecting to have the default locale in the record
+        expect(new AlgoliaLocalizedProduct({ product: product, locale: 'fr', attributeList: ['custom.algoliaTest', 'custom.displaySize', 'name'], baseModel: baseModel})).toEqual(expected);
+    });
+});
+
+
+describe('algoliaLocalizedProduct overriding custom attributes', function () {
+    afterEach(() => {
+        jest.resetModules();
+    });
+
+    test('algoliaLocalizedProduct overrided custom attribute logic for fr locale (Nested attributes)', function () {
+        setupMockConfig({
+            'custom.algoliaTest': {
+                attribute: 'custom.algoliaTest',
+                localized: true,
+                variantAttribute: false
+            }
+        });
+        const AlgoliaLocalizedProductModel = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+
+        const product = new ProductMock();
+        const baseModel =  new AlgoliaLocalizedProductModel({ product: product, locale: 'default', attributeList: ['custom.displaySize'] });
+        const expectedProductModel = {
+            objectID: '701644031206M',
+            custom: {
+                algoliaTest: 'fr locale',
+                displaySize: '14cm'
+            }
+        };
+
+        expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['custom.algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
+    });
+
+    test('algoliaLocalizedProduct overrided custom attribute logic for fr locale (Non-nested attributes)', function () {
+        setupMockConfig({
+            'algoliaTest': {
+                attribute: 'custom.algoliaTest',
+                localized: true,
+                variantAttribute: true
+            }
+        });
+        const AlgoliaLocalizedProductModel = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+
+        const product = new ProductMock();
+        const baseModel =  new AlgoliaLocalizedProductModel({ product: product, locale: 'default', attributeList: ['custom.displaySize'] });
+        const expectedProductModel = {
+            objectID: '701644031206M',
+            custom: {
+                displaySize: '14cm'
+            },
+            algoliaTest: 'fr locale',
+        };
+
+        expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
     });
 });

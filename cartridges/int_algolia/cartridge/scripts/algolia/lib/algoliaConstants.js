@@ -1,7 +1,7 @@
 'use strict';
 
 var currentSiteID = require('dw/system/Site').getCurrent().getID();
-var File = require('dw/io/File');
+var File = require('dw/io/File'); // eslint-disable-line no-redeclare
 
 const ALGOLIA_FILES_FOLDER = File.IMPEX + '/src/Algolia/';
 

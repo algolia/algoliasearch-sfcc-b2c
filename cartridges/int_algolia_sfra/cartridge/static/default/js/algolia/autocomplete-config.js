@@ -1,4 +1,5 @@
 /* global autocomplete, getAlgoliaResults, algoliaData  */
+/* exported enableAutocomplete */
 
 var recommendClient;
 var trendingItemsArr = [];
@@ -48,7 +49,7 @@ function enableAutocomplete(config) {
             }
         }
 
-        //Listen for click events and close the panel if the click is outside the input 
+        //Listen for click events and close the panel if the click is outside the input
         document.addEventListener('click', onClickOutside, true);
 
         //change this code with jquery
@@ -96,7 +97,7 @@ function mapHitToTrendingItem(hit) {
  * @returns {Promise} - The promise object.
  */
 function fetchTrendingItems() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const indexName = algoliaData.productsIndex;
 
         recommendClient.getTrendingItems([{
@@ -220,10 +221,8 @@ function getSourcesArray(config) {
             },
             item({
                 item,
-                components,
                 html,
             }) {
-                var a = item;
                 return html `
                     <a href=${item.url}>
                         <div class="text-truncate text-nowrap">

@@ -1,4 +1,5 @@
-/* global instantsearch */
+/* global algoliaData */
+/* exported enableRecommendations */
 
 const { frequentlyBoughtTogether, relatedProducts, trendingItems, lookingSimilar } = window['@algolia/recommend-js'];
 
@@ -11,7 +12,7 @@ var registeredWidgets = new Map();
 function enableRecommendations(config) {
     var categoryHierarchy = config.categoryDisplayNamePath;
     var categoryArray = categoryHierarchy.split(config.categoryDisplayNamePathSeparator);
-    var categoryHierarchy = categoryArray.join(' > ');
+    categoryHierarchy = categoryArray.join(' > ');
     var categoryDepth = categoryArray.length - 1;
 
     createRecommendationWidget({
@@ -108,7 +109,7 @@ function getObjectIds(container) {
     try {
         const objectIDs = container.getAttribute('data-object-ids');
         if (!objectIDs) return null;
-        dataObjectIds = objectIDs.replace(/'/g, '"');
+        var dataObjectIds = objectIDs.replace(/'/g, '"');
         return JSON.parse(dataObjectIds);
     } catch (e) {
         console.error('Parsing error on objectIDs:', e);
@@ -220,8 +221,6 @@ function transformItem(item) {
     }
 
     if (item.colorVariations) {
-        // Display the swatches only if at least one item has some colorVariations
-        displaySwatches = true;
         item.colorVariations.forEach(colorVariation => {
             colorVariation.variationURL = generateProductUrl({
                 objectID: item.objectID,
@@ -234,9 +233,7 @@ function transformItem(item) {
 
     // Master-level indexing
     if (item.variants) {
-        let price;
         item.variants.forEach(variant => {
-            price = variant.price[algoliaData.currencyCode]
             variant.url = generateProductUrl({
                 objectID: item.objectID,
                 productUrl: variant.url,
@@ -283,6 +280,7 @@ function transformItem(item) {
  * @param {Object} item - Item object
  * @returns {Object} Image object
  */
+// eslint-disable-next-line no-unused-vars
 function getItemImage(item) {
     if (item.image_groups) {
         const imageGroup = item.image_groups.find(i => i.view_type === 'large') || item.image_groups[0];
@@ -333,4 +331,20 @@ if (algoliaData.enableRecommend) {
             });
         });
     });
+}
+
+/**
+ * Build a product URL with Algolia query parameters
+ * @param {string} objectID objectID
+ * @param {string} productUrl url of the product
+ * @param {string} queryID queryID
+ * @param {string} indexName indexName
+ * @return {string} Final URL of the product
+ */
+function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
+    const url = new URL(productUrl, window.location.origin);
+    url.searchParams.append('queryID', queryID);
+    url.searchParams.append('objectID', objectID);
+    url.searchParams.append('indexName', indexName);
+    return url.href;
 }
