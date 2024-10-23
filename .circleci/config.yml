@@ -46,7 +46,7 @@ jobs:
           name: Checkout Code
           command: |
             echo "Starting clone..."
-            GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:SalesforceCommerceCloud/storefront-reference-architecture.git .
+            GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:algolia/storefront-reference-architecture.git .
       - run:
           name: Install required packages
           command: |
