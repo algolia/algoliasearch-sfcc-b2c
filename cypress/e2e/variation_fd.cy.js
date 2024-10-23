@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+/// <reference types="cypress" />
+
 describe('Algolia Search', () => {
     beforeEach(() => {
         // Visit your website's homepage or search page

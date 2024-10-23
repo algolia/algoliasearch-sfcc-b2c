@@ -647,6 +647,7 @@ function calculateDisplayPrice(item) {
 
     var promotions;
     var calloutMsg = '';
+    var variant;
 
     if (algoliaData.recordModel === 'master-level' && item.variants) {
         promotions = item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
