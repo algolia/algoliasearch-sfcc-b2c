@@ -130,38 +130,6 @@ jobs:
           command: |
             cd cartridges && ls
       - run:
-          name: Install required packages
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y zip
-      - run:
-          name: Install sfcc-ci
-          command: sudo npm install -g sfcc-ci
-      - run:
-          name: Authenticate with SFCC and get access token
-          command: |
-            sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
-            echo "Raw output of sfcc-ci client:auth:token:"
-            ACCESS_TOKEN=$(sfcc-ci client:auth:token)
-            echo "export ACCESS_TOKEN=$ACCESS_TOKEN" >> $BASH_ENV
-      - run:
-          name: Create Code Version Directory
-          command: mkdir $CODE_VERSION
-      - run:
-          name: Copy Cartridges
-          command: |
-            if [ -d "cartridges" ]; then
-              cp -R cartridges/* $CODE_VERSION/
-            else
-              echo "Cartridges directory not found. Skipping."
-            fi
-      - run:
-          name: Package Code
-          command: zip -r $CODE_VERSION.zip $CODE_VERSION
-      - run:
-          name: Deploy Code to Sandbox
-          command: sfcc-ci code:deploy $CODE_VERSION.zip --instance $SANDBOX_HOST
-      - run:
           name: Activate Code Version
           command: sfcc-ci code:activate $CODE_VERSION -i $SANDBOX_HOST
       - run:
