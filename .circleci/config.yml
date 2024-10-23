@@ -1,7 +1,8 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.1.0
+  node: circleci/node@6.1.0
+  cypress: cypress-io/cypress@3
 
 aliases:
   - &persist_work_dir
@@ -12,7 +13,7 @@ aliases:
     at: .
   - &node_executor
     name: node/default
-    tag: '18.15'
+    tag: '18.18.0'
 
 jobs:
   checkout:
@@ -30,6 +31,176 @@ jobs:
       - run: npm run test
       - run: npm run test:unit
 
+  prepare-site-import:
+    executor: *node_executor
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "SHA256:s+i0QBzZp3EQiY4DKt4/VjZtxHUfw2gRGeI0RAnzpyw"
+      - run:
+          name: Add GitHub to known hosts
+          command: |
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+      - run:
+          name: Checkout Code
+          command: |
+            echo "Starting clone..."
+            GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:algolia/sfra-e2e-reference.git .
+      - run:
+          name: Install required packages
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y zip
+      - run:
+          name: Install npm packages
+          command: npm install
+      - run:
+          name: Compile JS files
+          command: npm run compile:js
+      - run:
+          name: Compile CSS files
+          command: npm run compile:scss
+      - run:
+          name: Install sfcc-ci
+          command: sudo npm install -g sfcc-ci
+      - run:
+          name: Authenticate with SFCC and get access token
+          command: |
+            sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
+            echo "Raw output of sfcc-ci client:auth:token:"
+            ACCESS_TOKEN=$(sfcc-ci client:auth:token)
+            echo "export ACCESS_TOKEN=$ACCESS_TOKEN" >> $BASH_ENV
+      - run:
+          name: Create Code Version Directory
+          command: mkdir $CODE_VERSION
+      - run:
+          name: Copy Cartridges
+          command: |
+            if [ -d "cartridges" ]; then
+              cp -R cartridges/* $CODE_VERSION/
+            else
+              echo "Cartridges directory not found. Skipping."
+            fi
+      - run:
+          name: Package Code
+          command: zip -r $CODE_VERSION.zip $CODE_VERSION
+      - run:
+          name: Deploy Code to Sandbox
+          command: sfcc-ci code:deploy $CODE_VERSION.zip --instance $SANDBOX_HOST
+      - run:
+          name: Prepare Site Import Directory
+          command: |
+            mkdir -p site_import/sites/RefArch
+            mkdir -p site_import/meta
+      - run:
+          name: Generate preferences.xml
+          command: |
+            cat \<< EOF > site_import/sites/RefArch/preferences.xml
+            <?xml version="1.0" encoding="UTF-8"?>
+            <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
+                <custom-preferences>
+                  <all-instances>
+                    <preference preference-id="Algolia_RecordModel">variant-level</preference>
+                    <preference preference-id="Algolia_IndexPrefix">varx</preference>
+                    <preference preference-id="Algolia_AdditionalAttributes">color,size,colorVariations,masterID,short_description,brand,name,pricebooks</preference>
+                  </all-instances>
+                </custom-preferences>
+            </preferences>
+            EOF
+      - run:
+          name: Package Site Import
+          command: zip -r site_import.zip site_import
+      - run:
+          name: Upload Site Preferences
+          command: sfcc-ci instance:upload site_import.zip --instance $SANDBOX_HOST
+      - run:
+          name: Import Site Preferences
+          command: sfcc-ci instance:import site_import.zip --instance $SANDBOX_HOST --sync
+      - run:
+          name: Clean up
+          command: rm -rf site_import site_import.zip
+
+  deployment-and-jobs:
+    executor: *node_executor
+    steps:
+      - checkout
+      - run:
+          name: Check folder structure
+          command: |
+            cd cartridges && ls
+      - run:
+          name: Install required packages
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y zip
+      - run:
+          name: Install sfcc-ci
+          command: sudo npm install -g sfcc-ci
+      - run:
+          name: Authenticate with SFCC and get access token
+          command: |
+            sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
+            echo "Raw output of sfcc-ci client:auth:token:"
+            ACCESS_TOKEN=$(sfcc-ci client:auth:token)
+            echo "export ACCESS_TOKEN=$ACCESS_TOKEN" >> $BASH_ENV
+      - run:
+          name: Create Code Version Directory
+          command: mkdir $CODE_VERSION
+      - run:
+          name: Copy Cartridges
+          command: |
+            if [ -d "cartridges" ]; then
+              cp -R cartridges/* $CODE_VERSION/
+            else
+              echo "Cartridges directory not found. Skipping."
+            fi
+      - run:
+          name: Package Code
+          command: zip -r $CODE_VERSION.zip $CODE_VERSION
+      - run:
+          name: Deploy Code to Sandbox
+          command: sfcc-ci code:deploy $CODE_VERSION.zip --instance $SANDBOX_HOST
+      - run:
+          name: Activate Code Version
+          command: sfcc-ci code:activate $CODE_VERSION -i $SANDBOX_HOST
+      - run:
+          name: Trigger SFCC Job
+          command: sfcc-ci job:run AlgoliaProductIndex_v2 --instance $SANDBOX_HOST
+      - run:
+          name: Wait for Job Completion
+          command: |
+            echo "Waiting for 4 minutes to allow job completion..."
+            sleep 240
+
+  index-tests:
+    executor: *node_executor
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - run:
+          name: Install Algolia Dependencies
+          command: npm install algoliasearch
+      - run:
+          name: Run Algolia Index Tests
+          command: npm test -- test/e2e/variation_index.test.js
+
+  e2e-tests:
+    executor: cypress/default
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: npm ci
+      - run:
+          name: Run Algolia Index Tests
+          command: npm test -- test/e2e/validate_algolia.test.js
+      - run:
+          name: Run Cypress Tests
+          command: npx cypress run --browser electron --headless --config-file cypress.config.js
+
 workflows:
   suite:
     jobs:
@@ -37,3 +208,37 @@ workflows:
       - test:
           requires:
             - checkout
+      - prepare-site-import:
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - feat/e2e-circleci
+      - deployment-and-jobs:
+          requires:
+            - prepare-site-import
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - feat/e2e-circleci
+      - index-tests:
+          requires:
+            - deployment-and-jobs
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - feat/e2e-circleci
+      - e2e-tests:
+          requires:
+            - index-tests
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - feat/e2e-circleci
