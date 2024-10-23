@@ -74,6 +74,9 @@ const stepExecution = {
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex');
 const collectionHelper = require('../../../../../mocks/helpers/collectionHelper');
 
+// eslint-disable-next-line
+const PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr');
+
 beforeEach(() => {
     global.customPreferences['Algolia_RecordModel'] = 'variant-level';
     mockAdditionalAttributes = ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',

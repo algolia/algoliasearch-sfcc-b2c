@@ -1,4 +1,6 @@
 const GlobalMock = require('../../../../../mocks/global');
+// eslint-disable-next-line
+const PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr');
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
