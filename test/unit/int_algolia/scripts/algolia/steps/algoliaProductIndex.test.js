@@ -74,7 +74,7 @@ const stepExecution = {
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductIndex');
 const collectionHelper = require('../../../../../mocks/helpers/collectionHelper');
 
-const PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr');
+const PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr'); // eslint-disable-line no-unused-vars
 
 beforeEach(() => {
     global.customPreferences['Algolia_RecordModel'] = 'variant-level';

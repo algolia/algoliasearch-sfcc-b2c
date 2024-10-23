@@ -7,6 +7,10 @@
 
 var activeCustomerPromotions = [];
 
+/**
+ * Initializes InstantSearch
+ * @param {Object} config Configuration object
+ */
 function enableInstantSearch(config) {
     const productsIndex = algoliaData.productsIndex;
     const contentsIndex = algoliaData.contentsIndex;
@@ -238,9 +242,7 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
-                        const displayCalloutMsg = !hit.calloutMsg && 'd-none';
-                        const productId = algoliaData.recordModel === 'master-level' ? (hit.defaultVariantID ? hit.defaultVariantID : hit.objectID) : hit.objectID;
-                        const callOutMsgClassname = `callout-msg-placeholder-${productId}`;
+                        const hiddenCalloutMsg = !hit.calloutMsg && 'd-none';
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -248,7 +250,7 @@ function enableInstantSearch(config) {
                                  data-index-name="${hit.__indexName}"
                             >
                                 <div class="product-tile">
-                                    <small class="callout-msg ${displayCalloutMsg} ${callOutMsgClassname}">
+                                    <small class="callout-msg ${hiddenCalloutMsg}">
                                      ${hit.calloutMsg }
                                     </small>
                                     <div class="image-container">
@@ -643,6 +645,7 @@ function calculateDisplayPrice(item) {
 
     var promotions;
     var calloutMsg = '';
+    var variant;
 
     if (algoliaData.recordModel === 'master-level' && item.variants) {
         promotions = item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
