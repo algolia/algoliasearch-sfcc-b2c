@@ -1,7 +1,8 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.1.0
+  node: circleci/node@6.1.0
+  cypress: cypress-io/cypress@3
 
 aliases:
   - &persist_work_dir
@@ -12,7 +13,7 @@ aliases:
     at: .
   - &node_executor
     name: node/default
-    tag: '18.15'
+    tag: '18.18.0'
 
 jobs:
   checkout:
@@ -30,6 +31,105 @@ jobs:
       - run: npm run test
       - run: npm run test:unit
 
+  deployment-and-jobs:
+    executor: *node_executor
+    steps:
+      - checkout
+      - run:
+          name: Install required packages
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y zip jq
+      - run:
+          name: Install sfcc-ci
+          command: sudo npm install -g sfcc-ci
+      - run:
+          name: Authenticate with SFCC
+          command: |
+            sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
+            echo "export ACCESS_TOKEN=$(sfcc-ci client:auth:token)" >> $BASH_ENV
+      - run:
+          name: Create Code Version Directory
+          command: mkdir $CODE_VERSION
+      - run:
+          name: Copy Cartridges
+          command: |
+            if [ -d "cartridges" ]; then
+              cp -R cartridges/* $CODE_VERSION/
+            else
+              echo "Cartridges directory not found. Skipping."
+            fi
+      - run:
+          name: Package Code
+          command: zip -r $CODE_VERSION.zip $CODE_VERSION
+      - run:
+          name: Deploy Code to Sandbox
+          command: sfcc-ci code:deploy $CODE_VERSION.zip --instance $SANDBOX_HOST
+      - run:
+          name: Activate Code Version
+          command: sfcc-ci code:activate $CODE_VERSION -i $SANDBOX_HOST
+      - run:
+          name: Update Site Preferences via API
+          command: |
+            npm install axios
+            node test/e2e/update_preferences.js
+      - run:
+          name: Trigger SFCC Job and Wait for Completion
+          command: |
+            echo "Triggering job AlgoliaProductIndex_v2..."
+            JOB_RUN_OUTPUT=$(sfcc-ci job:run AlgoliaProductIndex_v2 --instance $SANDBOX_HOST --json)
+            JOB_EXECUTION_ID=$(echo "$JOB_RUN_OUTPUT" | jq -r '.id')
+            echo "Job execution ID: $JOB_EXECUTION_ID"
+
+            TIMEOUT=240  # 4 minutes
+            INTERVAL=20  # 30 seconds
+            ELAPSED=0
+
+            while [ $ELAPSED -lt $TIMEOUT ]; do
+                STATUS_OUTPUT=$(sfcc-ci job:status AlgoliaProductIndex_v2 $JOB_EXECUTION_ID --instance $SANDBOX_HOST --json)
+                STATUS=$(echo "$STATUS_OUTPUT" | jq -r '.status')
+                echo "Job status: $STATUS"
+                if [ "$STATUS" = "OK" ] || [ "$STATUS" = "ERROR" ]; then
+                    echo "Job completed with status: $STATUS"
+                    break
+                fi
+                sleep $INTERVAL
+                ELAPSED=$(($ELAPSED + $INTERVAL))
+            done
+
+            if [ $ELAPSED -ge $TIMEOUT ]; then
+                echo "Job did not complete within timeout."
+                exit 1
+            fi
+
+  index-tests:
+    executor: *node_executor
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: npm install
+      - run:
+          name: Install Algolia Dependencies
+          command: npm install algoliasearch axios
+      - run:
+          name: Run Algolia Index Tests
+          command: npm test -- test/e2e/variation_validate.test.js
+
+  e2e-tests:
+    executor: cypress/default
+    steps:
+      - checkout
+      - run:
+          name: Install Dependencies
+          command: npm ci
+      - run:
+          name: Run Algolia Index Tests
+          command: npm test -- test/e2e/variation_fd.cy.js
+      - run:
+          name: Run Cypress Tests
+          command: npx cypress run --browser electron --headless --config-file cypress.config.js
+
 workflows:
   suite:
     jobs:
@@ -37,3 +137,30 @@ workflows:
       - test:
           requires:
             - checkout
+      - deployment-and-jobs:
+          requires:
+            - test
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - feat/e2e-circleci
+      - index-tests:
+          requires:
+            - deployment-and-jobs
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - feat/e2e-circleci
+      - e2e-tests:
+          requires:
+            - index-tests
+          filters:
+            branches:
+              only:
+                - master
+                - develop
+                - feat/e2e-circleci
