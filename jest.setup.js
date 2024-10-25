@@ -18,6 +18,7 @@ jest.mock('dw/catalog/ProductMgr', () => {
     return {
         queryAllSiteProducts: jest.fn().mockReturnValue({
             close: jest.fn(),
+            count: 4658,
         }),
         getProduct: jest.fn((id) => {
             const VariantMock = require('./test/mocks/dw/catalog/Variant');
