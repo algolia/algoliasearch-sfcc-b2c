@@ -2,7 +2,6 @@
 
 var GlobalMock = require('../../../../../mocks/global');
 var ProductMock = require('../../../../../mocks/dw/catalog/Variant');
-var PromotionMgrMock = require('../../../../../mocks/dw/campaign/PromotionMgr'); // eslint-disable-line no-unused-vars
 
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();

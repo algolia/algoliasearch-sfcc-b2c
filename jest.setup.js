@@ -358,3 +358,10 @@ jest.mock('dw/experience/PageMgr', () => {
         }),
     };
 }, {virtual: true});
+
+jest.mock('dw/campaign/PromotionMgr', () => {
+    return {
+        getPromotion: jest.fn(),
+        getActivePromotions: jest.fn(),
+    }
+}, {virtual: true});

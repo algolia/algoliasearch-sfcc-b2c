@@ -392,6 +392,7 @@ function enableInstantSearch(config) {
                                     indexName: item.__indexName,
                                 });
                             });
+
                             // 1. Find the variant matching the selected facets, or use the default variant
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
@@ -420,6 +421,7 @@ function enableInstantSearch(config) {
                                     return variant.variantID === item.defaultVariantID;
                                 }) || item.variants[0];
                             }
+
                             // 2. Get the colorVariation corresponding to the selected variant, to display its image
                             if (item.colorVariations) {
                                 const colorVariation = item.colorVariations.find(i => {
@@ -432,6 +434,7 @@ function enableInstantSearch(config) {
                                     item.image = imageGroup.images[0];
                                 }
                             }
+
                             // 3. Get the variant price
                             if (selectedVariant) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
