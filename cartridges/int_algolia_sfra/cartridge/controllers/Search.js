@@ -71,6 +71,21 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 }
             }
 
+            var PromotionMgr = require('dw/campaign/PromotionMgr');
+            var promotionPlan = PromotionMgr.getActiveCustomerPromotions();
+            var getActivePromotions = promotionPlan.productPromotions;
+
+            var activePromotionsArr = [];
+
+            for (var i = 0; i < getActivePromotions.length; i++) {
+                activePromotionsArr.push({
+                    id: getActivePromotions[i].ID,
+                    calloutMsg: getActivePromotions[i].calloutMsg ? getActivePromotions[i].calloutMsg.markup : '',
+                });
+            }
+
+            var activePromotions = JSON.stringify(activePromotionsArr);
+
             res.render('search/searchResults', {
                 algoliaEnable: true,
                 category: category,
@@ -81,6 +96,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 contentHits: contentHits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q,
+                activePromotions: activePromotions
             });
         }
     }
