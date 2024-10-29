@@ -4,6 +4,13 @@
  * Initializes InstantSearch
  * @param {Object} config Configuration object
  */
+
+var activeCustomerPromotions = [];
+
+/**
+ * Initializes InstantSearch
+ * @param {Object} config Configuration object
+ */
 function enableInstantSearch(config) {
     const productsIndex = algoliaData.productsIndex;
     const contentsIndex = algoliaData.contentsIndex;
@@ -13,6 +20,8 @@ function enableInstantSearch(config) {
     const contentResultEl = document.querySelector('#algolia-content-hits-placeholder');
     const contentSearchbarTab = document.querySelector('#content-search-bar-button');
     const navbar = document.querySelector('.search-nav');
+    const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
+    activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
 
     let displaySwatches = false;
     var initialUiState = {};
@@ -233,6 +242,7 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
+                        const hiddenCalloutMsg = !hit.calloutMsg && 'd-none';
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -240,6 +250,9 @@ function enableInstantSearch(config) {
                                  data-index-name="${hit.__indexName}"
                             >
                                 <div class="product-tile">
+                                    <small class="callout-msg ${hiddenCalloutMsg}">
+                                     ${hit.calloutMsg }
+                                    </small>
                                     <div class="image-container">
                                         <a href="${hit.url}">
                                             <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
@@ -269,25 +282,28 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${hit.promotionalPrice && html`
-                                                <span class="strike-through list">
-                                                     <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
+                                            ${html`
+                                                ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
+                                                    <span class="strike-through list">
+                                                         <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
+                                                    </span>
+                                                `}
+                                                <span class="sales">
+                                                    <span class="value">
+                                                        ${hit.currencySymbol} ${hit.displayPrice}
+                                                    </span>
                                                 </span>
                                             `}
-                                            <span class="sales">
-                                                <span class="value">
-                                                    ${hit.currencySymbol} ${hit.promotionalPrice ? hit.promotionalPrice : hit.price}
-                                                </span>
-                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        `
-                    },
+                        `;
+                    }, 
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
+
                     return items.map(function (item) {
                         // assign image
                         if (item.image_groups) {
@@ -304,17 +320,14 @@ function enableInstantSearch(config) {
                                 alt: item.name + ', large',
                             }
                         }
-
                         // adjusted price in user currency
                         if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
                             item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
                         }
-
                         // price in user currency
                         if (item.price && item.price[algoliaData.currencyCode] !== null) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
-
                         // If no promotionalPrice, use the pricebooks to display the strikeout price
                         if (!item.promotionalPrice &&
                             item.pricebooks &&
@@ -338,16 +351,11 @@ function enableInstantSearch(config) {
                                 item.price = maxPrice;
                             }
                         }
-
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
-
-
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
-
                         // originating index
                         item.__indexName = productsIndex;
-
                         // url with queryID (used for analytics)
                         if (item.url) {
                             item.url = generateProductUrl({
@@ -357,7 +365,6 @@ function enableInstantSearch(config) {
                                 indexName: item.__indexName,
                             });
                         }
-
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
@@ -370,6 +377,10 @@ function enableInstantSearch(config) {
                                 });
                             });
                         }
+                        // Calculate displayPrice
+                        var { price, calloutMsg } = calculateDisplayPrice(item);
+                        item.displayPrice = price;
+                        item.calloutMsg = calloutMsg;
 
                         // Master-level indexing
                         if (item.variants) {
@@ -430,12 +441,15 @@ function enableInstantSearch(config) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
                                 }
                                 if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
-                                    item.price = selectedVariant.price[algoliaData.currencyCode]
+                                    item.price = selectedVariant.price[algoliaData.currencyCode];
                                 }
                                 item.url = selectedVariant.url;
+                                let { price: variantPrice, calloutMsg: variantCalloutMsg } = calculateDisplayPrice(selectedVariant);
+
+                                item.displayPrice = variantPrice;
+                                item.calloutMsg = variantCalloutMsg;
                             }
                         }
-
                         return item;
                     });
                 }
@@ -623,4 +637,54 @@ function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
     url.searchParams.append('objectID', objectID);
     url.searchParams.append('indexName', indexName);
     return url.href;
+}
+
+/**
+ * Calculate the display price for an item when lazy loading pricing is disabled
+ * @param {Object} item The item object
+ * @return {number} The calculated sales price
+ */
+function calculateDisplayPrice(item) {
+
+    var promotions;
+    var calloutMsg = '';
+    var variant;
+
+    if (algoliaData.recordModel === 'master-level' && item.variants) {
+        promotions = item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
+        variant = item.variants.length > 0 ? item.variants[0] : item;
+    } else {
+        promotions = item.promotions;
+        variant = item;
+    }
+
+    if (promotions && promotions[algoliaData.currencyCode]) {
+        var productPromos = promotions[algoliaData.currencyCode];
+        var minPrice = algoliaData.recordModel === 'master-level' ? (variant.price[algoliaData.currencyCode] ? variant.price[algoliaData.currencyCode] : variant.price) : item.price;
+        for (var i = 0; i < activeCustomerPromotions.length; i++) {
+            for (var j = 0; j < productPromos.length; j++) {
+                if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < minPrice) {
+                    minPrice = productPromos[j].price;
+                    calloutMsg = activeCustomerPromotions[i].calloutMsg;
+                }
+            }
+        }
+
+        return {
+            price: minPrice,
+            calloutMsg: calloutMsg,
+        }
+    }
+
+    if (item.promotionalPrice) {
+        return {
+            price: item.promotionalPrice,
+            calloutMsg: '',
+        }
+    }
+
+    return {
+        price: item.price,
+        calloutMsg: '',
+    }
 }
