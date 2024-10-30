@@ -24,11 +24,9 @@ function sendChunk(entriesArray, resType, fieldList) {
 /**
  * Resending unsent objects to Algolia API
  * @param {Array} failedChunks - array of objects for send to Algolia
- * @param {string} [resType] (optional, when using multiple endpoints) "price" | "inventory" - passing it over to sendProductObjects()
- * @param {string} [fieldList] (optional) if supplied, it will override the list of fields to be sent in the handshake - passing it over to sendProductObjects()
  * @returns {boolean} - successful
  */
-function sendFailedChunks(failedChunks, resType, fieldList) {
+function sendFailedChunks(failedChunks) {
     var status = new Status(Status.OK);
 
     if (failedChunks.length === 0) {

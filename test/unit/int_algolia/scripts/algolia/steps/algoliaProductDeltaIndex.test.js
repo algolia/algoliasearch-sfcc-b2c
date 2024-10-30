@@ -1,5 +1,4 @@
 const GlobalMock = require('../../../../../mocks/global');
-
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 

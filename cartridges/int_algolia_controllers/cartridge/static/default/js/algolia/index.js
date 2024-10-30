@@ -1,4 +1,4 @@
-/* global algoliasearch */
+/* global algoliasearch, algoliaData, enableAutocomplete, enableInstantSearch, enableInsights */
 
 document.addEventListener('DOMContentLoaded', function () {
     var $suggestionsWrapper = $('#suggestions-wrapper');

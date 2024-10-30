@@ -47,11 +47,10 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         if (useAlgolia) {
             var hits;
             var contentHits;
-            var queryHits;
             //For Algolia, we don't need personalized cache, as the real results are fetched on the front-end.
-            res.cachePeriod = 24; // eslint-disable-line no-param-reassign
-            res.cachePeriodUnit = 'hours'; // eslint-disable-line no-param-reassign
-            res.personalized = true; // eslint-disable-line no-param-reassign
+            res.cachePeriod = 24;
+            res.cachePeriodUnit = 'hours';
+            res.personalized = true;
 
             // server-side rendering to improve SEO - makes a server-side request to Algolia to return CLP search results
             // only triggered when the user-agent looks like a bot, as we want it triggered only for search engines bots (DuckDuckBot, GoogleBot, BingBot, YandexBot, Baiduspider, ...)
@@ -72,6 +71,21 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 }
             }
 
+            var PromotionMgr = require('dw/campaign/PromotionMgr');
+            var promotionPlan = PromotionMgr.getActiveCustomerPromotions();
+            var getActivePromotions = promotionPlan.productPromotions;
+
+            var activePromotionsArr = [];
+
+            for (var i = 0; i < getActivePromotions.length; i++) {
+                activePromotionsArr.push({
+                    id: getActivePromotions[i].ID,
+                    calloutMsg: getActivePromotions[i].calloutMsg ? getActivePromotions[i].calloutMsg.markup : '',
+                });
+            }
+
+            var activePromotions = JSON.stringify(activePromotionsArr);
+
             res.render('search/searchResults', {
                 algoliaEnable: true,
                 category: category,
@@ -82,6 +96,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 contentHits: contentHits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q,
+                activePromotions: activePromotions
             });
         }
     }
@@ -94,7 +109,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             if ((pageLookupResult.page && pageLookupResult.page.hasVisibilityRules()) || pageLookupResult.invisiblePage) {
                 // the result may be different for another user, do not cache on this level
                 // the page itself is a remote include and can still be cached
-                res.cachePeriod = 0; // eslint-disable-line no-param-reassign
+                res.cachePeriod = 0;
             }
 
             if (pageLookupResult.page) {

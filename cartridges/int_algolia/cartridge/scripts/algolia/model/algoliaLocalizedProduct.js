@@ -3,6 +3,7 @@
 var Site = require('dw/system/Site');
 var Currency = require('dw/util/Currency');
 var PriceBookMgr = require('dw/catalog/PriceBookMgr');
+var PromotionMgr = require('dw/campaign/PromotionMgr');
 var URLUtils = require('dw/web/URLUtils');
 
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
@@ -17,14 +18,14 @@ var extendedProductAttributesConfig;
 try {
     extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
     logger.info('Extension file "productAttributesConfig.js" loaded');
-} catch(e) {
+} catch (e) { // eslint-disable-line no-unused-vars
     extendedProductAttributesConfig = {};
 }
 var extendedProductRecordCustomizer;
 try {
     extendedProductRecordCustomizer = require('*/cartridge/configuration/productRecordCustomizer.js');
     logger.info('Extension file "productRecordCustomizer.js" loaded');
-} catch(e) {
+} catch (e) { // eslint-disable-line no-unused-vars
 }
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
@@ -37,7 +38,7 @@ const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold')
  * @returns {dw.value.Money|null} lowest price or null if no price available
  */
 function getPromotionalPrice(product) {
-    var promotions = dw.campaign.PromotionMgr.getActivePromotions().getProductPromotions(product);
+    var promotions = PromotionMgr.getActivePromotions().getProductPromotions(product);
     var lowestPromoPrice = null;
     var promoPrices = promotions
         .toArray()
@@ -56,6 +57,49 @@ function getPromotionalPrice(product) {
         });
     }
     return lowestPromoPrice;
+}
+
+
+/**
+ * Retrieves the promotional prices for a given product.
+ * This function fetches that active promotions from now to one month later for the specified product, (not including rule based promotions)
+ * extracts the promotional prices, and returns them as an array of objects.
+ * Promotions without a price are filtered out.
+ * @param {dw.catalog.Product} product - The product for which to get promotional prices.
+ * @param {dw.campaign.Campaign[]} campaigns - The campaigns to consider.
+ * @returns {Array<Object>} An array of promotional price objects.
+ * @returns {number} return[].price - The promotional price value.
+ * @returns {string} return[].promoId - The ID of the promotion.
+ */
+function getPromotionalPrices(product, campaigns) {
+    var now = new Date();
+    var oneMonthLater = new Date();
+    oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+    var promotionObjects = [];
+
+    for (var i = 0; i < campaigns.length; i++) {
+        var campaignPromos = PromotionMgr.getActivePromotionsForCampaign(campaigns[i], now, oneMonthLater).getProductPromotions(product);
+
+        var campPromotionObj = campaignPromos
+            .toArray()
+            .map(function (promotion) {
+                // get all promotions for this product
+                let price = promotion.getPromotionalPrice(product);
+                if (price === dw.value.Money.NOT_AVAILABLE) {
+                    return null;
+                }
+                let promoId = promotion.ID;
+                return {
+                    price: price.getValue(),
+                    promoId: promoId
+                };
+            })
+            .filter(Boolean); // Remove null values from the array
+
+        promotionObjects = promotionObjects.concat(campPromotionObj);
+    }
+
+    return promotionObjects;
 }
 
 /**
@@ -308,6 +352,27 @@ var aggregatedValueHandlers = {
         }
         currentSession.setCurrency(currentCurrency);
         return promotionalPrice;
+    },
+    promotions: function (product) {
+        // Get promotional price for all currencies
+        var promotionalPrices = null;
+        var currentSession = request.getSession();
+        var siteCurrencies = Site.getCurrent().getAllowedCurrencies();
+        var siteCurrenciesSize = siteCurrencies.size();
+        var currentCurrency = currentSession.getCurrency();
+        var campaigns = PromotionMgr.getCampaigns().toArray();
+        for (var k = 0; k < siteCurrenciesSize; k += 1) {
+            var currency = Currency.getCurrency(siteCurrencies[k]);
+            currentSession.setCurrency(currency);
+            var promotionObjects = getPromotionalPrices(product, campaigns);
+
+            if (promotionObjects.length > 0) {
+                if (!promotionalPrices) { promotionalPrices = {}; }
+                promotionalPrices[siteCurrencies[k]] = promotionObjects;
+            }
+        }
+        currentSession.setCurrency(currentCurrency);
+        return promotionalPrices;
     },
     variants: function(product, parameters) {
         if (!product.isMaster() && !product.isVariationGroup()) {

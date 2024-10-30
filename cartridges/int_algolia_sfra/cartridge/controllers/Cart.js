@@ -42,7 +42,7 @@ server.append('AddProduct', function (req, res, next) {
             } else {
                 algoliaProductData.pid = productId;
             }
-        } catch (e) {
+        } catch (e) { // eslint-disable-line no-unused-vars
             algoliaProductData.pid = productId;
         }
 

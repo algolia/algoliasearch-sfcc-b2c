@@ -121,7 +121,7 @@ function callJsonService(title, service, params) {
             try {
                 data = JSON.parse(result.object.response);
                 statusItem.addDetail('object', data);
-            } catch (parseError) {
+            } catch (parseError) { // eslint-disable-line no-unused-vars
                 // response is marked as json, but it is not
                 statusItem.setStatus(Status.ERROR);
                 logger.error('JSON.parse error. Method: {0}. String: {1}', title, result.object.response);
