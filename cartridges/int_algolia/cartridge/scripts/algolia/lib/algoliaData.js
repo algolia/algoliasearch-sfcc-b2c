@@ -29,6 +29,7 @@ const clientSideData = {
     "categoriesIndex": calculateIndexName('categories'),
     "contentsIndex": calculateIndexName('contents'),
     "recordModel": getPreference('RecordModel'),
+    "priceEndpoint": URLUtils.url('Algolia-Price').toString(),
     "quickViewUrlBase": URLUtils.url('Product-ShowQuickView').toString(),
     "strings": {
         "placeholder": Resource.msg('label.header.searchwatermark', 'common', ''),
@@ -56,7 +57,8 @@ const clientSideData = {
             "separator": Resource.msg('search.pricefilter.separator','algolia',null),
             "submit": Resource.msg('search.pricefilter.submit','algolia',null),
         },
-        "newArrivals": Resource.msg('panel.newarrivals','algolia',null)
+        "newArrivals": Resource.msg('panel.newarrivals','algolia',null),
+        "from": Resource.msg('label.from','algolia',null),
     },
     "noImages": {
         "large": URLUtils.staticURL('/images/noimagelarge.png').toString(),
