@@ -422,6 +422,11 @@ function enableInstantSearch(config) {
                                 }) || item.variants[0];
                             }
 
+                            if (!item.color) {
+                                // This permits to highlight the correct swatch
+                                item.color = selectedVariant.color;
+                            }
+
                             // 2. Get the colorVariation corresponding to the selected variant, to display its image
                             if (item.colorVariations) {
                                 const colorVariation = item.colorVariations.find(i => {
@@ -606,15 +611,25 @@ function enableInstantSearch(config) {
                 }
 
                 return html`
-                <a onmouseover="${() => {
+                <a onmouseover="${(e) => {
         const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
         const image = parent.querySelector('.tile-image');
         const link = parent.querySelector('.image-container > a');
+        // Remove existing border effects
+        const existingSelectedSwatches = parent.querySelectorAll('.swatch-selected');
+        existingSelectedSwatches.forEach(selectedSwatch => {
+            selectedSwatch.classList.remove('swatch-selected');
+        });
+        
+        e.target.parentNode.querySelector('.swatch').classList.add("swatch-selected");
         image.src = variantImage.dis_base_link;
         link.href = colorVariation.variationURL;
     }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
                     <span>
-                        <img class="swatch swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
+                        <img class="swatch swatch-circle mb-1 ${colorVariation.color === hit.color ? 'swatch-selected' : ''}"
+                             data-index="0.0" style="background-image: url(${swatch.dis_base_link})"
+                             src="${swatch.dis_base_link}" alt="${swatch.alt}"
+                        />
                     </span>
                 </a>
             `;
