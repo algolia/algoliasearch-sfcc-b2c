@@ -22,7 +22,6 @@ function enableInstantSearch(config) {
     const navbar = document.querySelector('.search-nav');
     const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
     const isPricingLazyLoad = algoliaData.EnablePricingLazyLoad;
-    console.log('isPricingLazyLoad', isPricingLazyLoad);
     activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
 
     let displaySwatches = false;
