@@ -14,14 +14,37 @@ aliases:
   - &node_executor
     name: node/default
     tag: '18.18.0'
+  - &npm_cache_key
+    v1-npm-{{ checksum "package-lock.json" }}
+  - &restore_npm_cache
+    restore_cache:
+      keys:
+        - *npm_cache_key
+  - &save_npm_cache
+    save_cache:
+      key: *npm_cache_key
+      paths:
+        - ~/.npm
+  - &install_sfcc_ci
+    run:
+      name: Install sfcc-ci
+      command: sudo npm install -g sfcc-ci
+  
+  - &authenticate_sfcc
+    run:
+      name: Authenticate with SFCC
+      command: |
+        sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
+        echo "export ACCESS_TOKEN=$(sfcc-ci client:auth:token)" >> $BASH_ENV
 
 jobs:
   checkout:
     executor: *node_executor
     steps:
       - checkout
+      - *restore_npm_cache
       - node/install-packages
-      - run: npm run lint:js
+      - *save_npm_cache
       - persist_to_workspace: *persist_work_dir
 
   test:
@@ -61,16 +84,8 @@ jobs:
       - run:
           name: Compile CSS files
           command: npm run compile:scss
-      - run:
-          name: Install sfcc-ci
-          command: sudo npm install -g sfcc-ci
-      - run:
-          name: Authenticate with SFCC and get access token
-          command: |
-            sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
-            echo "Raw output of sfcc-ci client:auth:token:"
-            ACCESS_TOKEN=$(sfcc-ci client:auth:token)
-            echo "export ACCESS_TOKEN=$ACCESS_TOKEN" >> $BASH_ENV
+      - *install_sfcc_ci
+      - *authenticate_sfcc
       - run:
           name: Create Code Version Directory
           command: mkdir $CODE_VERSION
@@ -125,6 +140,8 @@ jobs:
     executor: *node_executor
     steps:
       - checkout
+      - *install_sfcc_ci
+      - *authenticate_sfcc
       - run:
           name: Check folder structure
           command: |
@@ -133,17 +150,7 @@ jobs:
           name: Install required packages
           command: |
             sudo apt-get update
-            sudo apt-get install -y zip
-      - run:
-          name: Install sfcc-ci
-          command: sudo npm install -g sfcc-ci
-      - run:
-          name: Authenticate with SFCC and get access token
-          command: |
-            sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
-            echo "Raw output of sfcc-ci client:auth:token:"
-            ACCESS_TOKEN=$(sfcc-ci client:auth:token)
-            echo "export ACCESS_TOKEN=$ACCESS_TOKEN" >> $BASH_ENV
+            sudo apt-get install -y jq zip
       - run:
           name: Create Code Version Directory
           command: mkdir $CODE_VERSION
@@ -165,18 +172,66 @@ jobs:
           name: Activate Code Version
           command: sfcc-ci code:activate $CODE_VERSION -i $SANDBOX_HOST
       - run:
-          name: Trigger SFCC Job
-          command: sfcc-ci job:run AlgoliaProductIndex_v2 --instance $SANDBOX_HOST
-      - run:
-          name: Wait for Job Completion
+          name: Trigger SFCC Job and Wait for Completion
           command: |
-            echo "Waiting for 4 minutes to allow job completion..."
-            sleep 240
+            # Start the job and capture the execution ID
+            RESPONSE=$(sfcc-ci job:run AlgoliaProductIndex_v2 --instance $SANDBOX_HOST --json)
+            echo "Job run response: $RESPONSE"
+            
+            JOB_EXEC_ID=$(echo "$RESPONSE" | jq -r '.id')
+            
+            if [ -z "$JOB_EXEC_ID" ] || [ "$JOB_EXEC_ID" = "null" ]; then
+              echo "Failed to get job execution ID"
+              echo "Full response was: $RESPONSE"
+              exit 1
+            fi
+            
+            echo "Job started with execution ID: '$JOB_EXEC_ID'"
+            
+            # Poll for job completion
+            MAX_ATTEMPTS=15
+            ATTEMPT=1
+            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+              echo "Checking status for job execution ID: '$JOB_EXEC_ID'"
+              
+              # Updated command with both job ID and execution ID
+              STATUS=$(sfcc-ci job:status "AlgoliaProductIndex_v2" "$JOB_EXEC_ID" --instance "$SANDBOX_HOST" --json || echo '{"error": true}')
+              
+              if echo "$STATUS" | jq -e '.error' > /dev/null; then
+                echo "Failed to get job status"
+                echo "Full status response: $STATUS"
+                exit 1
+              fi
+              
+              EXEC_STATUS=$(echo "$STATUS" | jq -r '.execution_status')
+              EXIT_STATUS=$(echo "$STATUS" | jq -r '.exit_status.status')
+              
+              echo "Current status: $EXEC_STATUS (Exit: $EXIT_STATUS)"
+              
+              if [ "$EXEC_STATUS" = "finished" ]; then
+                if [ "$EXIT_STATUS" = "ok" ]; then
+                  echo "Job completed successfully"
+                  exit 0
+                else
+                  echo "Job failed with status: $EXIT_STATUS"
+                  exit 1
+                fi
+              fi
+              
+              echo "Attempt $ATTEMPT of $MAX_ATTEMPTS: Job still running..."
+              ATTEMPT=$((ATTEMPT + 1))
+              sleep 30
+            done
+            
+            echo "Timeout waiting for job completion"
+            exit 1
 
   index-tests:
     executor: *node_executor
     steps:
       - checkout
+      - *install_sfcc_ci
+      - *authenticate_sfcc
       - run:
           name: Install Dependencies
           command: npm install
@@ -196,7 +251,7 @@ jobs:
           command: npm ci
       - run:
           name: Run Algolia Index Tests
-          command: npm test -- test/e2e/validate_algolia.test.js
+          command: npm test -- test/e2e/variation_index.test.js
       - run:
           name: Run Cypress Tests
           command: npx cypress run --browser electron --headless --config-file cypress.config.js
@@ -208,6 +263,7 @@ workflows:
       - test:
           requires:
             - checkout
+            - deployment-and-jobs
       - prepare-site-import:
           filters:
             branches:
