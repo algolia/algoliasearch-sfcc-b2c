@@ -21,6 +21,7 @@ const clientSideData = {
     "searchApiKey": getPreference('SearchApiKey'),
     "enableContentSearch": getPreference('EnableContentSearch'),
     "enableRecommend": getPreference('EnableRecommend'),
+    "EnablePricingLazyLoad": getPreference('EnablePricingLazyLoad'),
     "locale": request.getLocale(),
     "currencyCode": request.getSession().getCurrency().getCurrencyCode(),
     "currencySymbol": request.getSession().getCurrency().getSymbol(),

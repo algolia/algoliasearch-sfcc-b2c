@@ -215,6 +215,19 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_EnablePricingLazyLoad </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.enable', 'algolia', null)}" />
+                        <isprint value="${Resource.msg('algolia.label.preference.enablePricingLazyLoad', 'algolia', null)}" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.enablePricingLazyLoad.help', 'algolia', null)}</div>
+                    </td>
+                    <td class="table_detail w e s">
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('EnablePricingLazyLoad') ? "checked": ""} id="EnablePricingLazyLoad" name="EnablePricingLazyLoad" />
+                    </td>
+                </tr>
+
                 <iscomment> Apply button </iscomment>
                 <tr>
                     <td class="w e s buttonspacing" align="right" colspan="2">
