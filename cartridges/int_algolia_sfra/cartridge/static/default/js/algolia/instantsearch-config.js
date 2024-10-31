@@ -21,15 +21,7 @@ function enableInstantSearch(config) {
     const contentSearchbarTab = document.querySelector('#content-search-bar-button');
     const navbar = document.querySelector('.search-nav');
     const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
-    const isPricingLazyLoad = algoliaData.EnablePricingLazyLoad;
-
-    try {
-        // First, try to parse it as JSON
-        activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
-    } catch (e) {
-        // If that fails, split the string by comma
-        activeCustomerPromotions = activeCustomerPromotionsEl.dataset.promotions.split(',').map(item => item.trim());
-    }
+    activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
 
     let displaySwatches = false;
     var initialUiState = {};
@@ -735,7 +727,6 @@ function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
     return url.href;
 }
 
-counter=0;
 /**
  * Calculate the display price for an item when lazy loading pricing is disabled
  * @param {Object} item The item object
@@ -746,16 +737,17 @@ function calculateDisplayPrice(item) {
     var calloutMsg = '';
     var variant;
 
-    if (algoliaData.recordModel === 'master-level') {
-        promotions = item.variants && item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
-        variant = item.variants && item.variants.length > 0 ? item.variants[0] : item;
+    if (algoliaData.recordModel === 'master-level' && item.variants) {
+        promotions = item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
+        variant = item.variants.length > 0 ? item.variants[0] : item;
     } else {
         promotions = item.promotions;
+        variant = item;
     }
 
     if (promotions && promotions[algoliaData.currencyCode]) {
         var productPromos = promotions[algoliaData.currencyCode];
-        var minPrice = algoliaData.recordModel === 'master-level' ? variant.price[algoliaData.currencyCode] : item.price;
+        var minPrice = algoliaData.recordModel === 'master-level' ? (variant.price[algoliaData.currencyCode] ? variant.price[algoliaData.currencyCode] : variant.price) : item.price;
         for (var i = 0; i < activeCustomerPromotions.length; i++) {
             for (var j = 0; j < productPromos.length; j++) {
                 if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < minPrice) {
