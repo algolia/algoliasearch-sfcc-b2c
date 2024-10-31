@@ -22,7 +22,7 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
         );
 
         //find the minimum price and the promotion
-        var minPrice = 99999999999999999999; //set to a high number
+        var minPrice = Number.MAX_VALUE; // Initialize with JavaScript's maximum number value
         var activePromotion = null;
 
         var promotions = product.promotions || [];
