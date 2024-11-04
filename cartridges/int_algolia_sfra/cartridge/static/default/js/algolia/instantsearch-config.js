@@ -243,7 +243,7 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
-                        const displayCalloutMsg = (isPricingLazyLoad && 'd-none') || (!isPricingLazyLoad && (!hit.calloutMsg && 'd-none'));
+                        const shouldHideCallout = isPricingLazyLoad || !hit.calloutMsg;
                         const productId = algoliaData.recordModel === 'master-level' ? (hit.defaultVariantID ? hit.defaultVariantID : hit.objectID) : hit.objectID;
                         const callOutMsgClassname = `callout-msg-placeholder-${productId}`;
                         return html`
@@ -253,8 +253,8 @@ function enableInstantSearch(config) {
                                  data-index-name="${hit.__indexName}"
                             >
                                 <div class="product-tile">
-                                    <small class="callout-msg ${displayCalloutMsg} ${callOutMsgClassname}">
-                                     ${!isPricingLazyLoad && hit.calloutMsg }
+                                    <small class="callout-msg ${shouldHideCallout ? 'd-none' : ''} ${callOutMsgClassname}">
+                                     ${!isPricingLazyLoad && hit.calloutMsg}
                                     </small>
                                     <div class="image-container">
                                         <a href="${hit.url}">
@@ -698,19 +698,39 @@ function updateAllProductPrices() {
 function getPriceHtml(product) {
     let priceObj = product.price;
 
-    // All these conditions mean that the product is on sale, and we should display the list price crossed out
-    if ((product.activePromotion && product.activePromotion.price) ||
-        (product && product.price && product.price.list && product.price.list.value)) {
+    const hasActivePromotion = product.activePromotion && product.activePromotion.price;
+    const hasListPrice = priceObj && priceObj.list && priceObj.list.value;
+    const hasSalesPrice = priceObj && priceObj.sales && priceObj.sales.value;
+
+    // Determine if the product is on sale
+    const isOnSale = hasActivePromotion || hasListPrice;
+
+    // Get the list price or fallback to sales price if list price is unavailable
+    const listPriceValue = hasListPrice
+        ? priceObj.list.value
+        : hasSalesPrice
+            ? priceObj.sales.value
+            : null;
+
+    // Get the sales price from active promotion or regular sales price
+    const salesPriceValue = hasActivePromotion
+        ? product.activePromotion.price
+        : hasSalesPrice
+            ? priceObj.sales.value
+            : null;
+
+    if (isOnSale) {
         return `<span class="strike-through list">
-                    <span class="value"> ${algoliaData.currencySymbol} ${(priceObj && priceObj.list && priceObj.list.value) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
+                    <span class="value"> ${algoliaData.currencySymbol} ${listPriceValue} </span>
                 </span>
                 <span class="sales">
-                    <span class="value"> ${algoliaData.currencySymbol} ${(product.activePromotion && product.activePromotion.price) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
+                    <span class="value"> ${algoliaData.currencySymbol} ${salesPriceValue} </span>
                 </span>`;
     }
 
-    return `<span class="value"> ${algoliaData.currencySymbol} ${priceObj && priceObj.sales && priceObj.sales.value} </span>`;
+    return `<span class="value"> ${algoliaData.currencySymbol} ${salesPriceValue} </span>`;
 }
+
 
 /**
  * Build a product URL with Algolia query parameters
