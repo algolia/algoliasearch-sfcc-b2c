@@ -38,7 +38,7 @@
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link content-search" id="content-search-bar-button" aria-controls="content-search-results-pane" data-toggle="tab" role="tab" aria-selected="false" id="articles-tab">
+                        <a class="nav-link content-search" id="content-search-bar-button" aria-controls="content-search-results-pane" data-toggle="tab" role="tab" aria-selected="false" tabindex="0" id="articles-tab">
                             ${Resource.msg('tab.nav.search.artclesresults', 'search', null)}<span class="ai-nb-hits" id="ai-content-count"></span>
                         </a>
                     </li>
