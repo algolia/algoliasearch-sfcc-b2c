@@ -699,7 +699,7 @@ function getPriceHtml(product) {
     let priceObj = product.price;
 
     // All these conditions mean that the product is on sale, and we should display the list price crossed out
-    if ((product && product.activePromotion && product.activePromotion.price) ||
+    if ((product.activePromotion && product.activePromotion.price) ||
         (product && product.price && product.price.list && product.price.list.value)) {
         return `<span class="strike-through list">
                     <span class="value"> ${algoliaData.currencySymbol} ${(priceObj && priceObj.list && priceObj.list.value) || (priceObj && priceObj.sales && priceObj.sales.value)} </span>
