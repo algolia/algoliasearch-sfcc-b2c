@@ -696,26 +696,23 @@ function updateAllProductPrices() {
  * @returns {string} HTML string representing the price display.
  */
 function getPriceHtml(product) {
-    let priceObj = product.price;
+    const { price: priceObj, activePromotion, defaultPrice } = product;
+    const hasActivePromotion = activePromotion?.price;
+    const salesPrice = priceObj?.sales?.value;
+    const listPrice = priceObj?.list?.value;
+    const discountedPrice = hasActivePromotion ? activePromotion.price : salesPrice;
 
-    const hasActivePromotion = product.activePromotion && product.activePromotion.price;
-    const salesPrice = priceObj && priceObj.sales && priceObj.sales.value;
+    // Helper function to create price HTML
+    const createPriceHtml = (originalPrice, finalPrice) => `
+        <span class="strike-through list">
+            <span class="value"> ${algoliaData.currencySymbol} ${originalPrice} </span>
+        </span>
+        <span class="sales">
+            <span class="value"> ${algoliaData.currencySymbol} ${finalPrice} </span>
+        </span>`;
 
-    // Get the sales price from active promotion or regular sales price
-    const discountedPrice = hasActivePromotion
-        ? product.activePromotion.price : null;
-
-
-    if (hasActivePromotion) {
-        const defaultPrice = product.defaultPrice;
-
-        return `<span class="strike-through list">
-                    <span class="value"> ${algoliaData.currencySymbol} ${defaultPrice} </span>
-                </span>
-                <span class="sales">
-                    <span class="value"> ${algoliaData.currencySymbol} ${discountedPrice} </span>
-                </span>`;
-    }
+    if (hasActivePromotion) return createPriceHtml(defaultPrice, discountedPrice);
+    if (listPrice) return createPriceHtml(listPrice, salesPrice);
 
     return `<span class="value"> ${algoliaData.currencySymbol} ${salesPrice} </span>`;
 }
