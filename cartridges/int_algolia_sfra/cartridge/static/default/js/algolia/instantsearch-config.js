@@ -697,9 +697,9 @@ function updateAllProductPrices() {
  */
 function getPriceHtml(product) {
     const { price: priceObj, activePromotion, defaultPrice } = product;
-    const hasActivePromotion = activePromotion?.price;
-    const salesPrice = priceObj?.sales?.value;
-    const listPrice = priceObj?.list?.value;
+    const hasActivePromotion = activePromotion && activePromotion.price;
+    const salesPrice = priceObj && priceObj.sales && priceObj.sales.value;
+    const listPrice = priceObj && priceObj.list && priceObj.list.value;
     const discountedPrice = hasActivePromotion ? activePromotion.price : salesPrice;
 
     // Helper function to create price HTML
