@@ -699,36 +699,25 @@ function getPriceHtml(product) {
     let priceObj = product.price;
 
     const hasActivePromotion = product.activePromotion && product.activePromotion.price;
-    const hasListPrice = priceObj && priceObj.list && priceObj.list.value;
-    const hasSalesPrice = priceObj && priceObj.sales && priceObj.sales.value;
-
-    // Determine if the product is on sale
-    const isOnSale = hasActivePromotion || hasListPrice;
-
-    // Get the list price or fallback to sales price if list price is unavailable
-    const listPriceValue = hasListPrice
-        ? priceObj.list.value
-        : hasSalesPrice
-            ? priceObj.sales.value
-            : null;
+    const salesPrice = priceObj && priceObj.sales && priceObj.sales.value;
 
     // Get the sales price from active promotion or regular sales price
-    const salesPriceValue = hasActivePromotion
-        ? product.activePromotion.price
-        : hasSalesPrice
-            ? priceObj.sales.value
-            : null;
+    const discountedPrice = hasActivePromotion
+        ? product.activePromotion.price : null;
 
-    if (isOnSale) {
+
+    if (hasActivePromotion) {
+        const defaultPrice = product.defaultPrice;
+
         return `<span class="strike-through list">
-                    <span class="value"> ${algoliaData.currencySymbol} ${listPriceValue} </span>
+                    <span class="value"> ${algoliaData.currencySymbol} ${defaultPrice} </span>
                 </span>
                 <span class="sales">
-                    <span class="value"> ${algoliaData.currencySymbol} ${salesPriceValue} </span>
+                    <span class="value"> ${algoliaData.currencySymbol} ${discountedPrice} </span>
                 </span>`;
     }
 
-    return `<span class="value"> ${algoliaData.currencySymbol} ${salesPriceValue} </span>`;
+    return `<span class="value"> ${algoliaData.currencySymbol} ${salesPrice} </span>`;
 }
 
 
