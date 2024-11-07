@@ -1,6 +1,7 @@
 const GlobalMock = require('../../../../../mocks/global');
 const MasterVariantMock = require('../../../../../mocks/dw/catalog/MasterProduct');
 const VariantMock = require('../../../../../mocks/dw/catalog/Variant');
+const ProductMgrMock = require('dw/catalog/ProductMgr');
 
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
@@ -254,6 +255,7 @@ describe('afterStep', () => {
     describe('partialRecordUpdate', () => {
         test('failurePercentage <= failureThresholdPercentage', () => {
             job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
             job.__getJobReport().recordsFailed = 5;
             job.__getJobReport().recordsToSend = 100;
             job.afterStep(true);
@@ -262,6 +264,7 @@ describe('afterStep', () => {
         });
         test('failurePercentage > failureThresholdPercentage', () => {
             job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
             job.__getJobReport().recordsFailed = 6;
             job.__getJobReport().recordsToSend = 100;
             const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Check the logs for details.';
@@ -274,6 +277,7 @@ describe('afterStep', () => {
     describe('fullCatalogReindex', () => {
         test('failurePercentage <= failureThresholdPercentage', () => {
             job.beforeStep({ indexingMethod: 'fullCatalogReindex', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
             job.__getJobReport().recordsFailed = 5;
             job.__getJobReport().recordsToSend = 100;
             job.afterStep(true);
@@ -286,9 +290,20 @@ describe('afterStep', () => {
         });
         test('failurePercentage > failureThresholdPercentage', () => {
             job.beforeStep({ indexingMethod: 'fullCatalogReindex', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
             job.__getJobReport().recordsFailed = 6;
             job.__getJobReport().recordsToSend = 100;
-            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Not moving temporary indices to production. Check the logs for details.';
+            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Check the logs for details. Temporary indices were not moved to production.';
+            expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
+            expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
+            expect(job.__getJobReport().error).toBe(true);
+            expect(job.__getJobReport().errorMessage).toBe(expectedErrorMsg);
+        });
+        test('processedItems < products.count', () => {
+            job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
+            job.__getJobReport().processedItems = 1000;
+            const expectedProcessedItems = ProductMgrMock.queryAllSiteProducts().count;
+            const expectedErrorMsg = `Not all products were processed: 1000 / ${expectedProcessedItems}. Check the logs for details. Temporary indices were not moved to production.`;
             expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
             expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
             expect(job.__getJobReport().error).toBe(true);

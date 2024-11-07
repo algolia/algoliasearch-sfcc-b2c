@@ -400,32 +400,30 @@ exports.afterStep = function(success, parameters, stepExecution) {
     logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
     logger.info('Chunks sent: {0}; Chunks failed: {1}', jobReport.chunksSent, jobReport.chunksFailed);
 
-    if (jobReport.error) {
-        jobReport.endTime = new Date();
-        jobReport.writeToCustomObject();
-        logger.error(jobReport.errorMessage);
-        // Don't try to finish the indexing and show the job in ERROR in the history
-        throw new Error(jobReport.errorMessage);
-    }
-
     const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
 
-    if (paramIndexingMethod === 'fullCatalogReindex') {
-        if (failurePercentage <= paramFailureThresholdPercentage) {
-            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
-        } else {
-            // don't proceed with the atomic reindexing
-            jobReport.error = true;
-            jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
-                 paramFailureThresholdPercentage + '%). Not moving temporary indices to production. Check the logs for details.';
-        }
-    } else if (failurePercentage > paramFailureThresholdPercentage) {
+    if (failurePercentage > paramFailureThresholdPercentage) {
         jobReport.error = true;
         jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
             paramFailureThresholdPercentage + '%). Check the logs for details.';
+    } else if (jobReport.processedItems !== products.count) {
+        jobReport.error = true;
+        jobReport.errorMessage =
+            'Not all products were processed: ' +
+            jobReport.processedItems + ' / ' + products.count +
+            '. Check the logs for details.';
     } else if (jobReport.chunksFailed > 0) {
         jobReport.error = true;
         jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
+    }
+
+    if (paramIndexingMethod === 'fullCatalogReindex') {
+        if (!jobReport.error) {
+            // proceed with the atomic reindexing only if everything went fine
+            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
+        } else {
+            jobReport.errorMessage += ' Temporary indices were not moved to production.';
+        }
     }
 
     jobReport.endTime = new Date();
@@ -434,7 +432,8 @@ exports.afterStep = function(success, parameters, stepExecution) {
     if (!jobReport.error) {
         logger.info('Indexing completed successfully.');
     } else {
-        // Showing the job in ERROR in the history
+        logger.error(jobReport.errorMessage);
+        // Show the job in ERROR in the BM history
         throw new Error(jobReport.errorMessage);
     }
 }
