@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /// <reference types="cypress" />
 
 describe('Algolia Search', () => {
@@ -18,9 +17,6 @@ describe('Algolia Search', () => {
     it('performs a search and displays results', () => {
         // Type a search query
         cy.get('#autocomplete-0-input').type('TomTom Go 720')
-
-        // Wait 1 second
-        cy.wait(1000)
 
         // Wait for the autocomplete results to load
         cy.get('.aa-PanelLayout', {

@@ -1,6 +1,6 @@
 'use strict';
 
-var assert = require('chai').assert;
+var assert = require('chai').assert; // eslint-disable-line no-redeclare
 var proxyquire = require('proxyquire').noCallThru().noPreserveCache();
 
 var GlobalMock = require('../../../../../mocks/global');

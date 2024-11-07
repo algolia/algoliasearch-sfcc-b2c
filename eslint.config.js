@@ -2,9 +2,12 @@ const globals = require('globals');
 const js = require('@eslint/js');
 const jquery = require('eslint-plugin-jquery');
 const jsdoc = require('eslint-plugin-jsdoc');
+const pluginCypress = require('eslint-plugin-cypress/flat');
+
 
 module.exports = [
     js.configs.recommended,
+    pluginCypress.configs.recommended,
     {
         ignores: [
             '**/doc/',

@@ -45,6 +45,7 @@ jobs:
       - *restore_npm_cache
       - node/install-packages
       - *save_npm_cache
+      - run: npm run lint:js
       - persist_to_workspace: *persist_work_dir
 
   test:

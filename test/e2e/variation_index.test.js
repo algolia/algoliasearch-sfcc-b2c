@@ -1,5 +1,5 @@
 const algoliasearch = require('algoliasearch');
-const { execSync } = require('child_process');
+const sfcc = require('sfcc-ci');
 
 describe('Algolia Integration', () => {
     beforeAll(async () => {
@@ -16,14 +16,24 @@ describe('Algolia Integration', () => {
             }
         });
 
-        // Authenticate with SFCC using explicit environment variables
+        // Authenticate with SFCC using the JavaScript API
         try {
-            execSync(
-                `sfcc-ci client:auth "${process.env.SFCC_OAUTH_CLIENT_ID}" "${process.env.SFCC_OAUTH_CLIENT_SECRET}"`,
-                { stdio: 'inherit' }
-            );
-            process.env.ACCESS_TOKEN = execSync('sfcc-ci client:auth:token').toString().trim();
-            console.log('Successfully authenticated with SFCC');
+            await new Promise((resolve, reject) => {
+                sfcc.auth.auth(
+                    process.env.SFCC_OAUTH_CLIENT_ID, 
+                    process.env.SFCC_OAUTH_CLIENT_SECRET,
+                    (err, token) => {
+                        if (err) {
+                            console.error('Failed to authenticate with SFCC:', err);
+                            reject(err);
+                            return;
+                        }
+                        process.env.ACCESS_TOKEN = token;
+                        console.log('Successfully authenticated with SFCC');
+                        resolve(token);
+                    }
+                );
+            });
         } catch (error) {
             console.error('Failed to authenticate with SFCC:', error);
             throw error;
@@ -40,7 +50,6 @@ describe('Algolia Integration', () => {
 
     let client;
     let index;
-    let consoleLogSpy;
 
     beforeEach(() => {
         // Skip setup if not in CircleCI
@@ -48,14 +57,6 @@ describe('Algolia Integration', () => {
 
         client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY);
         index = client.initIndex(process.env.ALGOLIA_INDEX_NAME || 'varx__products__en_US');
-        consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
-    });
-
-    afterEach(() => {
-        // Only restore mock if we're in CircleCI and the spy was created
-        if (process.env.CIRCLECI && consoleLogSpy) {
-            consoleLogSpy.mockRestore();
-        }
     });
 
     test('should search for a specific product', async () => {
