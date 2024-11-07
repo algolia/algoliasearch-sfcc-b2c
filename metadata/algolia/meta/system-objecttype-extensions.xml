@@ -201,8 +201,8 @@ Setting this preference replaces the first two segments, the final index name be
             </attribute-definition>
 
             <attribute-definition attribute-id="Algolia_EnablePricingLazyLoad">
-                <display-name xml:lang="x-default">Enables Pricing Lazy Load</display-name>
-                <description xml:lang="x-default">It fetches prices from SFCC not Algolia</description>
+                <display-name xml:lang="x-default">Enable prices lazy loading</display-name>
+                <description xml:lang="x-default">Fetch prices from SFCC after the search results are returned from Algolia</description>
                 <type>boolean</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
