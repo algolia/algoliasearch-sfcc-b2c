@@ -21,6 +21,7 @@ function enableInstantSearch(config) {
     const contentSearchbarTab = document.querySelector('#content-search-bar-button');
     const navbar = document.querySelector('.search-nav');
     const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
+    const isPricingLazyLoad = algoliaData.EnablePricingLazyLoad;
     activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
 
     let displaySwatches = false;
@@ -242,7 +243,9 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
-                        const hiddenCalloutMsg = !hit.calloutMsg && 'd-none';
+                        const shouldHideCallout = isPricingLazyLoad || !hit.calloutMsg;
+                        const productId = algoliaData.recordModel === 'master-level' ? (hit.defaultVariantID ? hit.defaultVariantID : hit.objectID) : hit.objectID;
+                        const callOutMsgClassname = `callout-msg-placeholder-${productId}`;
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -250,8 +253,8 @@ function enableInstantSearch(config) {
                                  data-index-name="${hit.__indexName}"
                             >
                                 <div class="product-tile">
-                                    <small class="callout-msg ${hiddenCalloutMsg}">
-                                     ${hit.calloutMsg }
+                                    <small class="callout-msg ${shouldHideCallout ? 'd-none' : ''} ${callOutMsgClassname}">
+                                     ${!isPricingLazyLoad && hit.calloutMsg}
                                     </small>
                                     <div class="image-container">
                                         <a href="${hit.url}">
@@ -282,7 +285,8 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${html`
+                                            ${isPricingLazyLoad && html`<span class="price-placeholder" data-product-id="${productId}"></span>`}
+                                            ${!isPricingLazyLoad && html`
                                                 ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
                                                     <span class="strike-through list">
                                                          <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
@@ -520,6 +524,14 @@ function enableInstantSearch(config) {
     search.start();
 
     search.on('render', function () {
+        if (isPricingLazyLoad && search.status === 'idle') {
+            var items = search.renderState[algoliaData.productsIndex].infiniteHits.hits;
+            var productIDs = items.map((item) => algoliaData.recordModel === 'master-level' ? (item.defaultVariantID ? item.defaultVariantID : item.objectID) : item.objectID);
+            fetchPromoPrices(productIDs).then(() => {
+                updateAllProductPrices();
+            });
+        }
+
         var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
         $(emptyFacetSelector).each(function () {
             $(this).parents().eq(2).hide();
@@ -638,6 +650,89 @@ function enableInstantSearch(config) {
     }
 }
 
+// Add this at the top of the file, outside of any function
+const fetchedPrices = new Map();
+
+/**
+ * Fetches promotional prices for a list of product IDs
+ * @param {Array} productIDs - An array of product IDs.
+ * @returns {Promise} A promise that resolves when prices are fetched
+ */
+function fetchPromoPrices(productIDs) {
+    if (productIDs.length === 0) return Promise.resolve();
+
+    // Filter out already fetched product IDs
+    const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
+    
+    if (unfetchedProductIDs.length === 0) return Promise.resolve();
+
+    return $.ajax({
+        url: algoliaData.priceEndpoint,
+        type: 'GET',
+        data: {
+            pids: unfetchedProductIDs.toString(),
+        },
+    }).then(function(data) {
+        let products = data.products;
+        for (let product of products) {
+            fetchedPrices.set(product.id, product);
+        }
+    });
+}
+
+/**
+ * Updates the price display for all products on the page
+ */
+function updateAllProductPrices() {
+    const pricePlaceholders = document.querySelectorAll('.price-placeholder');
+
+    pricePlaceholders.forEach(placeholder => {
+        const productId = placeholder.getAttribute('data-product-id');
+        const product = fetchedPrices.get(productId);
+
+        if (product) {
+            let priceHtml = getPriceHtml(product);
+            placeholder.innerHTML = priceHtml;
+
+            if (product.activePromotion && product.activePromotion.price) {
+                const calloutMsg = document.querySelector(`.callout-msg-placeholder-${productId}`);
+                if (calloutMsg) {
+                    calloutMsg.innerHTML = product.activePromotion.promotion.calloutMsg;
+                    calloutMsg.classList.remove('d-none');
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Generates HTML for displaying product prices, including promotional prices if applicable.
+ * @param {Object} product - The product object containing price information.
+ * @returns {string} HTML string representing the price display.
+ */
+function getPriceHtml(product) {
+    const { price: priceObj, activePromotion, defaultPrice } = product;
+    const hasActivePromotion = activePromotion && activePromotion.price;
+    const salesPrice = priceObj && priceObj.sales && priceObj.sales.value;
+    const listPrice = priceObj && priceObj.list && priceObj.list.value;
+    const discountedPrice = hasActivePromotion ? activePromotion.price : salesPrice;
+
+    // Helper function to create price HTML
+    const createPriceHtml = (originalPrice, finalPrice) => `
+        <span class="strike-through list">
+            <span class="value"> ${algoliaData.currencySymbol} ${originalPrice} </span>
+        </span>
+        <span class="sales">
+            <span class="value"> ${algoliaData.currencySymbol} ${finalPrice} </span>
+        </span>`;
+
+    if (hasActivePromotion) return createPriceHtml(defaultPrice, discountedPrice);
+    if (listPrice) return createPriceHtml(listPrice, salesPrice);
+
+    return `<span class="value"> ${algoliaData.currencySymbol} ${salesPrice} </span>`;
+}
+
+
 /**
  * Build a product URL with Algolia query parameters
  * @param {string} objectID objectID
@@ -660,7 +755,6 @@ function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
  * @return {number} The calculated sales price
  */
 function calculateDisplayPrice(item) {
-
     var promotions;
     var calloutMsg = '';
     var variant;
