@@ -15,3 +15,4 @@ bin/*
 cypress/screenshots/*
 cypress/videos/*
 .env
+.secrets

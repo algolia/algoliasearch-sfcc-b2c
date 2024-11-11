@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, develop, feat/e2e-circleci, github-actions ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      CODE_VERSION: ${{ secrets.CODE_VERSION }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Required Packages
+        run: |
+          apt-get update
+          apt-get install -y zip
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint JavaScript
+        run: npm run lint:js
+
+      - name: Run Unit Tests
+        run: npm test
+
+      - name: Compile JS and CSS
+        run: |
+          npm run compile:js
+          npm run compile:scss
+
+      - name: Create Code Version Directory
+        run: mkdir $CODE_VERSION
+
+      - name: Copy Cartridges
+        run: cp -R cartridges/* $CODE_VERSION/
+
+      - name: Package Code
+        run: zip -r $CODE_VERSION.zip $CODE_VERSION
+
+      - name: Prepare Site Import
+        run: |
+          mkdir -p site_import/sites/RefArch
+          mkdir -p site_import/meta
+          cat <<EOF > site_import/sites/RefArch/preferences.xml
+          <?xml version="1.0" encoding="UTF-8"?>
+          <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
+              <custom-preferences>
+                <all-instances>
+                  <preference preference-id="Algolia_RecordModel">variant-level</preference>
+                  <preference preference-id="Algolia_IndexPrefix">varx</preference>
+                  <preference preference-id="Algolia_AdditionalAttributes">color,size,colorVariations,masterID,short_description,brand,name,pricebooks</preference>
+                </all-instances>
+              </custom-preferences>
+          </preferences>
+          EOF
+
+      - name: Package Site Import
+        run: zip -r site_import.zip site_import
+
+      - name: Deploy and Activate Code
+        env:
+          SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
+          SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
+          SANDBOX_HOST: ${{ secrets.SANDBOX_HOST }}
+          CODE_VERSION: ${{ env.CODE_VERSION }}
+        run: npm run deploy:code
+
+      - name: Import Site Preferences
+        env:
+          SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
+          SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
+          SANDBOX_HOST: ${{ secrets.SANDBOX_HOST }}
+        run: npm run import:preferences
+
+      - name: Run SFCC Job
+        env:
+          SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
+          SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
+          SANDBOX_HOST: ${{ secrets.SANDBOX_HOST }}
+        run: npm run run:sfcc-job

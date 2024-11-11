@@ -82,4 +82,19 @@ module.exports = [
             'jsdoc/require-jsdoc': 'off',
         },
     },
+    {
+        files: ['scripts/**/*.js'],
+        languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            globals: {
+                ...globals.node,
+            },
+        },
+        rules: {
+            'jsdoc/require-jsdoc': 'off',
+            'func-names': 'off',
+            'import/no-unresolved': 'off',
+        },
+    },
 ];

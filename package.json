@@ -16,7 +16,10 @@
         "watch": "sgmf-scripts --watch",
         "watch:static": "sgmf-scripts --watch static",
         "cypress:open": "cypress open",
-        "cypress:run": "cypress run"
+        "cypress:run": "cypress run",
+        "run:sfcc-job": "node scripts/runSFCCJob.js",
+        "deploy:code": "node scripts/deployCode.js",
+        "import:preferences": "node scripts/importPreferences.js"
     },
     "repository": {
         "type": "git",
@@ -34,21 +37,22 @@
         "chai": "^4.3.7",
         "copy-files-from-to": "^3.8.0",
         "cypress": "^13.15.0",
+        "dotenv": "^16.4.5",
         "eslint": "9.12.0",
         "eslint-config-prettier": "9.1.0",
-        "eslint-plugin-jquery": "1.5.1",
-        "eslint-plugin-prettier": "5.2.1",
-        "eslint-plugin-jsdoc": "50.3.2",
         "eslint-plugin-cypress": "^4.1.0",
+        "eslint-plugin-jquery": "1.5.1",
+        "eslint-plugin-jsdoc": "50.3.2",
+        "eslint-plugin-prettier": "5.2.1",
+        "globals": "15.11.0",
         "instantsearch.css": "8.1.0",
         "instantsearch.js": "4.60.0",
-        "globals": "15.11.0",
         "jest": "29.6.4",
         "prettier": "3.3.3",
         "proxyquire": "2.1.3",
         "search-insights": "2.11.0",
-        "sgmf-scripts": "^2.4.2",
-        "sfcc-ci": "^2.12.0"
+        "sfcc-ci": "^2.12.0",
+        "sgmf-scripts": "^2.4.2"
     },
     "browserslist": [
         "last 2 versions",

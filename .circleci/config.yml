@@ -14,17 +14,6 @@ aliases:
   - &node_executor
     name: node/default
     tag: '18.18.0'
-  - &npm_cache_key
-    v1-npm-{{ checksum "package-lock.json" }}
-  - &restore_npm_cache
-    restore_cache:
-      keys:
-        - *npm_cache_key
-  - &save_npm_cache
-    save_cache:
-      key: *npm_cache_key
-      paths:
-        - ~/.npm
   - &install_sfcc_ci
     run:
       name: Install sfcc-ci
@@ -38,194 +27,12 @@ aliases:
         echo "export ACCESS_TOKEN=$(sfcc-ci client:auth:token)" >> $BASH_ENV
 
 jobs:
-  checkout:
-    executor: *node_executor
-    steps:
-      - checkout
-      - *restore_npm_cache
-      - node/install-packages
-      - *save_npm_cache
-      - run: npm run lint:js
-      - persist_to_workspace: *persist_work_dir
-
   test:
     executor: *node_executor
     steps:
-      - attach_workspace: *attach_work_dir
-      - run: npm run test
-      - run: npm run test:unit
-
-  prepare-site-import:
-    executor: *node_executor
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:s+i0QBzZp3EQiY4DKt4/VjZtxHUfw2gRGeI0RAnzpyw"
-      - run:
-          name: Add GitHub to known hosts
-          command: |
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts
-      - run:
-          name: Checkout Code
-          command: |
-            echo "Starting clone..."
-            GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" git clone git@github.com:algolia/storefront-reference-architecture.git .
-      - run:
-          name: Install required packages
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y zip
-      - run:
-          name: Install npm packages
-          command: npm install
-      - run:
-          name: Compile JS files
-          command: npm run compile:js
-      - run:
-          name: Compile CSS files
-          command: npm run compile:scss
-      - *install_sfcc_ci
-      - *authenticate_sfcc
-      - run:
-          name: Create Code Version Directory
-          command: mkdir $CODE_VERSION
-      - run:
-          name: Copy Cartridges
-          command: |
-            if [ -d "cartridges" ]; then
-              cp -R cartridges/* $CODE_VERSION/
-            else
-              echo "Cartridges directory not found. Skipping."
-            fi
-      - run:
-          name: Package Code
-          command: zip -r $CODE_VERSION.zip $CODE_VERSION
-      - run:
-          name: Deploy Code to Sandbox
-          command: sfcc-ci code:deploy $CODE_VERSION.zip --instance $SANDBOX_HOST
-      - run:
-          name: Prepare Site Import Directory
-          command: |
-            mkdir -p site_import/sites/RefArch
-            mkdir -p site_import/meta
-      - run:
-          name: Generate preferences.xml
-          command: |
-            cat \<< EOF > site_import/sites/RefArch/preferences.xml
-            <?xml version="1.0" encoding="UTF-8"?>
-            <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
-                <custom-preferences>
-                  <all-instances>
-                    <preference preference-id="Algolia_RecordModel">variant-level</preference>
-                    <preference preference-id="Algolia_IndexPrefix">varx</preference>
-                    <preference preference-id="Algolia_AdditionalAttributes">color,size,colorVariations,masterID,short_description,brand,name,pricebooks</preference>
-                  </all-instances>
-                </custom-preferences>
-            </preferences>
-            EOF
-      - run:
-          name: Package Site Import
-          command: zip -r site_import.zip site_import
-      - run:
-          name: Upload Site Preferences
-          command: sfcc-ci instance:upload site_import.zip --instance $SANDBOX_HOST
-      - run:
-          name: Import Site Preferences
-          command: sfcc-ci instance:import site_import.zip --instance $SANDBOX_HOST --sync
-      - run:
-          name: Clean up
-          command: rm -rf site_import site_import.zip
-
-  deployment-and-jobs:
-    executor: *node_executor
-    steps:
       - checkout
-      - *install_sfcc_ci
-      - *authenticate_sfcc
-      - run:
-          name: Check folder structure
-          command: |
-            cd cartridges && ls
-      - run:
-          name: Install required packages
-          command: |
-            sudo apt-get update
-            sudo apt-get install -y jq zip
-      - run:
-          name: Create Code Version Directory
-          command: mkdir $CODE_VERSION
-      - run:
-          name: Copy Cartridges
-          command: |
-            if [ -d "cartridges" ]; then
-              cp -R cartridges/* $CODE_VERSION/
-            else
-              echo "Cartridges directory not found. Skipping."
-            fi
-      - run:
-          name: Package Code
-          command: zip -r $CODE_VERSION.zip $CODE_VERSION
-      - run:
-          name: Deploy Code to Sandbox
-          command: sfcc-ci code:deploy $CODE_VERSION.zip --instance $SANDBOX_HOST
-      - run:
-          name: Activate Code Version
-          command: sfcc-ci code:activate $CODE_VERSION -i $SANDBOX_HOST
-      - run:
-          name: Trigger SFCC Job and Wait for Completion
-          command: |
-            # Start the job and capture the execution ID
-            RESPONSE=$(sfcc-ci job:run AlgoliaProductIndex_v2 --instance $SANDBOX_HOST --json)
-            echo "Job run response: $RESPONSE"
-            
-            JOB_EXEC_ID=$(echo "$RESPONSE" | jq -r '.id')
-            
-            if [ -z "$JOB_EXEC_ID" ] || [ "$JOB_EXEC_ID" = "null" ]; then
-              echo "Failed to get job execution ID"
-              echo "Full response was: $RESPONSE"
-              exit 1
-            fi
-            
-            echo "Job started with execution ID: '$JOB_EXEC_ID'"
-            
-            # Poll for job completion
-            MAX_ATTEMPTS=15
-            ATTEMPT=1
-            while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
-              echo "Checking status for job execution ID: '$JOB_EXEC_ID'"
-              
-              # Updated command with both job ID and execution ID
-              STATUS=$(sfcc-ci job:status "AlgoliaProductIndex_v2" "$JOB_EXEC_ID" --instance "$SANDBOX_HOST" --json || echo '{"error": true}')
-              
-              if echo "$STATUS" | jq -e '.error' > /dev/null; then
-                echo "Failed to get job status"
-                echo "Full status response: $STATUS"
-                exit 1
-              fi
-              
-              EXEC_STATUS=$(echo "$STATUS" | jq -r '.execution_status')
-              EXIT_STATUS=$(echo "$STATUS" | jq -r '.exit_status.status')
-              
-              echo "Current status: $EXEC_STATUS (Exit: $EXIT_STATUS)"
-              
-              if [ "$EXEC_STATUS" = "finished" ]; then
-                if [ "$EXIT_STATUS" = "ok" ]; then
-                  echo "Job completed successfully"
-                  exit 0
-                else
-                  echo "Job failed with status: $EXIT_STATUS"
-                  exit 1
-                fi
-              fi
-              
-              echo "Attempt $ATTEMPT of $MAX_ATTEMPTS: Job still running..."
-              ATTEMPT=$((ATTEMPT + 1))
-              sleep 30
-            done
-            
-            echo "Timeout waiting for job completion"
-            exit 1
+      - run: npm ci
+      - run: npm run test:unit
 
   index-tests:
     executor: *node_executor
@@ -251,45 +58,21 @@ jobs:
           name: Install Dependencies
           command: npm ci
       - run:
-          name: Run Algolia Index Tests
-          command: npm test -- test/e2e/variation_index.test.js
-      - run:
           name: Run Cypress Tests
           command: npx cypress run --browser electron --headless --config-file cypress.config.js
 
 workflows:
   suite:
     jobs:
-      - checkout
-      - test:
-          requires:
-            - checkout
-            - deployment-and-jobs
-      - prepare-site-import:
-          filters:
-            branches:
-              only:
-                - master
-                - develop
-                - feat/e2e-circleci
-      - deployment-and-jobs:
-          requires:
-            - prepare-site-import
-          filters:
-            branches:
-              only:
-                - master
-                - develop
-                - feat/e2e-circleci
+      - test
       - index-tests:
-          requires:
-            - deployment-and-jobs
           filters:
             branches:
               only:
                 - master
                 - develop
                 - feat/e2e-circleci
+                - github-actions
       - e2e-tests:
           requires:
             - index-tests
@@ -299,3 +82,4 @@ workflows:
                 - master
                 - develop
                 - feat/e2e-circleci
+                - github-actions
