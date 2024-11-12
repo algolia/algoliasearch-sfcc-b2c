@@ -9,7 +9,11 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CODE_VERSION: ${{ secrets.CODE_VERSION }}
+      CODE_VERSION: ${{ vars.CODE_VERSION }}
+      ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+      ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
+      SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+      TEST_PRODUCT_ID: ${{ vars.TEST_PRODUCT_ID }}
 
     steps:
       - name: Checkout Code
@@ -72,20 +76,20 @@ jobs:
         env:
           SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
           SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
-          SANDBOX_HOST: ${{ secrets.SANDBOX_HOST }}
-          CODE_VERSION: ${{ env.CODE_VERSION }}
+          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+          CODE_VERSION: ${{ vars.CODE_VERSION }}
         run: npm run deploy:code
 
       - name: Import Site Preferences
         env:
           SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
           SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
-          SANDBOX_HOST: ${{ secrets.SANDBOX_HOST }}
+          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
         run: npm run import:preferences
 
       - name: Run SFCC Job
         env:
           SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
           SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
-          SANDBOX_HOST: ${{ secrets.SANDBOX_HOST }}
+          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
         run: npm run run:sfcc-job
