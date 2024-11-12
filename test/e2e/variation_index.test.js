@@ -8,7 +8,6 @@ describe('Algolia Integration', () => {
             return;
         }
 
-        // First verify SFCC auth credentials exist
         const sfccAuthVars = ['SFCC_OAUTH_CLIENT_ID', 'SFCC_OAUTH_CLIENT_SECRET'];
         sfccAuthVars.forEach(envVar => {
             if (!process.env[envVar]) {
