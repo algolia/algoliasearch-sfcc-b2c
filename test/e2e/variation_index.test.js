@@ -37,7 +37,7 @@ describe('Algolia Integration', () => {
             console.error('Failed to authenticate with SFCC:', error);
             throw error;
         }
-        
+
         // Now verify other required environment variables
         const requiredEnvVars = ['SANDBOX_HOST', 'ACCESS_TOKEN', 'ALGOLIA_APP_ID', 'ALGOLIA_API_KEY'];
         requiredEnvVars.forEach(envVar => {
