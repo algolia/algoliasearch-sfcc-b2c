@@ -65,21 +65,7 @@ workflows:
   suite:
     jobs:
       - test
-      - index-tests:
-          filters:
-            branches:
-              only:
-                - master
-                - develop
-                - feat/e2e-circleci
-                - github-actions
+      - index-tests
       - e2e-tests:
           requires:
             - index-tests
-          filters:
-            branches:
-              only:
-                - master
-                - develop
-                - feat/e2e-circleci
-                - github-actions

@@ -93,3 +93,16 @@ jobs:
           SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
           SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
         run: npm run run:sfcc-job
+
+      - name: Trigger CircleCI Pipeline
+        env:
+          CIRCLE_CI_TOKEN: ${{ secrets.CIRCLE_CI_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Circle-Token: $CIRCLE_CI_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"branch\": \"$GITHUB_REF_NAME\",
+              \"parameters\": {}
+            }" \
+            "https://circleci.com/api/v2/project/gh/${GITHUB_REPOSITORY}/pipeline"
