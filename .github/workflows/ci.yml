@@ -54,26 +54,6 @@ jobs:
       - name: Package Code
         run: zip -r $CODE_VERSION.zip $CODE_VERSION
 
-      - name: Prepare Site Import
-        run: |
-          mkdir -p site_import/sites/RefArch
-          mkdir -p site_import/meta
-          cat <<EOF > site_import/sites/RefArch/preferences.xml
-          <?xml version="1.0" encoding="UTF-8"?>
-          <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
-              <custom-preferences>
-                <all-instances>
-                  <preference preference-id="Algolia_RecordModel">variant-level</preference>
-                  <preference preference-id="Algolia_IndexPrefix">varx</preference>
-                  <preference preference-id="Algolia_AdditionalAttributes">color,size,colorVariations,masterID,short_description,brand,name,pricebooks</preference>
-                </all-instances>
-              </custom-preferences>
-          </preferences>
-          EOF
-
-      - name: Package Site Import
-        run: zip -r site_import.zip site_import
-
       - name: Deploy and Activate Code
         env:
           SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
