@@ -12,7 +12,6 @@ const archiver = require('archiver');
 
         const instance = process.env.SANDBOX_HOST;
 
-        // Define paths
         const siteImportDir = path.resolve('./site_import');
         const sitesDir = path.join(siteImportDir, 'sites');
         const refArchDir = path.join(sitesDir, 'RefArch');
