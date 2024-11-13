@@ -18,12 +18,10 @@ const archiver = require('archiver');
         const refArchDir = path.join(sitesDir, 'RefArch');
         const metaDir = path.join(siteImportDir, 'meta');
 
-        // Create directories
         fs.mkdirSync(refArchDir, { recursive: true });
         fs.mkdirSync(metaDir, { recursive: true });
         console.log('Directories created successfully.');
 
-        // Create preferences.xml
         const preferencesXmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
     <custom-preferences>
@@ -39,7 +37,6 @@ const archiver = require('archiver');
         fs.writeFileSync(preferencesXmlPath, preferencesXmlContent);
         console.log('preferences.xml created successfully.');
 
-        // Zip the site_import folder
         const siteArchive = path.resolve('./site_import.zip');
         console.log('Creating site_import.zip...');
         await new Promise((resolve, reject) => {
@@ -60,7 +57,6 @@ const archiver = require('archiver');
             archive.finalize();
         });
 
-        // Upload Site Preferences
         console.log('Uploading site_import.zip...');
         await new Promise((resolve, reject) => {
             sfcc.instance.upload(instance, siteArchive, token, {}, (err) => {
@@ -74,7 +70,6 @@ const archiver = require('archiver');
             });
         });
 
-        // Import Site Preferences
         console.log('Importing site preferences...');
         await new Promise((resolve, reject) => {
             sfcc.instance.import(instance, 'site_import.zip', token, (err) => {
