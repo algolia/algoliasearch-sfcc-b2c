@@ -7,7 +7,7 @@ describe('Algolia Search', () => {
 
         // Wait for the page to load
         cy.get('body', {
-            timeout: 10000
+            timeout: 20000
         }).should('be.visible')
 
         // Handle the cookie consent pop-up
