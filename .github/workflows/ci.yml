@@ -14,6 +14,8 @@ jobs:
       ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
       SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
       TEST_PRODUCT_ID: ${{ vars.TEST_PRODUCT_ID }}
+      SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
+      SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
 
     steps:
       - name: Checkout Code
@@ -36,7 +38,7 @@ jobs:
         run: npm run lint:js
 
       - name: Run Unit Tests
-        run: npm test
+        run: npm run test
 
       - name: Compile JS and CSS
         run: |
@@ -74,35 +76,82 @@ jobs:
 
       - name: Deploy and Activate Code
         env:
-          SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
-          SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
           SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
           CODE_VERSION: ${{ vars.CODE_VERSION }}
         run: npm run deploy:code
 
       - name: Import Site Preferences
         env:
-          SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
-          SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
           SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
         run: npm run import:preferences
 
       - name: Run SFCC Job
         env:
-          SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
-          SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
           SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
         run: npm run run:sfcc-job
 
-      - name: Trigger CircleCI Pipeline
-        env:
-          CIRCLE_CI_TOKEN: ${{ secrets.CIRCLE_CI_TOKEN }}
+  unit-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Unit Tests
+        run: npm run test:unit
+
+  index-tests:
+    runs-on: ubuntu-latest
+    needs: build
+    env:
+      SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
+      SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
+      SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install sfcc-ci
+        run: sudo npm install -g sfcc-ci
+
+      - name: Authenticate with SFCC
         run: |
-          curl -X POST \
-            -H "Circle-Token: $CIRCLE_CI_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"branch\": \"$GITHUB_REF_NAME\",
-              \"parameters\": {}
-            }" \
-            "https://circleci.com/api/v2/project/gh/${GITHUB_REPOSITORY}/pipeline"
+          sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
+          echo "ACCESS_TOKEN=$(sfcc-ci client:auth:token)" >> $GITHUB_ENV
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Install Algolia Dependencies
+        run: npm install algoliasearch
+
+      - name: Run Algolia Index Tests
+        run: npm test -- test/e2e/variation_index.test.js
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: [build, index-tests]
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Run Cypress Tests
+        uses: cypress-io/github-action@v6
+        with:
+          install: npm ci
+          browser: electron
+          headless: true
+          config-file: cypress.config.js
