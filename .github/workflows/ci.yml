@@ -121,7 +121,7 @@ jobs:
       - name: Run Algolia Index Tests
         run: npm test -- test/e2e/variation_index.test.js
 
-  e2e-tests:
+  frontend-tests:
     runs-on: ubuntu-latest
     needs: [build, index-tests]
     steps:
