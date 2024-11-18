@@ -95,6 +95,10 @@ jobs:
       SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
       SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
       SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+      ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+      ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
+      ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
+      TEST_PRODUCT_ID: ${{ vars.TEST_PRODUCT_ID }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
