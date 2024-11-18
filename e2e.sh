@@ -55,7 +55,7 @@ node scripts/runSFCCJob.js
 
 echo "Running index tests..."
 npm install algoliasearch
-npm test -- test/e2e/variation_index.test.js
+npm run test:variationindex
 
 echo "Running frontend tests..."
 npx cypress run

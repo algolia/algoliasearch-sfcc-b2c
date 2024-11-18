@@ -3,10 +3,6 @@ const sfcc = require('sfcc-ci');
 
 describe('Algolia Integration', () => {
     beforeAll(async () => {
-        if (!process.env.CIRCLECI) {
-            console.log('Skipping Algolia Integration tests - not in CircleCI environment');
-            return;
-        }
 
         const sfccAuthVars = ['SFCC_OAUTH_CLIENT_ID', 'SFCC_OAUTH_CLIENT_SECRET'];
         sfccAuthVars.forEach(envVar => {
@@ -51,18 +47,12 @@ describe('Algolia Integration', () => {
     let index;
 
     beforeEach(() => {
-        // Skip setup if not in CircleCI
-        if (!process.env.CIRCLECI) return;
 
         client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY);
         index = client.initIndex(process.env.ALGOLIA_INDEX_NAME || 'varx__products__en_US');
     });
 
     test('should search for a specific product', async () => {
-        if (!process.env.CIRCLECI) {
-            console.log('Test skipped - not in CircleCI environment');
-            return;
-        }
 
         // Updated API URL structure to match curl example
         const apiUrl = `https://${process.env.SANDBOX_HOST}/s/-/dw/data/v24_5/products/${process.env.TEST_PRODUCT_ID}?site_id=RefArch&client_id=${process.env.SFCC_OAUTH_CLIENT_ID}`;
