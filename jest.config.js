@@ -10,6 +10,7 @@ const config = {
 
     // The paths to modules that run some code to configure or set up the testing environment before each test
     setupFiles: ['<rootDir>/jest.setup.js'],
+    testPathIgnorePatterns: ['/node_modules/', '/test/e2e/'],
 };
 
 module.exports = config;

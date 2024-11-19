@@ -4,7 +4,7 @@
     "description": "Algolia SFRA Link Cartridge",
     "scripts": {
         "test": "sgmf-scripts --test test/unit/**/model/algoliaProduct.js",
-        "test:unit": "jest",
+        "test:unit": "jest test/unit",
         "test:integration": "sgmf-scripts --integration 'test/integration/**/*.js'",
         "copy-scripts": "copy-files-from-to",
         "compile:scss": "sgmf-scripts --compile css",
