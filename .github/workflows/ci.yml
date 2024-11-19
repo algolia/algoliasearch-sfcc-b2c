@@ -108,6 +108,14 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Create dw.json file
+        run: |
+          echo '{
+            "client-id": "'"${{ secrets.SFCC_OAUTH_CLIENT_ID }}"'",
+            "client-secret": "'"${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}"'",
+            "hostname": "'"${{ vars.SANDBOX_HOST }}"'"
+          }' > dw.json
+
       - name: Install sfcc-ci
         run: sudo npm install -g sfcc-ci
 
