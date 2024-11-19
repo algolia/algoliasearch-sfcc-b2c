@@ -4,7 +4,7 @@
     "description": "Algolia SFRA Link Cartridge",
     "scripts": {
         "test": "sgmf-scripts --test test/unit/**/model/algoliaProduct.js",
-        "test:unit": "jest test/unit",
+        "test:unit": "jest --testPathPattern='test/unit'",
         "test:integration": "sgmf-scripts --integration 'test/integration/**/*.js'",
         "copy-scripts": "copy-files-from-to",
         "compile:scss": "sgmf-scripts --compile css",
@@ -20,10 +20,9 @@
         "deploy:code": "node scripts/deployCode.js",
         "import:preferences": "node scripts/importPreferences.js",
         "run:sfcc-job": "node scripts/runSFCCJob.js",
-        "test:index": "npm install algoliasearch && npm test -- test/e2e/variation_index.test.js",
         "test:frontend": "cypress run",
         "test:e2e": "./e2e.sh",
-        "test:variationindex": "jest test/e2e/variation_index.test.js"
+        "test:variationindex": "jest --testPathPattern='test/e2e/variation_index.test.js'"
     },
     "repository": {
         "type": "git",
