@@ -31,18 +31,20 @@ echo "Linting JavaScript..."
 npm run lint:js
 
 echo "Running unit tests..."
-npm run test
+npm run test:unit
 
 echo "Compiling JavaScript..."
-npm run compile:js
+npm run compile:js --silent
 
 echo "Compiling SCSS..."
-npm run compile:scss
+npm run compile:scss --silent
 
 echo "Preparing code for deployment..."
 mkdir -p "$CODE_VERSION"
 cp -R cartridges/* "$CODE_VERSION"/
-zip -r "$CODE_VERSION.zip" "$CODE_VERSION"
+
+echo "Zipping the cartridges directory..."
+zip -rq "${CODE_VERSION}.zip" "$CODE_VERSION"
 
 echo "Deploying code..."
 node scripts/deployCode.js
