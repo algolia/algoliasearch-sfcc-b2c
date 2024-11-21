@@ -1,11 +1,11 @@
 /// <reference types="cypress" />
 
-
-
 describe('Algolia Search', () => {
     beforeEach(() => {
+        const host = Cypress.env('SANDBOX_HOST');
+
         // Visit your website's homepage or search page
-        cy.visit(`https://${process.env.SANDBOX_HOST}/on/demandware.store/Sites-RefArch-Site`)
+        cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
 
         // Wait for the page to load
         cy.get('body', {

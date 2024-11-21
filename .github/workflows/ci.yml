@@ -136,8 +136,6 @@ jobs:
   frontend-tests:
     runs-on: ubuntu-latest
     needs: [build, index-tests]
-    env:
-      SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -149,3 +147,5 @@ jobs:
           browser: electron
           headless: true
           config-file: cypress.config.js
+        env:
+          CYPRESS_SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
