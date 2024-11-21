@@ -149,3 +149,4 @@ jobs:
           config-file: cypress.config.js
         env:
           CYPRESS_SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
