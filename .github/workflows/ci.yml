@@ -136,6 +136,8 @@ jobs:
   frontend-tests:
     runs-on: ubuntu-latest
     needs: [build, index-tests]
+    env:
+      SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
