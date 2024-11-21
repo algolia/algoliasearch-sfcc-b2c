@@ -1,9 +1,11 @@
 /// <reference types="cypress" />
 
+
+
 describe('Algolia Search', () => {
     beforeEach(() => {
         // Visit your website's homepage or search page
-        cy.visit('https://zzgk-003.dx.commercecloud.salesforce.com/on/demandware.store/Sites-RefArch-Site')
+        cy.visit(process.env.SANDBOX_HOST)
 
         // Wait for the page to load
         cy.get('body', {

@@ -18,8 +18,7 @@ module.exports = [
             'cartridges/modules',
             'cartridges/algolia_sg_changes',
             'cartridges/int_algolia_controllers/cartridge/static/default/js/lib',
-            'cartridges/int_algolia_sfra/cartridge/static/default/js/lib',
-            'e2e-tests',
+            'cartridges/int_algolia_sfra/cartridge/static/default/js/lib'
         ],
     },
     {

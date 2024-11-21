@@ -35,7 +35,7 @@ const authenticate = require('./auth');
         // Poll for Job Completion
         let attempts = 0;
         const maxAttempts = 15;
-        const delay = 30000; // 30 seconds
+        const delay = 15000; // 15 seconds
 
         while (attempts < maxAttempts) {
             const status = await new Promise((resolve, reject) => {
@@ -45,7 +45,6 @@ const authenticate = require('./auth');
                         console.error('Error details:', JSON.stringify(err, null, 2));
                         reject(err);
                     } else {
-                        console.log('Job status result:', JSON.stringify(result, null, 2));
                         resolve(result);
                     }
                 });

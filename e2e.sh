@@ -56,7 +56,6 @@ echo "Running SFCC job..."
 node scripts/runSFCCJob.js
 
 echo "Running index tests..."
-npm install algoliasearch
 npm run test:variationindex
 
 echo "Running frontend tests..."
