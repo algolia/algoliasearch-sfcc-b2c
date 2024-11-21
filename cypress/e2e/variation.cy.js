@@ -5,7 +5,7 @@
 describe('Algolia Search', () => {
     beforeEach(() => {
         // Visit your website's homepage or search page
-        cy.visit(process.env.SANDBOX_HOST)
+        cy.visit(`https://${process.env.SANDBOX_HOST}/on/demandware.store/Sites-RefArch-Site`)
 
         // Wait for the page to load
         cy.get('body', {
