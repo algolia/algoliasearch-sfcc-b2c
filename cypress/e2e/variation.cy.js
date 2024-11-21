@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+require('dotenv').config();
 
 describe('Algolia Search', () => {
     beforeEach(() => {
