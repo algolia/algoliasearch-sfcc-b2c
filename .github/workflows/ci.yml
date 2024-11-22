@@ -1,13 +1,10 @@
 name: CI
 
 on:
-  push:
-    branches: [ master, develop, feat/e2e-circleci, github-actions ]
   pull_request:
 
 jobs:
   build:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'develop')
     runs-on: ubuntu-latest
 
     env:
@@ -87,7 +84,6 @@ jobs:
         run: npm run lint:js
 
   index-tests:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'develop')
     runs-on: ubuntu-latest
     needs: build
     env:
@@ -133,7 +129,6 @@ jobs:
         run: npm run test:variationindex
 
   frontend-tests:
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.base_ref == 'develop')
     runs-on: ubuntu-latest
     needs: [build, index-tests]
     steps:
