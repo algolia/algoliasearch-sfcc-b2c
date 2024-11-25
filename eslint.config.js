@@ -2,9 +2,12 @@ const globals = require('globals');
 const js = require('@eslint/js');
 const jquery = require('eslint-plugin-jquery');
 const jsdoc = require('eslint-plugin-jsdoc');
+const pluginCypress = require('eslint-plugin-cypress/flat');
+
 
 module.exports = [
     js.configs.recommended,
+    pluginCypress.configs.recommended,
     {
         ignores: [
             '**/doc/',
@@ -15,7 +18,7 @@ module.exports = [
             'cartridges/modules',
             'cartridges/algolia_sg_changes',
             'cartridges/int_algolia_controllers/cartridge/static/default/js/lib',
-            'cartridges/int_algolia_sfra/cartridge/static/default/js/lib',
+            'cartridges/int_algolia_sfra/cartridge/static/default/js/lib'
         ],
     },
     {
@@ -77,6 +80,21 @@ module.exports = [
         },
         rules: {
             'jsdoc/require-jsdoc': 'off',
+        },
+    },
+    {
+        files: ['scripts/**/*.js'],
+        languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            globals: {
+                ...globals.node,
+            },
+        },
+        rules: {
+            'jsdoc/require-jsdoc': 'off',
+            'func-names': 'off',
+            'import/no-unresolved': 'off',
         },
     },
 ];
