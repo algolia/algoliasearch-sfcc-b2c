@@ -19,6 +19,10 @@ exports[`process colorVariations 1`] = `
             "id": "newarrivals-womens",
             "name": "Womens",
           },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
+          },
         ],
         [
           {
@@ -157,6 +161,10 @@ exports[`process colorVariations 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [
@@ -297,6 +305,10 @@ exports[`process colorVariations 1`] = `
             "id": "newarrivals-womens",
             "name": "Femmes",
           },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
+          },
         ],
         [
           {
@@ -435,6 +447,10 @@ exports[`process colorVariations 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Femmes",
+          },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
           },
         ],
         [
@@ -575,6 +591,10 @@ exports[`process colorVariations 1`] = `
             "id": "newarrivals-womens",
             "name": "Womens",
           },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
+          },
         ],
         [
           {
@@ -713,6 +733,10 @@ exports[`process colorVariations 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [
@@ -857,6 +881,10 @@ exports[`process default 1`] = `
             "id": "newarrivals-womens",
             "name": "Womens",
           },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
+          },
         ],
         [
           {
@@ -951,6 +979,10 @@ exports[`process default 1`] = `
             "id": "newarrivals-womens",
             "name": "Femmes",
           },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
+          },
         ],
         [
           {
@@ -1044,6 +1076,10 @@ exports[`process default 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [
@@ -1147,6 +1183,10 @@ exports[`process fullCatalogReindex 1`] = `
             "id": "newarrivals-womens",
             "name": "Womens",
           },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
+          },
         ],
         [
           {
@@ -1244,6 +1284,10 @@ exports[`process fullCatalogReindex 1`] = `
             "id": "newarrivals-womens",
             "name": "Femmes",
           },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
+          },
         ],
         [
           {
@@ -1340,6 +1384,10 @@ exports[`process fullCatalogReindex 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [
@@ -1443,6 +1491,10 @@ exports[`process fullRecordUpdate 1`] = `
             "id": "newarrivals-womens",
             "name": "Womens",
           },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
+          },
         ],
         [
           {
@@ -1539,6 +1591,10 @@ exports[`process fullRecordUpdate 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Femmes",
+          },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
           },
         ],
         [
@@ -1637,6 +1693,10 @@ exports[`process fullRecordUpdate 1`] = `
             "id": "newarrivals-womens",
             "name": "Womens",
           },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
+          },
         ],
         [
           {
@@ -1733,6 +1793,10 @@ exports[`process master-level indexing 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [
@@ -1889,6 +1953,10 @@ exports[`process master-level indexing 1`] = `
             "id": "newarrivals-womens",
             "name": "Femmes",
           },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
+          },
         ],
         [
           {
@@ -2043,6 +2111,10 @@ exports[`process master-level indexing 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [
@@ -2206,6 +2278,10 @@ exports[`process partialRecordUpdate 1`] = `
             "id": "newarrivals-womens",
             "name": "Womens",
           },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
+          },
         ],
         [
           {
@@ -2300,6 +2376,10 @@ exports[`process partialRecordUpdate 1`] = `
             "id": "newarrivals-womens",
             "name": "Femmes",
           },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
+          },
         ],
         [
           {
@@ -2393,6 +2473,10 @@ exports[`process partialRecordUpdate 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [

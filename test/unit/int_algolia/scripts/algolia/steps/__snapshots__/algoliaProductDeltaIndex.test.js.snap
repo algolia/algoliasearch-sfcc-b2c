@@ -21,6 +21,10 @@ exports[`process default 1`] = `
             "id": "newarrivals-womens",
             "name": "Womens",
           },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
+          },
         ],
         [
           {
@@ -118,6 +122,10 @@ exports[`process default 1`] = `
             "id": "newarrivals-womens",
             "name": "Femmes",
           },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
+          },
         ],
         [
           {
@@ -214,6 +222,10 @@ exports[`process default 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [
@@ -313,6 +325,10 @@ exports[`process master-level indexing 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [
@@ -470,6 +486,10 @@ exports[`process master-level indexing 1`] = `
             "id": "newarrivals-womens",
             "name": "Femmes",
           },
+          {
+            "id": "newarrivals",
+            "name": "Nouveaux arrivages",
+          },
         ],
         [
           {
@@ -625,6 +645,10 @@ exports[`process master-level indexing 1`] = `
           {
             "id": "newarrivals-womens",
             "name": "Womens",
+          },
+          {
+            "id": "newarrivals",
+            "name": "New Arrivals",
           },
         ],
         [

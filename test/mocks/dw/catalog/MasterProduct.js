@@ -236,6 +236,7 @@ class Product {
                             return null;
                     }
                 },
+                online: true,
                 root: false,
                 parent: {
                     ID: 'newarrivals',
@@ -250,6 +251,7 @@ class Product {
                                 return null;
                         }
                     },
+                    online: true,
                     root: true,
                     parent: {
                         ID: 'root',
