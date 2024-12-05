@@ -287,9 +287,9 @@ function enableInstantSearch(config) {
                                         <div class="price">
                                             ${isPricingLazyLoad && html`<span class="price-placeholder" data-product-id="${productId}"></span>`}
                                             ${!isPricingLazyLoad && html`
-                                                ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
+                                                ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price) || (hit.highestPriceBookPrice && hit.highestPriceBookPrice > hit.displayPrice)) && html`
                                                     <span class="strike-through list">
-                                                         <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
+                                                         <span class="value"> ${hit.currencySymbol} ${((hit.promotionalPrice && hit.promotionalPrice < hit.price) || (hit.displayPrice < hit.price)) ? hit.price : hit.highestPriceBookPrice} </span>
                                                     </span>
                                                 `}
                                                 <span class="sales">
@@ -332,29 +332,7 @@ function enableInstantSearch(config) {
                         if (item.price && item.price[algoliaData.currencyCode] !== null) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
-                        // If no promotionalPrice, use the pricebooks to display the strikeout price
-                        if (!item.promotionalPrice &&
-                            item.pricebooks &&
-                            item.pricebooks[algoliaData.currencyCode] &&
-                            item.pricebooks[algoliaData.currencyCode].length > 0
-                        ) {
-                            const prices = item.pricebooks[algoliaData.currencyCode].filter(pricebook => {
-                                if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
-                                    return false;
-                                }
-                                if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
-                                    return false;
-                                }
-                                return true;
-                            }).map(pricebook => pricebook.price);
-                            const maxPrice = prices.reduce((acc, currentValue) => {
-                                return Math.max(acc, currentValue);
-                            });
-                            if (maxPrice > item.price) {
-                                item.promotionalPrice = item.price;
-                                item.price = maxPrice;
-                            }
-                        }
+
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
@@ -385,6 +363,10 @@ function enableInstantSearch(config) {
                         var { price, calloutMsg } = calculateDisplayPrice(item);
                         item.displayPrice = price;
                         item.calloutMsg = calloutMsg;
+
+                        item.highestPriceBookPrice = item.pricebooks && item.pricebooks[algoliaData.currencyCode] && item.pricebooks[algoliaData.currencyCode].length > 0 ? item.pricebooks[algoliaData.currencyCode].reduce((max, pricebook) => {
+                            return Math.max(max, pricebook.price);
+                        }, 0) : undefined;
 
                         // Master-level indexing
                         if (item.variants) {
@@ -457,6 +439,10 @@ function enableInstantSearch(config) {
 
                                 item.displayPrice = variantPrice;
                                 item.calloutMsg = variantCalloutMsg;
+
+                                item.highestPriceBookPrice = selectedVariant.pricebooks && selectedVariant.pricebooks[algoliaData.currencyCode] && selectedVariant.pricebooks[algoliaData.currencyCode].length > 0 ? selectedVariant.pricebooks[algoliaData.currencyCode].reduce((max, pricebook) => {
+                                    return Math.max(max, pricebook.price);
+                                }, 0) : undefined;
                             }
                         }
                         return item;
@@ -792,8 +778,20 @@ function calculateDisplayPrice(item) {
         }
     }
 
+    if (item.pricebooks && item.pricebooks[algoliaData.currencyCode] && item.pricebooks[algoliaData.currencyCode].length > 0) {
+
+        const lowestPrice = item.pricebooks[algoliaData.currencyCode].reduce((min, pricebook) => {
+            return Math.min(min, pricebook.price);
+        }, Infinity);
+
+        return {
+            price: lowestPrice,
+            calloutMsg: '',
+        }
+    }
+
     return {
-        price: item.price,
+        price: algoliaData.recordModel === 'master-level' ? (variant.price[algoliaData.currencyCode] ? variant.price[algoliaData.currencyCode] : variant.price) : item.price,
         calloutMsg: '',
     }
 }
