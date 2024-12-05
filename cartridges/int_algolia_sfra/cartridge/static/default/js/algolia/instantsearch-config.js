@@ -166,6 +166,22 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.newArrivals
             }),
 
+            toggleRefinementWithPanel({
+                container: '#algolia-newarrival-placeholder',
+                attribute: 'newArrival',
+                templates: {
+                    labelText(data, { html }) {
+                        return html`
+                            <a style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-square-o'}"></i>
+                                <span> ${algoliaData.strings.newArrivals}</span>
+                            </a>
+                        `;
+                    },
+                },
+                panelTitle: algoliaData.strings.newArrivals
+            }),
+
             refinementListWithPanel({
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
@@ -303,7 +319,7 @@ function enableInstantSearch(config) {
                                 </div>
                             </div>
                         `;
-                    }, 
+                    },
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
@@ -557,6 +573,15 @@ function enableInstantSearch(config) {
     }
 
     /**
+     * Builds a refinement toggle with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
+    function toggleRefinementWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.toggleRefinement)(options)
+    }
+
+    /**
      * Builds a range input with the Panel widget
      * @param {Object} options Options object
      * @returns {Object} The Panel widget
@@ -663,7 +688,7 @@ function fetchPromoPrices(productIDs) {
 
     // Filter out already fetched product IDs
     const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
-    
+
     if (unfetchedProductIDs.length === 0) return Promise.resolve();
 
     return $.ajax({

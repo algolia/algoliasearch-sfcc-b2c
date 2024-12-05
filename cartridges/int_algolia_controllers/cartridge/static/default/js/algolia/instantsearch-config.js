@@ -138,6 +138,17 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.newArrivals
             }),
 
+            toggleRefinementWithPanel({
+                container: '#algolia-newarrival-placeholder',
+                attribute: 'newArrival',
+                templates: {
+                    labelText(data, { html }) {
+                        return html`<span> ${algoliaData.strings.newArrivals}</span>`;
+                    },
+                },
+                panelTitle: algoliaData.strings.newArrivals,
+            }),
+
             refinementListWithPanel({
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
@@ -328,6 +339,15 @@ function enableInstantSearch(config) {
      */
     function refinementListWithPanel(options) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(options)
+    }
+
+    /**
+     * Builds a refinement toggle with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
+    function toggleRefinementWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.toggleRefinement)(options)
     }
 
     /**
