@@ -98,8 +98,8 @@ var specialValueHandlers = {
     newArrivalsCategory: function(productModel) {
         if (!empty(productModel.categories)) {
             for (var i = 0; i < productModel.categories.length; i += 1) {
-                var rootCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
-                if (rootCategoryId === NEW_ARRIVALS_CATEGORY_ID) {
+                var topLevelCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
+                if (topLevelCategoryId === NEW_ARRIVALS_CATEGORY_ID) {
                     return createAlgoliaLocalizedCategoryObject(productModel.categories[i]);
                 }
             }
@@ -109,8 +109,8 @@ var specialValueHandlers = {
     newArrival: function(productModel) {
         if (!empty(productModel.categories)) {
             for (var i = 0; i < productModel.categories.length; i += 1) {
-                var rootCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
-                if (rootCategoryId === NEW_ARRIVALS_CATEGORY_ID) {
+                var topLevelCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
+                if (topLevelCategoryId === NEW_ARRIVALS_CATEGORY_ID) {
                     return true;
                 }
             }
