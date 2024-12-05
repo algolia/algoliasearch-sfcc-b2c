@@ -67,7 +67,7 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 const AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 const algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig')
 const attributes = algoliaProductConfig.defaultAttributes_v2.concat(['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
-    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups', 'custom.algoliaTest']);
+    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups', 'custom.algoliaTest', 'categoryPageId']);
 
 function setupMockConfig(customAttributes) {
     jest.resetModules();
@@ -101,6 +101,10 @@ describe('algoliaLocalizedProduct', function () {
                     {
                         id: 'newarrivals-womens',
                         name: 'Womens',
+                    },
+                    {
+                        id: 'newarrivals',
+                        name: 'New Arrivals',
                     }
                 ],
                 [
@@ -117,6 +121,13 @@ describe('algoliaLocalizedProduct', function () {
                         name: 'Womens',
                     }
                 ]
+            ],
+            categoryPageId: [
+                "newarrivals",
+                "newarrivals-womens",
+                "womens",
+                "womens-clothing",
+                "womens-clothing-bottoms",
             ],
             __primary_category: {
                 0: 'Womens',
@@ -204,6 +215,10 @@ describe('algoliaLocalizedProduct', function () {
                     {
                         id: 'newarrivals-womens',
                         name: 'Femmes',
+                    },
+                    {
+                        id: 'newarrivals',
+                        name: 'Nouveaux arrivages',
                     }
                 ],
                 [
@@ -220,6 +235,13 @@ describe('algoliaLocalizedProduct', function () {
                         name: 'Femmes',
                     }
                 ]
+            ],
+            categoryPageId: [
+                "newarrivals",
+                "newarrivals-womens",
+                "womens",
+                "womens-clothing",
+                "womens-clothing-bottoms",
             ],
             __primary_category: {
                 0: 'Femmes',

@@ -213,6 +213,9 @@ var attributeConfig_v2 = {
     categories: {
         localized: true
     },
+    categoryPageId: {
+        localized: true,
+    },
     color: {
         localized: true,
         variantAttribute: true,

@@ -183,6 +183,36 @@ function computePrimaryCategoryHierarchicalFacets(categories, primaryCategoryId)
 }
 
 /**
+ * Get the category ids of each level of a category hierarchy
+ * Example:
+ *  For the `mens-clothing-shorts` category, who has the following hierarchy:
+ *   |_`mens`
+ *     |_`mens-clothing`
+ *       |_`mens-clothing-shorts`
+ *  The function returns: ['mens', 'mens-clothing', 'mens-clothing-shorts']
+ *
+ * @param {dw.catalog.Category} category
+ * @return {string[]} an array containing the categoryIds of each level, ordered from the root
+ */
+function getCategoryHierarchyIds(category) {
+    var res = [];
+    if (empty(category)) {
+        return res;
+    }
+
+    res.unshift(category.ID);
+    var currentCategory = category;
+    while (!currentCategory.topLevel && !currentCategory.root) {
+        currentCategory = currentCategory.parent;
+        if (!currentCategory.online) { // If a parent category is not online, we don't want to index anything
+            return [];
+        }
+        res.unshift(currentCategory.ID);
+    }
+    return res;
+}
+
+/**
  * Handler complex and calculated Product attributes
  */
 var aggregatedValueHandlers = {
@@ -208,6 +238,22 @@ var aggregatedValueHandlers = {
             .map(function (category) {
                 return getCategoryFlatTree(category);
             });
+    },
+    categoryPageId: function (product) {
+        var res = [];
+        var productCategories = product.getOnlineCategories();
+        productCategories = empty(productCategories) ? [] : productCategories.toArray();
+
+        if (product.isVariant()) {
+            var masterProductCategories = product.masterProduct.getOnlineCategories();
+            masterProductCategories = empty(masterProductCategories) ? [] : masterProductCategories.toArray();
+            productCategories = productCategories.concat(masterProductCategories);
+        }
+
+        productCategories.forEach(function (category) {
+            res = res.concat(getCategoryHierarchyIds(category));
+        });
+        return res;
     },
     primary_category_id: function (product) {
         var result = null;
