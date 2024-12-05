@@ -75,4 +75,10 @@ describe('customizeLocalizedProductModel (jobs v2)', () => {
         productModelCustomizer.customizeLocalizedProductModel(product, []);
         expect(product).not.toHaveProperty('newArrivalsCategory');
     });
+
+    test('newArrival', () => {
+        productModelCustomizer.customizeLocalizedProductModel(product, ['newArrival']);
+        expect(product).toHaveProperty('newArrival');
+        expect(product.newArrival).toBe(true);
+    });
 });

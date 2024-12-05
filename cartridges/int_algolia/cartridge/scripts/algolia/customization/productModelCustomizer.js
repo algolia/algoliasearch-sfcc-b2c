@@ -93,6 +93,32 @@ function createAlgoliaLocalizedCategoryObject(category) {
     return result;
 }
 
+var NEW_ARRIVALS_CATEGORY_ID = 'newarrivals';
+var specialValueHandlers = {
+    newArrivalsCategory: function(productModel) {
+        if (!empty(productModel.categories)) {
+            for (var i = 0; i < productModel.categories.length; i += 1) {
+                var rootCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
+                if (rootCategoryId === NEW_ARRIVALS_CATEGORY_ID) {
+                    return createAlgoliaLocalizedCategoryObject(productModel.categories[i]);
+                }
+            }
+        }
+        return null;
+    },
+    newArrival: function(productModel) {
+        if (!empty(productModel.categories)) {
+            for (var i = 0; i < productModel.categories.length; i += 1) {
+                var rootCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
+                if (rootCategoryId === NEW_ARRIVALS_CATEGORY_ID) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+
 /**
  * Customize a Localized Algolia Product.
  * Add extra properties to the product model.
@@ -100,22 +126,12 @@ function createAlgoliaLocalizedCategoryObject(category) {
  * @param {Array} algoliaAttributes - The attributes to index
  */
 function customizeLocalizedProductModel(productModel, algoliaAttributes) {
-    var CATEGORY_ATTRIBUTE = 'newArrivalsCategory';
-    var CATEGORY_ID = 'newarrivals';
-
-    if (algoliaAttributes.indexOf(CATEGORY_ATTRIBUTE) >= 0) {
-        productModel[CATEGORY_ATTRIBUTE] = null;
-
-        if (!empty(productModel.categories)) {
-            for (var i = 0; i < productModel.categories.length; i += 1) {
-                var rootCategoryId = productModel.categories[i][productModel.categories[i].length - 1].id;
-                if (rootCategoryId === CATEGORY_ID) {
-                    productModel[CATEGORY_ATTRIBUTE] = createAlgoliaLocalizedCategoryObject(productModel.categories[i]);
-                    break;
-                }
-            }
+    var specialAttributes = ['newArrival', 'newArrivalsCategory'];
+    specialAttributes.forEach(function(attributeName) {
+        if (algoliaAttributes.indexOf(attributeName) >= 0 && specialValueHandlers[attributeName]) {
+            productModel[attributeName] = specialValueHandlers[attributeName](productModel);
         }
-    }
+    })
 }
 
 module.exports = {
