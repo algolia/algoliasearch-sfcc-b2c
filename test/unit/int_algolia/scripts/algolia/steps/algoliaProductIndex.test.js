@@ -86,14 +86,14 @@ describe('beforeStep', () => {
     test('defaultAttributes', () => {
         mockAdditionalAttributes = [];
         job.beforeStep({}, stepExecution);
-        expect(job.__getAttributesToSend()).toStrictEqual(['name', 'primary_category_id',
-            'categories', 'in_stock', 'price', 'image_groups', 'url']);
+        expect(job.__getAttributesToSend()).toStrictEqual(['name', 'categoryPageId',
+            '__primary_category', 'in_stock', 'price', 'image_groups', 'url']);
     });
     test('no duplicated attributes', () => {
         mockAdditionalAttributes = ['name'];
         job.beforeStep({}, stepExecution);
-        expect(job.__getAttributesToSend()).toStrictEqual(['name', 'primary_category_id',
-            'categories', 'in_stock', 'price', 'image_groups', 'url']);
+        expect(job.__getAttributesToSend()).toStrictEqual(['name', 'categoryPageId',
+            '__primary_category', 'in_stock', 'price', 'image_groups', 'url']);
     });
     test('locales for indexing', () => {
         job.beforeStep({}, stepExecution);

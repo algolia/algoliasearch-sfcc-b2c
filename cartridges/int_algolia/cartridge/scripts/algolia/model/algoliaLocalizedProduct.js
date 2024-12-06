@@ -564,12 +564,6 @@ function algoliaLocalizedProduct(parameters) {
                 );
             }
         }
-        if (parameters.fullRecordUpdate) {
-            this._tags = ['id:' + product.ID];
-        }
-        if (this.primary_category_id && this.categories) {
-            this['__primary_category'] = computePrimaryCategoryHierarchicalFacets(this.categories, this.primary_category_id);
-        }
         productModelCustomizer.customizeLocalizedProductModel(this, attributeList);
         if (extendedProductRecordCustomizer) {
             extendedProductRecordCustomizer(this);
