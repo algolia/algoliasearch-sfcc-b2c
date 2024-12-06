@@ -143,57 +143,6 @@ function getCategoryFlatTree(category) {
 }
 
 /**
- * Compute hierarchical facets from the 'categories' field:
- * If we have the following categories:
- * [
- *   [{ id: 'newarrivals-televisions', name: 'New TVs' } ],
- *   [
- *     { id: 'electronics-televisions-flatscreen', name: 'Flat Screen' },
- *     { id: 'electronics-televisions', name: 'Televisions' },
- *     { id: 'electronics', name: 'Electronics' }
- *   ]
- * ]
- * And the primary category is "electronics-televisions-flatscreen",
- * this method returns the following object:
- * {
- *   0: "Electronics"
- *   1: "Electronics > Televisions"
- *   2: "Electronics > Televisions > Flat Screen"
- * }
- * https://www.algolia.com/doc/guides/managing-results/refine-results/faceting/#hierarchical-facets
- * @param {Array} categories - array containing one array per assigned categories, representing the category hierarchy
- * @param {string} primaryCategoryId - the id primary category
- * @returns {Object} - the primary category's hierarchical facets
- */
-function computePrimaryCategoryHierarchicalFacets(categories, primaryCategoryId) {
-    var res = {};
-
-    // Find the hierarchy that contains the primary category
-    var primaryCategoryHierarchy;
-    for (let i = 0; i < categories.length && !primaryCategoryHierarchy; ++i) {
-        for (let j = 0; j < categories[i].length && !primaryCategoryHierarchy; ++j) {
-            if (categories[i][j].id === primaryCategoryId) {
-                primaryCategoryHierarchy = categories[i];
-            }
-        }
-    }
-    if (!primaryCategoryHierarchy) {
-        return res;
-    }
-
-    // Reverse the hierarchy to have the top category first, and keep only the name
-    var reverseHierarchyNames = [];
-    for (let i = 0; i < primaryCategoryHierarchy.length; ++i) {
-        reverseHierarchyNames.unshift(primaryCategoryHierarchy[i].name);
-    }
-
-    for (let i = 0; i < reverseHierarchyNames.length; ++i) {
-        res[i] = reverseHierarchyNames.slice(0, i + 1).join(' > ');
-    }
-    return res;
-}
-
-/**
  * Compute the hierarchical facets for a given category.
  * Return an array containing the hierarchical facets, ordered from top to bottom.
  * Note: if one of the parent category is 'offline', an empty array is returned.
