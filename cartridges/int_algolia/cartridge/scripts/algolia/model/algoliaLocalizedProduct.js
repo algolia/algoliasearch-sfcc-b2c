@@ -104,6 +104,17 @@ function getPromotionalPrices(product, campaigns) {
 
 /**
  * Create category tree of Product
+ * @example
+ *  For the `mens-clothing-shorts` category, who has the following hierarchy:
+ *   |_`mens`
+ *     |_`mens-clothing`
+ *       |_`mens-clothing-shorts`
+ *  The function returns:
+ *      [
+ *          { id: 'mens-clothing-shorts', 'Shorts' }
+ *          { id: 'mens-clothing', name: 'Clothing' },
+ *          { id: 'mens', name: 'Men' },
+ *      ]
  * @param {dw.catalog.Category} category - category
  * @returns {Object} - category tree
  */
@@ -178,6 +189,43 @@ function computePrimaryCategoryHierarchicalFacets(categories, primaryCategoryId)
 
     for (let i = 0; i < reverseHierarchyNames.length; ++i) {
         res[i] = reverseHierarchyNames.slice(0, i + 1).join(' > ');
+    }
+    return res;
+}
+
+/**
+ * Compute the hierarchical facets for a given category.
+ * Return an array containing the hierarchical facets, ordered from top to bottom.
+ * Note: if one of the parent category is 'offline', an empty array is returned.
+ * @example
+ * For the `mens-clothing-shorts` category, who has the following hierarchy:
+ *  |_`mens`
+ *    |_`mens-clothing`
+ *      |_`mens-clothing-shorts`
+ * The function returns: ['Men', 'Men > Clothing', 'Men > Clothing > Shorts']
+ * @param {dw.catalog.Category} category
+ * @returns {Array}
+ */
+function getHierarchicalCategories(category) {
+    var res = [];
+    if (empty(category)) {
+        return res;
+    }
+
+    // Build an array of the category hierarchy names, e.g.: ['Men', 'Clothing', 'Shorts']
+    var currentCategory = category;
+    var categoryHierarchyNames = [currentCategory.displayName];
+    while (!currentCategory.topLevel && !currentCategory.root) {
+        currentCategory = currentCategory.parent;
+        if (!currentCategory.online) { // If a parent category is not online, don't index anything
+            return [];
+        }
+        categoryHierarchyNames.unshift(currentCategory.displayName);
+    }
+
+    // Transform it into an array of hierarchical facets: ['Men', 'Men > Clothing', 'Men > Clothing > Shorts']
+    for (let i = 0; i < categoryHierarchyNames.length; ++i) {
+        res.push(categoryHierarchyNames.slice(0, i + 1).join(' > '));
     }
     return res;
 }
@@ -264,6 +312,21 @@ var aggregatedValueHandlers = {
             result = product.primaryCategory.ID;
         }
         return result;
+    },
+    __primary_category: function (product) {
+        var res = {};
+        var primaryCategory = product.primaryCategory;
+        if (empty(primaryCategory)) {
+            primaryCategory = product.isVariant() ? product.masterProduct.primaryCategory : null;
+            if (empty(primaryCategory)) {
+                return null;
+            }
+        }
+        var hierarchicalCategories = getHierarchicalCategories(primaryCategory);
+        for (let i = 0; i < hierarchicalCategories.length; ++i) {
+            res[i] = hierarchicalCategories[i];
+        }
+        return res;
     },
     color: function (product) {
         var variationModel = product.getVariationModel();
@@ -438,6 +501,9 @@ var aggregatedValueHandlers = {
             variants.push(localizedVariant);
         }
         return variants;
+    },
+    _tags: function(product) {
+        return ['id:' + product.ID];
     }
 }
 
