@@ -24,7 +24,7 @@ test('generateVariantRecords', () => {
     const variantRecords = jobHelper.generateVariantRecords({
         masterProduct,
         locales: collectionHelper.createCollection(['fr']),
-        attributeList: ['name', 'primary_category_id', 'categories', 'in_stock', 'price', 'url', 'colorVariations'],
+        attributeList: ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'url', 'colorVariations'],
         nonLocalizedAttributes: [],
     });
     expect(variantRecords).toMatchSnapshot();
