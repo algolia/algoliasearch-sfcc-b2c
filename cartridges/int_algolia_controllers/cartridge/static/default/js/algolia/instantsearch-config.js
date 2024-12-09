@@ -316,13 +316,6 @@ function enableInstantSearch(config) {
 
     search.start();
 
-    search.on('render', function () {
-        var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
-        $(emptyFacetSelector).each(function () {
-            $(this).parents().eq(2).hide();
-        });
-    });
-
     /**
      * Generates a menu with the Panel widget
      * @param {Object} options Options object
@@ -369,8 +362,8 @@ function enableInstantSearch(config) {
         return instantsearch.widgets.panel({
             hidden: function(options) {
                 var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
-                var facet = facets.find(function(facet) { return facet.name === attribute }); // eslint-disable-line no-shadow
-                var facetExists = !!facet;
+                var attributeFacet = facets.find(function(facet) { return facet.name === attribute });
+                var facetExists = attributeFacet && attributeFacet.data;
                 return !facetExists; // hides panel if not facets selectable
             },
             templates: {
