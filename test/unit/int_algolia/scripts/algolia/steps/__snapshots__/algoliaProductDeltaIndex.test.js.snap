@@ -11,35 +11,13 @@ exports[`process default 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-          {
-            "id": "newarrivals",
-            "name": "New Arrivals",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -92,7 +70,6 @@ exports[`process default 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -112,35 +89,13 @@ exports[`process default 1`] = `
         "1": "Femmes > Vêtements",
         "2": "Femmes > Vêtements > Bas",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-          {
-            "id": "newarrivals",
-            "name": "Nouveaux arrivages",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Combo rose vif",
       "image_groups": [
@@ -193,7 +148,6 @@ exports[`process default 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Rose",
       "refinementSize": "4",
       "searchable": true,
@@ -213,35 +167,13 @@ exports[`process default 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-          {
-            "id": "newarrivals",
-            "name": "New Arrivals",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -294,7 +226,6 @@ exports[`process default 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -320,31 +251,12 @@ exports[`process master-level indexing 1`] = `
         "2": "Womens > Clothing > Bottoms",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-          {
-            "id": "newarrivals",
-            "name": "New Arrivals",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -448,7 +360,6 @@ exports[`process master-level indexing 1`] = `
       "pageDescription": "Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.",
       "pageKeywords": null,
       "pageTitle": "Floral Dress",
-      "primary_category_id": "womens-clothing-bottoms",
       "searchable": true,
       "short_description": "Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.",
       "variant": false,
@@ -480,31 +391,12 @@ exports[`process master-level indexing 1`] = `
         "2": "Femmes > Vêtements > Bas",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-          {
-            "id": "newarrivals",
-            "name": "Nouveaux arrivages",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -608,7 +500,6 @@ exports[`process master-level indexing 1`] = `
       "pageDescription": "Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.",
       "pageKeywords": null,
       "pageTitle": "Robe florale",
-      "primary_category_id": "womens-clothing-bottoms",
       "searchable": true,
       "short_description": "Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.",
       "variant": false,
@@ -640,31 +531,12 @@ exports[`process master-level indexing 1`] = `
         "2": "Womens > Clothing > Bottoms",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-          {
-            "id": "newarrivals",
-            "name": "New Arrivals",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -768,7 +640,6 @@ exports[`process master-level indexing 1`] = `
       "pageDescription": "Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.",
       "pageKeywords": null,
       "pageTitle": "Floral Dress",
-      "primary_category_id": "womens-clothing-bottoms",
       "searchable": true,
       "short_description": "Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.",
       "variant": false,
