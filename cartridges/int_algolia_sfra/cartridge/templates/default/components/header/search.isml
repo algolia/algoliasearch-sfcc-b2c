@@ -2,7 +2,7 @@
 <isif condition="${algoliaData.getPreference('Enable')}">
     <div class="site-search">
         <div id="suggestions-wrapper"
-            data-category="${pdict.cgid}"
+            data-category="${empty(pdict.cgid) ? '' : pdict.cgid}"
             data-category-display-name-path="${pdict.categoryDisplayNamePath}"
             data-category-display-name-path-separator="${pdict.categoryDisplayNamePathSeparator}"
             data-q="${empty(pdict.q) ? '' : pdict.q}"
