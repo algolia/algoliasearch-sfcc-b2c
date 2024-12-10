@@ -127,7 +127,6 @@ function removeFolderRecursively(folder, maxDate) {
     return success;
 }
 
-
 /**
  * Safely moves a file to another location
  * @param {dw.io.File} sourceFile File to move
