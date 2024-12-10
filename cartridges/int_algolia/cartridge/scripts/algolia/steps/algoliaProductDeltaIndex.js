@@ -5,6 +5,7 @@ var ProductMgr = require('dw/catalog/ProductMgr');
 var Site = require('dw/system/Site');
 var File = require('dw/io/File'); // eslint-disable-line no-redeclare
 var logger;
+const MAX_FILE_AGE_DAYS = 0; // Constant for file cleanup - files older than 60 days will be deleted
 
 // job step parameters
 var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage, paramLocalesForIndexing;
@@ -231,11 +232,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     l1_completedDir = new File(l0_deltaExportDir, '_completed');
     l1_completedDir.mkdir(); // creating "_completed" folder -- does no harm if it already exists
 
-    logger.info('Removing old files from completed directory...');
-    jobHelper.removeOldFilesFromCompleted(l1_completedDir);
-
     l1_failedDir = new File(l0_deltaExportDir, '_failed');
     l1_failedDir.mkdir();
+
+    logger.info('Removing old files from completed directory...');
+    fileHelper.removeFolderRecursively(l1_completedDir, MAX_FILE_AGE_DAYS);
+    logger.info('Removing old files from failed directory...');
+    fileHelper.removeFolderRecursively(l1_failedDir, MAX_FILE_AGE_DAYS);
 
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
