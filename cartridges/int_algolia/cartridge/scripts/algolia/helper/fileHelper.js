@@ -74,29 +74,47 @@ function getAllXMLFilesInFolder(folder) {
 }
 
 /**
- * Removes a folder and its contents recursively.
- * @param {dw.io.File} folder The folder to remove (of class File)
- * @returns {boolean} Success Boolean
+ * Recursively removes a folder and its contents that are older than a specified date.
+ * If no maxDate is provided (or if it is 0), it removes all items unconditionally.
+ *
+ * @param {dw.io.File} folder - The folder to remove (of class File)
+ * @param {number} [maxDate=0] - The maximum allowed lastModified timestamp (in ms).
+ *                               Items older than this timestamp will be removed.
+ *                               If set to 0 (the default), all items are removed.
+ * @returns {boolean} - True if removal succeeded for all targeted items, false otherwise.
  */
-function removeFolderRecursively(folder) {
+function removeFolderRecursively(folder, maxDate) {
     var success = true;
+    maxDate = maxDate || 0; // Default to 0 if not provided
 
     if (folder.exists() && folder.isDirectory()) {
-        // generate an array of the files and folders
         var files = folder.listFiles().toArray();
 
         files.forEach(function(file) {
+            var shouldRemove = true;
+            if (maxDate > 0) {
+                var lastModified = file.lastModified();
+                shouldRemove = lastModified < maxDate;
+            }
+
             if (file.isDirectory()) {
-                // recursively remove subfolders
-                success = success && removeFolderRecursively(file);
+                var subSuccess = removeFolderRecursively(file, maxDate);
+
+                if (subSuccess && shouldRemove) {
+                    subSuccess = file.remove();
+                }
+
+                success = success && subSuccess;
             } else {
-                // remove files within the folder
-                success = success && file.remove();
+                if (shouldRemove) {
+                    success = success && file.remove();
+                }
             }
         });
 
-        // remove the empty folder itself
-        success = success && folder.remove();
+        if (maxDate === 0 || folder.lastModified() < maxDate) {
+            success = success && folder.remove();
+        }
     }
 
     return success;
