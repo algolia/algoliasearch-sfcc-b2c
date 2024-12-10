@@ -93,32 +93,25 @@ function removeFolderRecursively(folder, maxDate) {
         files.forEach(function(file) {
             var shouldRemove = true;
             if (maxDate > 0) {
-                // Check if file/folder is older than maxDate
                 var lastModified = file.lastModified();
                 shouldRemove = lastModified < maxDate;
             }
 
             if (file.isDirectory()) {
-                // Recursively remove subfolder contents that meet the criteria
                 var subSuccess = removeFolderRecursively(file, maxDate);
 
-                // Attempt to remove the directory itself only if it meets the criteria and was successfully processed
                 if (subSuccess && shouldRemove) {
-                    // In case removal didn't happen in recursion (if folder was empty after recursion, it gets removed here)
-                    // If it's still there after recursion, try removing now.
                     subSuccess = file.remove();
                 }
 
                 success = success && subSuccess;
             } else {
-                // For files, remove if they meet the criteria
                 if (shouldRemove) {
                     success = success && file.remove();
                 }
             }
         });
 
-        // After processing all contents, remove the now-empty folder if it meets the criteria
         if (maxDate === 0 || folder.lastModified() < maxDate) {
             success = success && folder.remove();
         }
