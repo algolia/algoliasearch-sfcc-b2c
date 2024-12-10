@@ -57,27 +57,62 @@ function enableInstantSearch(config) {
         search.use(insightsMiddleware);
     }
 
-    if (document.querySelector('#algolia-category-title-placeholder')) {
-        search.addWidgets([
-            instantsearch.widgets.breadcrumb({
-                container: '#algolia-category-title-placeholder',
-                attributes: [
-                    '__primary_category.0',
-                    '__primary_category.1',
-                    '__primary_category.2'
-                ],
-                templates: {
-                    home: '',
-                    separator: ''
-                },
-                transformItems: function (items) {
-                    return items.slice(-1); // keep only last item
-                }
-            })
-        ])
-    }
-
     if (document.querySelector('#algolia-searchbox-placeholder')) {
+        if (config.categoryId) {
+            // Category page: filter on categoryPageId
+            // doc: https://www.algolia.com/doc/guides/solutions/ecommerce/browse/tutorials/category-pages/
+            search.addWidgets([
+                instantsearch.widgets.configure({
+                    filters: `categoryPageId: '${config.categoryId}'`,
+                }),
+            ]);
+        } else {
+            // Search results page: display the categories hierarchy and the "Reset" button
+            search.addWidgets([
+                instantsearch.widgets.clearRefinements({
+                    container: '#algolia-clear-refinements-placeholder',
+                    cssClasses: {
+                        root: 'secondary-bar col-12 offset-sm-4 offset-md-0 col-sm-4 col-md-12',
+                        button: 'btn btn-block btn-outline-primary',
+                        disabledButton: 'disabled'
+                    },
+                    templates: {
+                        resetLabel: algoliaData.strings.reset
+                    }
+                }),
+                hierarchicalMenuWithPanel({
+                    container: '#algolia-categories-list-placeholder',
+                    attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
+                    templates: {
+                        item(data, { html }) {
+                            return html`
+                                <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                    <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                    <span class="${data.cssClasses.label}"> ${data.label}</span>
+                                </a>
+                            `
+                        },
+                    },
+                    panelTitle: algoliaData.strings.categoryPanelTitle
+                }),
+                hierarchicalMenuWithPanel({
+                    container: '#algolia-newarrivals-list-placeholder',
+                    attributes: ['newArrivalsCategory.0', 'newArrivalsCategory.1'],
+                    templates: {
+                        item(data, { html }) {
+                            return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                        },
+                    },
+                    panelTitle: algoliaData.strings.newArrivals
+                }),
+            ]);
+        }
+
         search.addWidgets([
             instantsearch.widgets.configure({
                 distinct: true,
@@ -121,49 +156,6 @@ function enableInstantSearch(config) {
                     {label: algoliaData.strings.priceAsc, value: productsIndexPriceAsc},
                     {label: algoliaData.strings.priceDesc, value: productsIndexPriceDesc}
                 ]
-            }),
-            instantsearch.widgets.clearRefinements({
-                container: '#algolia-clear-refinements-placeholder',
-                cssClasses: {
-                    root: 'secondary-bar col-12 offset-sm-4 offset-md-0 col-sm-4 col-md-12',
-                    button: 'btn btn-block btn-outline-primary',
-                    disabledButton: 'disabled'
-                },
-                templates: {
-                    resetLabel: algoliaData.strings.reset
-                }
-            }),
-
-            hierarchicalMenuWithPanel({
-                container: '#algolia-categories-list-placeholder',
-                attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
-                templates: {
-                    item(data, { html }) {
-                        return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
-                            </a>
-                        `
-                    },
-                },
-                panelTitle: algoliaData.strings.categoryPanelTitle
-            }),
-
-            hierarchicalMenuWithPanel({
-                container: '#algolia-newarrivals-list-placeholder',
-                attributes: ['newArrivalsCategory.0', 'newArrivalsCategory.1'],
-                templates: {
-                    item(data, { html }) {
-                        return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
-                            </a>
-                        `
-                    },
-                },
-                panelTitle: algoliaData.strings.newArrivals
             }),
 
             toggleRefinementWithPanel({
