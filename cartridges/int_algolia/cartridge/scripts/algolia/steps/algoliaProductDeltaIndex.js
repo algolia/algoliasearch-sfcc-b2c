@@ -231,6 +231,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     l1_completedDir = new File(l0_deltaExportDir, '_completed');
     l1_completedDir.mkdir(); // creating "_completed" folder -- does no harm if it already exists
 
+    logger.info('Removing old files from completed directory...');
+    jobHelper.removeOldFilesFromCompleted(l1_completedDir);
+
     l1_failedDir = new File(l0_deltaExportDir, '_failed');
     l1_failedDir.mkdir();
 

@@ -1,6 +1,7 @@
 'use strict';
 
 var algoliaLogger = require('dw/system/Logger').getLogger('algolia');
+const MAX_FILE_AGE_DAYS = 60; // Constant for file cleanup - files older than 60 days will be deleted
 
 /**
  * Function to convert array to XML object
@@ -669,6 +670,37 @@ function getDefaultAttributeConfig(attributeName) {
     };
 }
 
+/**
+ * Removes files and folders older than MAX_FILE_AGE_DAYS from the completed folder.
+ * @param {dw.io.File} completedDir - The "_completed" directory
+ */
+function removeOldFilesFromCompleted(completedDir) {
+    if (!completedDir || !completedDir.exists()) {
+        return;
+    }
+
+    var now = new Date().getTime();
+    var files = completedDir.listFiles();
+    if (files && files.length > 0) {
+        for (var i = 0; i < files.length; i++) {
+            var file = files[i];
+            var lastModified = file.lastModified();
+            var ageInDays = (now - lastModified) / (1000 * 60 * 60 * 24);
+
+            if (ageInDays > MAX_FILE_AGE_DAYS) {
+                if (file.isDirectory()) {
+                    // remove folder recursively
+                    var fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
+                    fileHelper.removeFolderRecursively(file);
+                } else {
+                    file.remove();
+                }
+            }
+        }
+    }
+}
+
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -696,5 +728,6 @@ module.exports = {
     getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,
 
-    getDefaultAttributeConfig: getDefaultAttributeConfig
+    getDefaultAttributeConfig: getDefaultAttributeConfig,
+    removeOldFilesFromCompleted: removeOldFilesFromCompleted
 };
