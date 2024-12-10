@@ -5,7 +5,7 @@ var ProductMgr = require('dw/catalog/ProductMgr');
 var Site = require('dw/system/Site');
 var File = require('dw/io/File'); // eslint-disable-line no-redeclare
 var logger;
-const MAX_FILE_AGE_DAYS = 0; // Constant for file cleanup - files older than 60 days will be deleted
+const MAX_FILE_AGE_DAYS = 60; // Constant for file cleanup - files older than 60 days will be deleted
 
 // job step parameters
 var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage, paramLocalesForIndexing;
