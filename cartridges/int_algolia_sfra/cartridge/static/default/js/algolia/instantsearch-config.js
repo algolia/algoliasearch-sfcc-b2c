@@ -744,22 +744,38 @@ function determinePrices(item, algoliaData, activeCustomerPromos) {
     let strikeoutPrice = null;
     let calloutMsg = '';
 
-    if (item.pricebooks && item.pricebooks[algoliaData.currencyCode]) {
-        const { computedPrice } = applyPricebooks(item, algoliaData);
-        if (computedPrice !== null) {
-            if (computedPrice < displayPrice) {
-                strikeoutPrice = displayPrice; 
-                displayPrice = computedPrice; 
-            } else if (computedPrice > displayPrice) {
-                // If pricebooks show a higher original price
-                strikeoutPrice = computedPrice;
-            }
-        }
-    }
-
+    // Apply promotional price if available
     if (item.promotionalPrice && item.promotionalPrice < item.price) {
         strikeoutPrice = item.price;
         displayPrice = item.promotionalPrice;
+    }
+    // Apply pricebooks only if promotionalPrice is not set
+    else if (
+        !item.promotionalPrice &&
+        item.pricebooks &&
+        item.pricebooks[algoliaData.currencyCode] &&
+        item.pricebooks[algoliaData.currencyCode].length > 0
+    ) {
+        const prices = item.pricebooks[algoliaData.currencyCode]
+            .filter(pricebook => {
+                if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
+                    return false;
+                }
+                if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
+                    return false;
+                }
+                return true;
+            })
+            .map(pricebook => pricebook.price);
+
+        const maxPrice = prices.reduce((acc, currentValue) => Math.max(acc, currentValue), -Infinity);
+
+        if (maxPrice > item.price) {
+            item.promotionalPrice = item.price;
+            item.price = maxPrice;
+            displayPrice = item.price;
+            strikeoutPrice = item.promotionalPrice;
+        }
     }
 
     if (item.promotions && item.promotions[algoliaData.currencyCode]) {
