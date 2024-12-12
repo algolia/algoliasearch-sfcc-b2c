@@ -57,62 +57,27 @@ function enableInstantSearch(config) {
         search.use(insightsMiddleware);
     }
 
-    if (document.querySelector('#algolia-searchbox-placeholder')) {
-        if (config.categoryId) {
-            // Category page: filter on categoryPageId
-            // doc: https://www.algolia.com/doc/guides/solutions/ecommerce/browse/tutorials/category-pages/
-            search.addWidgets([
-                instantsearch.widgets.configure({
-                    filters: `categoryPageId: '${config.categoryId}'`,
-                }),
-            ]);
-        } else {
-            // Search results page: display the categories hierarchy and the "Reset" button
-            search.addWidgets([
-                instantsearch.widgets.clearRefinements({
-                    container: '#algolia-clear-refinements-placeholder',
-                    cssClasses: {
-                        root: 'secondary-bar col-12 offset-sm-4 offset-md-0 col-sm-4 col-md-12',
-                        button: 'btn btn-block btn-outline-primary',
-                        disabledButton: 'disabled'
-                    },
-                    templates: {
-                        resetLabel: algoliaData.strings.reset
-                    }
-                }),
-                hierarchicalMenuWithPanel({
-                    container: '#algolia-categories-list-placeholder',
-                    attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
-                    templates: {
-                        item(data, { html }) {
-                            return html`
-                                <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                    <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
-                                    <span class="${data.cssClasses.label}"> ${data.label}</span>
-                                </a>
-                            `
-                        },
-                    },
-                    panelTitle: algoliaData.strings.categoryPanelTitle
-                }),
-                hierarchicalMenuWithPanel({
-                    container: '#algolia-newarrivals-list-placeholder',
-                    attributes: ['newArrivalsCategory.0', 'newArrivalsCategory.1'],
-                    templates: {
-                        item(data, { html }) {
-                            return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
-                            </a>
-                        `
-                        },
-                    },
-                    panelTitle: algoliaData.strings.newArrivals
-                }),
-            ]);
-        }
+    if (document.querySelector('#algolia-category-title-placeholder')) {
+        search.addWidgets([
+            instantsearch.widgets.breadcrumb({
+                container: '#algolia-category-title-placeholder',
+                attributes: [
+                    '__primary_category.0',
+                    '__primary_category.1',
+                    '__primary_category.2'
+                ],
+                templates: {
+                    home: '',
+                    separator: ''
+                },
+                transformItems: function (items) {
+                    return items.slice(-1); // keep only last item
+                }
+            })
+        ])
+    }
 
+    if (document.querySelector('#algolia-searchbox-placeholder')) {
         search.addWidgets([
             instantsearch.widgets.configure({
                 distinct: true,
@@ -157,18 +122,45 @@ function enableInstantSearch(config) {
                     {label: algoliaData.strings.priceDesc, value: productsIndexPriceDesc}
                 ]
             }),
-
-            toggleRefinementWithPanel({
-                container: '#algolia-newarrival-placeholder',
-                attribute: 'newArrival',
+            instantsearch.widgets.clearRefinements({
+                container: '#algolia-clear-refinements-placeholder',
+                cssClasses: {
+                    root: 'secondary-bar col-12 offset-sm-4 offset-md-0 col-sm-4 col-md-12',
+                    button: 'btn btn-block btn-outline-primary',
+                    disabledButton: 'disabled'
+                },
                 templates: {
-                    labelText(data, { html }) {
+                    resetLabel: algoliaData.strings.reset
+                }
+            }),
+
+            hierarchicalMenuWithPanel({
+                container: '#algolia-categories-list-placeholder',
+                attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
+                templates: {
+                    item(data, { html }) {
                         return html`
-                            <a style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-square-o'}"></i>
-                                <span> ${algoliaData.strings.newArrivals}</span>
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
                             </a>
-                        `;
+                        `
+                    },
+                },
+                panelTitle: algoliaData.strings.categoryPanelTitle
+            }),
+
+            hierarchicalMenuWithPanel({
+                container: '#algolia-newarrivals-list-placeholder',
+                attributes: ['newArrivalsCategory.0', 'newArrivalsCategory.1'],
+                templates: {
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
                     },
                 },
                 panelTitle: algoliaData.strings.newArrivals
@@ -294,12 +286,12 @@ function enableInstantSearch(config) {
                                         </div>
                                         <div class="price">
                                             ${isPricingLazyLoad && html`<span class="price-placeholder" data-product-id="${productId}"></span>`}
+                                            ${!isPricingLazyLoad && hit.strikeoutPrice && html`
+                                                <span class="strike-through list">
+                                                    <span class="value"> ${hit.currencySymbol} ${hit.strikeoutPrice} </span>
+                                                </span>
+                                            `}
                                             ${!isPricingLazyLoad && html`
-                                                ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
-                                                    <span class="strike-through list">
-                                                         <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
-                                                    </span>
-                                                `}
                                                 <span class="sales">
                                                     <span class="value">
                                                         ${hit.currencySymbol} ${hit.displayPrice}
@@ -311,7 +303,7 @@ function enableInstantSearch(config) {
                                 </div>
                             </div>
                         `;
-                    },
+                    }, 
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
@@ -332,37 +324,17 @@ function enableInstantSearch(config) {
                                 alt: item.name + ', large',
                             }
                         }
-                        // adjusted price in user currency
+
+                        // adjusted promotionalPrice in user currency
                         if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
                             item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
                         }
+
                         // price in user currency
                         if (item.price && item.price[algoliaData.currencyCode] !== null) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
-                        // If no promotionalPrice, use the pricebooks to display the strikeout price
-                        if (!item.promotionalPrice &&
-                            item.pricebooks &&
-                            item.pricebooks[algoliaData.currencyCode] &&
-                            item.pricebooks[algoliaData.currencyCode].length > 0
-                        ) {
-                            const prices = item.pricebooks[algoliaData.currencyCode].filter(pricebook => {
-                                if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
-                                    return false;
-                                }
-                                if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
-                                    return false;
-                                }
-                                return true;
-                            }).map(pricebook => pricebook.price);
-                            const maxPrice = prices.reduce((acc, currentValue) => {
-                                return Math.max(acc, currentValue);
-                            });
-                            if (maxPrice > item.price) {
-                                item.promotionalPrice = item.price;
-                                item.price = maxPrice;
-                            }
-                        }
+
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
@@ -377,6 +349,7 @@ function enableInstantSearch(config) {
                                 indexName: item.__indexName,
                             });
                         }
+
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
@@ -389,46 +362,29 @@ function enableInstantSearch(config) {
                                 });
                             });
                         }
-                        // Calculate displayPrice
-                        var { price, calloutMsg } = calculateDisplayPrice(item);
-                        item.displayPrice = price;
-                        item.calloutMsg = calloutMsg;
 
-                        // Master-level indexing
+                        // Master-level indexing: variant selection
+                        let selectedVariant = null;
                         if (item.variants) {
-                            item.variants.forEach(variant => {
-                                variant.url = generateProductUrl({
-                                    objectID: item.objectID,
-                                    productUrl: variant.url,
-                                    queryID: item.__queryID,
-                                    indexName: item.__indexName,
-                                });
-                            });
-
-                            // 1. Find the variant matching the selected facets, or use the default variant
-                            let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
                             const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
+
                             if (colorFacets.length > 0 && sizeFacets.length > 0) {
-                                // 1.1 If both facets are selected, find the variant that match both
                                 selectedVariant = item.variants.find(variant => {
                                     return sizeFacets.includes(variant.size) && colorFacets.includes(variant.color);
                                 });
                             }
                             if (!selectedVariant && colorFacets.length > 0) {
-                                // 1.2 If we have color refinement, find one that match the selected color
                                 selectedVariant = item.variants.find(variant => {
                                     return colorFacets.includes(variant.color)
                                 });
                             }
                             if (!selectedVariant && sizeFacets.length > 0) {
-                                // 1.3 Otherwise if we have size refinement, find one that match the selected size
                                 selectedVariant = item.variants.find(variant => {
                                     return sizeFacets.includes(variant.size)
                                 });
                             }
                             if (!selectedVariant) {
-                                // 1.4 No facets selected, use the default variant
                                 selectedVariant = item.variants.find(variant => {
                                     return variant.variantID === item.defaultVariantID;
                                 }) || item.variants[0];
@@ -452,21 +408,39 @@ function enableInstantSearch(config) {
                                 }
                             }
 
-                            // 3. Get the variant price
+                            // Override item prices if variant-level data is present
                             if (selectedVariant) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
+                                } else if (selectedVariant.promotionalPrice && typeof selectedVariant.promotionalPrice === 'number') {
+                                    // In case it's already in correct currency
+                                    item.promotionalPrice = selectedVariant.promotionalPrice;
                                 }
+
                                 if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
                                     item.price = selectedVariant.price[algoliaData.currencyCode];
+                                } else if (selectedVariant.price && typeof selectedVariant.price === 'number') {
+                                    item.price = selectedVariant.price;
                                 }
-                                item.url = selectedVariant.url;
-                                let { price: variantPrice, calloutMsg: variantCalloutMsg } = calculateDisplayPrice(selectedVariant);
 
-                                item.displayPrice = variantPrice;
-                                item.calloutMsg = variantCalloutMsg;
+                                item.url = selectedVariant.url;
+                                // Also apply promotions from variant if available
+                                item.promotions = selectedVariant.promotions || item.promotions;
+                                item.pricebooks = selectedVariant.pricebooks || item.pricebooks;
                             }
                         }
+
+                        if (!isPricingLazyLoad) {
+                            const { displayPrice, strikeoutPrice, calloutMsg } = determinePrices(item, algoliaData, activeCustomerPromotions);
+                            item.displayPrice = displayPrice;
+                            item.strikeoutPrice = strikeoutPrice;
+                            item.calloutMsg = calloutMsg;
+                        } else {
+                            item.displayPrice = item.price;
+                            item.strikeoutPrice = null;
+                            item.calloutMsg = '';
+                        }
+
                         return item;
                     });
                 }
@@ -539,6 +513,11 @@ function enableInstantSearch(config) {
                 updateAllProductPrices();
             });
         }
+
+        var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
+        $(emptyFacetSelector).each(function () {
+            $(this).parents().eq(2).hide();
+        });
     });
 
     /**
@@ -560,15 +539,6 @@ function enableInstantSearch(config) {
     }
 
     /**
-     * Builds a refinement toggle with the Panel widget
-     * @param {Object} options Options object
-     * @returns {Object} The Panel widget
-     */
-    function toggleRefinementWithPanel(options) {
-        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.toggleRefinement)(options)
-    }
-
-    /**
      * Builds a range input with the Panel widget
      * @param {Object} options Options object
      * @returns {Object} The Panel widget
@@ -587,8 +557,8 @@ function enableInstantSearch(config) {
         return instantsearch.widgets.panel({
             hidden: function(options) {
                 var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
-                var attributeFacet = facets.find(function(facet) { return facet.name === attribute });
-                var facetExists = attributeFacet && attributeFacet.data;
+                var facet = facets.find(function(facet) { return facet.name === attribute }); // eslint-disable-line no-shadow
+                var facetExists = !!facet;
                 return !facetExists; // hides panel if not facets selectable
             },
             templates: {
@@ -634,29 +604,31 @@ function enableInstantSearch(config) {
                     return '';
                 }
 
+                /* eslint-disable indent */
                 return html`
                 <a onmouseover="${(e) => {
-        const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
-        const image = parent.querySelector('.tile-image');
-        const link = parent.querySelector('.image-container > a');
-        // Remove existing border effects
-        const existingSelectedSwatches = parent.querySelectorAll('.swatch-selected');
-        existingSelectedSwatches.forEach(selectedSwatch => {
-            selectedSwatch.classList.remove('swatch-selected');
-        });
-        
-        e.target.parentNode.querySelector('.swatch').classList.add("swatch-selected");
-        image.src = variantImage.dis_base_link;
-        link.href = colorVariation.variationURL;
-    }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
+                    const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
+                    const image = parent.querySelector('.tile-image');
+                    const link = parent.querySelector('.image-container > a');
+                    // Remove existing border effects
+                    const existingSelectedSwatches = parent.querySelectorAll('.swatch-selected');
+                    existingSelectedSwatches.forEach(selectedSwatch => {
+                        selectedSwatch.classList.remove('swatch-selected');
+                    });
+
+                    e.target.parentNode.querySelector('.swatch').classList.add("swatch-selected");
+                    image.src = variantImage.dis_base_link;
+                    link.href = colorVariation.variationURL;
+                }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
                     <span>
                         <img class="swatch swatch-circle mb-1 ${colorVariation.color === hit.color ? 'swatch-selected' : ''}"
                              data-index="0.0" style="background-image: url(${swatch.dis_base_link})"
                              src="${swatch.dis_base_link}" alt="${swatch.alt}"
                         />
                     </span>
-                </a>
-            `;
+                    </a>
+                `;
+                /* eslint-enable indent */
             });
         }
     }
@@ -675,7 +647,7 @@ function fetchPromoPrices(productIDs) {
 
     // Filter out already fetched product IDs
     const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
-
+    
     if (unfetchedProductIDs.length === 0) return Promise.resolve();
 
     return $.ajax({
@@ -744,7 +716,6 @@ function getPriceHtml(product) {
     return `<span class="value"> ${algoliaData.currencySymbol} ${salesPrice} </span>`;
 }
 
-
 /**
  * Build a product URL with Algolia query parameters
  * @param {string} objectID objectID
@@ -762,50 +733,105 @@ function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
 }
 
 /**
- * Calculate the display price for an item when lazy loading pricing is disabled
+ * Determine final display price, strikeout price, and calloutMsg for an item
  * @param {Object} item The item object
- * @return {number} The calculated sales price
+ * @param {Object} algoliaData The Algolia data configuration
+ * @param {Array} activeCustomerPromotions The list of active promotions
+ * @returns {Object} { displayPrice, strikeoutPrice, calloutMsg }
  */
-function calculateDisplayPrice(item) {
-    var promotions;
-    var calloutMsg = '';
-    var variant;
+function determinePrices(item, algoliaData, activeCustomerPromos) {
+    let displayPrice = item.price;
+    let strikeoutPrice = null;
+    let calloutMsg = '';
 
-    if (algoliaData.recordModel === 'master-level' && item.variants) {
-        promotions = item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
-        variant = item.variants.length > 0 ? item.variants[0] : item;
-    } else {
-        promotions = item.promotions;
-        variant = item;
-    }
-
-    if (promotions && promotions[algoliaData.currencyCode]) {
-        var productPromos = promotions[algoliaData.currencyCode];
-        var minPrice = algoliaData.recordModel === 'master-level' ? (variant.price[algoliaData.currencyCode] ? variant.price[algoliaData.currencyCode] : variant.price) : item.price;
-        for (var i = 0; i < activeCustomerPromotions.length; i++) {
-            for (var j = 0; j < productPromos.length; j++) {
-                if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < minPrice) {
-                    minPrice = productPromos[j].price;
-                    calloutMsg = activeCustomerPromotions[i].calloutMsg;
-                }
+    if (item.pricebooks && item.pricebooks[algoliaData.currencyCode]) {
+        const { computedPrice } = applyPricebooks(item, algoliaData);
+        if (computedPrice !== null) {
+            if (computedPrice < displayPrice) {
+                strikeoutPrice = displayPrice; 
+                displayPrice = computedPrice; 
+            } else if (computedPrice > displayPrice) {
+                // If pricebooks show a higher original price
+                strikeoutPrice = computedPrice;
             }
         }
+    }
 
-        return {
-            price: minPrice,
-            calloutMsg: calloutMsg,
+    if (item.promotionalPrice && item.promotionalPrice < item.price) {
+        strikeoutPrice = item.price;
+        displayPrice = item.promotionalPrice;
+    }
+
+    if (item.promotions && item.promotions[algoliaData.currencyCode]) {
+        const { promotionalPriceFromPromos, msg } = applyPromotions(item, algoliaData, activeCustomerPromos);
+        if (promotionalPriceFromPromos < displayPrice) {
+            displayPrice = promotionalPriceFromPromos;
+            calloutMsg = msg;
         }
     }
 
-    if (item.promotionalPrice) {
-        return {
-            price: item.promotionalPrice,
-            calloutMsg: '',
-        }
+    if (!strikeoutPrice) {
+        strikeoutPrice = item.price > displayPrice ? item.price : null;
     }
 
-    return {
-        price: item.price,
-        calloutMsg: '',
+    return { displayPrice, strikeoutPrice, calloutMsg };
+}
+
+/**
+ * Apply promotions to find a lower promotional price if available
+ * @param {Object} item The item
+ * @param {Object} algoliaData The Algolia data config
+ * @param {Array} activeCustomerPromotions Active promotions
+ * @returns {Object} { promotionalPriceFromPromos, msg }
+ */
+function applyPromotions(item, algoliaData, activeCustomerPromos) {
+    let promotionalPriceFromPromos = item.price;
+    let msg = '';
+
+    const productPromos = item.promotions[algoliaData.currencyCode];
+    for (var i = 0; i < activeCustomerPromos.length; i++) {
+        for (var j = 0; j < productPromos.length; j++) {
+            if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < promotionalPriceFromPromos) {
+                promotionalPriceFromPromos = productPromos[j].price;
+                msg = activeCustomerPromotions[i].calloutMsg;
+            }
+        }
     }
+    return { promotionalPriceFromPromos, msg };
+}
+
+/**
+ * Apply pricebooks to adjust prices if no promotional price was found
+ * Only consider pricebooks that are currently online
+ * @param {Object} item The item
+ * @param {Object} algoliaData The Algolia data config
+ * @returns {Object} { computedPrice, computedStrikeout }
+ */
+function applyPricebooks(item, algoliaData) {
+    const validPricebooks = item.pricebooks[algoliaData.currencyCode].filter(pricebook => {
+        if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
+            return false;
+        }
+        if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
+            return false;
+        }
+        return true;
+    });
+
+    if (validPricebooks.length === 0) {
+        return { computedPrice: null, computedStrikeout: null };
+    }
+
+    const prices = validPricebooks.map(pricebook => pricebook.price);
+    const maxPrice = prices.reduce((acc, currentValue) => Math.max(acc, currentValue), -Infinity);
+    const minPrice = prices.reduce((acc, currentValue) => Math.min(acc, currentValue), Infinity);
+
+    if (maxPrice > item.price) {
+        return { computedPrice: maxPrice, computedStrikeout: item.price };
+    }
+    if (minPrice < item.price) {
+        return { computedPrice: minPrice, computedStrikeout: item.price };
+    }
+
+    return { computedPrice: null, computedStrikeout: null };
 }
