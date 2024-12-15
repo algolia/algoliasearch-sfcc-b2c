@@ -4,10 +4,11 @@
  * Call REST service and handle common errors
  */
 
-var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
-var stringUtils = require('dw/util/StringUtils');
-const Resource = require('dw/web/Resource');
+const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+
+const stringUtils = require('dw/util/StringUtils');
+const Resource = require('dw/web/Resource');
 
 var UNEXPECTED_ERROR_CODE = '-1';
 
