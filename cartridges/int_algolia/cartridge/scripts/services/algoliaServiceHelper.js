@@ -6,6 +6,8 @@
 
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 var stringUtils = require('dw/util/StringUtils');
+const Resource = require('dw/web/Resource');
+const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 var UNEXPECTED_ERROR_CODE = '-1';
 
@@ -143,6 +145,62 @@ function callJsonService(title, service, params) {
     return callStatus;
 }
 
+/**
+ * Validates API key permissions by checking ACLs and index access
+ * @param {dw.svc.Service} service - Service instance to use for validation
+ * @returns {Object} Response indicating validation status and any error messages
+ */
+function validateAPIKey(service) {
+    const applicationID = algoliaData.getPreference('ApplicationID');
+    
+    // First check key permissions
+    const keyResponse = service.call({
+        method: 'GET',
+        url: 'https://' + applicationID + '.algolia.net/1/keys/' + algoliaData.getPreference('AdminApiKey')
+    });
+
+    if (!keyResponse.ok) {
+        return {
+            error: true,
+            errorMessage: Resource.msg('algolia.error.key.validation', 'algolia', null)
+        };
+    }
+
+    const keyData = keyResponse.object.body;
+    const requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
+    const missingACLs = requiredACLs.filter(function(acl) {
+        return keyData.acl.indexOf(acl) === -1;
+    });
+
+    if (missingACLs.length > 0) {
+        const errorMessage = Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '));
+        return {
+            error: true,
+            errorMessage: errorMessage
+        };
+    }
+
+    // Then check index access by attempting to get settings of the products index
+    const testIndex = algoliaData.calculateIndexName('products');
+    const indexResponse = service.call({
+        method: 'GET',
+        url: 'https://' + applicationID + '.algolia.net/1/indexes/' + testIndex + '/settings'
+    });
+
+    if (!indexResponse.ok) {
+        return {
+            error: true,
+            errorMessage: Resource.msg('algolia.error.index.access', 'algolia', null)
+        };
+    }
+
+    return {
+        error: false,
+        errorMessage: ''
+    };
+}
+
 module.exports.callService = callService;
 module.exports.callJsonService = callJsonService;
 module.exports.UNEXPECTED_ERROR_CODE = UNEXPECTED_ERROR_CODE;
+module.exports.validateAPIKey = validateAPIKey;

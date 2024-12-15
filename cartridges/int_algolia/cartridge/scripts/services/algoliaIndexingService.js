@@ -5,6 +5,8 @@ const System = require('dw/system/System');
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 const version = require('*/algoliaconfig').version;
+const Resource = require('dw/web/Resource');
+const serviceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 
 /**
  * Algolia Indexing Service definition file
@@ -52,4 +54,17 @@ function getService(jobInfo) {
     return indexingService;
 }
 
-module.exports.getService = getService;
+/**
+ * Validates API key permissions by checking ACLs and index access
+ * @param {Object} jobInfo - Information about the validation job
+ * @returns {Object} Response from the Algolia API
+ */
+function validateAPIKey(jobInfo) {
+    const service = getService(jobInfo);
+    return serviceHelper.validateAPIKey(service);
+}
+
+module.exports = {
+    getService: getService,
+    validateAPIKey: validateAPIKey
+};

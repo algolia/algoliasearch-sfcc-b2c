@@ -8,14 +8,15 @@ var Resource = require('dw/web/Resource');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
+var algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
+const BMHelper = require('../scripts/helper/BMHelper');
+var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 
 /**
  * @description Render default template
  * @returns {void} ISML.renderTemplate
  */
 function start() {
-    const BMHelper = require('../scripts/helper/BMHelper');
-
     var pdictValues = {
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData,
@@ -30,7 +31,30 @@ function start() {
  */
 function handleSettings() {
     var params = request.httpParameterMap;
+
     try {
+        // Get service instance from indexingService
+        const service = algoliaIndexingService.getService({
+            jobID: 'API_KEY_VALIDATION',
+            stepID: 'validatePermissions'
+        });
+
+        // Use serviceHelper to validate API key
+        const validationResult = algoliaServiceHelper.validateAPIKey(service);
+
+        if (validationResult.error) {
+            // If validation fails, render template with error message
+            var pdictValues = {
+                setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
+                algoliaData: algoliaData,
+                latestReports: BMHelper.getLatestCOReportsByJob(),
+                errorMessage: validationResult.errorMessage
+            };
+            ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+            return;
+        }
+
+        // Continue with existing settings update logic
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
         var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
         var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
