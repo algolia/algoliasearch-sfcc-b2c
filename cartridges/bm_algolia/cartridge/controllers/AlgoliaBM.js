@@ -38,17 +38,31 @@ function handleSettings() {
             jobID: 'API_KEY_VALIDATION',
             stepID: 'validatePermissions'
         });
+        var pdictValues;
 
         // Use serviceHelper to validate API key
         const validationResult = algoliaServiceHelper.validateAPIKey(service);
 
         if (validationResult.error) {
             // If validation fails, render template with error message
-            var pdictValues = {
+            pdictValues = {
                 setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
                 algoliaData: algoliaData,
                 latestReports: BMHelper.getLatestCOReportsByJob(),
-                errorMessage: validationResult.errorMessage
+                errorMessage: validationResult.errorMessage,
+                warningMessage: validationResult.warning
+            };
+            ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+            return;
+        }
+
+        // If validation succeeds but there are warnings, show them
+        if (validationResult.warning) {
+            pdictValues = {
+                setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
+                algoliaData: algoliaData,
+                latestReports: BMHelper.getLatestCOReportsByJob(),
+                warningMessage: validationResult.warning
             };
             ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
             return;

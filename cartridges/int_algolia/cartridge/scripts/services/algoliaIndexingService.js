@@ -5,7 +5,6 @@ const System = require('dw/system/System');
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 const version = require('*/algoliaconfig').version;
-const Resource = require('dw/web/Resource');
 const serviceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 
 /**

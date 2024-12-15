@@ -148,12 +148,11 @@ function callJsonService(title, service, params) {
 /**
  * Validates API key permissions by checking ACLs and index access
  * @param {dw.svc.Service} service - Service instance to use for validation
- * @returns {Object} Response indicating validation status and any error messages
+ * @returns {Object} Response indicating validation status, error messages, and warnings
  */
 function validateAPIKey(service) {
     const applicationID = algoliaData.getPreference('ApplicationID');
-    
-    // First check key permissions
+
     const keyResponse = service.call({
         method: 'GET',
         url: 'https://' + applicationID + '.algolia.net/1/keys/' + algoliaData.getPreference('AdminApiKey')
@@ -168,19 +167,27 @@ function validateAPIKey(service) {
 
     const keyData = keyResponse.object.body;
     const requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
-    const missingACLs = requiredACLs.filter(function(acl) {
-        return keyData.acl.indexOf(acl) === -1;
+    const missingACLs = requiredACLs.slice();
+    const excessiveACLs = [];
+
+    keyData.acl.forEach(function(acl) {
+        const aclIndex = missingACLs.indexOf(acl);
+        if (aclIndex === -1) {
+            excessiveACLs.push(acl);
+        } else {
+            missingACLs.splice(aclIndex, 1);
+        }
     });
 
     if (missingACLs.length > 0) {
         const errorMessage = Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '));
         return {
             error: true,
-            errorMessage: errorMessage
+            errorMessage: errorMessage,
+            warning: excessiveACLs.length > 0 ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', ')) : ''
         };
     }
 
-    // Then check index access by attempting to get settings of the products index
     const testIndex = algoliaData.calculateIndexName('products');
     const indexResponse = service.call({
         method: 'GET',
@@ -196,7 +203,8 @@ function validateAPIKey(service) {
 
     return {
         error: false,
-        errorMessage: ''
+        errorMessage: '',
+        warning: excessiveACLs.length > 0 ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', ')) : ''
     };
 }
 
