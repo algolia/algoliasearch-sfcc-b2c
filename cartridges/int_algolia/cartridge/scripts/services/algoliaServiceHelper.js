@@ -148,15 +148,15 @@ function callJsonService(title, service, params) {
 
 /**
  * Validates API key permissions by checking ACLs and index access
- * @param {dw.svc.Service} service - Service instance to use for validation
- * @returns {Object} Response indicating validation status, error messages, and warnings
+ * @param {dw.svc.Service} service - Service instance to call
+ * @param {string} applicationID - Algolia Application ID
+ * @param {string} adminApiKey - Algolia Admin API Key
+ * @returns {Object} Response indicating validation success or failure
  */
-function validateAPIKey(service) {
-    const applicationID = algoliaData.getPreference('ApplicationID');
-
+function validateAPIKey(service, applicationID, adminApiKey) {
     const keyResponse = service.call({
         method: 'GET',
-        url: 'https://' + applicationID + '.algolia.net/1/keys/' + algoliaData.getPreference('AdminApiKey')
+        url: 'https://' + applicationID + '.algolia.net/1/keys/' + adminApiKey
     });
 
     if (!keyResponse.ok) {

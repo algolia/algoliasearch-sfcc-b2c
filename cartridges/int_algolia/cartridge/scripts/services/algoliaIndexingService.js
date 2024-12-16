@@ -5,7 +5,6 @@ const System = require('dw/system/System');
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 const version = require('*/algoliaconfig').version;
-const serviceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 
 /**
  * Algolia Indexing Service definition file
@@ -15,8 +14,8 @@ const serviceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper
  * @returns {dw.svc.HTTPService} - HTTPService object
  */
 function getService(jobInfo) {
-    const applicationID = algoliaData.getPreference('ApplicationID');
-    const adminAPIKey = algoliaData.getPreference('AdminApiKey');
+    const applicationID = jobInfo.applicationID || algoliaData.getPreference('ApplicationID');
+    const adminAPIKey = jobInfo.adminApikey || algoliaData.getPreference('AdminApiKey');
 
     if (empty(applicationID) || empty(adminAPIKey)) {
         throw new Error('Indexing service: Missing credentials');
@@ -53,17 +52,7 @@ function getService(jobInfo) {
     return indexingService;
 }
 
-/**
- * Validates API key permissions by checking ACLs and index access
- * @param {Object} jobInfo - Information about the validation job
- * @returns {Object} Response from the Algolia API
- */
-function validateAPIKey(jobInfo) {
-    const service = getService(jobInfo);
-    return serviceHelper.validateAPIKey(service);
-}
 
 module.exports = {
-    getService: getService,
-    validateAPIKey: validateAPIKey
+    getService: getService
 };
