@@ -4,8 +4,11 @@
  * Call REST service and handle common errors
  */
 
-var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
-var stringUtils = require('dw/util/StringUtils');
+const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+
+const stringUtils = require('dw/util/StringUtils');
+const Resource = require('dw/web/Resource');
 
 var UNEXPECTED_ERROR_CODE = '-1';
 
@@ -143,6 +146,70 @@ function callJsonService(title, service, params) {
     return callStatus;
 }
 
+/**
+ * Validates API key permissions by checking ACLs and index access
+ * @param {dw.svc.Service} service - Service instance to call
+ * @param {string} applicationID - Algolia Application ID
+ * @param {string} adminApiKey - Algolia Admin API Key
+ * @returns {Object} Response indicating validation success or failure
+ */
+function validateAPIKey(service, applicationID, adminApiKey) {
+    const keyResponse = service.call({
+        method: 'GET',
+        url: 'https://' + applicationID + '.algolia.net/1/keys/' + adminApiKey
+    });
+
+    if (!keyResponse.ok) {
+        return {
+            error: true,
+            errorMessage: Resource.msg('algolia.error.key.validation', 'algolia', null)
+        };
+    }
+
+    const keyData = keyResponse.object.body;
+    const requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
+    const missingACLs = requiredACLs.slice();
+    const excessiveACLs = [];
+
+    keyData.acl.forEach(function(acl) {
+        const aclIndex = missingACLs.indexOf(acl);
+        if (aclIndex === -1) {
+            excessiveACLs.push(acl);
+        } else {
+            missingACLs.splice(aclIndex, 1);
+        }
+    });
+
+    if (missingACLs.length > 0) {
+        const errorMessage = Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '));
+        return {
+            error: true,
+            errorMessage: errorMessage,
+            warning: excessiveACLs.length > 0 ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', ')) : ''
+        };
+    }
+
+    const testIndex = algoliaData.calculateIndexName('products');
+    const indexResponse = service.call({
+        method: 'GET',
+        url: 'https://' + applicationID + '.algolia.net/1/indexes/' + testIndex + '/settings'
+    });
+
+    if (!indexResponse.ok) {
+        return {
+            error: true,
+            errorMessage: Resource.msg('algolia.error.index.access', 'algolia', null)
+        };
+    }
+
+    return {
+        error: false,
+        errorMessage: '',
+        warning: excessiveACLs.length > 0 ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', ')) : ''
+    };
+}
+
 module.exports.callService = callService;
 module.exports.callJsonService = callJsonService;
 module.exports.UNEXPECTED_ERROR_CODE = UNEXPECTED_ERROR_CODE;
+module.exports.validateAPIKey = validateAPIKey;

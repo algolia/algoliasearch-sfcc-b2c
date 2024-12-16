@@ -56,6 +56,9 @@ table#algolia-report-table .cell-number {
 .red {
     color: red;
 }
+.yellow {
+    color: #f0ad4e;
+}
 .narrow {
     font-family: 'Arial Narrow', Helvetica, Arial, Verdana, sans-serif;
 }

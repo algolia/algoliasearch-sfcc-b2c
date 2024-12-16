@@ -8,14 +8,15 @@ var Resource = require('dw/web/Resource');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
+var algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
+const BMHelper = require('../scripts/helper/BMHelper');
+var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 
 /**
  * @description Render default template
  * @returns {void} ISML.renderTemplate
  */
 function start() {
-    const BMHelper = require('../scripts/helper/BMHelper');
-
     var pdictValues = {
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData,
@@ -30,7 +31,34 @@ function start() {
  */
 function handleSettings() {
     var params = request.httpParameterMap;
+    var validationResult;
+    var applicationID = params.ApplicationID.value;
+    var adminApikey = params.AdminApiKey.value;
+
     try {
+        // Get service instance from indexingService
+        const service = algoliaIndexingService.getService({
+            jobID: 'API_KEY_VALIDATION',
+            stepID: 'validatePermissions',
+            applicationID: applicationID,
+            adminApikey: adminApikey
+        });
+        var pdictValues;
+
+        validationResult = algoliaServiceHelper.validateAPIKey(service, applicationID, adminApikey);
+
+        if (validationResult.error) {
+            pdictValues = {
+                setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
+                algoliaData: algoliaData,
+                latestReports: BMHelper.getLatestCOReportsByJob(),
+                errorMessage: validationResult.errorMessage,
+                warningMessage: validationResult.warning
+            };
+            ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+            return;
+        }
+
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
         var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
         var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
@@ -51,6 +79,17 @@ function handleSettings() {
         algoliaData.setPreference('EnablePricingLazyLoad', algoliaEnablePricingLazyLoad);
     } catch (error) {
         Logger.error(error);
+    }
+
+    if (validationResult.warning) {
+        pdictValues = {
+            setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
+            algoliaData: algoliaData,
+            latestReports: BMHelper.getLatestCOReportsByJob(),
+            warningMessage: validationResult.warning
+        };
+        ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+        return;
     }
 
     start();
