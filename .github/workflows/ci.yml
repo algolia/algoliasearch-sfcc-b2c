@@ -2,6 +2,8 @@ name: CI
 
 on:
   pull_request:
+    branches:
+      - develop
 
 jobs:
   pr-checks:
@@ -21,6 +23,7 @@ jobs:
       ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
       SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
       TEST_PRODUCT_ID: ${{ vars.TEST_PRODUCT_ID }}
+      TEST_MASTER_PRODUCT_ID: ${{ vars.TEST_MASTER_PRODUCT_ID }}
       SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
       SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
 
@@ -102,6 +105,7 @@ jobs:
       ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
       ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
       TEST_PRODUCT_ID: ${{ vars.TEST_PRODUCT_ID }}
+      TEST_MASTER_PRODUCT_ID: ${{ vars.TEST_MASTER_PRODUCT_ID }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -139,17 +143,32 @@ jobs:
   frontend-tests:
     runs-on: ubuntu-latest
     needs: [build, index-tests]
+    strategy:
+      matrix:
+        record-model: ['variation-level', 'master-level']
+        index-prefix: ['varx', 'basex']
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Update Site Preferences for Record Model
+        env:
+          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+          RECORD_MODEL: ${{ matrix.record-model }}
+          INDEX_PREFIX: ${{ matrix.index-prefix }}
+        run: |
+          npm ci
+          node scripts/importPreferences.js --recordModel $RECORD_MODEL --indexPrefix $INDEX_PREFIX
 
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
           install: npm ci
           browser: electron
-          headless: true
+          headed: false
           config-file: cypress.config.js
         env:
           CYPRESS_SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+          CYPRESS_RECORD_MODEL: ${{ matrix.record-model }}
+          CYPRESS_INDEX_PREFIX: ${{ matrix.index-prefix }}
           SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}

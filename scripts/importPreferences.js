@@ -16,6 +16,16 @@ const archiver = require('archiver');
         const sitesDir = path.join(siteImportDir, 'sites');
         const refArchDir = path.join(sitesDir, 'RefArch');
         const metaDir = path.join(siteImportDir, 'meta');
+        var recordModel, indexPrefix, additionalAttributes;
+        if (process.env.RECORD_MODEL === 'master-level') { 
+            recordModel = 'master-level';
+            indexPrefix = 'basex';
+            additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival';
+        } else {
+            recordModel = 'variant-level';
+            indexPrefix = 'varx';
+            additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival';
+        }
 
         fs.mkdirSync(refArchDir, { recursive: true });
         fs.mkdirSync(metaDir, { recursive: true });
@@ -25,9 +35,9 @@ const archiver = require('archiver');
 <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
     <custom-preferences>
       <all-instances>
-        <preference preference-id="Algolia_RecordModel">variant-level</preference>
-        <preference preference-id="Algolia_IndexPrefix">varx</preference>
-        <preference preference-id="Algolia_AdditionalAttributes">color,size,colorVariations,masterID,short_description,brand,name,pricebooks</preference>
+        <preference preference-id="Algolia_RecordModel">${recordModel}</preference>
+        <preference preference-id="Algolia_IndexPrefix">${indexPrefix}</preference>
+        <preference preference-id="Algolia_AdditionalAttributes">${additionalAttributes}</preference>
       </all-instances>
     </custom-preferences>
 </preferences>`;

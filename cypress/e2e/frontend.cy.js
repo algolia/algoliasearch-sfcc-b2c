@@ -1,0 +1,57 @@
+/// <reference types="cypress" />
+require('dotenv').config();
+
+describe('Algolia Search', () => {
+    beforeEach(() => {
+        const host = Cypress.env('SANDBOX_HOST');
+        
+        // Visit your website's homepage or search page
+        cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
+
+        // Wait for the page to load
+        cy.get('body', { timeout: 20000 }).should('be.visible');
+
+        // Handle the cookie consent pop-up
+        cy.get('.affirm').click();
+    });
+
+    const testSearchScenarios = [
+        {
+            name: 'variation product search',
+            query: 'TomTom Go 720',
+            expectedProduct: 'TomTom Go 720 Portable GPS Unit'
+        },
+        {
+            name: 'master product search',
+            query: 'Roll Up',
+            expectedProduct: 'Roll Up Cargo Pant'
+        }
+    ];
+
+    testSearchScenarios.forEach(scenario => {
+        it(`performs a ${scenario.name} and displays results`, () => {
+            // Type a search query
+            cy.get('#autocomplete-0-input').type(scenario.query);
+
+            // Wait for the autocomplete results to load
+            cy.get('.aa-PanelLayout', { timeout: 10000 }).should('be.visible');
+
+            // Autocomplete should contain the search query
+            cy.get('.aa-PanelLayout').should('contain', scenario.query);
+
+            // press enter
+            cy.get('#autocomplete-0-input').type('{enter}');
+
+            // Wait for results to load
+            cy.get('.search-results', { timeout: 10000 }).should('be.visible');
+
+            // Find the specific product tile
+            cy.contains('.product-tile', scenario.expectedProduct)
+                .should('be.visible')
+                .within(() => {
+                    cy.get('.price').should('be.visible');
+                    cy.get('.tile-image').should('be.visible');
+                });
+        });
+    });
+});
