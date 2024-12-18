@@ -2,14 +2,14 @@
 <extensions xmlns="http://www.demandware.com/xml/bmmodules/2007-12-11" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.demandware.com/xml/bmmodules/2007-12-11 bmext.xsd">
     <menuitem id="algolia-menu-item" site="true"  position="100">
     	<name xml:lang="x-default">Algolia</name>
-    	<short_description xml:lang="x-default">Algolia indexing</short_description>
-        <description xml:lang="x-default">Algolia indexing</description>
+    	<short_description xml:lang="x-default">Configure Algolia indexing and search</short_description>
+        <description xml:lang="x-default">Configure Algolia indexing and search</description>
     	<icon>icons/Algolia_vector_logo.png</icon>
     </menuitem>
     <menuaction id="customsubmenu_algolia" menupath="algolia-menu-item" position="100" site="true">
       <name xml:lang="x-default">Algolia</name>
-      <short_description xml:lang="x-default">Algolia indexing</short_description>
-      <description xml:lang="x-default">Algolia indexing</description>
+      <short_description xml:lang="x-default">Configure Algolia indexing and search</short_description>
+      <description xml:lang="x-default">Configure Algolia indexing and search</description>
       <exec pipeline="AlgoliaBM" node="Start"/>
       <sub-pipelines>
       	<pipeline name="AlgoliaBM-Start"/>
@@ -19,7 +19,7 @@
       </sub-pipelines>
       <parameters>
          <parameter name="menuname" value="AlgoliaBM"/>
-         <parameter name="mainmenuname" value="Algolia indexing"/>
+         <parameter name="mainmenuname" value="Configure Algolia indexing and search"/>
       </parameters>
       <icon>icons/Algolia_vector_logo.png</icon>
     </menuaction>
