@@ -94,6 +94,21 @@ describe('Extreme Content Manipulation', () => {
             expect(removeHtmlTagsAndFormat(input)).toBe(expectedOutput);
         });
     });
+
+    test('should remove content inside an <area> tag even if multiline', () => {
+        const htmlContent = `<div>
+            <area>Test 1
+                <div>
+                    <button>Test 2</button>
+                </div>
+            </area>
+            <div>
+                <span>Test 3</span>
+            </div>
+        </div>`;
+        const result = splitHtmlContent(htmlContent, 1000, 'div');
+        expect(result).toEqual(['Test 3']);
+    });
 });
 
 

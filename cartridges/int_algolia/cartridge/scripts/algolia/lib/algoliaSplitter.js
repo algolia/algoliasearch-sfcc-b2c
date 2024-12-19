@@ -33,13 +33,15 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
     sections.forEach(function(section) {
         section = StringUtils.trim(splitterBegin + section) || '';
 
-        if (!section.trim()) {
+        if (!section) {
             return;
         }
 
+        section = removeHtmlTagsAndFormat(section).trim();
 
-        //remove all HTML tags
-        section = removeHtmlTagsAndFormat(section);
+        if (!section) {
+            return;
+        }
 
         var sectionSize = new Bytes(section).getLength();
         if (sectionSize > maxByteSize) {
@@ -61,11 +63,18 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
  * @returns {string} Sanitized content
  */
 function removeIgnoredContent(content) {
-    //remove restricted tags and their content
     IGNORED_TAGS.forEach(function(tag) {
-        content = content.replace(new RegExp('<' + tag + '.*?' + tag + '>', 'g'), '');
+        // Remove entire <tag ...>...</tag> blocks (multiline)
+        content = content.replace(
+            new RegExp('<' + tag + '[^>]*>[\\s\\S]*?<\\/' + tag + '>', 'gi'),
+            ''
+        );
+        // Remove self-closing tags <tag ... />
+        content = content.replace(
+            new RegExp('<' + tag + '[^>]*?\\/?>', 'gi'),
+            ''
+        );
     });
-
     return content;
 }
 
