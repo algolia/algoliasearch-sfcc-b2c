@@ -29,7 +29,7 @@ const archiver = require('archiver');
 
         fs.mkdirSync(refArchDir, { recursive: true });
         fs.mkdirSync(metaDir, { recursive: true });
-        console.log('Directories created successfully.');
+        console.log('Directories created successfully for recordModel: ' + recordModel + ' and indexPrefix: ' + indexPrefix);
 
         const preferencesXmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
