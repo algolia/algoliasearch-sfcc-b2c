@@ -5,7 +5,6 @@ var Currency = require('dw/util/Currency');
 var PriceBookMgr = require('dw/catalog/PriceBookMgr');
 var PromotionMgr = require('dw/campaign/PromotionMgr');
 var URLUtils = require('dw/web/URLUtils');
-var ProductAvailabilityModel = require('dw/catalog/ProductAvailabilityModel');
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
@@ -360,7 +359,7 @@ var aggregatedValueHandlers = {
         let availabilityModel = product.getAvailabilityModel();
 
         if (product.isMaster() || product.isVariationGroup()) {
-            return availabilityModel.availabilityStatus === ProductAvailabilityModel.AVAILABILITY_STATUS_IN_STOCK;
+            return availabilityModel.availabilityStatus === 'IN_STOCK';
         }
 
         let inventoryRecord = availabilityModel.getInventoryRecord();
