@@ -175,6 +175,15 @@ Setting this preference replaces the first two segments, the final index name be
                 </value-definitions>
             </attribute-definition>
 
+            <attribute-definition attribute-id="Algolia_IndexOutofStock">
+                <display-name xml:lang="x-default">Index Out of Stock</display-name>
+                <description xml:lang="x-default">Index out of stock products</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_LocalesForIndexing">
                 <display-name xml:lang="x-default">Locales for indexing</display-name>
                 <description xml:lang="x-default">List of locales that will be used by the indexing jobs</description>

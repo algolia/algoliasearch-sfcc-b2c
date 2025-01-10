@@ -604,6 +604,8 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
 function generateVariantRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+    const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+    const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 
     const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
     const variants = parameters.masterProduct.getVariants();
@@ -623,6 +625,16 @@ function generateVariantRecords(parameters) {
 
     for (let v = 0; v < variants.size(); ++v) {
         var variant = variants[v];
+
+        let indexOutofStock = algoliaData.getPreference('IndexOutofStock');
+        let inventoryRecord = variant.getAvailabilityModel().getInventoryRecord(); // can be null
+
+        if (!indexOutofStock) {
+            if (!inventoryRecord || (inventoryRecord && inventoryRecord.getATS().getValue() < ALGOLIA_IN_STOCK_THRESHOLD)) {
+                continue;
+            }
+        }
+
         if (!productFilter.isInclude(variant)) {
             continue;
         }

@@ -504,3 +504,63 @@ describe('algoliaLocalizedProduct overriding custom attributes', function () {
         expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
     });
 });
+
+describe('IndexOutofStock logic tests', function () {
+    let AlgoliaLocalizedProduct;
+    let ProductMock;
+
+    beforeEach(() => {
+        jest.resetModules();
+        ProductMock = require('../../../../../mocks/dw/catalog/Variant');
+    });
+
+    test('should skip out-of-stock variants if IndexOutofStock = false', function () {
+        jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
+            return {
+                getSetOfArray: function () {
+                    return []; 
+                },
+                getPreference: function (id) {
+                    if (id === 'InStockThreshold') return 1;
+                    if (id === 'IndexOutofStock') return false;
+                    return null;
+                }
+            };
+        }, { virtual: true });
+
+        AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+
+        const product = new ProductMock({
+            inventory: { atsValue: 0 }
+        });
+
+        const localizedProduct = new AlgoliaLocalizedProduct({ product, attributeList: ['objectID'] });
+
+        expect(localizedProduct.objectID).toBeNull();
+    });
+
+    test('should index out-of-stock variants if IndexOutofStock = true', function () {
+        jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
+            return {
+                getSetOfArray: function () {
+                    return []; 
+                },
+                getPreference: function (id) {
+                    if (id === 'InStockThreshold') return 1;
+                    if (id === 'IndexOutofStock') return true; 
+                    return null;
+                }
+            };
+        }, { virtual: true });
+
+        AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+
+        const product = new ProductMock({
+            inventory: { atsValue: 0 }
+        });
+
+        const localizedProduct = new AlgoliaLocalizedProduct({ product, attributeList: ['objectID'] });
+
+        expect(localizedProduct).not.toBeNull();
+    });
+});

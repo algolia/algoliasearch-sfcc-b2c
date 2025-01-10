@@ -441,6 +441,15 @@ var aggregatedValueHandlers = {
         const variantsIt = product.variants.iterator();
         while (variantsIt.hasNext()) {
             var variant = variantsIt.next();
+
+            let indexOutofStock = algoliaData.getPreference('IndexOutofStock');
+            let inventoryRecord = variant.getAvailabilityModel().getInventoryRecord(); // can be null
+            if (!indexOutofStock) {
+                if (!inventoryRecord || (inventoryRecord && inventoryRecord.getATS().getValue() < ALGOLIA_IN_STOCK_THRESHOLD)) {
+                    continue;
+                }
+            }
+
             var localizedVariant = new algoliaLocalizedProduct({
                 product: variant,
                 locale: request.getLocale(),
@@ -473,7 +482,7 @@ function algoliaLocalizedProduct(parameters) {
     const attributeList = parameters.attributeList;
     const baseModel = parameters.baseModel;
 
-    request.setLocale(parameters.locale || 'default');
+    request.setLocale(parameters.locale || 'default');    
 
     if (empty(product) || empty(attributeList)) {
         this.id = null;
