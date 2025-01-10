@@ -506,12 +506,11 @@ describe('algoliaLocalizedProduct overriding custom attributes', function () {
 });
 
 describe('IndexOutofStock logic tests', function () {
-    let AlgoliaLocalizedProduct;
-    let ProductMock;
+    var ProductMockObj;
 
     beforeEach(() => {
         jest.resetModules();
-        ProductMock = require('../../../../../mocks/dw/catalog/Variant');
+        ProductMockObj = require('../../../../../mocks/dw/catalog/Variant');
     });
 
     test('should skip out-of-stock variants if IndexOutofStock = false', function () {
@@ -528,9 +527,8 @@ describe('IndexOutofStock logic tests', function () {
             };
         }, { virtual: true });
 
-        AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
-        const product = new ProductMock({
+        const product = new ProductMockObj({
             inventory: { atsValue: 0 }
         });
 
@@ -553,9 +551,7 @@ describe('IndexOutofStock logic tests', function () {
             };
         }, { virtual: true });
 
-        AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
-
-        const product = new ProductMock({
+        const product = new ProductMockObj({
             inventory: { atsValue: 0 }
         });
 
