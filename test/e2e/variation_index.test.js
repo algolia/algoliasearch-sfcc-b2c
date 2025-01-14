@@ -102,7 +102,7 @@ describe('Algolia Integration', () => {
         const results = await client.searchSingleIndex({
             indexName: process.env.ALGOLIA_INDEX_NAME || 'varx__products__en_US',
             searchParams: {query: sfccProduct.name.default},
-          });
+        });
 
         // Add validation for Algolia results
         if (!results.hits || !results.hits.length) {
