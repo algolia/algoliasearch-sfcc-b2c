@@ -33,10 +33,6 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
     sections.forEach(function(section) {
         section = StringUtils.trim(splitterBegin + section) || '';
 
-        if (!section) {
-            return;
-        }
-
         section = removeHtmlTagsAndFormat(section).trim();
 
         if (!section) {
@@ -140,5 +136,6 @@ function getMaxBodySize(content) {
 module.exports = {
     splitHtmlContent: splitHtmlContent,
     getMaxBodySize: getMaxBodySize,
-    removeHtmlTagsAndFormat: removeHtmlTagsAndFormat
+    removeHtmlTagsAndFormat: removeHtmlTagsAndFormat,
+    removeIgnoredContent: removeIgnoredContent
 };
