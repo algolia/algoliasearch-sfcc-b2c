@@ -5,7 +5,6 @@
  */
 
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
-const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 const stringUtils = require('dw/util/StringUtils');
 const Resource = require('dw/web/Resource');
