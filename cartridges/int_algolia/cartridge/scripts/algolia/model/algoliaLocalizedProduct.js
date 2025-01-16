@@ -482,7 +482,7 @@ function algoliaLocalizedProduct(parameters) {
     const attributeList = parameters.attributeList;
     const baseModel = parameters.baseModel;
 
-    request.setLocale(parameters.locale || 'default');    
+    request.setLocale(parameters.locale || 'default');
 
     if (empty(product) || empty(attributeList)) {
         this.id = null;
