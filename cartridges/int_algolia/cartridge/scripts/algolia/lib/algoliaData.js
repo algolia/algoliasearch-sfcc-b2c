@@ -250,10 +250,11 @@ function getIndexPrefix() {
  * its value will be used as a prefix instead of the first part of the hostname and the siteID
  * @param {string} type type of indices: products | categories
  * @param {string} locale optional: requested locale
+ * @param {string} prefix optional: index prefix
  * @returns {string} index name
  */
-function calculateIndexName(type, locale) {
-    return getIndexPrefix() + '__' + type + '__' + (locale || request.getLocale());
+function calculateIndexName(type, locale, prefix) {
+    return (prefix || getIndexPrefix()) + '__' + type + '__' + (locale || request.getLocale());
 }
 
 /**

@@ -45,7 +45,9 @@ function handleSettings() {
         });
         var pdictValues;
 
-        validationResult = algoliaServiceHelper.validateAPIKey(service, applicationID, adminApikey);
+        var indexName = algoliaData.calculateIndexName('products', null, params.IndexPrefix.value);
+
+        validationResult = algoliaServiceHelper.validateAPIKey(service, applicationID, adminApikey, indexName);
 
         if (validationResult.error) {
             pdictValues = {

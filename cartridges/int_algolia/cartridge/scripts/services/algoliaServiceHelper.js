@@ -151,9 +151,10 @@ function callJsonService(title, service, params) {
  * @param {dw.svc.Service} service - Service instance to call
  * @param {string} applicationID - Algolia Application ID
  * @param {string} adminApiKey - Algolia Admin API Key
+ * @param {string} indexName - Algolia Index Name
  * @returns {Object} Response indicating validation success or failure
  */
-function validateAPIKey(service, applicationID, adminApiKey) {
+function validateAPIKey(service, applicationID, adminApiKey, indexName) {
     const keyResponse = service.call({
         method: 'GET',
         url: 'https://' + applicationID + '.algolia.net/1/keys/' + adminApiKey
@@ -189,10 +190,9 @@ function validateAPIKey(service, applicationID, adminApiKey) {
         };
     }
 
-    const testIndex = algoliaData.calculateIndexName('products');
     const indexResponse = service.call({
         method: 'GET',
-        url: 'https://' + applicationID + '.algolia.net/1/indexes/' + testIndex + '/settings'
+        url: 'https://' + applicationID + '.algolia.net/1/indexes/' + indexName + '/settings'
     });
 
     if (!indexResponse.ok) {
