@@ -235,10 +235,12 @@ exports.beforeStep = function(parameters, stepExecution) {
     l1_failedDir = new File(l0_deltaExportDir, '_failed');
     l1_failedDir.mkdir();
 
+    var maxDateInMs = MAX_FILE_AGE_DAYS * 24 * 60 * 60 * 1000;
+
     logger.info('Removing old files from completed directory...');
-    fileHelper.removeFolderRecursively(l1_completedDir, MAX_FILE_AGE_DAYS);
+    fileHelper.removeFolderRecursively(l1_completedDir, maxDateInMs);
     logger.info('Removing old files from failed directory...');
-    fileHelper.removeFolderRecursively(l1_failedDir, MAX_FILE_AGE_DAYS);
+    fileHelper.removeFolderRecursively(l1_failedDir, maxDateInMs);
 
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {

@@ -78,31 +78,27 @@ function getAllXMLFilesInFolder(folder) {
  * If no maxDate is provided (or if it is 0), it removes all items unconditionally.
  *
  * @param {dw.io.File} folder - The folder to remove (of class File)
- * @param {number} [maxDate=0] - The maximum allowed lastModified timestamp (in ms).
+ * @param {number} [maxDateInMs=0] - The maximum allowed lastModified timestamp (in ms).
  *                               Items older than this timestamp will be removed.
  *                               If set to 0 (the default), all items are removed.
  * @returns {boolean} - True if removal succeeded for all targeted items, false otherwise.
  */
-function removeFolderRecursively(folder, maxDate) {
+function removeFolderRecursively(folder, maxDateInMs) {
     var success = true;
-    maxDate = maxDate || 0; // Default to 0 if not provided
+    maxDateInMs = maxDateInMs || 0; // Default to 0 if not provided
 
     if (folder.exists() && folder.isDirectory()) {
         var files = folder.listFiles().toArray();
 
         files.forEach(function(file) {
             var shouldRemove = true;
-            if (maxDate > 0) {
+            if (maxDateInMs > 0) {
                 var lastModified = file.lastModified();
-                shouldRemove = lastModified < maxDate;
+                shouldRemove = lastModified < maxDateInMs;
             }
 
             if (file.isDirectory()) {
-                var subSuccess = removeFolderRecursively(file, maxDate);
-
-                if (subSuccess && shouldRemove) {
-                    subSuccess = file.remove();
-                }
+                var subSuccess = removeFolderRecursively(file, maxDateInMs);
 
                 success = success && subSuccess;
             } else {
@@ -112,7 +108,7 @@ function removeFolderRecursively(folder, maxDate) {
             }
         });
 
-        if (maxDate === 0 || folder.lastModified() < maxDate) {
+        if (maxDateInMs === 0 || folder.lastModified() < maxDateInMs) {
             success = success && folder.remove();
         }
     }
