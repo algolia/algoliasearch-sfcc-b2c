@@ -5,7 +5,6 @@ var Currency = require('dw/util/Currency');
 var PriceBookMgr = require('dw/catalog/PriceBookMgr');
 var PromotionMgr = require('dw/campaign/PromotionMgr');
 var URLUtils = require('dw/web/URLUtils');
-
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
@@ -357,11 +356,15 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product) {
+        let availabilityModel = product.getAvailabilityModel();
+
         if (product.isMaster() || product.isVariationGroup()) {
-            return undefined;
+            return availabilityModel.availabilityStatus === 'IN_STOCK';
         }
-        let inventoryRecord = product.getAvailabilityModel().getInventoryRecord(); // can be null
-        return (inventoryRecord ? inventoryRecord.getATS().getValue() >= ALGOLIA_IN_STOCK_THRESHOLD : false);
+
+        let inventoryRecord = availabilityModel.getInventoryRecord();
+        let inStock = (inventoryRecord ? inventoryRecord.getATS().getValue() >= ALGOLIA_IN_STOCK_THRESHOLD : false);
+        return inStock;
     },
     image_groups: function (product) {
         var imageGroupsArr = [];
