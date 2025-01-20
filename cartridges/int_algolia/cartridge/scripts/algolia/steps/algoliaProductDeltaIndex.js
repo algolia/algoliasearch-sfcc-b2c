@@ -388,16 +388,24 @@ exports.process = function(cpObj, parameters, stepExecution) {
         }
 
         if (productFilter.isInclude(product)) {
-
-            // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-            var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
-            for (let l = 0; l < siteLocales.size(); l++) {
-                let locale = siteLocales[l];
-                let indexName = algoliaData.calculateIndexName('products', locale);
-                let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
-                algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
+            if (productFilter.isIncludeOutOfStock(product)) {
+                var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
+                for (let l = 0; l < siteLocales.size(); l++) {
+                    let locale = siteLocales[l];
+                    let indexName = algoliaData.calculateIndexName('products', locale);
+                    let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+                    algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
+                }
+                jobReport.processedItemsToSend++;
+            } else {
+                // => product is out-of-stock and IndexOutofStock=false => must delete from Algolia
+                for (let l = 0; l < siteLocales.size(); l++) {
+                    var locale = siteLocales[l];
+                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
+                }
+                jobReport.processedItemsToSend++;
             }
-            jobReport.processedItemsToSend++;
         }
     } else {
         for (let l = 0; l < siteLocales.size(); l++) {

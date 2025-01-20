@@ -29,6 +29,7 @@ try {
 }
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutofStock');
 
 /**
  * Get the lowest promotional price for product
@@ -357,11 +358,15 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product) {
-        if (product.isMaster() || product.isVariationGroup()) {
+        if (product.isMaster() || product.isVariationGroup() || !INDEX_OUT_OF_STOCK) {
             return undefined;
         }
-        let inventoryRecord = product.getAvailabilityModel().getInventoryRecord(); // can be null
-        return (inventoryRecord ? inventoryRecord.getATS().getValue() >= ALGOLIA_IN_STOCK_THRESHOLD : false);
+
+        let inventoryRecord = product.getAvailabilityModel().getInventoryRecord();
+        let inventoryRecordValue = inventoryRecord ? inventoryRecord.getATS().getValue() : 0;
+        let outOfStock = inventoryRecordValue < ALGOLIA_IN_STOCK_THRESHOLD;
+
+        return outOfStock ? false : true;
     },
     image_groups: function (product) {
         var imageGroupsArr = [];

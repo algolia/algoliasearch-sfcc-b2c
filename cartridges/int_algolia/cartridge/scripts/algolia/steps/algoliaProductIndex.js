@@ -301,6 +301,10 @@ exports.process = function(product, parameters, stepExecution) {
     }
 
     if (productFilter.isInclude(product)) {
+        if (!productFilter.isIncludeOutOfStock(product)) {
+            return [];
+        }
+
         var algoliaOperations = [];
 
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
@@ -320,6 +324,7 @@ exports.process = function(product, parameters, stepExecution) {
 
         return algoliaOperations;
     }
+    return [];
 }
 
 /**
