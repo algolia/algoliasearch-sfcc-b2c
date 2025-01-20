@@ -46,6 +46,7 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
 
 let mockAdditionalAttributes;
 let mockLocalesForIndexing;
+let mockRecordModel = 'variant-level';
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
     return {
@@ -62,6 +63,8 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
         },
         getPreference: function (key) {
             switch (key) {
+                case 'RecordModel':
+                    return mockRecordModel;
                 case 'IndexOutofStock':
                     return true;
                 case 'InStockThreshold':
@@ -86,7 +89,7 @@ const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/
 const collectionHelper = require('../../../../../mocks/helpers/collectionHelper');
 
 beforeEach(() => {
-    global.customPreferences['Algolia_RecordModel'] = 'variant-level';
+    mockRecordModel = 'variant-level';
     mockAdditionalAttributes = ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
         'pageTitle', 'short_description', 'name', 'long_description', 'image_groups'];
     mockLocalesForIndexing = [];
@@ -193,7 +196,7 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot();
     });
     test('master-level indexing', () => {
-        global.customPreferences['Algolia_RecordModel'] = 'master-level';
+        mockRecordModel = 'master-level';
         mockAdditionalAttributes = [];
 
         // Process a master product with two size variations on the same color variation
