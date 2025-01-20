@@ -409,9 +409,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
         }
     } else {
         for (let l = 0; l < siteLocales.size(); l++) {
-            var locale = siteLocales[l];
-            var indexName = algoliaData.calculateIndexName('products', locale);
-            algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
+            let localeIndexName = algoliaData.calculateIndexName('products', siteLocales[l]);
+            algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, localeIndexName));
         }
         jobReport.processedItemsToSend++;
     }

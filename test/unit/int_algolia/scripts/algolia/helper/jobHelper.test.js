@@ -3,6 +3,27 @@ const VariantMock = require("../../../../../mocks/dw/catalog/Variant");
 const collectionHelper = require("../../../../../mocks/helpers/collectionHelper");
 const jobHelper = require("../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper");
 
+jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
+    return {
+        getSetOfArray: function (id) {
+            return id === 'AdditionalAttributes'
+                ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
+                    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
+                : [];
+        },
+        getPreference: function (id) {
+            switch (id) {
+                case 'IndexOutofStock':
+                    return true;
+                case 'InStockThreshold':
+                    return 1;
+                default:
+                    return [];
+            }
+        }
+    }
+}, {virtual: true});
+
 test('generateVariantRecords', () => {
     // master product with two size variations on the same color variation
     const masterProduct = new MasterProductMock();

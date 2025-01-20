@@ -33,6 +33,16 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
                     return [];
             }
         },
+        getPreference: function (key) {
+            switch (key) {
+                case 'IndexOutofStock':
+                    return true;
+                case 'InStockThreshold':
+                    return 0;
+                default:
+                    return [];
+            }
+        }
     }
 }, {virtual: true});
 
