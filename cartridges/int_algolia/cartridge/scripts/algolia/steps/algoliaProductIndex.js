@@ -323,9 +323,7 @@ exports.process = function(product, parameters, stepExecution) {
         jobReport.recordsToSend += algoliaOperations.length; // number of records to be sent to Algolia (one per locale per product)
 
         return algoliaOperations;
-    }
-    return [];
-}
+    }}
 
 /**
  * write-function (steptypes.json)

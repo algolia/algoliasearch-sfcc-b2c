@@ -56,7 +56,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
                 case 'InStockThreshold':
                     return 1;
                 default:
-                    return [];
+                    return null;
             }
         }
     }
