@@ -511,59 +511,73 @@ describe('algoliaLocalizedProduct overriding custom attributes', function () {
         expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
     });
 });
-
-describe('IndexOutofStock logic tests', function () {
-    var ProductMockObj;
+// test/unit/int_algolia/scripts/algolia/filters/productFilter.test.js
+describe('productFilter.isIncludeOutOfStock', () => {
+    let productFilter;
+    const AlgoliaLocalizedProductModel = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
     beforeEach(() => {
         jest.resetModules();
-        ProductMockObj = require('../../../../../mocks/dw/catalog/Variant');
     });
 
-    test('should skip out-of-stock variants if IndexOutofStock = false', function () {
-        jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
-            return {
-                getSetOfArray: function () {
-                    return []; 
-                },
-                getPreference: function (id) {
-                    if (id === 'InStockThreshold') return 1;
-                    if (id === 'IndexOutofStock') return false;
-                    return null;
-                }
-            };
-        }, { virtual: true });
+    test('skips out-of-stock if IndexOutofStock = false', () => {
+        jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
+            getSetOfArray: () => [],
+            getPreference: (id) => {
+                if (id === 'InStockThreshold') return 1;
+                if (id === 'IndexOutofStock') return false;
+                return null;
+            },
+        }), { virtual: true });
 
+        productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
-        const product = new ProductMockObj({
-            inventory: { atsValue: 0 }
+        const product = new ProductMock();
+        const outOfStockVariant =  new AlgoliaLocalizedProductModel({ 
+            product: product,
+            locale: 'default',
+            attributeList: ['custom.displaySize']
         });
 
-        const localizedProduct = new AlgoliaLocalizedProduct({ product, attributeList: ['objectID'] });
+        outOfStockVariant.getAvailabilityModel = () => {
+            return {
+                getInventoryRecord: () => {
+                    return { getATS: () => { return { getValue: () => { return 0; } } } };
+                },
+            };
+        }
+        const shouldInclude = productFilter.isIncludeOutOfStock(outOfStockVariant);
 
-        expect(localizedProduct.objectID).toBeNull();
+        expect(shouldInclude).toBe(false);
     });
 
-    test('should index out-of-stock variants if IndexOutofStock = true', function () {
-        jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
-            return {
-                getSetOfArray: function () {
-                    return []; 
-                },
-                getPreference: function (id) {
-                    if (id === 'InStockThreshold') return 1;
-                    if (id === 'IndexOutofStock') return true; 
-                    return null;
-                }
-            };
-        }, { virtual: true });
+    test('includes out-of-stock if IndexOutofStock = true', () => {
+        jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
+            getSetOfArray: () => [],
+            getPreference: (id) => {
+                if (id === 'InStockThreshold') return 1;
+                if (id === 'IndexOutofStock') return true;
+                return null;
+            },
+        }), { virtual: true });
 
-        const product = new ProductMockObj({
-            inventory: { atsValue: 0 }
+        productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+
+        const product = new ProductMock();
+        const outOfStockVariant =  new AlgoliaLocalizedProductModel({ 
+            product: product,
+            locale: 'default',
+            attributeList: ['custom.displaySize']
         });
+        outOfStockVariant.getAvailabilityModel = () => {
+            return {
+                getInventoryRecord: () => {
+                    return { getATS: () => { return { getValue: () => { return 0; } } } };
+                },
+            };
+        }
+        const shouldInclude = productFilter.isIncludeOutOfStock(outOfStockVariant);
 
-        const localizedProduct = new AlgoliaLocalizedProduct({ product, attributeList: ['objectID'] });
-
-        expect(localizedProduct).not.toBeNull();
+        expect(shouldInclude).toBe(true);
     });
 });
