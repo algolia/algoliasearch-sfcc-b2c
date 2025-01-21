@@ -28,7 +28,7 @@ try {
 }
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
-const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutofStock');
+const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 
 /**
  * Get the lowest promotional price for product
@@ -450,7 +450,7 @@ var aggregatedValueHandlers = {
         while (variantsIt.hasNext()) {
             var variant = variantsIt.next();
 
-            let indexOutofStock = algoliaData.getPreference('IndexOutofStock');
+            let indexOutofStock = algoliaData.getPreference('IndexOutOfStock');
             let inventoryRecord = variant.getAvailabilityModel().getInventoryRecord(); // can be null
             if (!indexOutofStock) {
                 if (!inventoryRecord || (inventoryRecord && inventoryRecord.getATS().getValue() < ALGOLIA_IN_STOCK_THRESHOLD)) {

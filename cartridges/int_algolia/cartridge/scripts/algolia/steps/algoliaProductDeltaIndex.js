@@ -398,7 +398,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 }
                 jobReport.processedItemsToSend++;
             } else {
-                // => product is out-of-stock and IndexOutofStock=false => must delete from Algolia
+                // => product is out-of-stock and IndexOutOfStock=false => must delete from Algolia
                 for (let l = 0; l < siteLocales.size(); l++) {
                     var locale = siteLocales[l];
                     var indexName = algoliaData.calculateIndexName('products', locale);

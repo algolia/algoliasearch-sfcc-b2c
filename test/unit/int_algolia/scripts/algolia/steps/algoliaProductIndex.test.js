@@ -65,7 +65,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
             switch (key) {
                 case 'RecordModel':
                     return mockRecordModel;
-                case 'IndexOutofStock':
+                case 'IndexOutOfStock':
                     return true;
                 case 'InStockThreshold':
                     return 0;

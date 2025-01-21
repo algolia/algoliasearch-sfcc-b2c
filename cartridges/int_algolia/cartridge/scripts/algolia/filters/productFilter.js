@@ -16,15 +16,15 @@ function isInclude(product) {
 }
 
 /**
- * If IndexOutofStock is false, we only return `true` here if the product has
- * ATS >= InStockThreshold. If IndexOutofStock is true, then always return `true`.
+ * If IndexOutOfStock is false, we only return `true` here if the product has
+ * ATS >= InStockThreshold. If IndexOutOfStock is true, then always return `true`.
  * @param {dw.catalog.Product} product - Product
  * @returns {boolean} - True if product should be included in the index, false if not.
  */
 function isIncludeOutOfStock(product) {
     var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
-    var indexOutOfStock = algoliaData.getPreference('IndexOutofStock');
+    var indexOutOfStock = algoliaData.getPreference('IndexOutOfStock');
 
     if (indexOutOfStock) {
         return true;

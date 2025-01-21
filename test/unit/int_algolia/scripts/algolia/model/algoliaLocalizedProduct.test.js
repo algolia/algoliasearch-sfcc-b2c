@@ -51,7 +51,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
         },
         getPreference: function (id) {
             switch (id) {
-                case 'IndexOutofStock':
+                case 'IndexOutOfStock':
                     return true;
                 case 'InStockThreshold':
                     return 1;
@@ -520,12 +520,12 @@ describe('productFilter.isIncludeOutOfStock', () => {
         jest.resetModules();
     });
 
-    test('skips out-of-stock if IndexOutofStock = false', () => {
+    test('skips out-of-stock if IndexOutOfStock = false', () => {
         jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
             getSetOfArray: () => [],
             getPreference: (id) => {
                 if (id === 'InStockThreshold') return 1;
-                if (id === 'IndexOutofStock') return false;
+                if (id === 'IndexOutOfStock') return false;
                 return null;
             },
         }), { virtual: true });
@@ -551,12 +551,12 @@ describe('productFilter.isIncludeOutOfStock', () => {
         expect(shouldInclude).toBe(false);
     });
 
-    test('includes out-of-stock if IndexOutofStock = true', () => {
+    test('includes out-of-stock if IndexOutOfStock = true', () => {
         jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
             getSetOfArray: () => [],
             getPreference: (id) => {
                 if (id === 'InStockThreshold') return 1;
-                if (id === 'IndexOutofStock') return true;
+                if (id === 'IndexOutOfStock') return true;
                 return null;
             },
         }), { virtual: true });

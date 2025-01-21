@@ -49,7 +49,7 @@ function handleSettings() {
         algoliaData.setPreference('EnableContentSearch', algoliaEnableContentSearch);
         algoliaData.setPreference('EnableRecommend', algoliaEnableRecommend);
         algoliaData.setPreference('EnablePricingLazyLoad', algoliaEnablePricingLazyLoad);
-        algoliaData.setPreference('IndexOutofStock', params.IndexOutofStock.submitted);
+        algoliaData.setPreference('IndexOutOfStock', params.IndexOutOfStock.submitted);
     } catch (error) {
         Logger.error(error);
     }
