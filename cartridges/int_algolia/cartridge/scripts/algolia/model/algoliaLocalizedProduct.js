@@ -360,7 +360,7 @@ var aggregatedValueHandlers = {
         const availabilityModel = product.getAvailabilityModel();
 
         if (product.isMaster() || product.isVariationGroup()) {
-            return (availabilityModel.availabilityStatus === 'IN_STOCK');
+            return availabilityModel.availabilityStatus === 'IN_STOCK';
         }
 
         if (!INDEX_OUT_OF_STOCK) {
