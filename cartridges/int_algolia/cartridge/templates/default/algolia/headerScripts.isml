@@ -10,7 +10,7 @@
 
     <iscomment>--- algoliasearch ---</iscomment>
     <script type="module">
-        import algoliasearch from '${URLUtils.staticURL('js/lib/algolia/algoliasearch-lite.esm.browser.js')}';
+        import algoliasearch from "${URLUtils.staticURL('js/lib/algolia/algoliasearch-lite.esm.browser.js')}";
         window.algoliasearch = algoliasearch;
     </script>
 

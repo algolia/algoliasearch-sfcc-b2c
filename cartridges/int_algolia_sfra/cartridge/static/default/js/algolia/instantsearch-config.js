@@ -1,4 +1,12 @@
-/* global instantsearch */
+/* global instantsearch, algoliaData */
+/* exported enableInstantSearch */
+/**
+ * Initializes InstantSearch
+ * @param {Object} config Configuration object
+ */
+
+var activeCustomerPromotions = [];
+
 /**
  * Initializes InstantSearch
  * @param {Object} config Configuration object
@@ -12,6 +20,9 @@ function enableInstantSearch(config) {
     const contentResultEl = document.querySelector('#algolia-content-hits-placeholder');
     const contentSearchbarTab = document.querySelector('#content-search-bar-button');
     const navbar = document.querySelector('.search-nav');
+    const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
+    const isPricingLazyLoad = algoliaData.EnablePricingLazyLoad;
+    activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
 
     let displaySwatches = false;
     var initialUiState = {};
@@ -46,27 +57,62 @@ function enableInstantSearch(config) {
         search.use(insightsMiddleware);
     }
 
-    if (document.querySelector('#algolia-category-title-placeholder')) {
-        search.addWidgets([
-            instantsearch.widgets.breadcrumb({
-                container: '#algolia-category-title-placeholder',
-                attributes: [
-                    '__primary_category.0',
-                    '__primary_category.1',
-                    '__primary_category.2'
-                ],
-                templates: {
-                    home: '',
-                    separator: ''
-                },
-                transformItems: function (items) {
-                    return items.slice(-1); // keep only last item
-                }
-            })
-        ])
-    }
-
     if (document.querySelector('#algolia-searchbox-placeholder')) {
+        if (config.categoryId) {
+            // Category page: filter on categoryPageId
+            // doc: https://www.algolia.com/doc/guides/solutions/ecommerce/browse/tutorials/category-pages/
+            search.addWidgets([
+                instantsearch.widgets.configure({
+                    filters: `categoryPageId: '${config.categoryId}'`,
+                }),
+            ]);
+        } else {
+            // Search results page: display the categories hierarchy and the "Reset" button
+            search.addWidgets([
+                instantsearch.widgets.clearRefinements({
+                    container: '#algolia-clear-refinements-placeholder',
+                    cssClasses: {
+                        root: 'secondary-bar col-12 offset-sm-4 offset-md-0 col-sm-4 col-md-12',
+                        button: 'btn btn-block btn-outline-primary',
+                        disabledButton: 'disabled'
+                    },
+                    templates: {
+                        resetLabel: algoliaData.strings.reset
+                    }
+                }),
+                hierarchicalMenuWithPanel({
+                    container: '#algolia-categories-list-placeholder',
+                    attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
+                    templates: {
+                        item(data, { html }) {
+                            return html`
+                                <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                    <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                    <span class="${data.cssClasses.label}"> ${data.label}</span>
+                                </a>
+                            `
+                        },
+                    },
+                    panelTitle: algoliaData.strings.categoryPanelTitle
+                }),
+                hierarchicalMenuWithPanel({
+                    container: '#algolia-newarrivals-list-placeholder',
+                    attributes: ['newArrivalsCategory.0', 'newArrivalsCategory.1'],
+                    templates: {
+                        item(data, { html }) {
+                            return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                        },
+                    },
+                    panelTitle: algoliaData.strings.newArrivals
+                }),
+            ]);
+        }
+
         search.addWidgets([
             instantsearch.widgets.configure({
                 distinct: true,
@@ -111,45 +157,18 @@ function enableInstantSearch(config) {
                     {label: algoliaData.strings.priceDesc, value: productsIndexPriceDesc}
                 ]
             }),
-            instantsearch.widgets.clearRefinements({
-                container: '#algolia-clear-refinements-placeholder',
-                cssClasses: {
-                    root: 'secondary-bar col-12 offset-sm-4 offset-md-0 col-sm-4 col-md-12',
-                    button: 'btn btn-block btn-outline-primary',
-                    disabledButton: 'disabled'
-                },
-                templates: {
-                    resetLabel: algoliaData.strings.reset
-                }
-            }),
 
-            hierarchicalMenuWithPanel({
-                container: '#algolia-categories-list-placeholder',
-                attributes: ['__primary_category.0', '__primary_category.1', '__primary_category.2'],
+            toggleRefinementWithPanel({
+                container: '#algolia-newarrival-placeholder',
+                attribute: 'newArrival',
                 templates: {
-                    item(data, { html }) {
+                    labelText(data, { html }) {
                         return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            <a style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-square-o'}"></i>
+                                <span> ${algoliaData.strings.newArrivals}</span>
                             </a>
-                        `
-                    },
-                },
-                panelTitle: algoliaData.strings.categoryPanelTitle
-            }),
-
-            hierarchicalMenuWithPanel({
-                container: '#algolia-newarrivals-list-placeholder',
-                attributes: ['newArrivalsCategory.0', 'newArrivalsCategory.1'],
-                templates: {
-                    item(data, { html }) {
-                        return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
-                            </a>
-                        `
+                        `;
                     },
                 },
                 panelTitle: algoliaData.strings.newArrivals
@@ -232,6 +251,9 @@ function enableInstantSearch(config) {
                     showMoreText: algoliaData.strings.moreResults,
                     empty: '',
                     item(hit, { html, components }) {
+                        const shouldHideCallout = isPricingLazyLoad || !hit.calloutMsg;
+                        const productId = algoliaData.recordModel === 'master-level' ? (hit.defaultVariantID ? hit.defaultVariantID : hit.objectID) : hit.objectID;
+                        const callOutMsgClassname = `callout-msg-placeholder-${productId}`;
                         return html`
                             <div class="product"
                                  data-pid="${hit.objectID}"
@@ -239,6 +261,9 @@ function enableInstantSearch(config) {
                                  data-index-name="${hit.__indexName}"
                             >
                                 <div class="product-tile">
+                                    <small class="callout-msg ${shouldHideCallout ? 'd-none' : ''} ${callOutMsgClassname}">
+                                     ${!isPricingLazyLoad && hit.calloutMsg}
+                                    </small>
                                     <div class="image-container">
                                         <a href="${hit.url}">
                                             <img class="tile-image" src="${hit.image.dis_base_link}" alt="${hit.image.alt}" title="${hit.name}"/>
@@ -268,25 +293,29 @@ function enableInstantSearch(config) {
                                             </a>
                                         </div>
                                         <div class="price">
-                                            ${hit.promotionalPrice && html`
-                                                <span class="strike-through list">
-                                                     <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
+                                            ${isPricingLazyLoad && html`<span class="price-placeholder" data-product-id="${productId}"></span>`}
+                                            ${!isPricingLazyLoad && html`
+                                                ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
+                                                    <span class="strike-through list">
+                                                         <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
+                                                    </span>
+                                                `}
+                                                <span class="sales">
+                                                    <span class="value">
+                                                        ${hit.currencySymbol} ${hit.displayPrice}
+                                                    </span>
                                                 </span>
                                             `}
-                                            <span class="sales">
-                                                <span class="value">
-                                                    ${hit.currencySymbol} ${hit.promotionalPrice ? hit.promotionalPrice : hit.price}
-                                                </span>
-                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        `
+                        `;
                     },
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
+
                     return items.map(function (item) {
                         // assign image
                         if (item.image_groups) {
@@ -303,17 +332,14 @@ function enableInstantSearch(config) {
                                 alt: item.name + ', large',
                             }
                         }
-
                         // adjusted price in user currency
                         if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
                             item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
                         }
-
                         // price in user currency
                         if (item.price && item.price[algoliaData.currencyCode] !== null) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
-
                         // If no promotionalPrice, use the pricebooks to display the strikeout price
                         if (!item.promotionalPrice &&
                             item.pricebooks &&
@@ -337,13 +363,9 @@ function enableInstantSearch(config) {
                                 item.price = maxPrice;
                             }
                         }
-
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
-
-
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
-
                         // originating index
                         item.__indexName = productsIndex;
 
@@ -351,6 +373,10 @@ function enableInstantSearch(config) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
                         }
+                        // Calculate displayPrice
+                        var { price, calloutMsg } = calculateDisplayPrice(item);
+                        item.displayPrice = price;
+                        item.calloutMsg = calloutMsg;
 
                         // Master-level indexing
                         if (item.variants) {
@@ -383,6 +409,11 @@ function enableInstantSearch(config) {
                                 }) || item.variants[0];
                             }
 
+                            if (!item.color) {
+                                // This permits to highlight the correct swatch
+                                item.color = selectedVariant.color;
+                            }
+
                             // 2. Get the colorVariation corresponding to the selected variant, to display its image
                             if (item.colorVariations) {
                                 const colorVariation = item.colorVariations.find(i => {
@@ -402,12 +433,15 @@ function enableInstantSearch(config) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
                                 }
                                 if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
-                                    item.price = selectedVariant.price[algoliaData.currencyCode]
+                                    item.price = selectedVariant.price[algoliaData.currencyCode];
                                 }
                                 item.url = selectedVariant.url;
+                                let { price: variantPrice, calloutMsg: variantCalloutMsg } = calculateDisplayPrice(selectedVariant);
+
+                                item.displayPrice = variantPrice;
+                                item.calloutMsg = variantCalloutMsg;
                             }
                         }
-
                         return item;
                     });
                 }
@@ -473,10 +507,13 @@ function enableInstantSearch(config) {
     search.start();
 
     search.on('render', function () {
-        var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
-        $(emptyFacetSelector).each(function () {
-            $(this).parents().eq(2).hide();
-        });
+        if (isPricingLazyLoad && search.status === 'idle') {
+            var items = search.renderState[algoliaData.productsIndex].infiniteHits.hits;
+            var productIDs = items.map((item) => algoliaData.recordModel === 'master-level' ? (item.defaultVariantID ? item.defaultVariantID : item.objectID) : item.objectID);
+            fetchPromoPrices(productIDs).then(() => {
+                updateAllProductPrices();
+            });
+        }
     });
 
     /**
@@ -498,6 +535,15 @@ function enableInstantSearch(config) {
     }
 
     /**
+     * Builds a refinement toggle with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
+    function toggleRefinementWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.toggleRefinement)(options)
+    }
+
+    /**
      * Builds a range input with the Panel widget
      * @param {Object} options Options object
      * @returns {Object} The Panel widget
@@ -516,8 +562,8 @@ function enableInstantSearch(config) {
         return instantsearch.widgets.panel({
             hidden: function(options) {
                 var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
-                var facet = facets.find(function(facet) { return facet.name === attribute }); // eslint-disable-line no-shadow
-                var facetExists = !!facet;
+                var attributeFacet = facets.find(function(facet) { return facet.name === attribute });
+                var facetExists = attributeFacet && attributeFacet.data;
                 return !facetExists; // hides panel if not facets selectable
             },
             templates: {
@@ -564,19 +610,177 @@ function enableInstantSearch(config) {
                 }
 
                 return html`
-                <a onmouseover="${() => {
+                <a onmouseover="${(e) => {
         const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
         const image = parent.querySelector('.tile-image');
         const link = parent.querySelector('.image-container > a');
+        // Remove existing border effects
+        const existingSelectedSwatches = parent.querySelectorAll('.swatch-selected');
+        existingSelectedSwatches.forEach(selectedSwatch => {
+            selectedSwatch.classList.remove('swatch-selected');
+        });
+        
+        e.target.parentNode.querySelector('.swatch').classList.add("swatch-selected");
         image.src = variantImage.dis_base_link;
         link.href = colorVariation.variationURL;
     }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
                     <span>
-                        <img class="swatch swatch-circle mb-1" data-index="0.0" style="background-image: url(${swatch.dis_base_link})" src="${swatch.dis_base_link}" alt="${swatch.alt}"/>
+                        <img class="swatch swatch-circle mb-1 ${colorVariation.color === hit.color ? 'swatch-selected' : ''}"
+                             data-index="0.0" style="background-image: url(${swatch.dis_base_link})"
+                             src="${swatch.dis_base_link}" alt="${swatch.alt}"
+                        />
                     </span>
                 </a>
             `;
             });
         }
+    }
+}
+
+// Add this at the top of the file, outside of any function
+const fetchedPrices = new Map();
+
+/**
+ * Fetches promotional prices for a list of product IDs
+ * @param {Array} productIDs - An array of product IDs.
+ * @returns {Promise} A promise that resolves when prices are fetched
+ */
+function fetchPromoPrices(productIDs) {
+    if (productIDs.length === 0) return Promise.resolve();
+
+    // Filter out already fetched product IDs
+    const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
+
+    if (unfetchedProductIDs.length === 0) return Promise.resolve();
+
+    return $.ajax({
+        url: algoliaData.priceEndpoint,
+        type: 'GET',
+        data: {
+            pids: unfetchedProductIDs.toString(),
+        },
+    }).then(function(data) {
+        let products = data.products;
+        for (let product of products) {
+            fetchedPrices.set(product.id, product);
+        }
+    });
+}
+
+/**
+ * Updates the price display for all products on the page
+ */
+function updateAllProductPrices() {
+    const pricePlaceholders = document.querySelectorAll('.price-placeholder');
+
+    pricePlaceholders.forEach(placeholder => {
+        const productId = placeholder.getAttribute('data-product-id');
+        const product = fetchedPrices.get(productId);
+
+        if (product) {
+            let priceHtml = getPriceHtml(product);
+            placeholder.innerHTML = priceHtml;
+
+            if (product.activePromotion && product.activePromotion.price) {
+                const calloutMsg = document.querySelector(`.callout-msg-placeholder-${productId}`);
+                if (calloutMsg) {
+                    calloutMsg.innerHTML = product.activePromotion.promotion.calloutMsg;
+                    calloutMsg.classList.remove('d-none');
+                }
+            }
+        }
+    });
+}
+
+/**
+ * Generates HTML for displaying product prices, including promotional prices if applicable.
+ * @param {Object} product - The product object containing price information.
+ * @returns {string} HTML string representing the price display.
+ */
+function getPriceHtml(product) {
+    const { price: priceObj, activePromotion, defaultPrice } = product;
+    const hasActivePromotion = activePromotion && activePromotion.price;
+    const salesPrice = priceObj && priceObj.sales && priceObj.sales.value;
+    const listPrice = priceObj && priceObj.list && priceObj.list.value;
+    const discountedPrice = hasActivePromotion ? activePromotion.price : salesPrice;
+
+    // Helper function to create price HTML
+    const createPriceHtml = (originalPrice, finalPrice) => `
+        <span class="strike-through list">
+            <span class="value"> ${algoliaData.currencySymbol} ${originalPrice} </span>
+        </span>
+        <span class="sales">
+            <span class="value"> ${algoliaData.currencySymbol} ${finalPrice} </span>
+        </span>`;
+
+    if (hasActivePromotion) return createPriceHtml(defaultPrice, discountedPrice);
+    if (listPrice) return createPriceHtml(listPrice, salesPrice);
+
+    return `<span class="value"> ${algoliaData.currencySymbol} ${salesPrice} </span>`;
+}
+
+
+/**
+ * Build a product URL with Algolia query parameters
+ * @param {string} objectID objectID
+ * @param {string} productUrl url of the product
+ * @param {string} queryID queryID
+ * @param {string} indexName indexName
+ * @return {string} Final URL of the product
+ */
+function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
+    const url = new URL(productUrl, window.location.origin);
+    url.searchParams.append('queryID', queryID);
+    url.searchParams.append('objectID', objectID);
+    url.searchParams.append('indexName', indexName);
+    return url.href;
+}
+
+/**
+ * Calculate the display price for an item when lazy loading pricing is disabled
+ * @param {Object} item The item object
+ * @return {number} The calculated sales price
+ */
+function calculateDisplayPrice(item) {
+    var promotions;
+    var calloutMsg = '';
+    var variant;
+
+    if (algoliaData.recordModel === 'master-level' && item.variants) {
+        promotions = item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
+        variant = item.variants.length > 0 ? item.variants[0] : item;
+    } else {
+        promotions = item.promotions;
+        variant = item;
+    }
+
+    if (promotions && promotions[algoliaData.currencyCode]) {
+        var productPromos = promotions[algoliaData.currencyCode];
+        var minPrice = algoliaData.recordModel === 'master-level' ? (variant.price[algoliaData.currencyCode] ? variant.price[algoliaData.currencyCode] : variant.price) : item.price;
+        for (var i = 0; i < activeCustomerPromotions.length; i++) {
+            for (var j = 0; j < productPromos.length; j++) {
+                if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < minPrice) {
+                    minPrice = productPromos[j].price;
+                    calloutMsg = activeCustomerPromotions[i].calloutMsg;
+                }
+            }
+        }
+
+        return {
+            price: minPrice,
+            calloutMsg: calloutMsg,
+        }
+    }
+
+    if (item.promotionalPrice) {
+        return {
+            price: item.promotionalPrice,
+            calloutMsg: '',
+        }
+    }
+
+    return {
+        price: item.price,
+        calloutMsg: '',
     }
 }

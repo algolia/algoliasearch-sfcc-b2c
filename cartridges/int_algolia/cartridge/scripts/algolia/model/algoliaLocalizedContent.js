@@ -1,7 +1,6 @@
 'use strict';
 
 var URLUtils = require('dw/web/URLUtils');
-var AlgoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
 var AlgoliaContentConfig = require('*/cartridge/scripts/algolia/lib/algoliaContentConfig');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
 
@@ -11,13 +10,12 @@ var ACTION_ENDPOINT_CONTENT = 'Page-Show';
  * Handler complex and calculated Content attributes
  */
 var aggregatedValueHandlers = {
-    url: function (content, includedContent) {
+    url: function (content) {
         var pageURL = URLUtils.url(ACTION_ENDPOINT_CONTENT, 'cid', content.ID);
         return pageURL ? pageURL.toString() : null;
     },
     body: function (content, includedContent) {
         var body = null;
-        var pageDesignerContent;
 
         if (content.isPage() && (includedContent === 'allContents' || includedContent === 'pageDesignerComponents')) {
             var pageDesignerHelper = require('*/cartridge/scripts/algolia/lib/pageDesignerHelper');

@@ -1,7 +1,7 @@
 'use strict';
 
 var defaultAttributes = ['id', 'primary_category_id', 'in_stock', 'price', 'categories'];
-var defaultAttributes_v2 = ['name', 'primary_category_id', 'categories', 'in_stock', 'price', 'image_groups', 'url'];
+var defaultAttributes_v2 = ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'image_groups', 'url'];
 // Configurations for master-level indexing mode
 var defaultMasterAttributes_v2 = ['variants', 'defaultVariantID', 'colorVariations'];
 var defaultVariantAttributes_v2 = ['in_stock', 'price', 'color', 'size', 'url'];
@@ -213,6 +213,12 @@ var attributeConfig_v2 = {
     categories: {
         localized: true
     },
+    categoryPageId: {
+        localized: false,
+    },
+    __primary_category: {
+        localized: true,
+    },
     color: {
         localized: true,
         variantAttribute: true,
@@ -239,6 +245,10 @@ var attributeConfig_v2 = {
         variantAttribute: true,
     },
     promotionalPrice: {
+        localized: false,
+        variantAttribute: true,
+    },
+    promotions: {
         localized: false,
         variantAttribute: true,
     },

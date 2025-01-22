@@ -18,6 +18,7 @@ jest.mock('dw/catalog/ProductMgr', () => {
     return {
         queryAllSiteProducts: jest.fn().mockReturnValue({
             close: jest.fn(),
+            count: 4658,
         }),
         getProduct: jest.fn((id) => {
             const VariantMock = require('./test/mocks/dw/catalog/Variant');
@@ -357,4 +358,11 @@ jest.mock('dw/experience/PageMgr', () => {
             return new PageMock()
         }),
     };
+}, {virtual: true});
+
+jest.mock('dw/campaign/PromotionMgr', () => {
+    return {
+        getPromotion: jest.fn(),
+        getActivePromotions: jest.fn(),
+    }
 }, {virtual: true});

@@ -10,30 +10,12 @@ exports[`process colorVariations 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -136,7 +118,6 @@ exports[`process colorVariations 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
     },
     "indexName": "test_index___products__default.tmp",
@@ -149,30 +130,12 @@ exports[`process colorVariations 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031213M",
-      ],
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -275,7 +238,6 @@ exports[`process colorVariations 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031213M",
     },
     "indexName": "test_index___products__default.tmp",
@@ -288,30 +250,12 @@ exports[`process colorVariations 1`] = `
         "1": "Femmes > Vêtements",
         "2": "Femmes > Vêtements > Bas",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -414,7 +358,6 @@ exports[`process colorVariations 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
     },
     "indexName": "test_index___products__fr.tmp",
@@ -427,30 +370,12 @@ exports[`process colorVariations 1`] = `
         "1": "Femmes > Vêtements",
         "2": "Femmes > Vêtements > Bas",
       },
-      "_tags": [
-        "id:701644031213M",
-      ],
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -553,7 +478,6 @@ exports[`process colorVariations 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031213M",
     },
     "indexName": "test_index___products__fr.tmp",
@@ -566,30 +490,12 @@ exports[`process colorVariations 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -692,7 +598,6 @@ exports[`process colorVariations 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
     },
     "indexName": "test_index___products__en.tmp",
@@ -705,30 +610,12 @@ exports[`process colorVariations 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031213M",
-      ],
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -831,7 +718,6 @@ exports[`process colorVariations 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031213M",
     },
     "indexName": "test_index___products__en.tmp",
@@ -851,27 +737,12 @@ exports[`process default 1`] = `
         "2": "Womens > Clothing > Bottoms",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -924,7 +795,6 @@ exports[`process default 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -945,27 +815,12 @@ exports[`process default 1`] = `
         "2": "Femmes > Vêtements > Bas",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Combo rose vif",
       "image_groups": [
@@ -1018,7 +873,6 @@ exports[`process default 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Rose",
       "refinementSize": "4",
       "searchable": true,
@@ -1039,27 +893,12 @@ exports[`process default 1`] = `
         "2": "Womens > Clothing > Bottoms",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -1112,7 +951,6 @@ exports[`process default 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -1137,31 +975,13 @@ exports[`process fullCatalogReindex 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -1214,7 +1034,6 @@ exports[`process fullCatalogReindex 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -1234,31 +1053,13 @@ exports[`process fullCatalogReindex 1`] = `
         "1": "Femmes > Vêtements",
         "2": "Femmes > Vêtements > Bas",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Combo rose vif",
       "image_groups": [
@@ -1311,7 +1112,6 @@ exports[`process fullCatalogReindex 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Rose",
       "refinementSize": "4",
       "searchable": true,
@@ -1331,31 +1131,13 @@ exports[`process fullCatalogReindex 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -1408,7 +1190,6 @@ exports[`process fullCatalogReindex 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -1433,31 +1214,13 @@ exports[`process fullRecordUpdate 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -1510,7 +1273,6 @@ exports[`process fullRecordUpdate 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -1530,31 +1292,13 @@ exports[`process fullRecordUpdate 1`] = `
         "1": "Femmes > Vêtements",
         "2": "Femmes > Vêtements > Bas",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Combo rose vif",
       "image_groups": [
@@ -1607,7 +1351,6 @@ exports[`process fullRecordUpdate 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Rose",
       "refinementSize": "4",
       "searchable": true,
@@ -1627,31 +1370,13 @@ exports[`process fullRecordUpdate 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "_tags": [
-        "id:701644031206M",
-      ],
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -1704,7 +1429,6 @@ exports[`process fullRecordUpdate 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -1728,27 +1452,12 @@ exports[`process master-level indexing 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -1847,7 +1556,6 @@ exports[`process master-level indexing 1`] = `
       ],
       "name": "Floral Dress",
       "objectID": "25592581M",
-      "primary_category_id": "womens-clothing-bottoms",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
@@ -1883,27 +1591,12 @@ exports[`process master-level indexing 1`] = `
         "1": "Femmes > Vêtements",
         "2": "Femmes > Vêtements > Bas",
       },
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -2002,7 +1695,6 @@ exports[`process master-level indexing 1`] = `
       ],
       "name": "Robe florale",
       "objectID": "25592581M",
-      "primary_category_id": "womens-clothing-bottoms",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Combo rose vif",
@@ -2038,27 +1730,12 @@ exports[`process master-level indexing 1`] = `
         "1": "Womens > Clothing",
         "2": "Womens > Clothing > Bottoms",
       },
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -2157,7 +1834,6 @@ exports[`process master-level indexing 1`] = `
       ],
       "name": "Floral Dress",
       "objectID": "25592581M",
-      "primary_category_id": "womens-clothing-bottoms",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
@@ -2200,27 +1876,12 @@ exports[`process partialRecordUpdate 1`] = `
         "2": "Womens > Clothing > Bottoms",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -2273,7 +1934,6 @@ exports[`process partialRecordUpdate 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,
@@ -2294,27 +1954,12 @@ exports[`process partialRecordUpdate 1`] = `
         "2": "Femmes > Vêtements > Bas",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Combo rose vif",
       "image_groups": [
@@ -2367,7 +2012,6 @@ exports[`process partialRecordUpdate 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Rose",
       "refinementSize": "4",
       "searchable": true,
@@ -2388,27 +2032,12 @@ exports[`process partialRecordUpdate 1`] = `
         "2": "Womens > Clothing > Bottoms",
       },
       "brand": null,
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Womens",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bottoms",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Clothing",
-          },
-          {
-            "id": "womens",
-            "name": "Womens",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "color": "Hot Pink Combo",
       "image_groups": [
@@ -2461,7 +2090,6 @@ exports[`process partialRecordUpdate 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "refinementColor": "Pink",
       "refinementSize": "4",
       "searchable": true,

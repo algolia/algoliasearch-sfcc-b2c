@@ -1,8 +1,9 @@
-/* global algoliasearch */
+/* global algoliasearch, algoliaData, enableAutocomplete, enableInstantSearch, enableInsights, enableRecommendations */
 
 document.addEventListener('DOMContentLoaded', function () {
     var $suggestionsWrapper = $('#suggestions-wrapper');
 
+    var categoryId = $suggestionsWrapper.attr('data-category');
     var categoryDisplayNamePath = $suggestionsWrapper.attr('data-category-display-name-path');  // path of the current category
     var categoryDisplayNamePathSeparator = $suggestionsWrapper.attr('data-category-display-name-path-separator'); // separator used to serialize the category path (by default: '>')
     var urlQuery = $suggestionsWrapper.attr('data-q'); // onload search query - for search page - URL param: q
@@ -36,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
         enableInstantSearch({
             searchClient,
             urlQuery,
+            categoryId,
             categoryDisplayNamePath,
             categoryDisplayNamePathSeparator,
         });

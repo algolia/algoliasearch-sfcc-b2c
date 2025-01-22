@@ -4,6 +4,8 @@
     <isinclude template="reporting/reportingUrls" />
 </isif>
 
+<span id="algolia-activePromos" data-promotions="<isprint value="${pdict.activePromotions}" encoding="htmldoublequote"/>"></span>
+
 <iscomment> Search Results Banner </iscomment>
 <isif condition="${pdict.category}">
     <div class="hero slant-down search-banner"
@@ -36,7 +38,7 @@
                         </a>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <a class="nav-link content-search" id="content-search-bar-button" aria-controls="content-search-results-pane" data-toggle="tab" role="tab" aria-selected="false" id="articles-tab">
+                        <a class="nav-link content-search" id="content-search-bar-button" aria-controls="content-search-results-pane" data-toggle="tab" role="tab" aria-selected="false" tabindex="0" id="articles-tab">
                             ${Resource.msg('tab.nav.search.artclesresults', 'search', null)}<span class="ai-nb-hits" id="ai-content-count"></span>
                         </a>
                     </li>
@@ -65,6 +67,7 @@
 
                         <div class="refinements">
                             <div id="algolia-categories-list-placeholder"></div>
+                            <div id="algolia-newarrival-placeholder"></div>
                             <div id="algolia-newarrivals-list-placeholder"></div>
                             <div id="algolia-brand-list-placeholder"></div>
                             <div id="algolia-size-list-placeholder"></div>

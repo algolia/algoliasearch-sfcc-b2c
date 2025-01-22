@@ -1,6 +1,5 @@
 
 var algoliaSearchService = require('*/cartridge/scripts/services/algoliaSearchService');
-var LocalServiceRegistry = require('dw/svc/LocalServiceRegistry');
 var Logger = require('dw/system/Logger');
 
 /**
@@ -14,7 +13,6 @@ function getServerSideHits(query, type, indexType) {
     var searchService = algoliaSearchService.getService(indexType);
 
     if (!empty(searchService)) {
-        var params = '';
         if (type === 'category') {
             var facetFiltersParamValue = require('*/cartridge/scripts/algolia/helper/ssrHelper').facetFiltersParamValueFromBreadcrumbs(query);
         }
@@ -44,4 +42,3 @@ function getServerSideHits(query, type, indexType) {
 }
 
 module.exports.getServerSideHits = getServerSideHits;
-

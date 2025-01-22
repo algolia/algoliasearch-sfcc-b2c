@@ -200,6 +200,14 @@ Setting this preference replaces the first two segments, the final index name be
                 <default-value>false</default-value>
             </attribute-definition>
 
+            <attribute-definition attribute-id="Algolia_EnablePricingLazyLoad">
+                <display-name xml:lang="x-default">Enable prices lazy loading</display-name>
+                <description xml:lang="x-default">Fetch prices from SFCC after the search results are returned from Algolia</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_EnableSSR">
                 <display-name xml:lang="x-default">Enable SSR</display-name>
                 <description xml:lang="x-default">Enables server-side rendering for CLP search results. Helps with SEO as CLP pages are no longer rendered with empty containers that are to be filled by client-side code, but increases page load times a tiny bit (which can be countered with page caching).</description>
@@ -265,6 +273,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_EnableSSR"/>
                 <attribute attribute-id="Algolia_EnableContentSearch"/>
                 <attribute attribute-id="Algolia_EnableRecommend"/>
+                <attribute attribute-id="Algolia_EnablePricingLazyLoad"/>
             </attribute-group>
         </group-definitions>
 

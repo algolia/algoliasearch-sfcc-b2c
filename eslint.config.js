@@ -1,8 +1,13 @@
 const globals = require('globals');
+const js = require('@eslint/js');
 const jquery = require('eslint-plugin-jquery');
 const jsdoc = require('eslint-plugin-jsdoc');
+const pluginCypress = require('eslint-plugin-cypress/flat');
+
 
 module.exports = [
+    js.configs.recommended,
+    pluginCypress.configs.recommended,
     {
         ignores: [
             '**/doc/',
@@ -13,7 +18,7 @@ module.exports = [
             'cartridges/modules',
             'cartridges/algolia_sg_changes',
             'cartridges/int_algolia_controllers/cartridge/static/default/js/lib',
-            'cartridges/int_algolia_sfra/cartridge/static/default/js/lib',
+            'cartridges/int_algolia_sfra/cartridge/static/default/js/lib'
         ],
     },
     {
@@ -24,11 +29,14 @@ module.exports = [
 
         languageOptions: {
             globals: {
+                ...globals.browser,
+                ...globals.node,
                 empty: true,
                 request: true,
                 dw: true,
                 XML: true,
                 $: true,
+                session: true,
             },
 
             ecmaVersion: 2015,
@@ -51,7 +59,6 @@ module.exports = [
             'jsdoc/require-jsdoc': 'error',
 
             'vars-on-top': 'off',
-            'global-require': 'off',
 
             'no-shadow': [
                 'error',
@@ -59,21 +66,35 @@ module.exports = [
                     allow: ['err', 'callback'],
                 },
             ],
-
-            'max-len': 'off',
         },
     },
     {
-        files: ['eslint.config.js', 'test/**/*.js'],
+        files: ['eslint.config.js', 'jest.config.js', 'test/**/*.js'],
         languageOptions: {
             globals: {
-                ...globals.mocha,
+                ...globals.jest,
+                ...globals.node,
             },
 
             ecmaVersion: 'latest',
         },
         rules: {
             'jsdoc/require-jsdoc': 'off',
+        },
+    },
+    {
+        files: ['scripts/**/*.js'],
+        languageOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            globals: {
+                ...globals.node,
+            },
+        },
+        rules: {
+            'jsdoc/require-jsdoc': 'off',
+            'func-names': 'off',
+            'import/no-unresolved': 'off',
         },
     },
 ];

@@ -11,7 +11,7 @@ var paramRecordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, AlgoliaJobReport;
-var jobHelper, modelHelper, reindexHelper, sendHelper;
+var jobHelper, reindexHelper;
 var indexingOperation;
 var fullRecordUpdate = false;
 
@@ -58,10 +58,8 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-    modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
-    sendHelper = require('*/cartridge/scripts/algolia/helper/sendHelper');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
@@ -70,7 +68,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
         logger.info('Configuration file "productAttributesConfig.js" loaded')
-    } catch(e) {
+    } catch (e) { // eslint-disable-line no-unused-vars
         extendedProductAttributesConfig = {};
     }
 
@@ -210,6 +208,7 @@ exports.beforeStep = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {number} total number of products
  */
+// eslint-disable-next-line no-unused-vars
 exports.getTotalCount = function(parameters, stepExecution) {
     return products.count;
 }
@@ -220,6 +219,7 @@ exports.getTotalCount = function(parameters, stepExecution) {
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  * @returns {dw.catalog.Product} B2C Product object
  */
+// eslint-disable-next-line no-unused-vars
 exports.read = function(parameters, stepExecution) {
     if (products.hasNext()) {
         return products.next();
@@ -235,6 +235,7 @@ exports.read = function(parameters, stepExecution) {
  *                  [ "action": "addObject", "indexName": "sfcc_products_en_US", body: { "id": "008884303989M", "name": "Fitted Shirt" },
  *                    "action": "addObject", "indexName": "sfcc_products_fr_FR", body: { "id": "008884303989M", "name": "Chemise ajustée" } ]
  */
+// eslint-disable-next-line no-unused-vars
 exports.process = function(product, parameters, stepExecution) {
 
     jobReport.processedItems++; // counts towards the total number of products processed
@@ -247,7 +248,7 @@ exports.process = function(product, parameters, stepExecution) {
             return [];
         }
         if (product.master) {
-            var algoliaOperations = [];
+            let algoliaOperations = [];
             var processedVariantsToSend = 0;
 
             if (paramRecordModel !== MASTER_LEVEL) {
@@ -261,8 +262,8 @@ exports.process = function(product, parameters, stepExecution) {
                     fullRecordUpdate: fullRecordUpdate,
                 });
                 for (let l = 0; l < siteLocales.size(); ++l) {
-                    var locale = siteLocales[l];
-                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    let locale = siteLocales[l];
+                    let indexName = algoliaData.calculateIndexName('products', locale);
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         indexName += '.tmp';
                     }
@@ -274,10 +275,10 @@ exports.process = function(product, parameters, stepExecution) {
                 }
             } else {
                 // Master-level indexing
-                var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                 for (let l = 0; l < siteLocales.size(); ++l) {
-                    var locale = siteLocales[l];
-                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    let locale = siteLocales[l];
+                    let indexName = algoliaData.calculateIndexName('products', locale);
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         indexName += '.tmp';
                     }
@@ -328,6 +329,7 @@ exports.process = function(product, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.send = function(algoliaOperations, parameters, stepExecution) {
     // algoliaOperations contains all the returned Algolia operations from process() as a List of arrays
     var algoliaOperationsArray = algoliaOperations.toArray();
@@ -373,6 +375,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
  * @param {dw.util.HashMap} parameters job step parameters
  * @param {dw.job.JobStepExecution} stepExecution contains information about the job step
  */
+// eslint-disable-next-line no-unused-vars
 exports.afterStep = function(success, parameters, stepExecution) {
     // An exit status cannot be defined for a chunk-oriented script module.
     // Chunk modules always finish with either OK or ERROR.
@@ -397,32 +400,30 @@ exports.afterStep = function(success, parameters, stepExecution) {
     logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
     logger.info('Chunks sent: {0}; Chunks failed: {1}', jobReport.chunksSent, jobReport.chunksFailed);
 
-    if (jobReport.error) {
-        jobReport.endTime = new Date();
-        jobReport.writeToCustomObject();
-        logger.error(jobReport.errorMessage);
-        // Don't try to finish the indexing and show the job in ERROR in the history
-        throw new Error(jobReport.errorMessage);
-    }
-
     const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
 
-    if (paramIndexingMethod === 'fullCatalogReindex') {
-        if (failurePercentage <= paramFailureThresholdPercentage) {
-            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
-        } else {
-            // don't proceed with the atomic reindexing
-            jobReport.error = true;
-            jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
-                 paramFailureThresholdPercentage + '%). Not moving temporary indices to production. Check the logs for details.';
-        }
-    } else if (failurePercentage > paramFailureThresholdPercentage) {
+    if (failurePercentage > paramFailureThresholdPercentage) {
         jobReport.error = true;
         jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
             paramFailureThresholdPercentage + '%). Check the logs for details.';
+    } else if (jobReport.processedItems !== products.count) {
+        jobReport.error = true;
+        jobReport.errorMessage =
+            'Not all products were processed: ' +
+            jobReport.processedItems + ' / ' + products.count +
+            '. Check the logs for details.';
     } else if (jobReport.chunksFailed > 0) {
         jobReport.error = true;
         jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
+    }
+
+    if (paramIndexingMethod === 'fullCatalogReindex') {
+        if (!jobReport.error) {
+            // proceed with the atomic reindexing only if everything went fine
+            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
+        } else {
+            jobReport.errorMessage += ' Temporary indices were not moved to production.';
+        }
     }
 
     jobReport.endTime = new Date();
@@ -431,7 +432,8 @@ exports.afterStep = function(success, parameters, stepExecution) {
     if (!jobReport.error) {
         logger.info('Indexing completed successfully.');
     } else {
-        // Showing the job in ERROR in the history
+        logger.error(jobReport.errorMessage);
+        // Show the job in ERROR in the BM history
         throw new Error(jobReport.errorMessage);
     }
 }

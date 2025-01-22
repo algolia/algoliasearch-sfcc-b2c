@@ -1,4 +1,5 @@
 /* global autocomplete, getAlgoliaResults, algoliaData  */
+/* exported enableAutocomplete */
 
 var recommendClient;
 var trendingItemsArr = [];
@@ -96,7 +97,7 @@ function mapHitToTrendingItem(hit) {
  * @returns {Promise} - The promise object.
  */
 function fetchTrendingItems() {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const indexName = algoliaData.productsIndex;
 
         recommendClient.getTrendingItems([{
@@ -211,10 +212,8 @@ function getSourcesArray(config) {
             },
             item({
                 item,
-                components,
                 html,
             }) {
-                var a = item;
                 return html `
                     <a href=${item.url}>
                         <div class="text-truncate text-nowrap">

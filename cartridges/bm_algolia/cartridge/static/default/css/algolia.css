@@ -96,3 +96,9 @@ tr {
 .info-hover:hover + .tooltip {
     display: block;
 }
+.customModule-leftside {
+    max-width: 250px;
+}
+.customModule-card {
+    font-family: Helvetica Neue, sans-serif !important;
+}

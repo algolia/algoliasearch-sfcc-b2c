@@ -9,27 +9,12 @@ exports[`generateVariantRecords 1`] = `
         "1": "Femmes > Vêtements",
         "2": "Femmes > Vêtements > Bas",
       },
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -94,7 +79,6 @@ exports[`generateVariantRecords 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
     },
     algoliaLocalizedProduct {
@@ -103,27 +87,12 @@ exports[`generateVariantRecords 1`] = `
         "1": "Femmes > Vêtements",
         "2": "Femmes > Vêtements > Bas",
       },
-      "categories": [
-        [
-          {
-            "id": "newarrivals-womens",
-            "name": "Femmes",
-          },
-        ],
-        [
-          {
-            "id": "womens-clothing-bottoms",
-            "name": "Bas",
-          },
-          {
-            "id": "womens-clothing",
-            "name": "Vêtements",
-          },
-          {
-            "id": "womens",
-            "name": "Femmes",
-          },
-        ],
+      "categoryPageId": [
+        "newarrivals",
+        "newarrivals-womens",
+        "womens",
+        "womens-clothing",
+        "womens-clothing-bottoms",
       ],
       "colorVariations": [
         {
@@ -188,7 +157,6 @@ exports[`generateVariantRecords 1`] = `
         "EUR": 92.88,
         "USD": 129,
       },
-      "primary_category_id": "womens-clothing-bottoms",
       "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031213M",
     },
   ],
