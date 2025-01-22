@@ -728,6 +728,7 @@ function getPriceHtml(product) {
  * @param {string} indexName indexName
  * @return {string} Final URL of the product
  */
+// eslint-disable-next-line no-unused-vars
 function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
     const url = new URL(productUrl, window.location.origin);
     url.searchParams.append('queryID', queryID);

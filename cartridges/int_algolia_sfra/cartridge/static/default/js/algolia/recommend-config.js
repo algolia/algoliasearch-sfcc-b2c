@@ -302,19 +302,3 @@ if (algoliaData.enableRecommend) {
         });
     });
 }
-
-/**
- * Build a product URL with Algolia query parameters
- * @param {string} objectID objectID
- * @param {string} productUrl url of the product
- * @param {string} queryID queryID
- * @param {string} indexName indexName
- * @return {string} Final URL of the product
- */
-function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
-    const url = new URL(productUrl, window.location.origin);
-    url.searchParams.append('queryID', queryID);
-    url.searchParams.append('objectID', objectID);
-    url.searchParams.append('indexName', indexName);
-    return url.href;
-}
