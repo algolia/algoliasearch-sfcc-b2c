@@ -719,24 +719,6 @@ function getPriceHtml(product) {
     return `<span class="value"> ${algoliaData.currencySymbol} ${salesPrice} </span>`;
 }
 
-
-/**
- * Build a product URL with Algolia query parameters
- * @param {string} objectID objectID
- * @param {string} productUrl url of the product
- * @param {string} queryID queryID
- * @param {string} indexName indexName
- * @return {string} Final URL of the product
- */
-// eslint-disable-next-line no-unused-vars
-function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
-    const url = new URL(productUrl, window.location.origin);
-    url.searchParams.append('queryID', queryID);
-    url.searchParams.append('objectID', objectID);
-    url.searchParams.append('indexName', indexName);
-    return url.href;
-}
-
 /**
  * Calculate the display price for an item when lazy loading pricing is disabled
  * @param {Object} item The item object
