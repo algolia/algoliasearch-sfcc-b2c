@@ -210,38 +210,8 @@ function transformItem(item) {
     // originating index
     item.__indexName = algoliaData.productsIndex;
 
-    // url with queryID (used for analytics)
-    if (item.url) {
-        item.url = generateProductUrl({
-            objectID: item.objectID,
-            productUrl: item.url,
-            queryID: item.__queryID,
-            indexName: item.__indexName,
-        });
-    }
-
-    if (item.colorVariations) {
-        item.colorVariations.forEach(colorVariation => {
-            colorVariation.variationURL = generateProductUrl({
-                objectID: item.objectID,
-                productUrl: colorVariation.variationURL,
-                queryID: item.__queryID,
-                indexName: item.__indexName,
-            });
-        });
-    }
-
     // Master-level indexing
     if (item.variants) {
-        item.variants.forEach(variant => {
-            variant.url = generateProductUrl({
-                objectID: item.objectID,
-                productUrl: variant.url,
-                queryID: item.__queryID,
-                indexName: item.__indexName,
-            });
-        });
-
         // 1. Use the default variant
         let selectedVariant = item.variants.find(variant => {
             return variant.variantID === item.defaultVariantID;
@@ -331,20 +301,4 @@ if (algoliaData.enableRecommend) {
             });
         });
     });
-}
-
-/**
- * Build a product URL with Algolia query parameters
- * @param {string} objectID objectID
- * @param {string} productUrl url of the product
- * @param {string} queryID queryID
- * @param {string} indexName indexName
- * @return {string} Final URL of the product
- */
-function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
-    const url = new URL(productUrl, window.location.origin);
-    url.searchParams.append('queryID', queryID);
-    url.searchParams.append('objectID', objectID);
-    url.searchParams.append('indexName', indexName);
-    return url.href;
 }

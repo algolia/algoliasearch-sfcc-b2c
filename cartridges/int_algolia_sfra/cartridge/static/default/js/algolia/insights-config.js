@@ -9,13 +9,11 @@
  * @param {string} productsIndex Products index name
  */
 function enableInsights(appId, searchApiKey, productsIndex) {
-    const LOCAL_STORAGE_KEY = 'algolia-insights';
     const insightsData = document.querySelector('#algolia-insights');
 
     let userToken;
     let authenticatedUserToken;
     let trackingAllowed = false;
-    let trackedQueryIDs = {};
 
     const dwanonymousCookieMatch = document.cookie.match(/dwanonymous_\w*=(\w*);/);
     if (dwanonymousCookieMatch) {
@@ -26,13 +24,6 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     }
     if (insightsData && insightsData.dataset.trackingallowed === 'true') {
         trackingAllowed = true;
-        try {
-            trackedQueryIDs = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '{}');
-        } catch (e) { // eslint-disable-line no-unused-vars
-            localStorage.removeItem(LOCAL_STORAGE_KEY);
-        }
-    } else {
-        localStorage.removeItem(LOCAL_STORAGE_KEY);
     }
 
     window.aa('init', {
@@ -40,9 +31,9 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         apiKey: searchApiKey,
         userToken,
         authenticatedUserToken,
+        userHasOptedOut: !trackingAllowed,
     });
 
-    let lastQueryID = null;
     let lastIndexName = null;
 
     // Event defined at https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/dec9c7c684275127338ac3197dfaf8fe656bb2b7/cartridges/app_storefront_base/cartridge/client/default/js/product/base.js#L676
@@ -50,8 +41,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     $('body').on('product:afterAddToCart', function (event, data) {
         const objectIDs = [];
         const objectData = [];
-        const queryID = getUrlParameter('queryID') || lastQueryID;
-        const index = getUrlParameter('indexName') || lastIndexName || productsIndex;
+        const index = lastIndexName || productsIndex;
         let currency;
 
         const algoliaProductData = data.algoliaProductData;
@@ -59,10 +49,6 @@ function enableInsights(appId, searchApiKey, productsIndex) {
             price: algoliaProductData.price,
             quantity: parseInt(algoliaProductData.qty),
         };
-
-        if (queryID && queryID !== 'undefined') {
-            productInfo.queryID = queryID;
-        }
 
         if (algoliaProductData.discount) {
             productInfo.discount = algoliaProductData.discount;
@@ -73,20 +59,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         objectIDs.push('' + algoliaProductData.pid);
         objectData.push(productInfo);
 
-        if (trackingAllowed) {
-            trackedQueryIDs[algoliaProductData.pid] = queryID;
-            // Clean up products that were removed from the cart and save the new trackedQueryIDs
-            for (const key in trackedQueryIDs) {
-                if (!data.cart.items.find((item) => item.id === key)) {
-                    delete trackedQueryIDs[key];
-                }
-            }
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(trackedQueryIDs));
-        }
-
-        const algoliaEventType = queryID
-            ? 'addedToCartObjectIDsAfterSearch'
-            : 'addedToCartObjectIDs';
+        const algoliaEventType = 'addedToCartObjectIDsAfterSearch';
         // pliUUID is defined only for a single product add to cart: https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/1d7d4d987d681a11b045746618aec744b4409540/cartridges/app_storefront_base/cartridge/controllers/Cart.js#L125
         const eventName = data.pliUUID ? 'Product Add to cart' : 'Global Add to cart';
 
@@ -97,8 +70,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
             objectData,
             currency,
         };
-
-        window.aa(algoliaEventType, algoliaEvent);
+        window.aa(algoliaEventType, algoliaEvent, { inferQueryID: true });
     });
 
     // when on search page
@@ -107,7 +79,6 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         searchPage.addEventListener('click', function (event) {
             var insightsTarget = findInsightsTarget(event.target, event.currentTarget);
             if (insightsTarget) {
-                lastQueryID = $(insightsTarget).data('query-id');
                 lastIndexName = $(insightsTarget).data('index-name');
             }
         });
@@ -137,17 +108,9 @@ function enableInsights(appId, searchApiKey, productsIndex) {
                 productInfo.discount = product.discount;
             }
 
-            if (trackingAllowed) {
-                productInfo.queryID = trackedQueryIDs[product.id];
-                delete trackedQueryIDs[product.id];
-            }
-
             objectIDs.push(product.pid);
             objectData.push(productInfo);
         });
-        if (trackingAllowed) {
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(trackedQueryIDs));
-        }
 
         const algoliaEvent = {
             eventName: 'Products purchased',
@@ -156,11 +119,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
             objectData,
             currency,
         };
-        const algoliaEventType = trackingAllowed
-            ? 'purchasedObjectIDsAfterSearch'
-            : 'purchasedObjectIDs';
-
-        window.aa(algoliaEventType, algoliaEvent);
+        window.aa('purchasedObjectIDsAfterSearch', algoliaEvent, { inferQueryID: true });
     }
 
     /**
@@ -178,26 +137,5 @@ function enableInsights(appId, searchApiKey, productsIndex) {
             element = element.parentElement;
         }
         return element;
-    }
-
-    /**
-     * Returns the value of a URL parameter
-     * @param {string} parameterName The parameter name whose value should be returned
-     * @returns {string} The value of the parameter
-     */
-    function getUrlParameter(parameterName) {
-        var queryString = window.location.search.substring(1);
-        var sURLVariables = queryString.split('&');
-        var currentParameterName;
-
-        for (var i = 0; i < sURLVariables.length; i++) {
-            currentParameterName = sURLVariables[i].split('=');
-
-            if (currentParameterName[0] === parameterName) {
-                return currentParameterName[1] === undefined
-                    ? true
-                    : decodeURIComponent(currentParameterName[1]);
-            }
-        }
     }
 }
