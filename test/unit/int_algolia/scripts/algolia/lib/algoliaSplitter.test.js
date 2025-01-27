@@ -1,4 +1,4 @@
-const { splitHtmlContent, getMaxBodySize, removeHtmlTagsAndFormat } = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaSplitter');
+const { splitHtmlContent, getMaxBodySize, removeHtmlTagsAndFormat, removeIgnoredContent } = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaSplitter');
 
 jest.mock('dw/util/Bytes', () => {
     class BytesMock {
@@ -93,6 +93,62 @@ describe('Extreme Content Manipulation', () => {
             const expectedOutput = 'This is a test string with HTML tags, new lines, and more breaks.';
             expect(removeHtmlTagsAndFormat(input)).toBe(expectedOutput);
         });
+    });
+
+    test('should remove content inside an <area> tag even if multiline', () => {
+        const htmlContent = `<div>
+            <area>Test 1
+                <div>
+                    <button>Test 2</button>
+                </div>
+            </area>
+            <div>
+                <span>Test 3</span>
+            </div>
+        </div>`;
+        const result = splitHtmlContent(htmlContent, 1000, 'div');
+        expect(result).toEqual(['Test 3']);
+    });
+});
+
+describe('removeIgnoredContent', () => {
+    test('removes content within regular tags', () => {
+        const input = '<div>Keep this<script>Remove this</script>Keep this too</div>';
+        expect(removeIgnoredContent(input)).toBe('<div>Keep thisKeep this too</div>');
+    });
+
+    test('removes content within multiline tags', () => {
+        const input = `<div>Keep this<script>
+            Remove
+            this
+            content
+        </script>Keep this too</div>`;
+        expect(removeIgnoredContent(input)).toBe('<div>Keep thisKeep this too</div>');
+    });
+
+    test('removes self-closing tags', () => {
+        const input = '<div>Keep this<input type="text" />Keep this too</div>';
+        expect(removeIgnoredContent(input)).toBe('<div>Keep thisKeep this too</div>');
+    });
+
+    test('removes multiple instances of ignored tags', () => {
+        const input = '<div>Text<script>JS1</script>Middle<script>JS2</script>End</div>';
+        expect(removeIgnoredContent(input)).toBe('<div>TextMiddleEnd</div>');
+    });
+
+    test('handles multiple self-closing tags', () => {
+        const input = '<div>Start<input /><input/>End</div>';
+        expect(removeIgnoredContent(input)).toBe('<div>StartEnd</div>');
+    });
+
+    test('handles mixed regular and self-closing ignored tags', () => {
+        const input = '<div>Start<script>Remove</script><input />Middle<style>Remove</style><input/>End</div>';
+        expect(removeIgnoredContent(input)).toBe('<div>StartMiddleEnd</div>');
+    });
+
+    test('preserves content not in ignored tags', () => {
+        const input = '<div><span>Keep</span><script>Remove</script><p>Also Keep</p></div>';
+        expect(removeIgnoredContent(input)).toBe('<div><span>Keep</span><p>Also Keep</p></div>');
     });
 });
 
