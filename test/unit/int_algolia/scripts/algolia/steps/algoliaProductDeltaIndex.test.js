@@ -118,10 +118,24 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot();
     });
 
-    test('master-level indexing with IndexOutOfStock=true and product is out of stock', () => {
+    test('master-level indexing with IndexOutOfStock=true and product is in stock', () => {
         mockRecordModel = 'master-level';
         mockIndexOutOfStock = true;
         mockInStockThreshold = 10;
+        job.beforeStep(parameters, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({
+            jobID: 'TestJobID',
+            stepID: 'TestStepID',
+            indexingMethod: 'fullRecordUpdate'
+        });
+        var algoliaOperations = job.process({productID: '25592581M', available: true});
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+
+    test('master-level indexing with IndexOutOfStock=true and product is out of stock', () => {
+        mockRecordModel = 'master-level';
+        mockIndexOutOfStock = true;
+        mockInStockThreshold = 1;
         job.beforeStep(parameters, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({
             jobID: 'TestJobID',
