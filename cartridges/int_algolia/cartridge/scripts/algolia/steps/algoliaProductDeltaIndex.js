@@ -387,6 +387,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
             }
         }
 
+        // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
         if (productFilter.isInclude(product)) {
             if (productFilter.isIncludeOutOfStock(product)) {
                 var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
