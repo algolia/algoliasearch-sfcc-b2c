@@ -10,6 +10,5 @@ module.exports = defineConfig({
             // Important: return the updated config
             return config;
         },
-        pageLoadTimeout: 30000,
     },
 });
