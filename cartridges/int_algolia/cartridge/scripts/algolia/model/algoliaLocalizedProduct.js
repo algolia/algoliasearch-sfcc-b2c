@@ -441,6 +441,7 @@ var aggregatedValueHandlers = {
         return promotionalPrices;
     },
     variants: function(product, parameters) {
+        const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
         if (!product.isMaster() && !product.isVariationGroup()) {
             return null;
         }
@@ -450,12 +451,8 @@ var aggregatedValueHandlers = {
         while (variantsIt.hasNext()) {
             var variant = variantsIt.next();
 
-            let indexOutofStock = algoliaData.getPreference('IndexOutOfStock');
-            let inventoryRecord = variant.getAvailabilityModel().getInventoryRecord(); // can be null
-            if (!indexOutofStock) {
-                if (!inventoryRecord || (inventoryRecord && inventoryRecord.getATS().getValue() < ALGOLIA_IN_STOCK_THRESHOLD)) {
-                    continue;
-                }
+            if (!productFilter.isIncludeOutOfStock(variant)) {
+                continue;
             }
 
             var localizedVariant = new algoliaLocalizedProduct({

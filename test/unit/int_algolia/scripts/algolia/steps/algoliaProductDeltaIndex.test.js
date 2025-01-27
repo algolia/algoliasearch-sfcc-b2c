@@ -18,6 +18,9 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
 }, {virtual: true});
 
 let mockLocalesForIndexing;
+let mockRecordModel = 'variant-level';
+let mockIndexOutOfStock = false;
+let mockInStockThreshold = 0;
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
     return {
@@ -36,9 +39,11 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
         getPreference: function (key) {
             switch (key) {
                 case 'IndexOutOfStock':
-                    return true;
+                    return mockIndexOutOfStock;
                 case 'InStockThreshold':
-                    return 0;
+                    return mockInStockThreshold;
+                case 'RecordModel':
+                    return mockRecordModel;
                 default:
                     return [];
             }
@@ -100,8 +105,23 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot();
     });
 
-    test('master-level indexing', () => {
-        global.customPreferences['Algolia_RecordModel'] = 'master-level';
+    test('master-level indexing with IndexOutOfStock=false and product is in stock', () => {
+        mockRecordModel = 'master-level';
+        mockIndexOutOfStock = false;
+        job.beforeStep(parameters, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({
+            jobID: 'TestJobID',
+            stepID: 'TestStepID',
+            indexingMethod: 'fullRecordUpdate'
+        });
+        var algoliaOperations = job.process({productID: '25592581M', available: true});
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+
+    test('master-level indexing with IndexOutOfStock=true and product is out of stock', () => {
+        mockRecordModel = 'master-level';
+        mockIndexOutOfStock = true;
+        mockInStockThreshold = 10;
         job.beforeStep(parameters, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({
             jobID: 'TestJobID',
