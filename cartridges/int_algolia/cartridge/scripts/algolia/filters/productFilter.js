@@ -24,8 +24,7 @@ function isInclude(product) {
  * @returns {boolean}
  */
 function isInStock(product, threshold) {
-    var availabilityModel = product.
-    getAvailabilityModel();
+    var availabilityModel = product.getAvailabilityModel();
     if (!availabilityModel) {
         return false;
     }
