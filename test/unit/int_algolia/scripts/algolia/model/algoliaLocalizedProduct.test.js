@@ -523,42 +523,32 @@ describe('productFilter.isIncludeOutOfStock', () => {
     test('skips out-of-stock if IndexOutOfStock = false', () => {
         jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
             getSetOfArray: () => [],
-            getPreference: (id) => {
-                if (id === 'InStockThreshold') return 1;
-                if (id === 'IndexOutOfStock') return false;
-                return null;
-            },
         }), { virtual: true });
 
         productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
         const product = new ProductMock();
-        const outOfStockVariant =  new AlgoliaLocalizedProductModel({ 
+        const inStockVariant =  new AlgoliaLocalizedProductModel({ 
             product: product,
             locale: 'default',
             attributeList: ['custom.displaySize']
         });
 
-        outOfStockVariant.getAvailabilityModel = () => {
+        inStockVariant.getAvailabilityModel = () => {
             return {
                 getInventoryRecord: () => {
-                    return { getATS: () => { return { getValue: () => { return 0; } } } };
+                    return { getATS: () => { return { getValue: () => { return 5; } } } };
                 },
             };
         }
-        const shouldInclude = productFilter.isIncludeOutOfStock(outOfStockVariant);
+        const inStock = productFilter.isInStock(inStockVariant, 1);
 
-        expect(shouldInclude).toBe(false);
+        expect(inStock).toBe(true);
     });
 
     test('includes out-of-stock if IndexOutOfStock = true', () => {
         jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
             getSetOfArray: () => [],
-            getPreference: (id) => {
-                if (id === 'InStockThreshold') return 1;
-                if (id === 'IndexOutOfStock') return true;
-                return null;
-            },
         }), { virtual: true });
 
         productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -576,8 +566,8 @@ describe('productFilter.isIncludeOutOfStock', () => {
                 },
             };
         }
-        const shouldInclude = productFilter.isIncludeOutOfStock(outOfStockVariant);
+        const inStock = productFilter.isInStock(outOfStockVariant, 1);
 
-        expect(shouldInclude).toBe(true);
+        expect(inStock).toBe(false);
     });
 });

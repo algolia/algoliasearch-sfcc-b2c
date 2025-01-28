@@ -32,6 +32,8 @@ var fullRecordUpdate = false;
 
 const VARIANT_LEVEL = 'variant-level';
 const MASTER_LEVEL = 'master-level';
+var ALGOLIA_IN_STOCK_THRESHOLD;
+var INDEX_OUT_OF_STOCK;
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -71,6 +73,9 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+
+    ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+    INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
@@ -389,7 +394,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
         if (productFilter.isInclude(product)) {
-            if (productFilter.isIncludeOutOfStock(product)) {
+            const inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+            if (inStock || INDEX_OUT_OF_STOCK) {
                 var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
                 for (let l = 0; l < siteLocales.size(); l++) {
                     let locale = siteLocales[l];

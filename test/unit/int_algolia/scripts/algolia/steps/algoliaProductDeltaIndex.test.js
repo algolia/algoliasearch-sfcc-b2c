@@ -18,9 +18,9 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
 }, {virtual: true});
 
 let mockLocalesForIndexing;
-let mockRecordModel = 'variant-level';
-let mockIndexOutOfStock = false;
-let mockInStockThreshold = 0;
+let mockRecordModel;
+let mockIndexOutOfStock;
+let mockInStockThreshold;
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
     return {
@@ -67,10 +67,14 @@ const stepExecution = {
     getStepID: () => 'TestStepID',
 };
 
-const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
+let job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
 
 beforeEach(() => {
+    mockRecordModel = 'variant-level';
+    mockIndexOutOfStock = false;
+    mockInStockThreshold = 0;
     mockLocalesForIndexing = [];
+    job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
 });
 
 describe('beforeStep', () => {
@@ -105,22 +109,23 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot();
     });
 
-    test('master-level indexing with IndexOutOfStock=false and product is in stock', () => {
-        mockRecordModel = 'master-level';
+    test('variant-level indexing with IndexOutOfStock=false and product is in stock', () => {
+        mockRecordModel = 'variant-level';
         mockIndexOutOfStock = false;
+        mockInStockThreshold = 1;
         job.beforeStep(parameters, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({
             jobID: 'TestJobID',
             stepID: 'TestStepID',
             indexingMethod: 'fullRecordUpdate'
         });
-        var algoliaOperations = job.process({productID: '25592581M', available: true});
+        var algoliaOperations = job.process({productID: '701644031206M', available: true});
         expect(algoliaOperations).toMatchSnapshot();
     });
 
-    test('master-level indexing with IndexOutOfStock=true and product is in stock', () => {
-        mockRecordModel = 'master-level';
-        mockIndexOutOfStock = true;
+    test('variant-level indexing with IndexOutOfStock=false and product is out of stock', () => {
+        mockRecordModel = 'variant-level';
+        mockIndexOutOfStock = false;
         mockInStockThreshold = 10;
         job.beforeStep(parameters, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({
@@ -128,12 +133,12 @@ describe('process', () => {
             stepID: 'TestStepID',
             indexingMethod: 'fullRecordUpdate'
         });
-        var algoliaOperations = job.process({productID: '25592581M', available: true});
+        var algoliaOperations = job.process({productID: '701644031206M', available: true});
         expect(algoliaOperations).toMatchSnapshot();
     });
 
-    test('master-level indexing with IndexOutOfStock=true and product is out of stock', () => {
-        mockRecordModel = 'master-level';
+    test('variant-level indexing with IndexOutOfStock=true and product is in stock', () => {
+        mockRecordModel = 'variant-level';
         mockIndexOutOfStock = true;
         mockInStockThreshold = 1;
         job.beforeStep(parameters, stepExecution);
@@ -142,7 +147,21 @@ describe('process', () => {
             stepID: 'TestStepID',
             indexingMethod: 'fullRecordUpdate'
         });
-        var algoliaOperations = job.process({productID: '25592581M', available: true});
+        var algoliaOperations = job.process({productID: '701644031206M', available: true});
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+
+    test('variant-level indexing with IndexOutOfStock=true and product is out of stock', () => {
+        mockRecordModel = 'variant-level';
+        mockIndexOutOfStock = true;
+        mockInStockThreshold = 10;
+        job.beforeStep(parameters, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({
+            jobID: 'TestJobID',
+            stepID: 'TestStepID',
+            indexingMethod: 'fullRecordUpdate'
+        });
+        var algoliaOperations = job.process({productID: '701644031206M', available: true});
         expect(algoliaOperations).toMatchSnapshot();
     });
 });

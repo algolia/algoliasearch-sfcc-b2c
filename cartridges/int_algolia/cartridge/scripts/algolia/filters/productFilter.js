@@ -16,24 +16,27 @@ function isInclude(product) {
 }
 
 /**
- * If IndexOutOfStock is false, we only return `true` here if the product has
- * ATS >= InStockThreshold. If IndexOutOfStock is true, then always return `true`.
- * @param {dw.catalog.Product} product - Product
- * @returns {boolean} - True if product should be included in the index, false if not.
+ * Returns `true` if the product’s ATS >= threshold, false otherwise.
+ * This function is “pure” (it only checks product data).
+ *
+ * @param {dw.catalog.Product} product - The SFCC product or variant to check
+ * @param {number} threshold - The min ATS to consider in-stock
+ * @returns {boolean}
  */
-function isIncludeOutOfStock(product) {
-    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
-    var indexOutOfStock = algoliaData.getPreference('IndexOutOfStock');
-
-    if (indexOutOfStock) {
-        return true;
+function isInStock(product, threshold) {
+    var availabilityModel = product.
+    getAvailabilityModel();
+    if (!availabilityModel) {
+        return false;
     }
-
-    var invRecord = product.getAvailabilityModel().getInventoryRecord();
-    var isOut = (!invRecord || invRecord.getATS().getValue() < ALGOLIA_IN_STOCK_THRESHOLD);
-    return !isOut; // if outOfStock => return false, else return true
+    var invRecord = availabilityModel.getInventoryRecord();
+    var atsValue = invRecord ? invRecord.getATS().getValue() : 0;
+    return atsValue >= threshold;
 }
 
-module.exports.isInclude = isInclude;
-module.exports.isIncludeOutOfStock = isIncludeOutOfStock;
+
+
+module.exports = {
+    isInStock: isInStock,
+    isInclude: isInclude,
+};
