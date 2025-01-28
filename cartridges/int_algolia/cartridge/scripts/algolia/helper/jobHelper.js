@@ -603,10 +603,6 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
  */
 function generateVariantRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
-    const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
-    const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
-    const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 
     const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
     const variants = parameters.masterProduct.getVariants();
