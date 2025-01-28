@@ -364,25 +364,35 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         let indexName = algoliaData.calculateIndexName('products', locale);
                         let records = recordsPerLocale[locale];
                         processedVariantsToSend = records.length;
+                        
                         records.forEach(function(record) {
-                            algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
+                            if (INDEX_OUT_OF_STOCK || record.in_stock) {
+                                algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
+                            } else {
+                                algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: record.objectID }, indexName));
+                            }
                         });
                     }
                 } else {
                     // Master-level indexing
-                    let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
-                    for (let l = 0; l < siteLocales.size(); ++l) {
-                        let locale = siteLocales[l];
-                        let indexName = algoliaData.calculateIndexName('products', locale);
-                        let localizedMaster = new AlgoliaLocalizedProduct({
-                            product: product,
-                            locale: locale,
-                            attributeList: masterAttributes,
-                            variantAttributes: variantAttributes,
-                            baseModel: baseModel,
-                        });
-                        processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
-                        algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
+                    let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+                    if (inStock || INDEX_OUT_OF_STOCK) {
+                        let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                        for (let l = 0; l < siteLocales.size(); ++l) {
+                            let locale = siteLocales[l];
+                            let indexName = algoliaData.calculateIndexName('products', locale);
+                            let localizedMaster = new AlgoliaLocalizedProduct({
+                                product: product,
+                                locale: locale,
+                                attributeList: masterAttributes,
+                                variantAttributes: variantAttributes,
+                                baseModel: baseModel,
+                            });
+                            processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
+                            algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
+                        }
+                    } else {
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
                     }
                 }
 
@@ -394,7 +404,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
         if (productFilter.isInclude(product)) {
-            const inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+            let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
             if (inStock || INDEX_OUT_OF_STOCK) {
                 var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
                 for (let l = 0; l < siteLocales.size(); l++) {

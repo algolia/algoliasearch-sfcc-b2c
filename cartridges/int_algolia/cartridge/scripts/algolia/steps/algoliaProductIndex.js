@@ -274,7 +274,9 @@ exports.process = function(product, parameters, stepExecution) {
                     var records = recordsPerLocale[locale];
                     processedVariantsToSend = records.length;
                     records.forEach(function(record) {
-                        algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, record, indexName));
+                        if (INDEX_OUT_OF_STOCK || record.in_stock) {
+                            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, record, indexName));
+                        }
                     });
                 }
             } else {

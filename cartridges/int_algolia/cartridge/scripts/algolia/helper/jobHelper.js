@@ -627,17 +627,13 @@ function generateVariantRecords(parameters) {
     for (let v = 0; v < variants.size(); ++v) {
         var variant = variants[v];
 
-        const inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
-        if (!productFilter.isInclude(variant) || (!inStock && !INDEX_OUT_OF_STOCK)) {
-            continue;
-        }
-
         var baseModel = new AlgoliaLocalizedProduct({
             product: variant,
             locale: 'default',
             attributeList: parameters.nonLocalizedAttributes,
             fullRecordUpdate: parameters.fullRecordUpdate
         });
+
         for (let l = 0; l < parameters.locales.size(); ++l) {
             let locale = parameters.locales[l];
             // Add shared attributes in the base model
