@@ -755,15 +755,15 @@ function calculateDisplayPrice(item) {
         }
     }
 
-    if (item.promotionalPrice) {
+    if (variant.promotionalPrice) {
         return {
-            price: item.promotionalPrice,
+            price: variant.promotionalPrice[algoliaData.currencyCode] || variant.promotionalPrice,
             calloutMsg: '',
         }
     }
 
     return {
-        price: item.price,
+        price: variant.price[algoliaData.currencyCode] || variant.price,
         calloutMsg: '',
     }
 }
