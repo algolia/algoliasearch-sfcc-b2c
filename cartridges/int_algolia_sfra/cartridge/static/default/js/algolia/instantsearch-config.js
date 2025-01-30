@@ -438,7 +438,7 @@ function enableInstantSearch(config) {
                                 item.url = selectedVariant.url;
                                 let { price: variantPrice, calloutMsg: variantCalloutMsg } = calculateDisplayPrice(selectedVariant);
 
-                                item.displayPrice = variantPrice;
+                                item.displayPrice = variantPrice[algoliaData.currencyCode] || variantPrice;
                                 item.calloutMsg = variantCalloutMsg;
                             }
                         }
