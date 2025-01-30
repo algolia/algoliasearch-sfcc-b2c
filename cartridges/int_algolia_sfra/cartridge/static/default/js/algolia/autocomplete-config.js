@@ -185,17 +185,8 @@ function getSourcesArray(config) {
                     item.firstImage = smallImageGroup.images[0];
                 }
 
-                // add queryID, objectID and indexName to the URL (analytics)
-                let newURL = '';
-                if (item.url) {
-                    newURL = new URL(item.url, window.location.origin);
-                    newURL.searchParams.append('objectID', item.objectID);
-                    newURL.searchParams.append('queryID', item.__autocomplete_queryID);
-                    newURL.searchParams.append('indexName', item.__autocomplete_indexName);
-                }
-
                 return html `
-                        <a href="${newURL.href}">
+                        <a href="${item.url}">
                             <div class="text-truncate text-nowrap">
                                 <img class="swatch-circle hidden-xs-down" src=${item.firstImage.dis_base_link}></img>
                                 <span>${components.Highlight({ hit: item, attribute: "name", tagName: "em" })}</span>

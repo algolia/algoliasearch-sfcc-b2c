@@ -1,7 +1,7 @@
 {
 	"copyFiles": [{
-			"from": "node_modules/algoliasearch/dist/algoliasearch-lite.esm.browser.js",
-			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/algoliasearch-lite.esm.browser.js"
+			"from": "node_modules/algoliasearch/dist/lite/builds/browser.umd.js",
+			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/browser.js"
 		},
 		{
 			"from": "node_modules/@algolia/autocomplete-theme-classic/dist/theme.min.css",
@@ -32,8 +32,8 @@
 			"to": "cartridges/int_algolia_sfra/cartridge/static/default/js/lib/algolia/search-insights.min.js"
 		},
 		{
-			"from": "node_modules/algoliasearch/dist/algoliasearch-lite.esm.browser.js",
-			"to": "cartridges/int_algolia_controllers/cartridge/static/default/js/lib/algolia/algoliasearch-lite.esm.browser.js"
+			"from": "node_modules/algoliasearch/dist/lite/builds/browser.umd.js",
+			"to": "cartridges/int_algolia_controllers/cartridge/static/default/js/lib/algolia/browser.js"
 		},
 		{
 			"from": "node_modules/@algolia/autocomplete-theme-classic/dist/theme.min.css",

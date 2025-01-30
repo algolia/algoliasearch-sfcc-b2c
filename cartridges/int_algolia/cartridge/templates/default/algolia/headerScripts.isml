@@ -9,9 +9,9 @@
     </script>
 
     <iscomment>--- algoliasearch ---</iscomment>
-    <script type="module">
-        import algoliasearch from "${URLUtils.staticURL('js/lib/algolia/algoliasearch-lite.esm.browser.js')}";
-        window.algoliasearch = algoliasearch;
+    <script src="${URLUtils.staticURL('/js/lib/algolia/browser.js')}"></script>
+    <script>
+        window.algoliasearch = window['algoliasearch/lite'].liteClient;
     </script>
 
     <iscomment>--- Algolia autocomplete.js ---</iscomment>
