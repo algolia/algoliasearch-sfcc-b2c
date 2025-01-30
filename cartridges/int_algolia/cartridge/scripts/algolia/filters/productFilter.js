@@ -28,6 +28,12 @@ function isInStock(product, threshold) {
     if (!availabilityModel) {
         return false;
     }
+
+    // if the master is in stock, then we assume all variants are in stock - Threshold is not applied
+    if (product.master || product.variationGroup) {
+        return availabilityModel.availabilityStatus === 'IN_STOCK';
+    }
+
     var invRecord = availabilityModel.getInventoryRecord();
     var atsValue = invRecord ? invRecord.getATS().getValue() : 0;
     return atsValue >= threshold;

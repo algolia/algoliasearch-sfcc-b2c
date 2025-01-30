@@ -359,21 +359,15 @@ var aggregatedValueHandlers = {
     in_stock: function (product) {
         const availabilityModel = product.getAvailabilityModel();
 
-        if (product.isMaster() || product.isVariationGroup()) {
-            return availabilityModel.availabilityStatus === 'IN_STOCK';
-        }
-
         const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
-        const inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+        let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
 
         if (!inStock && !INDEX_OUT_OF_STOCK) {
             return undefined;
         }
 
-        const inventoryRecord = availabilityModel.getInventoryRecord();
-        const atsValue = inventoryRecord ? inventoryRecord.getATS().getValue() : 0;
-        return atsValue >= ALGOLIA_IN_STOCK_THRESHOLD;
+        return inStock;
     },
     image_groups: function (product) {
         var imageGroupsArr = [];
@@ -455,7 +449,7 @@ var aggregatedValueHandlers = {
         while (variantsIt.hasNext()) {
             var variant = variantsIt.next();
 
-            const inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
+            let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
 
             if (!inStock && !INDEX_OUT_OF_STOCK) {
                 continue;
