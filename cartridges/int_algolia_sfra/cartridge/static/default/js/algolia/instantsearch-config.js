@@ -158,6 +158,22 @@ function enableInstantSearch(config) {
                 ]
             }),
 
+            toggleRefinementWithPanel({
+                container: '#algolia-newarrival-placeholder',
+                attribute: 'newArrival',
+                templates: {
+                    labelText(data, { html }) {
+                        return html`
+                            <a style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-square' : 'fa-square-o'}"></i>
+                                <span> ${algoliaData.strings.newArrivals}</span>
+                            </a>
+                        `;
+                    },
+                },
+                panelTitle: algoliaData.strings.newArrivals
+            }),
+
             refinementListWithPanel({
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
@@ -345,38 +361,35 @@ function enableInstantSearch(config) {
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
-                            item.colorVariations.forEach(colorVariation => {
-                                colorVariation.variationURL = generateProductUrl({
-                                    objectID: item.objectID,
-                                    productUrl: colorVariation.variationURL,
-                                    queryID: item.__queryID,
-                                    indexName: item.__indexName,
-                                });
-                            });
                         }
 
                         // Master-level indexing: variant selection
-                        let selectedVariant = null;
                         if (item.variants) {
+                            // 1. Find the variant matching the selected facets, or use the default variant
+                            let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
                             const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
 
                             if (colorFacets.length > 0 && sizeFacets.length > 0) {
+                                // 1.1 If both facets are selected, find the variant that match both
                                 selectedVariant = item.variants.find(variant => {
                                     return sizeFacets.includes(variant.size) && colorFacets.includes(variant.color);
                                 });
                             }
                             if (!selectedVariant && colorFacets.length > 0) {
+                                // 1.2 If we have color refinement, find one that match the selected color
                                 selectedVariant = item.variants.find(variant => {
                                     return colorFacets.includes(variant.color)
                                 });
                             }
                             if (!selectedVariant && sizeFacets.length > 0) {
+                                // 1.3 Otherwise if we have size refinement, find one that match the selected size
                                 selectedVariant = item.variants.find(variant => {
                                     return sizeFacets.includes(variant.size)
                                 });
                             }
                             if (!selectedVariant) {
+                                // 1.4 No facets selected, use the default variant
                                 selectedVariant = item.variants.find(variant => {
                                     return variant.variantID === item.defaultVariantID;
                                 }) || item.variants[0];
@@ -400,7 +413,7 @@ function enableInstantSearch(config) {
                                 }
                             }
 
-                            // Override item prices if variant-level data is present
+                            // 3. Get the variant price
                             if (selectedVariant) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
@@ -530,6 +543,14 @@ function enableInstantSearch(config) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(options)
     }
 
+    /**
+     * Builds a toggle refinement with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
+    function toggleRefinementWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.toggleRefinement)(options)
+    }
     /**
      * Builds a range input with the Panel widget
      * @param {Object} options Options object
@@ -783,9 +804,9 @@ function applyPromotions(item, algoliaData, activeCustomerPromos) {
     const productPromos = item.promotions[algoliaData.currencyCode];
     for (var i = 0; i < activeCustomerPromos.length; i++) {
         for (var j = 0; j < productPromos.length; j++) {
-            if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < promotionalPriceFromPromos) {
+            if (productPromos[j].promoId === activeCustomerPromos[i].id && productPromos[j].price < promotionalPriceFromPromos) {
                 promotionalPriceFromPromos = productPromos[j].price;
-                msg = activeCustomerPromotions[i].calloutMsg;
+                msg = activeCustomerPromos[i].calloutMsg;
             }
         }
     }

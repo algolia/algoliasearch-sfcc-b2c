@@ -33,13 +33,11 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
     sections.forEach(function(section) {
         section = StringUtils.trim(splitterBegin + section) || '';
 
-        if (!section.trim()) {
+        section = removeHtmlTagsAndFormat(section).trim();
+
+        if (!section) {
             return;
         }
-
-
-        //remove all HTML tags
-        section = removeHtmlTagsAndFormat(section);
 
         var sectionSize = new Bytes(section).getLength();
         if (sectionSize > maxByteSize) {
@@ -61,11 +59,18 @@ function splitHtmlContent(htmlContent, maxByteSize, splitterElement) {
  * @returns {string} Sanitized content
  */
 function removeIgnoredContent(content) {
-    //remove restricted tags and their content
     IGNORED_TAGS.forEach(function(tag) {
-        content = content.replace(new RegExp('<' + tag + '.*?' + tag + '>', 'g'), '');
+        // Remove entire <tag ...>...</tag> blocks (multiline)
+        content = content.replace(
+            new RegExp('<' + tag + '[^>]*>[\\s\\S]*?<\\/' + tag + '>', 'gi'),
+            ''
+        );
+        // Remove self-closing tags <tag ... />
+        content = content.replace(
+            new RegExp('<' + tag + '[^>]*?\\/?>', 'gi'),
+            ''
+        );
     });
-
     return content;
 }
 
@@ -131,5 +136,6 @@ function getMaxBodySize(content) {
 module.exports = {
     splitHtmlContent: splitHtmlContent,
     getMaxBodySize: getMaxBodySize,
-    removeHtmlTagsAndFormat: removeHtmlTagsAndFormat
+    removeHtmlTagsAndFormat: removeHtmlTagsAndFormat,
+    removeIgnoredContent: removeIgnoredContent
 };

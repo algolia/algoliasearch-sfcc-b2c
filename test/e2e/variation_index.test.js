@@ -1,4 +1,4 @@
-const algoliasearch = require('algoliasearch');
+const { algoliasearch } = require('algoliasearch');
 const sfcc = require('sfcc-ci');
 
 describe('Algolia Integration', () => {
@@ -44,12 +44,10 @@ describe('Algolia Integration', () => {
     });
 
     let client;
-    let index;
 
     beforeEach(() => {
 
         client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY);
-        index = client.initIndex(process.env.ALGOLIA_INDEX_NAME || 'varx__products__en_US');
     });
 
     test('should search for a specific product', async () => {
@@ -101,8 +99,11 @@ describe('Algolia Integration', () => {
         }
 
         // Then verify in Algolia
-        const results = await index.search(sfccProduct.name.default);
-        
+        const results = await client.searchSingleIndex({
+            indexName: process.env.ALGOLIA_INDEX_NAME || 'varx__products__en_US',
+            searchParams: {query: sfccProduct.name.default},
+        });
+
         // Add validation for Algolia results
         if (!results.hits || !results.hits.length) {
             console.error('No matching products found in Algolia');
