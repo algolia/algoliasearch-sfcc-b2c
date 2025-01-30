@@ -357,8 +357,6 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product) {
-        const availabilityModel = product.getAvailabilityModel();
-
         const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
         let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
