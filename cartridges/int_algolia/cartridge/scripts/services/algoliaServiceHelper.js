@@ -8,6 +8,7 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 const stringUtils = require('dw/util/StringUtils');
 const Resource = require('dw/web/Resource');
+const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 var UNEXPECTED_ERROR_CODE = '-1';
 
@@ -107,9 +108,7 @@ function callJsonService(title, service, params) {
     var callStatus = new Status(Status.OK);
     var statusItem = callStatus.items.get(0);
 
-    var result = null;
-    var data = null;
-
+    var result;
     try {
         result = service.setThrowOnError().call(JSON.stringify(params));
     } catch (error) {
@@ -121,15 +120,14 @@ function callJsonService(title, service, params) {
     if (result.ok) {
         if (isResponseJSON(service)) {
             try {
-                data = JSON.parse(result.object.response);
+                var data = JSON.parse(result.object.response);
                 statusItem.addDetail('object', data);
-            } catch (parseError) { // eslint-disable-line no-unused-vars
-                // response is marked as json, but it is not
+            } catch (error) {
                 statusItem.setStatus(Status.ERROR);
-                logger.error('JSON.parse error. Method: {0}. String: {1}', title, result.object.response);
+                logger.error('JSON.parse error. Error: {0}. Method: {1}. String: {2}', error, title, result.object.response);
             }
         } else {
-            // statusItem.setStatus(Status.ERROR);
+            // not JSON, handle gracefully
             statusItem.addDetail('object', {});
             if (result.object && result.object.response) {
                 logger.warn('Response is not JSON. Method: {0}. Result: {1}', title, result.object.response);
@@ -146,17 +144,50 @@ function callJsonService(title, service, params) {
 }
 
 /**
- * Validates API key permissions by checking ACLs and index access
- * @param {dw.svc.Service} service - Service instance to call
- * @param {string} applicationID - Algolia Application ID
- * @param {string} adminApiKey - Algolia Admin API Key
- * @param {string} indexName - Algolia Index Name
- * @returns {Object} Response indicating validation success or failure
+ * @param {string} indexName - full index name (e.g. "testPrefix__products__en_US")
+ * @param {string} pattern   - pattern from the key's indexes field ("*", "myPrefix_*", etc.)
+ * @returns {boolean}        - true if the indexName matches the wildcard or exact pattern
  */
-function validateAPIKey(service, applicationID, adminApiKey, indexName) {
-    const keyResponse = service.call({
+function matchesIndexName(indexName, pattern) {
+    // Escape regex special chars except '*'
+    var escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
+    // Replace '*' with '.*'
+    escaped = escaped.replace(/\*/g, '.*');
+    var re = new RegExp('^' + escaped + '$');
+    return re.test(indexName);
+}
+
+/**
+ * Validate an Algolia API Key's ACLs and index restrictions.
+ * 
+ * @param {dw.svc.Service} service - Service instance to call
+ * @param {string} applicationID   - Algolia Application ID
+ * @param {string} apiKey          - Key we want to validate (admin or search)
+ * @param {string} indexPrefix     - The custom prefix used by the cartridge
+ * @param {Array} locales          - Locales from BM form
+ * @param {boolean} isAdminKey     - If true, we require admin ACLs; if false, we require 'search'
+ * @param {boolean} isRecommendationEnabled - If true, we require 'recommend' ACL
+ * @param {boolean} isContentSearchEnabled - If true, we require 'contentSearch' ACL
+ * @returns {Object} { error:Boolean, errorMessage:String, warning:String }
+ */
+function validateAPIKey(service, applicationID, apiKey, indexPrefix, locales, isAdminKey, isRecommendationEnabled, isContentSearchEnabled) {
+    // 0) Build the required ACL array
+    var requiredACLs;
+    if (isAdminKey) {
+        requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
+    } else {
+        // minimal read usage is  "search", (initial values for search ke : "search", "listIndexes", "settings)
+        requiredACLs = ['search'];
+
+        if (isRecommendationEnabled) {
+            requiredACLs.push('recommendation');
+        }
+    }
+
+    // 1) Retrieve key info from Algolia
+    var keyResponse = service.call({
         method: 'GET',
-        url: 'https://' + applicationID + '.algolia.net/1/keys/' + adminApiKey
+        url: 'https://' + applicationID + '.algolia.net/1/keys/' + apiKey
     });
 
     if (!keyResponse.ok) {
@@ -166,49 +197,93 @@ function validateAPIKey(service, applicationID, adminApiKey, indexName) {
         };
     }
 
-    const keyData = keyResponse.object.body;
-    const requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
-    const missingACLs = requiredACLs.slice();
-    const excessiveACLs = [];
+    var keyData = keyResponse.object.body;
 
-    keyData.acl.forEach(function(acl) {
-        const aclIndex = missingACLs.indexOf(acl);
-        if (aclIndex === -1) {
+    // 2) Check required ACLs
+    var missingACLs = requiredACLs.slice();
+    var excessiveACLs = [];
+    var actualACLs = keyData.acl || [];
+
+    actualACLs.forEach(function (acl) {
+        var idx = missingACLs.indexOf(acl);
+        if (idx === -1) {
+            // not required => it's extra
             excessiveACLs.push(acl);
         } else {
-            missingACLs.splice(aclIndex, 1);
+            // remove from missing
+            missingACLs.splice(idx, 1);
         }
     });
 
     if (missingACLs.length > 0) {
-        const errorMessage = Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '));
+        var errMsg = Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '));
+        return {
+            error: true,
+            errorMessage: errMsg,
+            warning: excessiveACLs.length > 0
+                ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
+                : ''
+        };
+    }
+
+    // 3) If indexes field is not present or empty, the key has no index-specific restriction => pass
+    var restrictedIndexes = keyData.indexes || [];
+    if (restrictedIndexes.length === 0) {
+        return {
+            error: false,
+            errorMessage: '',
+            warning: excessiveACLs.length > 0
+                ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
+                : ''
+        };
+    }
+
+    // 4) If indexes field exists, confirm that all indices we might create (for each type, each locale) match
+    var indexTypes = ['products', 'categories'];
+
+    if (isContentSearchEnabled) {
+        indexTypes.push('contents');
+    }
+
+    var hasError = false;
+    var errorMessage = '';
+
+    indexTypes.forEach(function (indexType) {
+        locales.forEach(function (locale) {
+            var indexName = algoliaData.calculateIndexName(indexType, locale, indexPrefix);
+            var matched = restrictedIndexes.some(function (pattern) {
+                return matchesIndexName(indexName, pattern);
+            });
+
+            if (!matched) {
+                hasError = true;
+                errorMessage = Resource.msgf('algolia.error.index.restricted', 'algolia', null, indexName);
+            }
+        });
+    });
+
+    if (hasError) {
         return {
             error: true,
             errorMessage: errorMessage,
-            warning: excessiveACLs.length > 0 ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', ')) : ''
+            warning: excessiveACLs.length > 0
+                ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
+                : ''
         };
-    }
-
-    const indexResponse = service.call({
-        method: 'GET',
-        url: 'https://' + applicationID + '.algolia.net/1/indexes/' + indexName + '/settings'
-    });
-
-    if (!indexResponse.ok) {
+    } else {
         return {
-            error: true,
-            errorMessage: Resource.msg('algolia.error.index.access', 'algolia', null)
+            error: false,
+            errorMessage: '',
+            warning: excessiveACLs.length > 0
+                ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
+                : ''
         };
     }
-
-    return {
-        error: false,
-        errorMessage: '',
-        warning: excessiveACLs.length > 0 ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', ')) : ''
-    };
 }
 
-module.exports.callService = callService;
-module.exports.callJsonService = callJsonService;
-module.exports.UNEXPECTED_ERROR_CODE = UNEXPECTED_ERROR_CODE;
-module.exports.validateAPIKey = validateAPIKey;
+module.exports = {
+    callService: callService,
+    callJsonService: callJsonService,
+    UNEXPECTED_ERROR_CODE: UNEXPECTED_ERROR_CODE,
+    validateAPIKey: validateAPIKey
+};

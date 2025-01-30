@@ -61,32 +61,59 @@
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" />
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
-                        <div class="tooltip">${Resource.msg('algolia.label.preference.searchkey.help', 'algolia', null)}</div>
+                        <div class="tooltip">
+                            <isprint value="${Resource.msg('algolia.label.preference.searchkey.help', 'algolia', null)}" />
+                            <br/>
+                            <isprint value="${Resource.msg('algolia.label.preference.searchkey.mandatoryacl', 'algolia', null)}" />
+                        </div>
+                        <isif condition="${pdict.searchWarningMessage}">
+                            <div class="warning-message yellow narrow">
+                                ${pdict.searchWarningMessage}
+                            </div>
+                        </isif>
+                        <isif condition="${pdict.searchErrorMessage}">
+                            <div class="error-message red narrow">
+                                ${pdict.searchErrorMessage}
+                            </div>
+                        </isif>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" placeholder="${Resource.msg('algolia.label.util.optional.headless', 'algolia', null)}"/>
+                        <input type="text"
+                               value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}"
+                               id="SearchApiKey"
+                               name="SearchApiKey"
+                               placeholder="${Resource.msg('algolia.label.util.optional.headless', 'algolia', null)}"/>
                     </td>
                 </tr>
 
                 <iscomment> Algolia_AdminApiKey </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.adminkey', 'algolia', null)}" encoding="jshtml" /><span class="red b"> ${Resource.msg('algolia.label.util.required', 'algolia', null)}</span>
+                        <isprint value="${Resource.msg('algolia.label.preference.adminkey', 'algolia', null)}" encoding="jshtml" />
+                        <span class="red b"> ${Resource.msg('algolia.label.util.required', 'algolia', null)}</span>
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
-                        <div class="tooltip">${Resource.msg('algolia.label.preference.adminkey.help', 'algolia', null)}</div>
-                        <isif condition="${pdict.warningMessage}">
+                        <div class="tooltip">
+                            <isprint value="${Resource.msg('algolia.label.preference.adminkey.help', 'algolia', null)}" />
+                            <br/>
+                            <isprint value="${Resource.msg('algolia.label.preference.adminkey.mandatoryacl', 'algolia', null)}" />
+                        </div>
+                        <isif condition="${pdict.adminWarningMessage}">
                             <div class="warning-message yellow narrow">
-                                ${pdict.warningMessage}
+                                ${pdict.adminWarningMessage}
                             </div>
                         </isif>
-                        <isif condition="${pdict.errorMessage}">
+                        <isif condition="${pdict.adminErrorMessage}">
                             <div class="error-message red narrow">
-                                ${pdict.errorMessage}
+                                ${pdict.adminErrorMessage}
                             </div>
                         </isif>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('AdminApiKey') ? pdict.algoliaData.getPreference('AdminApiKey') : ''}" id="AdminApiKey" name="AdminApiKey" required/>
+                        <input type="text"
+                               value="${pdict.algoliaData.getPreference('AdminApiKey') ? pdict.algoliaData.getPreference('AdminApiKey') : ''}"
+                               id="AdminApiKey"
+                               name="AdminApiKey"
+                               required />
                     </td>
                 </tr>
 

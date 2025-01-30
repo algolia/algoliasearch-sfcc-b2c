@@ -31,47 +31,80 @@ function start() {
  */
 function handleSettings() {
     var params = request.httpParameterMap;
-    var validationResult;
     var applicationID = params.ApplicationID.value;
-    var adminApikey = params.AdminApiKey.value;
+    var adminApikey = params.AdminApiKey.value || '';
+    var searchApikey = params.SearchApiKey.value || '';
+    var indexPrefix = params.IndexPrefix.value || '';
+    var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
+    var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
+
+    var localesInput = params.LocalesForIndexing.value || 'default';
+    var locales = algoliaData.csvStringToArray(localesInput, ',');
+    var adminValidation = {};
+    var searchValidation = {};
 
     try {
-        // Get service instance from indexingService
-        const service = algoliaIndexingService.getService({
-            jobID: 'API_KEY_VALIDATION',
-            stepID: 'validatePermissions',
-            applicationID: applicationID,
-            adminApikey: adminApikey
-        });
-        var pdictValues;
+        // 1) Validate Admin API key - If user left search key blank, skip the check. 
+        if (adminApikey) {
+            var serviceAdmin = algoliaIndexingService.getService({
+                jobID: 'API_KEY_VALIDATION_ADMIN',
+                stepID: 'validatePermissions',
+                applicationID: applicationID,
+                adminApikey: adminApikey
+            });
 
-        var indexName = algoliaData.calculateIndexName('products', null, params.IndexPrefix.value);
+            adminValidation = algoliaServiceHelper.validateAPIKey(serviceAdmin,
+                applicationID,
+                adminApikey,
+                indexPrefix,
+                locales,
+                true,
+                algoliaEnableRecommend,
+                algoliaEnableContentSearch
+            );
 
-        validationResult = algoliaServiceHelper.validateAPIKey(service, applicationID, adminApikey, indexName);
-
-        if (validationResult.error) {
-            pdictValues = {
-                setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
-                algoliaData: algoliaData,
-                latestReports: BMHelper.getLatestCOReportsByJob(),
-                errorMessage: validationResult.errorMessage,
-                warningMessage: validationResult.warning
-            };
-            ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
-            return;
+            if (adminValidation.error) {
+                showDashboardWithMessages(adminValidation, searchValidation);
+                return;
+            }
         }
 
+        // 2) Validate Search API key (must have 'search' ACL). If user left search key blank, skip the check. 
+        if (searchApikey) {
+            var serviceSearch = algoliaIndexingService.getService({
+                jobID: 'API_KEY_VALIDATION_SEARCH',
+                stepID: 'validatePermissions',
+                applicationID: applicationID,
+                adminApikey: searchApikey
+            });
+
+            searchValidation = algoliaServiceHelper.validateAPIKey(serviceSearch,
+                applicationID,
+                searchApikey,
+                indexPrefix,
+                locales,
+                false,
+                algoliaEnableRecommend,
+                algoliaEnableContentSearch
+            );
+
+            if (searchValidation.error) {
+                showDashboardWithMessages(adminValidation, searchValidation);
+                return;
+            }
+        }
+
+        // If we get here, both checks are fine or not applicable. Save settings.
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
-        var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
-        var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
         var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
+
         algoliaData.setPreference('Enable', algoliaEnable);
-        algoliaData.setPreference('ApplicationID', params.ApplicationID.value);
+        algoliaData.setPreference('ApplicationID', applicationID);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
-        algoliaData.setPreference('SearchApiKey', params.SearchApiKey.value);
-        algoliaData.setPreference('AdminApiKey', params.AdminApiKey.value);
-        algoliaData.setPreference('IndexPrefix', params.IndexPrefix.value);
+        algoliaData.setPreference('SearchApiKey', searchApikey);
+        algoliaData.setPreference('AdminApiKey', adminApikey);
+        algoliaData.setPreference('IndexPrefix', indexPrefix);
         algoliaData.setPreference('RecordModel', params.RecordModel.value);
         algoliaData.setSetOfStrings('LocalesForIndexing', params.LocalesForIndexing.value);
         algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
@@ -79,22 +112,43 @@ function handleSettings() {
         algoliaData.setPreference('EnableContentSearch', algoliaEnableContentSearch);
         algoliaData.setPreference('EnableRecommend', algoliaEnableRecommend);
         algoliaData.setPreference('EnablePricingLazyLoad', algoliaEnablePricingLazyLoad);
+
     } catch (error) {
         Logger.error(error);
-    }
-
-    if (validationResult.warning) {
-        pdictValues = {
-            setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
-            algoliaData: algoliaData,
-            latestReports: BMHelper.getLatestCOReportsByJob(),
-            warningMessage: validationResult.warning
-        };
-        ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+        showDashboardWithMessages(adminValidation, searchValidation, error.message);
         return;
     }
 
-    start();
+
+    if (adminValidation.error || searchValidation.error) {
+        showDashboardWithMessages(adminValidation, searchValidation, '');
+        return;
+    }
+
+    if (adminValidation.warning || searchValidation.warning) {
+        showDashboardWithMessages(adminValidation, searchValidation, '');
+    } else {
+        // Pure success scenario
+        start();
+    }
+}
+
+/**
+ * Helper to re-render the dashboard with an error message
+ * @param {string} errorMessage - The error message to display
+ * @param {string} warningMessage - Any associated warning
+ */
+function showDashboardWithMessages(adminValidation, searchValidation, errorMessage) {
+    ISML.renderTemplate('algoliabm/dashboard/index', {
+        setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
+        algoliaData: algoliaData,
+        latestReports: BMHelper.getLatestCOReportsByJob(),
+        adminErrorMessage: adminValidation.errorMessage,
+        adminWarningMessage: adminValidation.warning,
+        searchErrorMessage: searchValidation.errorMessage,
+        searchWarningMessage: searchValidation.warning,
+        errorMessage: errorMessage
+    });
 }
 
 /**
