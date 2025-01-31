@@ -35,10 +35,6 @@ function handleSettings() {
     var adminApikey = params.AdminApiKey.value || '';
     var searchApikey = params.SearchApiKey.value || '';
     var indexPrefix = params.IndexPrefix.value || '';
-    var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
-    var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
-    var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
-    var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
 
     var adminValidation = {};
     var searchValidation = {};
@@ -47,6 +43,11 @@ function handleSettings() {
     var isIndexPrefixChanged = currentIndexPrefix !== indexPrefix;
 
     try {
+        var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
+        var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
+        var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
+        var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
+
         // 1) Validate Admin API key - If user left admin key blank and prefix didn't change, skip check.
         if (adminApikey || isIndexPrefixChanged) {
             var serviceAdmin = algoliaIndexingService.getService({
