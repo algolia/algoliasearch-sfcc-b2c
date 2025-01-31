@@ -10,7 +10,6 @@ require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
-const { spawnSync } = require('child_process');
 
 (function main() {
     const codeVersion = process.env.CODE_VERSION;

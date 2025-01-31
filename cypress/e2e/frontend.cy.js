@@ -15,18 +15,21 @@ describe('Algolia Search', () => {
         cy.get('.affirm').click();
     });
 
-    const testSearchScenarios = [
-        {
-            name: 'variation product search',
-            query: 'TomTom Go 720',
-            expectedProduct: 'TomTom Go 720 Portable GPS Unit'
-        },
-        {
+    const testSearchScenarios = [];
+
+    if (process.env.RECORD_MODEL === 'master-level') {
+        testSearchScenarios.push({
             name: 'master product search',
             query: 'Roll Up',
             expectedProduct: 'Roll Up Cargo Pant'
-        }
-    ];
+        });
+    } else {
+        testSearchScenarios.push({
+            name: 'variation product search',
+            query: 'TomTom Go 720',
+            expectedProduct: 'TomTom Go 720 Portable GPS Unit'
+        });
+    }
 
     testSearchScenarios.forEach(scenario => {
         it(`performs a ${scenario.name} and displays results`, () => {

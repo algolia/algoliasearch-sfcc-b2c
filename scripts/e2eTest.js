@@ -16,7 +16,6 @@
 
 require('dotenv').config();
 const fs = require('fs');
-const path = require('path');
 const { runCLI } = require('jest');
 const cypress = require('cypress');
 const deployCode = require('./deployCode');
@@ -25,12 +24,12 @@ const runSFCCJob = require('./runSFCCJob');
 
 // List of paths to clean up
 const cleanupPaths = [
-  'e2e-tests',
-  'e2e-tests.zip',
-  'site_import.zip',
-  'site_import',
-  process.env.CODE_VERSION,
-  `${process.env.CODE_VERSION}.zip`
+    'e2e-tests',
+    'e2e-tests.zip',
+    'site_import.zip',
+    'site_import',
+    process.env.CODE_VERSION,
+    `${process.env.CODE_VERSION}.zip`
 ];
 
 /**
@@ -153,14 +152,14 @@ async function runVariationIndexTests() {
  */
 async function runCypressTests() {
     const cypressEnv = {
-        // If you want Cypress environment variables, pass them here.
-        // e.g. RECORD_MODEL: process.env.RECORD_MODEL,
-        // or anything else you might need.
+        RECORD_MODEL: process.env.RECORD_MODEL,
     };
 
     const result = await cypress.run({
         spec: 'cypress/e2e/frontend.cy.js',
-        env: cypressEnv
+        env: cypressEnv,
+        browser: 'chrome',
+        headless: true
     });
 
     if (result.totalFailed > 0) {
