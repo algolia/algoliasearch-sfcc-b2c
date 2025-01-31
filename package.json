@@ -24,7 +24,6 @@
         "test:e2e": "./scripts/e2eTest.js",
         "test:variationindex": "jest --testPathPattern='test/e2e/variation_index.test.js'",
         "e2e:cleanup": "rm -rf e2e-tests e2e-tests.zip site_import.zip site_import \"$CODE_VERSION\" \"$CODE_VERSION.zip\"",
-        "e2e:check-codeversion": "if [ -z \"$CODE_VERSION\" ]; then echo 'ERROR: CODE_VERSION is not set. Please define it in your .env file or export it in your shell.'; exit 1; fi",
         "e2e:lint": "npm run lint:js",
         "e2e:unit": "npm run test:unit",
         "e2e:compile-js": "npm run compile:js --silent",
@@ -33,8 +32,7 @@
         "e2e:deploy-code": "npm run deploy:code",
         "e2e:import-preferences": "npm run import:preferences",
         "e2e:run-sfcc-job": "npm run run:sfcc-job",
-        "e2e:variation-index-test": "npm run test:variationindex",
-        "e2e:frontend-test": "npm run test:frontend"
+        "e2e:variation-index-test": "npm run test:variationindex"
     },
     "repository": {
         "type": "git",

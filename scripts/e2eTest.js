@@ -68,13 +68,10 @@ function main() {
     try {
         // Initial setup and compilation
         cleanup(); // Initial cleanup before starting
-        ensureCodeVersion();
         ensureRequiredEnvVars();
 
         console.log(`Using CODE_VERSION: ${process.env.CODE_VERSION}`);
 
-        lintJS();
-        runUnitTests();
         compileJS();
         compileSCSS();
         prepareCode();
@@ -96,7 +93,7 @@ function main() {
 }
 
 function ensureRequiredEnvVars() {
-    const required = ['TEST_PRODUCT_ID', 'TEST_MASTER_PRODUCT_ID'];
+    const required = ['TEST_PRODUCT_ID', 'TEST_MASTER_PRODUCT_ID', 'CODE_VERSION'];
     required.forEach(varName => {
         if (!process.env[varName]) {
             throw new Error(`ERROR: ${varName} is not set. Please define it in your .env file.`);
@@ -139,7 +136,7 @@ function runTestsForConfiguration(recordModel, indexPrefix, productId) {
     // Run Cypress tests
     console.log('Running frontend tests...');
     execSync(
-        `CYPRESS_RECORD_MODEL=${recordModel} CYPRESS_INDEX_PREFIX=${indexPrefix} CYPRESS_TEST_PRODUCT_ID=${productId} npm run e2e:frontend-test`,
+        `CYPRESS_RECORD_MODEL=${recordModel} CYPRESS_INDEX_PREFIX=${indexPrefix} CYPRESS_TEST_PRODUCT_ID=${productId} npm run test:frontend`,
         {
             stdio: 'inherit',
             shell: '/bin/bash'
@@ -147,19 +144,6 @@ function runTestsForConfiguration(recordModel, indexPrefix, productId) {
     );
 
     console.log(`Configuration test completed: Record Model=${recordModel}, Index Prefix=${indexPrefix}`);
-}
-
-// Utility functions
-function ensureCodeVersion() {
-    execSync('npm run e2e:check-codeversion', { stdio: 'inherit', shell: '/bin/bash' });
-}
-
-function lintJS() {
-    execSync('npm run e2e:lint', { stdio: 'inherit' });
-}
-
-function runUnitTests() {
-    execSync('npm run e2e:unit', { stdio: 'inherit' });
 }
 
 function compileJS() {
