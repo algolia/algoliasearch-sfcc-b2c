@@ -5,10 +5,8 @@
  */
 
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
-
 const stringUtils = require('dw/util/StringUtils');
 const Resource = require('dw/web/Resource');
-const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 var UNEXPECTED_ERROR_CODE = '-1';
 
@@ -144,9 +142,10 @@ function callJsonService(title, service, params) {
 }
 
 /**
- * @param {string} indexName - full index name (e.g. "testPrefix__products__en_US")
- * @param {string} pattern   - pattern from the key's indexes field ("*", "myPrefix_*", etc.)
- * @returns {boolean}        - true if the indexName matches the wildcard or exact pattern
+ * Replaces wildcard `*` with `.*` and does a full ^...$ match
+ * @param {string} indexName - e.g. "test__products__en_US"
+ * @param {string} pattern   - e.g. "test*" or "prod_*" or "*_dev"
+ * @returns {boolean} whether indexName matches that pattern
  */
 function matchesIndexName(indexName, pattern) {
     // Escape regex special chars except '*'
@@ -158,25 +157,27 @@ function matchesIndexName(indexName, pattern) {
 }
 
 /**
- * Validate an Algolia API Key's ACLs and index restrictions.
- * 
- * @param {dw.svc.Service} service - Service instance to call
- * @param {string} applicationID   - Algolia Application ID
- * @param {string} apiKey          - Key we want to validate (admin or search)
- * @param {string} indexPrefix     - The custom prefix used by the cartridge
- * @param {Array} locales          - Locales from BM form
- * @param {boolean} isAdminKey     - If true, we require admin ACLs; if false, we require 'search'
- * @param {boolean} isRecommendationEnabled - If true, we require 'recommend' ACL
- * @param {boolean} isContentSearchEnabled - If true, we require 'contentSearch' ACL
- * @returns {Object} { error:Boolean, errorMessage:String, warning:String }
+ * Validate an Algolia API Key's ACLs and prefix coverage.
+ *
+ * The key can be restricted to certain sets of indices by "indexes": [...]. If that field is missing
+ * or empty, the key isn't restricted by index name, so only ACL checks matter. Otherwise, we check
+ * if at least one of the "indexes" patterns covers the user-entered indexPrefix.
+ *
+ * @param {dw.svc.Service} service
+ * @param {string} applicationID
+ * @param {string} apiKey
+ * @param {string} indexPrefix         - the user-provided prefix in BM
+ * @param {boolean} isAdminKey
+ * @param {boolean} isRecommendationEnabled
+ * @returns {Object} { error: Boolean, errorMessage: String, warning: String }
  */
-function validateAPIKey(service, applicationID, apiKey, indexPrefix, locales, isAdminKey, isRecommendationEnabled, isContentSearchEnabled) {
+function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey, isRecommendationEnabled) {
     // 0) Build the required ACL array
     var requiredACLs;
     if (isAdminKey) {
         requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
     } else {
-        // minimal read usage is  "search", (initial values for search ke : "search", "listIndexes", "settings)
+        // minimal read usage is  "search", (initial values for search : "search", "listIndexes", "settings)
         requiredACLs = ['search'];
 
         if (isRecommendationEnabled) {
@@ -198,19 +199,16 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, locales, is
     }
 
     var keyData = keyResponse.object.body;
-
-    // 2) Check required ACLs
-    var missingACLs = requiredACLs.slice();
-    var excessiveACLs = [];
     var actualACLs = keyData.acl || [];
 
+    // 2) Identify missing vs. excessive ACLs
+    var missingACLs = requiredACLs.slice();
+    var excessiveACLs = [];
     actualACLs.forEach(function (acl) {
         var idx = missingACLs.indexOf(acl);
         if (idx === -1) {
-            // not required => it's extra
             excessiveACLs.push(acl);
         } else {
-            // remove from missing
             missingACLs.splice(idx, 1);
         }
     });
@@ -226,9 +224,10 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, locales, is
         };
     }
 
-    // 3) If indexes field is not present or empty, the key has no index-specific restriction => pass
+    // 3) Check index restrictions, if any
     var restrictedIndexes = keyData.indexes || [];
     if (restrictedIndexes.length === 0) {
+        // Key is not restricted by indexName => pass
         return {
             error: false,
             errorMessage: '',
@@ -238,47 +237,35 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, locales, is
         };
     }
 
-    // 4) If indexes field exists, confirm that all indices we might create (for each type, each locale) match
-    var indexTypes = ['products', 'categories'];
 
-    if (isContentSearchEnabled) {
-        indexTypes.push('contents');
-    }
-
-    var hasError = false;
-    var errorMessage = '';
-
-    indexTypes.forEach(function (indexType) {
-        locales.forEach(function (locale) {
-            var indexName = algoliaData.calculateIndexName(indexType, locale, indexPrefix);
-            var matched = restrictedIndexes.some(function (pattern) {
-                return matchesIndexName(indexName, pattern);
-            });
-
-            if (!matched) {
-                hasError = true;
-                errorMessage = Resource.msgf('algolia.error.index.restricted', 'algolia', null, indexName);
-            }
-        });
+    var matchedPrefix = restrictedIndexes.some(function (pattern) {
+        // Build a placeholder indexName: we simulate "indexPrefix plus something", e.g. "__products"
+        // so that "test*" would match "test__products" if the prefix = "test".
+        // The simplest is to just add a short suffix to avoid empty string edge case.
+        var simulated = indexPrefix + '__anything';
+        return matchesIndexName(simulated, pattern);
     });
 
-    if (hasError) {
+    if (!matchedPrefix) {
+        // Failing scenario: none of the restricted patterns matches your prefix
+        var prefixError = Resource.msgf('algolia.error.index.restrictedprefix', 'algolia', null, indexPrefix);
         return {
             error: true,
-            errorMessage: errorMessage,
-            warning: excessiveACLs.length > 0
-                ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
-                : ''
-        };
-    } else {
-        return {
-            error: false,
-            errorMessage: '',
+            errorMessage: prefixError,
             warning: excessiveACLs.length > 0
                 ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
                 : ''
         };
     }
+
+    // 4) Passed everything
+    return {
+        error: false,
+        errorMessage: '',
+        warning: excessiveACLs.length > 0
+            ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
+            : ''
+    };
 }
 
 module.exports = {

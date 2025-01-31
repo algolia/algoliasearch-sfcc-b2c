@@ -38,14 +38,15 @@ function handleSettings() {
     var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
     var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
 
-    var localesInput = params.LocalesForIndexing.value || 'default';
-    var locales = algoliaData.csvStringToArray(localesInput, ',');
     var adminValidation = {};
     var searchValidation = {};
 
+    var currentIndexPrefix = algoliaData.getPreference('IndexPrefix');
+    var isIndexPrefixChanged = currentIndexPrefix !== indexPrefix;
+
     try {
-        // 1) Validate Admin API key - If user left search key blank, skip the check. 
-        if (adminApikey) {
+        // 1) Validate Admin API key - If user left admin key blank and prefix didn't change, skip check.
+        if (adminApikey || isIndexPrefixChanged) {
             var serviceAdmin = algoliaIndexingService.getService({
                 jobID: 'API_KEY_VALIDATION_ADMIN',
                 stepID: 'validatePermissions',
@@ -53,14 +54,13 @@ function handleSettings() {
                 adminApikey: adminApikey
             });
 
-            adminValidation = algoliaServiceHelper.validateAPIKey(serviceAdmin,
+            adminValidation = algoliaServiceHelper.validateAPIKey(
+                serviceAdmin,
                 applicationID,
                 adminApikey,
                 indexPrefix,
-                locales,
-                true,
-                algoliaEnableRecommend,
-                algoliaEnableContentSearch
+                true,                  // isAdminKey
+                algoliaEnableRecommend // isRecommendationEnabled (though for admin ACL we only check the standard perms)
             );
 
             if (adminValidation.error) {
@@ -69,8 +69,8 @@ function handleSettings() {
             }
         }
 
-        // 2) Validate Search API key (must have 'search' ACL). If user left search key blank, skip the check. 
-        if (searchApikey) {
+        // 2) Validate Search API key (must have 'search' ACL). If user left search key blank and prefix didn't change, skip check.
+        if (searchApikey || isIndexPrefixChanged) {
             var serviceSearch = algoliaIndexingService.getService({
                 jobID: 'API_KEY_VALIDATION_SEARCH',
                 stepID: 'validatePermissions',
@@ -78,14 +78,13 @@ function handleSettings() {
                 adminApikey: searchApikey
             });
 
-            searchValidation = algoliaServiceHelper.validateAPIKey(serviceSearch,
+            searchValidation = algoliaServiceHelper.validateAPIKey(
+                serviceSearch,
                 applicationID,
                 searchApikey,
                 indexPrefix,
-                locales,
-                false,
-                algoliaEnableRecommend,
-                algoliaEnableContentSearch
+                false,                 // isAdminKey = false
+                algoliaEnableRecommend // isRecommendationEnabled
             );
 
             if (searchValidation.error) {
@@ -119,7 +118,6 @@ function handleSettings() {
         return;
     }
 
-
     if (adminValidation.error || searchValidation.error) {
         showDashboardWithMessages(adminValidation, searchValidation, '');
         return;
@@ -135,8 +133,9 @@ function handleSettings() {
 
 /**
  * Helper to re-render the dashboard with an error message
- * @param {string} errorMessage - The error message to display
- * @param {string} warningMessage - Any associated warning
+ * @param {Object} adminValidation   admin key check results
+ * @param {Object} searchValidation  search key check results
+ * @param {string} errorMessage      optional error message
  */
 function showDashboardWithMessages(adminValidation, searchValidation, errorMessage) {
     ISML.renderTemplate('algoliabm/dashboard/index', {
