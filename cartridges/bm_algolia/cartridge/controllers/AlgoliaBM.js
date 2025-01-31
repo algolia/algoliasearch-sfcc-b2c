@@ -37,6 +37,8 @@ function handleSettings() {
     var indexPrefix = params.IndexPrefix.value || '';
     var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
     var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
+    var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
+    var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
 
     var adminValidation = {};
     var searchValidation = {};
@@ -59,8 +61,7 @@ function handleSettings() {
                 applicationID,
                 adminApikey,
                 indexPrefix,
-                true,                  // isAdminKey
-                algoliaEnableRecommend // isRecommendationEnabled (though for admin ACL we only check the standard perms)
+                true                  // isAdminKey
             );
 
             if (adminValidation.error) {
@@ -83,8 +84,7 @@ function handleSettings() {
                 applicationID,
                 searchApikey,
                 indexPrefix,
-                false,                 // isAdminKey = false
-                algoliaEnableRecommend // isRecommendationEnabled
+                false                 // isAdminKey = false
             );
 
             if (searchValidation.error) {
@@ -94,8 +94,6 @@ function handleSettings() {
         }
 
         // If we get here, both checks are fine or not applicable. Save settings.
-        var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
-        var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
 
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', applicationID);

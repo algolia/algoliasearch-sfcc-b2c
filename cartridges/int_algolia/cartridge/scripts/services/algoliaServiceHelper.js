@@ -168,10 +168,9 @@ function matchesIndexName(indexName, pattern) {
  * @param {string} apiKey
  * @param {string} indexPrefix         - the user-provided prefix in BM
  * @param {boolean} isAdminKey
- * @param {boolean} isRecommendationEnabled
  * @returns {Object} { error: Boolean, errorMessage: String, warning: String }
  */
-function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey, isRecommendationEnabled) {
+function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey) {
     // 0) Build the required ACL array
     var requiredACLs;
     if (isAdminKey) {
@@ -179,10 +178,6 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey,
     } else {
         // minimal read usage is  "search", (initial values for search : "search", "listIndexes", "settings)
         requiredACLs = ['search'];
-
-        if (isRecommendationEnabled) {
-            requiredACLs.push('recommendation');
-        }
     }
 
     // 1) Retrieve key info from Algolia

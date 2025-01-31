@@ -41,7 +41,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             indexPrefix,
             true,   // isAdminKey
-            false   // isRecommendationEnabled
         );
         expect(result.error).toBe(true);
         expect(result.errorMessage).toContain('MSG:algolia.error.key.validation');
@@ -65,7 +64,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             indexPrefix,
             true,  // isAdminKey
-            false
         );
         expect(result.error).toBe(true);
         expect(result.errorMessage).toMatch(/missing.permissions/i);
@@ -89,36 +87,10 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             indexPrefix,
             false, // isAdminKey
-            false  // isRecommendationEnabled
         );
         expect(result.error).toBe(true);
         expect(result.errorMessage).toMatch(/missing.permissions/i);
         expect(result.errorMessage).toMatch(/search/);
-    });
-
-    it('should require "recommendation" ACL if isRecommendationEnabled for search key', () => {
-        mockService.call.mockReturnValueOnce({
-            ok: true,
-            object: {
-                body: {
-                    acl: ['search'],
-                    indexes: []
-                }
-            }
-        });
-
-        // Now we expect "recommendation" too
-        const result = algoliaServiceHelper.validateAPIKey(
-            mockService,
-            applicationID,
-            apiKey,
-            indexPrefix,
-            false,  // not admin
-            true    // recommend
-        );
-        expect(result.error).toBe(true);
-        expect(result.errorMessage).toMatch(/missing.permissions/i);
-        expect(result.errorMessage).toMatch(/recommendation/);
     });
 
     it('should allow extra ACLs but mark them as a warning', () => {
@@ -142,7 +114,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             indexPrefix,
             true,  // admin
-            false
         );
         expect(result.error).toBe(false);
         expect(result.warning).toMatch(/excessive.permissions/i);
@@ -167,7 +138,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             indexPrefix,
             false, // search key
-            false
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
@@ -190,7 +160,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             'myPrefix', // user prefix
             false,      // not admin
-            false
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
@@ -213,7 +182,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             'myPrefix', // mismatch
             false,
-            false
         );
         expect(result.error).toBe(true);
         expect(result.errorMessage).toMatch(/restrictedprefix/);
@@ -237,7 +205,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             'anythingGoes',
             false,
-            false
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
@@ -260,7 +227,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             '',   // user typed no prefix
             false,
-            false
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
@@ -283,7 +249,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             apiKey,
             '', // no prefix
             false,
-            false
         );
         expect(result.error).toBe(true);
         expect(result.errorMessage).toMatch(/restrictedprefix/);
