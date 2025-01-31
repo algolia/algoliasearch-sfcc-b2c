@@ -17,8 +17,6 @@ function isInclude(product) {
 
 /**
  * Returns `true` if the product’s ATS >= threshold, false otherwise.
- * This function is “pure” (it only checks product data).
- *
  * @param {dw.catalog.Product} product - The SFCC product or variant to check
  * @param {number} threshold - The min ATS to consider in-stock
  * @returns {boolean}
@@ -30,6 +28,7 @@ function isInStock(product, threshold) {
     }
 
     // if the master is in stock, then we assume all variants are in stock - Threshold is not applied
+    // Otherwise, we need to check each variants stock status and it is so complex and will increase job time
     if (product.master || product.variationGroup) {
         return availabilityModel.availabilityStatus === 'IN_STOCK';
     }

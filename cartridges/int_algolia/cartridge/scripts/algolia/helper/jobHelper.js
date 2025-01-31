@@ -603,6 +603,7 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
  */
 function generateVariantRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+    const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
     const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
     const variants = parameters.masterProduct.getVariants();
@@ -622,14 +623,15 @@ function generateVariantRecords(parameters) {
 
     for (let v = 0; v < variants.size(); ++v) {
         var variant = variants[v];
-
+        if (!productFilter.isInclude(variant)) {
+            continue;
+        }
         var baseModel = new AlgoliaLocalizedProduct({
             product: variant,
             locale: 'default',
             attributeList: parameters.nonLocalizedAttributes,
             fullRecordUpdate: parameters.fullRecordUpdate
         });
-
         for (let l = 0; l < parameters.locales.size(); ++l) {
             let locale = parameters.locales[l];
             // Add shared attributes in the base model

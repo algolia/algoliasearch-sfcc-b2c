@@ -376,11 +376,11 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 } else {
                     // Master-level indexing
                     let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
-                    let indexName = algoliaData.calculateIndexName('products', locale);
                     if (inStock || INDEX_OUT_OF_STOCK) {
                         let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                         for (let l = 0; l < siteLocales.size(); ++l) {
                             let locale = siteLocales[l];
+                            let indexName = algoliaData.calculateIndexName('products', locale);
                             let localizedMaster = new AlgoliaLocalizedProduct({
                                 product: product,
                                 locale: locale,
