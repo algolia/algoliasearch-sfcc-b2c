@@ -368,26 +368,10 @@ function enableInstantSearch(config) {
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
                         // originating index
                         item.__indexName = productsIndex;
-                        // url with queryID (used for analytics)
-                        if (item.url) {
-                            item.url = generateProductUrl({
-                                objectID: item.objectID,
-                                productUrl: item.url,
-                                queryID: item.__queryID,
-                                indexName: item.__indexName,
-                            });
-                        }
+
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
-                            item.colorVariations.forEach(colorVariation => {
-                                colorVariation.variationURL = generateProductUrl({
-                                    objectID: item.objectID,
-                                    productUrl: colorVariation.variationURL,
-                                    queryID: item.__queryID,
-                                    indexName: item.__indexName,
-                                });
-                            });
                         }
                         // Calculate displayPrice
                         var { price, calloutMsg } = calculateDisplayPrice(item);
@@ -396,15 +380,6 @@ function enableInstantSearch(config) {
 
                         // Master-level indexing
                         if (item.variants) {
-                            item.variants.forEach(variant => {
-                                variant.url = generateProductUrl({
-                                    objectID: item.objectID,
-                                    productUrl: variant.url,
-                                    queryID: item.__queryID,
-                                    indexName: item.__indexName,
-                                });
-                            });
-
                             // 1. Find the variant matching the selected facets, or use the default variant
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
@@ -744,23 +719,6 @@ function getPriceHtml(product) {
     return `<span class="value"> ${algoliaData.currencySymbol} ${salesPrice} </span>`;
 }
 
-
-/**
- * Build a product URL with Algolia query parameters
- * @param {string} objectID objectID
- * @param {string} productUrl url of the product
- * @param {string} queryID queryID
- * @param {string} indexName indexName
- * @return {string} Final URL of the product
- */
-function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
-    const url = new URL(productUrl, window.location.origin);
-    url.searchParams.append('queryID', queryID);
-    url.searchParams.append('objectID', objectID);
-    url.searchParams.append('indexName', indexName);
-    return url.href;
-}
-
 /**
  * Calculate the display price for an item when lazy loading pricing is disabled
  * @param {Object} item The item object
@@ -797,15 +755,15 @@ function calculateDisplayPrice(item) {
         }
     }
 
-    if (item.promotionalPrice) {
+    if (variant.promotionalPrice) {
         return {
-            price: item.promotionalPrice,
+            price: variant.promotionalPrice[algoliaData.currencyCode] || variant.promotionalPrice,
             calloutMsg: '',
         }
     }
 
     return {
-        price: item.price,
+        price: variant.price[algoliaData.currencyCode] || variant.price,
         calloutMsg: '',
     }
 }

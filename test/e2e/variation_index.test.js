@@ -1,4 +1,4 @@
-const algoliasearch = require('algoliasearch');
+const { algoliasearch } = require('algoliasearch');
 const sfcc = require('sfcc-ci');
 
 describe('Algolia Integration', () => {
@@ -44,13 +44,9 @@ describe('Algolia Integration', () => {
     });
 
     let client;
-    let index;
-    const recordModel = process.env.RECORD_MODEL || 'variation-level';
-    const indexPrefix = process.env.INDEX_PREFIX || 'varx';
 
     beforeEach(() => {
         client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY);
-        index = client.initIndex(`${indexPrefix}__products__en_US`);
     });
 
     const testProducts = [
@@ -121,7 +117,17 @@ describe('Algolia Integration', () => {
 
             const sfccProduct = await response.json();
 
-            console.log('SFCC Product:', sfccProduct);
+        // Then verify in Algolia
+        const results = await client.searchSingleIndex({
+            indexName: process.env.ALGOLIA_INDEX_NAME || 'varx__products__en_US',
+            searchParams: {query: sfccProduct.name.default},
+        });
+
+        // Add validation for Algolia results
+        if (!results.hits || !results.hits.length) {
+            console.error('No matching products found in Algolia');
+            throw new Error('Product not found in Algolia index');
+        }
 
             // Add validation for the SFCC product
             if (!sfccProduct || !sfccProduct.name || !sfccProduct.id) {
