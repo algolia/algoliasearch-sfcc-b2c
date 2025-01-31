@@ -9,10 +9,10 @@ const archiver = require('archiver');
 async function importPreferences() {
     try {
         const token = await authenticate();
-
         const instance = process.env.SANDBOX_HOST;
 
-        const siteImportDir = path.resolve('./site_import');
+        // "site_import" directory
+        const siteImportDir = path.resolve(__dirname, '../site_import');
         const sitesDir = path.join(siteImportDir, 'sites');
         const refArchDir = path.join(sitesDir, 'RefArch');
         const metaDir = path.join(siteImportDir, 'meta');
@@ -27,10 +27,17 @@ async function importPreferences() {
             additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival';
         }
 
+        // Create directories
         fs.mkdirSync(refArchDir, { recursive: true });
         fs.mkdirSync(metaDir, { recursive: true });
-        console.log('Directories created successfully for recordModel: ' + recordModel + ' and indexPrefix: ' + indexPrefix);
 
+        // Copy the "meta" folder from ../metadata/algolia/meta to site_import/meta
+        const sourceMeta = path.resolve(__dirname, '../metadata/algolia/meta');
+        fs.cpSync(sourceMeta, metaDir, { recursive: true });
+
+        console.log('Directories copied/created successfully.');
+
+        // Write your preferences.xml
         const preferencesXmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
     <custom-preferences>
@@ -44,59 +51,62 @@ async function importPreferences() {
 
         const preferencesXmlPath = path.join(refArchDir, 'preferences.xml');
         fs.writeFileSync(preferencesXmlPath, preferencesXmlContent);
+
         console.log('preferences.xml created successfully.');
 
-        const siteArchive = path.resolve('./site_import.zip');
+        // ZIP the entire site_import folder
+        const siteArchive = path.resolve(__dirname, '../site_import.zip');
         console.log('Creating site_import.zip...');
+        await new Promise((resolve, reject) => {
+            const output = fs.createWriteStream(siteArchive);
+            const archive = archiver('zip', { zlib: { level: 9 } });
 
-        const output = fs.createWriteStream(siteArchive);
-        const archive = archiver('zip', {
-            zlib: { level: 9 }
-        });
-
-        output.on('close', async () => {
-            console.log(`site_import.zip created (${archive.pointer()} total bytes).`);
-            console.log('Uploading site_import.zip...');
-
-            await new Promise((resolve, reject) => {
-                sfcc.instance.upload(instance, siteArchive, token, {}, (err) => {
-                    if (err) {
-                        console.error('Site preferences upload error:', err);
-                        reject(err);
-                    } else {
-                        console.log('Site preferences uploaded successfully.');
-                        resolve();
-                    }
-                });
+            output.on('close', () => {
+                console.log(`site_import.zip created (${archive.pointer()} total bytes).`);
+                resolve();
             });
 
-            console.log('Importing site preferences...');
-            await new Promise((resolve, reject) => {
-                sfcc.instance.import(instance, path.basename(siteArchive), token, (err) => {
-                    if (err) {
-                        console.error('Site preferences import error:', err);
-                        reject(err);
-                    } else {
-                        console.log('Site preferences imported successfully.');
-                        resolve();
-                    }
-                });
+            archive.on('error', (err) => {
+                reject(err);
             });
 
-            console.log('Site preferences import completed successfully.');
+            archive.pipe(output);
+            archive.directory(siteImportDir, 'site_import');
+            archive.finalize();
         });
 
-        archive.on('error', (err) => {
-            throw err;
+        // Upload the ZIP
+        console.log('Uploading site_import.zip...');
+        await new Promise((resolve, reject) => {
+            sfcc.instance.upload(instance, siteArchive, token, {}, (err) => {
+                if (err) {
+                    console.error('Upload error:', err);
+                    reject(err);
+                } else {
+                    console.log('Site preferences uploaded successfully.');
+                    resolve();
+                }
+            });
         });
 
-        archive.pipe(output);
-        archive.directory(siteImportDir, false);
-        await archive.finalize();
+        // Trigger the import job
+        console.log('Importing site preferences...');
+        await new Promise((resolve, reject) => {
+            sfcc.instance.import(instance, 'site_import.zip', token, (err) => {
+                if (err) {
+                    console.error('Import error:', err);
+                    reject(err);
+                } else {
+                    console.log('Site preferences imported successfully.');
+                    resolve();
+                }
+            });
+        });
 
+        console.log('Site preferences import completed successfully.');
     } catch (error) {
-        console.error('Import preferences error:', error);
-        throw error;
+        console.error('Error:', error);
+        process.exit(1);
     }
 }
 
