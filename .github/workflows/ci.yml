@@ -55,22 +55,6 @@ jobs:
       - name: Package Code
         run: zip -r $CODE_VERSION.zip $CODE_VERSION
 
-      - name: Deploy and Activate Code
-        env:
-          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
-          CODE_VERSION: ${{ vars.CODE_VERSION }}
-        run: npm run deploy:code
-
-      - name: Import Site Preferences
-        env:
-          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
-        run: npm run import:preferences
-
-      - name: Run SFCC Job
-        env:
-          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
-        run: npm run run:sfcc-job
-
   unit-tests-and-lints:
     runs-on: ubuntu-latest
     steps:
@@ -91,17 +75,19 @@ jobs:
       - name: Lint JavaScript
         run: npm run lint:js
 
-  index-tests:
+  e2e-tests:
     runs-on: ubuntu-latest
-    needs: build
     env:
+      CODE_VERSION: ${{ vars.CODE_VERSION }}
+      ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
+      ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
+      SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+      TEST_PRODUCT_ID: ${{ vars.TEST_PRODUCT_ID }}
+      TEST_MASTER_PRODUCT_ID: ${{ vars.TEST_MASTER_PRODUCT_ID }}
       SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
       SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
-      SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
-      ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
       ALGOLIA_API_KEY: ${{ secrets.ALGOLIA_API_KEY }}
-      ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
-      TEST_PRODUCT_ID: ${{ vars.TEST_PRODUCT_ID }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -111,45 +97,11 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Create dw.json file
-        run: |
-          echo '{
-            "client-id": "'"${{ secrets.SFCC_OAUTH_CLIENT_ID }}"'",
-            "client-secret": "'"${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}"'",
-            "hostname": "'"${{ vars.SANDBOX_HOST }}"'"
-          }' > dw.json
-
-      - name: Install sfcc-ci
-        run: sudo npm install -g sfcc-ci
-
-      - name: Authenticate with SFCC
-        run: |
-          sfcc-ci client:auth "$SFCC_OAUTH_CLIENT_ID" "$SFCC_OAUTH_CLIENT_SECRET"
-          echo "ACCESS_TOKEN=$(sfcc-ci client:auth:token)" >> $GITHUB_ENV
-
       - name: Install Dependencies
-        run: npm ci
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+          npm ci
 
-      - name: Install Algolia Dependencies
-        run: npm install algoliasearch
-
-      - name: Run Algolia Index Tests
-        run: npm run test:variationindex
-
-  frontend-tests:
-    runs-on: ubuntu-latest
-    needs: [build, index-tests]
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Run Cypress Tests
-        uses: cypress-io/github-action@v6
-        with:
-          install: npm ci
-          browser: electron
-          headless: true
-          config-file: cypress.config.js
-        env:
-          CYPRESS_SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
-          SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
+      - name: Run E2E Tests
+        run: npm run test:e2e

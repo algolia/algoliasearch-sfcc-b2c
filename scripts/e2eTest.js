@@ -1,166 +1,175 @@
 #!/usr/bin/env node
-
 /**
  * e2eTest.js
- * ----------------
- * Comprehensive Node script to replicate the e2e.sh logic.
- * Now with proper cleanup handling for both success and failure cases.
+ * ----------
+ * Orchestrates all steps in the end-to-end flow:
+ * 1. Checks required environment variables
+ * 2. Deploys code (already zipped and prepared by "npm run prepare:code")
+ * 3. For each record model (master-level, variation-level):
+ *    a) Import site preferences
+ *    b) Run the SFCC job
+ *    c) Run Variation Index Tests (Jest)
+ *    d) Run Cypress frontend tests
+ *
+ * Also handles cleanup of leftover artifacts on normal or error exit.
  */
 
-const { execSync } = require('child_process');
-const fs = require('fs');
 require('dotenv').config();
+const fs = require('fs');
+const path = require('path');
+const { runCLI } = require('jest');
+const cypress = require('cypress');
+const deployCode = require('./deployCode');
+const importPreferences = require('./importPreferences');
+const runSFCCJob = require('./runSFCCJob');
 
-// Files and directories to clean up
+// List of paths to clean up
 const cleanupPaths = [
-    'e2e-tests',
-    'e2e-tests.zip',
-    'site_import.zip',
-    'site_import',
-    process.env.CODE_VERSION,
-    `${process.env.CODE_VERSION}.zip`
+  'e2e-tests',
+  'e2e-tests.zip',
+  'site_import.zip',
+  'site_import',
+  process.env.CODE_VERSION,
+  `${process.env.CODE_VERSION}.zip`
 ];
 
 /**
- * Cleanup function to remove generated files and folders
+ * Removes leftover files/directories on script exit or error.
  */
 function cleanup() {
-    console.log('\nCleaning up...');
-    cleanupPaths.forEach(path => {
+    console.log('\n[INFO] Cleaning up temporary artifacts...');
+    cleanupPaths.forEach((item) => {
+        if (!item) return;
         try {
-            if (fs.existsSync(path)) {
-                if (fs.lstatSync(path).isDirectory()) {
-                    fs.rmSync(path, { recursive: true, force: true });
+            if (fs.existsSync(item)) {
+                const stat = fs.lstatSync(item);
+                if (stat.isDirectory()) {
+                    fs.rmSync(item, { recursive: true, force: true });
                 } else {
-                    fs.unlinkSync(path);
+                    fs.unlinkSync(item);
                 }
-                console.log(`Removed: ${path}`);
+                console.log(`[INFO] Removed: ${item}`);
             }
         } catch (error) {
-            console.error(`Error cleaning up ${path}:`, error.message);
+            console.error(`[WARN] Error cleaning up ${item}: ${error.message}`);
         }
     });
 }
 
-// Register cleanup handlers for different types of script termination
+// Trap various signals to ensure we do cleanup:
 process.on('exit', cleanup);
 process.on('SIGINT', () => {
-    console.log('\nReceived SIGINT (Ctrl+C)');
-    cleanup();
+    console.log('[ERROR] Received SIGINT (Ctrl+C). Exiting...');
     process.exit(1);
 });
 process.on('SIGTERM', () => {
-    console.log('\nReceived SIGTERM');
-    cleanup();
+    console.log('[ERROR] Received SIGTERM. Exiting...');
     process.exit(1);
 });
 process.on('uncaughtException', (error) => {
-    console.error('Uncaught Exception:', error);
-    cleanup();
+    console.error('[ERROR] Uncaught Exception:', error);
     process.exit(1);
 });
 
 /**
- * main()
- * - Orchestrates each step in the E2E sequence
+ * Main orchestration function.
  */
-function main() {
-    try {
-        // Initial setup and compilation
-        cleanup(); // Initial cleanup before starting
-        ensureRequiredEnvVars();
+async function main() {
+    ensureRequiredEnvVars();
 
-        console.log(`Using CODE_VERSION: ${process.env.CODE_VERSION}`);
+    console.log('[INFO] Starting E2E testing sequence...');
+    console.log('[INFO] Deploying code version...');
+    await deployCode();
 
-        compileJS();
-        compileSCSS();
-        prepareCode();
-        deployCode();
+    // We test two different record models:
+    const recordModels = ['master-level', 'variation-level'];
+    // In your code, you map each record model to a prefix
+    const indexPrefixes = {
+        'master-level': 'basex',
+        'variation-level': 'varx'
+    };
 
-        // First run all master-level tests
-        console.log('\n=== Running Master-Level Tests ===');
-        runTestsForConfiguration('master-level', 'basex', process.env.TEST_MASTER_PRODUCT_ID);
+    for (const model of recordModels) {
+        console.log(`\n[INFO] === Running E2E for: ${model} ===`);
+        process.env.RECORD_MODEL = model;
+        process.env.INDEX_PREFIX = indexPrefixes[model];
 
-        // Then run all variation-level tests
-        console.log('\n=== Running Variation-Level Tests ===');
-        runTestsForConfiguration('variation-level', 'varx', process.env.TEST_PRODUCT_ID);
+        console.log('[INFO] Importing site preferences...');
+        await importPreferences();
 
-        console.log('All E2E tests completed successfully.');
-    } catch (error) {
-        console.error('Error during E2E testing:', error.message);
-        process.exit(1);
+        console.log('[INFO] Running SFCC job...');
+        await runSFCCJob();
+
+        console.log('[INFO] Running Variation Index Tests (Jest)...');
+        await runVariationIndexTests();
+
+        console.log('[INFO] Running Cypress Frontend Tests...');
+        await runCypressTests();
     }
+
+    console.log('\n[INFO] All E2E tests completed successfully.');
+    process.exit(0);
 }
 
+/**
+ * Ensures that essential environment variables are set.
+ */
 function ensureRequiredEnvVars() {
-    const required = ['TEST_PRODUCT_ID', 'TEST_MASTER_PRODUCT_ID', 'CODE_VERSION'];
-    required.forEach(varName => {
-        if (!process.env[varName]) {
-            throw new Error(`ERROR: ${varName} is not set. Please define it in your .env file.`);
+    const requiredVars = [
+        'TEST_PRODUCT_ID',
+        'TEST_MASTER_PRODUCT_ID',
+        'CODE_VERSION',
+        'SANDBOX_HOST',
+        'SFCC_OAUTH_CLIENT_ID',
+        'SFCC_OAUTH_CLIENT_SECRET',
+        'ALGOLIA_APP_ID',
+        'ALGOLIA_API_KEY'
+    ];
+
+    requiredVars.forEach((envVar) => {
+        if (!process.env[envVar]) {
+            throw new Error(`Missing required environment variable: ${envVar}`);
         }
     });
 }
 
 /**
- * Runs all tests for a specific configuration
- * @param {string} recordModel - 'master-level' or 'variation-level'
- * @param {string} indexPrefix - 'basex' or 'varx'
- * @param {string} productId - The product ID to test with
+ * Runs the Variation Index Tests via Jest's programmatic API.
  */
-function runTestsForConfiguration(recordModel, indexPrefix, productId) {
-    console.log(`\nTesting configuration: Record Model=${recordModel}, Index Prefix=${indexPrefix}`);
-    
-    // Import preferences for this configuration
-    console.log('Importing site preferences...');
-    execSync(`RECORD_MODEL=${recordModel} INDEX_PREFIX=${indexPrefix} npm run e2e:import-preferences`, {
-        stdio: 'inherit',
-        shell: '/bin/bash'
+async function runVariationIndexTests() {
+    // We can specify more advanced config if needed:
+    const config = {
+        runInBand: true,        // run tests sequentially
+        testPathPattern: ['test/e2e/variation_index.test.js']
+    };
+    const { results } = await runCLI(config, [process.cwd()]);
+    if (results.numFailedTests || results.numFailedTestSuites) {
+        throw new Error('Variation Index Tests failed. Please check the Jest results above.');
+    }
+}
+
+/**
+ * Runs the Cypress End-to-End Tests via the Cypress module API.
+ */
+async function runCypressTests() {
+    const cypressEnv = {
+        // If you want Cypress environment variables, pass them here.
+        // e.g. RECORD_MODEL: process.env.RECORD_MODEL,
+        // or anything else you might need.
+    };
+
+    const result = await cypress.run({
+        spec: 'cypress/e2e/frontend.cy.js',
+        env: cypressEnv
     });
 
-    // Run SFCC job
-    console.log('Running SFCC job...');
-    execSync('npm run e2e:run-sfcc-job', {
-        stdio: 'inherit'
-    });
-
-    // Run variation index tests
-    console.log('Running index tests...');
-    execSync(
-        `RECORD_MODEL=${recordModel} INDEX_PREFIX=${indexPrefix} TEST_PRODUCT_ID=${productId} npm run e2e:variation-index-test`,
-        {
-            stdio: 'inherit',
-            shell: '/bin/bash'
-        }
-    );
-
-    // Run Cypress tests
-    console.log('Running frontend tests...');
-    execSync(
-        `CYPRESS_RECORD_MODEL=${recordModel} CYPRESS_INDEX_PREFIX=${indexPrefix} CYPRESS_TEST_PRODUCT_ID=${productId} npm run test:frontend`,
-        {
-            stdio: 'inherit',
-            shell: '/bin/bash'
-        }
-    );
-
-    console.log(`Configuration test completed: Record Model=${recordModel}, Index Prefix=${indexPrefix}`);
+    if (result.totalFailed > 0) {
+        throw new Error('Cypress tests failed. Please check logs above.');
+    }
 }
 
-function compileJS() {
-    execSync('npm run e2e:compile-js', { stdio: 'inherit' });
-}
-
-function compileSCSS() {
-    execSync('npm run e2e:compile-scss', { stdio: 'inherit' });
-}
-
-function prepareCode() {
-    execSync('npm run e2e:prepare-code', { stdio: 'inherit', shell: '/bin/bash' });
-}
-
-function deployCode() {
-    execSync('npm run e2e:deploy-code', { stdio: 'inherit' });
-}
-
-// Run the main function
-main();
+// Kick off the script
+main().catch((err) => {
+    console.error('[ERROR] E2E testing error:', err);
+    process.exit(1);
+});

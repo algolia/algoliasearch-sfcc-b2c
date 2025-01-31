@@ -3,7 +3,6 @@ const sfcc = require('sfcc-ci');
 
 describe('Algolia Integration', () => {
     beforeAll(async () => {
-
         const sfccAuthVars = ['SFCC_OAUTH_CLIENT_ID', 'SFCC_OAUTH_CLIENT_SECRET'];
         sfccAuthVars.forEach(envVar => {
             if (!process.env[envVar]) {
@@ -44,6 +43,8 @@ describe('Algolia Integration', () => {
     });
 
     let client;
+    const recordModel = process.env.RECORD_MODEL || 'variation-level';
+    const indexPrefix = process.env.INDEX_PREFIX || 'varx';
 
     beforeEach(() => {
         client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY);
@@ -117,35 +118,29 @@ describe('Algolia Integration', () => {
 
             const sfccProduct = await response.json();
 
-        // Then verify in Algolia
-        const results = await client.searchSingleIndex({
-            indexName: process.env.ALGOLIA_INDEX_NAME || 'varx__products__en_US',
-            searchParams: {query: sfccProduct.name.default},
-        });
-
-        // Add validation for Algolia results
-        if (!results.hits || !results.hits.length) {
-            console.error('No matching products found in Algolia');
-            throw new Error('Product not found in Algolia index');
-        }
-
             // Add validation for the SFCC product
             if (!sfccProduct || !sfccProduct.name || !sfccProduct.id) {
                 console.error('Invalid SFCC product response:', sfccProduct);
                 throw new Error('Invalid SFCC product data received');
             }
 
-            // Then verify in Algolia
-            const results = await index.search(sfccProduct.name.default);
-            
+            // Then verify in Algolia using the v5 API
+            const { results } = await client.search({
+                requests: [
+                    {
+                        indexName: process.env.ALGOLIA_INDEX_NAME || `${indexPrefix}__products__en_US`,
+                        query: sfccProduct.name.default
+                    }
+                ]
+            });
+
             // Add validation for Algolia results
-            if (!results.hits || !results.hits.length) {
+            if (!results?.[0]?.hits?.length) {
                 console.error('No matching products found in Algolia');
                 throw new Error('Product not found in Algolia index');
             }
 
-            const hit = results.hits[0];
-
+            const hit = results[0].hits[0];
             expect(hit.name).toContain(sfccProduct.name.default);
         });
     });

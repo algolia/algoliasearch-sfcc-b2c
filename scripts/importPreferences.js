@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
 
-(async () => {
+async function importPreferences() {
     try {
         const token = await authenticate();
 
@@ -48,53 +48,65 @@ const archiver = require('archiver');
 
         const siteArchive = path.resolve('./site_import.zip');
         console.log('Creating site_import.zip...');
-        await new Promise((resolve, reject) => {
-            const output = fs.createWriteStream(siteArchive);
-            const archive = archiver('zip', { zlib: { level: 9 } });
 
-            output.on('close', () => {
-                console.log(`site_import.zip created (${archive.pointer()} total bytes).`);
-                resolve();
-            });
-
-            archive.on('error', (err) => {
-                reject(err);
-            });
-
-            archive.pipe(output);
-            archive.directory(siteImportDir, 'site_import');
-            archive.finalize();
+        const output = fs.createWriteStream(siteArchive);
+        const archive = archiver('zip', {
+            zlib: { level: 9 }
         });
 
-        console.log('Uploading site_import.zip...');
-        await new Promise((resolve, reject) => {
-            sfcc.instance.upload(instance, siteArchive, token, {}, (err) => {
-                if (err) {
-                    console.error('Upload error:', err);
-                    reject(err);
-                } else {
-                    console.log('Site preferences uploaded successfully.');
-                    resolve();
-                }
+        output.on('close', async () => {
+            console.log(`site_import.zip created (${archive.pointer()} total bytes).`);
+            console.log('Uploading site_import.zip...');
+
+            await new Promise((resolve, reject) => {
+                sfcc.instance.upload(instance, siteArchive, token, {}, (err) => {
+                    if (err) {
+                        console.error('Site preferences upload error:', err);
+                        reject(err);
+                    } else {
+                        console.log('Site preferences uploaded successfully.');
+                        resolve();
+                    }
+                });
             });
+
+            console.log('Importing site preferences...');
+            await new Promise((resolve, reject) => {
+                sfcc.instance.import(instance, path.basename(siteArchive), token, (err) => {
+                    if (err) {
+                        console.error('Site preferences import error:', err);
+                        reject(err);
+                    } else {
+                        console.log('Site preferences imported successfully.');
+                        resolve();
+                    }
+                });
+            });
+
+            console.log('Site preferences import completed successfully.');
         });
 
-        console.log('Importing site preferences...');
-        await new Promise((resolve, reject) => {
-            sfcc.instance.import(instance, 'site_import.zip', token, (err) => {
-                if (err) {
-                    console.error('Import error:', err);
-                    reject(err);
-                } else {
-                    console.log('Site preferences imported successfully.');
-                    resolve();
-                }
-            });
+        archive.on('error', (err) => {
+            throw err;
         });
 
-        console.log('Site preferences import completed successfully.');
+        archive.pipe(output);
+        archive.directory(siteImportDir, false);
+        await archive.finalize();
+
     } catch (error) {
-        console.error('Error:', error);
-        process.exit(1);
+        console.error('Import preferences error:', error);
+        throw error;
     }
-})();
+}
+
+// Export the function
+module.exports = importPreferences;
+
+// If this script is run directly, execute the function
+if (require.main === module) {
+    importPreferences().catch((error) => {
+        console.error('Error when running directly:', error);
+        process.exit(1);
+    });
+}
