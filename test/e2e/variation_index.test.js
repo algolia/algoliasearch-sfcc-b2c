@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { algoliasearch } = require('algoliasearch');
 const sfcc = require('sfcc-ci');
 
