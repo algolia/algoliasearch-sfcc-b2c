@@ -9,12 +9,12 @@ const Resource = require('dw/web/Resource');
 const stringUtils = require('dw/util/StringUtils');
 
 /**
- * Formats standard error message string.
- * @param {string} title - Error title or function name.
- * @param {string} url - Service endpoint URL.
- * @param {number} error - HTTP response code.
- * @param {string} errorMessage - Error message.
- * @returns {string} Formatted error message.
+* Formats standard error message string
+ * @param {string} title        - Error title, place or function name
+ * @param {string} url          - Url of the service endpoint
+ * @param {number} error        - HTTP response code for an HTTPService
+ * @param {string} errorMessage - Error Message
+ * @returns {string}            - formatted message
  */
 function standardErrorMessage(title, url, error, errorMessage) {
     return stringUtils.format('Error: {0},\nUrl: {1},\nErrorCode: {2},\nMessage: {3}',
@@ -25,11 +25,11 @@ function standardErrorMessage(title, url, error, errorMessage) {
 }
 
 /**
- * Parse error message and write it to log.
- * @param {string} title - Error title or function name.
- * @param {string} url - Service endpoint URL.
- * @param {dw.svc.Result} result - Result object.
- * @returns {null}
+ * Parse error message and write it to log
+ * @param {string}        title  - Error title, place or function name
+ * @param {string}        url    - Url of the service endpoint
+ * @param {dw.svc.Result} result - result
+ * @returns {null} - Null
  */
 function logServiceError(title, url, result) {
     var logMessage = '';
@@ -60,7 +60,7 @@ function logServiceError(title, url, result) {
  *              headers: dw.util.Map,
  *              statusCode: number
  *          }}                     - Response object or `null` in case of errors
-*/
+ */
 function callService(title, service, params) {
     var result;
     var data = null;
@@ -92,6 +92,7 @@ function isResponseJSON(service) {
 }
 
 /**
+ *
  * @param {string} title - Name of the action or method to describe the action performed
  * @param {dw.svc.HTTPService} service - Service instance to call
  * @param {Object} params - Params to be passed to service.call function
@@ -103,7 +104,8 @@ function callJsonService(title, service, params) {
     var callStatus = new Status(Status.OK);
     var statusItem = callStatus.items.get(0);
 
-    var result;
+    var result = null;
+    var data = null;
     try {
         result = service.setThrowOnError().call(JSON.stringify(params));
     } catch (error) {
@@ -115,11 +117,12 @@ function callJsonService(title, service, params) {
     if (result.ok) {
         if (isResponseJSON(service)) {
             try {
-                var data = JSON.parse(result.object.response);
+                data = JSON.parse(result.object.response);
                 statusItem.addDetail('object', data);
             } catch (error) {
+                // response is marked as json, but it is not
                 statusItem.setStatus(Status.ERROR);
-                logger.error('JSON.parse error. Error: {0}. Method: {1}. String: {2}', error, title, result.object.response);
+                logger.error('JSON.parse error. Method: {0}. String: {1}', title, result.object.response);
             }
         } else {
             // statusItem.setStatus(Status.ERROR);
