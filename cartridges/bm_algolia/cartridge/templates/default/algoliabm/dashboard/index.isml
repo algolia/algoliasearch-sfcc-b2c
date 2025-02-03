@@ -66,16 +66,6 @@
                             <br/>
                             <isprint value="${Resource.msg('algolia.label.preference.searchkey.mandatoryacl', 'algolia', null)}" />
                         </div>
-                        <isif condition="${pdict.searchWarningMessage}">
-                            <div class="warning-message yellow narrow">
-                                ${pdict.searchWarningMessage}
-                            </div>
-                        </isif>
-                        <isif condition="${pdict.searchErrorMessage}">
-                            <div class="error-message red narrow">
-                                ${pdict.searchErrorMessage}
-                            </div>
-                        </isif>
                     </td>
                     <td class="table_detail w e s">
                         <input type="text"

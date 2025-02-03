@@ -67,35 +67,10 @@ function handleSettings() {
                 serviceAdmin,
                 applicationID,
                 adminApikey,
-                finalIndexPrefix,
-                true
+                finalIndexPrefix
             );
 
             if (adminValidation.error) {
-                showDashboardWithMessages(adminValidation, searchValidation);
-                return;
-            }
-        }
-
-        // 2) Validate Search API key. Must always have 'search'.
-        // If user left the key blank and prefix is not changed, skip as well.
-        if (searchApikey || isIndexPrefixChanged) {
-            var serviceSearch = algoliaIndexingService.getService({
-                jobID: 'API_KEY_VALIDATION_SEARCH',
-                stepID: 'validatePermissions',
-                applicationID: applicationID,
-                adminApikey: searchApikey
-            });
-
-            searchValidation = algoliaServiceHelper.validateAPIKey(
-                serviceSearch,
-                applicationID,
-                searchApikey,
-                finalIndexPrefix,
-                false
-            );
-
-            if (searchValidation.error) {
                 showDashboardWithMessages(adminValidation, searchValidation);
                 return;
             }

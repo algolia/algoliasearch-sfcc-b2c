@@ -1,16 +1,9 @@
 /**
- * File: test/unit/int_algolia/scripts/services/algoliaServiceHelper.test.js
+ * File: cartridges/int_algolia/cartridge/scripts/services/algoliaServiceHelper.test.js
  */
 
 const Resource = require('dw/web/Resource');
 const algoliaServiceHelper = require('../../../../../cartridges/int_algolia/cartridge/scripts/services/algoliaServiceHelper');
-
-/**
- * Mock details:
- *   - We'll only test validateAPIKey’s handling of ACL array and index prefix coverage.
- *   - We no longer do loop checking each locale; we only verify that the user prefix is within
- *     at least one wildcard from "indexes".
- */
 
 describe('algoliaServiceHelper.validateAPIKey', () => {
     let mockService;
@@ -23,7 +16,7 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             call: jest.fn()
         };
 
-        // Default Resource mock
+        // Default Resource mocks
         Resource.msg = jest.fn((key) => `MSG:${key}`);
         Resource.msgf = jest.fn((key, bundle, ...args) => `MSGF:${key}:${args.join(',')}`);
     });
@@ -39,20 +32,19 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            indexPrefix,
-            true,   // isAdminKey
+            indexPrefix
         );
         expect(result.error).toBe(true);
         expect(result.errorMessage).toContain('MSG:algolia.error.key.validation');
     });
 
-    it('should require admin ACLs for an admin key', () => {
+    it('should require admin ACLs when some required permissions are missing', () => {
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
                 body: {
-                    // Missing some admin permissions
-                    acl: ['addObject', 'settings'], // missing deleteObject, deleteIndex
+                    // Missing 'deleteObject' and 'deleteIndex'
+                    acl: ['addObject', 'settings'],
                     indexes: []
                 }
             }
@@ -62,20 +54,19 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            indexPrefix,
-            true,  // isAdminKey
+            indexPrefix
         );
         expect(result.error).toBe(true);
-        expect(result.errorMessage).toMatch(/missing.permissions/i);
-        // We can also verify it mentions 'deleteObject' and 'deleteIndex'
+        expect(result.errorMessage).toMatch(/MSGF:algolia.error.missing.permissions/);
     });
 
-    it('should require "search" ACL for a search key', () => {
+    it('should allow extra ACLs and return a warning', () => {
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
                 body: {
-                    acl: ['settings'],
+                    // All required ACLs plus an extra one.
+                    acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings', 'extraACL'],
                     indexes: []
                 }
             }
@@ -85,49 +76,20 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            indexPrefix,
-            false, // isAdminKey
-        );
-        expect(result.error).toBe(true);
-        expect(result.errorMessage).toMatch(/missing.permissions/i);
-        expect(result.errorMessage).toMatch(/search/);
-    });
-
-    it('should allow extra ACLs but mark them as a warning', () => {
-        mockService.call.mockReturnValueOnce({
-            ok: true,
-            object: {
-                body: {
-                    // Perfect admin ACL plus extras
-                    acl: [
-                        'addObject', 'deleteObject', 'deleteIndex', 'settings',
-                        'extraACL'
-                    ],
-                    indexes: []
-                }
-            }
-        });
-
-        const result = algoliaServiceHelper.validateAPIKey(
-            mockService,
-            applicationID,
-            apiKey,
-            indexPrefix,
-            true,  // admin
+            indexPrefix
         );
         expect(result.error).toBe(false);
-        expect(result.warning).toMatch(/excessive.permissions/i);
+        expect(result.warning).toMatch(/MSGF:algolia.warning.excessive.permissions/);
         expect(result.warning).toMatch(/extraACL/);
     });
 
-    it('should pass if no index restrictions (i.e. no "indexes" field)', () => {
+    it('should pass if there are no index restrictions', () => {
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
                 body: {
-                    // minimal search key
-                    acl: ['search']
-                    // no indexes field => means unrestricted
+                    acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings']
+                    // No indexes field implies no restrictions.
                 }
             }
         });
@@ -136,19 +98,18 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            indexPrefix,
-            false, // search key
+            indexPrefix
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
     });
 
-    it('should pass if "indexes": ["myPrefix*"] covers the user-specified prefix "myPrefix"', () => {
+    it('should pass if restrictedIndexes contains a pattern matching the indexPrefix using polyfill logic', () => {
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
                 body: {
-                    acl: ['search'],
+                    acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings'],
                     indexes: ['myPrefix*']
                 }
             }
@@ -158,19 +119,18 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            'myPrefix', // user prefix
-            false,      // not admin
+            'myPrefix'
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
     });
 
-    it('should fail if "indexes": ["test*"] does not match the user prefix "myPrefix"', () => {
+    it('should fail if restrictedIndexes does not match the indexPrefix using polyfill logic', () => {
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
                 body: {
-                    acl: ['search'],
+                    acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings'],
                     indexes: ['test*']
                 }
             }
@@ -180,20 +140,19 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            'myPrefix', // mismatch
-            false,
+            'myPrefix'
         );
         expect(result.error).toBe(true);
-        expect(result.errorMessage).toMatch(/restrictedprefix/);
+        expect(result.errorMessage).toMatch(/MSGF:algolia.error.index.restrictedprefix/);
         expect(result.errorMessage).toMatch(/myPrefix/);
     });
 
-    it('should handle a universal wildcard "*" that matches any prefix', () => {
+    it('should pass if restrictedIndexes contains the universal wildcard', () => {
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
                 body: {
-                    acl: ['search'],
+                    acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings'],
                     indexes: ['*']
                 }
             }
@@ -203,20 +162,29 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            'anythingGoes',
-            false,
+            'anythingGoes'
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
     });
 
-    it('should pass if indexPrefix is empty but "indexes": ["*"] covers it', () => {
+    it('should use the default indexPrefix when provided indexPrefix is empty', () => {
+        const defaultIndexPrefix = 'defaultPrefix';
+        // Mock algoliaData.getIndexPrefix
+        jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
+            return {
+                getIndexPrefix: function () {
+                    return defaultIndexPrefix;
+                }
+            };
+        }, { virtual: true });
+
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
                 body: {
-                    acl: ['search'],
-                    indexes: ['*']
+                    acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings'],
+                    indexes: ['defaultPrefix*']
                 }
             }
         });
@@ -225,8 +193,7 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            '',   // user typed no prefix
-            false,
+            ''
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
@@ -237,7 +204,7 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             ok: true,
             object: {
                 body: {
-                    acl: ['search'],
+                    acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings'],
                     indexes: ['test*']
                 }
             }
@@ -248,8 +215,8 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             applicationID,
             apiKey,
             '', // no prefix
-            false,
         );
-        expect(result.error).toBe(false); // because our validation is not strict;
+        expect(result.error).toBe(true);
+        expect(result.errorMessage).toMatch(/MSGF:algolia.error.index.restrictedprefix/);
     });
 });

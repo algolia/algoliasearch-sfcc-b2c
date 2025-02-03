@@ -5,64 +5,8 @@
  */
 
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
-const stringUtils = require('dw/util/StringUtils');
 const Resource = require('dw/web/Resource');
-
-var UNEXPECTED_ERROR_CODE = '-1';
-
-/**
- * Custom helper to check if a string starts with a given prefix.
- * @param {string} str
- * @param {string} prefix
- * @returns {boolean}
- */
-function stringStartsWith(str, prefix) {
-    return str.substring(0, prefix.length) === prefix;
-}
-
-/**
- * Custom helper to check if a string ends with a given suffix.
- * @param {string} str
- * @param {string} suffix
- * @returns {boolean}
- */
-function stringEndsWith(str, suffix) {
-    return str.substring(str.length - suffix.length) === suffix;
-}
-
-/**
- * Determines whether the given indexPrefix matches a restricted pattern.
- * The pattern may include a wildcard character '*' which is interpreted as:
- *   - If '*' appears anywhere, then only the portion before the first '*' is used for matching.
- *   - If the pattern starts with '*', then the suffix (after the '*') is used.
- *   - Otherwise, an exact match is required.
- *
- * @param {string} indexPrefix
- * @param {string} pattern
- * @returns {boolean} True if matched.
- */
-function matchIndexPrefix(indexPrefix, pattern) {
-    // If the restricted pattern is exactly "*", it covers any prefix.
-    if (pattern === '*') {
-        return true;
-    }
-
-    // If the pattern contains a wildcard '*'
-    if (pattern.indexOf('*') > -1) {
-        // If the pattern starts with '*', use the substring after '*' as suffix for matching.
-        if (pattern.charAt(0) === '*') {
-            var suffixPart = pattern.substring(1);
-            return stringEndsWith(indexPrefix, suffixPart);
-        }
-        // Otherwise, take the substring before the first '*' as the required prefix.
-        var starPos = pattern.indexOf('*');
-        var patternPrefix = pattern.substring(0, starPos);
-        return stringStartsWith(indexPrefix, patternPrefix);
-    }
-
-    // No wildcard: perform an exact match.
-    return indexPrefix === pattern;
-}
+const stringUtils = require('dw/util/StringUtils');
 
 /**
  * Formats standard error message string.
@@ -195,89 +139,81 @@ function callJsonService(title, service, params) {
 }
 
 /**
- * Validate an Algolia API Key's ACLs and index restrictions.
- * It checks that the key has all required ACLs and, if the key is restricted to specific indices,
- * that the provided indexPrefix (or the generated default, if empty) is covered by at least one allowed pattern.
- * This implementation follows logic similar to that used in the Crawler project.
+ * Validates an Algolia API key’s permissions and index restrictions.
+ * It retrieves key details from Algolia, then verifies that the key contains
+ * all required ACLs (depending on whether it is an admin key or not) and that the
+ * provided indexPrefix is covered by one of the allowed index patterns.
  *
- * @param {dw.svc.Service} service
- * @param {string} applicationID
- * @param {string} apiKey
- * @param {string} indexPrefix
- * @param {boolean} isAdminKey
- * @returns {Object} { error: Boolean, errorMessage: String, warning: String }
+ * @param {dw.svc.Service} service - The service instance used for the API call.
+ * @param {string} applicationID - The Algolia Application ID.
+ * @param {string} apiKey - The API key to validate.
+ * @param {string} indexPrefix - The index prefix to validate against.
+ * @returns {Object} An object with properties { error: Boolean, errorMessage: String, warning: String }.
  */
-function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey) {
-    // If indexPrefix is empty, use the default generated value.
+function validateAPIKey(service, applicationID, apiKey, indexPrefix) {
+    // Use default indexPrefix if none is provided.
     if (!indexPrefix || indexPrefix.trim() === "") {
         var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
         indexPrefix = algoliaData.getIndexPrefix();
     }
+    // Define the required ACLs.
+    var requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
 
-    // Build the required ACL array.
-    var requiredACLs = isAdminKey
-        ? ['addObject', 'deleteObject', 'deleteIndex', 'settings']
-        : ['search'];
-
-    // Retrieve key info from Algolia using the /keys endpoint.
-    var keyResponse = service.call({
+    var response = service.call({
         method: 'GET',
         url: 'https://' + applicationID + '.algolia.net/1/keys/' + apiKey
     });
 
-    if (!keyResponse.ok) {
+    if (!response.ok) {
         return {
             error: true,
             errorMessage: Resource.msg('algolia.error.key.validation', 'algolia', null)
         };
     }
 
-    var keyData = keyResponse.object.body;
+    var keyData = response.object.body;
     var actualACLs = keyData.acl || [];
 
-    // Identify missing vs. excessive ACLs.
-    var missingACLs = requiredACLs.filter(function (reqAcl) {
-        return actualACLs.indexOf(reqAcl) === -1;
+    // Check for missing required ACLs.
+    var missingACLs = requiredACLs.filter(function (acl) {
+        return actualACLs.indexOf(acl) === -1;
     });
-    var excessiveACLs = actualACLs.filter(function (acl) {
-        return requiredACLs.indexOf(acl) === -1;
-    });
-
     if (missingACLs.length > 0) {
-        var errMsg = Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '));
         return {
             error: true,
-            errorMessage: errMsg,
-            warning: excessiveACLs.length > 0
-                ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
-                : ''
+            errorMessage: Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '))
         };
     }
 
-    // Check index restrictions, if any.
+    // Check index restrictions if any are specified.
     var restrictedIndexes = keyData.indexes;
-    if (restrictedIndexes && restrictedIndexes.length > 0) {
-        var match = false;
-        for (var i = 0; i < restrictedIndexes.length; i++) {
-            var pattern = restrictedIndexes[i];
-            if (matchIndexPrefix(indexPrefix, pattern)) {
-                match = true;
-                break;
+    if (restrictedIndexes && restrictedIndexes.length > 0 && indexPrefix) {
+        var match = restrictedIndexes.some(function (pattern) {
+            // Check for universal wildcard
+            if (pattern === '*') {
+                return true;
             }
-        }
+            // Polyfill for endsWith('*'): check if the last character is '*'
+            if (pattern.charAt(pattern.length - 1) === '*') {
+                var prefix = pattern.substring(0, pattern.length - 1);
+                // Polyfill for startsWith: check if indexPrefix begins with prefix
+                return indexPrefix.substring(0, prefix.length) === prefix;
+            }
+            return pattern === indexPrefix;
+        });
         if (!match) {
-            var prefixError = Resource.msgf('algolia.error.index.restrictedprefix', 'algolia', null, indexPrefix);
             return {
                 error: true,
-                errorMessage: prefixError,
-                warning: excessiveACLs.length > 0
-                    ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
-                    : ''
+                errorMessage: Resource.msgf('algolia.error.index.restrictedprefix', 'algolia', null, indexPrefix)
             };
         }
     }
 
-    // All checks passed.
+    // Identify any extra (excessive) ACLs.
+    var excessiveACLs = actualACLs.filter(function (acl) {
+        return requiredACLs.indexOf(acl) === -1;
+    });
+
     return {
         error: false,
         errorMessage: '',
@@ -290,6 +226,5 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey)
 module.exports = {
     callService: callService,
     callJsonService: callJsonService,
-    UNEXPECTED_ERROR_CODE: UNEXPECTED_ERROR_CODE,
     validateAPIKey: validateAPIKey
 };
