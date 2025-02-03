@@ -5,6 +5,7 @@ var ISML = require('dw/template/ISML');
 var URLUtils = require('dw/web/URLUtils');
 var Logger = require('dw/system/Logger');
 var Resource = require('dw/web/Resource');
+var Site = require('dw/system/Site');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
@@ -48,6 +49,11 @@ function handleSettings() {
         var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
         var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
 
+        // If the user typed an empty prefix, the cartridge logic eventually
+        // uses the default <hostname>__<siteID>, so we should validate *that* scenario:
+        var typedPrefix = indexPrefix.trim();
+        var finalIndexPrefix = typedPrefix || (algoliaData.getInstanceHostName() + '__' + Site.getCurrent().getID());
+
         // 1) Validate Admin API key - If user left admin key blank and prefix didn't change, skip check.
         if (adminApikey || isIndexPrefixChanged) {
             var serviceAdmin = algoliaIndexingService.getService({
@@ -61,8 +67,8 @@ function handleSettings() {
                 serviceAdmin,
                 applicationID,
                 adminApikey,
-                indexPrefix,
-                true                  // isAdminKey
+                finalIndexPrefix,
+                true
             );
 
             if (adminValidation.error) {
@@ -71,7 +77,8 @@ function handleSettings() {
             }
         }
 
-        // 2) Validate Search API key (must have 'search' ACL). If user left search key blank and prefix didn't change, skip check.
+        // 2) Validate Search API key. Must always have 'search'.
+        // If user left the key blank and prefix is not changed, skip as well.
         if (searchApikey || isIndexPrefixChanged) {
             var serviceSearch = algoliaIndexingService.getService({
                 jobID: 'API_KEY_VALIDATION_SEARCH',
@@ -84,8 +91,8 @@ function handleSettings() {
                 serviceSearch,
                 applicationID,
                 searchApikey,
-                indexPrefix,
-                false                 // isAdminKey = false
+                finalIndexPrefix,
+                false
             );
 
             if (searchValidation.error) {
@@ -94,8 +101,7 @@ function handleSettings() {
             }
         }
 
-        // If we get here, both checks are fine or not applicable. Save settings.
-
+        // If we get here, both checks are fine or not applicable. Save settings:
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', applicationID);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);

@@ -45,7 +45,7 @@ function logServiceError(title, url, result) {
         case 403:
         default:
             logMessage = standardErrorMessage(title, url, result.error, result.errorMessage);
-    } // switch ends
+    }
 
     logger.error(logMessage);
 
@@ -142,45 +142,55 @@ function callJsonService(title, service, params) {
 }
 
 /**
- * Replaces wildcard `*` with `.*` and does a full ^...$ match
- * @param {string} indexName - e.g. "test__products__en_US"
- * @param {string} pattern   - e.g. "test*" or "prod_*" or "*_dev"
- * @returns {boolean} whether indexName matches that pattern
+ * Whether an indexPrefix is matched by a pattern like "*", "test*", "*dev", or exact match.
+ * @param {string} indexPrefix
+ * @param {string} pattern
+ * @returns {boolean} - True if matched
  */
-function matchesIndexName(indexName, pattern) {
-    // Escape regex special chars except '*'
-    var escaped = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&');
-    // Replace '*' with '.*'
-    escaped = escaped.replace(/\*/g, '.*');
-    var re = new RegExp('^' + escaped + '$');
-    return re.test(indexName);
+function matchIndexPrefix(indexPrefix, pattern) {
+    // If the restricted pattern is literally "*", it covers any prefix
+    if (pattern === '*') {
+        return true;
+    }
+    // If pattern ends with "*", e.g. "test*", check if indexPrefix starts with the pattern (minus the *)
+    if (pattern.endsWith('*') && pattern.length > 1) {
+        var withoutStar = pattern.slice(0, -1);
+        return indexPrefix.startsWith(withoutStar);
+    }
+    // If pattern starts with "*", e.g. "*dev", check if indexPrefix ends with the pattern (minus the *)
+    if (pattern.startsWith('*') && pattern.length > 1) {
+        var withoutInitialStar = pattern.slice(1);
+        return indexPrefix.endsWith(withoutInitialStar);
+    }
+    // Otherwise, do exact comparison
+    return indexPrefix === pattern;
 }
 
 /**
- * Validate an Algolia API Key's ACLs and prefix coverage.
- *
- * The key can be restricted to certain sets of indices by "indexes": [...]. If that field is missing
- * or empty, the key isn't restricted by index name, so only ACL checks matter. Otherwise, we check
- * if at least one of the "indexes" patterns covers the user-entered indexPrefix.
+ * Validate an Algolia API Key's ACLs and index restrictions.
+ * It checks that the key has all required ACLs and, if the key is restricted to specific indices,
+ * that the provided indexPrefix (or the generated default, if empty) is covered by at least one allowed pattern.
  *
  * @param {dw.svc.Service} service
  * @param {string} applicationID
  * @param {string} apiKey
- * @param {string} indexPrefix         - the user-provided prefix in BM
+ * @param {string} indexPrefix
  * @param {boolean} isAdminKey
  * @returns {Object} { error: Boolean, errorMessage: String, warning: String }
  */
 function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey) {
-    // 0) Build the required ACL array
-    var requiredACLs;
-    if (isAdminKey) {
-        requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
-    } else {
-        // minimal read usage is  "search", (initial values for search : "search", "listIndexes", "settings)
-        requiredACLs = ['search'];
+    // If indexPrefix is empty, use the default generated value
+    if (!indexPrefix || indexPrefix.trim() === "") {
+        var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+        indexPrefix = algoliaData.getIndexPrefix();
     }
 
-    // 1) Retrieve key info from Algolia
+    // 1) Build the required ACL array
+    var requiredACLs = isAdminKey
+        ? ['addObject', 'deleteObject', 'deleteIndex', 'settings']
+        : ['search'];
+
+    // 2) Retrieve key info from Algolia using the /keys endpoint
     var keyResponse = service.call({
         method: 'GET',
         url: 'https://' + applicationID + '.algolia.net/1/keys/' + apiKey
@@ -196,15 +206,18 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey)
     var keyData = keyResponse.object.body;
     var actualACLs = keyData.acl || [];
 
-    // 2) Identify missing vs. excessive ACLs
-    var missingACLs = requiredACLs.slice();
+    // 3) Identify missing vs. excessive ACLs
+    var missingACLs = [];
+    requiredACLs.forEach(function (reqAcl) {
+        if (actualACLs.indexOf(reqAcl) === -1) {
+            missingACLs.push(reqAcl);
+        }
+    });
+
     var excessiveACLs = [];
     actualACLs.forEach(function (acl) {
-        var idx = missingACLs.indexOf(acl);
-        if (idx === -1) {
+        if (requiredACLs.indexOf(acl) === -1) {
             excessiveACLs.push(acl);
-        } else {
-            missingACLs.splice(idx, 1);
         }
     });
 
@@ -219,41 +232,26 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey)
         };
     }
 
-    // 3) Check index restrictions, if any
+    // 4) Check index restrictions, if any
     var restrictedIndexes = keyData.indexes || [];
-    if (restrictedIndexes.length === 0) {
-        // Key is not restricted by indexName => pass
-        return {
-            error: false,
-            errorMessage: '',
-            warning: excessiveACLs.length > 0
-                ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
-                : ''
-        };
+    if (restrictedIndexes.length > 0) {
+        var matchedPrefix = restrictedIndexes.some(function (pattern) {
+            return matchIndexPrefix(indexPrefix, pattern);
+        });
+
+        if (!matchedPrefix) {
+            var prefixError = Resource.msgf('algolia.error.index.restrictedprefix', 'algolia', null, indexPrefix);
+            return {
+                error: true,
+                errorMessage: prefixError,
+                warning: excessiveACLs.length > 0
+                    ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
+                    : ''
+            };
+        }
     }
 
-
-    var matchedPrefix = restrictedIndexes.some(function (pattern) {
-        // Build a placeholder indexName: we simulate "indexPrefix plus something", e.g. "__products"
-        // so that "test*" would match "test__products" if the prefix = "test".
-        // The simplest is to just add a short suffix to avoid empty string edge case.
-        var simulated = indexPrefix + '__anything';
-        return matchesIndexName(simulated, pattern);
-    });
-
-    if (!matchedPrefix) {
-        // Failing scenario: none of the restricted patterns matches your prefix
-        var prefixError = Resource.msgf('algolia.error.index.restrictedprefix', 'algolia', null, indexPrefix);
-        return {
-            error: true,
-            errorMessage: prefixError,
-            warning: excessiveACLs.length > 0
-                ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
-                : ''
-        };
-    }
-
-    // 4) Passed everything
+    // 5) Passed all checks
     return {
         error: false,
         errorMessage: '',
