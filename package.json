@@ -21,8 +21,6 @@
         "run:sfcc-job": "node scripts/runSFCCJob.js",
         "test:frontend": "cypress run --browser chrome --headed",
         "test:e2e": "./e2e.sh",
-        "test:variationindex": "jest --testPathPattern='test/e2e/variation_index.test.js'",
-        "test:algoliaProductDeltaIndex": "jest --testPathPattern='test/unit/int_algolia/scripts/algolia/steps/algoliaProductDeltaIndex.test.js'"
     },
     "repository": {
         "type": "git",
