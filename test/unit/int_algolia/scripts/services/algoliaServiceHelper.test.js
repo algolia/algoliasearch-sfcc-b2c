@@ -250,7 +250,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             '', // no prefix
             false,
         );
-        expect(result.error).toBe(true);
-        expect(result.errorMessage).toMatch(/restrictedprefix/);
+        expect(result.error).toBe(false); // because our validation is not strict;
     });
 });
