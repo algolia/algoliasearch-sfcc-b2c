@@ -9,7 +9,7 @@ const Resource = require('dw/web/Resource');
 const stringUtils = require('dw/util/StringUtils');
 
 /**
-* Formats standard error message string
+ * Formats standard error message string
  * @param {string} title        - Error title, place or function name
  * @param {string} url          - Url of the service endpoint
  * @param {number} error        - HTTP response code for an HTTPService
@@ -106,6 +106,7 @@ function callJsonService(title, service, params) {
 
     var result = null;
     var data = null;
+
     try {
         result = service.setThrowOnError().call(JSON.stringify(params));
     } catch (error) {
@@ -119,7 +120,7 @@ function callJsonService(title, service, params) {
             try {
                 data = JSON.parse(result.object.response);
                 statusItem.addDetail('object', data);
-            } catch (error) {
+            } catch (parseError) { // eslint-disable-line no-unused-vars
                 // response is marked as json, but it is not
                 statusItem.setStatus(Status.ERROR);
                 logger.error('JSON.parse error. Method: {0}. String: {1}', title, result.object.response);
