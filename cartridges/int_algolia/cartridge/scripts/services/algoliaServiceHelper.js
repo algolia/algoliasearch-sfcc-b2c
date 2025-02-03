@@ -92,14 +92,14 @@ function logServiceError(title, url, result) {
 
     switch (result.error) {
         case 400:
-            // Response is not a JSON. Write it as plain string.
+            // Response is not a JSON. Write is as plain string.
             logMessage = standardErrorMessage(title, url, result.error, result.errorMessage);
             break;
         case 500:
         case 403:
         default:
             logMessage = standardErrorMessage(title, url, result.error, result.errorMessage);
-    }
+    } // switch ends
 
     logger.error(logMessage);
 
@@ -107,16 +107,16 @@ function logServiceError(title, url, result) {
 }
 
 /**
- * Call service, parse errors, and return data or null.
- * @param {string} title - Action or method description.
- * @param {dw.svc.Service} service - Service instance to call.
- * @param {Object} params - Parameters to pass to service.call.
+ * Call service, parse errors and return data or null
+ * @param {string}         title   - Name of the action or method to describe the action performed
+ * @param {dw.svc.Service} service - Service instance to call
+ * @param {Object}         params  - Params to be passed to service.call function
  * @returns {?{
  *              response: string,
  *              headers: dw.util.Map,
  *              statusCode: number
- *          }} Response object or null on error.
- */
+ *          }}                     - Response object or `null` in case of errors
+*/
 function callService(title, service, params) {
     var result;
     var data = null;
@@ -138,9 +138,9 @@ function callService(title, service, params) {
 }
 
 /**
- * Check if response type is JSON.
- * @param {dw.svc.HTTPService} service - Service instance.
- * @returns {boolean} True if Content-Type is application/json.
+ * Check if response type is JSON
+ * @param {dw.svc.HTTPService} service - Service to obtain client from
+ * @returns {boolean}                  - boolean if `Content-Type` is `application/json`
  */
 function isResponseJSON(service) {
     var contentTypeHeader = service.getClient().getResponseHeader('Content-Type');
@@ -148,11 +148,10 @@ function isResponseJSON(service) {
 }
 
 /**
- * Call JSON service and return a dw.system.Status.
- * @param {string} title - Action description.
- * @param {dw.svc.HTTPService} service - Service instance.
- * @param {Object} params - Parameters to pass.
- * @returns {dw.system.Status} Status with response details.
+ * @param {string} title - Name of the action or method to describe the action performed
+ * @param {dw.svc.HTTPService} service - Service instance to call
+ * @param {Object} params - Params to be passed to service.call function
+ * @returns {dw.system.Status} - for success calls result data available via getDetail('object');
  */
 function callJsonService(title, service, params) {
     var Status = require('dw/system/Status');
@@ -179,7 +178,7 @@ function callJsonService(title, service, params) {
                 logger.error('JSON.parse error. Error: {0}. Method: {1}. String: {2}', error, title, result.object.response);
             }
         } else {
-            // Not JSON, handle gracefully.
+            // statusItem.setStatus(Status.ERROR);
             statusItem.addDetail('object', {});
             if (result.object && result.object.response) {
                 logger.warn('Response is not JSON. Method: {0}. Result: {1}', title, result.object.response);
