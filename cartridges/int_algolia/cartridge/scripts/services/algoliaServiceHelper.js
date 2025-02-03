@@ -11,12 +11,66 @@ const Resource = require('dw/web/Resource');
 var UNEXPECTED_ERROR_CODE = '-1';
 
 /**
- * Formats standard error message string
- * @param {string} title        - Error title, place or function name
- * @param {string} url          - Url of the service endpoint
- * @param {number} error        - HTTP response code for an HTTPService
- * @param {string} errorMessage - Error Message
- * @returns {string}            - formatted message
+ * Custom helper to check if a string starts with a given prefix.
+ * @param {string} str
+ * @param {string} prefix
+ * @returns {boolean}
+ */
+function stringStartsWith(str, prefix) {
+    return str.substring(0, prefix.length) === prefix;
+}
+
+/**
+ * Custom helper to check if a string ends with a given suffix.
+ * @param {string} str
+ * @param {string} suffix
+ * @returns {boolean}
+ */
+function stringEndsWith(str, suffix) {
+    return str.substring(str.length - suffix.length) === suffix;
+}
+
+/**
+ * Determines whether the given indexPrefix matches a restricted pattern.
+ * The pattern may include a wildcard character '*' which is interpreted as:
+ *   - If '*' appears anywhere, then only the portion before the first '*' is used for matching.
+ *   - If the pattern starts with '*', then the suffix (after the '*') is used.
+ *   - Otherwise, an exact match is required.
+ *
+ * @param {string} indexPrefix
+ * @param {string} pattern
+ * @returns {boolean} True if matched.
+ */
+function matchIndexPrefix(indexPrefix, pattern) {
+    // If the restricted pattern is exactly "*", it covers any prefix.
+    if (pattern === '*') {
+        return true;
+    }
+
+    // If the pattern contains a wildcard '*'
+    if (pattern.indexOf('*') > -1) {
+        // If the pattern starts with '*', use the substring after '*' as suffix for matching.
+        if (pattern.charAt(0) === '*') {
+            var suffixPart = pattern.substring(1);
+            return stringEndsWith(indexPrefix, suffixPart);
+        }
+        // Otherwise, take the substring before the first '*' as the required prefix.
+        var starPos = pattern.indexOf('*');
+        var patternPrefix = pattern.substring(0, starPos);
+        return stringStartsWith(indexPrefix, patternPrefix);
+    }
+
+    // No wildcard: perform an exact match.
+    return indexPrefix === pattern;
+}
+
+/**
+ * Formats standard error message string.
+ * @param {string} title - Error title or function name.
+ * @param {string} url - Service endpoint URL.
+ * @param {number} error - HTTP response code.
+ * @param {string} errorMessage - Error message.
+ * @returns {string} Formatted error message.
  */
 function standardErrorMessage(title, url, error, errorMessage) {
     return stringUtils.format('Error: {0},\nUrl: {1},\nErrorCode: {2},\nMessage: {3}',
@@ -27,18 +81,18 @@ function standardErrorMessage(title, url, error, errorMessage) {
 }
 
 /**
- * Parse error message and write it to log
- * @param {string}        title  - Error title, place or function name
- * @param {string}        url    - Url of the service endpoint
- * @param {dw.svc.Result} result - result
- * @returns {null} - Null
+ * Parse error message and write it to log.
+ * @param {string} title - Error title or function name.
+ * @param {string} url - Service endpoint URL.
+ * @param {dw.svc.Result} result - Result object.
+ * @returns {null}
  */
 function logServiceError(title, url, result) {
     var logMessage = '';
 
     switch (result.error) {
         case 400:
-            // Response is not a JSON. Write is as plain string.
+            // Response is not a JSON. Write it as plain string.
             logMessage = standardErrorMessage(title, url, result.error, result.errorMessage);
             break;
         case 500:
@@ -53,15 +107,15 @@ function logServiceError(title, url, result) {
 }
 
 /**
- * Call service, parse errors and return data or null
- * @param {string}         title   - Name of the action or method to describe the action performed
- * @param {dw.svc.Service} service - Service instance to call
- * @param {Object}         params  - Params to be passed to service.call function
+ * Call service, parse errors, and return data or null.
+ * @param {string} title - Action or method description.
+ * @param {dw.svc.Service} service - Service instance to call.
+ * @param {Object} params - Parameters to pass to service.call.
  * @returns {?{
  *              response: string,
  *              headers: dw.util.Map,
  *              statusCode: number
- *          }}                     - Response object or `null` in case of errors
+ *          }} Response object or null on error.
  */
 function callService(title, service, params) {
     var result;
@@ -84,9 +138,9 @@ function callService(title, service, params) {
 }
 
 /**
- * Check if response type is JSON
- * @param {dw.svc.HTTPService} service - Service to obtain client from
- * @returns {boolean}                  - boolean if `Content-Type` is `application/json`
+ * Check if response type is JSON.
+ * @param {dw.svc.HTTPService} service - Service instance.
+ * @returns {boolean} True if Content-Type is application/json.
  */
 function isResponseJSON(service) {
     var contentTypeHeader = service.getClient().getResponseHeader('Content-Type');
@@ -94,11 +148,11 @@ function isResponseJSON(service) {
 }
 
 /**
- *
- * @param {string} title - Name of the action or method to describe the action performed
- * @param {dw.svc.HTTPService} service - Service instance to call
- * @param {Object} params - Params to be passed to service.call function
- * @returns {dw.system.Status} - for success calls result data available via getDetail('object');
+ * Call JSON service and return a dw.system.Status.
+ * @param {string} title - Action description.
+ * @param {dw.svc.HTTPService} service - Service instance.
+ * @param {Object} params - Parameters to pass.
+ * @returns {dw.system.Status} Status with response details.
  */
 function callJsonService(title, service, params) {
     var Status = require('dw/system/Status');
@@ -125,7 +179,7 @@ function callJsonService(title, service, params) {
                 logger.error('JSON.parse error. Error: {0}. Method: {1}. String: {2}', error, title, result.object.response);
             }
         } else {
-            // not JSON, handle gracefully
+            // Not JSON, handle gracefully.
             statusItem.addDetail('object', {});
             if (result.object && result.object.response) {
                 logger.warn('Response is not JSON. Method: {0}. Result: {1}', title, result.object.response);
@@ -142,34 +196,10 @@ function callJsonService(title, service, params) {
 }
 
 /**
- * Whether an indexPrefix is matched by a pattern like "*", "test*", "*dev", or exact match.
- * @param {string} indexPrefix
- * @param {string} pattern
- * @returns {boolean} - True if matched
- */
-function matchIndexPrefix(indexPrefix, pattern) {
-    // If the restricted pattern is literally "*", it covers any prefix
-    if (pattern === '*') {
-        return true;
-    }
-    // If pattern ends with "*", e.g. "test*", check if indexPrefix starts with the pattern (minus the *)
-    if (pattern.endsWith('*') && pattern.length > 1) {
-        var withoutStar = pattern.slice(0, -1);
-        return indexPrefix.startsWith(withoutStar);
-    }
-    // If pattern starts with "*", e.g. "*dev", check if indexPrefix ends with the pattern (minus the *)
-    if (pattern.startsWith('*') && pattern.length > 1) {
-        var withoutInitialStar = pattern.slice(1);
-        return indexPrefix.endsWith(withoutInitialStar);
-    }
-    // Otherwise, do exact comparison
-    return indexPrefix === pattern;
-}
-
-/**
  * Validate an Algolia API Key's ACLs and index restrictions.
  * It checks that the key has all required ACLs and, if the key is restricted to specific indices,
  * that the provided indexPrefix (or the generated default, if empty) is covered by at least one allowed pattern.
+ * This implementation follows logic similar to that used in the Crawler project.
  *
  * @param {dw.svc.Service} service
  * @param {string} applicationID
@@ -179,18 +209,18 @@ function matchIndexPrefix(indexPrefix, pattern) {
  * @returns {Object} { error: Boolean, errorMessage: String, warning: String }
  */
 function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey) {
-    // If indexPrefix is empty, use the default generated value
+    // If indexPrefix is empty, use the default generated value.
     if (!indexPrefix || indexPrefix.trim() === "") {
         var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
         indexPrefix = algoliaData.getIndexPrefix();
     }
 
-    // 1) Build the required ACL array
+    // Build the required ACL array.
     var requiredACLs = isAdminKey
         ? ['addObject', 'deleteObject', 'deleteIndex', 'settings']
         : ['search'];
 
-    // 2) Retrieve key info from Algolia using the /keys endpoint
+    // Retrieve key info from Algolia using the /keys endpoint.
     var keyResponse = service.call({
         method: 'GET',
         url: 'https://' + applicationID + '.algolia.net/1/keys/' + apiKey
@@ -206,19 +236,12 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey)
     var keyData = keyResponse.object.body;
     var actualACLs = keyData.acl || [];
 
-    // 3) Identify missing vs. excessive ACLs
-    var missingACLs = [];
-    requiredACLs.forEach(function (reqAcl) {
-        if (actualACLs.indexOf(reqAcl) === -1) {
-            missingACLs.push(reqAcl);
-        }
+    // Identify missing vs. excessive ACLs.
+    var missingACLs = requiredACLs.filter(function (reqAcl) {
+        return actualACLs.indexOf(reqAcl) === -1;
     });
-
-    var excessiveACLs = [];
-    actualACLs.forEach(function (acl) {
-        if (requiredACLs.indexOf(acl) === -1) {
-            excessiveACLs.push(acl);
-        }
+    var excessiveACLs = actualACLs.filter(function (acl) {
+        return requiredACLs.indexOf(acl) === -1;
     });
 
     if (missingACLs.length > 0) {
@@ -232,14 +255,18 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey)
         };
     }
 
-    // 4) Check index restrictions, if any
-    var restrictedIndexes = keyData.indexes || [];
-    if (restrictedIndexes.length > 0) {
-        var matchedPrefix = restrictedIndexes.some(function (pattern) {
-            return matchIndexPrefix(indexPrefix, pattern);
-        });
-
-        if (!matchedPrefix) {
+    // Check index restrictions, if any.
+    var restrictedIndexes = keyData.indexes;
+    if (restrictedIndexes && restrictedIndexes.length > 0) {
+        var match = false;
+        for (var i = 0; i < restrictedIndexes.length; i++) {
+            var pattern = restrictedIndexes[i];
+            if (matchIndexPrefix(indexPrefix, pattern)) {
+                match = true;
+                break;
+            }
+        }
+        if (!match) {
             var prefixError = Resource.msgf('algolia.error.index.restrictedprefix', 'algolia', null, indexPrefix);
             return {
                 error: true,
@@ -251,7 +278,7 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, isAdminKey)
         }
     }
 
-    // 5) Passed all checks
+    // All checks passed.
     return {
         error: false,
         errorMessage: '',
