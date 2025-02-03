@@ -61,18 +61,10 @@
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.searchkey', 'algolia', null)}" encoding="jshtml" />
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
-                        <div class="tooltip">
-                            <isprint value="${Resource.msg('algolia.label.preference.searchkey.help', 'algolia', null)}" />
-                            <br/>
-                            <isprint value="${Resource.msg('algolia.label.preference.searchkey.mandatoryacl', 'algolia', null)}" />
-                        </div>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.searchkey.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="text"
-                               value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}"
-                               id="SearchApiKey"
-                               name="SearchApiKey"
-                               placeholder="${Resource.msg('algolia.label.util.optional.headless', 'algolia', null)}"/>
+                        <input type="text" value="${pdict.algoliaData.getPreference('SearchApiKey') ? pdict.algoliaData.getPreference('SearchApiKey') : ''}" id="SearchApiKey" name="SearchApiKey" placeholder="${Resource.msg('algolia.label.util.optional.headless', 'algolia', null)}"/>
                     </td>
                 </tr>
 
