@@ -67,7 +67,7 @@ const stepExecution = {
     getStepID: () => 'TestStepID',
 };
 
-let job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
+let job;
 
 beforeEach(() => {
     mockRecordModel = 'variant-level';

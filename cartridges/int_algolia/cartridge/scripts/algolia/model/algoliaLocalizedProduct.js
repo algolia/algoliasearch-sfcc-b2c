@@ -12,6 +12,8 @@ var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
 var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+
 
 var extendedProductAttributesConfig;
 try {
@@ -357,11 +359,12 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product) {
-        const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+        let threshold = algoliaData.getPreference('InStockThreshold');
+        let indexOutOfStock = algoliaData.getPreference('IndexOutOfStock');
 
-        let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+        let inStock = productFilter.isInStock(product, threshold);
 
-        if (!inStock && !INDEX_OUT_OF_STOCK) {
+        if (!inStock && !indexOutOfStock) {
             return undefined;
         }
 
@@ -437,7 +440,6 @@ var aggregatedValueHandlers = {
         return promotionalPrices;
     },
     variants: function(product, parameters) {
-        const productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
         if (!product.isMaster() && !product.isVariationGroup()) {
             return null;
         }
@@ -453,11 +455,14 @@ var aggregatedValueHandlers = {
                 continue;
             }
 
+            var baseModel = { in_stock: inStock };
+
             var localizedVariant = new algoliaLocalizedProduct({
                 product: variant,
                 locale: request.getLocale(),
                 attributeList: parameters.variantAttributes,
                 isVariant: true,
+                baseModel: baseModel,
             });
             variants.push(localizedVariant);
         }

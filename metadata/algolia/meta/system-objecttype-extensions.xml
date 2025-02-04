@@ -283,6 +283,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_EnableContentSearch"/>
                 <attribute attribute-id="Algolia_EnableRecommend"/>
                 <attribute attribute-id="Algolia_EnablePricingLazyLoad"/>
+                <attribute attribute-id="Algolia_IndexOutOfStock"/>
             </attribute-group>
         </group-definitions>
 
