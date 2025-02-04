@@ -29,7 +29,6 @@ function isInStock(product, threshold) {
 
     // even if one variant is in stock, we consider the product as in stock
     if (product.master || product.variationGroup) {
-        const variants = [];
         const variantsIt = product.variants.iterator();
         while (variantsIt.hasNext()) {
             let variant = variantsIt.next();
