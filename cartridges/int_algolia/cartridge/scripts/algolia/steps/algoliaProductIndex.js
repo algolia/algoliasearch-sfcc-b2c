@@ -242,6 +242,10 @@ exports.read = function(parameters, stepExecution) {
 // eslint-disable-next-line no-unused-vars
 exports.process = function(product, parameters, stepExecution) {
 
+    if (product.ID === '11736753M' || product.ID === '883360541075M' || product.ID === '883360541105M') {
+        var a = 3;
+    }
+
     jobReport.processedItems++; // counts towards the total number of products processed
 
     if (paramRecordModel === MASTER_LEVEL || attributesComputedFromBaseProduct.length > 0) {
@@ -295,8 +299,13 @@ exports.process = function(product, parameters, stepExecution) {
                         variantAttributes: variantAttributes,
                         baseModel: baseModel,
                     });
-                    processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
-                    algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedMaster, indexName));
+
+                    if (!INDEX_OUT_OF_STOCK && (localizedMaster && localizedMaster.variants && (localizedMaster.variants.length === 0))) {
+                        continue;
+                    } else {
+                        processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedMaster, indexName));
+                    }
                 }
             }
 

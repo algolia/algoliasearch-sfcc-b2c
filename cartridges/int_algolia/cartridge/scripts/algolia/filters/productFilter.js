@@ -27,10 +27,23 @@ function isInStock(product, threshold) {
         return false;
     }
 
-    // if the master is in stock, then we assume all variants are in stock - Threshold is not applied
-    // Otherwise, we need to check each variants stock status and it is so complex and will increase job time
+    // even if one variant is in stock, we consider the product as in stock
     if (product.master || product.variationGroup) {
-        return availabilityModel.availabilityStatus === 'IN_STOCK';
+        const variants = [];
+        const variantsIt = product.variants.iterator();
+        while (variantsIt.hasNext()) {
+            let variant = variantsIt.next();
+            let variantAvailabilityModel = variant.getAvailabilityModel();
+            if (variantAvailabilityModel) {
+                let variantInvRecord = variantAvailabilityModel.getInventoryRecord();
+                if (variantInvRecord) {
+                    let variantAtsValue = variantInvRecord.getATS().getValue();
+                    if (variantAtsValue >= threshold) {
+                        return true;
+                    }
+                }
+            }
+        }
     }
 
     var invRecord = availabilityModel.getInventoryRecord();
