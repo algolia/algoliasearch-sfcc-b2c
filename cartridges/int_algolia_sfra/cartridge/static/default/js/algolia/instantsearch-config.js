@@ -160,7 +160,7 @@ function enableInstantSearch(config) {
 
             toggleRefinementWithPanel({
                 container: '#algolia-newarrival-placeholder',
-                attribute: 'newArrival',
+                attribute: (algoliaData.recordModel === 'master-level' ? 'variants.newArrival' : 'newArrival'),
                 templates: {
                     labelText(data, { html }) {
                         return html`
