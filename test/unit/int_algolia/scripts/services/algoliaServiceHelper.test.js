@@ -169,16 +169,11 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
         // Mock algoliaData.getIndexPrefix
         jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
             return {
-                getIndexPrefix: function () {
-                    return defaultIndexPrefix;
-                },
                 getDefaultIndexPrefix: function () {
                     return defaultIndexPrefix;
                 }
             };
         }, { virtual: true });
-
-        var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
         mockService.call.mockReturnValueOnce({
             ok: true,
@@ -189,34 +184,18 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
                 }
             }
         });
-        // Empty indexPrefix should use the default indexPrefix
-        const indexPrefix = algoliaData.getDefaultIndexPrefix();
 
         const result = algoliaServiceHelper.validateAPIKey(
             mockService,
             applicationID,
             apiKey,
-            indexPrefix
+            '' // because indexPrefix is empty, it will use the default indexPrefix
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
     });
 
     it('should fail if indexPrefix is empty but "indexes": ["test*"] cannot match it', () => {
-        const defaultIndexPrefix = 'defaultPrefix';
-        jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
-            return {
-                getIndexPrefix: function () {
-                    return defaultIndexPrefix;
-                },
-                getDefaultIndexPrefix: function () {
-                    return defaultIndexPrefix;
-                }
-            };
-        }, { virtual: true });
-
-        var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
@@ -227,14 +206,11 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             }
         });
 
-        // Empty indexPrefix should use the default indexPrefix
-        const indexPrefix = algoliaData.getDefaultIndexPrefix();
-
         const result = algoliaServiceHelper.validateAPIKey(
             mockService,
             applicationID,
             apiKey,
-            indexPrefix
+            indexPrefix // because indexPrefix is empty, it will use the default indexPrefix
         );
         expect(result.error).toBe(true);
         expect(result.errorMessage).toMatch(/MSGF:algolia.error.index.restrictedprefix/);
