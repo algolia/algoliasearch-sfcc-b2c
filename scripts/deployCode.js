@@ -4,7 +4,7 @@ const sfcc = require('sfcc-ci');
 const authenticate = require('./auth');
 const path = require('path');
 
-(async () => {
+async function deployCode() {
     try {
         const token = await authenticate();
 
@@ -41,6 +41,15 @@ const path = require('path');
         console.log('Code deployment and activation completed successfully.');
     } catch (error) {
         console.error('Deployment error:', error);
-        process.exit(1);
+        throw error;
     }
-})();
+}
+
+module.exports = deployCode;
+
+if (require.main === module) {
+    deployCode().catch((error) => {
+        console.error('Error when running directly:', error);
+        process.exit(1);
+    });
+}
