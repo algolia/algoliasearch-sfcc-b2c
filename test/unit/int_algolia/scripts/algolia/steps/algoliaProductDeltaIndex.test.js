@@ -109,6 +109,18 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot();
     });
 
+    test('master-level indexing', () => {
+        mockRecordModel = 'master-level';
+        job.beforeStep(parameters, stepExecution);
+        expect(mockSetJobInfo).toHaveBeenCalledWith({
+            jobID: 'TestJobID',
+            stepID: 'TestStepID',
+            indexingMethod: 'fullRecordUpdate'
+        });
+        var algoliaOperations = job.process({productID: '25592581M', available: true});
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+
     test('variant-level indexing with IndexOutOfStock=false and product is out of stock', () => {
         mockRecordModel = 'variant-level';
         mockIndexOutOfStock = true;
