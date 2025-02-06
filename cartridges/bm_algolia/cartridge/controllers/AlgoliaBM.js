@@ -5,7 +5,6 @@ var ISML = require('dw/template/ISML');
 var URLUtils = require('dw/web/URLUtils');
 var Logger = require('dw/system/Logger');
 var Resource = require('dw/web/Resource');
-var Site = require('dw/system/Site');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
@@ -40,9 +39,6 @@ function handleSettings() {
     var adminValidation = {};
     var searchValidation = {};
 
-    var currentIndexPrefix = algoliaData.getPreference('IndexPrefix');
-    var isIndexPrefixChanged = currentIndexPrefix !== indexPrefix;
-
     try {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
         var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
@@ -52,28 +48,26 @@ function handleSettings() {
         // If the user typed an empty prefix, the cartridge logic eventually
         // uses the default <hostname>__<siteID>, so we should validate *that* scenario:
         var typedPrefix = indexPrefix.trim();
-        var finalIndexPrefix = typedPrefix || (algoliaData.getInstanceHostName() + '__' + Site.getCurrent().getID());
+        var finalIndexPrefix = typedPrefix || algoliaData.getDefaultIndexPrefix();
 
         // 1) Validate Admin API key - If user left admin key blank and prefix didn't change, skip check.
-        if (adminApikey || isIndexPrefixChanged) {
-            var serviceAdmin = algoliaIndexingService.getService({
-                jobID: 'API_KEY_VALIDATION_ADMIN',
-                stepID: 'validatePermissions',
-                applicationID: applicationID,
-                adminApikey: adminApikey
-            });
+        var serviceAdmin = algoliaIndexingService.getService({
+            jobID: 'API_KEY_VALIDATION_ADMIN',
+            stepID: 'validatePermissions',
+            applicationID: applicationID,
+            adminApikey: adminApikey
+        });
 
-            adminValidation = algoliaServiceHelper.validateAPIKey(
-                serviceAdmin,
-                applicationID,
-                adminApikey,
-                finalIndexPrefix
-            );
+        adminValidation = algoliaServiceHelper.validateAPIKey(
+            serviceAdmin,
+            applicationID,
+            adminApikey,
+            finalIndexPrefix
+        );
 
-            if (adminValidation.error) {
-                showDashboardWithMessages(adminValidation, searchValidation);
-                return;
-            }
+        if (adminValidation.error) {
+            showDashboardWithMessages(adminValidation, searchValidation);
+            return;
         }
 
         // If we get here, both checks are fine or not applicable. Save settings:

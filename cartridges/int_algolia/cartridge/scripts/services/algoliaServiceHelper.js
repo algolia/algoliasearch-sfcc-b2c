@@ -155,11 +155,7 @@ function callJsonService(title, service, params) {
  * @returns {Object} An object with properties { error: Boolean, errorMessage: String, warning: String }.
  */
 function validateAPIKey(service, applicationID, apiKey, indexPrefix) {
-    // Use default indexPrefix if none is provided.
-    if (!indexPrefix || indexPrefix.trim() === "") {
-        var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-        indexPrefix = algoliaData.getIndexPrefix();
-    }
+
     // Define the required ACLs.
     var requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
 

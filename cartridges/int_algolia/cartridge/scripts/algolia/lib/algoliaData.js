@@ -240,8 +240,16 @@ function getIndexPrefix() {
     if (!empty(indexPrefix)) {
         return indexPrefix.trim();
     } else {
-        return getInstanceHostName() + '__' + currentSite.getID();
+        return getDefaultIndexPrefix();
     }
+}
+
+/**
+ * Get default index prefix
+ * @returns {string} default index prefix
+ */
+function getDefaultIndexPrefix() {
+    return getInstanceHostName() + '__' + currentSite.getID();
 }
 
 /**
@@ -253,8 +261,8 @@ function getIndexPrefix() {
  * @param {string} prefix optional: index prefix
  * @returns {string} index name
  */
-function calculateIndexName(type, locale, prefix) {
-    return (prefix || getIndexPrefix()) + '__' + type + '__' + (locale || request.getLocale());
+function calculateIndexName(type, locale) {
+    return (getIndexPrefix()) + '__' + type + '__' + (locale || request.getLocale());
 }
 
 /**
@@ -351,4 +359,5 @@ module.exports = {
     csvStringToArray: csvStringToArray,
     CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR,
     clientSideData: clientSideData,
+    getDefaultIndexPrefix: getDefaultIndexPrefix
 };
