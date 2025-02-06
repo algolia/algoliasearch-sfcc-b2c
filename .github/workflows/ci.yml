@@ -46,15 +46,6 @@ jobs:
           npm run compile:js
           npm run compile:scss
 
-      - name: Create Code Version Directory
-        run: mkdir $CODE_VERSION
-
-      - name: Copy Cartridges
-        run: cp -R cartridges/* $CODE_VERSION/
-
-      - name: Package Code
-        run: zip -r $CODE_VERSION.zip $CODE_VERSION
-
   unit-tests-and-lints:
     runs-on: ubuntu-latest
     steps:

@@ -25,10 +25,21 @@ const archiver = require('archiver');
         fs.mkdirSync(codeVersion);
     }
 
-    // Copy cartridges folder into the code version folder
-    // On Unix-based systems, you could also do a cp -R, but let's do it via Node for clarity:
-    // If you're on Node 16+, you can use fs.cp, else use fallback:
-    copyDirectoryRecursive('cartridges', codeVersion);
+    // Copy the contents of the "cartridges" folder directly into the codeVersion directory
+    var srcDir = 'cartridges';
+    if (!fs.existsSync(srcDir)) {
+        throw new Error('Source directory does not exist: ' + srcDir);
+    }
+
+    // Copy the contents of the "cartridges" folder directly into the codeVersion directory
+    var entries = fs.readdirSync(srcDir, { withFileTypes: true });
+    for (var i = 0; i < entries.length; i++) {
+        var entry = entries[i];
+        var srcPath = path.join(srcDir, entry.name);
+        var destPath = path.join(codeVersion, entry.name);
+        // fs.cpSync handles both files and directories when using { recursive: true }.
+        fs.cpSync(srcPath, destPath, { recursive: true });
+    }
 
     // Zip up the directory
     const zipFileName = `${codeVersion}.zip`;
@@ -38,33 +49,6 @@ const archiver = require('archiver');
     console.log('Code preparation completed.');
 })();
 
-/**
- * Recursively copies the contents of srcDir into destDir.
- */
-function copyDirectoryRecursive(srcDir, destDir) {
-    if (!fs.existsSync(srcDir)) {
-        throw new Error(`Source directory does not exist: ${srcDir}`);
-    }
-    if (!fs.existsSync(destDir)) {
-        fs.mkdirSync(destDir, { recursive: true });
-    }
-
-    const entries = fs.readdirSync(srcDir, { withFileTypes: true });
-    entries.forEach(entry => {
-        const srcPath = path.join(srcDir, entry.name);
-        const destPath = path.join(destDir, entry.name);
-        if (entry.isDirectory()) {
-            fs.mkdirSync(destPath, { recursive: true });
-            copyDirectoryRecursive(srcPath, destPath);
-        } else {
-            fs.copyFileSync(srcPath, destPath);
-        }
-    });
-}
-
-/**
- * Creates a zip archive of the given directory as outputFile.
- */
 function zipDirectory(directory, outputFile) {
     const output = fs.createWriteStream(outputFile);
     const archive = archiver('zip', { zlib: { level: 9 } });

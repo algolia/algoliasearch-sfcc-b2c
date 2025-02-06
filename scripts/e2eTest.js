@@ -139,7 +139,7 @@ async function runVariationIndexTests() {
     // We can specify more advanced config if needed:
     const config = {
         runInBand: true,        // run tests sequentially
-        testPathPattern: ['test/e2e/variation_index.test.js']
+        testPathPattern: ['test/e2e/algolia_index.test.js']
     };
     const { results } = await runCLI(config, [process.cwd()]);
     if (results.numFailedTests || results.numFailedTestSuites) {
