@@ -37,7 +37,6 @@ function handleSettings() {
     var indexPrefix = params.IndexPrefix.value || '';
 
     var adminValidation = {};
-    var searchValidation = {};
 
     try {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
@@ -66,7 +65,7 @@ function handleSettings() {
         );
 
         if (adminValidation.error) {
-            showDashboardWithMessages(adminValidation, searchValidation);
+            showDashboardWithMessages(adminValidation);
             return;
         }
 
@@ -88,17 +87,17 @@ function handleSettings() {
 
     } catch (error) {
         Logger.error(error);
-        showDashboardWithMessages(adminValidation, searchValidation, error.message);
+        showDashboardWithMessages(adminValidation, error.message);
         return;
     }
 
-    if (adminValidation.error || searchValidation.error) {
-        showDashboardWithMessages(adminValidation, searchValidation, '');
+    if (adminValidation.error) {
+        showDashboardWithMessages(adminValidation, '');
         return;
     }
 
-    if (adminValidation.warning || searchValidation.warning) {
-        showDashboardWithMessages(adminValidation, searchValidation, '');
+    if (adminValidation.warning) {
+        showDashboardWithMessages(adminValidation, '');
     } else {
         start();
     }
@@ -107,18 +106,15 @@ function handleSettings() {
 /**
  * Helper to re-render the dashboard with an error message
  * @param {Object} adminValidation   admin key check results
- * @param {Object} searchValidation  search key check results
  * @param {string} errorMessage      optional error message
  */
-function showDashboardWithMessages(adminValidation, searchValidation, errorMessage) {
+function showDashboardWithMessages(adminValidation, errorMessage) {
     ISML.renderTemplate('algoliabm/dashboard/index', {
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData,
         latestReports: BMHelper.getLatestCOReportsByJob(),
         adminErrorMessage: adminValidation.errorMessage,
         adminWarningMessage: adminValidation.warning,
-        searchErrorMessage: searchValidation.errorMessage,
-        searchWarningMessage: searchValidation.warning,
         errorMessage: errorMessage
     });
 }
