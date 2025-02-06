@@ -52,5 +52,4 @@ function getService(jobInfo) {
     return indexingService;
 }
 
-
 module.exports.getService = getService;
