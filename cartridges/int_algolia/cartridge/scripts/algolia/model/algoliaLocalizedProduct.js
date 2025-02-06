@@ -359,12 +359,9 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product) {
-        let threshold = algoliaData.getPreference('InStockThreshold');
-        let indexOutOfStock = algoliaData.getPreference('IndexOutOfStock');
+        let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
 
-        let inStock = productFilter.isInStock(product, threshold);
-
-        if (!inStock && !indexOutOfStock) {
+        if (!inStock && !INDEX_OUT_OF_STOCK) {
             return undefined;
         }
 

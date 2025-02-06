@@ -92,6 +92,18 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_IndexOutOfStock </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.indexoutofstock', 'algolia', null)}" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.indexoutofstock.help', 'algolia', null)}</div>
+                    </td>
+                    <td class="table_detail w e s">
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('IndexOutOfStock') ? "checked": ""} id="IndexOutOfStock" name="IndexOutOfStock" />
+                    </td>
+                </tr>
+
                 <iscomment> Algolia_AdditionalAttributes </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
@@ -225,18 +237,6 @@
                     </td>
                     <td class="table_detail w e s">
                         <input type="checkbox" ${pdict.algoliaData.getPreference('EnablePricingLazyLoad') ? "checked": ""} id="EnablePricingLazyLoad" name="EnablePricingLazyLoad" />
-                    </td>
-                </tr>
-
-                <iscomment> Algolia_IndexOutOfStock </iscomment>
-                <tr>
-                    <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.indexoutofstock', 'algolia', null)}" />
-                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
-                        <div class="tooltip">${Resource.msg('algolia.label.preference.indexoutofstock.help', 'algolia', null)}</div>
-                    </td>
-                    <td class="table_detail w e s">
-                        <input type="checkbox" ${pdict.algoliaData.getPreference('IndexOutOfStock') ? "checked": ""} id="IndexOutOfStock" name="IndexOutOfStock" />
                     </td>
                 </tr>
 
