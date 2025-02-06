@@ -145,8 +145,7 @@ function callJsonService(title, service, params) {
 /**
  * Validates an Algolia API key’s permissions and index restrictions.
  * It retrieves key details from Algolia, then verifies that the key contains
- * all required ACLs (depending on whether it is an admin key or not) and that the
- * provided indexPrefix is covered by one of the allowed index patterns.
+ * all required ACLs and that the provided indexPrefix is covered by one of the allowed index patterns.
  *
  * @param {dw.svc.Service} service - The service instance used for the API call.
  * @param {string} applicationID - The Algolia Application ID.

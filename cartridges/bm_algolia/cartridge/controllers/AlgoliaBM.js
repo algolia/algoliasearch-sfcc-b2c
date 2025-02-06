@@ -46,11 +46,11 @@ function handleSettings() {
         var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
 
         // If the user typed an empty prefix, the cartridge logic eventually
-        // uses the default <hostname>__<siteID>, so we should validate *that* scenario:
+        // uses the default <hostname>__<siteID>
         var typedPrefix = indexPrefix.trim();
         var finalIndexPrefix = typedPrefix || algoliaData.getDefaultIndexPrefix();
 
-        // 1) Validate Admin API key - If user left admin key blank and prefix didn't change, skip check.
+        // 1) Validate Admin API key
         var serviceAdmin = algoliaIndexingService.getService({
             jobID: 'API_KEY_VALIDATION_ADMIN',
             stepID: 'validatePermissions',
@@ -70,7 +70,7 @@ function handleSettings() {
             return;
         }
 
-        // If we get here, both checks are fine or not applicable. Save settings:
+        // If we get here, the check is fine or not applicable. Save settings:
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', applicationID);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
@@ -100,7 +100,6 @@ function handleSettings() {
     if (adminValidation.warning || searchValidation.warning) {
         showDashboardWithMessages(adminValidation, searchValidation, '');
     } else {
-        // Pure success scenario
         start();
     }
 }

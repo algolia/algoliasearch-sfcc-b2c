@@ -262,7 +262,7 @@ function getDefaultIndexPrefix() {
  * @returns {string} index name
  */
 function calculateIndexName(type, locale) {
-    return (getIndexPrefix()) + '__' + type + '__' + (locale || request.getLocale());
+    return getIndexPrefix() + '__' + type + '__' + (locale || request.getLocale());
 }
 
 /**

@@ -53,6 +53,4 @@ function getService(jobInfo) {
 }
 
 
-module.exports = {
-    getService: getService
-};
+module.exports.getService = getService;

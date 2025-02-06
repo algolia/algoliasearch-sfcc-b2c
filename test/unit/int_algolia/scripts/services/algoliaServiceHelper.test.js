@@ -189,7 +189,7 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
             mockService,
             applicationID,
             apiKey,
-            '' // because indexPrefix is empty, it will use the default indexPrefix
+            ''
         );
         expect(result.error).toBe(false);
         expect(result.errorMessage).toBe('');
