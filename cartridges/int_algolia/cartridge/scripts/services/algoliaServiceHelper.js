@@ -4,10 +4,9 @@
  * Call REST service and handle common errors
  */
 
-var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
-var stringUtils = require('dw/util/StringUtils');
-
-var UNEXPECTED_ERROR_CODE = '-1';
+const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+const Resource = require('dw/web/Resource');
+const stringUtils = require('dw/util/StringUtils');
 
 /**
  * Formats standard error message string
@@ -143,6 +142,88 @@ function callJsonService(title, service, params) {
     return callStatus;
 }
 
-module.exports.callService = callService;
-module.exports.callJsonService = callJsonService;
-module.exports.UNEXPECTED_ERROR_CODE = UNEXPECTED_ERROR_CODE;
+/**
+ * Validates an Algolia API key’s permissions and index restrictions.
+ * It retrieves key details from Algolia, then verifies that the key contains
+ * all required ACLs and that the provided indexPrefix is covered by one of the allowed index patterns.
+ *
+ * @param {dw.svc.Service} service - The service instance used for the API call.
+ * @param {string} applicationID - The Algolia Application ID.
+ * @param {string} apiKey - The API key to validate.
+ * @param {string} indexPrefix - The index prefix to validate against.
+ * @returns {Object} An object with properties { error: Boolean, errorMessage: String, warning: String }.
+ */
+function validateAPIKey(service, applicationID, apiKey, indexPrefix) {
+
+    // Define the required ACLs.
+    var requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
+
+    var response = service.call({
+        method: 'GET',
+        url: 'https://' + applicationID + '.algolia.net/1/keys/' + apiKey
+    });
+
+    if (!response.ok) {
+        return {
+            error: true,
+            errorMessage: Resource.msg('algolia.error.key.validation', 'algolia', null)
+        };
+    }
+
+    var keyData = response.object.body;
+    var actualACLs = keyData.acl || [];
+
+    // Check for missing required ACLs.
+    var missingACLs = requiredACLs.filter(function (acl) {
+        return actualACLs.indexOf(acl) === -1;
+    });
+    if (missingACLs.length > 0) {
+        return {
+            error: true,
+            errorMessage: Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '))
+        };
+    }
+
+    // Check index restrictions if any are specified.
+    var restrictedIndexes = keyData.indexes;
+    if (restrictedIndexes && restrictedIndexes.length > 0 && indexPrefix) {
+        var match = restrictedIndexes.some(function (pattern) {
+            // Check for universal wildcard
+            if (pattern === '*') {
+                return true;
+            }
+            // Polyfill for endsWith('*'): check if the last character is '*'
+            if (pattern.charAt(pattern.length - 1) === '*') {
+                var prefix = pattern.substring(0, pattern.length - 1);
+                // Polyfill for startsWith: check if indexPrefix begins with prefix
+                return indexPrefix.substring(0, prefix.length) === prefix;
+            }
+            return pattern === indexPrefix;
+        });
+        if (!match) {
+            return {
+                error: true,
+                errorMessage: Resource.msgf('algolia.error.index.restrictedprefix', 'algolia', null, indexPrefix)
+            };
+        }
+    }
+
+    // Identify any extra (excessive) ACLs.
+    var excessiveACLs = actualACLs.filter(function (acl) {
+        return requiredACLs.indexOf(acl) === -1;
+    });
+
+    return {
+        error: false,
+        errorMessage: '',
+        warning: excessiveACLs.length > 0
+            ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
+            : ''
+    };
+}
+
+module.exports = {
+    callService: callService,
+    callJsonService: callJsonService,
+    validateAPIKey: validateAPIKey
+};

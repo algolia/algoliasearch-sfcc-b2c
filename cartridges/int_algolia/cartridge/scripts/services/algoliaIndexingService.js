@@ -14,8 +14,8 @@ const version = require('*/algoliaconfig').version;
  * @returns {dw.svc.HTTPService} - HTTPService object
  */
 function getService(jobInfo) {
-    const applicationID = algoliaData.getPreference('ApplicationID');
-    const adminAPIKey = algoliaData.getPreference('AdminApiKey');
+    const applicationID = jobInfo.applicationID || algoliaData.getPreference('ApplicationID');
+    const adminAPIKey = jobInfo.adminApikey || algoliaData.getPreference('AdminApiKey');
 
     if (empty(applicationID) || empty(adminAPIKey)) {
         throw new Error('Indexing service: Missing credentials');
