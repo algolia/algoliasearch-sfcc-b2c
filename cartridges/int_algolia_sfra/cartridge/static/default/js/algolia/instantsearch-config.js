@@ -160,7 +160,7 @@ function enableInstantSearch(config) {
 
             toggleRefinementWithPanel({
                 container: '#algolia-newarrival-placeholder',
-                attribute: (algoliaData.recordModel === 'master-level' ? 'variants.newArrival' : 'newArrival'),
+                attribute: 'newArrival',
                 templates: {
                     labelText(data, { html }) {
                         return html`
@@ -348,15 +348,6 @@ function enableInstantSearch(config) {
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
                         // originating index
                         item.__indexName = productsIndex;
-                        // url with queryID (used for analytics)
-                        if (item.url) {
-                            item.url = generateProductUrl({
-                                objectID: item.objectID,
-                                productUrl: item.url,
-                                queryID: item.__queryID,
-                                indexName: item.__indexName,
-                            });
-                        }
 
                         if (item.colorVariations) {
                             // Display the swatches only if at least one item has some colorVariations
@@ -424,8 +415,6 @@ function enableInstantSearch(config) {
 
                                 if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
                                     item.price = selectedVariant.price[algoliaData.currencyCode];
-                                } else if (selectedVariant.price && typeof selectedVariant.price === 'number') {
-                                    item.price = selectedVariant.price;
                                 }
 
                                 item.url = selectedVariant.url;
@@ -570,8 +559,8 @@ function enableInstantSearch(config) {
         return instantsearch.widgets.panel({
             hidden: function(options) {
                 var facets = [].concat(options.results.disjunctiveFacets, options.results.hierarchicalFacets)
-                var facet = facets.find(function(facet) { return facet.name === attribute }); // eslint-disable-line no-shadow
-                var facetExists = !!facet;
+                var attributeFacet = facets.find(function(facet) { return facet.name === attribute });
+                var facetExists = attributeFacet && attributeFacet.data;
                 return !facetExists; // hides panel if not facets selectable
             },
             templates: {
@@ -730,22 +719,6 @@ function getPriceHtml(product) {
 }
 
 /**
- * Build a product URL with Algolia query parameters
- * @param {string} objectID objectID
- * @param {string} productUrl url of the product
- * @param {string} queryID queryID
- * @param {string} indexName indexName
- * @return {string} Final URL of the product
- */
-function generateProductUrl({ objectID, productUrl, queryID, indexName }) {
-    const url = new URL(productUrl, window.location.origin);
-    url.searchParams.append('queryID', queryID);
-    url.searchParams.append('objectID', objectID);
-    url.searchParams.append('indexName', indexName);
-    return url.href;
-}
-
-/**
  * Determine final display price, strikeout price, and calloutMsg for an item
  * @param {Object} item The item object
  * @param {Object} algoliaData The Algolia data configuration
@@ -758,14 +731,13 @@ function determinePrices(item, algoliaData, activeCustomerPromos) {
     let calloutMsg = '';
 
     if (item.pricebooks && item.pricebooks[algoliaData.currencyCode]) {
-        const { computedPrice } = applyPricebooks(item, algoliaData);
-        if (computedPrice !== null) {
-            if (computedPrice < displayPrice) {
-                strikeoutPrice = displayPrice; 
-                displayPrice = computedPrice; 
-            } else if (computedPrice > displayPrice) {
-                // If pricebooks show a higher original price
-                strikeoutPrice = computedPrice;
+        const strikeoutPriceFromPricebook = getPricebookStrikeoutPrice(item, algoliaData);
+        if (strikeoutPriceFromPricebook !== null) {
+            if (strikeoutPriceFromPricebook < displayPrice) {
+                strikeoutPrice = displayPrice;
+                displayPrice = strikeoutPriceFromPricebook;
+            } else if (strikeoutPriceFromPricebook > displayPrice) {
+                strikeoutPrice = strikeoutPriceFromPricebook;
             }
         }
     }
@@ -780,11 +752,8 @@ function determinePrices(item, algoliaData, activeCustomerPromos) {
         if (promotionalPriceFromPromos < displayPrice) {
             displayPrice = promotionalPriceFromPromos;
             calloutMsg = msg;
+            strikeoutPrice = item.price > displayPrice ? item.price : null;
         }
-    }
-
-    if (!strikeoutPrice) {
-        strikeoutPrice = item.price > displayPrice ? item.price : null;
     }
 
     return { displayPrice, strikeoutPrice, calloutMsg };
@@ -814,14 +783,14 @@ function applyPromotions(item, algoliaData, activeCustomerPromos) {
 }
 
 /**
- * Apply pricebooks to adjust prices if no promotional price was found
- * Only consider pricebooks that are currently online
- * @param {Object} item The item
- * @param {Object} algoliaData The Algolia data config
- * @returns {Object} { computedPrice, computedStrikeout }
+ * Returnsthe pricebook's strikeout price (if available).
+ * @param {Object} item 
+ * @param {Object} algoliaData 
+ * @returns {number|null} The highest pricebook price if it's greater than item.price, otherwise null.
  */
-function applyPricebooks(item, algoliaData) {
-    const validPricebooks = item.pricebooks[algoliaData.currencyCode].filter(pricebook => {
+function getPricebookStrikeoutPrice(item, algoliaData) {
+    // 1. Filter pricebooks (only those that are currently online)
+    const validPricebooks = (item.pricebooks[algoliaData.currencyCode] || []).filter((pricebook) => {
         if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
             return false;
         }
@@ -831,20 +800,21 @@ function applyPricebooks(item, algoliaData) {
         return true;
     });
 
+    // 2. If there are no valid pricebooks, return null
     if (validPricebooks.length === 0) {
-        return { computedPrice: null, computedStrikeout: null };
+        return null;
     }
 
-    const prices = validPricebooks.map(pricebook => pricebook.price);
-    const maxPrice = prices.reduce((acc, currentValue) => Math.max(acc, currentValue), -Infinity);
-    const minPrice = prices.reduce((acc, currentValue) => Math.min(acc, currentValue), Infinity);
+    // 3. Find the maximum price
+    const maxPrice = validPricebooks.reduce((acc, pb) => {
+        return Math.max(acc, pb.price);
+    }, -Infinity);
 
+    // 4. If maxPrice is greater than item.price, then the strikeout price is maxPrice
     if (maxPrice > item.price) {
-        return { computedPrice: maxPrice, computedStrikeout: item.price };
-    }
-    if (minPrice < item.price) {
-        return { computedPrice: minPrice, computedStrikeout: item.price };
+        return maxPrice;
     }
 
-    return { computedPrice: null, computedStrikeout: null };
+    // 5. Otherwise, there is no price
+    return null;
 }
