@@ -511,7 +511,6 @@ describe('algoliaLocalizedProduct overriding custom attributes', function () {
         expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
     });
 });
-// test/unit/int_algolia/scripts/algolia/filters/productFilter.test.js
 describe('productFilter.isIncludeOutOfStock', () => {
     let productFilter;
     const AlgoliaLocalizedProductModel = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');

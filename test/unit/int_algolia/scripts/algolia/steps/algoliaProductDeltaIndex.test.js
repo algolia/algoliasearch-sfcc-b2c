@@ -71,8 +71,8 @@ let job;
 
 beforeEach(() => {
     mockRecordModel = 'variant-level';
-    mockIndexOutOfStock = false;
-    mockInStockThreshold = 0;
+    mockIndexOutOfStock = true;
+    mockInStockThreshold = 5;
     mockLocalesForIndexing = [];
     job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
 });
@@ -111,7 +111,7 @@ describe('process', () => {
 
     test('variant-level indexing with IndexOutOfStock=false and product is out of stock', () => {
         mockRecordModel = 'variant-level';
-        mockIndexOutOfStock = false;
+        mockIndexOutOfStock = true;
         mockInStockThreshold = 10;
         job.beforeStep(parameters, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({

@@ -50,8 +50,6 @@ function isInStock(product, threshold) {
     return atsValue >= threshold;
 }
 
-
-
 module.exports = {
     isInStock: isInStock,
     isInclude: isInclude,
