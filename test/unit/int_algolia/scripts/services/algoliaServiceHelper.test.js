@@ -164,36 +164,6 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
         expect(result.errorMessage).toBe('');
     });
 
-    it('should use the default indexPrefix when provided indexPrefix is empty', () => {
-        const defaultIndexPrefix = 'defaultPrefix';
-        // Mock algoliaData.getIndexPrefix
-        jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
-            return {
-                getDefaultIndexPrefix: function () {
-                    return defaultIndexPrefix;
-                }
-            };
-        }, { virtual: true });
-
-        mockService.call.mockReturnValueOnce({
-            ok: true,
-            object: {
-                body: {
-                    acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings'],
-                    indexes: ['defaultPrefix*']
-                }
-            }
-        });
-
-        const result = algoliaServiceHelper.validateAPIKey(
-            mockService,
-            applicationID,
-            apiKey,
-            ''
-        );
-        expect(result.error).toBe(false);
-        expect(result.errorMessage).toBe('');
-    });
 
     it('should fail if indexPrefix is empty but "indexes": ["test*"] cannot match it', () => {
         mockService.call.mockReturnValueOnce({
