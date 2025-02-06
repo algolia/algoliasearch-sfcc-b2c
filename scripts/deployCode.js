@@ -45,10 +45,8 @@ async function deployCode() {
     }
 }
 
-// Export the function
 module.exports = deployCode;
 
-// If this script is run directly, execute the function
 if (require.main === module) {
     deployCode().catch((error) => {
         console.error('Error when running directly:', error);

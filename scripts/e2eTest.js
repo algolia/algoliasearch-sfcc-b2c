@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 /**
- * e2eTest.js
- * ----------
  * Orchestrates all steps in the end-to-end flow:
  * 1. Checks required environment variables
  * 2. Deploys code (already zipped and prepared by "npm run prepare:code")
@@ -82,7 +80,7 @@ async function main() {
 
     // We test two different record models:
     const recordModels = ['master-level', 'variation-level'];
-    // In your code, you map each record model to a prefix
+
     const indexPrefixes = {
         'master-level': 'basex',
         'variation-level': 'varx'
@@ -167,7 +165,6 @@ async function runCypressTests() {
     }
 }
 
-// Kick off the script
 main().catch((err) => {
     console.error('[ERROR] E2E testing error:', err);
     process.exit(1);

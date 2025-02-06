@@ -125,7 +125,6 @@ describe('Algolia Integration', () => {
                 throw new Error('Invalid SFCC product data received');
             }
 
-            // Then verify in Algolia using the v5 API
             const { results } = await client.search({
                 requests: [
                     {
@@ -135,7 +134,6 @@ describe('Algolia Integration', () => {
                 ]
             });
 
-            // Add validation for Algolia results
             if (!results?.[0]?.hits?.length) {
                 console.error('No matching products found in Algolia');
                 throw new Error('Product not found in Algolia index');

@@ -1,4 +1,3 @@
-// scripts/runSFCCJob.js
 require('dotenv').config();
 const sfcc = require('sfcc-ci');
 const authenticate = require('./auth');
@@ -107,10 +106,8 @@ async function runSFCCJob() {
     }
 }
 
-// Export the function
 module.exports = runSFCCJob;
 
-// If this script is run directly, execute the function
 if (require.main === module) {
     runSFCCJob().catch((error) => {
         console.error('Error when running directly:', error);

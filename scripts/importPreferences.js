@@ -1,4 +1,3 @@
-// scripts/importPreferences.js
 require('dotenv').config();
 const sfcc = require('sfcc-ci');
 const authenticate = require('./auth');
@@ -37,7 +36,6 @@ async function importPreferences() {
 
         console.log('Directories copied/created successfully.');
 
-        // Write your preferences.xml
         const preferencesXmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
     <custom-preferences>
@@ -54,7 +52,6 @@ async function importPreferences() {
 
         console.log('preferences.xml created successfully.');
 
-        // ZIP the entire site_import folder
         const siteArchive = path.resolve(__dirname, '../site_import.zip');
         console.log('Creating site_import.zip...');
         await new Promise((resolve, reject) => {
@@ -75,7 +72,6 @@ async function importPreferences() {
             archive.finalize();
         });
 
-        // Upload the ZIP
         console.log('Uploading site_import.zip...');
         await new Promise((resolve, reject) => {
             sfcc.instance.upload(instance, siteArchive, token, {}, (err) => {
@@ -89,7 +85,6 @@ async function importPreferences() {
             });
         });
 
-        // Trigger the import job
         console.log('Importing site preferences...');
         await new Promise((resolve, reject) => {
             sfcc.instance.import(instance, 'site_import.zip', token, (err) => {
@@ -110,10 +105,8 @@ async function importPreferences() {
     }
 }
 
-// Export the function
 module.exports = importPreferences;
 
-// If this script is run directly, execute the function
 if (require.main === module) {
     importPreferences().catch((error) => {
         console.error('Error when running directly:', error);

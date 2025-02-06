@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 /**
- * prepareCode.js
- * --------------
  * Creates a code version directory, copies cartridges, and zips them up
  * under <CODE_VERSION>.zip
  */
