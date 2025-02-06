@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Orchestrates all steps in the end-to-end flow:
  * 1. Checks required environment variables
