@@ -783,7 +783,7 @@ function applyPromotions(item, algoliaData, activeCustomerPromos) {
 }
 
 /**
- * Returnsthe pricebook's strikeout price (if available).
+ * Returns the pricebook's strikeout price (if available).
  * @param {Object} item 
  * @param {Object} algoliaData 
  * @returns {number|null} The highest pricebook price if it's greater than item.price, otherwise null.
