@@ -28,6 +28,8 @@ var extendedProductAttributesConfig;
 
 const VARIANT_LEVEL = 'variant-level';
 const MASTER_LEVEL = 'master-level';
+var ALGOLIA_IN_STOCK_THRESHOLD;
+var INDEX_OUT_OF_STOCK;
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -64,6 +66,8 @@ exports.beforeStep = function(parameters, stepExecution) {
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+    ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+    INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
@@ -270,7 +274,9 @@ exports.process = function(product, parameters, stepExecution) {
                     var records = recordsPerLocale[locale];
                     processedVariantsToSend = records.length;
                     records.forEach(function(record) {
-                        algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, record, indexName));
+                        if (INDEX_OUT_OF_STOCK || record.in_stock) {
+                            algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, record, indexName));
+                        }
                     });
                 }
             } else {
@@ -289,8 +295,13 @@ exports.process = function(product, parameters, stepExecution) {
                         variantAttributes: variantAttributes,
                         baseModel: baseModel,
                     });
-                    processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
-                    algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedMaster, indexName));
+
+                    if (!INDEX_OUT_OF_STOCK && (localizedMaster && localizedMaster.variants && (localizedMaster.variants.length === 0))) {
+                        continue;
+                    } else {
+                        processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedMaster, indexName));
+                    }
                 }
             }
 
@@ -301,6 +312,11 @@ exports.process = function(product, parameters, stepExecution) {
     }
 
     if (productFilter.isInclude(product)) {
+        const inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+        if (!inStock && !INDEX_OUT_OF_STOCK) {
+            return [];
+        }
+
         var algoliaOperations = [];
 
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
