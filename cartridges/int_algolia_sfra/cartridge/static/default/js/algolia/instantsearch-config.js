@@ -507,11 +507,6 @@ function enableInstantSearch(config) {
                 updateAllProductPrices();
             });
         }
-
-        var emptyFacetSelector = '.ais-HierarchicalMenu--noRefinement';
-        $(emptyFacetSelector).each(function () {
-            $(this).parents().eq(2).hide();
-        });
     });
 
     /**
@@ -722,7 +717,7 @@ function getPriceHtml(product) {
  * Determine final display price, strikeout price, and calloutMsg for an item
  * @param {Object} item The item object
  * @param {Object} algoliaData The Algolia data configuration
- * @param {Array} activeCustomerPromotions The list of active promotions
+ * @param {Array} activeCustomerPromos The list of active promotions
  * @returns {Object} { displayPrice, strikeoutPrice, calloutMsg }
  */
 function determinePrices(item, algoliaData, activeCustomerPromos) {
