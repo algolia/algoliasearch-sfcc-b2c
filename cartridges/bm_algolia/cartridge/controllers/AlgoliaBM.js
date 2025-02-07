@@ -49,7 +49,7 @@ function handleSettings() {
         var typedPrefix = indexPrefix.trim();
         var finalIndexPrefix = typedPrefix || algoliaData.getDefaultIndexPrefix();
 
-        // 1) Validate Admin API key
+        // 1) Validate indexing key
         var serviceAdmin = algoliaIndexingService.getService({
             jobID: 'API_KEY_VALIDATION_ADMIN',
             stepID: 'validatePermissions',
