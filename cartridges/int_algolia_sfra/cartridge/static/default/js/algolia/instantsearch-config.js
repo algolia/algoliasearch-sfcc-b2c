@@ -408,9 +408,6 @@ function enableInstantSearch(config) {
                             if (selectedVariant) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
-                                } else if (selectedVariant.promotionalPrice && typeof selectedVariant.promotionalPrice === 'number') {
-                                    // In case it's already in correct currency
-                                    item.promotionalPrice = selectedVariant.promotionalPrice;
                                 }
 
                                 if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
