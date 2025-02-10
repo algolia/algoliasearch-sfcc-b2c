@@ -21,8 +21,6 @@ const runSFCCJob = require('./runSFCCJob');
 
 // List of paths to clean up
 const cleanupPaths = [
-    'e2e-tests',
-    'e2e-tests.zip',
     'site_import.zip',
     'site_import',
     process.env.CODE_VERSION,
@@ -159,8 +157,10 @@ async function runCypressTests() {
         headless: true
     });
 
-    if (result.totalFailed > 0) {
-        throw new Error('Cypress tests failed. Please check logs above.');
+    console.log(`[INFO] Cypress run result: status=${result.status}, totalFailed=${result.totalFailed || 0}, failures=${result.failures || 0}`);
+
+    if (result.status === 'failed' || result.failures > 0 || (result.totalFailed && result.totalFailed > 0)) {
+        throw new Error(`Cypress tests failed with status: ${result.status}, failures: ${result.failures}, message: ${result.message}`);
     }
 }
 

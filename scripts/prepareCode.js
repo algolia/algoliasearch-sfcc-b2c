@@ -17,11 +17,6 @@ const archiver = require('archiver');
 
     console.log(`Preparing code with CODE_VERSION: ${codeVersion}`);
 
-    // Ensure the codeVersion directory does not already exist
-    if (!fs.existsSync(codeVersion)) {
-        fs.mkdirSync(codeVersion);
-    }
-
     // Copy the contents of the "cartridges" folder directly into the codeVersion directory
     var srcDir = 'cartridges';
     if (!fs.existsSync(srcDir)) {
@@ -29,14 +24,7 @@ const archiver = require('archiver');
     }
 
     // Copy the contents of the "cartridges" folder directly into the codeVersion directory
-    var entries = fs.readdirSync(srcDir, { withFileTypes: true });
-    for (var i = 0; i < entries.length; i++) {
-        var entry = entries[i];
-        var srcPath = path.join(srcDir, entry.name);
-        var destPath = path.join(codeVersion, entry.name);
-        // fs.cpSync handles both files and directories when using { recursive: true }.
-        fs.cpSync(srcPath, destPath, { recursive: true });
-    }
+    fs.cpSync(srcDir, codeVersion, { recursive: true });
 
     // Zip up the directory
     const zipFileName = `${codeVersion}.zip`;
