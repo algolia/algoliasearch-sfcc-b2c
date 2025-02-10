@@ -76,8 +76,6 @@
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">
                             <isprint value="${Resource.msg('algolia.label.preference.adminkey.help', 'algolia', null)}" />
-                            <br/>
-                            <isprint value="${Resource.msg('algolia.label.preference.adminkey.mandatoryacl', 'algolia', null)}" />
                         </div>
                         <isif condition="${pdict.adminWarningMessage}">
                             <div class="warning-message yellow narrow">
