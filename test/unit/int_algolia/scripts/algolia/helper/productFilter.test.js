@@ -4,7 +4,6 @@ var ProductMock = require('../../../../../mocks/dw/catalog/Variant');
 
 describe('productFilter.isInStock', () => {
     var productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
-    const AlgoliaLocalizedProductModel = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
     beforeEach(() => {
         jest.resetModules();
