@@ -294,12 +294,12 @@ function enableInstantSearch(config) {
                                         </div>
                                         <div class="price">
                                             ${isPricingLazyLoad && html`<span class="price-placeholder" data-product-id="${productId}"></span>`}
+                                            ${!isPricingLazyLoad && hit.strikeoutPrice && html`
+                                                <span class="strike-through list">
+                                                    <span class="value"> ${hit.currencySymbol} ${hit.strikeoutPrice} </span>
+                                                </span>
+                                            `}
                                             ${!isPricingLazyLoad && html`
-                                                ${ (hit.displayPrice < hit.price || (hit.promotionalPrice && hit.promotionalPrice < hit.price)) && html`
-                                                    <span class="strike-through list">
-                                                         <span class="value"> ${hit.currencySymbol} ${hit.price} </span>
-                                                    </span>
-                                                `}
                                                 <span class="sales">
                                                     <span class="value">
                                                         ${hit.currencySymbol} ${hit.displayPrice}
@@ -311,7 +311,7 @@ function enableInstantSearch(config) {
                                 </div>
                             </div>
                         `;
-                    },
+                    }, 
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
@@ -332,37 +332,17 @@ function enableInstantSearch(config) {
                                 alt: item.name + ', large',
                             }
                         }
-                        // adjusted price in user currency
+
+                        // adjusted promotionalPrice in user currency
                         if (item.promotionalPrice && item.promotionalPrice[algoliaData.currencyCode] !== null) {
                             item.promotionalPrice = item.promotionalPrice[algoliaData.currencyCode]
                         }
+
                         // price in user currency
                         if (item.price && item.price[algoliaData.currencyCode] !== null) {
                             item.price = item.price[algoliaData.currencyCode]
                         }
-                        // If no promotionalPrice, use the pricebooks to display the strikeout price
-                        if (!item.promotionalPrice &&
-                            item.pricebooks &&
-                            item.pricebooks[algoliaData.currencyCode] &&
-                            item.pricebooks[algoliaData.currencyCode].length > 0
-                        ) {
-                            const prices = item.pricebooks[algoliaData.currencyCode].filter(pricebook => {
-                                if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
-                                    return false;
-                                }
-                                if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
-                                    return false;
-                                }
-                                return true;
-                            }).map(pricebook => pricebook.price);
-                            const maxPrice = prices.reduce((acc, currentValue) => {
-                                return Math.max(acc, currentValue);
-                            });
-                            if (maxPrice > item.price) {
-                                item.promotionalPrice = item.price;
-                                item.price = maxPrice;
-                            }
-                        }
+
                         // currency symbol
                         item.currencySymbol = algoliaData.currencySymbol;
                         item.quickShowUrl = algoliaData.quickViewUrlBase + '?pid=' + (item.masterID || item.objectID);
@@ -373,17 +353,14 @@ function enableInstantSearch(config) {
                             // Display the swatches only if at least one item has some colorVariations
                             displaySwatches = true;
                         }
-                        // Calculate displayPrice
-                        var { price, calloutMsg } = calculateDisplayPrice(item);
-                        item.displayPrice = price;
-                        item.calloutMsg = calloutMsg;
 
-                        // Master-level indexing
+                        // Master-level indexing: variant selection
                         if (item.variants) {
                             // 1. Find the variant matching the selected facets, or use the default variant
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
                             const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
+
                             if (colorFacets.length > 0 && sizeFacets.length > 0) {
                                 // 1.1 If both facets are selected, find the variant that match both
                                 selectedVariant = item.variants.find(variant => {
@@ -432,16 +409,29 @@ function enableInstantSearch(config) {
                                 if (selectedVariant.promotionalPrice && selectedVariant.promotionalPrice[algoliaData.currencyCode] !== null) {
                                     item.promotionalPrice = selectedVariant.promotionalPrice[algoliaData.currencyCode];
                                 }
+
                                 if (selectedVariant.price && selectedVariant.price[algoliaData.currencyCode] !== null) {
                                     item.price = selectedVariant.price[algoliaData.currencyCode];
                                 }
-                                item.url = selectedVariant.url;
-                                let { price: variantPrice, calloutMsg: variantCalloutMsg } = calculateDisplayPrice(selectedVariant);
 
-                                item.displayPrice = variantPrice;
-                                item.calloutMsg = variantCalloutMsg;
+                                item.url = selectedVariant.url;
+                                // Also apply promotions from variant if available
+                                item.promotions = selectedVariant.promotions || item.promotions;
+                                item.pricebooks = selectedVariant.pricebooks || item.pricebooks;
                             }
                         }
+
+                        if (!isPricingLazyLoad) {
+                            const { displayPrice, strikeoutPrice, calloutMsg } = determinePrices(item, algoliaData, activeCustomerPromotions);
+                            item.displayPrice = displayPrice;
+                            item.strikeoutPrice = strikeoutPrice;
+                            item.calloutMsg = calloutMsg;
+                        } else {
+                            item.displayPrice = item.price;
+                            item.strikeoutPrice = null;
+                            item.calloutMsg = '';
+                        }
+
                         return item;
                     });
                 }
@@ -535,14 +525,13 @@ function enableInstantSearch(config) {
     }
 
     /**
-     * Builds a refinement toggle with the Panel widget
+     * Builds a toggle refinement with the Panel widget
      * @param {Object} options Options object
      * @returns {Object} The Panel widget
      */
     function toggleRefinementWithPanel(options) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.toggleRefinement)(options)
     }
-
     /**
      * Builds a range input with the Panel widget
      * @param {Object} options Options object
@@ -609,29 +598,31 @@ function enableInstantSearch(config) {
                     return '';
                 }
 
+                /* eslint-disable indent */
                 return html`
                 <a onmouseover="${(e) => {
-        const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
-        const image = parent.querySelector('.tile-image');
-        const link = parent.querySelector('.image-container > a');
-        // Remove existing border effects
-        const existingSelectedSwatches = parent.querySelectorAll('.swatch-selected');
-        existingSelectedSwatches.forEach(selectedSwatch => {
-            selectedSwatch.classList.remove('swatch-selected');
-        });
-        
-        e.target.parentNode.querySelector('.swatch').classList.add("swatch-selected");
-        image.src = variantImage.dis_base_link;
-        link.href = colorVariation.variationURL;
-    }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
+                    const parent = document.querySelector(`[data-pid="${hit.objectID}"]`);
+                    const image = parent.querySelector('.tile-image');
+                    const link = parent.querySelector('.image-container > a');
+                    // Remove existing border effects
+                    const existingSelectedSwatches = parent.querySelectorAll('.swatch-selected');
+                    existingSelectedSwatches.forEach(selectedSwatch => {
+                        selectedSwatch.classList.remove('swatch-selected');
+                    });
+
+                    e.target.parentNode.querySelector('.swatch').classList.add("swatch-selected");
+                    image.src = variantImage.dis_base_link;
+                    link.href = colorVariation.variationURL;
+                }}" href="${colorVariation.variationURL}" aria-label="${swatch.title}">
                     <span>
                         <img class="swatch swatch-circle mb-1 ${colorVariation.color === hit.color ? 'swatch-selected' : ''}"
                              data-index="0.0" style="background-image: url(${swatch.dis_base_link})"
                              src="${swatch.dis_base_link}" alt="${swatch.alt}"
                         />
                     </span>
-                </a>
-            `;
+                    </a>
+                `;
+                /* eslint-enable indent */
             });
         }
     }
@@ -650,7 +641,7 @@ function fetchPromoPrices(productIDs) {
 
     // Filter out already fetched product IDs
     const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
-
+    
     if (unfetchedProductIDs.length === 0) return Promise.resolve();
 
     return $.ajax({
@@ -720,50 +711,102 @@ function getPriceHtml(product) {
 }
 
 /**
- * Calculate the display price for an item when lazy loading pricing is disabled
+ * Determine final display price, strikeout price, and calloutMsg for an item
  * @param {Object} item The item object
- * @return {number} The calculated sales price
+ * @param {Object} algoliaData The Algolia data configuration
+ * @param {Array} activeCustomerPromos The list of active promotions
+ * @returns {Object} { displayPrice, strikeoutPrice, calloutMsg }
  */
-function calculateDisplayPrice(item) {
-    var promotions;
-    var calloutMsg = '';
-    var variant;
+function determinePrices(item, algoliaData, activeCustomerPromos) {
+    let displayPrice = item.price;
+    let strikeoutPrice = null;
+    let calloutMsg = '';
 
-    if (algoliaData.recordModel === 'master-level' && item.variants) {
-        promotions = item.variants.length > 0 ? item.variants[0].promotions : item.promotions;
-        variant = item.variants.length > 0 ? item.variants[0] : item;
-    } else {
-        promotions = item.promotions;
-        variant = item;
-    }
-
-    if (promotions && promotions[algoliaData.currencyCode]) {
-        var productPromos = promotions[algoliaData.currencyCode];
-        var minPrice = algoliaData.recordModel === 'master-level' ? (variant.price[algoliaData.currencyCode] ? variant.price[algoliaData.currencyCode] : variant.price) : item.price;
-        for (var i = 0; i < activeCustomerPromotions.length; i++) {
-            for (var j = 0; j < productPromos.length; j++) {
-                if (productPromos[j].promoId === activeCustomerPromotions[i].id && productPromos[j].price < minPrice) {
-                    minPrice = productPromos[j].price;
-                    calloutMsg = activeCustomerPromotions[i].calloutMsg;
-                }
+    if (item.pricebooks && item.pricebooks[algoliaData.currencyCode]) {
+        const strikeoutPriceFromPricebook = getPricebookStrikeoutPrice(item, algoliaData);
+        if (strikeoutPriceFromPricebook !== null) {
+            if (strikeoutPriceFromPricebook < displayPrice) {
+                strikeoutPrice = displayPrice;
+                displayPrice = strikeoutPriceFromPricebook;
+            } else if (strikeoutPriceFromPricebook > displayPrice) {
+                strikeoutPrice = strikeoutPriceFromPricebook;
             }
         }
+    }
 
-        return {
-            price: minPrice,
-            calloutMsg: calloutMsg,
+    if (item.promotionalPrice && item.promotionalPrice < item.price) {
+        strikeoutPrice = item.price;
+        displayPrice = item.promotionalPrice;
+    }
+
+    if (item.promotions && item.promotions[algoliaData.currencyCode]) {
+        const { promotionalPriceFromPromos, msg } = applyPromotions(item, algoliaData, activeCustomerPromos);
+        if (promotionalPriceFromPromos < displayPrice) {
+            displayPrice = promotionalPriceFromPromos;
+            calloutMsg = msg;
+            strikeoutPrice = item.price > displayPrice ? item.price : null;
         }
     }
 
-    if (variant.promotionalPrice) {
-        return {
-            price: variant.promotionalPrice[algoliaData.currencyCode] || variant.promotionalPrice,
-            calloutMsg: '',
+    return { displayPrice, strikeoutPrice, calloutMsg };
+}
+
+/**
+ * Apply promotions to find a lower promotional price if available
+ * @param {Object} item The item
+ * @param {Object} algoliaData The Algolia data config
+ * @param {Array} activeCustomerPromotions Active promotions
+ * @returns {Object} { promotionalPriceFromPromos, msg }
+ */
+function applyPromotions(item, algoliaData, activeCustomerPromos) {
+    let promotionalPriceFromPromos = item.price;
+    let msg = '';
+
+    const productPromos = item.promotions[algoliaData.currencyCode];
+    for (var i = 0; i < activeCustomerPromos.length; i++) {
+        for (var j = 0; j < productPromos.length; j++) {
+            if (productPromos[j].promoId === activeCustomerPromos[i].id && productPromos[j].price < promotionalPriceFromPromos) {
+                promotionalPriceFromPromos = productPromos[j].price;
+                msg = activeCustomerPromos[i].calloutMsg;
+            }
         }
     }
+    return { promotionalPriceFromPromos, msg };
+}
 
-    return {
-        price: variant.price[algoliaData.currencyCode] || variant.price,
-        calloutMsg: '',
+/**
+ * Returns the pricebook's strikeout price (if available).
+ * @param {Object} item 
+ * @param {Object} algoliaData 
+ * @returns {number|null} The highest pricebook price if it's greater than item.price, otherwise null.
+ */
+function getPricebookStrikeoutPrice(item, algoliaData) {
+    // 1. Filter pricebooks (only those that are currently online)
+    const validPricebooks = (item.pricebooks[algoliaData.currencyCode] || []).filter((pricebook) => {
+        if (pricebook.onlineFrom && pricebook.onlineFrom > Date.now()) {
+            return false;
+        }
+        if (pricebook.onlineTo && pricebook.onlineTo < Date.now()) {
+            return false;
+        }
+        return true;
+    });
+
+    // 2. If there are no valid pricebooks, return null
+    if (validPricebooks.length === 0) {
+        return null;
     }
+
+    // 3. Find the maximum price
+    const maxPrice = validPricebooks.reduce((acc, pb) => {
+        return Math.max(acc, pb.price);
+    }, -Infinity);
+
+    // 4. If maxPrice is greater than item.price, then the strikeout price is maxPrice
+    if (maxPrice > item.price) {
+        return maxPrice;
+    }
+
+    // 5. Otherwise, there is no price
+    return null;
 }
