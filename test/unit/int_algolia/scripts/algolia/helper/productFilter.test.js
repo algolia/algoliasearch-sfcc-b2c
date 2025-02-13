@@ -2,7 +2,7 @@
 
 var ProductMock = require('../../../../../mocks/dw/catalog/Variant');
 
-describe('productFilter.isIncludeOutOfStock', () => {
+describe('productFilter.isInStock', () => {
     var productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
     const AlgoliaLocalizedProductModel = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
@@ -10,52 +10,33 @@ describe('productFilter.isIncludeOutOfStock', () => {
         jest.resetModules();
     });
 
-    test('skips out-of-stock if IndexOutOfStock = false', () => {
-        jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
-            getSetOfArray: () => [],
-        }), { virtual: true });
+    test('Check if product is in stock', () => {
+        const inStockProduct = new ProductMock();
 
-
-        const product = new ProductMock();
-        const inStockVariant =  new AlgoliaLocalizedProductModel({ 
-            product: product,
-            locale: 'default',
-            attributeList: ['custom.displaySize']
-        });
-
-        inStockVariant.getAvailabilityModel = () => {
+        inStockProduct.getAvailabilityModel = () => {
             return {
                 getInventoryRecord: () => {
                     return { getATS: () => { return { getValue: () => { return 5; } } } };
                 },
             };
         }
-        const inStock = productFilter.isInStock(inStockVariant, 1);
+        const inStock = productFilter.isInStock(inStockProduct, 1);
 
         expect(inStock).toBe(true);
     });
 
-    test('includes out-of-stock if IndexOutOfStock = true', () => {
-        jest.doMock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
-            getSetOfArray: () => [],
-        }), { virtual: true });
-
+    test('Check if product is out of stock', () => {
         productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
-        const product = new ProductMock();
-        const outOfStockVariant =  new AlgoliaLocalizedProductModel({ 
-            product: product,
-            locale: 'default',
-            attributeList: ['custom.displaySize']
-        });
-        outOfStockVariant.getAvailabilityModel = () => {
+        const outOfStockProduct = new ProductMock();
+        outOfStockProduct.getAvailabilityModel = () => {
             return {
                 getInventoryRecord: () => {
                     return { getATS: () => { return { getValue: () => { return 0; } } } };
                 },
             };
         }
-        const inStock = productFilter.isInStock(outOfStockVariant, 1);
+        const inStock = productFilter.isInStock(outOfStockProduct, 1);
 
         expect(inStock).toBe(false);
     });
