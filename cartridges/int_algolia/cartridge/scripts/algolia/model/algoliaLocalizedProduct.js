@@ -14,7 +14,6 @@ var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
-
 var extendedProductAttributesConfig;
 try {
     extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
