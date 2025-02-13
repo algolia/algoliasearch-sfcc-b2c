@@ -12,6 +12,7 @@ var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
 var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
 var extendedProductAttributesConfig;
 try {
@@ -28,6 +29,7 @@ try {
 }
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 
 /**
  * Get the lowest promotional price for product
@@ -356,14 +358,12 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product) {
-        let availabilityModel = product.getAvailabilityModel();
+        let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
 
-        if (product.isMaster() || product.isVariationGroup()) {
-            return availabilityModel.availabilityStatus === 'IN_STOCK';
+        if (!inStock && !INDEX_OUT_OF_STOCK) {
+            return undefined;
         }
 
-        let inventoryRecord = availabilityModel.getInventoryRecord();
-        let inStock = (inventoryRecord ? inventoryRecord.getATS().getValue() >= ALGOLIA_IN_STOCK_THRESHOLD : false);
         return inStock;
     },
     image_groups: function (product) {
@@ -444,11 +444,21 @@ var aggregatedValueHandlers = {
         const variantsIt = product.variants.iterator();
         while (variantsIt.hasNext()) {
             var variant = variantsIt.next();
+
+            let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
+
+            if (!inStock && !INDEX_OUT_OF_STOCK) {
+                continue;
+            }
+
+            var baseModel = { in_stock: inStock };
+
             var localizedVariant = new algoliaLocalizedProduct({
                 product: variant,
                 locale: request.getLocale(),
                 attributeList: parameters.variantAttributes,
                 isVariant: true,
+                baseModel: baseModel,
             });
             variants.push(localizedVariant);
         }

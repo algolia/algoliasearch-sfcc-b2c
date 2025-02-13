@@ -15,6 +15,8 @@ describe('Algolia Search', () => {
 
         // Handle the cookie consent pop-up
         cy.get('.affirm').click()
+
+        cy.get('.modal-backdrop', { timeout: 4000 }).should('not.exist');
     })
 
     it('performs a search and displays results', () => {
