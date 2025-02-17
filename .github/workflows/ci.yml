@@ -143,12 +143,19 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Install Dependencies for browser
+        run: |
+          sudo apt-get install -y \
+          libnss3 \
+          libgbm1 \
+          xvfb
+
       - name: Run Cypress Tests
         uses: cypress-io/github-action@v6
         with:
           install: npm ci
-          browser: electron
-          headless: true
+          headed: false
+          browser: chrome
           config-file: cypress.config.js
         env:
           CYPRESS_SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
