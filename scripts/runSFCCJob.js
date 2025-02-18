@@ -19,7 +19,6 @@ async function runSFCCJob() {
                         console.error('Error details:', JSON.stringify(err, null, 2));
                         reject(err);
                     } else {
-                        console.log('Job started, result:', JSON.stringify(result, null, 2));
                         resolve(result);
                     }
                 });
@@ -55,8 +54,6 @@ async function runSFCCJob() {
             }
         }
 
-        console.log('Job execution object:', JSON.stringify(jobExecution, null, 2));
-
         const jobExecutionId = jobExecution?.body?.id;
         if (!jobExecutionId) {
             console.error('Job execution details:', JSON.stringify(jobExecution, null, 2));
@@ -78,14 +75,12 @@ async function runSFCCJob() {
                         console.error('Error details:', JSON.stringify(err, null, 2));
                         reject(err);
                     } else {
-                        console.log('Job status result:', JSON.stringify(result, null, 2));
                         resolve(result);
                     }
                 });
             });
 
             const execStatus = status?.status;
-            console.log(status);
             console.log(`Attempt ${attempts}: Job execution status - ${execStatus}`);
 
             if (execStatus === 'OK') {
