@@ -15,12 +15,12 @@
         "uploadCartridge": "sgmf-scripts --uploadCartridge int_algolia && sgmf-scripts --uploadCartridge int_algolia_controllers && sgmf-scripts --uploadCartridge int_algolia_sfra && sgmf-scripts --uploadCartridge algolia_sg_changes && sgmf-scripts --uploadCartridge bm_algolia",
         "watch": "sgmf-scripts --watch",
         "watch:static": "sgmf-scripts --watch static",
-        "cypress:open": "cypress open",
+        "test:frontend": "cypress run",
         "deploy:code": "node scripts/deployCode.js",
         "import:preferences": "node scripts/importPreferences.js",
         "run:sfcc-job": "node scripts/runSFCCJob.js",
-        "test:frontend": "cypress run --browser chrome --headed",
-        "test:variationindex": "jest --testPathPattern='test/e2e/variation_index.test.js'"
+        "prepare:code": "node scripts/prepareCode.js",
+        "test:e2e": "npm run compile:js && npm run compile:scss && npm run prepare:code && node scripts/e2eTest.js"
     },
     "repository": {
         "type": "git",
