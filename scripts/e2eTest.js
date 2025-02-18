@@ -159,7 +159,6 @@ async function runCypressTests() {
 
     if (result.status === 'failed' || (result.totalFailed && result.totalFailed > 0)) {
         console.log(`[INFO] Cypress run summary:
-            status: ${result.status}
             totalFailed: ${result.totalFailed ?? 0}
             totalPassed: ${result.totalPassed ?? 0}
           `);
