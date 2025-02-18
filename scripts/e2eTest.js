@@ -162,7 +162,6 @@ async function runCypressTests() {
             status: ${result.status}
             totalFailed: ${result.totalFailed ?? 0}
             totalPassed: ${result.totalPassed ?? 0}
-            runUrl: ${result.runUrl ?? 'N/A'}
           `);
         throw new Error(
           `Cypress tests failed with status: ${result.status || 'unknown'}`
