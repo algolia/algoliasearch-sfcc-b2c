@@ -157,11 +157,20 @@ async function runCypressTests() {
         headless: true
     });
 
-    console.log(`[INFO] Cypress run result: status=${result.status}, totalFailed=${result.totalFailed || 0}, failures=${result.failures || 0}`);
-
-    if (result.status === 'failed' || result.failures > 0 || (result.totalFailed && result.totalFailed > 0)) {
-        throw new Error(`Cypress tests failed with status: ${result.status}, failures: ${result.failures}, message: ${result.message}`);
+    if (result.status === 'failed' || (result.totalFailed && result.totalFailed > 0)) {
+        console.log(`[INFO] Cypress run summary:
+            status: ${result.status}
+            totalFailed: ${result.totalFailed ?? 0}
+            totalPassed: ${result.totalPassed ?? 0}
+            runUrl: ${result.runUrl ?? 'N/A'}
+          `);
+        throw new Error(
+          `Cypress tests failed with status: ${result.status || 'unknown'}`
+          + `, totalFailed: ${result.totalFailed || 0}`
+          + (result.message ? `, message: ${result.message}` : '')
+        );
     }
+    
 }
 
 main().catch((err) => {
