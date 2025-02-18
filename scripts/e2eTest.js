@@ -164,12 +164,11 @@ async function runCypressTests() {
             totalPassed: ${result.totalPassed ?? 0}
           `);
         throw new Error(
-          `Cypress tests failed with status: ${result.status || 'unknown'}`
-          + `, totalFailed: ${result.totalFailed || 0}`
-          + (result.message ? `, message: ${result.message}` : '')
+            `Cypress tests failed with status: ${result.status || 'unknown'}`
+            + `, totalFailed: ${result.totalFailed || 0}`
+            + (result.message ? `, message: ${result.message}` : '')
         );
     }
-    
 }
 
 main().catch((err) => {
