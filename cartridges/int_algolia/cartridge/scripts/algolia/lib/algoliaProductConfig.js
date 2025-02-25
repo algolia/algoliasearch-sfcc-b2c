@@ -4,7 +4,7 @@ var defaultAttributes = ['id', 'primary_category_id', 'in_stock', 'price', 'cate
 var defaultAttributes_v2 = ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'image_groups', 'url'];
 // Configurations for master-level indexing mode
 var defaultMasterAttributes_v2 = ['variants', 'defaultVariantID', 'colorVariations'];
-var defaultVariantAttributes_v2 = ['in_stock', 'price', 'color', 'size', 'url', 'storeAvailability'];
+var defaultVariantAttributes_v2 = ['in_stock', 'price', 'color', 'size', 'url'];
 
 var attributeConfig = {
     id: {
