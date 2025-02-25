@@ -4,7 +4,7 @@ var defaultAttributes = ['id', 'primary_category_id', 'in_stock', 'price', 'cate
 var defaultAttributes_v2 = ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'image_groups', 'url'];
 // Configurations for master-level indexing mode
 var defaultMasterAttributes_v2 = ['variants', 'defaultVariantID', 'colorVariations'];
-var defaultVariantAttributes_v2 = ['in_stock', 'price', 'color', 'size', 'url'];
+var defaultVariantAttributes_v2 = ['in_stock', 'price', 'color', 'size', 'url', 'storeAvailability'];
 
 var attributeConfig = {
     id: {
@@ -269,6 +269,10 @@ var attributeConfig_v2 = {
         variantAttribute: true,
     },
     url: {
+        localized: true,
+        variantAttribute: true,
+    },
+    storeAvailability: {
         localized: true,
         variantAttribute: true,
     },
