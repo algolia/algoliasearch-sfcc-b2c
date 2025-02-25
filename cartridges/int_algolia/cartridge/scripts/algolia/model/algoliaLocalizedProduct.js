@@ -47,7 +47,7 @@ if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
             var storeObject = {
                 id: store.ID,
                 storeInventory: storeInventory
-            }
+            };
             stores.push(storeObject);
         }
     }
