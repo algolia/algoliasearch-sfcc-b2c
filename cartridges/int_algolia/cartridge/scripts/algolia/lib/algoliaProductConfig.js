@@ -273,7 +273,7 @@ var attributeConfig_v2 = {
         variantAttribute: true,
     },
     storeAvailability: {
-        localized: true,
+        localized: false,
         variantAttribute: true,
     },
 };
