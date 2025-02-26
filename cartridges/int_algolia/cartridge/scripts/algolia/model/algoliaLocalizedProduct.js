@@ -30,6 +30,24 @@ try {
 
 const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
+const ATTRIBUTE_LIST = algoliaData.getSetOfArray('AdditionalAttributes');
+const stores = [];
+var SystemObjectMgr;
+
+if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
+    SystemObjectMgr = require('dw/object/SystemObjectMgr');
+    var storeIt = SystemObjectMgr.getAllSystemObjects('Store');
+    while (storeIt.hasNext()) {
+        var store = storeIt.next();
+        if (store.inventoryList) {
+            var storeObject = {
+                id: store.ID,
+                storeInventory: store.inventoryList
+            };
+            stores.push(storeObject);
+        }
+    }
+}
 
 /**
  * Get the lowest promotional price for product
@@ -466,6 +484,25 @@ var aggregatedValueHandlers = {
     },
     _tags: function(product) {
         return ['id:' + product.ID];
+    },
+    storeAvailability: function(product) {
+        var storeArray = [];
+        if (stores.length > 0) {
+            for (var i = 0; i < stores.length; i++) {
+                var storeEl = stores[i];
+                var storeElInventory = storeEl.storeInventory;
+                if (storeElInventory) {
+                    var inventoryRecord = storeElInventory.getRecord(product.ID);
+                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value > ALGOLIA_IN_STOCK_THRESHOLD) {
+                        storeArray.push(storeEl.id);
+                    }
+                }
+            }
+            if (storeArray.length > 0) {
+                return storeArray;
+            }
+        }
+        return storeArray;
     }
 }
 
