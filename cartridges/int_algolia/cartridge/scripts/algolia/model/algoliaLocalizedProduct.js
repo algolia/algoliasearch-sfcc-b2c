@@ -41,12 +41,10 @@ if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
     var storeIt = SystemObjectMgr.getAllSystemObjects('Store');
     while (storeIt.hasNext()) {
         var store = storeIt.next();
-        var storeInventoryListId = store.inventoryListID;
-        if (storeInventoryListId) {
-            var storeInventory = ProductInventoryMgr.getInventoryList(storeInventoryListId);
+        if (store.inventoryList) {
             var storeObject = {
                 id: store.ID,
-                storeInventory: storeInventory
+                storeInventory: store.inventoryList
             };
             stores.push(storeObject);
         }
