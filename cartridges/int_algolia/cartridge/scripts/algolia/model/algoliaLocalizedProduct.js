@@ -504,7 +504,7 @@ var aggregatedValueHandlers = {
                 return storeArray;
             }
         }
-        return undefined;
+        return storeArray;
     }
 }
 
