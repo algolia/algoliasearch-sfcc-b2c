@@ -33,11 +33,9 @@ const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 const ATTRIBUTE_LIST = algoliaData.getSetOfArray('AdditionalAttributes');
 const stores = [];
 var SystemObjectMgr;
-var ProductInventoryMgr;
 
 if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
     SystemObjectMgr = require('dw/object/SystemObjectMgr');
-    ProductInventoryMgr = require('dw/catalog/ProductInventoryMgr');
     var storeIt = SystemObjectMgr.getAllSystemObjects('Store');
     while (storeIt.hasNext()) {
         var store = storeIt.next();
