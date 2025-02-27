@@ -46,7 +46,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
         getSetOfArray: function (id) {
             return id === 'AdditionalAttributes'
                 ? ['url', 'UPC', 'searchable', 'variant', 'color', 'refinementColor', 'size', 'refinementSize', 'brand', 'online', 'pageDescription', 'pageKeywords',
-                    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups']
+                    'pageTitle', 'short_description', 'name', 'long_description', 'image_groups', 'storeAvailability']
                 : [];
         },
         getPreference: function (id) {
@@ -63,6 +63,77 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
 jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', () => {
     return jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/customization/productModelCustomizer');
 }, {virtual: true});
+
+// Mock for storeAvailability tests
+const originalMock = jest.fn();
+jest.mock('dw/object/SystemObjectMgr', () => {
+    return {
+        getAllSystemObjects: jest.fn().mockImplementation((objType) => {
+            if (objType === 'Store') {
+                const storeIterator = {
+                    hasNext: function() {
+                        if (!this.index) {
+                            this.index = 0;
+                        }
+                        return this.index < this.stores.length;
+                    },
+                    next: function() {
+                        const store = this.stores[this.index];
+                        this.index++;
+                        return store;
+                    },
+                    stores: [
+                        {
+                            ID: 'store1',
+                            inventoryList: {
+                                getRecord: jest.fn().mockImplementation((productId) => {
+                                    if (productId === 'product-in-stock') {
+                                        return {
+                                            ATS: { value: 10 }
+                                        };
+                                    } else if (productId === 'product-low-stock') {
+                                        return {
+                                            ATS: { value: 1 }
+                                        };
+                                    } else if (productId === 'product-out-of-stock') {
+                                        return {
+                                            ATS: { value: 0 }
+                                        };
+                                    }
+                                    return null;
+                                })
+                            }
+                        },
+                        {
+                            ID: 'store2',
+                            inventoryList: {
+                                getRecord: jest.fn().mockImplementation((productId) => {
+                                    if (productId === 'product-in-stock') {
+                                        return {
+                                            ATS: { value: 15 }
+                                        };
+                                    } else if (productId === 'product-store2-only') {
+                                        return {
+                                            ATS: { value: 5 }
+                                        };
+                                    }
+                                    return null;
+                                })
+                            }
+                        },
+                        {
+                            // Store without inventory list
+                            ID: 'store3',
+                            inventoryList: null
+                        }
+                    ]
+                };
+                return storeIterator;
+            }
+            return null;
+        })
+    };
+}, { virtual: true });
 
 const AlgoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 const algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig')
@@ -502,5 +573,90 @@ describe('algoliaLocalizedProduct overriding custom attributes', function () {
         };
 
         expect(new AlgoliaLocalizedProductModel({ product: product, locale: 'fr', attributeList: ['algoliaTest', 'custom.displaySize'], baseModel: baseModel})).toEqual(expectedProductModel);
+    });
+});
+
+describe('storeAvailability Tests', function() {
+    test('Product in stock in multiple stores', function() {
+        const product = new ProductMock({
+            ID: 'product-in-stock'
+        });
+
+        const algoliaProduct = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['storeAvailability']
+        });
+
+        expect(algoliaProduct.storeAvailability).toBeDefined();
+        expect(Array.isArray(algoliaProduct.storeAvailability)).toBe(true);
+        expect(algoliaProduct.storeAvailability).toContain('store1');
+        expect(algoliaProduct.storeAvailability).toContain('store2');
+        expect(algoliaProduct.storeAvailability.length).toBe(2);
+    });
+
+    test('Product only available in one store', function() {
+        const product = new ProductMock({
+            ID: 'product-store2-only'
+        });
+
+        const algoliaProduct = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['storeAvailability']
+        });
+
+        expect(algoliaProduct.storeAvailability).toBeDefined();
+        expect(Array.isArray(algoliaProduct.storeAvailability)).toBe(true);
+        expect(algoliaProduct.storeAvailability).toContain('store2');
+        expect(algoliaProduct.storeAvailability.length).toBe(1);
+    });
+
+    test('Product with low stock (below threshold)', function() {
+        const product = new ProductMock({
+            ID: 'product-low-stock'
+        });
+
+        const algoliaProduct = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['storeAvailability']
+        });
+
+        expect(algoliaProduct.storeAvailability).toBeDefined();
+        expect(Array.isArray(algoliaProduct.storeAvailability)).toBe(true);
+        expect(algoliaProduct.storeAvailability.length).toBe(0);
+    });
+
+    test('Product out of stock', function() {
+        const product = new ProductMock({
+            ID: 'product-out-of-stock'
+        });
+
+        const algoliaProduct = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['storeAvailability']
+        });
+
+        expect(algoliaProduct.storeAvailability).toBeDefined();
+        expect(Array.isArray(algoliaProduct.storeAvailability)).toBe(true);
+        expect(algoliaProduct.storeAvailability.length).toBe(0);
+    });
+
+    test('Product not in any store inventory', function() {
+        const product = new ProductMock({
+            ID: 'product-not-in-inventory'
+        });
+
+        const algoliaProduct = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['storeAvailability']
+        });
+
+        expect(algoliaProduct.storeAvailability).toBeDefined();
+        expect(Array.isArray(algoliaProduct.storeAvailability)).toBe(true);
+        expect(algoliaProduct.storeAvailability.length).toBe(0);
     });
 });
