@@ -66,68 +66,56 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 
 // Mock for storeAvailability tests
 jest.mock('dw/object/SystemObjectMgr', () => {
+    const mockCollection = require('../../../../../mocks/dw/util/Collection');
     return {
         getAllSystemObjects: jest.fn().mockImplementation((objType) => {
             if (objType === 'Store') {
-                const storeIterator = {
-                    hasNext: function() {
-                        if (!this.index) {
-                            this.index = 0;
+                const stores = [
+                    {
+                        ID: 'store1',
+                        inventoryList: {
+                            getRecord: jest.fn().mockImplementation((productId) => {
+                                if (productId === 'product-in-stock') {
+                                    return {
+                                        ATS: { value: 10 }
+                                    };
+                                } else if (productId === 'product-low-stock') {
+                                    return {
+                                        ATS: { value: 1 }
+                                    };
+                                } else if (productId === 'product-out-of-stock') {
+                                    return {
+                                        ATS: { value: 0 }
+                                    };
+                                }
+                                return null;
+                            })
                         }
-                        return this.index < this.stores.length;
                     },
-                    next: function() {
-                        const store = this.stores[this.index];
-                        this.index++;
-                        return store;
-                    },
-                    stores: [
-                        {
-                            ID: 'store1',
-                            inventoryList: {
-                                getRecord: jest.fn().mockImplementation((productId) => {
-                                    if (productId === 'product-in-stock') {
-                                        return {
-                                            ATS: { value: 10 }
-                                        };
-                                    } else if (productId === 'product-low-stock') {
-                                        return {
-                                            ATS: { value: 1 }
-                                        };
-                                    } else if (productId === 'product-out-of-stock') {
-                                        return {
-                                            ATS: { value: 0 }
-                                        };
-                                    }
-                                    return null;
-                                })
-                            }
-                        },
-                        {
-                            ID: 'store2',
-                            inventoryList: {
-                                getRecord: jest.fn().mockImplementation((productId) => {
-                                    if (productId === 'product-in-stock') {
-                                        return {
-                                            ATS: { value: 15 }
-                                        };
-                                    } else if (productId === 'product-store2-only') {
-                                        return {
-                                            ATS: { value: 5 }
-                                        };
-                                    }
-                                    return null;
-                                })
-                            }
-                        },
-                        {
-                            // Store without inventory list
-                            ID: 'store3',
-                            inventoryList: null
+                    {
+                        ID: 'store2',
+                        inventoryList: {
+                            getRecord: jest.fn().mockImplementation((productId) => {
+                                if (productId === 'product-in-stock') {
+                                    return {
+                                        ATS: { value: 15 }
+                                    };
+                                } else if (productId === 'product-store2-only') {
+                                    return {
+                                        ATS: { value: 5 }
+                                    };
+                                }
+                                return null;
+                            })
                         }
-                    ]
-                };
-                return storeIterator;
+                    },
+                    {
+                        // Store without inventory list
+                        ID: 'store3',
+                        inventoryList: null
+                    }
+                ];
+                return new mockCollection(stores).iterator();
             }
             return null;
         })
