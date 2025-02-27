@@ -272,6 +272,10 @@ var attributeConfig_v2 = {
         localized: true,
         variantAttribute: true,
     },
+    storeAvailability: {
+        localized: false,
+        variantAttribute: true,
+    },
 };
 
 module.exports = {
