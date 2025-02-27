@@ -65,7 +65,6 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 }, {virtual: true});
 
 // Mock for storeAvailability tests
-const originalMock = jest.fn();
 jest.mock('dw/object/SystemObjectMgr', () => {
     return {
         getAllSystemObjects: jest.fn().mockImplementation((objType) => {
