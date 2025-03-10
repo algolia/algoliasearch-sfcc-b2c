@@ -255,23 +255,13 @@ function enableInstantSearch(config) {
                 },
                 templates: {
                     item(data, { html }) {
-                        if (storeList.length === 0) {
+                        if (storeList.length === 0 || data.count === 0) {
                             return '';
                         }
+
                         let storeDetails = {};
 
-                        // Check if we have valid store data
-                        if (storeList.length > 0) {
-                            try {
-                                storeDetails = storeList.find(store => store.id === data.label) || {};
-                            } catch (e) {
-                                console.error('Error parsing store data:', e);
-                            }
-                        }
-                        // Don't show stores with 0 count
-                        if (data.count === 0) {
-                            return '';
-                        }
+                        storeDetails = storeList.find(store => store.id === data.label) || {};
 
                         const fullAddress = storeDetails.address ? `${storeDetails.address.address1}, ${storeDetails.address.city}, ${storeDetails.address.stateCode} ${storeDetails.address.postalCode || ''}` : '';
 
