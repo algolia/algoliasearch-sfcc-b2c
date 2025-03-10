@@ -86,3 +86,65 @@
 .swatch-selected {
     border: 2px solid #0070d2 !important;
 }
+
+/* Store Facet Styling */
+.store-list-facet {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.store-facet-item {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid var(--color-grey2);
+    padding-bottom: 10px;
+}
+
+.store-facet-item:last-child {
+    border-bottom: 0;
+}
+
+.store-facet-item a {
+    display: flex;
+    flex-direction: column;
+}
+
+.store-facet-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: 3px;
+    margin-left: 10px;
+}
+
+.store-facet-label i.fa {
+    margin-right: 8px;
+    font-size: 14px;
+    min-width: 14px;
+}
+
+.store-facet-item small {
+    color: var(--color-grey5);
+    font-size: 0.75rem;
+    margin-left: 22px;
+    display: block;
+    line-height: 1.4;
+}
+
+.store-facet-show-more {
+    background: none;
+    border: none;
+    color: var(--color-primary);
+    padding: 5px 0;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    cursor: pointer;
+    width: auto;
+    display: inline-block;
+}
+
+.store-facet-show-more:hover {
+    text-decoration: underline;
+}

@@ -59,6 +59,9 @@ const clientSideData = {
         },
         "newArrivals": Resource.msg('panel.newarrivals','algolia',null),
         "from": Resource.msg('label.from','algolia',null),
+        "storePanelTitle": Resource.msg('storePanelTitle','algolia',null),
+        "showMore": Resource.msg('showMore','algolia',null),
+        "showLess": Resource.msg('showLess','algolia',null),
     },
     "noImages": {
         "large": URLUtils.staticURL('/images/noimagelarge.png').toString(),
