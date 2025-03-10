@@ -113,7 +113,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
 
                 if (storesMap && !storesMap.empty) {
                     var storeIds = storesMap.keySet().toArray();
-                    for (var i = 0; i < storeIds.length; i++) {
+                    for (i = 0; i < storeIds.length; i++) {
                         var store = storeIds[i];
                         if (store && store.inventoryList) {
                             storeList.push({

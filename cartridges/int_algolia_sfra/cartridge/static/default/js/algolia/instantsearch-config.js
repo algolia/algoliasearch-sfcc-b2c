@@ -242,60 +242,60 @@ function enableInstantSearch(config) {
             }),
 
             refinementListWithPanel({
-                    container: '#algolia-store-list-placeholder',
-                    attribute: 'storeAvailability',
-                    cssClasses: {
-                        list: 'store-list-facet',
-                        item: 'store-facet-item',
-                        selectedItem: 'store-facet-selected',
-                        label: 'store-facet-label',
-                        noResults: 'store-facet-empty',
-                        showMore: 'store-facet-show-more',
-                        disabledShowMore: 'store-facet-show-more disabled'
-                    },
-                    templates: {
-                        item(data, { html }) {
-                            if (storeList.length === 0) {
-                                return '';
-                            }
-                            let storeDetails = {};
-
-                            // Check if we have valid store data
-                            if (storeList.length > 0) {
-                                try {
-                                    storeDetails = storeList.find(store => store.id === data.label) || {};
-                                } catch (e) {
-                                    console.error('Error parsing store data:', e);
-                                }
-                            }
-                            // Don't show stores with 0 count
-                            if (data.count === 0) {
-                                return '';
-                            }
-
-                            const fullAddress = storeDetails.address ? `${storeDetails.address.address1}, ${storeDetails.address.city}, ${storeDetails.address.stateCode} ${storeDetails.address.postalCode || ''}` : '';
-
-                            return html`
-                                <a class="${data.cssClasses.link}" href="${data.url}">
-                                    <div class="d-flex align-items-center w-100">
-                                        <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}" aria-hidden="true"></i>
-                                        <span class="${data.cssClasses.label}">${storeDetails.name || data.label}</span>
-                                    </div>
-                                    ${fullAddress ? html`
-                                        <small>
-                                            ${fullAddress}
-                                        </small>` : ''}
-                                </a>
-                            `;
-                        },
-                        showMoreText({ isShowingMore }) {
-                            return isShowingMore ? algoliaData.strings.showLess : algoliaData.strings.showMore;
+                container: '#algolia-store-list-placeholder',
+                attribute: 'storeAvailability',
+                cssClasses: {
+                    list: 'store-list-facet',
+                    item: 'store-facet-item',
+                    selectedItem: 'store-facet-selected',
+                    label: 'store-facet-label',
+                    noResults: 'store-facet-empty',
+                    showMore: 'store-facet-show-more',
+                    disabledShowMore: 'store-facet-show-more disabled'
+                },
+                templates: {
+                    item(data, { html }) {
+                        if (storeList.length === 0) {
+                            return '';
                         }
+                        let storeDetails = {};
+
+                        // Check if we have valid store data
+                        if (storeList.length > 0) {
+                            try {
+                                storeDetails = storeList.find(store => store.id === data.label) || {};
+                            } catch (e) {
+                                console.error('Error parsing store data:', e);
+                            }
+                        }
+                        // Don't show stores with 0 count
+                        if (data.count === 0) {
+                            return '';
+                        }
+
+                        const fullAddress = storeDetails.address ? `${storeDetails.address.address1}, ${storeDetails.address.city}, ${storeDetails.address.stateCode} ${storeDetails.address.postalCode || ''}` : '';
+
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}">
+                                <div class="d-flex align-items-center w-100">
+                                    <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}" aria-hidden="true"></i>
+                                    <span class="${data.cssClasses.label}">${storeDetails.name || data.label}</span>
+                                </div>
+                                ${fullAddress ? html`
+                                    <small>
+                                        ${fullAddress}
+                                    </small>` : ''}
+                            </a>
+                        `;
                     },
-                    panelTitle: algoliaData.strings.storePanelTitle,
-                    limit: 4,
-                    showMore: true,
-                    showMoreLimit: 20
+                    showMoreText({ isShowingMore }) {
+                        return isShowingMore ? algoliaData.strings.showLess : algoliaData.strings.showMore;
+                    }
+                },
+                panelTitle: algoliaData.strings.storePanelTitle,
+                limit: 4,
+                showMore: true,
+                showMoreLimit: 20
             }),
 
             instantsearch.widgets.infiniteHits({
