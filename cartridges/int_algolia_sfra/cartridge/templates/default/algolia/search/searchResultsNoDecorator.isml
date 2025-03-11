@@ -5,6 +5,7 @@
 </isif>
 
 <span id="algolia-activePromos" data-promotions="<isprint value="${pdict.activePromotions}" encoding="htmldoublequote"/>"></span>
+<span id="algolia-storeList" data-stores="<isprint value="${pdict.storeList}" encoding="htmldoublequote"/>"></span>
 
 <iscomment> Search Results Banner </iscomment>
 <isif condition="${pdict.category}">
@@ -73,6 +74,7 @@
                             <div id="algolia-size-list-placeholder"></div>
                             <div id="algolia-color-list-placeholder"></div>
                             <div id="algolia-price-filter-placeholder"></div>
+                            <div id="algolia-store-list-placeholder"></div>
                         </div>
                     </div>
                     <div class="col-sm-12 col-md-9">

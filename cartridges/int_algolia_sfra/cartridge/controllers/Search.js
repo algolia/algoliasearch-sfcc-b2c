@@ -86,7 +86,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
 
             var activePromotions = JSON.stringify(activePromotionsArr);
 
-            res.render('search/searchResults', {
+            var viewData = {
                 algoliaEnable: true,
                 category: category,
                 categoryDisplayNamePath: categoryDisplayNamePath,
@@ -97,7 +97,44 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 cgid: req.querystring.cgid,
                 q: req.querystring.q,
                 activePromotions: activePromotions
-            });
+            }
+
+            var storeList = [];
+
+            var attributeList = algoliaData.getSetOfArray('AdditionalAttributes');
+            var isStoreAvailabilityEnabled = attributeList.indexOf('storeAvailability') !== -1;
+
+            if (isStoreAvailabilityEnabled) {
+                // Do not need to cache this, because page is already cached via cache.applyShortPromotionSensitiveCache
+                var StoreMgr = require('dw/catalog/StoreMgr');
+
+                // Get all stores using a very large radius search
+                var storesMap = StoreMgr.searchStoresByCoordinates(0, 0, 'mi', 99999999);
+
+                if (storesMap && !storesMap.empty) {
+                    var storeIds = storesMap.keySet().toArray();
+                    for (i = 0; i < storeIds.length; i++) {
+                        var store = storeIds[i];
+                        if (store && store.inventoryList) {
+                            storeList.push({
+                                id: store.ID,
+                                name: store.name,
+                                address: {
+                                    address1: store.address1 || '',
+                                    city: store.city || '',
+                                    stateCode: store.stateCode || '',
+                                    postalCode: store.postalCode || ''
+                                },
+                                phone: store.phone || ''
+                            });
+                        }
+                    }
+                }
+                var storeListJSON = JSON.stringify(storeList);
+                viewData.storeList = storeListJSON;
+            }
+
+            res.render('search/searchResults', viewData);
         }
     }
     if (!useAlgolia) { // default Search-Show
