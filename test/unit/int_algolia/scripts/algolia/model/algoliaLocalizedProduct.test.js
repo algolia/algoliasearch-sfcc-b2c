@@ -50,7 +50,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
                 : [];
         },
         getPreference: function (id) {
-            return id === 'InStockThreshold' ? 1 : null;
+            return id === 'InStockThreshold' ? 2 : null;
         }
     }
 }, {virtual: true});
@@ -65,59 +65,69 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 }, {virtual: true});
 
 // Mock for storeAvailability tests
-jest.mock('dw/object/SystemObjectMgr', () => {
+jest.mock('dw/catalog/StoreMgr', () => {
     const mockCollection = require('../../../../../mocks/dw/util/Collection');
-    return {
-        getAllSystemObjects: jest.fn().mockImplementation((objType) => {
-            if (objType === 'Store') {
-                const stores = [
-                    {
-                        ID: 'store1',
-                        inventoryList: {
-                            getRecord: jest.fn().mockImplementation((productId) => {
-                                if (productId === 'product-in-stock') {
-                                    return {
-                                        ATS: { value: 10 }
-                                    };
-                                } else if (productId === 'product-low-stock') {
-                                    return {
-                                        ATS: { value: 1 }
-                                    };
-                                } else if (productId === 'product-out-of-stock') {
-                                    return {
-                                        ATS: { value: 0 }
-                                    };
-                                }
-                                return null;
-                            })
-                        }
-                    },
-                    {
-                        ID: 'store2',
-                        inventoryList: {
-                            getRecord: jest.fn().mockImplementation((productId) => {
-                                if (productId === 'product-in-stock') {
-                                    return {
-                                        ATS: { value: 15 }
-                                    };
-                                } else if (productId === 'product-store2-only') {
-                                    return {
-                                        ATS: { value: 5 }
-                                    };
-                                }
-                                return null;
-                            })
-                        }
-                    },
-                    {
-                        // Store without inventory list
-                        ID: 'store3',
-                        inventoryList: null
+    const stores = [
+        {
+            ID: 'store1',
+            inventoryList: {
+                getRecord: jest.fn().mockImplementation((productId) => {
+                    if (productId === 'product-in-stock') {
+                        return {
+                            ATS: { value: 10 }
+                        };
+                    } else if (productId === 'product-low-stock') {
+                        return {
+                            ATS: { value: 1 }
+                        };
+                    } else if (productId === 'product-out-of-stock') {
+                        return {
+                            ATS: { value: 0 }
+                        };
                     }
-                ];
-                return new mockCollection(stores).iterator();
+                    return null;
+                })
             }
-            return null;
+        },
+        {
+            ID: 'store2',
+            inventoryList: {
+                getRecord: jest.fn().mockImplementation((productId) => {
+                    if (productId === 'product-in-stock') {
+                        return {
+                            ATS: { value: 15 }
+                        };
+                    } else if (productId === 'product-store2-only') {
+                        return {
+                            ATS: { value: 5 }
+                        };
+                    }
+                    return null;
+                })
+            }
+        },
+        {
+            // Store without inventory list
+            ID: 'store3',
+            inventoryList: null
+        }
+    ];
+    
+    // Create a map-like object with the same stores
+    const storeMap = {
+        empty: false,
+        keySet: function() {
+            return {
+                toArray: function() {
+                    return stores;
+                }
+            };
+        }
+    };
+    
+    return {
+        searchStoresByCoordinates: jest.fn().mockImplementation(() => {
+            return storeMap;
         })
     };
 }, { virtual: true });
