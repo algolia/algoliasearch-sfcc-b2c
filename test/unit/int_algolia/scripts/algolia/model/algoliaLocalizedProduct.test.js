@@ -66,7 +66,6 @@ jest.mock('*/cartridge/scripts/algolia/customization/productModelCustomizer', ()
 
 // Mock for storeAvailability tests
 jest.mock('dw/catalog/StoreMgr', () => {
-    const mockCollection = require('../../../../../mocks/dw/util/Collection');
     const stores = [
         {
             ID: 'store1',
