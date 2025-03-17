@@ -17,43 +17,45 @@ exports.afterPOST = function (order) {
             var shipments = order.getShipments();
             for (var i = 0; i < shipments.length; i++) {
                 var shipment = shipments[i];
-                var j;
-                var k;
-                var pli;
-                var product;
-                var productOps;
                 var plis = shipment.getProductLineItems();
-                //check if shipment is a pickup shipment
+
+                // Process each product line item based on shipment type
                 if (shipment.custom.shipmentType === 'instore') {
-                    for (j = 0; j < plis.length; j++) {
-                        pli = plis[j];
-                        product = pli.product;
-                        productOps = getProductData(product, ['storeAvailability']);
-                        for (k = 0; k < productOps.length; k++) {
-                            var productOp = productOps[k];
+                    // Handle in-store pickup shipments
+                    for (let j = 0; j < plis.length; j++) {
+                        let pli = plis[j];
+                        let product = pli.product;
+                        let productOps = getProductData(product, ['storeAvailability']);
+
+                        productOps.forEach(function(productOp) {
                             // If the product is not available in the store anymore
                             if (productOp.body.storeAvailability.indexOf(shipment.custom.fromStoreId) === -1) {
                                 algoliaOperations.push(productOp);
                             }
-                        }
+                        });
                     }
                 } else {
-                    for (j = 0; j < plis.length; j++) {
-                        pli = plis[j];
-                        product = pli.product;
-                        productOps = getProductData(product, ['in_stock']);
-                        for (k = 0; k < productOps.length; k++) {
-                            productOp = productOps[k];
+                    // Handle standard shipments
+                    for (let j = 0; j < plis.length; j++) {
+                        let pli = plis[j];
+                        let product = pli.product;
+                        let productOps = getProductData(product, ['in_stock']);
+
+                        productOps.forEach(function(productOp) {
                             // If the product is not available in the inventory anymore
                             if (productOp.body.in_stock === false || productOp.body.in_stock === undefined) {
                                 if (algoliaData.getPreference('IndexOutOfStock')) {
                                     algoliaOperations.push(productOp);
                                 } else {
-                                    // If the product is not available in the inventory anymore and the IndexOutOfStock preference is disabled, we need to remove the product from Algolia
-                                    algoliaOperations.push(new jobHelper.AlgoliaOperation('deleteObject', { objectID: productOp.body.objectID }, productOp.indexName));
+                                    // If IndexOutOfStock preference is disabled, remove product from Algolia
+                                    algoliaOperations.push(new jobHelper.AlgoliaOperation(
+                                        'deleteObject',
+                                        { objectID: productOp.body.objectID }, 
+                                        productOp.indexName
+                                    ));
                                 }
                             }
-                        }
+                        });
                     }
                 }
             }
