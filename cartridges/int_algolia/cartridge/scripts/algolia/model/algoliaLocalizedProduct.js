@@ -38,9 +38,9 @@ if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
     var storesMap = StoreMgr.searchStoresByCoordinates(0, 0, 'mi', 99999999);
 
     if (storesMap && !storesMap.empty) {
-        var storeIds = storesMap.keySet().toArray();
-        for (var l = 0; l < storeIds.length; l++) {
-            var store = storeIds[l];
+        var storeObjects = storesMap.keySet().toArray();
+        for (var l = 0; l < storeObjects.length; l++) {
+            var store = storeObjects[l];
             if (store && store.inventoryList) {
                 stores.push({
                     id: store.ID,
