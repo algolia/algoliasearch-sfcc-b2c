@@ -32,19 +32,21 @@ const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold')
 const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 const ATTRIBUTE_LIST = algoliaData.getSetOfArray('AdditionalAttributes');
 const stores = [];
-var SystemObjectMgr;
 
 if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
-    SystemObjectMgr = require('dw/object/SystemObjectMgr');
-    var storeIt = SystemObjectMgr.getAllSystemObjects('Store');
-    while (storeIt.hasNext()) {
-        var store = storeIt.next();
-        if (store.inventoryList) {
-            var storeObject = {
-                id: store.ID,
-                storeInventory: store.inventoryList
-            };
-            stores.push(storeObject);
+    var StoreMgr = require('dw/catalog/StoreMgr');
+    var storesMap = StoreMgr.searchStoresByCoordinates(0, 0, 'mi', 99999999);
+
+    if (storesMap && !storesMap.empty) {
+        var storeObjects = storesMap.keySet().toArray();
+        for (var l = 0; l < storeObjects.length; l++) {
+            var store = storeObjects[l];
+            if (store && store.inventoryList) {
+                stores.push({
+                    id: store.ID,
+                    storeInventory: store.inventoryList
+                });
+            }
         }
     }
 }
@@ -493,7 +495,7 @@ var aggregatedValueHandlers = {
                 var storeElInventory = storeEl.storeInventory;
                 if (storeElInventory) {
                     var inventoryRecord = storeElInventory.getRecord(product.ID);
-                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value > ALGOLIA_IN_STOCK_THRESHOLD) {
+                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= ALGOLIA_IN_STOCK_THRESHOLD) {
                         storeArray.push(storeEl.id);
                     }
                 }
