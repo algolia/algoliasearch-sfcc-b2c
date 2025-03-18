@@ -121,15 +121,15 @@
                     </td>
                 </tr>
 
-                <iscomment> Algolia_EnableRealTimeInventory </iscomment>
+                <iscomment> Algolia_EnableRealTimeInventoryHook </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.enablerealtimeinventory', 'algolia', null)}" />
+                        <isprint value="${Resource.msg('algolia.label.preference.EnableRealTimeInventoryHook', 'algolia', null)}" />
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
-                        <div class="tooltip">${Resource.msg('algolia.label.preference.enablerealtimeinventory.help', 'algolia', null)}</div>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.EnableRealTimeInventoryHook.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="checkbox" ${pdict.algoliaData.getPreference('EnableRealTimeInventory') ? "checked": ""} id="EnableRealTimeInventory" name="EnableRealTimeInventory" />
+                        <input type="checkbox" ${pdict.algoliaData.getPreference('EnableRealTimeInventoryHook') ? "checked": ""} id="EnableRealTimeInventoryHook" name="EnableRealTimeInventoryHook" />
                     </td>
                 </tr>
 

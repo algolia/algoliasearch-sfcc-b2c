@@ -43,7 +43,7 @@ function handleSettings() {
         var algoliaEnableContentSearch = ('EnableContentSearch' in params) && (params.EnableContentSearch.submitted === true);
         var algoliaEnableRecommend = ('EnableRecommend' in params) && (params.EnableRecommend.submitted === true);
         var algoliaEnablePricingLazyLoad = ('EnablePricingLazyLoad' in params) && (params.EnablePricingLazyLoad.submitted === true);
-        var algoliaEnableRealTimeInventory = ('EnableRealTimeInventory' in params) && (params.EnableRealTimeInventory.submitted === true);
+        var algoliaEnableRealTimeInventoryHook = ('EnableRealTimeInventoryHook' in params) && (params.EnableRealTimeInventoryHook.submitted === true);
 
         // If the user typed an empty prefix, the cartridge logic eventually
         // uses the default <hostname>__<siteID>
@@ -86,7 +86,7 @@ function handleSettings() {
         algoliaData.setPreference('EnableRecommend', algoliaEnableRecommend);
         algoliaData.setPreference('EnablePricingLazyLoad', algoliaEnablePricingLazyLoad);
         algoliaData.setPreference('IndexOutOfStock', params.IndexOutOfStock.submitted);
-        algoliaData.setPreference('EnableRealTimeInventory', algoliaEnableRealTimeInventory);
+        algoliaData.setPreference('EnableRealTimeInventoryHook', algoliaEnableRealTimeInventoryHook);
     } catch (error) {
         Logger.error(error);
         showDashboardWithMessages(adminValidation, error.message);

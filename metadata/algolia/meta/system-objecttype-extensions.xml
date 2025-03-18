@@ -264,8 +264,8 @@ Setting this preference replaces the first two segments, the final index name be
                 <externally-managed-flag>false</externally-managed-flag>
             </attribute-definition>
 
-            <attribute-definition attribute-id="Algolia_EnableRealTimeInventory">
-                <display-name xml:lang="x-default">Enable Real Time Inventory</display-name>
+            <attribute-definition attribute-id="Algolia_EnableRealTimeInventoryHook">
+                <display-name xml:lang="x-default">Enable Real Time Inventory Hook</display-name>
                 <description xml:lang="x-default">Sends inventory updates to Algolia in real-time after each order.</description>
                 <type>boolean</type>
                 <mandatory-flag>false</mandatory-flag>
@@ -293,7 +293,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_EnableRecommend"/>
                 <attribute attribute-id="Algolia_EnablePricingLazyLoad"/>
                 <attribute attribute-id="Algolia_IndexOutOfStock"/>
-                <attribute attribute-id="Algolia_EnableRealTimeInventory"/>
+                <attribute attribute-id="Algolia_EnableRealTimeInventoryHook"/>
             </attribute-group>
         </group-definitions>
 

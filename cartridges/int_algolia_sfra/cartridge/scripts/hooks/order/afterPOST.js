@@ -8,9 +8,11 @@ var Status = require('dw/system/Status');
 
 
 exports.afterPOST = function (order) {
-    var Algolia_EnableRealTimeInventory = algoliaData.getPreference('EnableRealTimeInventory');
-    if (Algolia_EnableRealTimeInventory) {
+    var Algolia_EnableRealTimeInventoryHook = algoliaData.getPreference('EnableRealTimeInventoryHook');
+    if (Algolia_EnableRealTimeInventoryHook) {
         var reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+        var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+        var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
 
         try {
             var algoliaOperations = [];
@@ -25,37 +27,34 @@ exports.afterPOST = function (order) {
                     for (let j = 0; j < plis.length; j++) {
                         let pli = plis[j];
                         let product = pli.product;
-                        let productOps = getProductData(product, ['storeAvailability']);
 
-                        productOps.forEach(function(productOp) {
-                            // If the product is not available in the store anymore
-                            if (productOp.body.storeAvailability.indexOf(shipment.custom.fromStoreId) === -1) {
-                                algoliaOperations.push(productOp);
-                            }
-                        });
+                        if (!isInStoreStock(product, shipment.custom.fromStoreId, ALGOLIA_IN_STOCK_THRESHOLD)) {
+                            let productOps = getProductData(product, ['storeAvailability']);
+                            algoliaOperations = algoliaOperations.concat(productOps);
+                        }
                     }
                 } else {
                     // Handle standard shipments
                     for (let j = 0; j < plis.length; j++) {
                         let pli = plis[j];
                         let product = pli.product;
-                        let productOps = getProductData(product, ['in_stock']);
+                        var isInStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
 
-                        productOps.forEach(function(productOp) {
-                            // If the product is not available in the inventory anymore
-                            if (productOp.body.in_stock === false || productOp.body.in_stock === undefined) {
-                                if (algoliaData.getPreference('IndexOutOfStock')) {
-                                    algoliaOperations.push(productOp);
-                                } else {
-                                    // If IndexOutOfStock preference is disabled, remove product from Algolia
-                                    algoliaOperations.push(new jobHelper.AlgoliaOperation(
+                        if (!isInStock) {
+                            let productOps = getProductData(product, ['in_stock']);
+
+                            if (algoliaData.getPreference('IndexOutOfStock')) {
+                                algoliaOperations = algoliaOperations.concat(productOps);
+                            } else {
+                                productOps.forEach(function(productOp) {
+                                    algoliaOperations = algoliaOperations.concat(new jobHelper.AlgoliaOperation(
                                         'deleteObject',
                                         { objectID: productOp.body.objectID }, 
                                         productOp.indexName
                                     ));
-                                }
+                                });
                             }
-                        });
+                        }
                     }
                 }
             }
@@ -91,4 +90,21 @@ function getProductData(product, attributes) {
     return algoliaOperations;
 }
 
-
+/**
+ * Returns `true` if the product’s ATS >= threshold, false otherwise.
+ * @param {dw.catalog.Product} product - The SFCC product or variant to check
+ * @param {number} threshold - The min ATS to consider in-stock
+ * @returns {boolean}
+ */
+function isInStoreStock(product, storeId, threshold) {
+    var StoreMgr = require('dw/catalog/StoreMgr');
+    var store = StoreMgr.getStore(storeId);
+    var storeInventory = store.inventoryList;
+    if (storeInventory) {
+        var inventoryRecord = storeInventory.getRecord(product.ID);
+        if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= threshold) {
+            return true;
+        }
+    }
+    return false;
+}
