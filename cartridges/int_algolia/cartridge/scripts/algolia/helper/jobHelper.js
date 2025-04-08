@@ -669,6 +669,68 @@ function getDefaultAttributeConfig(attributeName) {
     };
 }
 
+/**
+ * Retrieves variant and master attribute configurations for a product.
+ *
+ * @returns {Object} An object with variant/master attribute arrays and base-product-computed attributes.
+ */
+function getAttributes() {
+    let extendedProductAttributesConfig;
+    let nonLocalizedAttributes = [];
+    let nonLocalizedMasterAttributes = [];
+    let attributesComputedFromBaseProduct = [];
+    let algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
+    let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+
+    try {
+        extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
+        algoliaLogger.info('Configuration file "productAttributesConfig.js" loaded');
+    } catch (e) { // eslint-disable-line no-unused-vars
+        extendedProductAttributesConfig = {};
+    }
+
+    let defaultAttributes = algoliaProductConfig.defaultAttributes_v2.slice();
+    let variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
+    let masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
+
+    // Additional attributes from SFCC custom preferences
+    let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
+    additionalAttributes.map(function(attribute) {
+        if (defaultAttributes.indexOf(attribute) < 0) {
+            defaultAttributes.push(attribute);
+        }
+    });
+
+    defaultAttributes.forEach(function(attribute) {
+        let attributeConfig = extendedProductAttributesConfig[attribute] ||
+            algoliaProductConfig.attributeConfig_v2[attribute] ||
+            getDefaultAttributeConfig(attribute);
+
+        if (attributeConfig.variantAttribute) {
+            variantAttributes.push(attribute);
+        } else {
+            masterAttributes.push(attribute);
+        }
+
+        if (attributeConfig.computedFromBaseProduct) {
+            attributesComputedFromBaseProduct.push(attribute);
+        } else if (!attributeConfig.localized) {
+            nonLocalizedAttributes.push(attribute);
+            if (!attributeConfig.variantAttribute) {
+                nonLocalizedMasterAttributes.push(attribute);
+            }
+        }
+    });
+
+    return {
+        variantAttributes: variantAttributes,
+        masterAttributes: masterAttributes,
+        attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
+        nonLocalizedAttributes: nonLocalizedAttributes,
+        nonLocalizedMasterAttributes: nonLocalizedMasterAttributes
+    };
+}
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -696,5 +758,6 @@ module.exports = {
     getObjectsArrayLength: getObjectsArrayLength,
     updateCPObjectFromXML: updateCPObjectFromXML,
 
-    getDefaultAttributeConfig: getDefaultAttributeConfig
+    getDefaultAttributeConfig: getDefaultAttributeConfig,
+    getAttributes: getAttributes
 };

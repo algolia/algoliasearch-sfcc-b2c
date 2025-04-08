@@ -50,7 +50,30 @@ function isInStock(product, threshold) {
     return atsValue >= threshold;
 }
 
+/**
+ * Checks store inventory for a given product and determines
+ * whether it meets the ATS threshold for being in stock.
+ *
+ * @param {dw.catalog.Product} product - The product or variant to check.
+ * @param {string} storeId - The store identifier.
+ * @param {number} threshold - The ATS threshold value considered in-stock.
+ * @returns {boolean} True if in stock for the specified store, false otherwise.
+ */
+function isInStoreStock(product, storeId, threshold) {
+    const StoreMgr = require('dw/catalog/StoreMgr');
+    let store = StoreMgr.getStore(storeId);
+    let storeInventory = store.inventoryList;
+    if (storeInventory) {
+        let inventoryRecord = storeInventory.getRecord(product.ID);
+        if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= threshold) {
+            return true;
+        }
+    }
+    return false;
+}
+
 module.exports = {
     isInStock: isInStock,
     isInclude: isInclude,
+    isInStoreStock: isInStoreStock
 };

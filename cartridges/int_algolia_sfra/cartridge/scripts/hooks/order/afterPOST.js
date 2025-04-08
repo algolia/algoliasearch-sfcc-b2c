@@ -1,108 +1,180 @@
 'use strict';
 
-var Site = require('dw/system/Site');
-var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-var Logger = require('dw/system/Logger');
-var Status = require('dw/system/Status');
+let Logger = require('dw/system/Logger');
+let Status = require('dw/system/Status');
 
+let jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+let reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+let productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
+let orderHelper = require('*/cartridge/scripts/algolia/helper/orderHelper');
+let isInStoreStock = productFilter.isInStoreStock;
+let generateAlgoliaOperations = orderHelper.generateAlgoliaOperations;
+
+let RECORD_MODEL_TYPE = {
+    MASTER_LEVEL: 'master-level',
+    VARIANT_LEVEL: 'variant-level'
+};
+
+/**
+ * Hook function that executes after an order is created (POST).
+ *
+ * @param {dw.order.Order} order - The newly created order instance.
+ * @returns {dw.system.Status} Status
+ */
 exports.afterPOST = function (order) {
-    var reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
-    var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
-    var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+    let ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+    let RECORD_MODEL = algoliaData.getPreference('RecordModel');
+    let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
 
     try {
-        var algoliaOperations = [];
-        var shipments = order.getShipments();
-        for (var i = 0; i < shipments.length; i++) {
-            var shipment = shipments[i];
-            var plis = shipment.getProductLineItems();
+        let algoliaOperations = [];
+        let shipments = order.getShipments();
 
-            // Process each product line item based on shipment type
+        for (let i = 0; i < shipments.length; i++) {
+            let shipment = shipments[i];
+            
             if (shipment.custom.shipmentType === 'instore') {
-                // Handle in-store pickup shipments
-                for (let j = 0; j < plis.length; j++) {
-                    let pli = plis[j];
-                    let product = pli.product;
-
-                    if (!isInStoreStock(product, shipment.custom.fromStoreId, ALGOLIA_IN_STOCK_THRESHOLD)) {
-                        let productOps = generateAlgoliaOperations(product, ['storeAvailability']);
-                        algoliaOperations = algoliaOperations.concat(productOps);
-                    }
-                }
+                algoliaOperations = algoliaOperations.concat(
+                    handleInStorePickupShipment(
+                        shipment,
+                        ALGOLIA_IN_STOCK_THRESHOLD,
+                        additionalAttributes,
+                        RECORD_MODEL
+                    )
+                );
             } else {
-                // Handle standard shipments
-                for (let j = 0; j < plis.length; j++) {
-                    let pli = plis[j];
-                    let product = pli.product;
-                    var isInStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
-
-                    if (!isInStock) {
-                        let productOps = generateAlgoliaOperations(product, ['in_stock']);
-
-                        if (algoliaData.getPreference('IndexOutOfStock')) {
-                            algoliaOperations = algoliaOperations.concat(productOps);
-                        } else {
-                            productOps.forEach(function(productOp) {
-                                algoliaOperations = algoliaOperations.concat(new jobHelper.AlgoliaOperation(
-                                    'deleteObject',
-                                    { objectID: productOp.body.objectID }, 
-                                    productOp.indexName
-                                ));
-                            });
-                        }
-                    }
-                }
+                algoliaOperations = algoliaOperations.concat(
+                    handleStandardShipment(
+                        shipment,
+                        ALGOLIA_IN_STOCK_THRESHOLD,
+                        additionalAttributes,
+                        RECORD_MODEL
+                    )
+                );
             }
         }
+
         if (algoliaOperations.length > 0) {
             reindexHelper.sendRetryableBatch(algoliaOperations);
         }
     } catch (error) {
-        Logger.error('Error in afterPOST hook for Order: ' + order.orderNo + ', Message: ' + error.message);
+        Logger.error(
+            'Error in afterPOST hook for Order: ' + order.orderNo +
+            ', Message: ' + error.message +
+            ', Stack: ' + error.stack
+        );
     }
 
     return new Status(Status.OK);
 };
 
-
 /**
- * Get the product data for the product
- * @param {dw.catalog.Product} product - The product to get the data for
- * @param {Array} attributes - The attributes to get the data for
- * @returns {Array} The product data
+ * Handles logic for updating Algolia records for an in-store pickup shipment.
+ *
+ * @param {dw.order.Shipment} shipment - The shipment object to process.
+ * @param {number} threshold - The in-stock threshold preference.
+ * @param {Array} additionalAttributes - A list of additional attributes to manage.
+ * @param {string} recordModel - The type of record model (master-level or variant-level).
+ * @returns {Array} An array of Algolia operations to be executed.
  */
-function generateAlgoliaOperations(product, attributes) {
-    var algoliaOperations = [];
-    var AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
-    var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: attributes });
-    var siteLocales = Site.getCurrent().getAllowedLocales();
-    for (let l = 0; l < siteLocales.size(); ++l) {
-        let locale = siteLocales[l];
-        let indexName = algoliaData.calculateIndexName('products', locale);
-        let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributes, baseModel: baseModel });
-        algoliaOperations.push(new jobHelper.AlgoliaOperation('partialUpdateObject', localizedProduct, indexName));
+function handleInStorePickupShipment(shipment, threshold, additionalAttributes, recordModel) {
+    let algoliaOperations = [];
+    let plis = shipment.getProductLineItems();
+
+    for (let j = 0; j < plis.length; j++) {
+        let pli = plis[j];
+        let product = pli.product;
+        let storeId = shipment.custom.fromStoreId;
+
+        let inStoreStock = isInStoreStock(product, storeId, threshold);
+        if (!inStoreStock && additionalAttributes.indexOf('storeAvailability') > -1) {
+            let productOps = [];
+            if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
+                productOps = generateAlgoliaOperations(
+                    product.masterProduct,
+                    ['storeAvailability', 'variants']
+                );
+            } else {
+                productOps = generateAlgoliaOperations(
+                    product,
+                    ['storeAvailability']
+                );
+            }
+            algoliaOperations = algoliaOperations.concat(productOps);
+        }
     }
     return algoliaOperations;
 }
 
 /**
- * Returns `true` if the product’s ATS >= threshold, false otherwise.
- * @param {dw.catalog.Product} product - The SFCC product or variant to check
- * @param {string} storeId - The store ID to check
- * @param {number} threshold - The min ATS to consider in-stock
- * @returns {boolean}
+ * Handles logic for updating Algolia records for a standard shipment.
+ *
+ * @param {dw.order.Shipment} shipment - The shipment object to process.
+ * @param {number} threshold - The in-stock threshold preference.
+ * @param {Array} additionalAttributes - A list of additional attributes to manage.
+ * @param {string} recordModel - The type of record model (master-level or variant-level).
+ * @returns {Array} An array of Algolia operations to be executed.
  */
-function isInStoreStock(product, storeId, threshold) {
-    var StoreMgr = require('dw/catalog/StoreMgr');
-    var store = StoreMgr.getStore(storeId);
-    var storeInventory = store.inventoryList;
-    if (storeInventory) {
-        var inventoryRecord = storeInventory.getRecord(product.ID);
-        if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= threshold) {
-            return true;
+function handleStandardShipment(shipment, threshold, additionalAttributes, recordModel) {
+    let algoliaOperations = [];
+    let plis = shipment.getProductLineItems();
+
+    for (let j = 0; j < plis.length; j++) {
+        let pli = plis[j];
+        let product = pli.product;
+
+        let isInStock = productFilter.isInStock(product, threshold);
+        if (!isInStock) {
+            let productOps = [];
+            let indexOutOfStock = algoliaData.getPreference('IndexOutOfStock');
+
+            if (indexOutOfStock) {
+                if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
+                    let attrArray = ['variants'];
+                    if (additionalAttributes.indexOf('in_stock') > -1) {
+                        attrArray.push('in_stock');
+                    }
+                    productOps = generateAlgoliaOperations(product.masterProduct, attrArray);
+                } else {
+                    productOps = generateAlgoliaOperations(product, ['in_stock']);
+                }
+                algoliaOperations = algoliaOperations.concat(productOps);
+            } else {
+                productOps = generateAlgoliaOperations(
+                    product.masterProduct,
+                    ['in_stock', 'variants']
+                );
+
+                if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
+                    let isMasterInStock = productFilter.isInStock(product.masterProduct, threshold);
+                    if (!isMasterInStock) {
+                        productOps.forEach(function(productOp) {
+                            algoliaOperations = algoliaOperations.concat(
+                                new jobHelper.AlgoliaOperation(
+                                    'deleteObject',
+                                    { objectID: productOp.body.objectID },
+                                    productOp.indexName
+                                )
+                            );
+                        });
+                    } else {
+                        algoliaOperations = algoliaOperations.concat(productOps);
+                    }
+                } else {
+                    productOps.forEach(function(productOp) {
+                        algoliaOperations = algoliaOperations.concat(
+                            new jobHelper.AlgoliaOperation(
+                                'deleteObject',
+                                { objectID: productOp.body.objectID },
+                                productOp.indexName
+                            )
+                        );
+                    });
+                }
+            }
         }
     }
-    return false;
+    return algoliaOperations;
 }
