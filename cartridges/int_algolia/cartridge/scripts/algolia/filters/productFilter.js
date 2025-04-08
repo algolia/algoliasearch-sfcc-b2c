@@ -62,12 +62,13 @@ function isInStock(product, threshold) {
 function isInStoreStock(product, storeId, threshold) {
     const StoreMgr = require('dw/catalog/StoreMgr');
     let store = StoreMgr.getStore(storeId);
+    if (!store || !store.inventoryList) {
+        return false;
+    }
     let storeInventory = store.inventoryList;
-    if (storeInventory) {
-        let inventoryRecord = storeInventory.getRecord(product.ID);
-        if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= threshold) {
-            return true;
-        }
+    let inventoryRecord = storeInventory.getRecord(product.ID);
+    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= threshold) {
+        return true;
     }
     return false;
 }
