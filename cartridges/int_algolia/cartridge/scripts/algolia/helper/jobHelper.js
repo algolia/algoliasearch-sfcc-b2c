@@ -671,7 +671,7 @@ function getDefaultAttributeConfig(attributeName) {
 
 /**
  * Retrieves variant and master attribute configurations for a product.
- *
+ * @TODO: This function can be used for the refactoring in the future
  * @returns {Object} An object with variant/master attribute arrays and base-product-computed attributes.
  */
 function getAttributes() {

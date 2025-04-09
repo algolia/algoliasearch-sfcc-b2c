@@ -7,6 +7,7 @@ let jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 let reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
 let productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
+let AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
 let orderHelper = require('*/cartridge/scripts/algolia/helper/orderHelper');
 let isInStoreStock = productFilter.isInStoreStock;
@@ -16,6 +17,48 @@ let RECORD_MODEL_TYPE = {
     MASTER_LEVEL: 'master-level',
     VARIANT_LEVEL: 'variant-level'
 };
+
+/**
+ * Creates the necessary configuration for a product based on the record model type.
+ * 
+ * @param {dw.catalog.Product} product - The product to create config for.
+ * @param {string} recordModel - The type of record model.
+ * @returns {Object} Configuration object to pass to generateAlgoliaOperations.
+ */
+function createProductConfig(product, recordModel) {
+    let attributesConfig = jobHelper.getAttributes();
+    let productConfig = {};
+    
+    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && product.master) {
+        // Master product configuration
+        productConfig.baseModel = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: attributesConfig.nonLocalizedMasterAttributes
+        });
+        productConfig.variantAttributes = attributesConfig.variantAttributes;
+        productConfig.attributeList = attributesConfig.masterAttributes;
+    } else if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && !product.master) {
+        // Variant product, but we're using master-level indexing
+        let masterProduct = product.masterProduct;
+        productConfig.baseModel = new AlgoliaLocalizedProduct({
+            product: masterProduct,
+            locale: 'default',
+            attributeList: attributesConfig.nonLocalizedMasterAttributes
+        });
+        productConfig.variantAttributes = attributesConfig.variantAttributes;
+        productConfig.attributeList = attributesConfig.masterAttributes;
+    } else {
+        // Variant-level indexing for variant product
+        productConfig.baseModel = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: attributesConfig.variantAttributes
+        });
+    }
+    
+    return productConfig;
+}
 
 /**
  * Hook function that executes after an order is created (POST).
@@ -90,19 +133,26 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
 
         let inStoreStock = isInStoreStock(product, storeId, threshold);
         if (!inStoreStock && additionalAttributes.indexOf('storeAvailability') > -1) {
-            let productOps = [];
             if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
-                productOps = generateAlgoliaOperations(
-                    product.masterProduct,
-                    ['storeAvailability', 'variants']
+                let masterProduct = product.masterProduct;
+                let productConfig = createProductConfig(masterProduct, recordModel);
+                
+                let productOps = generateAlgoliaOperations(
+                    masterProduct,
+                    ['storeAvailability', 'variants'],
+                    productConfig
                 );
+                algoliaOperations = algoliaOperations.concat(productOps);
             } else {
-                productOps = generateAlgoliaOperations(
+                let productConfig = createProductConfig(product, recordModel);
+                
+                let productOps = generateAlgoliaOperations(
                     product,
-                    ['storeAvailability']
+                    ['storeAvailability'],
+                    productConfig
                 );
+                algoliaOperations = algoliaOperations.concat(productOps);
             }
-            algoliaOperations = algoliaOperations.concat(productOps);
         }
     }
     return algoliaOperations;
@@ -127,28 +177,35 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
         let isInStock = productFilter.isInStock(product, threshold);
         if (!isInStock) {
-            let productOps = [];
             let indexOutOfStock = algoliaData.getPreference('IndexOutOfStock');
 
             if (indexOutOfStock) {
                 if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
+                    let masterProduct = product.masterProduct;
                     let attrArray = ['variants'];
                     if (additionalAttributes.indexOf('in_stock') > -1) {
                         attrArray.push('in_stock');
                     }
-                    productOps = generateAlgoliaOperations(product.masterProduct, attrArray);
+                    
+                    let productConfig = createProductConfig(masterProduct, recordModel);
+                    let productOps = generateAlgoliaOperations(masterProduct, attrArray, productConfig);
+                    algoliaOperations = algoliaOperations.concat(productOps);
                 } else {
-                    productOps = generateAlgoliaOperations(product, ['in_stock']);
+                    let productConfig = createProductConfig(product, recordModel);
+                    let productOps = generateAlgoliaOperations(product, ['in_stock'], productConfig);
+                    algoliaOperations = algoliaOperations.concat(productOps);
                 }
-                algoliaOperations = algoliaOperations.concat(productOps);
             } else {
-                productOps = generateAlgoliaOperations(
-                    product.masterProduct,
-                    ['in_stock', 'variants']
+                let masterProduct = product.masterProduct;
+                let productConfig = createProductConfig(masterProduct, recordModel);
+                let productOps = generateAlgoliaOperations(
+                    masterProduct,
+                    ['in_stock', 'variants'],
+                    productConfig
                 );
 
                 if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
-                    let isMasterInStock = productFilter.isInStock(product.masterProduct, threshold);
+                    let isMasterInStock = productFilter.isInStock(masterProduct, threshold);
                     if (!isMasterInStock) {
                         productOps.forEach(function(productOp) {
                             algoliaOperations = algoliaOperations.concat(
