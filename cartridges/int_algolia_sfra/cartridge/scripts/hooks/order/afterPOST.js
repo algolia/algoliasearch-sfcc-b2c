@@ -136,21 +136,17 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
             if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
                 let masterProduct = product.masterProduct;
                 let productConfig = createProductConfig(masterProduct, recordModel);
-                
-                let productOps = generateAlgoliaOperations(
-                    masterProduct,
-                    ['variants'],
-                    productConfig
-                );
+
+                productConfig.attributeList = ['variants'];
+                productConfig.product = masterProduct;
+
+                let productOps = generateAlgoliaOperations(productConfig);
                 algoliaOperations = algoliaOperations.concat(productOps);
             } else {
                 let productConfig = createProductConfig(product, recordModel);
-                
-                let productOps = generateAlgoliaOperations(
-                    product,
-                    ['storeAvailability'],
-                    productConfig
-                );
+                productConfig.attributeList = ['storeAvailability'];
+                productConfig.product = product;
+                let productOps = generateAlgoliaOperations(productConfig);
                 algoliaOperations = algoliaOperations.concat(productOps);
             }
         }
@@ -188,11 +184,17 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     }
                     
                     let productConfig = createProductConfig(masterProduct, recordModel);
-                    let productOps = generateAlgoliaOperations(masterProduct, attrArray, productConfig);
+                    productConfig.attributeList = attrArray;
+                    productConfig.product = masterProduct;
+
+                    let productOps = generateAlgoliaOperations(productConfig);
                     algoliaOperations = algoliaOperations.concat(productOps);
                 } else {
                     let productConfig = createProductConfig(product, recordModel);
-                    let productOps = generateAlgoliaOperations(product, ['in_stock'], productConfig);
+                    productConfig.attributeList = ['in_stock'];
+                    productConfig.product = product;
+
+                    let productOps = generateAlgoliaOperations(productConfig);
                     algoliaOperations = algoliaOperations.concat(productOps);
                 }
             } else {
@@ -203,11 +205,10 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     attrArray = ['variants'];
                 }
                 let productConfig = createProductConfig(baseProduct, recordModel);
-                let productOps = generateAlgoliaOperations(
-                    baseProduct,
-                    attrArray,
-                    productConfig
-                );
+                productConfig.attributeList = attrArray;
+                productConfig.product = baseProduct;
+
+                let productOps = generateAlgoliaOperations(productConfig);
 
                 if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
                     let isMasterInStock = productFilter.isInStock(baseProduct, threshold);

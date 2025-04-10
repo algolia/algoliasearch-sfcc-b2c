@@ -9,13 +9,10 @@ let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
  * Generates an array of AlgoliaOperation objects to partially update product records in Algolia.
  * The function loops through allowed locales of the current site and creates a partialUpdateObject
  * operation for each locale.
- *
- * @param {dw.catalog.Product} product - Either a master product or a variant product.
- * @param {Array} attributes - Array of attribute names to be updated.
  * @param {Object} productConfig - Optional configuration for the product model.
  * @returns {Array} An array of AlgoliaOperation objects ready for indexing.
  */
-function generateAlgoliaOperations(product, attributes, productConfig) {
+function generateAlgoliaOperations(productConfig) {
     let algoliaOperations = [];
     let siteLocales = Site.getCurrent().getAllowedLocales();
     
@@ -24,13 +21,8 @@ function generateAlgoliaOperations(product, attributes, productConfig) {
         let indexName = algoliaData.calculateIndexName('products', locale);
 
         // Create localizedProductConfig - start with required properties
-        let localizedProductConfig = productConfig || {};
-        
-        // Always ensure these required properties are set (overwrite if in productConfig)
-        localizedProductConfig.product = product;
+        let localizedProductConfig = productConfig;
         localizedProductConfig.locale = locale;
-        localizedProductConfig.attributeList = attributes;
-
         let localizedProduct = new AlgoliaLocalizedProduct(localizedProductConfig);
         algoliaOperations.push(
             new jobHelper.AlgoliaOperation(
