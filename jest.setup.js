@@ -143,7 +143,9 @@ jest.mock('dw/system/Site', () => {
         }
     }
 }, {virtual: true});
-jest.mock('dw/system/Status', () => {}, {virtual: true});
+jest.mock('dw/system/Status', () => {
+    return jest.requireActual('./test/mocks/dw/system/Status');
+}, {virtual: true});
 jest.mock('dw/system/System', () => {
     return {
         getCalendar: function() {
@@ -271,6 +273,9 @@ jest.mock('*/cartridge/scripts/algolia/helper/AlgoliaJobReport', () => {
 jest.mock('*/cartridge/scripts/algolia/helper/CPObjectIterator', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/CPObjectIterator');
 }, {virtual: true});
+jest.mock('*/cartridge/scripts/algolia/helper/orderHelper', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/orderHelper')
+}, { virtual: true });
 jest.mock('*/cartridge/scripts/algolia/helper/fileHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/fileHelper');
 }, {virtual: true});

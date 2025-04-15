@@ -14,34 +14,35 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
     }
 }, { virtual: true });
 
-test('generateVariantRecords', () => {
-    // master product with two size variations on the same color variation
-    const masterProduct = new MasterProductMock();
-    const variantPinkSize4 = new VariantMock({
-        ID: '701644031206M',
-        variationAttributes: { color: 'JJB52A0', size: '004' },
-        masterProduct,
-    });
-    const variantPinkSize6 = new VariantMock({
-        ID: '701644031213M',
-        variationAttributes: { color: 'JJB52A0', size: '006' },
-        masterProduct,
-    });
-    masterProduct.variants = collectionHelper.createCollection([
-        variantPinkSize4,
-        variantPinkSize6,
-    ]);
-
-    const variantRecords = jobHelper.generateVariantRecords({
-        masterProduct,
-        locales: collectionHelper.createCollection(['fr']),
-        attributeList: ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'url', 'colorVariations'],
-        nonLocalizedAttributes: [],
-    });
-    expect(variantRecords).toMatchSnapshot();
-});
 
 describe('Job Helper', function () {
+    test('generateVariantRecords', () => {
+        // master product with two size variations on the same color variation
+        const masterProduct = new MasterProductMock();
+        const variantPinkSize4 = new VariantMock({
+            ID: '701644031206M',
+            variationAttributes: { color: 'JJB52A0', size: '004' },
+            masterProduct,
+        });
+        const variantPinkSize6 = new VariantMock({
+            ID: '701644031213M',
+            variationAttributes: { color: 'JJB52A0', size: '006' },
+            masterProduct,
+        });
+        masterProduct.variants = collectionHelper.createCollection([
+            variantPinkSize4,
+            variantPinkSize6,
+        ]);
+    
+        const variantRecords = jobHelper.generateVariantRecords({
+            masterProduct,
+            locales: collectionHelper.createCollection(['fr']),
+            attributeList: ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'url', 'colorVariations'],
+            nonLocalizedAttributes: [],
+        });
+        expect(variantRecords).toMatchSnapshot();
+    });
+
     test('Test getDefaultAttributeConfig', function () {
         expect(jobHelper.getDefaultAttributeConfig('dummy')).toEqual({
             attribute: 'dummy',
@@ -51,7 +52,8 @@ describe('Job Helper', function () {
     });
 
     test('Test getAttributes', function () {
-        const result = jobHelper.getAttributes();
+        const additionalAttributes = [];
+        const result = jobHelper.getAttributes(additionalAttributes);
 
         // Check some variant attributes
         expect(result.variantAttributes).toContain('in_stock');

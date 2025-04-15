@@ -672,15 +672,15 @@ function getDefaultAttributeConfig(attributeName) {
 /**
  * Retrieves variant and master attribute configurations for a product.
  * @TODO: This function can be used in algoliaProductIndex.js for the refactoring in the future
+ * @param {Array} additionalAttributes - Additional attributes to be added to the default attributes.
  * @returns {Object} An object with variant/master attribute arrays and base-product-computed attributes.
  */
-function getAttributes() {
+function getAttributes(additionalAttributes) {
     let extendedProductAttributesConfig;
     let nonLocalizedAttributes = [];
     let nonLocalizedMasterAttributes = [];
     let attributesComputedFromBaseProduct = [];
     let algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
-    let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
@@ -693,8 +693,6 @@ function getAttributes() {
     let variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
     let masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
 
-    // Additional attributes from SFCC custom preferences
-    let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
     additionalAttributes.map(function(attribute) {
         if (defaultAttributes.indexOf(attribute) < 0) {
             defaultAttributes.push(attribute);

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`generateVariantRecords 1`] = `
+exports[`Job Helper generateVariantRecords 1`] = `
 {
   "fr": [
     algoliaLocalizedProduct {

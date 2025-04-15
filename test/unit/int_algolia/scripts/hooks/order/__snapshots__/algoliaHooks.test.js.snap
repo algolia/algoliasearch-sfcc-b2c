@@ -1,0 +1,162 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Algolia Hooks handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - storeAvailability 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - storeAvailability 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks handleStandardShipment should generate correct operations for in-stock products - in_stock 1`] = `[]`;
+
+exports[`Algolia Hooks handleStandardShipment should generate correct operations for out of stock products - in_stock - should records be deleted 1`] = `
+[
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;

@@ -25,8 +25,8 @@ let RECORD_MODEL_TYPE = {
  * @param {string} recordModel - The type of record model.
  * @returns {Object} Configuration object to pass to generateAlgoliaOperations.
  */
-function createProductConfig(product, recordModel) {
-    let attributesConfig = jobHelper.getAttributes();
+function createProductConfig(product, recordModel, additionalAttributes) {
+    let attributesConfig = jobHelper.getAttributes(additionalAttributes);
     let productConfig = {};
     
     if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && product.master) {
@@ -66,7 +66,7 @@ function createProductConfig(product, recordModel) {
  * @param {dw.order.Order} order - The newly created order instance.
  * @returns {dw.system.Status} Status
  */
-exports.afterPOST = function (order) {
+exports.inventoryUpdate = function (order) {
     let ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
     let RECORD_MODEL = algoliaData.getPreference('RecordModel');
     let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
@@ -77,7 +77,7 @@ exports.afterPOST = function (order) {
 
         for (let i = 0; i < shipments.length; i++) {
             let shipment = shipments[i];
-            
+
             if (shipment.custom.shipmentType === 'instore') {
                 algoliaOperations = algoliaOperations.concat(
                     handleInStorePickupShipment(
@@ -135,7 +135,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
         if (!inStoreStock && additionalAttributes.indexOf('storeAvailability') > -1) {
             if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
                 let masterProduct = product.masterProduct;
-                let productConfig = createProductConfig(masterProduct, recordModel);
+                let productConfig = createProductConfig(masterProduct, recordModel, additionalAttributes);
 
                 productConfig.attributeList = ['variants'];
                 productConfig.product = masterProduct;
@@ -143,7 +143,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
                 let productOps = generateAlgoliaOperations(productConfig);
                 algoliaOperations = algoliaOperations.concat(productOps);
             } else {
-                let productConfig = createProductConfig(product, recordModel);
+                let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                 productConfig.attributeList = ['storeAvailability'];
                 productConfig.product = product;
                 let productOps = generateAlgoliaOperations(productConfig);
@@ -182,15 +182,15 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     if (additionalAttributes.indexOf('in_stock') > -1) {
                         attrArray.push('in_stock');
                     }
-                    
-                    let productConfig = createProductConfig(masterProduct, recordModel);
+
+                    let productConfig = createProductConfig(masterProduct, recordModel, additionalAttributes);
                     productConfig.attributeList = attrArray;
                     productConfig.product = masterProduct;
 
                     let productOps = generateAlgoliaOperations(productConfig);
                     algoliaOperations = algoliaOperations.concat(productOps);
                 } else {
-                    let productConfig = createProductConfig(product, recordModel);
+                    let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                     productConfig.attributeList = ['in_stock'];
                     productConfig.product = product;
 
@@ -204,7 +204,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     baseProduct = product.masterProduct;
                     attrArray = ['variants'];
                 }
-                let productConfig = createProductConfig(baseProduct, recordModel);
+                let productConfig = createProductConfig(baseProduct, recordModel, additionalAttributes);
                 productConfig.attributeList = attrArray;
                 productConfig.product = baseProduct;
 
@@ -241,3 +241,6 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
     }
     return algoliaOperations;
 }
+
+exports.handleInStorePickupShipment = handleInStorePickupShipment;
+exports.handleStandardShipment = handleStandardShipment;
