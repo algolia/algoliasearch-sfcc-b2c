@@ -23,3 +23,28 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+// Close cookie consent pop-up
+Cypress.Commands.add('CloseCookieConsent', () => {
+    const host = Cypress.env('SANDBOX_HOST');
+    // Visit your website's homepage or search page
+    cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
+    // Wait for the page to load
+    cy.get('body', { timeout: 20000 }).should('be.visible');
+    // Handle the cookie consent pop-up
+    cy.get('.affirm').click();
+});
+
+// Login command (storefront)
+Cypress.Commands.add('loginSFRA', (email, password) => {
+    const host = Cypress.env('SANDBOX_HOST');
+    cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site/en_US/Login-Show`);
+
+    cy.get('input#login-form-email').type(email);
+    cy.get('input#login-form-password').type(password);
+    //login button under login form (login form name is login-form)
+    cy.get('form[name="login-form"] .btn.btn-block.btn-primary').click();
+
+    // Wait until My Account link visible as proof of login
+    cy.get('.account-image', { timeout: 10000 }).should('be.visible');
+});

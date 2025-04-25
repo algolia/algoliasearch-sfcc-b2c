@@ -82,7 +82,7 @@ describe('Algolia Integration', () => {
             }
 
             const apiUrl = `https://${process.env.SANDBOX_HOST}/s/-/dw/data/v24_5/products/${product.id}?site_id=RefArch&client_id=${process.env.SFCC_OAUTH_CLIENT_ID}`;
-            
+
             console.log('Attempting to fetch from URL:', apiUrl);
 
             const response = await fetch(
@@ -142,5 +142,30 @@ describe('Algolia Integration', () => {
             const hit = results[0].hits[0];
             expect(hit.name).toContain(sfccProduct.name.default);
         });
+    });
+
+    test('Algolia record contains storeAvailability attribute', async () => {
+        // Arrange
+        const productName = process.env.STORE_AVAILABILITY_TEST_PRODUCT_NAME;
+        const indexName = recordModel === 'master-level' ? process.env.ALGOLIA_INDEX_NAME_MASTER : process.env.ALGOLIA_INDEX_NAME_VARIATION;
+
+        // Act
+        const { results } = await client.search({
+            requests: [
+                {
+                    indexName,
+                    query: productName,
+                }
+            ]
+        });
+
+        const hit = results?.[0]?.hits?.[0];
+
+        // Assert
+        if (recordModel === 'master-level') {
+            expect(hit.variants[0].storeAvailability).toBeDefined();
+        } else {
+            expect(hit.storeAvailability).toBeDefined();
+        }
     });
 });

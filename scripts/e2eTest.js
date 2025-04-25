@@ -18,6 +18,7 @@ const cypress = require('cypress');
 const deployCode = require('./deployCode');
 const importPreferences = require('./importPreferences');
 const runSFCCJob = require('./runSFCCJob');
+const authenticate = require('./auth');
 
 // List of paths to clean up
 const cleanupPaths = [
@@ -91,6 +92,13 @@ async function main() {
         console.log('[INFO] Importing site preferences...');
         await importPreferences();
 
+        // Ensure token exists before OCAPI call
+        await ensureAccessToken();
+
+        // Pre‑set ATS to 2 so first job picks it up
+        console.log('[INFO] Updating inventory ATS to 2 before indexing job...');
+        await updateInventoryATS(process.env.TEST_PRODUCT_ID, 2);
+
         console.log('[INFO] Running SFCC job...');
         await runSFCCJob();
 
@@ -151,7 +159,7 @@ async function runCypressTests() {
     };
 
     const result = await cypress.run({
-        spec: 'cypress/e2e/frontend.cy.js',
+        spec: 'cypress/e2e/*.cy.js',
         env: cypressEnv,
         browser: 'chrome',
         headless: true
@@ -168,6 +176,44 @@ async function runCypressTests() {
             + (result.message ? `, message: ${result.message}` : '')
         );
     }
+}
+
+/**
+ * Ensures ACCESS_TOKEN is available in env, otherwise authenticates and sets it.
+ */
+async function ensureAccessToken() {
+    if (process.env.ACCESS_TOKEN) {
+        return;
+    }
+    const token = await authenticate();
+    process.env.ACCESS_TOKEN = token;
+}
+
+/**
+ * Updates the inventory ATS for a given product.
+ * @param {string} productId - The ID of the product to update.
+ * @param {number} atsValue - The new ATS value to set.
+ */
+async function updateInventoryATS(productId, atsValue) {
+    const inventoryListId = process.env.INVENTORY_LIST_ID || 'inventory_m';
+    const apiUrl = `https://${process.env.SANDBOX_HOST}/s/-/dw/data/v24_5/inventory_lists/${inventoryListId}/product_inventory_records/${productId}`;
+    const body = { allocation: { amount: atsValue } };
+
+    const response = await fetch(apiUrl, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify(body)
+    });
+
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Failed to update inventory record: ${response.status} ${response.statusText}. Body: ${text}`);
+    }
+    var res = await response.json();
+    console.log('New ATS value:', res.allocation.amount);
 }
 
 main().catch((err) => {

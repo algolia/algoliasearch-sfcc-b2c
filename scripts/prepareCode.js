@@ -22,8 +22,8 @@ const archiver = require('archiver');
         throw new Error('Source directory does not exist: ' + srcDir);
     }
 
-    // Copy the contents of the "cartridges" folder directly into the codeVersion directory
-    fs.cpSync(srcDir, codeVersion, { recursive: true });
+    // Copy the contents of the "cartridges" folder to the codeVersion directory
+    fs.cpSync(srcDir, codeVersion + '/' + codeVersion, { recursive: true });
 
     // Zip up the directory
     const zipFileName = `${codeVersion}.zip`;
