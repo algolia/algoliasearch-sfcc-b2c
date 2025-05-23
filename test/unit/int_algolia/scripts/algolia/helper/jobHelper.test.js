@@ -52,12 +52,14 @@ describe('Job Helper', function () {
     });
 
     test('Test getAttributes', function () {
-        const additionalAttributes = [];
+        const additionalAttributes = ['size', 'test'];
         const result = jobHelper.getAttributes(additionalAttributes);
 
         // Check some variant attributes
         expect(result.variantAttributes).toContain('in_stock');
         expect(result.variantAttributes).toContain('price');
+        expect(result.variantAttributes).toContain('test');
+        expect(result.variantAttributes).toContain('size');
 
         // Check some master attributes
         expect(result.masterAttributes).toContain('variants');

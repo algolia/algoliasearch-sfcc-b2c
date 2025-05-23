@@ -9,7 +9,7 @@ let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
  * Generates an array of AlgoliaOperation objects to partially update product records in Algolia.
  * The function loops through allowed locales of the current site and creates a partialUpdateObject
  * operation for each locale.
- * @param {Object} productConfig - Optional configuration for the product model.
+ * @param {Object} productConfig - configuration for the product model.
  * @returns {Array} An array of AlgoliaOperation objects ready for indexing.
  */
 function generateAlgoliaOperations(productConfig) {
