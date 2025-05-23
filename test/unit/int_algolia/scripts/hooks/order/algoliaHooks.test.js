@@ -10,7 +10,7 @@ const VariantMock = require('../../../../../mocks/dw/catalog/Variant');
 const collectionHelper = require('../../../../../mocks/helpers/collectionHelper');
 
 // Mock for dw.catalog.StoreMgr with 3 in stock
-const StoreMgr = jest.mock('dw/catalog/StoreMgr', () => ({ // eslint-disable-line no-unused-vars
+jest.mock('dw/catalog/StoreMgr', () => ({
     getStore: jest.fn().mockReturnValue({
         inventoryList: {
             getRecord: jest.fn().mockReturnValue({ ATS: { value: 3 } })
