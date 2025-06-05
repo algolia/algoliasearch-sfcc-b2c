@@ -9,7 +9,7 @@ const mockConfig = {
     IndexOutOfStock: true,
     InStockThreshold: 5,
     RecordModel: 'master-level',
-    AdditionalAttributes: ['storeAvailability', 'in_stock']
+    AdditionalAttributes: ['storeAvailability', 'in_stock', 'brand', 'description']
 };
 
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
