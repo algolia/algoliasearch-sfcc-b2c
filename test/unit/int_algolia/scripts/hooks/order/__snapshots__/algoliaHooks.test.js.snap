@@ -141,6 +141,58 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment
 ]
 `;
 
+exports[`Algolia Hooks when IndexOutOfStock is false handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks when IndexOutOfStock is false handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
 exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment should generate correct operations for master-level record model - in stock - BOPIS Shipment 1`] = `[]`;
 
 exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment should generate correct operations for master-level record model - in stock - Standard Shipment 1`] = `[]`;

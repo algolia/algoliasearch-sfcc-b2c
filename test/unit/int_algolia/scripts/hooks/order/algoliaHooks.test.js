@@ -9,7 +9,7 @@ const mockConfig = {
     IndexOutOfStock: true,
     InStockThreshold: 5,
     RecordModel: 'master-level',
-    AdditionalAttributes: ['storeAvailability', 'in_stock', 'brand', 'description']
+    AdditionalAttributes: ['storeAvailability', 'in_stock']
 };
 
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
@@ -333,7 +333,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 1;
-        const additionalAttributes = ['storeAvailability'];
+        const additionalAttributes = ['storeAvailability', 'in_stock'];
         const recordModel = 'master-level';
 
         // Act
@@ -352,7 +352,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 1;
-        const additionalAttributes = ['storeAvailability'];
+        const additionalAttributes = ['storeAvailability', 'in_stock'];
         const recordModel = 'variant-level';
 
         // Act
@@ -405,4 +405,45 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Assert
         expect(operations).toMatchSnapshot();
     });
+
+
+    test('handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment', function () {
+        // Arrange
+        const shipment = mockShipmentStandard;
+        const threshold = 10;
+        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const recordModel = 'master-level';
+
+        // Act
+        const operations = algoliaHooks.handleStandardShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
+        // Assert
+        expect(operations).toMatchSnapshot();
+    });
+
+
+    test('handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment', function () {
+        // Arrange
+        const shipment = mockShipmentStandard;
+        const threshold = 10;
+        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const recordModel = 'variant-level';
+
+        // Act
+        const operations = algoliaHooks.handleStandardShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
+        // Assert
+        expect(operations).toMatchSnapshot();
+    });
+
 });
