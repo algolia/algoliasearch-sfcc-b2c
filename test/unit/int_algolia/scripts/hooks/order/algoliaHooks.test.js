@@ -9,7 +9,7 @@ const mockConfig = {
     IndexOutOfStock: true,
     InStockThreshold: 5,
     RecordModel: 'master-level',
-    AdditionalAttributes: ['storeAvailability', 'in_stock']
+    AdditionalAttributes: ['storeAvailability', 'in_stock', 'short_description', 'brand']
 };
 
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
@@ -129,7 +129,7 @@ describe('Algolia Hooks when IndexOutOfStock is true', function () {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 10;
-        const additionalAttributes = ['storeAvailability'];
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
         // Act
@@ -148,7 +148,7 @@ describe('Algolia Hooks when IndexOutOfStock is true', function () {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 10;
-        const additionalAttributes = ['storeAvailability'];
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
         // Act
@@ -167,7 +167,7 @@ describe('Algolia Hooks when IndexOutOfStock is true', function () {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 1;
-        const additionalAttributes = ['storeAvailability'];
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
         // Act
@@ -186,7 +186,7 @@ describe('Algolia Hooks when IndexOutOfStock is true', function () {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 1;
-        const additionalAttributes = ['storeAvailability'];
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
         // Act
@@ -205,7 +205,7 @@ describe('Algolia Hooks when IndexOutOfStock is true', function () {
         // Arrange
         const shipment = mockShipmentStandard;
         const threshold = 1;
-        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
         // Act
@@ -224,7 +224,7 @@ describe('Algolia Hooks when IndexOutOfStock is true', function () {
         // Arrange
         const shipment = mockShipmentStandard;
         const threshold = 1;
-        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
         // Act
@@ -295,7 +295,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 10;
-        const additionalAttributes = ['storeAvailability'];
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
         // Act
@@ -314,7 +314,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 10;
-        const additionalAttributes = ['storeAvailability'];
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
         // Act
@@ -333,7 +333,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 1;
-        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
         // Act
@@ -352,7 +352,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentInStore;
         const threshold = 1;
-        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
         // Act
@@ -372,7 +372,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentStandard;
         const threshold = 5;
-        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
         // Act
@@ -391,7 +391,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentStandard;
         const threshold = 5;
-        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
         // Act
@@ -411,7 +411,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentStandard;
         const threshold = 10;
-        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
         // Act
@@ -431,7 +431,7 @@ describe('Algolia Hooks when IndexOutOfStock is false', function() {
         // Arrange
         const shipment = mockShipmentStandard;
         const threshold = 10;
-        const additionalAttributes = ['storeAvailability', 'in_stock'];
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
         // Act

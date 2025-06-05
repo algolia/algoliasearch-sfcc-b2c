@@ -56,7 +56,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
             attributeList: attributesConfig.variantAttributes
         });
     }
-    
+
     return productConfig;
 }
 
@@ -137,7 +137,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
                 let masterProduct = product.masterProduct;
                 let productConfig = createProductConfig(masterProduct, recordModel, additionalAttributes);
 
-                productConfig.attributeList = ['variants'];
+                productConfig.attributeList.push('variants');
                 productConfig.product = masterProduct;
 
                 let productOps = generateAlgoliaOperations(productConfig);
@@ -184,7 +184,9 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     }
 
                     let productConfig = createProductConfig(masterProduct, recordModel, additionalAttributes);
-                    productConfig.attributeList = attrArray;
+                    for (let i = 0; i < attrArray.length; i++) {
+                        productConfig.attributeList.push(attrArray[i]);
+                    }
                     productConfig.product = masterProduct;
 
                     let productOps = generateAlgoliaOperations(productConfig);
