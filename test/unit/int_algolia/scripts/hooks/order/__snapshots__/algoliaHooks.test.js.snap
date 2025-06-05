@@ -1,129 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment should generate correct operations for master-level record model - in stock - BOPIS Shipment 1`] = `[]`;
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for master-level record model - in stock - BOPIS Shipment 1`] = `[]`;
 
-exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment should generate correct operations for master-level record model - in stock - Standard Shipment 1`] = `[]`;
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - BOPIS Shipment 1`] = `[]`;
 
-exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - BOPIS Shipment 1`] = `
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleStandardShipment should generate correct operations for master-level record model - in stock - Standard Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleStandardShipment should generate correct operations for variant-level record model - in stock - Standard Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for master-level record model - in stock - BOPIS Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - BOPIS Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: true) handleStandardShipment should generate correct operations for master-level record model - in stock - Standard Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: true) handleStandardShipment should generate correct operations for variant-level record model - in stock - Standard Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - BOPIS Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "partialUpdateObject",
     "body": {
-      "__primary_category": {
-        "0": "Womens",
-        "1": "Womens > Clothing",
-        "2": "Womens > Clothing > Bottoms",
-      },
-      "brand": null,
-      "categoryPageId": [
-        "newarrivals",
-        "newarrivals-womens",
-        "womens",
-        "womens-clothing",
-        "womens-clothing-bottoms",
-      ],
-      "colorVariations": [
-        {
-          "color": "Hot Pink Combo",
-          "image_groups": [
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "large",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "small",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, swatch",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "swatch",
-            },
-          ],
-          "variationURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
-        },
-      ],
-      "defaultVariantID": "701644031206M",
-      "image_groups": [
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "large",
-        },
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "small",
-        },
-      ],
-      "name": "Floral Dress",
       "objectID": "25592581M",
-      "short_description": "Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -135,7 +37,7 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment
         },
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -152,121 +54,11 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment
   AlgoliaOperation {
     "action": "partialUpdateObject",
     "body": {
-      "__primary_category": {
-        "0": "Femmes",
-        "1": "Femmes > Vêtements",
-        "2": "Femmes > Vêtements > Bas",
-      },
-      "brand": null,
-      "categoryPageId": [
-        "newarrivals",
-        "newarrivals-womens",
-        "womens",
-        "womens-clothing",
-        "womens-clothing-bottoms",
-      ],
-      "colorVariations": [
-        {
-          "color": "Combo rose vif",
-          "image_groups": [
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Robe florale, Combo rose vif, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Robe florale, Combo rose vif",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Robe florale, Combo rose vif, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Robe florale, Combo rose vif",
-                },
-              ],
-              "view_type": "large",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Robe florale, Combo rose vif, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Robe florale, Combo rose vif",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Robe florale, Combo rose vif, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Robe florale, Combo rose vif",
-                },
-              ],
-              "view_type": "small",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, swatch",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
-                },
-              ],
-              "view_type": "swatch",
-            },
-          ],
-          "variationURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
-        },
-      ],
-      "defaultVariantID": "701644031206M",
-      "image_groups": [
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Robe florale, Combo rose vif, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Robe florale, Combo rose vif",
-            },
-            {
-              "_type": "image",
-              "alt": "Robe florale, Combo rose vif, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Robe florale, Combo rose vif",
-            },
-          ],
-          "view_type": "large",
-        },
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Robe florale, Combo rose vif, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Robe florale, Combo rose vif",
-            },
-            {
-              "_type": "image",
-              "alt": "Robe florale, Combo rose vif, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Robe florale, Combo rose vif",
-            },
-          ],
-          "view_type": "small",
-        },
-      ],
-      "name": "Robe florale",
       "objectID": "25592581M",
-      "short_description": "Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Combo rose vif",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -278,7 +70,7 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment
         },
         algoliaLocalizedProduct {
           "color": "Combo rose vif",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -295,121 +87,11 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment
   AlgoliaOperation {
     "action": "partialUpdateObject",
     "body": {
-      "__primary_category": {
-        "0": "Womens",
-        "1": "Womens > Clothing",
-        "2": "Womens > Clothing > Bottoms",
-      },
-      "brand": null,
-      "categoryPageId": [
-        "newarrivals",
-        "newarrivals-womens",
-        "womens",
-        "womens-clothing",
-        "womens-clothing-bottoms",
-      ],
-      "colorVariations": [
-        {
-          "color": "Hot Pink Combo",
-          "image_groups": [
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "large",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "small",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, swatch",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "swatch",
-            },
-          ],
-          "variationURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
-        },
-      ],
-      "defaultVariantID": "701644031206M",
-      "image_groups": [
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "large",
-        },
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "small",
-        },
-      ],
-      "name": "Floral Dress",
       "objectID": "25592581M",
-      "short_description": "Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -421,7 +103,7 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment
         },
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -438,11 +120,7 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment
 ]
 `;
 
-exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - BOPIS Shipment 1`] = `[]`;
-
-exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - Standard Shipment 1`] = `[]`;
-
-exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - BOPIS Shipment 1`] = `
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - BOPIS Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "partialUpdateObject",
@@ -471,7 +149,7 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleInStorePickupShipment
 ]
 `;
 
-exports[`Algolia Hooks when IndexOutOfStock is false handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment 1`] = `
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "deleteObject",
@@ -497,7 +175,7 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleStandardShipment shou
 ]
 `;
 
-exports[`Algolia Hooks when IndexOutOfStock is false handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment 1`] = `
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "deleteObject",
@@ -523,130 +201,16 @@ exports[`Algolia Hooks when IndexOutOfStock is false handleStandardShipment shou
 ]
 `;
 
-exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment should generate correct operations for master-level record model - in stock - BOPIS Shipment 1`] = `[]`;
-
-exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment should generate correct operations for master-level record model - in stock - Standard Shipment 1`] = `[]`;
-
-exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - BOPIS Shipment 1`] = `
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - BOPIS Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "partialUpdateObject",
     "body": {
-      "__primary_category": {
-        "0": "Womens",
-        "1": "Womens > Clothing",
-        "2": "Womens > Clothing > Bottoms",
-      },
-      "brand": null,
-      "categoryPageId": [
-        "newarrivals",
-        "newarrivals-womens",
-        "womens",
-        "womens-clothing",
-        "womens-clothing-bottoms",
-      ],
-      "colorVariations": [
-        {
-          "color": "Hot Pink Combo",
-          "image_groups": [
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "large",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "small",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, swatch",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "swatch",
-            },
-          ],
-          "variationURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
-        },
-      ],
-      "defaultVariantID": "701644031206M",
-      "image_groups": [
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "large",
-        },
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "small",
-        },
-      ],
-      "name": "Floral Dress",
       "objectID": "25592581M",
-      "short_description": "Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -658,7 +222,7 @@ exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment 
         },
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -675,121 +239,11 @@ exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment 
   AlgoliaOperation {
     "action": "partialUpdateObject",
     "body": {
-      "__primary_category": {
-        "0": "Femmes",
-        "1": "Femmes > Vêtements",
-        "2": "Femmes > Vêtements > Bas",
-      },
-      "brand": null,
-      "categoryPageId": [
-        "newarrivals",
-        "newarrivals-womens",
-        "womens",
-        "womens-clothing",
-        "womens-clothing-bottoms",
-      ],
-      "colorVariations": [
-        {
-          "color": "Combo rose vif",
-          "image_groups": [
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Robe florale, Combo rose vif, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Robe florale, Combo rose vif",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Robe florale, Combo rose vif, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Robe florale, Combo rose vif",
-                },
-              ],
-              "view_type": "large",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Robe florale, Combo rose vif, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Robe florale, Combo rose vif",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Robe florale, Combo rose vif, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Robe florale, Combo rose vif",
-                },
-              ],
-              "view_type": "small",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Robe fleurie, Mix rose vif, swatch",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
-                  "title": "Robe fleurie, Mix rose vif",
-                },
-              ],
-              "view_type": "swatch",
-            },
-          ],
-          "variationURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
-        },
-      ],
-      "defaultVariantID": "701644031206M",
-      "image_groups": [
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Robe florale, Combo rose vif, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Robe florale, Combo rose vif",
-            },
-            {
-              "_type": "image",
-              "alt": "Robe florale, Combo rose vif, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Robe florale, Combo rose vif",
-            },
-          ],
-          "view_type": "large",
-        },
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Robe florale, Combo rose vif, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Robe florale, Combo rose vif",
-            },
-            {
-              "_type": "image",
-              "alt": "Robe florale, Combo rose vif, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Robe florale, Combo rose vif",
-            },
-          ],
-          "view_type": "small",
-        },
-      ],
-      "name": "Robe florale",
       "objectID": "25592581M",
-      "short_description": "Sentez la brise chaude dans cette robe portefeuille à imprimé floral polyvalent. Complétez ce look avec une superbe paire de sandales à lanières pour une soirée en ville.",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Combo rose vif",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -801,7 +255,7 @@ exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment 
         },
         algoliaLocalizedProduct {
           "color": "Combo rose vif",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -818,121 +272,11 @@ exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment 
   AlgoliaOperation {
     "action": "partialUpdateObject",
     "body": {
-      "__primary_category": {
-        "0": "Womens",
-        "1": "Womens > Clothing",
-        "2": "Womens > Clothing > Bottoms",
-      },
-      "brand": null,
-      "categoryPageId": [
-        "newarrivals",
-        "newarrivals-womens",
-        "womens",
-        "womens-clothing",
-        "womens-clothing-bottoms",
-      ],
-      "colorVariations": [
-        {
-          "color": "Hot Pink Combo",
-          "image_groups": [
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, large",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "large",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, small",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "small",
-            },
-            {
-              "_type": "image_group",
-              "images": [
-                {
-                  "_type": "image",
-                  "alt": "Floral Dress, Hot Pink Combo, swatch",
-                  "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw506aa734/images/swatch/PG.10237222.JJB52A0.CP.jpg",
-                  "title": "Floral Dress, Hot Pink Combo",
-                },
-              ],
-              "view_type": "swatch",
-            },
-          ],
-          "variationURL": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=25592581M&dwvar_25592581M_color=JJB52A0",
-        },
-      ],
-      "defaultVariantID": "701644031206M",
-      "image_groups": [
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "large",
-        },
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "small",
-        },
-      ],
-      "name": "Floral Dress",
       "objectID": "25592581M",
-      "short_description": "Feel the warm breeze in this versatile printed floral wrap dress. Polish off this look with a great pair of strappy sandals for a night on the town.",
       "variants": [
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -944,7 +288,7 @@ exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment 
         },
         algoliaLocalizedProduct {
           "color": "Hot Pink Combo",
-          "in_stock": true,
+          "in_stock": false,
           "price": {
             "EUR": 92.88,
             "USD": 129,
@@ -961,11 +305,7 @@ exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment 
 ]
 `;
 
-exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - BOPIS Shipment 1`] = `[]`;
-
-exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - Standard Shipment 1`] = `[]`;
-
-exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - BOPIS Shipment 1`] = `
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - BOPIS Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "partialUpdateObject",
@@ -988,6 +328,139 @@ exports[`Algolia Hooks when IndexOutOfStock is true handleInStorePickupShipment 
     "body": {
       "objectID": "701644031206M",
       "storeAvailability": [],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": false,
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": false,
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": false,
+      "objectID": "701644031207M",
     },
     "indexName": "test_index___products__en",
   },

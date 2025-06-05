@@ -137,7 +137,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
                 let masterProduct = product.masterProduct;
                 let productConfig = createProductConfig(masterProduct, recordModel, additionalAttributes);
 
-                productConfig.attributeList.push('variants');
+                productConfig.attributeList = ['variants'];
                 productConfig.product = masterProduct;
 
                 let productOps = generateAlgoliaOperations(productConfig);
@@ -184,9 +184,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     }
 
                     let productConfig = createProductConfig(masterProduct, recordModel, additionalAttributes);
-                    for (let i = 0; i < attrArray.length; i++) {
-                        productConfig.attributeList.push(attrArray[i]);
-                    }
+                    productConfig.attributeList = attrArray;
                     productConfig.product = masterProduct;
 
                     let productOps = generateAlgoliaOperations(productConfig);
