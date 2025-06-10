@@ -6,7 +6,7 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => ({
 
 let mockConfig = {
     IndexOutOfStock: true,
-    InStockThreshold: 10,
+    InStockThreshold: 5,
     RecordModel: 'master-level',
     AdditionalAttributes: ['storeAvailability', 'short_description', 'brand']
 };
@@ -133,10 +133,59 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         testData = setupTestData();
     });
 
+    test('handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment', function () {
+        // Arrange
+        const shipment = testData.mockShipmentStandard;
+        const threshold = 10;
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
+        const recordModel = 'master-level';
+
+        // Act
+        const operations = algoliaHooks.handleStandardShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
+        // Assert
+        expect(operations).toMatchSnapshot();
+    });
+
+    test('handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment', function () {
+        // Arrange
+        const shipment = testData.mockShipmentStandard;
+        const threshold = 10;
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
+        const recordModel = 'variant-level';
+
+        // Act
+        const operations = algoliaHooks.handleStandardShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
+        // Assert
+        expect(operations).toMatchSnapshot();
+    });
+});
+
+describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: true)', function () {
+    let testData;
+
+    beforeEach(() => {
+        // Configure mock for out of stock scenario with IndexOutOfStock = true
+        mockConfig.InStockThreshold = 5;
+        mockConfig.IndexOutOfStock = true;
+        testData = setupTestData();
+    });
+
     test('handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - BOPIS Shipment', function () {
         // Arrange
         const shipment = testData.mockShipmentInStore;
-        const threshold = 10;
+        const threshold = 5;
         const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
@@ -155,7 +204,7 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
     test('handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - BOPIS Shipment', function () {
         // Arrange
         const shipment = testData.mockShipmentInStore;
-        const threshold = 10;
+        const threshold = 5;
         const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
@@ -170,6 +219,18 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         // Assert
         expect(operations).toMatchSnapshot();
     });
+});
+
+describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false)', function () {
+    let testData;
+
+    beforeEach(() => {
+        // Configure mock for out of stock scenario with IndexOutOfStock = false
+        mockConfig.InStockThreshold = 10;
+        mockConfig.IndexOutOfStock = false;
+        testData = setupTestData();
+    });
+
 
     test('handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment', function () {
         // Arrange
@@ -210,12 +271,12 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
     });
 });
 
-describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false)', function () {
+describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: false)', function () {
     let testData;
 
     beforeEach(() => {
         // Configure mock for out of stock scenario with IndexOutOfStock = false
-        mockConfig.InStockThreshold = 10;
+        mockConfig.InStockThreshold = 5;
         mockConfig.IndexOutOfStock = false;
         testData = setupTestData();
     });
@@ -223,7 +284,7 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
     test('handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - BOPIS Shipment', function () {
         // Arrange
         const shipment = testData.mockShipmentInStore;
-        const threshold = 10;
+        const threshold = 5;
         const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'master-level';
 
@@ -242,50 +303,12 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
     test('handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - BOPIS Shipment', function () {
         // Arrange
         const shipment = testData.mockShipmentInStore;
-        const threshold = 10;
+        const threshold = 5;
         const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
         const recordModel = 'variant-level';
 
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
-            shipment,
-            threshold,
-            additionalAttributes,
-            recordModel
-        );
-
-        // Assert
-        expect(operations).toMatchSnapshot();
-    });
-
-    test('handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment', function () {
-        // Arrange
-        const shipment = testData.mockShipmentStandard;
-        const threshold = 10;
-        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
-        const recordModel = 'master-level';
-
-        // Act
-        const operations = algoliaHooks.handleStandardShipment(
-            shipment,
-            threshold,
-            additionalAttributes,
-            recordModel
-        );
-
-        // Assert
-        expect(operations).toMatchSnapshot();
-    });
-
-    test('handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment', function () {
-        // Arrange
-        const shipment = testData.mockShipmentStandard;
-        const threshold = 10;
-        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
-        const recordModel = 'variant-level';
-
-        // Act
-        const operations = algoliaHooks.handleStandardShipment(
             shipment,
             threshold,
             additionalAttributes,
