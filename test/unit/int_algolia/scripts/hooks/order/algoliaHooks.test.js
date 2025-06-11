@@ -6,10 +6,12 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => ({
 
 let mockConfig = {
     IndexOutOfStock: true,
-    InStockThreshold: 5,
+    InStockThreshold: 10,
     RecordModel: 'master-level',
     AdditionalAttributes: ['storeAvailability', 'short_description', 'brand']
 };
+
+const algoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
     ...jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData'),
@@ -73,6 +75,11 @@ class ShipmentMock {
 
 // Helper function to setup common test data
 function setupTestData() {
+
+    algoliaLocalizedProduct.__setThreshold(mockConfig.InStockThreshold);
+    algoliaLocalizedProduct.__setIndexOutOfStock(mockConfig.IndexOutOfStock);
+    algoliaLocalizedProduct.__setAttributeList(mockConfig.AdditionalAttributes);
+
     const mockMasterProduct = new MasterVariantMock({
         inventoryList: {
             getRecord: jest.fn().mockReturnValue({ ATS: { value: 3 } })
