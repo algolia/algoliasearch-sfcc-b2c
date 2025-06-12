@@ -47,30 +47,12 @@ context('Inventory real-time update', () => {
         cy.get('.order-thank-you-msg', { timeout: 10000 }).should('be.visible');
 
         // Verify via storefront search that the product is no longer available (out of stock)
-        // Retry up to 3 times with 15-second waits between attempts
-        const verifyProductOutOfStock = (attempt = 1) => {
-            cy.get('#autocomplete-0-input').clear()
-            cy.get('#autocomplete-0-input').type(productName)
-            cy.get('#autocomplete-0-input').type('{enter}')
+        cy.get('#autocomplete-0-input').clear()
+        cy.get('#autocomplete-0-input').type(productName)
+        cy.get('#autocomplete-0-input').type('{enter}')
 
-            cy.get('.search-results', { timeout: 15000 }).should('be.visible').then(() => {
-                cy.get('body').then(($body) => {
-                    if ($body.find(':contains("No results")').length > 0) {
-                        cy.contains('No results').should('be.visible');
-                    } else {
-                        if (attempt < 3) {
-                            cy.log(`Attempt ${attempt} failed. Product still in stock. Waiting 15 seconds before retry...`);
-                            cy.wait(15000);
-                            verifyProductOutOfStock(attempt + 1);
-                        } else {
-                            cy.log('All 3 attempts failed. Product is still showing as in stock.');
-                            throw new Error('Product is still in stock after 3 attempts');
-                        }
-                    }
-                });
-            });
-        };
-
-        verifyProductOutOfStock();
+        // Wait for search results and verify product is out of stock
+        cy.get('.search-results', { timeout: 30000 }).should('be.visible')
+        cy.contains('No results', { timeout: 30000 }).should('be.visible');
     });
 });
