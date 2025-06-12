@@ -28,9 +28,9 @@ try {
 } catch (e) { // eslint-disable-line no-unused-vars
 }
 
-const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
-const INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
-const ATTRIBUTE_LIST = algoliaData.getSetOfArray('AdditionalAttributes');
+var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+var INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
+var ATTRIBUTE_LIST = algoliaData.getSetOfArray('AdditionalAttributes');
 const stores = [];
 
 if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
@@ -571,5 +571,18 @@ function algoliaLocalizedProduct(parameters) {
         }
     }
 }
+
+// For testing - static methods on constructor
+algoliaLocalizedProduct.__setThreshold = function(threshold) {
+    ALGOLIA_IN_STOCK_THRESHOLD = threshold;
+};
+
+algoliaLocalizedProduct.__setIndexOutOfStock = function(indexOutOfStock) {
+    INDEX_OUT_OF_STOCK = indexOutOfStock;
+};
+
+algoliaLocalizedProduct.__setAttributeList = function(attributeList) {
+    ATTRIBUTE_LIST = attributeList;
+};
 
 module.exports = algoliaLocalizedProduct;

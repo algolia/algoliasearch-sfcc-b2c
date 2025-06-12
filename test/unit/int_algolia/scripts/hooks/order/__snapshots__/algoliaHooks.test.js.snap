@@ -1,0 +1,468 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for master-level record model - in stock - BOPIS Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - BOPIS Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleStandardShipment should generate correct operations for master-level record model - in stock - Standard Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleStandardShipment should generate correct operations for variant-level record model - in stock - Standard Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for master-level record model - in stock - BOPIS Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - BOPIS Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: true) handleStandardShipment should generate correct operations for master-level record model - in stock - Standard Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: true) handleStandardShipment should generate correct operations for variant-level record model - in stock - Standard Shipment 1`] = `[]`;
+
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M",
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": false,
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": false,
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": false,
+      "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - BOPIS Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - BOPIS Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for master-level record model - out of stock - BOPIS Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Combo rose vif",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for variant-level record model - out of stock - BOPIS Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
