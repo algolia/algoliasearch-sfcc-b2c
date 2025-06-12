@@ -6,28 +6,6 @@ var ProductMock = require('../../../../../mocks/dw/catalog/Variant');
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
-jest.mock('dw/system/Site', () => {
-    return {
-        getCurrent: function () {
-            return {
-                getAllowedLocales: function () {
-                    var arr = ['default', 'fr', 'en'];
-                    arr.size = function () {
-                        return arr.length;
-                    };
-                    return arr;
-                },
-                getAllowedCurrencies: function () {
-                    var arr = ['USD', 'EUR'];
-                    arr.size = function () {
-                        return arr.length;
-                    };
-                    return arr;
-                }
-            };
-        }
-    }
-}, {virtual: true});
 jest.mock('dw/util/StringUtils', () => {
     return {
         trim: function (str) { return str; }

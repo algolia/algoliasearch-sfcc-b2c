@@ -1,0 +1,133 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Order Helper generateAlgoliaOperations should create operations for all locales 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": true,
+      "objectID": "25592581M",
+      "variants": [],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": true,
+      "objectID": "25592581M",
+      "variants": [],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": true,
+      "objectID": "25592581M",
+      "variants": [],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Order Helper generateAlgoliaOperations should keep all product Config for master level 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "id": "701644031206M",
+          "in_stock": true,
+          "storeAvailability": [],
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "id": "701644031213M",
+          "in_stock": true,
+          "storeAvailability": [],
+          "variantID": "701644031213M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "id": "701644031206M",
+          "in_stock": true,
+          "storeAvailability": [],
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "id": "701644031213M",
+          "in_stock": true,
+          "storeAvailability": [],
+          "variantID": "701644031213M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "id": "701644031206M",
+          "in_stock": true,
+          "storeAvailability": [],
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "id": "701644031213M",
+          "in_stock": true,
+          "storeAvailability": [],
+          "variantID": "701644031213M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Order Helper generateAlgoliaOperations should keep all product Config for variant level 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": true,
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": true,
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "in_stock": true,
+      "objectID": "701644031206M",
+      "storeAvailability": [],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;

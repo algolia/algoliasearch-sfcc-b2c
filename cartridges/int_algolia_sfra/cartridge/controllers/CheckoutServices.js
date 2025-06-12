@@ -25,7 +25,7 @@ server.append('PlaceOrder', function (req, res, next) {
         return next();
     }
 
-    HookMgr.callHook('dw.ocapi.shop.order.afterPOST', 'afterPOST', order);
+    HookMgr.callHook('dw.ocapi.shop.order.afterPOST', 'inventoryUpdate', order);
     next();
 });
 

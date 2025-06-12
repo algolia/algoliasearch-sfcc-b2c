@@ -23,8 +23,13 @@ function enableInstantSearch(config) {
     const activeCustomerPromotionsEl = document.querySelector('#algolia-activePromos');
     const isPricingLazyLoad = algoliaData.EnablePricingLazyLoad;
     activeCustomerPromotions = JSON.parse(activeCustomerPromotionsEl.dataset.promotions);
-    const storeListEl = document.querySelector('#algolia-storeList');
-    const storeList = storeListEl ? JSON.parse(storeListEl.dataset.stores) : [];
+    var storeList = [];
+    try {
+        const storeListEl = document.querySelector('#algolia-storeList');
+        storeList = storeListEl ? JSON.parse(storeListEl.dataset.stores) : [];
+    } catch (e) {
+        console.error('Error parsing store list', e);
+    }
 
     let displaySwatches = false;
     var initialUiState = {};

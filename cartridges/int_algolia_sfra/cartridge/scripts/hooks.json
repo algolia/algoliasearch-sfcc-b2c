@@ -2,7 +2,7 @@
     "hooks": [
         {
             "name": "dw.ocapi.shop.order.afterPOST",
-            "script": "./hooks/order/afterPOST"
+            "script": "./hooks/order/algoliaHooks"
         }
     ]
 }
