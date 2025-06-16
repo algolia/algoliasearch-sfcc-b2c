@@ -33,6 +33,4 @@ Cypress.on('uncaught:exception', (err) => {
     if (err.message && knownBenignErrors.some((substr) => err.message.includes(substr))) {
         return false; // prevents test failure for these known benign errors
     }
-    // You can return false for all errors if preferred:
-    // return false;
 });
