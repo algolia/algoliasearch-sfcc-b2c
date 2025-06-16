@@ -148,7 +148,7 @@ describe('Algolia Integration', () => {
     test('Algolia record contains storeAvailability attribute', async () => {
         // Arrange
         const prefix = process.env.INDEX_PREFIX;
-        const productName = process.env.STORE_AVAILABILITY_TEST_PRODUCT_NAME;
+        const productName = process.env.TEST_PRODUCT_NAME;
         const indexName = `${prefix}__products__en_US`;
 
         // Act
