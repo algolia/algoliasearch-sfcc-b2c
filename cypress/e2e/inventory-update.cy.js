@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const email = 'test@algolia.com';
 const password = 'Algolia2025!';
-const productName = Cypress.env('TEST_PRODUCT_NAME') || process.env.TEST_PRODUCT_NAME;
+const productName = Cypress.env('TEST_PRODUCT_NAME') || process.env.TEST_PRODUCT_NAME || 'Pink and Gold Cluster Drop Earring';
 
 /**
  * Inventory real-time update
