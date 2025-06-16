@@ -18,11 +18,11 @@ async function importPreferences() {
         var recordModel, indexPrefix, additionalAttributes;
         if (process.env.RECORD_MODEL === 'master-level') { 
             recordModel = 'master-level';
-            indexPrefix = 'basex';
+            indexPrefix = process.env.INDEX_PREFIX;
             additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival,storeAvailability';
         } else {
             recordModel = 'variant-level';
-            indexPrefix = 'varx';
+            indexPrefix = process.env.INDEX_PREFIX;
             additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival,storeAvailability';
         }
 

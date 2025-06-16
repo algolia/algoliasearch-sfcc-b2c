@@ -44,8 +44,8 @@ describe('Algolia Integration', () => {
     });
 
     let client;
-    const recordModel = process.env.RECORD_MODEL || 'variation-level';
-    const indexPrefix = process.env.INDEX_PREFIX || 'varx';
+    const recordModel = process.env.RECORD_MODEL
+    const indexPrefix = process.env.INDEX_PREFIX
 
     beforeEach(() => {
         client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY);
@@ -141,13 +141,15 @@ describe('Algolia Integration', () => {
 
             const hit = results[0].hits[0];
             expect(hit.name).toContain(sfccProduct.name.default);
+            process.env.TEST_PRODUCT_NAME = sfccProduct.name.default;
         });
     });
 
     test('Algolia record contains storeAvailability attribute', async () => {
         // Arrange
+        const prefix = process.env.INDEX_PREFIX;
         const productName = process.env.STORE_AVAILABILITY_TEST_PRODUCT_NAME;
-        const indexName = recordModel === 'master-level' ? process.env.ALGOLIA_INDEX_NAME_MASTER : process.env.ALGOLIA_INDEX_NAME_VARIATION;
+        const indexName = `${prefix}__products__en_US`;
 
         // Act
         const { results } = await client.search({

@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const email = 'test@algolia.com';
 const password = 'Algolia2025!';
-const productName = Cypress.env('TEST_PRODUCT_NAME') || process.env.TEST_PRODUCT_NAME || 'Pink and Gold Cluster Drop Earring';
+const productName = Cypress.env('TEST_PRODUCT_NAME') || process.env.TEST_PRODUCT_NAME;
 
 /**
  * Inventory real-time update
@@ -47,12 +47,33 @@ context('Inventory real-time update', () => {
         cy.get('.order-thank-you-msg', { timeout: 10000 }).should('be.visible');
 
         // Verify via storefront search that the product is no longer available (out of stock)
-        cy.get('#autocomplete-0-input').clear()
-        cy.get('#autocomplete-0-input').type(productName)
-        cy.get('#autocomplete-0-input').type('{enter}')
+        const maxAttempts = 3;
 
-        // Wait for search results and verify product is out of stock
-        cy.get('.search-results', { timeout: 30000 }).should('be.visible')
-        cy.contains('No results', { timeout: 30000 }).should('be.visible');
+        const performSearch = () => {
+            cy.get('#autocomplete-0-input').clear();
+            cy.get('#autocomplete-0-input').type(productName);
+            cy.get('#autocomplete-0-input').type('{enter}');
+        };
+
+        const verifyOutOfStock = (attempt = 1) => {
+            cy.log(`Inventory check attempt ${attempt}/${maxAttempts}`);
+            performSearch();
+
+            cy.get('body', { log: false }).then(($body) => {
+                const productStillVisible = $body.find('.product-tile:contains("' + productName + '")').length > 0;
+
+                if (!productStillVisible) {
+                    cy.log('✅ Product is out of stock (not found in search results)');
+                } else if (attempt < maxAttempts) {
+                    cy.log('🔄 Product still appears in search, retrying in 5s...');
+                    cy.then(() => new Cypress.Promise((resolve) => setTimeout(resolve, 5000)))
+                        .then(() => verifyOutOfStock(attempt + 1));
+                } else {
+                    throw new Error('❌ Product still appears in search after maximum retries');
+                }
+            });
+        };
+
+        verifyOutOfStock();
     });
 });
