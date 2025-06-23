@@ -80,11 +80,12 @@ async function main() {
     const recordModels = ['master-level', 'variation-level'];
 
     const indexPrefixes = {
-        'master-level': 'basex',
-        'variation-level': 'varx'
+        'master-level': 'test_ci',
+        'variation-level': 'test_ci'
     };
 
     for (const model of recordModels) {
+
         console.log(`\n[INFO] === Running E2E for: ${model} ===`);
         process.env.RECORD_MODEL = model;
         process.env.INDEX_PREFIX = indexPrefixes[model];

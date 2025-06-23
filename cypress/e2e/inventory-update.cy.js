@@ -1,8 +1,8 @@
 /// <reference types="cypress" />
 require('dotenv').config();
 
-const email = 'test@algolia.com';
-const password = 'Algolia2025!';
+const email = Cypress.env('TEST_SHOPPER_EMAIL');
+const password = Cypress.env('TEST_SHOPPER_PASSWORD');
 const productName = Cypress.env('TEST_PRODUCT_NAME') || process.env.TEST_PRODUCT_NAME || 'Pink and Gold Cluster Drop Earring';
 
 /**
