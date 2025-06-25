@@ -69,7 +69,7 @@ module.exports = [
         },
     },
     {
-        files: ['eslint.config.js', 'jest.config.js', 'test/**/*.js'],
+        files: ['eslint.config.js', 'jest.config.js', 'cypress.config.js', 'test/**/*.js'],
         languageOptions: {
             globals: {
                 ...globals.jest,
