@@ -80,8 +80,8 @@ async function main() {
     const recordModels = ['master-level', 'variation-level'];
 
     const indexPrefixes = {
-        'master-level': 'test_ci',
-        'variation-level': 'test_ci'
+        'master-level': 'test_ci_master',
+        'variation-level': 'test_ci_variation'
     };
 
     for (const model of recordModels) {
@@ -126,7 +126,9 @@ function ensureRequiredEnvVars() {
         'SFCC_OAUTH_CLIENT_ID',
         'SFCC_OAUTH_CLIENT_SECRET',
         'ALGOLIA_APP_ID',
-        'ALGOLIA_API_KEY'
+        'ALGOLIA_API_KEY',
+        'TEST_SHOPPER_EMAIL',
+        'TEST_SHOPPER_PASSWORD'
     ];
 
     requiredVars.forEach((envVar) => {

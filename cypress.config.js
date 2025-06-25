@@ -5,9 +5,18 @@ module.exports = defineConfig({
     e2e: {
         setupNodeEvents(on, config) {
             // Copy environment variables to Cypress config
-            config.env = config.env || {};
-            config.env.SANDBOX_HOST = process.env.SANDBOX_HOST;
-            // Important: return the updated config
+            config.env = {
+                ...config.env,
+                ...process.env,
+            };
+
+            on('task', {
+                async getProduct({ id }) {
+                    const getProduct = require('./scripts/getProduct');
+                    return await getProduct(id);
+                },
+            });
+
             return config;
         },
         pageLoadTimeout: 15000,

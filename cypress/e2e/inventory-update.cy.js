@@ -1,9 +1,9 @@
 /// <reference types="cypress" />
 require('dotenv').config();
 
-const email = Cypress.env('TEST_SHOPPER_EMAIL');
-const password = Cypress.env('TEST_SHOPPER_PASSWORD');
-const productName = Cypress.env('TEST_PRODUCT_NAME') || process.env.TEST_PRODUCT_NAME || 'Pink and Gold Cluster Drop Earring';
+let email;
+let password;
+let productName;
 
 /**
  * Inventory real-time update
@@ -12,8 +12,19 @@ const productName = Cypress.env('TEST_PRODUCT_NAME') || process.env.TEST_PRODUCT
 context('Inventory real-time update', () => {
     before(() => {
         cy.CloseCookieConsent();
-        // Login once
-        cy.loginSFRA(email, password);
+
+        email = Cypress.env('TEST_SHOPPER_EMAIL');
+        password = Cypress.env('TEST_SHOPPER_PASSWORD');
+
+        const idFromEnv = Cypress.env('TEST_PRODUCT_ID');
+
+        cy.task('getProduct', { id: idFromEnv }).then((product) => {
+            productName = product.name.default;
+            Cypress.env('TEST_PRODUCT_NAME', productName);
+        }).then(() => {
+            // Login after we have the product name
+            cy.loginSFRA(email, password);
+        });
     });
 
     it('Places order and ensures product removed from Algolia (out of stock)', () => {
