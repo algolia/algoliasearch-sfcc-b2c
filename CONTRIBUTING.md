@@ -34,6 +34,13 @@ If that account doesn't exist on your sandbox yet, you can create it:
 
 1. Open the storefront ➜ *My Account* ➜ *Register* and sign up **manually** using the following credentisals
 
+### 3.2 Preparing the Test Shopper Account
+Log in to your sandbox storefront with the test credentials (TEST_SHOPPER_EMAIL & TEST_SHOPPER_PASSWORD).
+
+In the account's "Address Book" section, create at least one default shipping address.
+
+In the "Payment Methods" section, add a credit card. With the SFCC demo data you can add a one-time card (4242 4242 4242 4242 and future date for expiry) and leave the CVV field blank; during the test flow loginSFRA will supply CVV=123 when the card is used.
+
 ## 5. Useful npm scripts
 
 - `npm run lint:js` – ESLint, Stylelint, and Prettier checks.

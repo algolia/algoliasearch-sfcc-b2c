@@ -25,7 +25,7 @@
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
 // Close cookie consent pop-up
-Cypress.Commands.add('CloseCookieConsent', () => {
+Cypress.Commands.add('closeCookieConsent', () => {
     const host = Cypress.env('SANDBOX_HOST');
     // Visit your website's homepage or search page
     cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);

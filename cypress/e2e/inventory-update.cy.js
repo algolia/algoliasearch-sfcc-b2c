@@ -11,7 +11,7 @@ let productName;
  */
 context('Inventory real-time update', () => {
     before(() => {
-        cy.CloseCookieConsent();
+        cy.closeCookieConsent();
 
         email = Cypress.env('TEST_SHOPPER_EMAIL');
         password = Cypress.env('TEST_SHOPPER_PASSWORD');

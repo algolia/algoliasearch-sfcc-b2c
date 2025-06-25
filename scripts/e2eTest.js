@@ -128,7 +128,9 @@ function ensureRequiredEnvVars() {
         'ALGOLIA_APP_ID',
         'ALGOLIA_API_KEY',
         'TEST_SHOPPER_EMAIL',
-        'TEST_SHOPPER_PASSWORD'
+        'TEST_SHOPPER_PASSWORD',
+        'INVENTORY_LIST_ID',
+        'INDEX_PREFIX'
     ];
 
     requiredVars.forEach((envVar) => {

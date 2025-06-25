@@ -4,7 +4,7 @@ require('dotenv').config();
 describe('Algolia Search', () => {
     beforeEach(() => {
         // Close cookie consent
-        cy.CloseCookieConsent();
+        cy.closeCookieConsent();
     });
 
     const testSearchScenarios = [];
