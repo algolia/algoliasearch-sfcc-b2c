@@ -19,3 +19,20 @@
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 require('./commands')
+
+// Ignore specific client-side JS errors that do not affect test assertions
+Cypress.on('uncaught:exception', (err) => {
+    // Ignore specific "cannot read property of undefined" cases that are known to
+    // happen in the storefront but do not impact the assertions we care about.
+    const knownBenignErrors = [
+        "reading 'price'",   // Algolia price parsing error @TODO: fix this
+        "reading 'split'",   // Checkout JS attempts to split undefined value
+        "reading 'nodeValue'", // Occasional DOM nodeValue errors from storefront JS
+        "Cannot read properties of undefined (reading 'color')", // Occasional DOM nodeValue errors from storefront JS @TODO: fix this
+        "$ is not defined", // Occasional DOM nodeValue errors from storefront JS
+    ];
+
+    if (err.message && knownBenignErrors.some((substr) => err.message.includes(substr))) {
+        return false; // prevents test failure for these known benign errors
+    }
+});

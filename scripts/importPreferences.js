@@ -18,12 +18,12 @@ async function importPreferences() {
         var recordModel, indexPrefix, additionalAttributes;
         if (process.env.RECORD_MODEL === 'master-level') { 
             recordModel = 'master-level';
-            indexPrefix = 'basex';
-            additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival';
+            indexPrefix = process.env.INDEX_PREFIX;
+            additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival,storeAvailability';
         } else {
             recordModel = 'variant-level';
-            indexPrefix = 'varx';
-            additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival';
+            indexPrefix = process.env.INDEX_PREFIX;
+            additionalAttributes = 'color,size,colorVariations,masterID,short_description,brand,name,pricebooks,newArrival,storeAvailability';
         }
 
         // Create directories
@@ -36,13 +36,19 @@ async function importPreferences() {
 
         console.log('Directories copied/created successfully.');
 
+        var additionalAttributesString = '';
+        additionalAttributes.split(',').forEach(attribute => {
+            additionalAttributesString += `<value>${attribute}</value>`;
+        });
+
         const preferencesXmlContent = `<?xml version="1.0" encoding="UTF-8"?>
 <preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
     <custom-preferences>
       <all-instances>
         <preference preference-id="Algolia_RecordModel">${recordModel}</preference>
         <preference preference-id="Algolia_IndexPrefix">${indexPrefix}</preference>
-        <preference preference-id="Algolia_AdditionalAttributes">${additionalAttributes}</preference>
+        <preference preference-id="Algolia_AdditionalAttributes">${additionalAttributesString}</preference>
+        <preference preference-id="Algolia_EnableRealTimeInventoryHook">true</preference>
       </all-instances>
     </custom-preferences>
 </preferences>`;

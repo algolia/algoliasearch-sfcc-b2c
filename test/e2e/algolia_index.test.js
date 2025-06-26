@@ -1,6 +1,9 @@
 require('dotenv').config();
 const { algoliasearch } = require('algoliasearch');
 const sfcc = require('sfcc-ci');
+const getProduct = require('../../scripts/getProduct');
+
+var productName;
 
 describe('Algolia Integration', () => {
     beforeAll(async () => {
@@ -44,8 +47,8 @@ describe('Algolia Integration', () => {
     });
 
     let client;
-    const recordModel = process.env.RECORD_MODEL || 'variation-level';
-    const indexPrefix = process.env.INDEX_PREFIX || 'varx';
+    const recordModel = process.env.RECORD_MODEL
+    const indexPrefix = process.env.INDEX_PREFIX;
 
     beforeEach(() => {
         client = algoliasearch(process.env.ALGOLIA_APP_ID, process.env.ALGOLIA_API_KEY);
@@ -81,43 +84,7 @@ describe('Algolia Integration', () => {
                 throw new Error(`TEST_${product.type.toUpperCase()}_PRODUCT_ID environment variable is not set`);
             }
 
-            const apiUrl = `https://${process.env.SANDBOX_HOST}/s/-/dw/data/v24_5/products/${product.id}?site_id=RefArch&client_id=${process.env.SFCC_OAUTH_CLIENT_ID}`;
-            
-            console.log('Attempting to fetch from URL:', apiUrl);
-
-            const response = await fetch(
-                apiUrl,
-                {
-                    headers: {
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${process.env.ACCESS_TOKEN}`
-                    }
-                }
-            );
-
-            if (!response.ok) {
-                const text = await response.text();
-                console.error('SFCC API Error Response:', {
-                    url: apiUrl,
-                    status: response.status,
-                    statusText: response.statusText,
-                    headers: Object.fromEntries(response.headers.entries()),
-                    body: text
-                });
-                throw new Error(`SFCC API request failed: ${response.status} ${response.statusText}`);
-            }
-
-            const contentType = response.headers.get('content-type');
-            if (!contentType || !contentType.includes('application/json')) {
-                const text = await response.text();
-                console.error('Unexpected response type:', {
-                    contentType,
-                    body: text
-                });
-                throw new Error(`Expected JSON response but got ${contentType}`);
-            }
-
-            const sfccProduct = await response.json();
+            const sfccProduct = await getProduct(product.id);
 
             // Add validation for the SFCC product
             if (!sfccProduct || !sfccProduct.name || !sfccProduct.id) {
@@ -141,6 +108,32 @@ describe('Algolia Integration', () => {
 
             const hit = results[0].hits[0];
             expect(hit.name).toContain(sfccProduct.name.default);
+            productName = sfccProduct.name.default;
         });
+    });
+
+    test('Algolia record contains storeAvailability attribute', async () => {
+        // Arrange
+        const prefix = process.env.INDEX_PREFIX;
+        const indexName = `${prefix}__products__en_US`;
+
+        // Act
+        const { results } = await client.search({
+            requests: [
+                {
+                    indexName,
+                    query: productName,
+                }
+            ]
+        });
+
+        const hit = results?.[0]?.hits?.[0];
+
+        // Assert
+        if (recordModel === 'master-level') {
+            expect(hit.variants[0].storeAvailability).toBeDefined();
+        } else {
+            expect(hit.storeAvailability).toBeDefined();
+        }
     });
 });

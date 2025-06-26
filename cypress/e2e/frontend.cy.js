@@ -3,16 +3,8 @@ require('dotenv').config();
 
 describe('Algolia Search', () => {
     beforeEach(() => {
-        const host = Cypress.env('SANDBOX_HOST');
-        
-        // Visit your website's homepage or search page
-        cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
-
-        // Wait for the page to load
-        cy.get('body', { timeout: 20000 }).should('be.visible');
-
-        // Handle the cookie consent pop-up
-        cy.get('.affirm').click();
+        // Close cookie consent
+        cy.closeCookieConsent();
     });
 
     const testSearchScenarios = [];
