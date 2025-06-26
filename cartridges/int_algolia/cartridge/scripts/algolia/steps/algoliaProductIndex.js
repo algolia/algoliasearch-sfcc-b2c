@@ -252,6 +252,11 @@ exports.process = function(product, parameters, stepExecution) {
             return [];
         }
         if (product.master) {
+            // Check if master product meets basic criteria
+            if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
+                return [];
+            }
+            
             let algoliaOperations = [];
             var processedVariantsToSend = 0;
 
