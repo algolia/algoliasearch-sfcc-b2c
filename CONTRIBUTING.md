@@ -23,14 +23,8 @@ Create a `.env` file at the project root (it is already in `.gitignore`) by usin
 
 ### 3.1 Creating the test shopper (one-time)
 
-Storefront User credentials
-```
-"test@algolia.com",
-"password":"Algolia2025!"
-```
-
-Cypress logs in with the email/password above.
-If that account doesn't exist on your sandbox yet, you can create it:
+Cypress will log in to the Storefront with the email/password defined in `TEST_SHOPPER_EMAIL` and `TEST_SHOPPER_PASSWORD`.
+If no test account exist on your sandbox yet, you can create one:
 
 1. Open the storefront ➜ *My Account* ➜ *Register* and sign up **manually** using the following credentisals
 
