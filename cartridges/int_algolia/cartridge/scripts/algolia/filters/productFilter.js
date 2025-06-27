@@ -25,7 +25,7 @@ function isSearchable(product) {
  */
 function hasOnlineCategory(product) {
     var categories = product.getOnlineCategories();
-    return categories && categories.length > 0;
+    return categories && categories.length > 0 ? true : false; // To cover unit tests that expect a boolean return value
 }
 
 /**
@@ -48,7 +48,12 @@ function isInclude(product) {
     if (!isSearchable(product)) return false;
     
     // Check if product has at least one online category
-    if (!hasOnlineCategory(product)) return false;
+    if (product.variant && product.getMasterProduct) {
+        var masterProduct = product.getMasterProduct();
+        if (masterProduct && !hasOnlineCategory(masterProduct)) return false;
+    } else {
+        if (!hasOnlineCategory(product)) return false;
+    }
     
     return true;
 }

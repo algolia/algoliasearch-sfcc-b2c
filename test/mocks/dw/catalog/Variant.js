@@ -70,6 +70,10 @@ class Variant extends MasterProduct {
         return []; // Categories are assigned on the master
     }
 
+    getMasterProduct() {
+        return this.masterProduct;
+    }
+
     getPriceModel() {
         const currency = request.getSession().getCurrency();
         let price;
