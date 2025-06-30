@@ -347,6 +347,18 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 return [];
             }
             if (product.master) {
+                // Check if master product meets basic criteria
+                if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
+                    // Master product fails filter criteria => delete all its variants from Algolia
+                    for (let l = 0; l < siteLocales.size(); l++) {
+                        let locale = siteLocales[l];
+                        let indexName = algoliaData.calculateIndexName('products', locale);
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
+                    }
+                    jobReport.processedItemsToSend++;
+                    return algoliaOperations;
+                }
+                
                 var processedVariantsToSend = 0;
 
                 if (paramRecordModel !== MASTER_LEVEL) {
@@ -428,6 +440,13 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 }
                 jobReport.processedItemsToSend++;
             }
+        } else {
+            // => product fails filter criteria (offline, not searchable, no online categories) => must delete from Algolia
+            for (let l = 0; l < siteLocales.size(); l++) {
+                let deleteOpsIndexName = algoliaData.calculateIndexName('products', siteLocales[l]);
+                algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, deleteOpsIndexName));
+            }
+            jobReport.processedItemsToSend++;
         }
     } else {
         for (let l = 0; l < siteLocales.size(); l++) {

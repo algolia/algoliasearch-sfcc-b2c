@@ -467,6 +467,12 @@ var aggregatedValueHandlers = {
 
             let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
 
+            let isInclude = productFilter.isInclude(variant);
+
+            if (!isInclude) {
+                continue;
+            }
+
             if (!inStock && !INDEX_OUT_OF_STOCK) {
                 continue;
             }

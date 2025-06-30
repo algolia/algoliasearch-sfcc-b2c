@@ -626,21 +626,6 @@ function generateVariantRecords(parameters) {
         if (!productFilter.isInclude(variant)) {
             continue;
         }
-
-        // @TODO: Remove this debug code
-        // This is a debug code to check if the variant is the one we want to debug
-        if (variant.ID === '750518699578M') {
-            var a = 3;
-            var b = 4;
-        }
-
-        if (!productFilter.isOnline(variant) || !productFilter.isSearchable(variant) || !productFilter.hasOnlineCategory(variant)) {
-            if (variant.ID === '750518699578M') {
-                var a = 3;
-                var b = 4;
-            }
-            continue
-        }
         var baseModel = new AlgoliaLocalizedProduct({
             product: variant,
             locale: 'default',
