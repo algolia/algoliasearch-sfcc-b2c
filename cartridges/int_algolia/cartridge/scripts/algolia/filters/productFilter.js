@@ -30,6 +30,7 @@ function hasOnlineCategory(product) {
 
 /**
  * Product index filter function
+ * Note: if you want to check filter status for master products, you should use isOnline and isSearchable, hasOnlineCategory functions separately.
  * @param {dw.catalog.Product} product - Product
  * @returns {boolean} - True if product should be included in the index, false if not.
  */

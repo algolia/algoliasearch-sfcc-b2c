@@ -1,7 +1,25 @@
 'use strict';
 
 var VariantMock = require('../../../../../mocks/dw/catalog/Variant');
-var ProductMock = require('../../../../../mocks/dw/catalog/Product');
+var MasterProductMock = require('../../../../../mocks/dw/catalog/MasterProduct');
+
+// To override the MasterProductMock for testing purposes
+function ProductMock(props = {}) {
+    const product = new MasterProductMock({ ID: props.ID || '008884303989M' });
+    product.master = false;
+    product.variant = false;
+    
+    // Override methods if provided in props
+    if (props.getOnlineCategories) product.getOnlineCategories = props.getOnlineCategories;
+    if (props.getAvailabilityModel) product.getAvailabilityModel = props.getAvailabilityModel;
+    if (props.getMasterProduct) product.getMasterProduct = props.getMasterProduct;
+    if (props.getVariants) product.getVariants = props.getVariants;
+    
+    // Apply property overrides
+    Object.assign(product, props);
+    
+    return product;
+}
 
 describe('productFilter.isInStock', () => {
     var productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
