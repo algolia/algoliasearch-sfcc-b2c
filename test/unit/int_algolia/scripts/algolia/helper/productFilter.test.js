@@ -82,16 +82,7 @@ describe('productFilter.isInStock', () => {
             };
         };
         
-        masterProduct.variants = {
-            iterator: () => {
-                let index = 0;
-                const variants = [outOfStockVariant, inStockVariant];
-                return {
-                    hasNext: () => index < variants.length,
-                    next: () => variants[index++]
-                };
-            }
-        };
+        masterProduct.variants = collectionHelper.createCollection([outOfStockVariant, inStockVariant]);
         
         // Reflecting a real-world scenario where master products do not have their own inventory record
         masterProduct.getAvailabilityModel = () => {
