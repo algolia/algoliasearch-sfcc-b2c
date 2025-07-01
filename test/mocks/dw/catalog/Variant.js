@@ -3,13 +3,16 @@ const ProductVariationModel = require("./ProductVariationModel");
 
 // https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/api/class_dw_catalog_Variant.html
 class Variant extends MasterProduct {
-    constructor({ ID, variationAttributes, masterProduct } = {}) {
+    constructor({ ID, variationAttributes, masterProduct, ats = 6, online = true, searchable = true } = {}) {
         super({ ID: ID || '701644031206M' });
         this.master = false;
         this.variant = true;
         this.masterProduct = masterProduct || new MasterProduct();
         this.variationAttributes = variationAttributes;
         this.UPC = '701644031206';
+        this.online = online;
+        this.searchable = searchable;
+        this._ats = ats;
 
         this.custom = {
             refinementColor: {
@@ -68,6 +71,22 @@ class Variant extends MasterProduct {
 
     getOnlineCategories() {
         return []; // Categories are assigned on the master
+    }
+
+    getAvailabilityModel() {
+        return {
+            getInventoryRecord: () => {
+                return {
+                    getATS: () => {
+                        return {
+                            getValue: () => {
+                                return this._ats;
+                            }
+                        };
+                    }
+                };
+            }
+        };
     }
 
     getMasterProduct() {

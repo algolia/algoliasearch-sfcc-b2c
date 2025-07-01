@@ -3,24 +3,6 @@
 var VariantMock = require('../../../../../mocks/dw/catalog/Variant');
 var MasterProductMock = require('../../../../../mocks/dw/catalog/MasterProduct');
 
-// To override the MasterProductMock for testing purposes
-function ProductMock(props = {}) {
-    const product = new MasterProductMock({ ID: props.ID || '008884303989M' });
-    product.master = false;
-    product.variant = false;
-    
-    // Override methods if provided in props
-    if (props.getOnlineCategories) product.getOnlineCategories = props.getOnlineCategories;
-    if (props.getAvailabilityModel) product.getAvailabilityModel = props.getAvailabilityModel;
-    if (props.getMasterProduct) product.getMasterProduct = props.getMasterProduct;
-    if (props.getVariants) product.getVariants = props.getVariants;
-    
-    // Apply property overrides
-    Object.assign(product, props);
-    
-    return product;
-}
-
 describe('productFilter.isInStock', () => {
     var productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
 
@@ -29,15 +11,7 @@ describe('productFilter.isInStock', () => {
     });
 
     test('Check if product is in stock', () => {
-        const inStockProduct = new VariantMock();
-
-        inStockProduct.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => {
-                    return { getATS: () => { return { getValue: () => { return 5; } } } };
-                },
-            };
-        }
+        const inStockProduct = new VariantMock({ ats: 5 });
         const inStock = productFilter.isInStock(inStockProduct, 1);
 
         expect(inStock).toBe(true);
@@ -46,129 +20,43 @@ describe('productFilter.isInStock', () => {
     test('Check if product is out of stock', () => {
         productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
-        const outOfStockProduct = new ProductMock();
-        outOfStockProduct.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => {
-                    return { getATS: () => { return { getValue: () => { return 0; } } } };
-                },
-            };
-        }
+        const outOfStockProduct = new VariantMock({ ats: 0 });
         const inStock = productFilter.isInStock(outOfStockProduct, 1);
 
         expect(inStock).toBe(false);
     });
 
     test('Master product with in-stock variant is considered in stock', () => {
-        const masterProduct = new VariantMock();
-        masterProduct.master = true;
-        masterProduct.variationGroup = false;
+        const inStockVariant = new VariantMock({ ats: 5 });
+        const outOfStockVariant = new VariantMock({ ats: 0 });
         
-        const inStockVariant = new VariantMock();
-        inStockVariant.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => {
-                    return { getATS: () => { return { getValue: () => { return 5; } } } };
-                }
-            };
-        };
-        
-        const outOfStockVariant = new VariantMock();
-        outOfStockVariant.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => {
-                    return { getATS: () => { return { getValue: () => { return 0; } } } };
-                }
-            };
-        };
-        
-        masterProduct.variants = collectionHelper.createCollection([outOfStockVariant, inStockVariant]);
-        
-        // Reflecting a real-world scenario where master products do not have their own inventory record
-        masterProduct.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => null
-            };
-        };
+        const masterProduct = new MasterProductMock({
+            variants: [outOfStockVariant, inStockVariant]
+        });
         
         const inStock = productFilter.isInStock(masterProduct, 1);
         expect(inStock).toBe(true);
     });
 
     test('Master product with all out-of-stock variants is considered out of stock', () => {
-        const masterProduct = new VariantMock();
-        masterProduct.master = true;
-        masterProduct.variationGroup = false;
+        const outOfStockVariant1 = new VariantMock({ ats: 0 });
+        const outOfStockVariant2 = new VariantMock({ ats: 0 });
         
-        const outOfStockVariant1 = new VariantMock();
-        outOfStockVariant1.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => {
-                    return { getATS: () => { return { getValue: () => { return 0; } } } };
-                }
-            };
-        };
-        
-        const outOfStockVariant2 = new VariantMock();
-        outOfStockVariant2.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => {
-                    return { getATS: () => { return { getValue: () => { return 0; } } } };
-                }
-            };
-        };
-        
-        masterProduct.variants = {
-            iterator: () => {
-                let index = 0;
-                const variants = [outOfStockVariant1, outOfStockVariant2];
-                return {
-                    hasNext: () => index < variants.length,
-                    next: () => variants[index++]
-                };
-            }
-        };
-        
-        masterProduct.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => null
-            };
-        };
+        const masterProduct = new MasterProductMock({
+            variants: [outOfStockVariant1, outOfStockVariant2]
+        });
         
         const inStock = productFilter.isInStock(masterProduct, 1);
         expect(inStock).toBe(false);
     });
 
     test('Variation group with in-stock variant is considered in stock', () => {
-        const variationGroup = new VariantMock();
-        variationGroup.master = false;
-        variationGroup.variationGroup = true;
+        const inStockVariant = new VariantMock({ ats: 3 });
         
-        const inStockVariant = new VariantMock();
-        inStockVariant.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => {
-                    return { getATS: () => { return { getValue: () => { return 3; } } } };
-                }
-            };
-        };
-        
-        variationGroup.variants = {
-            iterator: () => {
-                let index = 0;
-                const variants = [inStockVariant];
-                return {
-                    hasNext: () => index < variants.length,
-                    next: () => variants[index++]
-                };
-            }
-        };
-        
-        variationGroup.getAvailabilityModel = () => {
-            return {
-                getInventoryRecord: () => null
-            };
-        };
+        const variationGroup = new MasterProductMock({
+            variationGroup: true,
+            variants: [inStockVariant]
+        });
         
         const inStock = productFilter.isInStock(variationGroup, 1);
         expect(inStock).toBe(true);
@@ -210,7 +98,7 @@ describe('productFilter.isOnline', () => {
     });
 
     test('Product is online', () => {
-        const onlineProduct = new ProductMock({
+        const onlineProduct = new MasterProductMock({
             online: true
         });
         
@@ -219,7 +107,7 @@ describe('productFilter.isOnline', () => {
     });
 
     test('Product is offline', () => {
-        const offlineProduct = new ProductMock({
+        const offlineProduct = new MasterProductMock({
             online: false
         });
         
@@ -236,7 +124,7 @@ describe('productFilter.isSearchable', () => {
     });
 
     test('Product is searchable', () => {
-        const searchableProduct = new ProductMock({
+        const searchableProduct = new MasterProductMock({
             searchable: true
         });
         
@@ -245,7 +133,7 @@ describe('productFilter.isSearchable', () => {
     });
 
     test('Product is not searchable', () => {
-        const nonSearchableProduct = new ProductMock({
+        const nonSearchableProduct = new MasterProductMock({
             searchable: false
         });
         
@@ -262,39 +150,31 @@ describe('productFilter.hasOnlineCategory', () => {
     });
 
     test('Product has online categories', () => {
-        const productWithCategories = new ProductMock({
-            getOnlineCategories: () => [
-                { ID: 'category1', online: true },
-                { ID: 'category2', online: true }
-            ]
-        });
+        const productWithCategories = new MasterProductMock();
         
         const result = productFilter.hasOnlineCategory(productWithCategories);
         expect(result).toBe(true);
     });
 
     test('Product has no categories', () => {
-        const productWithoutCategories = new ProductMock({
-            getOnlineCategories: () => []
-        });
+        const productWithoutCategories = new MasterProductMock();
+        productWithoutCategories.getOnlineCategories = () => [];
         
         const result = productFilter.hasOnlineCategory(productWithoutCategories);
         expect(result).toBe(false);
     });
 
     test('Product returns null for categories', () => {
-        const productWithNullCategories = new ProductMock({
-            getOnlineCategories: () => null
-        });
+        const productWithNullCategories = new MasterProductMock();
+        productWithNullCategories.getOnlineCategories = () => null;
         
         const result = productFilter.hasOnlineCategory(productWithNullCategories);
         expect(result).toBe(false);
     });
 
     test('Product returns undefined for categories', () => {
-        const productWithUndefinedCategories = new ProductMock({
-            getOnlineCategories: () => undefined
-        });
+        const productWithUndefinedCategories = new MasterProductMock();
+        productWithUndefinedCategories.getOnlineCategories = () => undefined;
         
         const result = productFilter.hasOnlineCategory(productWithUndefinedCategories);
         expect(result).toBe(false);
@@ -309,28 +189,22 @@ describe('productFilter.isInclude', () => {
     });
 
     test('Valid product passes all filters', () => {
-        const validProduct = new ProductMock({
-            getOnlineCategories: () => [{ ID: 'category1', online: true }]
-        });
+        const validProduct = new VariantMock();
         
         const result = productFilter.isInclude(validProduct);
         expect(result).toBe(true);
     });
 
     test('Master product is excluded', () => {
-        const masterProduct = new ProductMock({
-            master: true,
-            getOnlineCategories: () => [{ ID: 'category1', online: true }]
-        });
+        const masterProduct = new MasterProductMock();
         
         const result = productFilter.isInclude(masterProduct);
         expect(result).toBe(false);
     });
 
     test('Variation group product is excluded', () => {
-        const variationGroupProduct = new ProductMock({
-            variationGroup: true,
-            getOnlineCategories: () => [{ ID: 'category1', online: true }]
+        const variationGroupProduct = new MasterProductMock({
+            variationGroup: true
         });
         
         const result = productFilter.isInclude(variationGroupProduct);
@@ -338,9 +212,8 @@ describe('productFilter.isInclude', () => {
     });
 
     test('Offline product is excluded', () => {
-        const offlineProduct = new ProductMock({
-            online: false,
-            getOnlineCategories: () => [{ ID: 'category1', online: true }]
+        const offlineProduct = new VariantMock({
+            online: false
         });
         
         const result = productFilter.isInclude(offlineProduct);
@@ -348,9 +221,8 @@ describe('productFilter.isInclude', () => {
     });
 
     test('Non-searchable product is excluded', () => {
-        const nonSearchableProduct = new ProductMock({
-            searchable: false,
-            getOnlineCategories: () => [{ ID: 'category1', online: true }]
+        const nonSearchableProduct = new VariantMock({
+            searchable: false
         });
         
         const result = productFilter.isInclude(nonSearchableProduct);
@@ -358,8 +230,11 @@ describe('productFilter.isInclude', () => {
     });
 
     test('Product without online categories is excluded', () => {
-        const productWithoutCategories = new ProductMock({
-            getOnlineCategories: () => []
+        const masterWithoutCategories = new MasterProductMock();
+        masterWithoutCategories.getOnlineCategories = () => [];
+        
+        const productWithoutCategories = new VariantMock({
+            masterProduct: masterWithoutCategories
         });
         
         const result = productFilter.isInclude(productWithoutCategories);
@@ -375,37 +250,37 @@ describe('productFilter.isInStoreStock', () => {
     });
 
     test('Product is in stock at store', () => {
-        const product = new ProductMock({ ID: 'in-stock-product' });
+        const product = new VariantMock({ ID: 'in-stock-product' });
         const inStock = productFilter.isInStoreStock(product, 'store-with-inventory', 2);
         expect(inStock).toBe(true);
     });
 
     test('Product is below threshold at store', () => {
-        const product = new ProductMock({ ID: 'low-stock-product' });
+        const product = new VariantMock({ ID: 'low-stock-product' });
         const inStock = productFilter.isInStoreStock(product, 'store-with-inventory', 2);
         expect(inStock).toBe(false);
     });
 
     test('Product is out of stock at store', () => {
-        const product = new ProductMock({ ID: 'out-of-stock-product' });
+        const product = new VariantMock({ ID: 'out-of-stock-product' });
         const inStock = productFilter.isInStoreStock(product, 'store-with-inventory', 2);
         expect(inStock).toBe(false);
     });
 
     test('Product not found in store inventory', () => {
-        const product = new ProductMock({ ID: 'non-existent-product' });
+        const product = new VariantMock({ ID: 'non-existent-product' });
         const inStock = productFilter.isInStoreStock(product, 'store-with-inventory', 2);
         expect(inStock).toBe(false);
     });
 
     test('Store does not exist', () => {
-        const product = new ProductMock({ ID: 'in-stock-product' });
+        const product = new VariantMock({ ID: 'in-stock-product' });
         const inStock = productFilter.isInStoreStock(product, 'non-existent-store', 2);
         expect(inStock).toBe(false);
     });
 
     test('Store has no inventory list', () => {
-        const product = new ProductMock({ ID: 'in-stock-product' });
+        const product = new VariantMock({ ID: 'in-stock-product' });
         const inStock = productFilter.isInStoreStock(product, 'store-without-inventory', 2);
         expect(inStock).toBe(false);
     });
