@@ -465,12 +465,11 @@ var aggregatedValueHandlers = {
         while (variantsIt.hasNext()) {
             var variant = variantsIt.next();
 
-            let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
-
             if (!productFilter.isInclude(variant)) {
                 continue;
             }
 
+            let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
             if (!inStock && !INDEX_OUT_OF_STOCK) {
                 continue;
             }
