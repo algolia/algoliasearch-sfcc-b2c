@@ -1,7 +1,36 @@
 'use strict';
 
 /**
+ * Checks if a product is online
+ * @param {dw.catalog.Product} product - Product to check
+ * @returns {boolean} - True if product is online, false otherwise
+ */
+function isOnline(product) {
+    return product.online;
+}
+
+/**
+ * Checks if a product is searchable
+ * @param {dw.catalog.Product} product - Product to check
+ * @returns {boolean} - True if product is searchable, false otherwise
+ */
+function isSearchable(product) {
+    return product.searchable;
+}
+
+/**
+ * Checks if a product has at least one online category
+ * @param {dw.catalog.Product} product - Product to check
+ * @returns {boolean} - True if product has at least one online category, false otherwise
+ */
+function hasOnlineCategory(product) {
+    var categories = product.getOnlineCategories();
+    return categories && categories.length > 0 ? true : false; // To cover unit tests that expect a boolean return value
+}
+
+/**
  * Product index filter function
+ * Note: if you want to check filter status for master products, you should use isOnline and isSearchable, hasOnlineCategory functions separately.
  * @param {dw.catalog.Product} product - Product
  * @returns {boolean} - True if product should be included in the index, false if not.
  */
@@ -12,6 +41,23 @@ function isInclude(product) {
     // if (product.optionProduct) return false;
     // Do not include bundled product
     if (product.bundled && !(product.priceModel && product.priceModel.price && product.priceModel.price.available)) return false;
+    
+    // Check online status
+    if (!isOnline(product)) return false;
+    
+    // Check searchable status
+    if (!isSearchable(product)) return false;
+    
+    // Check if product has at least one online category
+    // Note: In SFCC, variant products don't have their own categories - getOnlineCategories() returns empty for variants
+    // We must check categories on the master product instead
+    if (product.variant && product.getMasterProduct) {
+        var masterProduct = product.getMasterProduct();
+        if (masterProduct && !hasOnlineCategory(masterProduct)) return false;
+    } else {
+        if (!hasOnlineCategory(product)) return false;
+    }
+    
     return true;
 }
 
@@ -76,5 +122,8 @@ function isInStoreStock(product, storeId, threshold) {
 module.exports = {
     isInStock: isInStock,
     isInclude: isInclude,
-    isInStoreStock: isInStoreStock
+    isInStoreStock: isInStoreStock,
+    isOnline: isOnline,
+    isSearchable: isSearchable,
+    hasOnlineCategory: hasOnlineCategory
 };

@@ -16,3 +16,5 @@ cypress/screenshots/*
 cypress/videos/*
 .env
 .secrets
+/.codacy
+codacy.yml

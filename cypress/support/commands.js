@@ -32,7 +32,15 @@ Cypress.Commands.add('closeCookieConsent', () => {
     // Wait for the page to load
     cy.get('body', { timeout: 20000 }).should('be.visible');
     // Handle the cookie consent pop-up
-    cy.get('.affirm').click();
+    cy.get('body').then(($body) => {
+        if ($body.find('.affirm').length) {
+            // If the affirm button exists, click it
+            cy.get('.affirm').click();
+        } else {
+            // If the affirm button does not exist, log a message
+            cy.log('No cookie consent pop-up found.');
+        }
+    });
 });
 
 // Login command (storefront)
