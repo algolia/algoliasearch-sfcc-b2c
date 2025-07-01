@@ -434,8 +434,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
             } else {
                 // => product is out-of-stock and IndexOutOfStock=false => must delete from Algolia
                 for (let l = 0; l < siteLocales.size(); l++) {
-                    var locale = siteLocales[l];
-                    var indexName = algoliaData.calculateIndexName('products', locale);
+                    let locale = siteLocales[l];
+                    let indexName = algoliaData.calculateIndexName('products', locale);
                     algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
                 }
                 jobReport.processedItemsToSend++;
@@ -443,14 +443,16 @@ exports.process = function(cpObj, parameters, stepExecution) {
         } else {
             // => product fails filter criteria (offline, not searchable, no online categories) => must delete from Algolia
             for (let l = 0; l < siteLocales.size(); l++) {
-                let deleteOpsIndexName = algoliaData.calculateIndexName('products', siteLocales[l]);
-                algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, deleteOpsIndexName));
+                let locale = siteLocales[l];
+                let indexName = algoliaData.calculateIndexName('products', locale);
+                algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
             }
             jobReport.processedItemsToSend++;
         }
     } else {
         for (let l = 0; l < siteLocales.size(); l++) {
-            let localeIndexName = algoliaData.calculateIndexName('products', siteLocales[l]);
+            let locale = siteLocales[l];
+            let localeIndexName = algoliaData.calculateIndexName('products', locale);
             algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, localeIndexName));
         }
         jobReport.processedItemsToSend++;
