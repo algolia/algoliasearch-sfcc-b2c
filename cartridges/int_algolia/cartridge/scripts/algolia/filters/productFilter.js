@@ -1,11 +1,28 @@
 'use strict';
 
+// Load configuration
+let config;
+try {
+    config = require('*/cartridge/configuration/productFilterConfig');
+} catch (e) { // eslint-disable-line no-unused-vars
+    // If no custom config exists, use defaults
+    config = {
+        checkOnline: true,
+        checkSearchable: true,
+        checkOnlineCategory: true
+    };
+}
+
 /**
  * Checks if a product is online
  * @param {dw.catalog.Product} product - Product to check
  * @returns {boolean} - True if product is online, false otherwise
  */
 function isOnline(product) {
+    // If checkOnline is disabled in config, always return true
+    if (config.checkOnline === false) {
+        return true;
+    }
     return product.online;
 }
 
@@ -15,6 +32,10 @@ function isOnline(product) {
  * @returns {boolean} - True if product is searchable, false otherwise
  */
 function isSearchable(product) {
+    // If checkSearchable is disabled in config, always return true
+    if (config.checkSearchable === false) {
+        return true;
+    }
     return product.searchable;
 }
 
@@ -24,6 +45,10 @@ function isSearchable(product) {
  * @returns {boolean} - True if product has at least one online category, false otherwise
  */
 function hasOnlineCategory(product) {
+    // If checkOnlineCategory is disabled in config, always return true
+    if (config.checkOnlineCategory === false) {
+        return true;
+    }
     var categories = product.getOnlineCategories();
     return categories && categories.length > 0 ? true : false; // To cover unit tests that expect a boolean return value
 }
