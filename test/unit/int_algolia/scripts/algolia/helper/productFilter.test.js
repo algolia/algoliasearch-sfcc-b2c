@@ -285,3 +285,93 @@ describe('productFilter.isInStoreStock', () => {
         expect(inStock).toBe(false);
     });
 });
+
+describe('productFilter with custom configuration', () => {
+    beforeEach(() => {
+        jest.resetModules();
+    });
+
+    test('Respects checkOnline: false configuration', () => {
+        // Mock configuration with checkOnline: false
+        jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
+            checkOnline: false,
+            checkSearchable: true,
+            checkOnlineCategory: true
+        }), { virtual: true });
+
+        const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
+        
+        const offlineProduct = new VariantMock({
+            online: false // Product is offline
+        });
+        
+        // Should include offline product when checkOnline is false
+        const result = productFilter.isInclude(offlineProduct);
+        expect(result).toBe(true);
+    });
+
+    test('Respects checkSearchable: false configuration', () => {
+        // Mock configuration with checkSearchable: false
+        jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
+            checkOnline: true,
+            checkSearchable: false,
+            checkOnlineCategory: true
+        }), { virtual: true });
+
+        const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
+        
+        const nonSearchableProduct = new VariantMock({
+            searchable: false // Product is not searchable
+        });
+        
+        // Should include non-searchable product when checkSearchable is false
+        const result = productFilter.isInclude(nonSearchableProduct);
+        expect(result).toBe(true);
+    });
+
+    test('Respects checkOnlineCategory: false configuration', () => {
+        // Mock configuration with checkOnlineCategory: false
+        jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
+            checkOnline: true,
+            checkSearchable: true,
+            checkOnlineCategory: false
+        }), { virtual: true });
+
+        const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
+        
+        const masterWithoutCategories = new MasterProductMock();
+        masterWithoutCategories.getOnlineCategories = () => [];
+        
+        const productWithoutCategories = new VariantMock({
+            masterProduct: masterWithoutCategories
+        });
+        
+        // Should include product without categories when checkOnlineCategory is false
+        const result = productFilter.isInclude(productWithoutCategories);
+        expect(result).toBe(true);
+    });
+
+    test('All checks disabled configuration', () => {
+        // Mock configuration with all checks disabled
+        jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
+            checkOnline: false,
+            checkSearchable: false,
+            checkOnlineCategory: false
+        }), { virtual: true });
+
+        const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
+        
+        const masterWithoutCategories = new MasterProductMock();
+        masterWithoutCategories.getOnlineCategories = () => [];
+        
+        const problematicProduct = new VariantMock({
+            online: false,
+            searchable: false,
+            masterProduct: masterWithoutCategories
+        });
+        
+        // Should include product that fails all checks when all checks are disabled
+        const result = productFilter.isInclude(problematicProduct);
+        expect(result).toBe(true);
+    });
+});
