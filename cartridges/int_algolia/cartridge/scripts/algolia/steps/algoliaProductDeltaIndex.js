@@ -391,7 +391,6 @@ exports.process = function(cpObj, parameters, stepExecution) {
                             for (let v = 0; v < variants.size(); ++v) {
                                 let variant = variants[v];
                                 if (!productFilter.isInclude(variant)) {
-                                    // Push objectID so we can delete it later
                                     algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variant.getID() }, indexName));
                                 }
                             }
