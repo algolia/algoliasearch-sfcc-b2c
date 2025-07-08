@@ -159,7 +159,8 @@ Setting this preference replaces the first two segments, the final index name be
                 <display-name xml:lang="x-default">Record model</display-name>
                 <description xml:lang="x-default">Define the model used to store products in Algolia.
 'Variation Product': create one record per variation product.
-'Base Product': create one record per base product, containing all variants in a 'variants' attribute.</description>
+'Base Product': create one record per base product, containing all variants in a 'variants' attribute.
+'Variation Group Product': create one record per variant group (e.g., per color), containing sizes in that group.</description>
                 <type>enum-of-string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -172,7 +173,20 @@ Setting this preference replaces the first two segments, the final index name be
                         <display xml:lang="x-default">Base Product</display>
                         <value>master-level</value>
                     </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Variation Group Product</display>
+                        <value>variant-group-level</value>
+                    </value-definition>
                 </value-definitions>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_VariantGroupingAttribute">
+                <display-name xml:lang="x-default">Algolia Variant Grouping Attribute</display-name>
+                <description xml:lang="x-default">The product variation attribute ID to use for grouping variants when 'Record Model' is set to 'variant-group-level'. Defaults to 'color' if not specified. Example: 'color', 'style'.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>color</default-value>
             </attribute-definition>
 
             <attribute-definition attribute-id="Algolia_IndexOutOfStock">
@@ -286,6 +300,7 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_AdditionalAttributes"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
                 <attribute attribute-id="Algolia_RecordModel"/>
+                <attribute attribute-id="Algolia_VariantGroupingAttribute"/>
                 <attribute attribute-id="Algolia_LocalesForIndexing"/>
                 <attribute attribute-id="Algolia_EnableInsights"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
