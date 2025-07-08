@@ -165,16 +165,34 @@
                         <div class="tooltip">${Resource.msg('algolia.label.preference.recordmodel.help', 'algolia', null)}</div>
                     </td>
                     <td class="table_detail w e s">
-                        <select name="RecordModel" id="RecordModel">
+                        <select name="RecordModel" id="RecordModel" onchange="updateVariantGroupingField();">
                             <isif condition="${pdict.algoliaData.getPreference('RecordModel') === 'variant-level'}">
                                 <option value="variant-level" selected="selected">Variation Product</option>
                                 <option value="master-level">Base Product</option>
-                            <iselse>
+                                <option value="variant-group-level">Variation Group Product</option>
+                            <iselseif condition="${pdict.algoliaData.getPreference('RecordModel') === 'master-level'}">
                                 <option value="variant-level">Variation Product</option>
                                 <option value="master-level" selected="selected">Base Product</option>
+                                <option value="variant-group-level">Variation Group Product</option>
+                            <iselse>
+                                <option value="variant-level">Variation Product</option>
+                                <option value="master-level">Base Product</option>
+                                <option value="variant-group-level" selected="selected">Variation Group Product</option>
                             </iselse>
                             </isif>
                         </select>
+                    </td>
+                </tr>
+
+                <iscomment> VariantGroupingAttribute </iscomment>
+                <tr id="variantGroupingAttributeRow" style="display: none;">
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.variantgroupingattribute', 'algolia', null)}" encoding="jshtml" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.variantgroupingattribute.help', 'algolia', null)}</div>
+                    </td>
+                    <td class="table_detail w e s">
+                        <input type="text" value="${pdict.algoliaData.getPreference('VariantGroupingAttribute') ? pdict.algoliaData.getPreference('VariantGroupingAttribute') : 'color'}" id="VariantGroupingAttribute" name="VariantGroupingAttribute" placeholder="color"/>
                     </td>
                 </tr>
 
@@ -432,7 +450,20 @@
             document.getElementById("EnableContentSearch").disabled = !storefrontEnabled;
             document.getElementById("EnableRecommend").disabled = !storefrontEnabled;
         }
+        
+        function updateVariantGroupingField() {
+            const recordModel = document.getElementById("RecordModel").value;
+            const variantGroupingRow = document.getElementById("variantGroupingAttributeRow");
+            
+            if (recordModel === "variant-group-level") {
+                variantGroupingRow.style.display = "table-row";
+            } else {
+                variantGroupingRow.style.display = "none";
+            }
+        }
+        
         updateStorefrontCheckboxes();
+        updateVariantGroupingField();
     </script>
 
 </isdecorate>

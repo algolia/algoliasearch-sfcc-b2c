@@ -79,6 +79,7 @@ function handleSettings() {
         algoliaData.setPreference('AdminApiKey', adminApikey);
         algoliaData.setPreference('IndexPrefix', indexPrefix);
         algoliaData.setPreference('RecordModel', params.RecordModel.value);
+        algoliaData.setPreference('VariantGroupingAttribute', params.AlgoliaVariantGroupingAttribute.value || 'color');
         algoliaData.setSetOfStrings('LocalesForIndexing', params.LocalesForIndexing.value);
         algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
