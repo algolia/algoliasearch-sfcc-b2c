@@ -70,7 +70,7 @@ jobs:
         run: npm run lint:js
 
   e2e-tests:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       CODE_VERSION: ${{ vars.CODE_VERSION }}
       ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
@@ -98,6 +98,8 @@ jobs:
       - name: Install Dependencies
         run: |
           # macOS has zip pre-installed
+          sudo apt-get update
+          sudo apt-get install -y zip
           npm ci
 
       - name: Run E2E Tests
