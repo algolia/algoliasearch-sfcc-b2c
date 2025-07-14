@@ -257,7 +257,6 @@ async function notifyTestFailure() {
 
     } catch (error) {
         console.error('Failed to send Slack notification:', error);
-        // Don't fail the workflow if Slack notification fails
     }
 }
 
