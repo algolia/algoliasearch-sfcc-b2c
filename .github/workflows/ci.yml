@@ -135,7 +135,7 @@ jobs:
         if: steps.e2e-tests.outputs.exit_code != '0'
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+          SLACK_CHANNEL_ID: ${{ vars.SLACK_CHANNEL_ID }}
         run: |
           node scripts/slackNotifier.js
 
