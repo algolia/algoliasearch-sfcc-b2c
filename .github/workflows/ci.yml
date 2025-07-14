@@ -109,7 +109,7 @@ jobs:
 
       - name: Upload E2E Test Output
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: e2e-test-output
           path: e2e-output.log
@@ -117,7 +117,7 @@ jobs:
 
       - name: Upload Cypress Screenshots
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
           path: cypress/screenshots
@@ -125,7 +125,7 @@ jobs:
 
       - name: Upload Cypress Videos
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: cypress-videos
           path: cypress/videos
@@ -135,7 +135,7 @@ jobs:
         if: steps.e2e-tests.outputs.exit_code != '0'
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          SLACK_CHANNEL_ID: C0962DXSUGZ
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
         run: |
           node scripts/slackNotifier.js
 
