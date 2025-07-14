@@ -19,7 +19,7 @@ function httpsRequest(url, options, data) {
             res.on('end', () => {
                 try {
                     resolve(JSON.parse(responseData));
-                } catch (e) {
+                } catch (e) { // eslint-disable-line no-unused-vars
                     reject(new Error(`Invalid JSON response: ${responseData}`));
                 }
             });
