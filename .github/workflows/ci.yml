@@ -102,4 +102,45 @@ jobs:
           npm ci
 
       - name: Run E2E Tests
-        run: npm run test:e2e
+        id: e2e-tests
+        run: |
+          npm run test:e2e 2>&1 | tee e2e-output.log
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Upload E2E Test Output
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: e2e-test-output
+          path: e2e-output.log
+          retention-days: 7
+
+      - name: Upload Cypress Screenshots
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          retention-days: 7
+
+      - name: Upload Cypress Videos
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          retention-days: 7
+
+      - name: Send Slack Notification on Failure
+        if: steps.e2e-tests.outputs.exit_code != '0'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: C0962DXSUGZ
+        run: |
+          node scripts/slackNotifier.js
+
+      - name: Fail if E2E Tests Failed
+        if: steps.e2e-tests.outputs.exit_code != '0'
+        run: |
+          echo "E2E tests failed. Check the artifacts for screenshots and videos."
+          exit 1

@@ -167,7 +167,18 @@ async function runCypressTests() {
         spec: 'cypress/e2e/*.cy.js',
         env: cypressEnv,
         browser: 'chrome',
-        headless: true
+        headless: true,
+        config: {
+            video: true,
+            screenshotOnRunFailure: true,
+            videosFolder: 'cypress/videos',
+            screenshotsFolder: 'cypress/screenshots',
+            viewportWidth: 1280,
+            viewportHeight: 720,
+            defaultCommandTimeout: 10000,
+            requestTimeout: 10000,
+            responseTimeout: 30000
+        }
     });
 
     if (result.status === 'failed' || (result.totalFailed && result.totalFailed > 0)) {
