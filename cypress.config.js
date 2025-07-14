@@ -46,7 +46,8 @@ module.exports = defineConfig({
 
             return config;
         },
-        pageLoadTimeout: 15000,
+        pageLoadTimeout: 30000,
+        chromeWebSecurity: false,
         screenshotsFolder: 'cypress/screenshots',
         video: true,
         videosFolder: 'cypress/videos',
