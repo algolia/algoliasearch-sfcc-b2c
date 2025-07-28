@@ -20,26 +20,19 @@ module.exports = defineConfig({
             // Browser launch options for CI stability
             on('before:browser:launch', (browser = {}, launchOptions) => {
                 if (browser.family === 'chromium' && browser.name !== 'electron') {
-                    // disable Chrome web security for cross-origin requests
-                    launchOptions.args.push('--disable-web-security');
-                    // disable GPU hardware acceleration
-                    launchOptions.args.push('--disable-gpu');
-                    // disable dev shm usage for CI environments
-                    launchOptions.args.push('--disable-dev-shm-usage');
-                    // no sandbox for CI environments
-                    launchOptions.args.push('--no-sandbox');
-                    // disable setuid sandbox
-                    launchOptions.args.push('--disable-setuid-sandbox');
-                    // force device scale factor
-                    launchOptions.args.push('--force-device-scale-factor=1');
-                    // disable smooth scrolling
-                    launchOptions.args.push('--disable-smooth-scrolling');
-                    // disable background timer throttling
-                    launchOptions.args.push('--disable-background-timer-throttling');
-                    // disable renderer backgrounding
-                    launchOptions.args.push('--disable-renderer-backgrounding');
-                    // disable features that might cause flakiness
-                    launchOptions.args.push('--disable-features=VizDisplayCompositor');
+                    // Core stability flags for headless CI environments
+                    launchOptions.args.push('--disable-web-security');      // Allow cross-origin requests
+                    launchOptions.args.push('--disable-gpu');               // No GPU in CI runners
+                    launchOptions.args.push('--disable-dev-shm-usage');     // Use /tmp instead of /dev/shm (limited in Docker)
+                    launchOptions.args.push('--no-sandbox');                // Required for non-root CI environments
+                    launchOptions.args.push('--disable-setuid-sandbox');    // Related sandbox permission flag
+                    
+                    // Consistency flags to prevent flaky tests
+                    launchOptions.args.push('--force-device-scale-factor=1');              // Consistent screenshots
+                    launchOptions.args.push('--disable-smooth-scrolling');                 // Instant scrolling
+                    launchOptions.args.push('--disable-background-timer-throttling');      // Keep timers running
+                    launchOptions.args.push('--disable-renderer-backgrounding');           // Don't pause background tabs
+                    launchOptions.args.push('--disable-features=VizDisplayCompositor');    // Avoid GPU compositor crashes
                 }
                 return launchOptions;
             });
