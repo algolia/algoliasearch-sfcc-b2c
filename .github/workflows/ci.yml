@@ -97,16 +97,8 @@ jobs:
       - name: Run E2E Tests
         id: e2e-tests
         run: |
-          npm run test:e2e 2>&1 | tee e2e-output.log
-          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
-
-      - name: Upload E2E Test Output
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-test-output
-          path: e2e-output.log
-          retention-days: 7
+          npm run test:e2e
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: Upload Cypress Screenshots
         if: always()

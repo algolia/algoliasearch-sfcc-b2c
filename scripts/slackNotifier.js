@@ -1,115 +1,6 @@
+const { WebClient } = require('@slack/web-api');
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
-
-/**
- * Makes an HTTPS request
- * @param {string} url - URL to request
- * @param {object} options - Request options
- * @param {Buffer|string} data - Request body
- * @returns {Promise<object>} Response data
- */
-function httpsRequest(url, options, data) {
-    return new Promise((resolve, reject) => {
-        const req = https.request(url, options, (res) => {
-            let responseData = '';
-            res.on('data', (chunk) => {
-                responseData += chunk;
-            });
-            res.on('end', () => {
-                try {
-                    resolve(JSON.parse(responseData));
-                } catch (e) { // eslint-disable-line no-unused-vars
-                    reject(new Error(`Invalid JSON response: ${responseData}`));
-                }
-            });
-        });
-        req.on('error', reject);
-        if (data) {
-            req.write(data);
-        }
-        req.end();
-    });
-}
-
-/**
- * Uploads a file to Slack using multipart form data
- * @param {string} filePath - Path to the file to upload
- * @param {string} token - Slack bot token
- * @param {string} channel - Slack channel ID
- * @param {string} title - Title for the file
- * @param {string} comment - Initial comment for the file
- */
-async function uploadFileToSlack(filePath, token, channel, title, comment) {
-    const boundary = `----WebKitFormBoundary${Date.now()}`;
-    const fileContent = fs.readFileSync(filePath);
-    const fileName = path.basename(filePath);
-    
-    let body = '';
-    body += `--${boundary}\r\n`;
-    body += `Content-Disposition: form-data; name="channels"\r\n\r\n`;
-    body += `${channel}\r\n`;
-    body += `--${boundary}\r\n`;
-    body += `Content-Disposition: form-data; name="title"\r\n\r\n`;
-    body += `${title}\r\n`;
-    body += `--${boundary}\r\n`;
-    body += `Content-Disposition: form-data; name="initial_comment"\r\n\r\n`;
-    body += `${comment}\r\n`;
-    body += `--${boundary}\r\n`;
-    body += `Content-Disposition: form-data; name="file"; filename="${fileName}"\r\n`;
-    body += `Content-Type: ${fileName.endsWith('.png') ? 'image/png' : 'video/mp4'}\r\n\r\n`;
-    
-    const bodyStart = Buffer.from(body, 'utf8');
-    const bodyEnd = Buffer.from(`\r\n--${boundary}--\r\n`, 'utf8');
-    const bodyBuffer = Buffer.concat([bodyStart, fileContent, bodyEnd]);
-
-    const options = {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': `multipart/form-data; boundary=${boundary}`,
-            'Content-Length': bodyBuffer.length
-        }
-    };
-
-    const result = await httpsRequest('https://slack.com/api/files.upload', options, bodyBuffer);
-    
-    if (!result.ok) {
-        throw new Error(`Slack upload failed: ${result.error}`);
-    }
-    return result;
-}
-
-/**
- * Sends a message to Slack
- * @param {string} token - Slack bot token
- * @param {string} channel - Slack channel ID
- * @param {string} text - Message text
- * @param {Array} blocks - Slack blocks for rich formatting
- */
-async function sendSlackMessage(token, channel, text, blocks = []) {
-    const data = JSON.stringify({
-        channel,
-        text,
-        blocks,
-    });
-
-    const options = {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'Content-Length': Buffer.byteLength(data)
-        }
-    };
-
-    const result = await httpsRequest('https://slack.com/api/chat.postMessage', options, data);
-    
-    if (!result.ok) {
-        throw new Error(`Slack message failed: ${result.error}`);
-    }
-    return result;
-}
 
 /**
  * Main function to handle test failure notifications
@@ -127,6 +18,9 @@ async function notifyTestFailure() {
         console.error('SLACK_CHANNEL_ID not set, skipping Slack notification');
         return;
     }
+
+    // Initialize Slack client
+    const slack = new WebClient(token);
 
     const screenshotsDir = path.join(process.cwd(), 'cypress/screenshots');
     const videosDir = path.join(process.cwd(), 'cypress/videos');
@@ -180,7 +74,11 @@ async function notifyTestFailure() {
 
     try {
         // Send initial message
-        await sendSlackMessage(token, channel, 'E2E Tests Failed - Screenshots incoming...', blocks);
+        await slack.chat.postMessage({
+            channel,
+            text: 'E2E Tests Failed - Screenshots incoming...',
+            blocks
+        });
 
         // Upload screenshots
         if (fs.existsSync(screenshotsDir)) {
@@ -192,13 +90,14 @@ async function notifyTestFailure() {
                 
                 if (isFailure) {
                     console.log(`Uploading screenshot: ${screenshot}`);
-                    await uploadFileToSlack(
-                        filePath,
-                        token,
-                        channel,
-                        screenshot,
-                        `Failed test screenshot from run ${process.env.GITHUB_RUN_ID}`
-                    );
+                    
+                    await slack.files.uploadV2({
+                        channels: channel,
+                        file: fs.createReadStream(filePath),
+                        filename: screenshot,
+                        title: screenshot,
+                        initial_comment: `Failed test screenshot from run ${process.env.GITHUB_RUN_ID}`
+                    });
                 }
             }
         }
@@ -214,13 +113,14 @@ async function notifyTestFailure() {
                 // Only upload videos smaller than 50MB
                 if (stats.size < 50 * 1024 * 1024) {
                     console.log(`Uploading video: ${video}`);
-                    await uploadFileToSlack(
-                        filePath,
-                        token,
-                        channel,
-                        video,
-                        `Test video from run ${process.env.GITHUB_RUN_ID}`
-                    );
+                    
+                    await slack.files.uploadV2({
+                        channels: channel,
+                        file: fs.createReadStream(filePath),
+                        filename: video,
+                        title: video,
+                        initial_comment: `Test video from run ${process.env.GITHUB_RUN_ID}`
+                    });
                 } else {
                     console.log(`Skipping video ${video} - too large (${stats.size} bytes)`);
                 }
@@ -253,10 +153,16 @@ async function notifyTestFailure() {
             }
         ];
 
-        await sendSlackMessage(token, channel, 'Test failure artifacts uploaded', summaryBlocks);
+        await slack.chat.postMessage({
+            channel,
+            text: 'Test failure artifacts uploaded',
+            blocks: summaryBlocks
+        });
 
     } catch (error) {
         console.error('Failed to send Slack notification:', error);
+        // Re-throw to ensure the workflow knows something went wrong
+        throw error;
     }
 }
 
@@ -265,4 +171,4 @@ if (require.main === module) {
     notifyTestFailure().catch(console.error);
 }
 
-module.exports = { uploadFileToSlack, sendSlackMessage, notifyTestFailure };
+module.exports = { notifyTestFailure };
