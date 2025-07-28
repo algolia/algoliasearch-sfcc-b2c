@@ -65,7 +65,7 @@ jobs:
         run: npm run lint:js
 
   e2e-tests:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       CODE_VERSION: ${{ vars.CODE_VERSION }}
       ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
@@ -117,7 +117,7 @@ jobs:
           retention-days: 7
 
       - name: Send Slack Notification on Failure
-        if: steps.e2e-tests.outputs.exit_code != '0'
+        if: always()
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ vars.SLACK_CHANNEL_ID }}
