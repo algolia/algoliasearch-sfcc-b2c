@@ -36,3 +36,35 @@ Cypress.on('uncaught:exception', (err) => {
         return false; // prevents test failure for these known benign errors
     }
 });
+
+// Take screenshot before each test for debugging
+beforeEach(function() {
+    const testTitle = Cypress.currentTest.title;
+    const timestamp = new Date().toISOString().replace(/:/g, '-');
+    cy.screenshot(`before-${testTitle}-${timestamp}`, { capture: 'fullPage' });
+});
+
+// Enhanced screenshot on failure with additional debugging info
+afterEach(function() {
+    if (this.currentTest.state === 'failed') {
+        const testTitle = this.currentTest.title;
+        const timestamp = new Date().toISOString().replace(/:/g, '-');
+        
+        // Log current URL and page title for debugging
+        cy.url().then(url => {
+            cy.log(`Failed at URL: ${url}`);
+        });
+        
+        // Take multiple screenshots for better debugging
+        cy.screenshot(`failed-${testTitle}-viewport-${timestamp}`, { capture: 'viewport' });
+        cy.screenshot(`failed-${testTitle}-fullpage-${timestamp}`, { capture: 'fullPage' });
+        
+        // Log browser console errors
+        cy.window().then((win) => {
+            const consoleErrors = win.console.error.calls || [];
+            if (consoleErrors.length > 0) {
+                cy.log('Console errors:', consoleErrors);
+            }
+        });
+    }
+});
