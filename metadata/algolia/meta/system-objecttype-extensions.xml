@@ -180,15 +180,6 @@ Setting this preference replaces the first two segments, the final index name be
                 </value-definitions>
             </attribute-definition>
 
-            <attribute-definition attribute-id="Algolia_VariantGroupingAttribute">
-                <display-name xml:lang="x-default">Algolia Variant Grouping Attribute</display-name>
-                <description xml:lang="x-default">The product variation attribute ID to use for grouping variants when 'Record Model' is set to 'variant-group-level'. Defaults to 'color' if not specified. Example: 'color', 'style'.</description>
-                <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <default-value>color</default-value>
-            </attribute-definition>
-
             <attribute-definition attribute-id="Algolia_IndexOutOfStock">
                 <display-name xml:lang="x-default">Index Out of Stock</display-name>
                 <description xml:lang="x-default">Index out of stock products</description>
@@ -300,7 +291,6 @@ Setting this preference replaces the first two segments, the final index name be
                 <attribute attribute-id="Algolia_AdditionalAttributes"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
                 <attribute attribute-id="Algolia_RecordModel"/>
-                <attribute attribute-id="Algolia_VariantGroupingAttribute"/>
                 <attribute attribute-id="Algolia_LocalesForIndexing"/>
                 <attribute attribute-id="Algolia_EnableInsights"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
