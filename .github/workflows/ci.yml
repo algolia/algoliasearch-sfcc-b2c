@@ -36,11 +36,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install Required Packages
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip
-
       - name: Install Dependencies
         run: npm ci
 
@@ -97,9 +92,40 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y zip
           npm ci
 
       - name: Run E2E Tests
-        run: npm run test:e2e
+        id: e2e-tests
+        run: |
+          npm run test:e2e
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Upload Cypress Screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          retention-days: 7
+
+      - name: Upload Cypress Videos
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          retention-days: 7
+
+      - name: Send Slack Notification on Failure
+        if: steps.e2e-tests.outputs.exit_code != '0'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ vars.SLACK_CHANNEL_ID }}
+        run: |
+          node scripts/slackNotifier.js
+
+      - name: Fail if E2E Tests Failed
+        if: steps.e2e-tests.outputs.exit_code != '0'
+        run: |
+          echo "E2E tests failed. Check the artifacts for screenshots and videos."
+          exit 1
