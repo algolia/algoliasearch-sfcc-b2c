@@ -384,6 +384,17 @@ exports.process = function(cpObj, parameters, stepExecution) {
                                 algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: record.objectID }, indexName));
                             }
                         });
+
+                        // Check if we need a delete operation because of product filter because delta jobs are record updates not a full reindex
+                        let variants = product.variants;
+                        if (variants && variants.size() > 0) {
+                            for (let v = 0; v < variants.size(); ++v) {
+                                let variant = variants[v];
+                                if (!productFilter.isInclude(variant)) {
+                                    algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variant.getID() }, indexName));
+                                }
+                            }
+                        }
                     }
                 } else {
                     // Master-level indexing

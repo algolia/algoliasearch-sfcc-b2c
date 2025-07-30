@@ -285,3 +285,93 @@ describe('productFilter.isInStoreStock', () => {
         expect(inStock).toBe(false);
     });
 });
+
+describe('productFilter with custom configuration', () => {
+    beforeEach(() => {
+        jest.resetModules();
+    });
+
+    test('Respects includeOfflineProducts: true configuration', () => {
+        // Mock configuration with includeOfflineProducts: true
+        jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
+            includeOfflineProducts: true,
+            includeNotSearchableProducts: false,
+            includeProductsWithoutOnlineCategories: false
+        }), { virtual: true });
+
+        const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
+        
+        const offlineProduct = new VariantMock({
+            online: false // Product is offline
+        });
+        
+        // Should include offline product when includeOfflineProducts is true
+        const result = productFilter.isInclude(offlineProduct);
+        expect(result).toBe(true);
+    });
+
+    test('Respects includeNotSearchableProducts: true configuration', () => {
+        // Mock configuration with includeNotSearchableProducts: true
+        jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
+            includeOfflineProducts: false,
+            includeNotSearchableProducts: true,
+            includeProductsWithoutOnlineCategories: false
+        }), { virtual: true });
+
+        const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
+        
+        const nonSearchableProduct = new VariantMock({
+            searchable: false // Product is not searchable
+        });
+        
+        // Should include non-searchable product when includeNotSearchableProducts is true
+        const result = productFilter.isInclude(nonSearchableProduct);
+        expect(result).toBe(true);
+    });
+
+    test('Respects includeProductsWithoutOnlineCategories: true configuration', () => {
+        // Mock configuration with includeProductsWithoutOnlineCategories: true
+        jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
+            includeOfflineProducts: false,
+            includeNotSearchableProducts: false,
+            includeProductsWithoutOnlineCategories: true
+        }), { virtual: true });
+
+        const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
+        
+        const masterWithoutCategories = new MasterProductMock();
+        masterWithoutCategories.getOnlineCategories = () => [];
+        
+        const productWithoutCategories = new VariantMock({
+            masterProduct: masterWithoutCategories
+        });
+        
+        // Should include product without categories when includeProductsWithoutOnlineCategories is true
+        const result = productFilter.isInclude(productWithoutCategories);
+        expect(result).toBe(true);
+    });
+
+    test('All includes enabled configuration', () => {
+        // Mock configuration with all includes enabled
+        jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
+            includeOfflineProducts: true,
+            includeNotSearchableProducts: true,
+            includeProductsWithoutOnlineCategories: true
+        }), { virtual: true });
+
+        const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
+        
+        const masterWithoutCategories = new MasterProductMock();
+        masterWithoutCategories.getOnlineCategories = () => [];
+        
+        const problematicProduct = new VariantMock({
+            online: false,
+            searchable: false,
+            masterProduct: masterWithoutCategories
+        });
+        
+        // Should include product that fails all checks when all checks are disabled
+        const result = productFilter.isInclude(problematicProduct);
+        expect(result).toBe(true);
+    });
+});
