@@ -11,17 +11,17 @@
 // The `productFilterConfig.js` file should export an object with the following structure:
 
 const productFilterConfig = {
-    // Control whether to check if products are online
-    // Default: true (only index online products)
-    checkOnline: true,
+    // Control whether to include offline products in indexing
+    // Default: false (exclude offline products)
+    includeOfflineProducts: false,
 
-    // Control whether to check if products are searchable
-    // Default: true (only index searchable products)
-    checkSearchable: true,
+    // Control whether to include non-searchable products in indexing
+    // Default: false (exclude non-searchable products)
+    includeNotSearchableProducts: false,
 
-    // Control whether to check if products have online categories
-    // Default: true (only index products with at least one online category)
-    checkOnlineCategory: true
+    // Control whether to include products without online categories in indexing
+    // Default: false (exclude products without online categories)
+    includeProductsWithoutOnlineCategories: false
 
     // ========================================================================
     // STOCK-RELATED SETTINGS (Managed via Business Manager UI)

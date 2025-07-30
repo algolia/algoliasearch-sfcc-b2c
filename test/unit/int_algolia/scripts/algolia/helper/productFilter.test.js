@@ -291,12 +291,12 @@ describe('productFilter with custom configuration', () => {
         jest.resetModules();
     });
 
-    test('Respects checkOnline: false configuration', () => {
-        // Mock configuration with checkOnline: false
+    test('Respects includeOfflineProducts: true configuration', () => {
+        // Mock configuration with includeOfflineProducts: true
         jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
-            checkOnline: false,
-            checkSearchable: true,
-            checkOnlineCategory: true
+            includeOfflineProducts: true,
+            includeNotSearchableProducts: false,
+            includeProductsWithoutOnlineCategories: false
         }), { virtual: true });
 
         const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
@@ -305,17 +305,17 @@ describe('productFilter with custom configuration', () => {
             online: false // Product is offline
         });
         
-        // Should include offline product when checkOnline is false
+        // Should include offline product when includeOfflineProducts is true
         const result = productFilter.isInclude(offlineProduct);
         expect(result).toBe(true);
     });
 
-    test('Respects checkSearchable: false configuration', () => {
-        // Mock configuration with checkSearchable: false
+    test('Respects includeNotSearchableProducts: true configuration', () => {
+        // Mock configuration with includeNotSearchableProducts: true
         jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
-            checkOnline: true,
-            checkSearchable: false,
-            checkOnlineCategory: true
+            includeOfflineProducts: false,
+            includeNotSearchableProducts: true,
+            includeProductsWithoutOnlineCategories: false
         }), { virtual: true });
 
         const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
@@ -324,17 +324,17 @@ describe('productFilter with custom configuration', () => {
             searchable: false // Product is not searchable
         });
         
-        // Should include non-searchable product when checkSearchable is false
+        // Should include non-searchable product when includeNotSearchableProducts is true
         const result = productFilter.isInclude(nonSearchableProduct);
         expect(result).toBe(true);
     });
 
-    test('Respects checkOnlineCategory: false configuration', () => {
-        // Mock configuration with checkOnlineCategory: false
+    test('Respects includeProductsWithoutOnlineCategories: true configuration', () => {
+        // Mock configuration with includeProductsWithoutOnlineCategories: true
         jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
-            checkOnline: true,
-            checkSearchable: true,
-            checkOnlineCategory: false
+            includeOfflineProducts: false,
+            includeNotSearchableProducts: false,
+            includeProductsWithoutOnlineCategories: true
         }), { virtual: true });
 
         const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
@@ -346,17 +346,17 @@ describe('productFilter with custom configuration', () => {
             masterProduct: masterWithoutCategories
         });
         
-        // Should include product without categories when checkOnlineCategory is false
+        // Should include product without categories when includeProductsWithoutOnlineCategories is true
         const result = productFilter.isInclude(productWithoutCategories);
         expect(result).toBe(true);
     });
 
-    test('All checks disabled configuration', () => {
-        // Mock configuration with all checks disabled
+    test('All includes enabled configuration', () => {
+        // Mock configuration with all includes enabled
         jest.doMock('*/cartridge/configuration/productFilterConfig', () => ({
-            checkOnline: false,
-            checkSearchable: false,
-            checkOnlineCategory: false
+            includeOfflineProducts: true,
+            includeNotSearchableProducts: true,
+            includeProductsWithoutOnlineCategories: true
         }), { virtual: true });
 
         const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');

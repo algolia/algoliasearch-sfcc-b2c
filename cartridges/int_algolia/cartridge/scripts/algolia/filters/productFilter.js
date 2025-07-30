@@ -7,9 +7,9 @@ try {
 } catch (e) { // eslint-disable-line no-unused-vars
     // If no custom config exists, use defaults
     config = {
-        checkOnline: true,
-        checkSearchable: true,
-        checkOnlineCategory: true
+        includeOfflineProducts: false,
+        includeNotSearchableProducts: false,
+        includeProductsWithoutOnlineCategories: false
     };
 }
 
@@ -19,8 +19,8 @@ try {
  * @returns {boolean} - True if product is online, false otherwise
  */
 function isOnline(product) {
-    // If checkOnline is disabled in config, always return true
-    if (config.checkOnline === false) {
+    // If includeOfflineProducts is enabled in config, always return true
+    if (config.includeOfflineProducts === true) {
         return true;
     }
     return product.online;
@@ -32,8 +32,8 @@ function isOnline(product) {
  * @returns {boolean} - True if product is searchable, false otherwise
  */
 function isSearchable(product) {
-    // If checkSearchable is disabled in config, always return true
-    if (config.checkSearchable === false) {
+    // If includeNotSearchableProducts is enabled in config, always return true
+    if (config.includeNotSearchableProducts === true) {
         return true;
     }
     return product.searchable;
@@ -45,8 +45,8 @@ function isSearchable(product) {
  * @returns {boolean} - True if product has at least one online category, false otherwise
  */
 function hasOnlineCategory(product) {
-    // If checkOnlineCategory is disabled in config, always return true
-    if (config.checkOnlineCategory === false) {
+    // If includeProductsWithoutOnlineCategories is enabled in config, always return true
+    if (config.includeProductsWithoutOnlineCategories === true) {
         return true;
     }
     var categories = product.getOnlineCategories();
