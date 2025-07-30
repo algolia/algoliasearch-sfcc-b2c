@@ -175,7 +175,7 @@ Setting this preference replaces the first two segments, the final index name be
                     </value-definition>
                     <value-definition>
                         <display xml:lang="x-default">Variation Group Product</display>
-                        <value>variant-group-level</value>
+                        <value>variation-group-level</value>
                     </value-definition>
                 </value-definitions>
             </attribute-definition>
