@@ -169,15 +169,15 @@
                             <isif condition="${pdict.algoliaData.getPreference('RecordModel') === 'variant-level'}">
                                 <option value="variant-level" selected="selected">Variation Product</option>
                                 <option value="master-level">Base Product</option>
-                                <option value="variant-group-level">Variation Group Product</option>
+                                <option value="variation-group-level">Variation Group Product</option>
                             <iselseif condition="${pdict.algoliaData.getPreference('RecordModel') === 'master-level'}">
                                 <option value="variant-level">Variation Product</option>
                                 <option value="master-level" selected="selected">Base Product</option>
-                                <option value="variant-group-level">Variation Group Product</option>
+                                <option value="variation-group-level">Variation Group Product</option>
                             <iselse>
                                 <option value="variant-level">Variation Product</option>
                                 <option value="master-level">Base Product</option>
-                                <option value="variant-group-level" selected="selected">Variation Group Product</option>
+                                <option value="variation-group-level" selected="selected">Variation Group Product</option>
                             </iselse>
                             </isif>
                         </select>
