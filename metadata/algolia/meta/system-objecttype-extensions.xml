@@ -159,7 +159,8 @@ Setting this preference replaces the first two segments, the final index name be
                 <display-name xml:lang="x-default">Record model</display-name>
                 <description xml:lang="x-default">Define the model used to store products in Algolia.
 'Variation Product': create one record per variation product.
-'Base Product': create one record per base product, containing all variants in a 'variants' attribute.</description>
+'Base Product': create one record per base product, containing all variants in a 'variants' attribute.
+'Variation Group Product': create one record per variant group (e.g., per color), containing sizes in that group.</description>
                 <type>enum-of-string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
@@ -171,6 +172,10 @@ Setting this preference replaces the first two segments, the final index name be
                     <value-definition>
                         <display xml:lang="x-default">Base Product</display>
                         <value>master-level</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Variation Group Product</display>
+                        <value>variation-group-level</value>
                     </value-definition>
                 </value-definitions>
             </attribute-definition>
