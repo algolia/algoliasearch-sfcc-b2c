@@ -164,13 +164,6 @@ exports.beforeStep = function(parameters, stepExecution) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
-        if (paramIndexingMethod === 'partialRecordUpdate' && variantAttributes.length > 0) {
-            jobReport.endTime = new Date();
-            jobReport.error = true;
-            jobReport.errorMessage = 'partialRecordUpdate is not compatible with Base Product level indexing';
-            jobReport.writeToCustomObject();
-            throw new Error(jobReport.errorMessage);
-        }
     }
 
     /* --- site locales --- */
@@ -358,7 +351,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     jobReport.processedItemsToSend++;
                     return algoliaOperations;
                 }
-                
+
                 var processedVariantsToSend = 0;
 
                 if (paramRecordModel !== MASTER_LEVEL) {
@@ -376,7 +369,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         let indexName = algoliaData.calculateIndexName('products', locale);
                         let records = recordsPerLocale[locale];
                         processedVariantsToSend = records.length;
-                        
+
                         records.forEach(function(record) {
                             if (INDEX_OUT_OF_STOCK || record.in_stock) {
                                 algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
