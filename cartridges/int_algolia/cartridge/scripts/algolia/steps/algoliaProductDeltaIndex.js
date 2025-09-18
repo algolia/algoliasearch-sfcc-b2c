@@ -104,6 +104,8 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
+        variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
+        masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
         attributesToSend = algoliaProductConfig.defaultAttributes_v2.slice();
         const additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
         additionalAttributes.map(function(attribute) {
@@ -134,8 +136,6 @@ exports.beforeStep = function(parameters, stepExecution) {
 
 
     /* --- categorize attributes (master/variant, non-localized, shared) --- */
-    variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
-    masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
     attributesToSend.forEach(function(attribute) {
         var attributeConfig = extendedProductAttributesConfig[attribute] ||
             algoliaProductConfig.attributeConfig_v2[attribute] ||
