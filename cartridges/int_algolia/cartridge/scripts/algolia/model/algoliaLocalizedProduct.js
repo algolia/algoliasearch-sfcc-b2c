@@ -530,7 +530,7 @@ function algoliaLocalizedProduct(parameters) {
 
     request.setLocale(parameters.locale || 'default');
 
-    if (empty(product) || empty(attributeList)) {
+    if (empty(product)) {
         this.id = null;
     } else {
         if (parameters.isVariant) {
