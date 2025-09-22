@@ -330,11 +330,10 @@ exports.process = function(cpObj, parameters, stepExecution) {
     var product = ProductMgr.getProduct(cpObj.productID);
 
     let algoliaOperations = [];
+    let processedVariantsToSend = 0;
 
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
-        if (paramRecordModel === MASTER_LEVEL || attributesComputedFromBaseProduct.length > 0) {
-            // When there are attributes shared in all variants (such as 'colorVariations')
-            // or for master-level indexing, we work with the master products.
+        if (paramRecordModel === MASTER_LEVEL) {
             if (product.isVariant()) {
                 // This variant will be indexed when we treat its master product
                 return [];
@@ -352,74 +351,77 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     return algoliaOperations;
                 }
 
-                var processedVariantsToSend = 0;
-
-                if (paramRecordModel !== MASTER_LEVEL) {
-                    // Variant-level indexing
-                    var recordsPerLocale = jobHelper.generateVariantRecords({
-                        masterProduct: product,
-                        locales: siteLocales,
-                        attributeList: attributesToSend,
-                        nonLocalizedAttributes: nonLocalizedAttributes,
-                        attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
-                        fullRecordUpdate: fullRecordUpdate,
-                    });
+                let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+                if (inStock || INDEX_OUT_OF_STOCK) {
+                    let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                     for (let l = 0; l < siteLocales.size(); ++l) {
                         let locale = siteLocales[l];
                         let indexName = algoliaData.calculateIndexName('products', locale);
-                        let records = recordsPerLocale[locale];
-                        processedVariantsToSend = records.length;
-
-                        records.forEach(function(record) {
-                            if (INDEX_OUT_OF_STOCK || record.in_stock) {
-                                algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName))
-                            } else {
-                                algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: record.objectID }, indexName));
-                            }
+                        let localizedMaster = new AlgoliaLocalizedProduct({
+                            product: product,
+                            locale: locale,
+                            attributeList: masterAttributes,
+                            variantAttributes: variantAttributes,
+                            baseModel: baseModel,
                         });
-
-                        // Check if we need a delete operation because of product filter because delta jobs are record updates not a full reindex
-                        let variants = product.variants;
-                        if (variants && variants.size() > 0) {
-                            for (let v = 0; v < variants.size(); ++v) {
-                                let variant = variants[v];
-                                if (!productFilter.isInclude(variant)) {
-                                    algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variant.getID() }, indexName));
-                                }
-                            }
-                        }
+                        processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
                     }
                 } else {
-                    // Master-level indexing
-                    let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
-                    if (inStock || INDEX_OUT_OF_STOCK) {
-                        let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
-                        for (let l = 0; l < siteLocales.size(); ++l) {
-                            let locale = siteLocales[l];
-                            let indexName = algoliaData.calculateIndexName('products', locale);
-                            let localizedMaster = new AlgoliaLocalizedProduct({
-                                product: product,
-                                locale: locale,
-                                attributeList: masterAttributes,
-                                variantAttributes: variantAttributes,
-                                baseModel: baseModel,
-                            });
-                            processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
-                            algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
-                        }
-                    } else {
-                        // => product is out-of-stock and IndexOutOfStock=false => must delete from Algolia
-                        for (let l = 0; l < siteLocales.size(); l++) {
-                            let locale = siteLocales[l];
-                            let indexName = algoliaData.calculateIndexName('products', locale);
-                            algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
-                        }
+                    // => product is out-of-stock and IndexOutOfStock=false => must delete from Algolia
+                    for (let l = 0; l < siteLocales.size(); l++) {
+                        let locale = siteLocales[l];
+                        let indexName = algoliaData.calculateIndexName('products', locale);
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
                     }
                 }
 
                 jobReport.processedItemsToSend += processedVariantsToSend;
                 jobReport.recordsToSend += algoliaOperations.length;
                 return algoliaOperations;
+            }
+        } else if (attributesComputedFromBaseProduct.length > 0) {
+            // When there are attributes shared in all variants (such as 'colorVariations')
+            // we work with the master products. This permits to fetch those attributes only once.
+            if (product.isVariant()) {
+                // This variant will be indexed when we treat its master product
+                return [];
+            }
+
+            var recordsPerLocale = jobHelper.generateVariantRecords({
+                masterProduct: product,
+                locales: siteLocales,
+                attributeList: attributesToSend,
+                nonLocalizedAttributes: nonLocalizedAttributes,
+                attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
+                fullRecordUpdate: fullRecordUpdate,
+            });
+            for (let l = 0; l < siteLocales.size(); ++l) {
+                let locale = siteLocales[l];
+                let indexName = algoliaData.calculateIndexName('products', locale);
+                let records = recordsPerLocale[locale];
+                processedVariantsToSend = records.length;
+
+                records.forEach(function (record) {
+                    if (INDEX_OUT_OF_STOCK || record.in_stock) {
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName));
+                    } else {
+                        algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: record.objectID }, indexName));
+                    }
+                });
+
+                // Check if we need a delete operation because of product filter because delta jobs are record updates not a full reindex
+                let variants = product.variants;
+                if (variants && variants.size() > 0) {
+                    for (let v = 0; v < variants.size(); ++v) {
+                        let variant = variants[v];
+                        if (!productFilter.isInclude(variant)) {
+                            algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variant.getID() }, indexName));
+                        }
+                    }
+                }
+
+                jobReport.processedItemsToSend += processedVariantsToSend;
             }
         }
 
