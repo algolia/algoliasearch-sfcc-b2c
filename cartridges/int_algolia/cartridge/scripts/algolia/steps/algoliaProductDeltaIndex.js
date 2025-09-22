@@ -339,20 +339,12 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 return [];
             }
             if (product.master) {
-                // Check if master product meets basic criteria
-                if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
-                    // Master product fails filter criteria => delete all its variants from Algolia
-                    for (let l = 0; l < siteLocales.size(); l++) {
-                        let locale = siteLocales[l];
-                        let indexName = algoliaData.calculateIndexName('products', locale);
-                        algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
-                    }
-                    jobReport.processedItemsToSend++;
-                    return algoliaOperations;
-                }
-
                 let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
-                if (inStock || INDEX_OUT_OF_STOCK) {
+
+                if ((inStock || INDEX_OUT_OF_STOCK) &&
+                    productFilter.isOnline(product) &&
+                    productFilter.isSearchable(product) &&
+                    productFilter.hasOnlineCategory(product)) {
                     let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                     for (let l = 0; l < siteLocales.size(); ++l) {
                         let locale = siteLocales[l];
@@ -367,16 +359,17 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
                         algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
                     }
+                    jobReport.processedItemsToSend += processedVariantsToSend;
                 } else {
-                    // => product is out-of-stock and IndexOutOfStock=false => must delete from Algolia
+                    // => product is out-of-stock and IndexOutOfStock=false, or fails filter criteria => must delete from Algolia
                     for (let l = 0; l < siteLocales.size(); l++) {
                         let locale = siteLocales[l];
                         let indexName = algoliaData.calculateIndexName('products', locale);
                         algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
                     }
+                    jobReport.processedItemsToSend++;
                 }
 
-                jobReport.processedItemsToSend += processedVariantsToSend;
                 jobReport.recordsToSend += algoliaOperations.length;
                 return algoliaOperations;
             }
@@ -425,29 +418,19 @@ exports.process = function(cpObj, parameters, stepExecution) {
             }
         }
 
-        if (productFilter.isInclude(product)) {
-            let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
-            if (inStock || INDEX_OUT_OF_STOCK) {
-                // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-                var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
-                for (let l = 0; l < siteLocales.size(); l++) {
-                    let locale = siteLocales[l];
-                    let indexName = algoliaData.calculateIndexName('products', locale);
-                    let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
-                    algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
-                }
-                jobReport.processedItemsToSend++;
-            } else {
-                // => product is out-of-stock and IndexOutOfStock=false => must delete from Algolia
-                for (let l = 0; l < siteLocales.size(); l++) {
-                    let locale = siteLocales[l];
-                    let indexName = algoliaData.calculateIndexName('products', locale);
-                    algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
-                }
-                jobReport.processedItemsToSend++;
+        let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+        if (productFilter.isInclude(product) && (inStock || INDEX_OUT_OF_STOCK)) {
+            // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
+            var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
+            for (let l = 0; l < siteLocales.size(); l++) {
+                let locale = siteLocales[l];
+                let indexName = algoliaData.calculateIndexName('products', locale);
+                let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+                algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedProduct, indexName));
             }
+            jobReport.processedItemsToSend++;
         } else {
-            // => product fails filter criteria (offline, not searchable, no online categories) => must delete from Algolia
+            // => product or not in stock or fails filter criteria (offline, not searchable, no online categories) => must delete from Algolia
             for (let l = 0; l < siteLocales.size(); l++) {
                 let locale = siteLocales[l];
                 let indexName = algoliaData.calculateIndexName('products', locale);
