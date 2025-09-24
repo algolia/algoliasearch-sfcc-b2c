@@ -235,8 +235,12 @@ function getCategoryHierarchyIds(category) {
  */
 var aggregatedValueHandlers = {
     masterID: function(product) {
-        return product.isVariant() || product.isVariationGroup() ?
-            product.masterProduct.ID : null;
+        if (product.isVariant() || product.isVariationGroup()) {
+            return product.masterProduct.ID;
+        } else if (product.isMaster()) {
+            return product.ID;
+        }
+        return null;
     },
     defaultVariantID: function(product) {
         const defaultVariant = product.getVariationModel().getDefaultVariant();
@@ -298,8 +302,8 @@ var aggregatedValueHandlers = {
         }
         return res;
     },
-    color: function (product) {
-        var variationModel = product.getVariationModel();
+    color: function (product, parameters) {
+        var variationModel = parameters.variationModel || product.getVariationModel();
         var colorAttribute = variationModel.getProductVariationAttribute('color');
         return (colorAttribute && variationModel.getSelectedValue(colorAttribute))
             ? variationModel.getSelectedValue(colorAttribute).displayValue
@@ -320,8 +324,8 @@ var aggregatedValueHandlers = {
         }
         return modelHelper.getColorVariations(masterProduct);
     },
-    size: function (product) {
-        var variationModel = product.getVariationModel();
+    size: function (product, parameters) {
+        var variationModel = parameters.variationModel || product.getVariationModel();
         var sizeAttribute = variationModel.getProductVariationAttribute('size');
         return (sizeAttribute && variationModel.getSelectedValue(sizeAttribute))
             ? variationModel.getSelectedValue(sizeAttribute).displayValue
@@ -461,7 +465,12 @@ var aggregatedValueHandlers = {
         }
 
         const variants = [];
-        const variantsIt = product.variants.iterator();
+        let variantsIt;
+        if (parameters.variationModel) {
+            variantsIt = parameters.variationModel.getSelectedVariants().iterator();
+        } else {
+            variantsIt = product.variants.iterator();
+        }
         while (variantsIt.hasNext()) {
             var variant = variantsIt.next();
 
@@ -535,6 +544,8 @@ function algoliaLocalizedProduct(parameters) {
     } else {
         if (parameters.isVariant) {
             this.variantID = product.ID;
+        } else if (parameters.variationModel) {
+            this.objectID = product.ID + '-' + parameters.variationValueID;
         } else {
             this.objectID = product.ID;
         }

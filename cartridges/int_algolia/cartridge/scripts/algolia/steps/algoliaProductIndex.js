@@ -28,6 +28,8 @@ var extendedProductAttributesConfig;
 
 const VARIANT_LEVEL = 'variant-level';
 const MASTER_LEVEL = 'master-level';
+const VARIATION_GROUP_LEVEL = 'variation-group-level';
+const VARIATION_ATTRIBUTE_ID = 'color';
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
 
@@ -146,7 +148,15 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (paramRecordModel === MASTER_LEVEL) {
+    if (paramRecordModel === VARIATION_GROUP_LEVEL) {
+        logger.info('Variation-group record model, moving " + ' + VARIATION_ATTRIBUTE_ID + '" attribute to the root level');
+        masterAttributes.push(VARIATION_ATTRIBUTE_ID);
+        while (variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID) >= 0) {
+            variantAttributes.splice(variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID), 1);
+        }
+    }
+
+    if (paramRecordModel === MASTER_LEVEL || paramRecordModel === VARIATION_GROUP_LEVEL) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
@@ -274,6 +284,44 @@ exports.process = function(product, parameters, stepExecution) {
                 }
             }
 
+            jobReport.processedItemsToSend += processedVariantsToSend;
+            jobReport.recordsToSend += algoliaOperations.length;
+            return algoliaOperations;
+        }
+    } else if (paramRecordModel === VARIATION_GROUP_LEVEL) {
+        if (product.isVariant()) {
+            // This variant will be indexed when we treat its master product, skip it.
+            return [];
+        }
+        if (product.master) {
+            if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
+                return [];
+            }
+            let recordsPerLocale = jobHelper.generateVariationGroupRecords({
+                locales: siteLocales,
+                baseProduct: product,
+                baseProductAttributes: masterAttributes,
+                variantAttributes: variantAttributes,
+                nonLocalizedAttributes: nonLocalizedAttributes,
+                attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
+                variationAttributeId: VARIATION_ATTRIBUTE_ID,
+            });
+            for (let l = 0; l < siteLocales.size(); ++l) {
+                let locale = siteLocales[l];
+                let indexName = algoliaData.calculateIndexName('products', locale);
+                if (paramIndexingMethod === 'fullCatalogReindex') {
+                    indexName += '.tmp';
+                }
+                let variationGroupRecords = recordsPerLocale[locale];
+                variationGroupRecords.forEach(function (variationGroupRecord) {
+                    if (INDEX_OUT_OF_STOCK || (variationGroupRecord.variants && (variationGroupRecord.variants.length > 0))) {
+                        processedVariantsToSend += variationGroupRecord.variants.length;
+                        algoliaOperations.push(
+                            new jobHelper.AlgoliaOperation(indexingOperation, variationGroupRecord, indexName)
+                        );
+                    }
+                });
+            }
             jobReport.processedItemsToSend += processedVariantsToSend;
             jobReport.recordsToSend += algoliaOperations.length;
             return algoliaOperations;

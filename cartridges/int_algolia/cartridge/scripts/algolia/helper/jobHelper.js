@@ -643,7 +643,6 @@ function generateVariantRecords(parameters) {
                 locale: locale,
                 attributeList: parameters.attributeList,
                 baseModel: baseModel,
-                fullRecordUpdate: parameters.fullRecordUpdate,
             });
             algoliaRecordsPerLocale[locale].push(localizedVariant);
         }
@@ -651,6 +650,73 @@ function generateVariantRecords(parameters) {
     return algoliaRecordsPerLocale;
 }
 
+/**
+ * For a given base product and variationAttributeId, generate all variation-group records
+ *
+ * @param {Object} parameters - model parameters
+ * @param {dw.catalog.Product} parameters.baseProduct - A master product
+ * @param {string} parameters.locales - The requested locales
+ * @param {Array} parameters.baseProductAttributes - list of attributes to add at the root level of the record
+ * @param {Array} parameters.variantAttributes - list of attributes to add in the 'variants' array of the record
+ * @param {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
+ * @param {Array} parameters.attributesComputedFromBaseProduct - list of attributes computed from the baseProduct and shared in all variants
+ * @param {string} parameters.variationAttributeId - id of the variation attribute used to group the variants (default: 'color')
+ * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
+ */
+function generateVariationGroupRecords(parameters) {
+    const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+
+    const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
+
+    // Fetch shared attributes such as 'colorVariations' only once (for each locale), to set them later in each record
+    const sharedAttributesPerLocale = {};
+    const algoliaRecordsPerLocale = {};
+    for (let l = 0; l < parameters.locales.size(); ++l) {
+        let locale = parameters.locales[l];
+        sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
+            product: parameters.baseProduct,
+            locale: locale,
+            attributeList: attributesComputedFromBaseProduct,
+        });
+        algoliaRecordsPerLocale[locale] = [];
+    }
+
+    let variationModel = parameters.baseProduct.getVariationModel();
+    let variationAttribute = variationModel.getProductVariationAttribute(parameters.variationAttributeId || 'color');
+    if (!variationAttribute) {
+        algoliaLogger.info('No ' + parameters.variationAttributeId + ' attribute found for product ' + parameters.baseProduct.ID);
+        return algoliaRecordsPerLocale;
+    }
+    let variationValues = variationModel.getAllValues(variationAttribute).iterator();
+    while (variationValues.hasNext()) {
+        let variationValue = variationValues.next();
+        variationModel.setSelectedAttributeValue(variationAttribute.ID, variationValue.ID);
+        let baseModel = new AlgoliaLocalizedProduct({
+            product: parameters.baseProduct,
+            locale: 'default',
+            attributeList: parameters.nonLocalizedAttributes,
+        });
+        for (let l = 0; l < parameters.locales.size(); ++l) {
+            let locale = parameters.locales[l];
+            // Add shared attributes in the base model
+            attributesComputedFromBaseProduct.forEach(function(sharedAttribute) {
+                baseModel[sharedAttribute] = sharedAttributesPerLocale[locale][sharedAttribute];
+            });
+            let localizedVariationGroup = new AlgoliaLocalizedProduct({
+                product: parameters.baseProduct,
+                locale: locale,
+                attributeList: parameters.baseProductAttributes,
+                variantAttributes: parameters.variantAttributes,
+                baseModel: baseModel,
+                variationModel: variationModel,
+                variationValueID: variationValue.ID,
+            });
+            algoliaRecordsPerLocale[locale].push(localizedVariationGroup);
+        }
+    }
+
+    return algoliaRecordsPerLocale;
+}
 
 /**
  * Returns the default configuration for a given attribute.
@@ -750,6 +816,7 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     generateVariantRecords: generateVariantRecords,
+    generateVariationGroupRecords: generateVariationGroupRecords,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,
