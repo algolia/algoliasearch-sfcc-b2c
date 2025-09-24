@@ -276,6 +276,10 @@ var attributeConfig_v2 = {
         localized: false,
         variantAttribute: true,
     },
+    variants: {
+        localized: true,
+        variantAttribute: false,
+    }
 };
 
 module.exports = {
