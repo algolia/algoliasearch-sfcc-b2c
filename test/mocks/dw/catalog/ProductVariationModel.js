@@ -1,5 +1,6 @@
 const collectionHelper = require('../../helpers/collectionHelper');
 const ProductVariationAttributeValue = require('./ProductVariationAttributeValue');
+const mockImages = require('../../../mocks/data/images');
 
 // https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/api/class_dw_catalog_ProductVariationModel.html
 class ProductVariationModel {
@@ -33,6 +34,16 @@ class ProductVariationModel {
     setSelectedAttributeValue(variationAttributeID, variationAttributeValueID) {
         this.variationAttributes[variationAttributeID] = variationAttributeValueID;
     }
+    getSelectedVariants() {
+        return collectionHelper.createCollection(this.variants.filter(variant => {
+            for (const attributeID in this.variationAttributes) {
+                if (this.variationAttributes[attributeID] !== variant.variationAttributes[attributeID]) {
+                    return false;
+                }
+            }
+            return true;
+        }));
+    }
     getAllValues(variationAttribute) {
         if (!this.variants) {
             return collectionHelper.createCollection([])
@@ -56,9 +67,10 @@ class ProductVariationModel {
         return true;
     }
     getImages(viewtype) {
-        return collectionHelper.createCollection(
-            this.images[viewtype][request.getLocale()] || this.images[viewtype]['en']
-        );
+        let locale = request.getLocale() || 'en';
+        const images = mockImages[this.variationAttributes['color']] || this.images;
+        const res = images[viewtype][locale] || images[viewtype]['en'];
+        return collectionHelper.createCollection(res);
     }
 
     getHtmlName(variationAttribute) {
