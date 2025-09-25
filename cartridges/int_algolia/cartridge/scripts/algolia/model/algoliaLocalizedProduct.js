@@ -390,14 +390,20 @@ var aggregatedValueHandlers = {
 
         return inStock;
     },
-    image_groups: function (product) {
+    image_groups: function (product, parameters) {
         var imageGroupsArr = [];
-        var imageGroup = modelHelper.getImageGroups(product.getImages('large'), 'large');
+        var imagesLarge = parameters.variationModel ?
+            parameters.variationModel.getImages('large') :
+            product.getImages('large');
+        var imageGroup = modelHelper.getImageGroups(imagesLarge, 'large');
         if (!empty(imageGroup)) {
             imageGroupsArr.push(imageGroup);
         }
 
-        imageGroup = modelHelper.getImageGroups(product.getImages('small'), 'small');
+        var imagesSmall = parameters.variationModel ?
+            parameters.variationModel.getImages('small') :
+            product.getImages('small');
+        imageGroup = modelHelper.getImageGroups(imagesSmall, 'small');
         if (!empty(imageGroup)) {
             imageGroupsArr.push(imageGroup);
         }

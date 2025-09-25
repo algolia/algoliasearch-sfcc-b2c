@@ -655,7 +655,7 @@ function generateVariantRecords(parameters) {
  *
  * @param {Object} parameters - model parameters
  * @param {dw.catalog.Product} parameters.baseProduct - A master product
- * @param {string} parameters.locales - The requested locales
+ * @param {dw.util.List} parameters.locales - The requested locales
  * @param {Array} parameters.baseProductAttributes - list of attributes to add at the root level of the record
  * @param {Array} parameters.variantAttributes - list of attributes to add in the 'variants' array of the record
  * @param {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
@@ -672,7 +672,7 @@ function generateVariationGroupRecords(parameters) {
     const sharedAttributesPerLocale = {};
     const algoliaRecordsPerLocale = {};
     for (let l = 0; l < parameters.locales.size(); ++l) {
-        let locale = parameters.locales[l];
+        let locale = parameters.locales.get(l);
         sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
             product: parameters.baseProduct,
             locale: locale,
@@ -697,7 +697,7 @@ function generateVariationGroupRecords(parameters) {
             attributeList: parameters.nonLocalizedAttributes,
         });
         for (let l = 0; l < parameters.locales.size(); ++l) {
-            let locale = parameters.locales[l];
+            let locale = parameters.locales.get(l);
             // Add shared attributes in the base model
             attributesComputedFromBaseProduct.forEach(function(sharedAttribute) {
                 baseModel[sharedAttribute] = sharedAttributesPerLocale[locale][sharedAttribute];

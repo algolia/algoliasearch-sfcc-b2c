@@ -307,7 +307,7 @@ exports.process = function(product, parameters, stepExecution) {
                 variationAttributeId: VARIATION_ATTRIBUTE_ID,
             });
             for (let l = 0; l < siteLocales.size(); ++l) {
-                let locale = siteLocales[l];
+                let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
                 if (paramIndexingMethod === 'fullCatalogReindex') {
                     indexName += '.tmp';
