@@ -244,6 +244,30 @@ describe('process', () => {
         const algoliaOperations = job.process(masterProduct);
         expect(algoliaOperations).toMatchSnapshot();
     });
+    test('variation-group-level indexing - product without variation attribute', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'variation-group-level';
+        mockAdditionalAttributes = ['size'];
+        mockLocalesForIndexing = ['en'];
+
+        // Process a master product with two color variations and two size variations
+        const masterProduct = new MasterVariantMock({
+            variants: [
+                new VariantMock({
+                    ID: '701644031206M',
+                    variationAttributes: { size: '004' },
+                }),
+                new VariantMock({
+                    ID: '701644031213M',
+                    variationAttributes: { size: '006' },
+                }),
+            ]
+        });
+
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
+
+        const algoliaOperations = job.process(masterProduct);
+        expect(algoliaOperations).toMatchSnapshot();
+    });
 });
 
 describe('send', () => {

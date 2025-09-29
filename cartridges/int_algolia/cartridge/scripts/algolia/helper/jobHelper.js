@@ -612,7 +612,7 @@ function generateVariantRecords(parameters) {
     const sharedAttributesPerLocale = {};
     const algoliaRecordsPerLocale = {};
     for (let l = 0; l < parameters.locales.size(); ++l) {
-        let locale = parameters.locales[l];
+        let locale = parameters.locales.get(l);
         sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
             product: parameters.masterProduct,
             locale: locale,
@@ -633,7 +633,7 @@ function generateVariantRecords(parameters) {
             fullRecordUpdate: parameters.fullRecordUpdate
         });
         for (let l = 0; l < parameters.locales.size(); ++l) {
-            let locale = parameters.locales[l];
+            let locale = parameters.locales.get(l);
             // Add shared attributes in the base model
             attributesComputedFromBaseProduct.forEach(function(sharedAttribute) {
                 baseModel[sharedAttribute] = sharedAttributesPerLocale[locale][sharedAttribute];

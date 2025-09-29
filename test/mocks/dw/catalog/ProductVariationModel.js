@@ -14,6 +14,16 @@ class ProductVariationModel {
     }
 
     getProductVariationAttribute(id) {
+        if (this.variants) {
+            // Base product. Check if the attribute exists in at least one variant
+            const variantWithAttribute = this.variants.find((variant) => {
+                return variant.variationAttributes && id in variant.variationAttributes;
+            });
+            if (!variantWithAttribute) {
+                return null;
+            }
+        }
+
         const productVariationAttributes = {
             color: {
                 default: { ID: 'color', displayName: 'Color' },

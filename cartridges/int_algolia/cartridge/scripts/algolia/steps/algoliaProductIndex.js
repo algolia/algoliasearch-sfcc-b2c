@@ -297,6 +297,40 @@ exports.process = function(product, parameters, stepExecution) {
             if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
                 return [];
             }
+
+            let variationModel = product.getVariationModel();
+            let variationAttribute = variationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
+            if (!variationAttribute) {
+                logger.info('No ' + VARIATION_ATTRIBUTE_ID + ' attribute found for product ' + product.ID + ', will generate variant records');
+                // TODO: move in a shared function, the code is the same as below
+                let recordsPerLocale = jobHelper.generateVariantRecords({
+                    masterProduct: product,
+                    locales: siteLocales,
+                    attributeList: attributesToSend,
+                    nonLocalizedAttributes: nonLocalizedAttributes,
+                    attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
+                });
+                for (let l = 0; l < siteLocales.size(); ++l) {
+                    let locale = siteLocales.get(l);
+                    let indexName = algoliaData.calculateIndexName('products', locale);
+                    if (paramIndexingMethod === 'fullCatalogReindex') {
+                        indexName += '.tmp';
+                    }
+                    let records = recordsPerLocale[locale];
+                    records.forEach(function (record) {
+                        if (INDEX_OUT_OF_STOCK || record.in_stock) {
+                            processedVariantsToSend++;
+                            algoliaOperations.push(
+                                new jobHelper.AlgoliaOperation(indexingOperation, record, indexName)
+                            );
+                        }
+                    });
+                }
+                jobReport.processedItemsToSend += processedVariantsToSend;
+                jobReport.recordsToSend += algoliaOperations.length;
+                return algoliaOperations;
+            }
+
             let recordsPerLocale = jobHelper.generateVariationGroupRecords({
                 locales: siteLocales,
                 baseProduct: product,
