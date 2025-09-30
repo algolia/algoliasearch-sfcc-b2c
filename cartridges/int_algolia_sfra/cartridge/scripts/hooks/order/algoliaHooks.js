@@ -20,27 +20,18 @@ let RECORD_MODEL_TYPE = {
 
 /**
  * Creates the necessary configuration for a product based on the record model type.
- * 
+ *
  * @param {dw.catalog.Product} product - The product to create config for.
  * @param {string} recordModel - The type of record model.
+ * @param {Array} additionalAttributes - User-defined attributes to index.
  * @returns {Object} Configuration object to pass to generateAlgoliaOperations.
  */
 function createProductConfig(product, recordModel, additionalAttributes) {
     let attributesConfig = jobHelper.getAttributes(additionalAttributes);
     let productConfig = {};
-    
+
     if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && product.master) {
-        // Master product configuration
-        productConfig.baseModel = new AlgoliaLocalizedProduct({
-            product: product,
-            locale: 'default',
-            attributeList: attributesConfig.nonLocalizedMasterAttributes
-        });
-        productConfig.variantAttributes = attributesConfig.variantAttributes;
-        productConfig.attributeList = attributesConfig.masterAttributes;
-    } else if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && !product.master) {
-        // Variant product, but we're using master-level indexing
-        let masterProduct = product.masterProduct;
+        let masterProduct = product.master ? product : product.masterProduct;
         productConfig.baseModel = new AlgoliaLocalizedProduct({
             product: masterProduct,
             locale: 'default',
@@ -48,6 +39,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
         });
         productConfig.variantAttributes = attributesConfig.variantAttributes;
         productConfig.attributeList = attributesConfig.masterAttributes;
+        productConfig.product = masterProduct;
     } else {
         // Variant-level indexing for variant product
         productConfig.baseModel = new AlgoliaLocalizedProduct({
@@ -55,6 +47,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
             locale: 'default',
             attributeList: attributesConfig.variantAttributes
         });
+        productConfig.product = product;
     }
 
     return productConfig;
@@ -134,18 +127,15 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
         let inStoreStock = isInStoreStock(product, storeId, threshold);
         if (!inStoreStock && additionalAttributes.indexOf('storeAvailability') > -1) {
             if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
-                let masterProduct = product.masterProduct;
-                let productConfig = createProductConfig(masterProduct, recordModel, additionalAttributes);
-
+                let productConfig = createProductConfig(product.masterProduct, recordModel, additionalAttributes);
                 productConfig.attributeList = ['variants'];
-                productConfig.product = masterProduct;
 
                 let productOps = generateAlgoliaOperations(productConfig);
                 algoliaOperations = algoliaOperations.concat(productOps);
             } else {
                 let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                 productConfig.attributeList = ['storeAvailability'];
-                productConfig.product = product;
+
                 let productOps = generateAlgoliaOperations(productConfig);
                 algoliaOperations = algoliaOperations.concat(productOps);
             }
@@ -185,14 +175,12 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                     let productConfig = createProductConfig(masterProduct, recordModel, additionalAttributes);
                     productConfig.attributeList = attrArray;
-                    productConfig.product = masterProduct;
 
                     let productOps = generateAlgoliaOperations(productConfig);
                     algoliaOperations = algoliaOperations.concat(productOps);
                 } else {
                     let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                     productConfig.attributeList = ['in_stock'];
-                    productConfig.product = product;
 
                     let productOps = generateAlgoliaOperations(productConfig);
                     algoliaOperations = algoliaOperations.concat(productOps);
@@ -206,7 +194,6 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                 }
                 let productConfig = createProductConfig(baseProduct, recordModel, additionalAttributes);
                 productConfig.attributeList = attrArray;
-                productConfig.product = baseProduct;
 
                 let productOps = generateAlgoliaOperations(productConfig);
 
