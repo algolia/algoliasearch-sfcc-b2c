@@ -15,8 +15,10 @@ let generateAlgoliaOperations = orderHelper.generateAlgoliaOperations;
 
 let RECORD_MODEL_TYPE = {
     MASTER_LEVEL: 'master-level',
-    VARIANT_LEVEL: 'variant-level'
+    VARIANT_LEVEL: 'variant-level',
+    VARIATION_GROUP_LEVEL: 'variation-group-level'
 };
+const VARIATION_ATTRIBUTE_ID = 'color';
 
 /**
  * Creates the necessary configuration for a product based on the record model type.
@@ -30,6 +32,9 @@ function createProductConfig(product, recordModel, additionalAttributes) {
     let attributesConfig = jobHelper.getAttributes(additionalAttributes);
     let productConfig = {};
 
+    let productVariationModel = product.getVariationModel();
+    let variationAttribute = productVariationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
+
     if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && product.master) {
         let masterProduct = product.master ? product : product.masterProduct;
         productConfig.baseModel = new AlgoliaLocalizedProduct({
@@ -37,6 +42,31 @@ function createProductConfig(product, recordModel, additionalAttributes) {
             locale: 'default',
             attributeList: attributesConfig.nonLocalizedMasterAttributes
         });
+        productConfig.variantAttributes = attributesConfig.variantAttributes;
+        productConfig.attributeList = attributesConfig.masterAttributes;
+        productConfig.product = masterProduct;
+    } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL && variationAttribute) {
+        let masterProduct = product.master ? product : product.masterProduct;
+        productConfig.baseModel = new AlgoliaLocalizedProduct({
+            product: masterProduct,
+            locale: 'default',
+            attributeList: attributesConfig.nonLocalizedMasterAttributes
+        });
+
+        let variationAttributeValue = productVariationModel.getSelectedValue(variationAttribute);
+        // Set the variation model to the variation group of the current product
+        if (variationAttributeValue) {
+            let variationGroupModel = masterProduct.getVariationModel();
+            variationGroupModel.setSelectedAttributeValue(variationAttribute.ID, variationAttributeValue.ID);
+            productConfig.variationModel = variationGroupModel;
+            productConfig.variationValueID = variationAttributeValue.ID;
+        }
+
+        // Move the variation attribute at the root level
+        attributesConfig.masterAttributes.push(VARIATION_ATTRIBUTE_ID);
+        while (attributesConfig.variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID) >= 0) {
+            attributesConfig.variantAttributes.splice(attributesConfig.variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID), 1);
+        }
         productConfig.variantAttributes = attributesConfig.variantAttributes;
         productConfig.attributeList = attributesConfig.masterAttributes;
         productConfig.product = masterProduct;
@@ -132,6 +162,12 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
 
                 let productOps = generateAlgoliaOperations(productConfig);
                 algoliaOperations = algoliaOperations.concat(productOps);
+            } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL) {
+                let productConfig = createProductConfig(product, recordModel, additionalAttributes);
+                productConfig.attributeList = ['variants'];
+
+                let productOps = generateAlgoliaOperations(productConfig);
+                algoliaOperations = algoliaOperations.concat(productOps);
             } else {
                 let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                 productConfig.attributeList = ['storeAvailability'];
@@ -178,6 +214,17 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                     let productOps = generateAlgoliaOperations(productConfig);
                     algoliaOperations = algoliaOperations.concat(productOps);
+                } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL) {
+                    let attrArray = ['variants'];
+                    if (additionalAttributes.indexOf('in_stock') > -1) {
+                        attrArray.push('in_stock');
+                    }
+
+                    let productConfig = createProductConfig(product, recordModel, additionalAttributes);
+                    productConfig.attributeList = attrArray;
+
+                    let productOps = generateAlgoliaOperations(productConfig);
+                    algoliaOperations = algoliaOperations.concat(productOps);
                 } else {
                     let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                     productConfig.attributeList = ['in_stock'];
@@ -187,19 +234,32 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                 }
             } else {
                 let baseProduct = product;
-                let attrArray = ['in_stock', 'variants'];
                 if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
                     baseProduct = product.masterProduct;
-                    attrArray = ['variants'];
                 }
                 let productConfig = createProductConfig(baseProduct, recordModel, additionalAttributes);
-                productConfig.attributeList = attrArray;
+                productConfig.attributeList = ['variants'];
 
                 let productOps = generateAlgoliaOperations(productConfig);
 
                 if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
-                    let isMasterInStock = productFilter.isInStock(baseProduct, threshold);
+                    let isMasterInStock = productFilter.isInStock(product.masterProduct, threshold);
                     if (!isMasterInStock) {
+                        productOps.forEach(function(productOp) {
+                            algoliaOperations = algoliaOperations.concat(
+                                new jobHelper.AlgoliaOperation(
+                                    'deleteObject',
+                                    { objectID: productOp.body.objectID },
+                                    productOp.indexName
+                                )
+                            );
+                        });
+                    } else {
+                        algoliaOperations = algoliaOperations.concat(productOps);
+                    }
+                } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL) {
+                    let isGroupInStock = productFilter.isVariationGroupInStock(productConfig.variationModel, threshold);
+                    if (!isGroupInStock) {
                         productOps.forEach(function(productOp) {
                             algoliaOperations = algoliaOperations.concat(
                                 new jobHelper.AlgoliaOperation(

@@ -66,13 +66,13 @@ function isInclude(product) {
     // if (product.optionProduct) return false;
     // Do not include bundled product
     if (product.bundled && !(product.priceModel && product.priceModel.price && product.priceModel.price.available)) return false;
-    
+
     // Check online status
     if (!isOnline(product)) return false;
-    
+
     // Check searchable status
     if (!isSearchable(product)) return false;
-    
+
     // Check if product has at least one online category
     // Note: In SFCC, variant products don't have their own categories - getOnlineCategories() returns empty for variants
     // We must check categories on the master product instead
@@ -82,7 +82,7 @@ function isInclude(product) {
     } else {
         if (!hasOnlineCategory(product)) return false;
     }
-    
+
     return true;
 }
 
@@ -122,6 +122,22 @@ function isInStock(product, threshold) {
 }
 
 /**
+ * Checks if at least one variant in a variation model is in stock.
+ */
+function isVariationGroupInStock(variationModel, threshold) {
+    const variantsIt = variationModel.getSelectedVariants().iterator();
+    while (variantsIt.hasNext()) {
+        let variant = variantsIt.next();
+        let variantAtsValue = variant.getAvailabilityModel().getInventoryRecord().getATS().getValue();
+        if (variantAtsValue >= threshold) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
  * Checks store inventory for a given product and determines
  * whether it meets the ATS threshold for being in stock.
  *
@@ -146,6 +162,7 @@ function isInStoreStock(product, storeId, threshold) {
 
 module.exports = {
     isInStock: isInStock,
+    isVariationGroupInStock: isVariationGroupInStock,
     isInclude: isInclude,
     isInStoreStock: isInStoreStock,
     isOnline: isOnline,
