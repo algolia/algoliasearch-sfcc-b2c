@@ -389,6 +389,50 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 return [];
             }
             if (product.master) {
+                let variationModel = product.getVariationModel();
+                let variationAttribute = variationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
+                if (!variationAttribute) {
+                    logger.info('No ' + VARIATION_ATTRIBUTE_ID + ' attribute found for product ' + product.ID + ', will generate variant records');
+                    // TODO: move in a shared function, the code is the same than the "attributesComputedFromBaseProduct" condition below
+                    let recordsPerLocale = jobHelper.generateVariantRecords({
+                        masterProduct: product,
+                        locales: siteLocales,
+                        attributeList: attributesToSend,
+                        nonLocalizedAttributes: nonLocalizedAttributes,
+                        attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
+                        fullRecordUpdate: fullRecordUpdate,
+                    });
+                    for (let l = 0; l < siteLocales.size(); ++l) {
+                        let locale = siteLocales[l];
+                        let indexName = algoliaData.calculateIndexName('products', locale);
+                        let records = recordsPerLocale[locale];
+                        processedVariantsToSend = records.length;
+
+                        records.forEach(function (record) {
+                            if (INDEX_OUT_OF_STOCK || record.in_stock) {
+                                algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName));
+                            } else {
+                                algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: record.objectID }, indexName));
+                            }
+                        });
+
+                        // Delete records of variants that don't match the filter anymore.
+                        let variants = product.variants;
+                        if (variants && variants.size() > 0) {
+                            for (let v = 0; v < variants.size(); ++v) {
+                                let variant = variants[v];
+                                if (!productFilter.isInclude(variant)) {
+                                    algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variant.getID() }, indexName));
+                                }
+                            }
+                        }
+
+                        jobReport.processedItemsToSend += processedVariantsToSend;
+                    }
+                    jobReport.recordsToSend += algoliaOperations.length;
+                    return algoliaOperations;
+                }
+
                 let recordsPerLocale = jobHelper.generateVariationGroupRecords({
                     locales: siteLocales,
                     baseProduct: product,
