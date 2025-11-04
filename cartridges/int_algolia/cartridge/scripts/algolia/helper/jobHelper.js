@@ -654,16 +654,29 @@ function generateVariantRecords(parameters) {
  * For a given base product and variationAttributeId, generate all variation-group records
  *
  * @param {Object} parameters - model parameters
- * @param {dw.catalog.Product} parameters.baseProduct - A master product
- * @param {dw.util.List} parameters.locales - The requested locales
- * @param {Array} parameters.baseProductAttributes - list of attributes to add at the root level of the record
- * @param {Array} parameters.variantAttributes - list of attributes to add in the 'variants' array of the record
- * @param {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
- * @param {Array} parameters.attributesComputedFromBaseProduct - list of attributes computed from the baseProduct and shared in all variants
- * @param {string} parameters.variationAttributeId - id of the variation attribute used to group the variants (default: 'color')
- * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
+ * @property {dw.catalog.Product} parameters.baseProduct - A master product
+ * @property {dw.util.List} parameters.locales - The requested locales
+ * @property {Array} parameters.baseProductAttributes - list of attributes to add at the root level of the record
+ * @property {Array} parameters.variantAttributes - list of attributes to add in the 'variants' array of the record
+ * @property {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
+ * @property {Array} parameters.attributesComputedFromBaseProduct - list of attributes computed from the baseProduct and shared in all variants
+ * @property {string} parameters.variationAttributeId - id of the variation attribute used to group the variants (default: 'color')
+ * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct (one per variation value)
+ * @example
+ * {
+ *   'en_US': [{
+ *       objectID: 'baseProductID-redVariationValueID',
+ *       color: 'red',
+ *       variants: [ { variantID: 'smallRedVariantID', size: 'S' }, ... ],
+ *   }, {
+ *       objectID: 'baseProductID-blueVariationValueID',
+ *       color: 'blue',
+ *       variants: [ { variantID: 'smallBlueVariantID', size: 'S' }, ... ],
+ *   }],
+ *   'fr_FR': [ ... ],
+ * }
  */
-function generateVariationGroupRecords(parameters) {
+function generateProductVariationGroupRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
     const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
@@ -682,7 +695,7 @@ function generateVariationGroupRecords(parameters) {
     }
 
     let variationModel = parameters.baseProduct.getVariationModel();
-    let variationAttribute = variationModel.getProductVariationAttribute(parameters.variationAttributeId || 'color');
+    let variationAttribute = variationModel.getProductVariationAttribute(parameters.variationAttributeId);
     if (!variationAttribute) {
         algoliaLogger.info('No ' + parameters.variationAttributeId + ' attribute found for product ' + parameters.baseProduct.ID);
         return algoliaRecordsPerLocale;
@@ -723,9 +736,9 @@ function generateVariationGroupRecords(parameters) {
  * You can override this behavior by adding a specific configuration for the attribute.
  * @param {string} attributeName - The name of the attribute to get the default configuration for.
  * @returns {Object} The default configuration object for the attribute.
- * @returns {string} return.attributeName - The name of the attribute.
- * @returns {boolean} return.localized - Indicates if the attribute is localized.
- * @returns {boolean} return.variantAttribute - Indicates if the attribute is a variant attribute.
+ * @property {string} attributeName - The name of the attribute.
+ * @property {boolean} localized - Indicates if the attribute is localized.
+ * @property {boolean} variantAttribute - Indicates if the attribute is a variant attribute.
  */
 function getDefaultAttributeConfig(attributeName) {
     return {
@@ -816,7 +829,7 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     generateVariantRecords: generateVariantRecords,
-    generateVariationGroupRecords: generateVariationGroupRecords,
+    generateProductVariationGroupRecords: generateProductVariationGroupRecords,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,
