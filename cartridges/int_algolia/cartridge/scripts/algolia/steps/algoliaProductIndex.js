@@ -349,7 +349,7 @@ exports.process = function(product, parameters, stepExecution) {
                 let variationGroupRecords = recordsPerLocale[locale];
                 variationGroupRecords.forEach(function (variationGroupRecord) {
                     if (INDEX_OUT_OF_STOCK || (variationGroupRecord.variants && (variationGroupRecord.variants.length > 0))) {
-                        processedVariantsToSend += variationGroupRecord.variants.length;
+                        processedVariantsToSend += variationGroupRecord.variants ? variationGroupRecord.variants.length : 0;
                         algoliaOperations.push(
                             new jobHelper.AlgoliaOperation(indexingOperation, variationGroupRecord, indexName)
                         );
