@@ -433,7 +433,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     return algoliaOperations;
                 }
 
-                let recordsPerLocale = jobHelper.generateVariationGroupRecords({
+                let recordsPerLocale = jobHelper.generateProductVariationGroupRecords({
                     locales: siteLocales,
                     baseProduct: product,
                     baseProductAttributes: masterAttributes,
