@@ -32,6 +32,8 @@ var fullRecordUpdate = false;
 
 const VARIANT_LEVEL = 'variant-level';
 const MASTER_LEVEL = 'master-level';
+const VARIATION_GROUP_LEVEL = 'variation-group-level';
+const VARIATION_ATTRIBUTE_ID = 'color';
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
 
@@ -160,7 +162,15 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (paramRecordModel === MASTER_LEVEL) {
+    if (paramRecordModel === VARIATION_GROUP_LEVEL) {
+        logger.info('Variation-group record model, moving " + ' + VARIATION_ATTRIBUTE_ID + '" attribute to the root level');
+        masterAttributes.push(VARIATION_ATTRIBUTE_ID);
+        while (variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID) >= 0) {
+            variantAttributes.splice(variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID), 1);
+        }
+    }
+
+    if (paramRecordModel === MASTER_LEVEL || paramRecordModel === VARIATION_GROUP_LEVEL) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
@@ -370,6 +380,88 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     jobReport.processedItemsToSend++;
                 }
 
+                jobReport.recordsToSend += algoliaOperations.length;
+                return algoliaOperations;
+            }
+        } else if (paramRecordModel === VARIATION_GROUP_LEVEL) {
+            if (product.isVariant()) {
+                // This variant will be indexed when we treat its master product
+                return [];
+            }
+            if (product.master) {
+                let variationModel = product.getVariationModel();
+                let variationAttribute = variationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
+                if (!variationAttribute) {
+                    logger.info('No ' + VARIATION_ATTRIBUTE_ID + ' attribute found for product ' + product.ID + ', will generate variant records');
+                    // TODO: move in a shared function, the code is the same than the "attributesComputedFromBaseProduct" condition below
+                    let recordsPerLocale = jobHelper.generateVariantRecords({
+                        masterProduct: product,
+                        locales: siteLocales,
+                        attributeList: attributesToSend,
+                        nonLocalizedAttributes: nonLocalizedAttributes,
+                        attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
+                        fullRecordUpdate: fullRecordUpdate,
+                    });
+                    for (let l = 0; l < siteLocales.size(); ++l) {
+                        let locale = siteLocales[l];
+                        let indexName = algoliaData.calculateIndexName('products', locale);
+                        let records = recordsPerLocale[locale];
+                        processedVariantsToSend = records.length;
+
+                        records.forEach(function (record) {
+                            if (INDEX_OUT_OF_STOCK || record.in_stock) {
+                                algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName));
+                            } else {
+                                algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: record.objectID }, indexName));
+                            }
+                        });
+
+                        // Delete records of variants that don't match the filter anymore.
+                        let variants = product.variants;
+                        if (variants && variants.size() > 0) {
+                            for (let v = 0; v < variants.size(); ++v) {
+                                let variant = variants[v];
+                                if (!productFilter.isInclude(variant)) {
+                                    algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variant.getID() }, indexName));
+                                }
+                            }
+                        }
+
+                        jobReport.processedItemsToSend += processedVariantsToSend;
+                    }
+                    jobReport.recordsToSend += algoliaOperations.length;
+                    return algoliaOperations;
+                }
+
+                let recordsPerLocale = jobHelper.generateProductVariationGroupRecords({
+                    locales: siteLocales,
+                    baseProduct: product,
+                    baseProductAttributes: masterAttributes,
+                    variantAttributes: variantAttributes,
+                    nonLocalizedAttributes: nonLocalizedAttributes,
+                    attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
+                    variationAttributeId: VARIATION_ATTRIBUTE_ID,
+                });
+                for (let l = 0; l < siteLocales.size(); ++l) {
+                    let locale = siteLocales.get(l);
+                    let indexName = algoliaData.calculateIndexName('products', locale);
+                    let variationGroupRecords = recordsPerLocale[locale];
+                    variationGroupRecords.forEach(function (variationGroupRecord) {
+                        if (INDEX_OUT_OF_STOCK || (variationGroupRecord.variants && (variationGroupRecord.variants.length > 0))) {
+                            processedVariantsToSend += variationGroupRecord.variants.length;
+                            algoliaOperations.push(
+                                new jobHelper.AlgoliaOperation(baseIndexingOperation, variationGroupRecord, indexName)
+                            );
+                        } else {
+                            // No variants to index - delete the variation group from Algolia
+                            logger.info('No more variants in stock for variation group ' + variationGroupRecord.objectID + ' - will be removed from Algolia index');
+                            algoliaOperations.push(
+                                new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variationGroupRecord.objectID }, indexName)
+                            );
+                        }
+                    });
+                }
+                jobReport.processedItemsToSend += processedVariantsToSend;
                 jobReport.recordsToSend += algoliaOperations.length;
                 return algoliaOperations;
             }
