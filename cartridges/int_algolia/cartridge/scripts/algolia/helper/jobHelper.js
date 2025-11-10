@@ -612,7 +612,7 @@ function generateVariantRecords(parameters) {
     const sharedAttributesPerLocale = {};
     const algoliaRecordsPerLocale = {};
     for (let l = 0; l < parameters.locales.size(); ++l) {
-        let locale = parameters.locales[l];
+        let locale = parameters.locales.get(l);
         sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
             product: parameters.masterProduct,
             locale: locale,
@@ -633,7 +633,7 @@ function generateVariantRecords(parameters) {
             fullRecordUpdate: parameters.fullRecordUpdate
         });
         for (let l = 0; l < parameters.locales.size(); ++l) {
-            let locale = parameters.locales[l];
+            let locale = parameters.locales.get(l);
             // Add shared attributes in the base model
             attributesComputedFromBaseProduct.forEach(function(sharedAttribute) {
                 baseModel[sharedAttribute] = sharedAttributesPerLocale[locale][sharedAttribute];
@@ -643,7 +643,6 @@ function generateVariantRecords(parameters) {
                 locale: locale,
                 attributeList: parameters.attributeList,
                 baseModel: baseModel,
-                fullRecordUpdate: parameters.fullRecordUpdate,
             });
             algoliaRecordsPerLocale[locale].push(localizedVariant);
         }
@@ -651,15 +650,95 @@ function generateVariantRecords(parameters) {
     return algoliaRecordsPerLocale;
 }
 
+/**
+ * For a given base product and variationAttributeId, generate all variation-group records
+ *
+ * @param {Object} parameters - model parameters
+ * @property {dw.catalog.Product} parameters.baseProduct - A master product
+ * @property {dw.util.List} parameters.locales - The requested locales
+ * @property {Array} parameters.baseProductAttributes - list of attributes to add at the root level of the record
+ * @property {Array} parameters.variantAttributes - list of attributes to add in the 'variants' array of the record
+ * @property {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
+ * @property {Array} parameters.attributesComputedFromBaseProduct - list of attributes computed from the baseProduct and shared in all variants
+ * @property {string} parameters.variationAttributeId - id of the variation attribute used to group the variants (default: 'color')
+ * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct (one per variation value)
+ * @example
+ * {
+ *   'en_US': [{
+ *       objectID: 'baseProductID-redVariationValueID',
+ *       color: 'red',
+ *       variants: [ { variantID: 'smallRedVariantID', size: 'S' }, ... ],
+ *   }, {
+ *       objectID: 'baseProductID-blueVariationValueID',
+ *       color: 'blue',
+ *       variants: [ { variantID: 'smallBlueVariantID', size: 'S' }, ... ],
+ *   }],
+ *   'fr_FR': [ ... ],
+ * }
+ */
+function generateProductVariationGroupRecords(parameters) {
+    const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+
+    const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
+
+    // Fetch shared attributes such as 'colorVariations' only once (for each locale), to set them later in each record
+    const sharedAttributesPerLocale = {};
+    const algoliaRecordsPerLocale = {};
+    for (let l = 0; l < parameters.locales.size(); ++l) {
+        let locale = parameters.locales.get(l);
+        sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
+            product: parameters.baseProduct,
+            locale: locale,
+            attributeList: attributesComputedFromBaseProduct,
+        });
+        algoliaRecordsPerLocale[locale] = [];
+    }
+
+    let variationModel = parameters.baseProduct.getVariationModel();
+    let variationAttribute = variationModel.getProductVariationAttribute(parameters.variationAttributeId);
+    if (!variationAttribute) {
+        algoliaLogger.info('No ' + parameters.variationAttributeId + ' attribute found for product ' + parameters.baseProduct.ID);
+        return algoliaRecordsPerLocale;
+    }
+    let variationValues = variationModel.getAllValues(variationAttribute).iterator();
+    while (variationValues.hasNext()) {
+        let variationValue = variationValues.next();
+        variationModel.setSelectedAttributeValue(variationAttribute.ID, variationValue.ID);
+        let baseModel = new AlgoliaLocalizedProduct({
+            product: parameters.baseProduct,
+            locale: 'default',
+            attributeList: parameters.nonLocalizedAttributes,
+        });
+        for (let l = 0; l < parameters.locales.size(); ++l) {
+            let locale = parameters.locales.get(l);
+            // Add shared attributes in the base model
+            attributesComputedFromBaseProduct.forEach(function(sharedAttribute) {
+                baseModel[sharedAttribute] = sharedAttributesPerLocale[locale][sharedAttribute];
+            });
+            let localizedVariationGroup = new AlgoliaLocalizedProduct({
+                product: parameters.baseProduct,
+                locale: locale,
+                attributeList: parameters.baseProductAttributes,
+                variantAttributes: parameters.variantAttributes,
+                baseModel: baseModel,
+                variationModel: variationModel,
+                variationValueID: variationValue.ID,
+            });
+            algoliaRecordsPerLocale[locale].push(localizedVariationGroup);
+        }
+    }
+
+    return algoliaRecordsPerLocale;
+}
 
 /**
  * Returns the default configuration for a given attribute.
  * You can override this behavior by adding a specific configuration for the attribute.
  * @param {string} attributeName - The name of the attribute to get the default configuration for.
  * @returns {Object} The default configuration object for the attribute.
- * @returns {string} return.attributeName - The name of the attribute.
- * @returns {boolean} return.localized - Indicates if the attribute is localized.
- * @returns {boolean} return.variantAttribute - Indicates if the attribute is a variant attribute.
+ * @property {string} attributeName - The name of the attribute.
+ * @property {boolean} localized - Indicates if the attribute is localized.
+ * @property {boolean} variantAttribute - Indicates if the attribute is a variant attribute.
  */
 function getDefaultAttributeConfig(attributeName) {
     return {
@@ -750,6 +829,7 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     generateVariantRecords: generateVariantRecords,
+    generateProductVariationGroupRecords: generateProductVariationGroupRecords,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,
