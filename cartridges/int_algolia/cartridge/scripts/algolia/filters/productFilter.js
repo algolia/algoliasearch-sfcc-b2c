@@ -76,7 +76,7 @@ function isInclude(product) {
     // Check if product has at least one online category
     // Note: In SFCC, variant products don't have their own categories - getOnlineCategories() returns empty for variants
     // We must check categories on the master product instead
-    if (product.variant && product.getMasterProduct) {
+    if (product.variant) {
         var masterProduct = product.getMasterProduct();
         if (masterProduct && !hasOnlineCategory(masterProduct)) return false;
     } else {
