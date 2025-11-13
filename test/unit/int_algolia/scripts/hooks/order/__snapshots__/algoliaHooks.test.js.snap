@@ -68,6 +68,32 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
 ]
 `;
 
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleStandardShipment should generate delete operations for variation-group-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "deleteObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
 exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleStandardShipment should generate correct operations for master-level record model - out of stock - Standard Shipment 1`] = `
 [
   AlgoliaOperation {
@@ -195,6 +221,104 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
     "body": {
       "in_stock": false,
       "objectID": "701644031207M",
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleStandardShipment should generate correct operations for variation-group-level record model - out of stock - Standard Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+      "variants": [
+        algoliaLocalizedProduct {
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+      "variants": [
+        algoliaLocalizedProduct {
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+      "variants": [
+        algoliaLocalizedProduct {
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "in_stock": false,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
     },
     "indexName": "test_index___products__en",
   },
@@ -461,6 +585,104 @@ exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Inde
     "body": {
       "objectID": "701644031206M",
       "storeAvailability": [],
+    },
+    "indexName": "test_index___products__en",
+  },
+]
+`;
+
+exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for variation-group-level record model - out of stock - BOPIS Shipment 1`] = `
+[
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+      "variants": [
+        algoliaLocalizedProduct {
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/default/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__default",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+      "variants": [
+        algoliaLocalizedProduct {
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/fr/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
+    },
+    "indexName": "test_index___products__fr",
+  },
+  AlgoliaOperation {
+    "action": "partialUpdateObject",
+    "body": {
+      "objectID": "25592581M-JJB52A0",
+      "variants": [
+        algoliaLocalizedProduct {
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
+        },
+        algoliaLocalizedProduct {
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "storeAvailability": [],
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031207M",
+          "variantID": "701644031207M",
+        },
+      ],
     },
     "indexName": "test_index___products__en",
   },
