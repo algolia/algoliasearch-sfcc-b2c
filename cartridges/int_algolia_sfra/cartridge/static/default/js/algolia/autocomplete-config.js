@@ -151,15 +151,31 @@ function getSourcesArray(config) {
             }
             return getAlgoliaResults({
                 searchClient: config.searchClient,
-                queries: [{
-                    indexName: algoliaData.productsIndex,
-                    query,
-                    params: {
-                        hitsPerPage: 3,
-                        distinct: true,
-                        clickAnalytics: true,
+                queries: [
+                    {
+                        indexName: algoliaData.productsIndex,
+                        query,
+                        params: {
+                            hitsPerPage: 3,
+                            distinct: true,
+                            clickAnalytics: true,
+                        },
                     },
-                }, ],
+                ],
+                transformResponse: function ({ hits }) {
+                    return hits[0].map(hit => {
+                        if (hit.variants) {
+                            // Base product/Variation group level indexing. We need to copy some variant attributes to the root
+                            const selectedVariant = hit.variants.find(variant => {
+                                return variant.variantID === hit.defaultVariantID;
+                            }) || hit.variants[0];
+                            if (selectedVariant) {
+                                hit.url = selectedVariant.url;
+                            }
+                        }
+                        return hit;
+                    })
+                },
             });
         },
         templates: {
