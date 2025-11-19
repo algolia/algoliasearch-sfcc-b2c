@@ -345,7 +345,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
         if (paramRecordModel === MASTER_LEVEL) {
             if (product.isVariant()) {
-                // This variant will be indexed when we treat its master product
+                // This variant will be processed when we handle its master product, skip it for now.
                 return [];
             }
             if (product.master) {
@@ -385,7 +385,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
             }
         } else if (paramRecordModel === VARIATION_GROUP_LEVEL) {
             if (product.isVariant()) {
-                // This variant will be indexed when we treat its master product
+                // This variant will be processed when we handle its master product, skip it for now.
                 return [];
             }
             if (product.master) {
@@ -469,7 +469,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
             // When there are attributes shared in all variants (such as 'colorVariations')
             // we work with the master products. This permits to fetch those attributes only once.
             if (product.isVariant()) {
-                // This variant will be indexed when we treat its master product
+                // This variant will be processed when we handle its master product, skip it for now.
                 return [];
             }
 
