@@ -162,14 +162,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (paramRecordModel === VARIATION_GROUP_LEVEL) {
-        logger.info('Variation-group record model, moving " + ' + VARIATION_ATTRIBUTE_ID + '" attribute to the root level');
-        masterAttributes.push(VARIATION_ATTRIBUTE_ID);
-        while (variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID) >= 0) {
-            variantAttributes.splice(variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID), 1);
-        }
-    }
-
     if (paramRecordModel === MASTER_LEVEL || paramRecordModel === VARIATION_GROUP_LEVEL) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
@@ -391,44 +383,43 @@ exports.process = function(cpObj, parameters, stepExecution) {
             if (product.master) {
                 let variationModel = product.getVariationModel();
                 let variationAttribute = variationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
+
+                // masters that DON'T have the specified variation attribute -- treat them as regular masters
+                // @TODO: same logic as for masters in the MASTER_LEVEL case, abstract away and refactor
                 if (!variationAttribute) {
-                    logger.info('No ' + VARIATION_ATTRIBUTE_ID + ' attribute found for product ' + product.ID + ', will generate variant records');
-                    // TODO: move in a shared function, the code is the same than the "attributesComputedFromBaseProduct" condition below
-                    let recordsPerLocale = jobHelper.generateVariantRecords({
-                        masterProduct: product,
-                        locales: siteLocales,
-                        attributeList: attributesToSend,
-                        nonLocalizedAttributes: nonLocalizedAttributes,
-                        attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
-                        fullRecordUpdate: fullRecordUpdate,
-                    });
-                    for (let l = 0; l < siteLocales.size(); ++l) {
-                        let locale = siteLocales[l];
-                        let indexName = algoliaData.calculateIndexName('products', locale);
-                        let records = recordsPerLocale[locale];
-                        processedVariantsToSend = records.length;
+                    logger.info('Specified variation attribute "' + VARIATION_ATTRIBUTE_ID + '" not found for master product "' + product.ID + '", falling back to master-type record.');
 
-                        records.forEach(function (record) {
-                            if (INDEX_OUT_OF_STOCK || record.in_stock) {
-                                algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName));
-                            } else {
-                                algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: record.objectID }, indexName));
-                            }
-                        });
+                    let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
 
-                        // Delete records of variants that don't match the filter anymore.
-                        let variants = product.variants;
-                        if (variants && variants.size() > 0) {
-                            for (let v = 0; v < variants.size(); ++v) {
-                                let variant = variants[v];
-                                if (!productFilter.isInclude(variant)) {
-                                    algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variant.getID() }, indexName));
-                                }
-                            }
+                    if ((inStock || INDEX_OUT_OF_STOCK) &&
+                        productFilter.isOnline(product) &&
+                        productFilter.isSearchable(product) &&
+                        productFilter.hasOnlineCategory(product)) {
+                        let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                        for (let l = 0; l < siteLocales.size(); ++l) {
+                            let locale = siteLocales[l];
+                            let indexName = algoliaData.calculateIndexName('products', locale);
+                            let localizedMaster = new AlgoliaLocalizedProduct({
+                                product: product,
+                                locale: locale,
+                                attributeList: masterAttributes,
+                                variantAttributes: variantAttributes,
+                                baseModel: baseModel,
+                            });
+                            processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
+                            algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
                         }
-
                         jobReport.processedItemsToSend += processedVariantsToSend;
+                    } else {
+                        // => product is out-of-stock and IndexOutOfStock=false, or fails filter criteria => must delete from Algolia
+                        for (let l = 0; l < siteLocales.size(); l++) {
+                            let locale = siteLocales[l];
+                            let indexName = algoliaData.calculateIndexName('products', locale);
+                            algoliaOperations.push(new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: cpObj.productID }, indexName));
+                        }
+                        jobReport.processedItemsToSend++;
                     }
+
                     jobReport.recordsToSend += algoliaOperations.length;
                     return algoliaOperations;
                 }
