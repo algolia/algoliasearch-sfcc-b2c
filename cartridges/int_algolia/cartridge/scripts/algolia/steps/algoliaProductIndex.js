@@ -1,8 +1,8 @@
 'use strict';
 
-var ArrayList = require('dw/util/ArrayList');
-var Site = require('dw/system/Site');
-var ProductMgr = require('dw/catalog/ProductMgr');
+const ArrayList = require('dw/util/ArrayList');
+const Site = require('dw/system/Site');
+const ProductMgr = require('dw/catalog/ProductMgr');
 var logger;
 
 // job step parameters
@@ -71,6 +71,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 
+    // Try to load `productAttributesConfig.js`, which can be used to override the configs in `algoliaProductConfig.js`.
+    // By default this file does not exist. For an example configuration, see `productAttributesConfig.example.js`.
+    // @TODO: variable name and file name should bear a resemblance so that the file can be looked up by the variable name only -- rename one or the other
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
         logger.info('Configuration file "productAttributesConfig.js" loaded')
@@ -87,13 +90,18 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullCatalogReindex'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
-    paramRecordModel = algoliaData.getPreference('RecordModel') || VARIANT_LEVEL; // 'variant-level' (default), 'master-level'
+    paramRecordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' (default), 'master-level', 'variation-group-level'
     paramLocalesForIndexing = algoliaData.csvStringToArray(parameters.localesForIndexing);
 
     /* --- attributeListOverride parameter --- */
+
+    // If no overrides are defined in the job's `attributeListOverride` parameter, use the default attributes from `algoliaProductConfig.js` and add the ones from the site preference `Algolia_AdditionalAttributes`.
+    // If there is an override, send only the attributes defined there.
     if (empty(paramAttributeListOverride)) {
-        variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
         masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
+        variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
+
+        // Get the default set of attributes and add the ones defined in `Algolia_AdditionalAttributes` to it
         attributesToSend = algoliaProductConfig.defaultAttributes_v2.slice();
         const additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
         additionalAttributes.map(function(attribute) {
@@ -104,6 +112,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     } else {
         attributesToSend = paramAttributeListOverride;
     }
+
     logger.info('attributeListOverride parameter: ' + paramAttributeListOverride);
     logger.info('Actual attributes to be sent: ' + JSON.stringify(attributesToSend));
 
@@ -163,6 +172,10 @@ exports.beforeStep = function(parameters, stepExecution) {
     }
 
     /* --- site locales --- */
+
+    // By default, all locales assigned to the site are indexed.
+    // You can change this for all jobs using the site preference `Algolia_LocalesForIndexing`.
+    // This preference, in turn, can also be overridden for a specific job using the `localesForIndexing` job parameter.
     siteLocales = Site.getCurrent().getAllowedLocales();
     logger.info('localesForIndexing parameter: ' + paramLocalesForIndexing);
     const localesForIndexing = paramLocalesForIndexing.length > 0 ?
@@ -172,12 +185,16 @@ exports.beforeStep = function(parameters, stepExecution) {
         if (siteLocales.indexOf(locale) < 0) {
             throw new Error('Locale "' + locale + '" is not enabled on ' + Site.getCurrent().getName());
         }
-    })
+    });
+
     if (localesForIndexing.length > 0) {
         siteLocales = new ArrayList(localesForIndexing);
     }
+
     logger.info('Will index ' + siteLocales.size() + ' locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
     jobReport.siteLocales = siteLocales.size();
+
+    /* --- preparing job for sending data to Algolia --- */
 
     algoliaIndexingAPI.setJobInfo({
         jobID: stepExecution.getJobExecution().getJobID(),
@@ -249,9 +266,11 @@ exports.process = function(product, parameters, stepExecution) {
     let algoliaOperations = [];
     let processedVariantsToSend = 0;
 
+    /* --- MAIN LOGIC --- */
+
     if (paramRecordModel === MASTER_LEVEL) {
         if (product.isVariant()) {
-            // This variant will be indexed when we treat its master product, skip it.
+            // This variant will be processed when we handle its master product, skip it for now.
             return [];
         }
         if (product.master) {
@@ -290,7 +309,7 @@ exports.process = function(product, parameters, stepExecution) {
         }
     } else if (paramRecordModel === VARIATION_GROUP_LEVEL) {
         if (product.isVariant()) {
-            // This variant will be indexed when we treat its master product, skip it.
+            // This variant will be processed when we handle its master product, skip it for now.
             return [];
         }
         if (product.master) {
@@ -331,6 +350,7 @@ exports.process = function(product, parameters, stepExecution) {
                 return algoliaOperations;
             }
 
+            // masters that have the specified variation attribute
             let recordsPerLocale = jobHelper.generateProductVariationGroupRecords({
                 locales: siteLocales,
                 baseProduct: product,
@@ -364,7 +384,7 @@ exports.process = function(product, parameters, stepExecution) {
         // When there are attributes shared in all variants (such as 'colorVariations')
         // we work with the master products. This permits to fetch those attributes only once.
         if (product.isVariant()) {
-            // This variant will be indexed when we treat its master product, skip it.
+            // This variant will be processed when we handle its master product, skip it for now.
             return [];
         }
         if (product.master) {
@@ -401,7 +421,9 @@ exports.process = function(product, parameters, stepExecution) {
         }
     }
 
-    // Process all products not treated above: standalone variants, option products, product sets, ...
+    // Process all products not handled above: simple products, option products, product sets, ...
+
+    // check for availability, taking into account the `Algolia_IndexOutOfStock` site preference
     if (productFilter.isInclude(product)) {
         const inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
         if (!inStock && !INDEX_OUT_OF_STOCK) {

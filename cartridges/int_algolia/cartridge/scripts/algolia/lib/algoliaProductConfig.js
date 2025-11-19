@@ -1,11 +1,16 @@
 'use strict';
 
+// @deprecated: pertains to v1 jobs, to be removed
 var defaultAttributes = ['id', 'primary_category_id', 'in_stock', 'price', 'categories'];
+
+// These attributes will be always be sent regardless of what is configured in `Algolia_AdditionalAttributes`
 var defaultAttributes_v2 = ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'image_groups', 'url'];
+
 // Configurations for master-level indexing mode
 var defaultMasterAttributes_v2 = ['variants', 'defaultVariantID', 'colorVariations'];
 var defaultVariantAttributes_v2 = ['in_stock', 'price', 'color', 'size', 'url'];
 
+// @deprecated: pertains to v1 jobs, to be removed
 var attributeConfig = {
     id: {
         attribute: 'ID',
@@ -124,6 +129,15 @@ var attributeConfig = {
     }
 };
 
+// Attribute configuration objects
+// Possible properties: attribute, localized, variantAttribute, computedFromBaseProduct -- see "https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/indexing/product-indexing/indexing-attributes#configurable-attributes" for more
+
+// For attributes not defined here, the default config becomes (see jobHelper.js > getDefaultAttributeConfig()):
+// {
+//     attribute: attributeName,
+//     localized: false,
+//     variantAttribute: true
+// }
 var attributeConfig_v2 = {
     brand: {
         attribute: 'brand',
@@ -209,7 +223,8 @@ var attributeConfig_v2 = {
         attribute: 'variant',
         localized: false
     },
-    // The following have no 'attribute' declared because the model has special values handlers
+    // The following objects have no `attribute` property declared because `algoliaLocalizedProduct.js` > aggregatedValueHandlers()` has special value handlers defined for them
+    // @TODO: reference the moved (and renamed) method after moving it in this file
     categories: {
         localized: true
     },
