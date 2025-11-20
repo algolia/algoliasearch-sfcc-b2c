@@ -106,6 +106,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
+        masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
         variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
         masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
         attributesToSend = algoliaProductConfig.defaultAttributes_v2.slice();
