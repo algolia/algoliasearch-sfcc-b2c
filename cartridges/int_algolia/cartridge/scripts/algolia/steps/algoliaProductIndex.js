@@ -26,7 +26,8 @@ var lastIndexingTasks = {};
 
 var extendedProductAttributesConfig;
 
-const VARIANT_LEVEL = 'variant-level';
+// eslint-disable-next-line no-unused-vars
+const VARIANT_LEVEL = 'variant-level'; // constant is not used explicitly, but leaving it here for consistency
 const MASTER_LEVEL = 'master-level';
 const VARIATION_GROUP_LEVEL = 'variation-group-level';
 const VARIATION_ATTRIBUTE_ID = 'color';
@@ -279,7 +280,7 @@ exports.process = function(product, parameters, stepExecution) {
                 if (paramIndexingMethod === 'fullCatalogReindex') {
                     indexName += '.tmp';
                 }
-                var localizedMaster = new AlgoliaLocalizedProduct({
+                let localizedMaster = new AlgoliaLocalizedProduct({
                     product: product,
                     locale: locale,
                     attributeList: masterAttributes,
@@ -324,7 +325,7 @@ exports.process = function(product, parameters, stepExecution) {
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         indexName += '.tmp';
                     }
-                    var localizedMaster = new AlgoliaLocalizedProduct({
+                    let localizedMaster = new AlgoliaLocalizedProduct({
                         product: product,
                         locale: locale,
                         attributeList: masterAttributes,
@@ -416,7 +417,8 @@ exports.process = function(product, parameters, stepExecution) {
         }
     }
 
-    // Process all products not handled above: simple products, option products, product sets, ...
+    // VARIANT_LEVEL indexing logic
+    // Also process all products not handled above for the other models: simple products, option products, product sets, ...
 
     // check for availability, taking into account the `Algolia_IndexOutOfStock` site preference
     if (productFilter.isInclude(product)) {
