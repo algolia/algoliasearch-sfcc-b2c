@@ -428,7 +428,7 @@ exports.process = function(product, parameters, stepExecution) {
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
         var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
         for (let l = 0; l < siteLocales.size(); ++l) {
-            var locale = siteLocales[l];
+            var locale = siteLocales.get(l);
             var indexName = algoliaData.calculateIndexName('products', locale);
 
             if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
