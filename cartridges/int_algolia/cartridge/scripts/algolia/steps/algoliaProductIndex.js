@@ -274,7 +274,7 @@ exports.process = function(product, parameters, stepExecution) {
             // Master-level indexing
             let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
             for (let l = 0; l < siteLocales.size(); ++l) {
-                let locale = siteLocales[l];
+                let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
                 if (paramIndexingMethod === 'fullCatalogReindex') {
                     indexName += '.tmp';
@@ -319,7 +319,7 @@ exports.process = function(product, parameters, stepExecution) {
 
                 let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                 for (let l = 0; l < siteLocales.size(); ++l) {
-                    let locale = siteLocales[l];
+                    let locale = siteLocales.get(l);
                     let indexName = algoliaData.calculateIndexName('products', locale);
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         indexName += '.tmp';
@@ -395,7 +395,7 @@ exports.process = function(product, parameters, stepExecution) {
                 fullRecordUpdate: fullRecordUpdate,
             });
             for (let l = 0; l < siteLocales.size(); ++l) {
-                let locale = siteLocales[l];
+                let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
                 if (paramIndexingMethod === 'fullCatalogReindex') {
                     indexName += '.tmp';
