@@ -2120,6 +2120,8 @@ exports[`process variation-group-level indexing - product without variation attr
         "womens-clothing",
         "womens-clothing-bottoms",
       ],
+      "colorVariations": null,
+      "defaultVariantID": "701644031206M",
       "image_groups": [
         {
           "_type": "image_group",
@@ -2158,80 +2160,32 @@ exports[`process variation-group-level indexing - product without variation attr
           "view_type": "small",
         },
       ],
-      "in_stock": true,
       "name": "Floral Dress",
-      "objectID": "701644031206M",
-      "price": {
-        "EUR": 92.88,
-        "USD": 129,
-      },
-      "size": "4",
-      "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
-    },
-    "indexName": "test_index___products__en.tmp",
-  },
-  AlgoliaOperation {
-    "action": "addObject",
-    "body": {
-      "__primary_category": {
-        "0": "Womens",
-        "1": "Womens > Clothing",
-        "2": "Womens > Clothing > Bottoms",
-      },
-      "categoryPageId": [
-        "newarrivals",
-        "newarrivals-womens",
-        "womens",
-        "womens-clothing",
-        "womens-clothing-bottoms",
-      ],
-      "image_groups": [
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dwcc434d54/images/large/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, large",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw58a034a4/images/large/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "large",
+      "objectID": "25592581M",
+      "variants": [
+        algoliaLocalizedProduct {
+          "color": null,
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "4",
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031206M",
+          "variantID": "701644031206M",
         },
-        {
-          "_type": "image_group",
-          "images": [
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw4e4ce4f6/images/small/PG.10237222.JJB52A0.PZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-            {
-              "_type": "image",
-              "alt": "Floral Dress, Hot Pink Combo, small",
-              "dis_base_link": "https://zzrk-018.sandbox.us01.dx.commercecloud.salesforce.com/on/demandware.static/-/Sites-apparel-m-catalog/default/dw2612fb5e/images/small/PG.10237222.JJB52A0.BZ.jpg",
-              "title": "Floral Dress, Hot Pink Combo",
-            },
-          ],
-          "view_type": "small",
+        algoliaLocalizedProduct {
+          "color": null,
+          "in_stock": true,
+          "price": {
+            "EUR": 92.88,
+            "USD": 129,
+          },
+          "size": "6",
+          "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031213M",
+          "variantID": "701644031213M",
         },
       ],
-      "in_stock": true,
-      "name": "Floral Dress",
-      "objectID": "701644031213M",
-      "price": {
-        "EUR": 92.88,
-        "USD": 129,
-      },
-      "size": "6",
-      "url": "/on/demandware.store/Sites-Algolia_SFRA-Site/en/Product-Show?pid=701644031213M",
     },
     "indexName": "test_index___products__en.tmp",
   },
@@ -2255,7 +2209,6 @@ exports[`process variation-group-level indexing 1`] = `
         "womens-clothing",
         "womens-clothing-bottoms",
       ],
-      "color": "Hot Pink Combo",
       "colorVariations": [
         {
           "color": "Hot Pink Combo",
@@ -2397,6 +2350,7 @@ exports[`process variation-group-level indexing 1`] = `
       "objectID": "25592581M-JJB52A0",
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
@@ -2407,6 +2361,7 @@ exports[`process variation-group-level indexing 1`] = `
           "variantID": "701644031206M",
         },
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
@@ -2435,7 +2390,6 @@ exports[`process variation-group-level indexing 1`] = `
         "womens-clothing",
         "womens-clothing-bottoms",
       ],
-      "color": "Navy",
       "colorVariations": [
         {
           "color": "Hot Pink Combo",
@@ -2565,6 +2519,7 @@ exports[`process variation-group-level indexing 1`] = `
       "objectID": "25592581M-JJC05A0",
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Navy",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
@@ -2575,6 +2530,7 @@ exports[`process variation-group-level indexing 1`] = `
           "variantID": "701644031220M",
         },
         algoliaLocalizedProduct {
+          "color": "Navy",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
