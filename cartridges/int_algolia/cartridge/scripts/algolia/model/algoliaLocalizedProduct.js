@@ -303,7 +303,7 @@ var aggregatedValueHandlers = {
         var colorAttribute = variationModel.getProductVariationAttribute('color');
         return (colorAttribute && variationModel.getSelectedValue(colorAttribute))
             ? variationModel.getSelectedValue(colorAttribute).displayValue
-            : null;
+            : product.custom.color;
     },
     refinementColor: function (product) {
         return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementColor')
@@ -325,7 +325,7 @@ var aggregatedValueHandlers = {
         var sizeAttribute = variationModel.getProductVariationAttribute('size');
         return (sizeAttribute && variationModel.getSelectedValue(sizeAttribute))
             ? variationModel.getSelectedValue(sizeAttribute).displayValue
-            : null;
+            : product.custom.size;
     },
     refinementSize: function (product) {
         return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementSize')
