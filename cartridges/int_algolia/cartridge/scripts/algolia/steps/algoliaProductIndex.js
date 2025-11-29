@@ -26,8 +26,7 @@ var lastIndexingTasks = {};
 
 var extendedProductAttributesConfig;
 
-// eslint-disable-next-line no-unused-vars
-const VARIANT_LEVEL = 'variant-level'; // constant is not used explicitly, but leaving it here for consistency
+const VARIANT_LEVEL = 'variant-level';
 const MASTER_LEVEL = 'master-level';
 const VARIATION_GROUP_LEVEL = 'variation-group-level';
 const VARIATION_ATTRIBUTE_ID = 'color';

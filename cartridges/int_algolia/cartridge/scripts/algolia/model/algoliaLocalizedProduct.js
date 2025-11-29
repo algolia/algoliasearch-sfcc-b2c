@@ -14,7 +14,8 @@ var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
-const VARIANT_LEVEL = 'variant-level';
+// eslint-disable-next-line no-unused-vars
+const VARIANT_LEVEL = 'variant-level'; // constant is not used explicitly, but leaving it here for consistency
 const MASTER_LEVEL = 'master-level';
 const VARIATION_GROUP_LEVEL = 'variation-group-level';
 
