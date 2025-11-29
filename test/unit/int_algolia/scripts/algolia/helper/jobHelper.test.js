@@ -73,4 +73,15 @@ describe('Job Helper', function () {
         // Check non-localized master attributes
         expect(result.nonLocalizedMasterAttributes).toContain('categoryPageId');
     });
+
+    test('Test isSimpleProduct()', function () {
+        const simpleProduct = new MasterProductMock();
+        simpleProduct.master = false;
+
+        const masterProduct = new MasterProductMock();
+
+        expect(jobHelper.isSimpleProduct(simpleProduct)).toBe(true);
+        expect(jobHelper.isSimpleProduct(masterProduct)).toBe(false);
+
+    });
 });
