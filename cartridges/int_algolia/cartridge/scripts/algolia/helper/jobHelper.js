@@ -611,6 +611,7 @@ function generateVariantRecords(parameters) {
     // Fetch shared attributes such as 'colorVariations' only once (for each locale), to set them later in each variant
     const sharedAttributesPerLocale = {};
     const algoliaRecordsPerLocale = {};
+
     for (let l = 0; l < parameters.locales.size(); ++l) {
         let locale = parameters.locales.get(l);
         sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
@@ -808,6 +809,19 @@ function getAttributes(additionalAttributes) {
     };
 }
 
+/**
+ * Returns true if supplied product is a simple product, false otherwise
+ * @param {dw.catalog.Product} product
+ * @returns {Boolean} whether the product is a simple product or not
+ */
+function isSimpleProduct(product) {
+    if (product.isMaster() || product.isVariant() || product.isVariationGroup() || product.isOptionProduct() || product.isBundle() || product.isProductSet()) {
+        return false;
+    } else {
+        return true;
+    }
+}
+
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -837,5 +851,6 @@ module.exports = {
     updateCPObjectFromXML: updateCPObjectFromXML,
 
     getDefaultAttributeConfig: getDefaultAttributeConfig,
-    getAttributes: getAttributes
+    getAttributes: getAttributes,
+    isSimpleProduct: isSimpleProduct,
 };
