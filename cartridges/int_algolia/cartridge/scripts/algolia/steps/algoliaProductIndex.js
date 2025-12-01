@@ -74,7 +74,6 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     // Try to load `productAttributesConfig.js`, which can be used to override the configs in `algoliaProductConfig.js`.
     // By default this file does not exist. For an example configuration, see `productAttributesConfig.example.js`.
-    // @TODO: variable name and file name should bear a resemblance so that the file can be looked up by the variable name only -- rename one or the other
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
         logger.info('Configuration file "productAttributesConfig.js" loaded')
@@ -99,10 +98,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     // If no overrides are defined in the job's `attributeListOverride` parameter, use the default attributes from `algoliaProductConfig.js` and add the ones from the site preference `Algolia_AdditionalAttributes`.
     // If there is an override, send only the attributes defined there.
     if (empty(paramAttributeListOverride)) {
-        masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
         variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
+        masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
 
-        // Get the default set of attributes and add the ones defined in `Algolia_AdditionalAttributes` to it
         attributesToSend = algoliaProductConfig.defaultAttributes_v2.slice();
         const additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
         additionalAttributes.map(function(attribute) {
@@ -314,7 +312,6 @@ exports.process = function(product, parameters, stepExecution) {
             let variationAttribute = variationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
 
             // masters that DON'T have the specified variation attribute -- treat them as regular masters
-            // @TODO: same logic as for masters in the MASTER_LEVEL case, abstract away and refactor
             if (!variationAttribute) {
                 logger.info('Specified variation attribute "' + VARIATION_ATTRIBUTE_ID + '" not found for master product "' + product.ID + '", falling back to master-type record.');
 

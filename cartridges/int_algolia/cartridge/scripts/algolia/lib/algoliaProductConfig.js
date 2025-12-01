@@ -224,7 +224,6 @@ var attributeConfig_v2 = {
         localized: false
     },
     // The following objects have no `attribute` property declared because `algoliaLocalizedProduct.js` > `aggregatedValueHandlers()` has special value handlers defined for them
-    // @TODO: reference the moved (and renamed) method after moving it in this file
     categories: {
         localized: true
     },

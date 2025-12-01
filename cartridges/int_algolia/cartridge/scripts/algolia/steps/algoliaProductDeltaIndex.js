@@ -106,7 +106,6 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- attributeListOverride parameter --- */
     if (empty(paramAttributeListOverride)) {
-        masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
         variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
         masterAttributes = algoliaProductConfig.defaultMasterAttributes_v2.slice();
         attributesToSend = algoliaProductConfig.defaultAttributes_v2.slice();
@@ -386,7 +385,6 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 let variationAttribute = variationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
 
                 // masters that DON'T have the specified variation attribute -- treat them as regular masters
-                // @TODO: same logic as for masters in the MASTER_LEVEL case, abstract away and refactor
                 if (!variationAttribute) {
                     logger.info('Specified variation attribute "' + VARIATION_ATTRIBUTE_ID + '" not found for master product "' + product.ID + '", falling back to master-type record.');
 

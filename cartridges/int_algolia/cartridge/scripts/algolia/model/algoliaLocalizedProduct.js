@@ -232,7 +232,6 @@ function getCategoryHierarchyIds(category) {
 
 /**
  * Handler for complex and calculated Product attributes
- * @TODO: should be renamed and moved to `algoliaProductConfig.js` next to the other attribute configs
  */
 var aggregatedValueHandlers = {
     masterID: function(product) {
