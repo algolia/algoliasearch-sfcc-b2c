@@ -62,11 +62,6 @@ function createProductConfig(product, recordModel, additionalAttributes) {
             productConfig.variationValueID = variationAttributeValue.ID;
         }
 
-        // Move the variation attribute at the root level
-        attributesConfig.masterAttributes.push(VARIATION_ATTRIBUTE_ID);
-        while (attributesConfig.variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID) >= 0) {
-            attributesConfig.variantAttributes.splice(attributesConfig.variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID), 1);
-        }
         productConfig.variantAttributes = attributesConfig.variantAttributes;
         productConfig.attributeList = attributesConfig.masterAttributes;
         productConfig.product = masterProduct;
