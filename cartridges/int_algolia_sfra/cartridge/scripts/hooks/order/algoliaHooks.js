@@ -45,7 +45,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
         productConfig.variantAttributes = attributesConfig.variantAttributes;
         productConfig.attributeList = attributesConfig.masterAttributes;
         productConfig.product = masterProduct;
-    } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL && variationAttribute) {
+    } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL && variationAttribute) {
         let masterProduct = product.master ? product : product.getMasterProduct();
         productConfig.baseModel = new AlgoliaLocalizedProduct({
             product: masterProduct,
