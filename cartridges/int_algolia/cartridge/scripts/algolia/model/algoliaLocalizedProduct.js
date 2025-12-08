@@ -568,7 +568,7 @@ function algoliaLocalizedProduct(parameters) {
             let isSimpleProduct = !product.isMaster() && !product.isVariant() && !product.isVariationGroup();
 
             // set `variantID` explicitly to null in the `variants` array object for simple products
-            this.variantID = isSimpleProduct ? null : product.ID;
+            this.variantID = isSimpleProduct ? null : product.getID();
         } else if (parameters.variationModel) { // VARIATION_GROUP_LEVEL indexing, master case
             this.objectID = product.getID() + '-' + parameters.variationValueID;
         } else { // all other cases
