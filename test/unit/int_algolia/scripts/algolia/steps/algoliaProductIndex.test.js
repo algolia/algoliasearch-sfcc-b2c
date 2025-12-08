@@ -210,8 +210,8 @@ describe('process', () => {
         const algoliaOperations = job.process(masterProduct);
         expect(algoliaOperations).toMatchSnapshot();
     });
-    test('variation-group-level indexing', () => {
-        global.customPreferences['Algolia_RecordModel'] = 'variation-group-level';
+    test('attribute-sliced-master-level indexing', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced-master-level';
         mockAdditionalAttributes = [];
         mockLocalesForIndexing = ['en'];
 
@@ -244,8 +244,8 @@ describe('process', () => {
         const algoliaOperations = job.process(masterProduct);
         expect(algoliaOperations).toMatchSnapshot();
     });
-    test('variation-group-level indexing - product without variation attribute', () => {
-        global.customPreferences['Algolia_RecordModel'] = 'variation-group-level';
+    test('attribute-sliced-master-level indexing - product without variation attribute', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced-master-level';
         mockAdditionalAttributes = ['size'];
         mockLocalesForIndexing = ['en'];
 

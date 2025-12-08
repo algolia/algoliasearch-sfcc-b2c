@@ -202,7 +202,7 @@ function enableInstantSearch(config) {
             // "price" refinement panel
             rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
-                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'variation-group-level' ?
+                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'attribute-sliced-master-level' ?
                     `variants.price.${algoliaData.currencyCode}` :
                     `price.${algoliaData.currencyCode}`,
                 cssClasses: {
@@ -221,7 +221,7 @@ function enableInstantSearch(config) {
             // "size" refinement panel
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
-                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'variation-group-level' ?
+                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'attribute-sliced-master-level' ?
                     'variants.size' :
                     'size',
                 templates: {
@@ -240,7 +240,7 @@ function enableInstantSearch(config) {
             // "color" refinement panel
             refinementListWithPanel({
                 container: '#algolia-color-list-placeholder',
-                attribute: algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'variation-group-level' ? 'variants.color' : 'color',
+                attribute: algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'attribute-sliced-master-level' ? 'variants.color' : 'color',
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -257,7 +257,7 @@ function enableInstantSearch(config) {
             // "storeAvailability" refinement panel
             refinementListWithPanel({
                 container: '#algolia-store-list-placeholder',
-                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'variation-group-level' ?
+                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'attribute-sliced-master-level' ?
                     'variants.storeAvailability' :
                     'storeAvailability',
                 cssClasses: {
@@ -425,7 +425,7 @@ function enableInstantSearch(config) {
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
                             let colorFacets = [];
-                            if (algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'variation-group-level') {
+                            if (algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'attribute-sliced-master-level') {
                                 colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
                             }
 

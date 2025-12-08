@@ -127,7 +127,7 @@ function isInStock(product, threshold) {
  * @param {Number} threshold
  * @returns {Boolean} whether at least one of the variants is in stock
  */
-function isVariationGroupInStock(variationModel, threshold) {
+function isCustomVariationGroupInStock(variationModel, threshold) {
     const variantsIt = variationModel.getSelectedVariants().iterator();
     while (variantsIt.hasNext()) {
         let variant = variantsIt.next();
@@ -165,7 +165,7 @@ function isInStoreStock(product, storeId, threshold) {
 
 module.exports = {
     isInStock: isInStock,
-    isVariationGroupInStock: isVariationGroupInStock,
+    isCustomVariationGroupInStock: isCustomVariationGroupInStock,
     isInclude: isInclude,
     isInStoreStock: isInStoreStock,
     isOnline: isOnline,

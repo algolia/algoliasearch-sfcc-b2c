@@ -682,7 +682,7 @@ function generateVariantRecords(parameters) {
  *   'fr_FR': [ ... ],
  * }
  */
-function generateProductVariationGroupRecords(parameters) {
+function generateAttributeSlicedMasterRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
     const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
@@ -835,7 +835,7 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     generateVariantRecords: generateVariantRecords,
-    generateProductVariationGroupRecords: generateProductVariationGroupRecords,
+    generateAttributeSlicedMasterRecords: generateAttributeSlicedMasterRecords,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,

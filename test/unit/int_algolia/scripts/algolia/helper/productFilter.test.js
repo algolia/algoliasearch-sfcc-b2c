@@ -50,7 +50,7 @@ describe('productFilter.isInStock', () => {
         expect(inStock).toBe(false);
     });
 
-    test('Variation group with in-stock variant is considered in stock', () => {
+    test('Attribute-sliced master with in-stock variant is considered in stock', () => {
         const inStockVariant = new VariantMock({ ats: 3 });
 
         const variationGroup = new MasterProductMock({

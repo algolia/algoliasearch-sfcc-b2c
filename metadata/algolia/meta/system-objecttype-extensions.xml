@@ -158,24 +158,27 @@ Setting this preference replaces the first two segments, the final index name be
             <attribute-definition attribute-id="Algolia_RecordModel">
                 <display-name xml:lang="x-default">Record model</display-name>
                 <description xml:lang="x-default">Define the model used to store products in Algolia.
-'Variation Product': create one record per variation product.
-'Base Product': create one record per base product, containing all variants in a 'variants' attribute.
-'Variation Group Product': create one record per variant group (e.g., per color), containing sizes in that group.</description>
+'Variant-level': create one record per variation / simple product. All attributes of all products are stored at the record's root level.
+'Master-level': create one record per master. Properties common to all attributes are stored at root level, variant attributes are stored inside the 'variants' array. Simple products also have a 'variants' array for consistency.
+'Attribute-sliced master-level': create one record per custom variation group (e.g. per color), containing size variants in that group.
+The product doesn't need to be an SFCC variation group; masters with multiple variation attributes are split into multiple masters by the given variation attribute, one record per variation attribute value
+(e.g. one record for all sizes of color red, another one for all sizes of color blue), for each locale.
+Like with the master-level record type, all records (incl. simple products) have a 'variants' array for consistency and easy faceting.</description>
                 <type>enum-of-string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <value-definitions>
                     <value-definition default="true">
-                        <display xml:lang="x-default">Variation Product</display>
+                        <display xml:lang="x-default">Variant-level</display>
                         <value>variant-level</value>
                     </value-definition>
                     <value-definition>
-                        <display xml:lang="x-default">Base Product</display>
+                        <display xml:lang="x-default">Master-level</display>
                         <value>master-level</value>
                     </value-definition>
                     <value-definition>
-                        <display xml:lang="x-default">Variation Group Product</display>
-                        <value>variation-group-level</value>
+                        <display xml:lang="x-default">Attribute-sliced master-level</display>
+                        <value>attribute-sliced-master-level</value>
                     </value-definition>
                 </value-definitions>
             </attribute-definition>

@@ -103,8 +103,8 @@ describe('process', () => {
         expect(algoliaOperations).toMatchSnapshot();
     });
 
-    test('variation-group-level indexing', () => {
-        global.customPreferences['Algolia_RecordModel'] = 'variation-group-level';
+    test('attribute-sliced-master-level indexing', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced-master-level';
         mockLocalesForIndexing = ['fr']
         job.beforeStep(parameters, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({
@@ -115,8 +115,8 @@ describe('process', () => {
         var algoliaOperations = job.process({productID: '25592581M', available: true});
         expect(algoliaOperations).toMatchSnapshot();
     });
-    test('variation-group-level indexing - out of stock', () => {
-        global.customPreferences['Algolia_RecordModel'] = 'variation-group-level';
+    test('attribute-sliced-master-level indexing - out of stock', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced-master-level';
         mockLocalesForIndexing = ['fr']
         algoliaLocalizedProduct.__setThreshold(7); // Default mock variant has an ATS of 6
         job.beforeStep(parameters, stepExecution);

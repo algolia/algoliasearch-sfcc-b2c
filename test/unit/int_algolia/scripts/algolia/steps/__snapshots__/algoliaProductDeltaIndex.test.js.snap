@@ -664,7 +664,7 @@ exports[`process master-level indexing 1`] = `
 ]
 `;
 
-exports[`process variation-group-level indexing - out of stock 1`] = `
+exports[`process attribute-sliced-master-level indexing - out of stock 1`] = `
 [
   AlgoliaOperation {
     "action": "deleteObject",
@@ -676,7 +676,7 @@ exports[`process variation-group-level indexing - out of stock 1`] = `
 ]
 `;
 
-exports[`process variation-group-level indexing 1`] = `
+exports[`process attribute-sliced-master-level indexing 1`] = `
 [
   AlgoliaOperation {
     "action": "addObject",

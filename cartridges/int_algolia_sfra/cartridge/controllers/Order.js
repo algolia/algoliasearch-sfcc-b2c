@@ -8,9 +8,12 @@ var priceFactory = require('*/cartridge/scripts/factories/price')
 var OrderMgr = require('dw/order/OrderMgr');
 
 server.extend(base);
-const MASTER_LEVEL = 'master-level';
 
-
+const RECORD_MODEL_TYPE = {
+    MASTER_LEVEL: 'master-level',
+    VARIANT_LEVEL: 'variant-level',
+    ATTRIBUTE_SLICED_MASTER_LEVEL: 'attribute-sliced-master-level',
+}
 
 server.append('Confirm', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableInsights')) {
@@ -31,7 +34,7 @@ server.append('Confirm', function (req, res, next) {
                 var algoliaProduct = {};
 
                 try {
-                    algoliaProduct.pid = algoliaData.getPreference('RecordModel') === MASTER_LEVEL ? product.masterProduct.ID : product.ID;
+                    algoliaProduct.pid = algoliaData.getPreference('RecordModel') === RECORD_MODEL_TYPE.MASTER_LEVEL ? product.masterProduct.ID : product.ID;
                 } catch (e) { // eslint-disable-line no-unused-vars
                     algoliaProduct.pid = product.ID;
                 }

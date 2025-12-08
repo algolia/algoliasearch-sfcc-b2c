@@ -14,6 +14,12 @@ var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 var logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 
+const RECORD_MODEL_TYPE = {
+    MASTER_LEVEL: 'master-level',
+    VARIANT_LEVEL: 'variant-level',
+    ATTRIBUTE_SLICED_MASTER_LEVEL: 'attribute-sliced-master-level',
+}
+
 var extendedProductAttributesConfig;
 try {
     extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
@@ -569,7 +575,7 @@ function algoliaLocalizedProduct(parameters) {
 
             // set `variantID` explicitly to null in the `variants` array object for simple products
             this.variantID = isSimpleProduct ? null : product.getID();
-        } else if (parameters.variationModel) { // VARIATION_GROUP_LEVEL indexing, master case
+        } else if (parameters.variationModel) { // ATTRIBUTE_SLICED_MASTER_LEVEL indexing, master case
             this.objectID = product.getID() + '-' + parameters.variationValueID;
         } else { // all other cases
             this.objectID = product.getID();

@@ -13,10 +13,10 @@ let orderHelper = require('*/cartridge/scripts/algolia/helper/orderHelper');
 let isInStoreStock = productFilter.isInStoreStock;
 let generateAlgoliaOperations = orderHelper.generateAlgoliaOperations;
 
-let RECORD_MODEL_TYPE = {
+const RECORD_MODEL_TYPE = {
     MASTER_LEVEL: 'master-level',
     VARIANT_LEVEL: 'variant-level',
-    VARIATION_GROUP_LEVEL: 'variation-group-level'
+    ATTRIBUTE_SLICED_MASTER_LEVEL: 'attribute-sliced-master-level',
 };
 const VARIATION_ATTRIBUTE_ID = 'color';
 
@@ -157,7 +157,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
 
                 let productOps = generateAlgoliaOperations(productConfig);
                 algoliaOperations = algoliaOperations.concat(productOps);
-            } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL) {
+            } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL) {
                 let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                 productConfig.attributeList = ['variants'];
 
@@ -209,7 +209,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                     let productOps = generateAlgoliaOperations(productConfig);
                     algoliaOperations = algoliaOperations.concat(productOps);
-                } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL) {
+                } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL) {
                     let attrArray = ['variants'];
                     if (additionalAttributes.indexOf('in_stock') > -1) {
                         attrArray.push('in_stock');
@@ -252,8 +252,8 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     } else {
                         algoliaOperations = algoliaOperations.concat(productOps);
                     }
-                } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL) {
-                    let isGroupInStock = productFilter.isVariationGroupInStock(productConfig.variationModel, threshold);
+                } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL) {
+                    let isGroupInStock = productFilter.isCustomVariationGroupInStock(productConfig.variationModel, threshold);
                     if (!isGroupInStock) {
                         productOps.forEach(function(productOp) {
                             algoliaOperations = algoliaOperations.concat(
