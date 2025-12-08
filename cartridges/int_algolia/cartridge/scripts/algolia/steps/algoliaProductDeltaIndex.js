@@ -434,7 +434,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     variantAttributes: variantAttributes,
                     nonLocalizedAttributes: nonLocalizedAttributes,
                     attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
-                    variationAttributeId: VARIATION_ATTRIBUTE_ID,
+                    variationAttributeID: VARIATION_ATTRIBUTE_ID,
                 });
 
                 for (let l = 0; l < siteLocales.size(); ++l) {
