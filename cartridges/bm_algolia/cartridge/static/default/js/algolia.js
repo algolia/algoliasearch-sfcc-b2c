@@ -2,6 +2,7 @@
 
 /* globals jQuery */
 /* @deprecated */
+
 (function ($) {
     $(document).ready(function () {
         var $siteStatusRow = $('.site-status-row');
@@ -105,6 +106,14 @@
             $dialogContainer.dialog('open');
         });
 
+        // Disables the "Grouping attribute for the Attribute-sliced master-level record model"
+        // text input unless "Record model" is "Attribute-sliced master-level"
+        $('select#RecordModel').on('change', function(e) {
+            var isAttributeSlicedMasterLevelRecordModelSelected = $(this).val() === 'attribute-sliced-master-level';
+            $('input#AttributeSlicedMasterRecord_GroupingAttribute').prop('disabled', !isAttributeSlicedMasterLevelRecordModelSelected);
+        });
+
         $resumeIndexingBtn.on('click', handleActionClick);
+
     });
 }(jQuery));

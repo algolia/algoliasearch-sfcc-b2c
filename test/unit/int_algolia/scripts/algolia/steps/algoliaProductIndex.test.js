@@ -210,8 +210,9 @@ describe('process', () => {
         const algoliaOperations = job.process(masterProduct);
         expect(algoliaOperations).toMatchSnapshot();
     });
-    test('attribute-sliced indexing', () => {
+    test('attribute-sliced-master-level indexing', () => {
         global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced';
+        global.customPreferences['Algolia_AttributeSlicedMasterRecord_GroupingAttribute'] = 'color';
         mockAdditionalAttributes = [];
         mockLocalesForIndexing = ['en'];
 

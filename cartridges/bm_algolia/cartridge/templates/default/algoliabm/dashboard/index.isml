@@ -183,6 +183,19 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_AttributeSlicedMasterRecord_GroupingAttribute </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.attributeslicedmasterrecord.groupingattribute', 'algolia', null)}" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.attributeslicedmasterrecord.groupingattribute.help', 'algolia', null)}</div>
+                    </td>
+
+                    <td class="table_detail w e s">
+                        <input type="text" value="${pdict.algoliaData.getPreference('AttributeSlicedMasterRecord_GroupingAttribute') ? pdict.algoliaData.getPreference('AttributeSlicedMasterRecord_GroupingAttribute') : ''}" id="AttributeSlicedMasterRecord_GroupingAttribute" name="AttributeSlicedMasterRecord_GroupingAttribute" placeholder="${Resource.msg('algolia.label.util.optional.onlyusedwithattributeslicedrecordmodel', 'algolia', null)}"/>
+                    </td>
+                </tr>
+
                 <iscomment> Algolia_LocalesForIndexing </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
