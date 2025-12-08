@@ -23,7 +23,7 @@ const VARIATION_ATTRIBUTE_ID = 'color';
 /**
  * Creates the necessary configuration for a product based on the record model type.
  *
- * @param {dw.catalog.Product} product - The product to create config for.
+ * @param {dw.catalog.Product | dw.catalog.Variant} product - The product to create config for.
  * @param {string} recordModel - The type of record model.
  * @param {Array} additionalAttributes - User-defined attributes to index.
  * @returns {Object} Configuration object to pass to generateAlgoliaOperations.
@@ -36,7 +36,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
     let variationAttribute = productVariationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
 
     if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && product.master) {
-        let masterProduct = product.master ? product : product.masterProduct;
+        let masterProduct = product.master ? product : product.getMasterProduct();
         productConfig.baseModel = new AlgoliaLocalizedProduct({
             product: masterProduct,
             locale: 'default',
@@ -45,8 +45,8 @@ function createProductConfig(product, recordModel, additionalAttributes) {
         productConfig.variantAttributes = attributesConfig.variantAttributes;
         productConfig.attributeList = attributesConfig.masterAttributes;
         productConfig.product = masterProduct;
-    } else if (recordModel === RECORD_MODEL_TYPE.VARIATION_GROUP_LEVEL && variationAttribute) {
-        let masterProduct = product.master ? product : product.masterProduct;
+    } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL && variationAttribute) {
+        let masterProduct = product.master ? product : product.getMasterProduct();
         productConfig.baseModel = new AlgoliaLocalizedProduct({
             product: masterProduct,
             locale: 'default',
@@ -54,19 +54,14 @@ function createProductConfig(product, recordModel, additionalAttributes) {
         });
 
         let variationAttributeValue = productVariationModel.getSelectedValue(variationAttribute);
-        // Set the variation model to the variation group of the current product
+        // Set the variation model to represent the current variation group
         if (variationAttributeValue) {
-            let variationGroupModel = masterProduct.getVariationModel();
-            variationGroupModel.setSelectedAttributeValue(variationAttribute.ID, variationAttributeValue.ID);
-            productConfig.variationModel = variationGroupModel;
+            let variationModel = masterProduct.getVariationModel();
+            variationModel.setSelectedAttributeValue(variationAttribute.ID, variationAttributeValue.ID);
+            productConfig.variationModel = variationModel;
             productConfig.variationValueID = variationAttributeValue.ID;
         }
 
-        // Move the variation attribute at the root level
-        attributesConfig.masterAttributes.push(VARIATION_ATTRIBUTE_ID);
-        while (attributesConfig.variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID) >= 0) {
-            attributesConfig.variantAttributes.splice(attributesConfig.variantAttributes.indexOf(VARIATION_ATTRIBUTE_ID), 1);
-        }
         productConfig.variantAttributes = attributesConfig.variantAttributes;
         productConfig.attributeList = attributesConfig.masterAttributes;
         productConfig.product = masterProduct;
@@ -157,7 +152,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
         let inStoreStock = isInStoreStock(product, storeId, threshold);
         if (!inStoreStock && additionalAttributes.indexOf('storeAvailability') > -1) {
             if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
-                let productConfig = createProductConfig(product.masterProduct, recordModel, additionalAttributes);
+                let productConfig = createProductConfig(product.getMasterProduct(), recordModel, additionalAttributes);
                 productConfig.attributeList = ['variants'];
 
                 let productOps = generateAlgoliaOperations(productConfig);
@@ -203,7 +198,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
             if (indexOutOfStock) {
                 if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
-                    let masterProduct = product.masterProduct;
+                    let masterProduct = product.getMasterProduct();
                     let attrArray = ['variants'];
                     if (additionalAttributes.indexOf('in_stock') > -1) {
                         attrArray.push('in_stock');
@@ -235,7 +230,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
             } else {
                 let baseProduct = product;
                 if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
-                    baseProduct = product.masterProduct;
+                    baseProduct = product.getMasterProduct();
                 }
                 let productConfig = createProductConfig(baseProduct, recordModel, additionalAttributes);
                 productConfig.attributeList = ['variants'];
@@ -243,7 +238,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                 let productOps = generateAlgoliaOperations(productConfig);
 
                 if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
-                    let isMasterInStock = productFilter.isInStock(product.masterProduct, threshold);
+                    let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), threshold);
                     if (!isMasterInStock) {
                         productOps.forEach(function(productOp) {
                             algoliaOperations = algoliaOperations.concat(

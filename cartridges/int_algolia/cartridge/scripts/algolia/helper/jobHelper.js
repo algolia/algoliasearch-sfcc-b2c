@@ -652,7 +652,12 @@ function generateVariantRecords(parameters) {
 }
 
 /**
- * For a given base product and variationAttributeId, generate all variation-group records
+ * For a given master product and variationAttributeID, generate all attribute-sliced master records for each locale,
+ * i.e. split master into custom variation groups by the supplied variationAttributeID
+ * NOTE: This implementation doesn't use SFCC variation groups, but works in a similar manner without having to explicitly deifne SFCC variation groups for masters with multiple variation attributes.
+ * Masters with multiple variation attributes are split (sliced) into multiple masters by the supplied variation attribute by the code.
+ * Example: if a master has four sizes and three colors (12 variants total) and the variation attribute to slice by is "color", the master will be split up into three records, one for each color value (red, green, blue),
+ * with each record having four size variants in the `variants` array. If there are multiple locales, this is done for all locales, so the output is three records per locale.
  *
  * @param {Object} parameters - model parameters
  * @property {dw.catalog.Product} parameters.baseProduct - A master product
@@ -661,7 +666,7 @@ function generateVariantRecords(parameters) {
  * @property {Array} parameters.variantAttributes - list of attributes to add in the 'variants' array of the record
  * @property {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
  * @property {Array} parameters.attributesComputedFromBaseProduct - list of attributes computed from the baseProduct and shared in all variants
- * @property {string} parameters.variationAttributeId - id of the variation attribute used to group the variants (default: 'color')
+ * @property {string} parameters.variationAttributeID - ID of the variation attribute used to group the variants (e.g. 'color')
  * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct (one per variation value)
  * @example
  * {
@@ -696,9 +701,9 @@ function generateProductVariationGroupRecords(parameters) {
     }
 
     let variationModel = parameters.baseProduct.getVariationModel();
-    let variationAttribute = variationModel.getProductVariationAttribute(parameters.variationAttributeId);
+    let variationAttribute = variationModel.getProductVariationAttribute(parameters.variationAttributeID);
     if (!variationAttribute) {
-        algoliaLogger.info('No ' + parameters.variationAttributeId + ' attribute found for product ' + parameters.baseProduct.ID);
+        algoliaLogger.info('No ' + parameters.variationAttributeID + ' attribute found for product ' + parameters.baseProduct.ID);
         return algoliaRecordsPerLocale;
     }
     let variationValues = variationModel.getAllValues(variationAttribute).iterator();

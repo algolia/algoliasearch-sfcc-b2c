@@ -36,7 +36,7 @@ server.append('Variation', function (req, res, next) {
 
         if (viewData.product) {
             session.privacy.algoliaAnchorProducts = JSON.stringify([viewData.product.id]);
-            viewData.algoliaAnchorProduct = JSON.parse(recommendUtils.getAnchorProductIds())[0];
+            viewData.algoliaAnchorProduct = JSON.parse(recommendUtils.getAnchorProductIDs())[0];
             res.setViewData(viewData);
         }
     }

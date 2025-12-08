@@ -61,7 +61,7 @@ function hasOnlineCategory(product) {
  */
 function isInclude(product) {
     // Do not include Master product
-    if (product.master || product.variationGroup) return false;
+    if (product.isMaster() || product.isVariationGroup()) return false;
     // Do not include Option products
     // if (product.optionProduct) return false;
     // Do not include bundled product
@@ -76,7 +76,7 @@ function isInclude(product) {
     // Check if product has at least one online category
     // Note: In SFCC, variant products don't have their own categories - getOnlineCategories() returns empty for variants
     // We must check categories on the master product instead
-    if (product.variant) {
+    if (product.isVariant()) { // dw.catalog.Variant
         var masterProduct = product.getMasterProduct();
         if (masterProduct && !hasOnlineCategory(masterProduct)) return false;
     } else {
@@ -99,7 +99,7 @@ function isInStock(product, threshold) {
     }
 
     // even if one variant is in stock, we consider the product as in stock
-    if (product.master || product.variationGroup) {
+    if (product.isMaster() || product.isVariationGroup()) {
         const variantsIt = product.variants.iterator();
         while (variantsIt.hasNext()) {
             let variant = variantsIt.next();
@@ -123,6 +123,9 @@ function isInStock(product, threshold) {
 
 /**
  * Checks if at least one variant in a variation model is in stock.
+ * @param {dw.catalog.ProductVariationModel} variationModel
+ * @param {Number} threshold
+ * @returns {Boolean} whether at least one of the variants is in stock
  */
 function isVariationGroupInStock(variationModel, threshold) {
     const variantsIt = variationModel.getSelectedVariants().iterator();

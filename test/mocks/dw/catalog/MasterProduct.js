@@ -39,6 +39,9 @@ class Product {
     get pageDescription() {
         return this.getPageDescription();
     }
+    getID() {
+        return this.ID;
+    }
     getPageDescription() {
         switch (request.getLocale()) {
             case 'fr':
@@ -227,6 +230,9 @@ class Product {
                     },
                 },
             },
+            getID: function() {
+                return this.ID;
+            }
         };
     }
 

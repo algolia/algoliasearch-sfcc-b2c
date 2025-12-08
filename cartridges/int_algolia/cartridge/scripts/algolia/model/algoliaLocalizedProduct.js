@@ -236,9 +236,9 @@ function getCategoryHierarchyIds(category) {
 var aggregatedValueHandlers = {
     masterID: function(product) {
         if (product.isVariant() || product.isVariationGroup()) {
-            return product.masterProduct.ID;
+            return product.getMasterProduct().getID();
         } else if (product.isMaster()) {
-            return product.ID;
+            return product.getID();
         }
         return null;
     },
@@ -251,7 +251,7 @@ var aggregatedValueHandlers = {
         productCategories = empty(productCategories) ? [] : productCategories.toArray();
 
         if (product.isVariant()) {
-            var masterProductCategories = product.masterProduct.getOnlineCategories();
+            var masterProductCategories = product.getMasterProduct().getOnlineCategories();
             masterProductCategories = empty(masterProductCategories) ? [] : masterProductCategories.toArray();
             productCategories = productCategories.concat(masterProductCategories);
         }
@@ -267,7 +267,7 @@ var aggregatedValueHandlers = {
         productCategories = empty(productCategories) ? [] : productCategories.toArray();
 
         if (product.isVariant()) {
-            var masterProductCategories = product.masterProduct.getOnlineCategories();
+            var masterProductCategories = product.getMasterProduct().getOnlineCategories();
             masterProductCategories = empty(masterProductCategories) ? [] : masterProductCategories.toArray();
             productCategories = productCategories.concat(masterProductCategories);
         }
@@ -280,10 +280,10 @@ var aggregatedValueHandlers = {
     primary_category_id: function (product) {
         var result = null;
         if (empty(product.primaryCategory)) {
-            var primaryCategory = product.isVariant() ? product.masterProduct.primaryCategory : null;
+            var primaryCategory = product.isVariant() ? product.getMasterProduct().getPrimaryCategory() : null;
             result = empty(primaryCategory) ? null : primaryCategory.ID;
         } else {
-            result = product.primaryCategory.ID;
+            result = product.getPrimaryCategory().getID();
         }
         return result;
     },
@@ -570,9 +570,9 @@ function algoliaLocalizedProduct(parameters) {
             // set `variantID` explicitly to null in the `variants` array object for simple products
             this.variantID = isSimpleProduct ? null : product.ID;
         } else if (parameters.variationModel) { // VARIATION_GROUP_LEVEL indexing, master case
-            this.objectID = product.ID + '-' + parameters.variationValueID;
+            this.objectID = product.getID() + '-' + parameters.variationValueID;
         } else { // all other cases
-            this.objectID = product.ID;
+            this.objectID = product.getID();
         }
 
         for (var i = 0; i < attributeList.length; i += 1) {
