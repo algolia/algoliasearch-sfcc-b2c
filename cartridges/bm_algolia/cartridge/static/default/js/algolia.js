@@ -108,7 +108,7 @@
 
         // Disables the "Grouping attribute for the Attribute-sliced master-level record model"
         // text input unless "Record model" is "Attribute-sliced master-level"
-        $('select#RecordModel').on('change', function(e) {
+        $('select#RecordModel').on('change', function() {
             var isAttributeSlicedMasterLevelRecordModelSelected = $(this).val() === 'attribute-sliced-master-level';
             $('input#AttributeSlicedMasterRecord_GroupingAttribute').prop('disabled', !isAttributeSlicedMasterLevelRecordModelSelected);
         });
