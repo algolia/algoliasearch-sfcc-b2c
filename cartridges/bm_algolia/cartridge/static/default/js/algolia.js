@@ -111,7 +111,7 @@
         $('select#RecordModel').on('change', function() {
             var isAttributeSlicedMasterLevelRecordModelSelected = $(this).val() === 'attribute-sliced-master-level';
             $('input#AttributeSlicedMasterRecord_GroupingAttribute').prop('disabled', !isAttributeSlicedMasterLevelRecordModelSelected);
-        });
+        }).trigger('change');
 
         $resumeIndexingBtn.on('click', handleActionClick);
 
