@@ -7,7 +7,11 @@ exports[`Order Helper generateAlgoliaOperations should create operations for all
     "body": {
       "in_stock": true,
       "objectID": "25592581M",
-      "variants": [],
+      "variants": [
+        algoliaLocalizedProduct {
+          "variantID": "701644031206M",
+        },
+      ],
     },
     "indexName": "test_index___products__default",
   },
@@ -16,7 +20,11 @@ exports[`Order Helper generateAlgoliaOperations should create operations for all
     "body": {
       "in_stock": true,
       "objectID": "25592581M",
-      "variants": [],
+      "variants": [
+        algoliaLocalizedProduct {
+          "variantID": "701644031206M",
+        },
+      ],
     },
     "indexName": "test_index___products__fr",
   },
@@ -25,7 +33,11 @@ exports[`Order Helper generateAlgoliaOperations should create operations for all
     "body": {
       "in_stock": true,
       "objectID": "25592581M",
-      "variants": [],
+      "variants": [
+        algoliaLocalizedProduct {
+          "variantID": "701644031206M",
+        },
+      ],
     },
     "indexName": "test_index___products__en",
   },
