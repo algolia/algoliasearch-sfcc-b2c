@@ -101,14 +101,18 @@ function isInStock(product, threshold) {
     // even if one variant is in stock, we consider the product as in stock
     if (product.isMaster() || product.isVariationGroup()) {
         const variantsIt = product.variants.iterator();
+
         while (variantsIt.hasNext()) {
             let variant = variantsIt.next();
             let variantAvailabilityModel = variant.getAvailabilityModel();
+
             if (variantAvailabilityModel) {
                 let variantInvRecord = variantAvailabilityModel.getInventoryRecord();
+
                 if (variantInvRecord) {
-                    let variantAtsValue = variantInvRecord.getATS().getValue();
-                    if (variantAtsValue >= threshold) {
+                    let variantATSValue = variantInvRecord.getATS().getValue();
+
+                    if (variantATSValue > 0 && variantATSValue >= threshold) { // comparing to zero explicitly so that a threshold of 0 wouldn't return true
                         return true;
                     }
                 }
@@ -118,7 +122,8 @@ function isInStock(product, threshold) {
 
     var invRecord = availabilityModel.getInventoryRecord();
     var atsValue = invRecord ? invRecord.getATS().getValue() : 0;
-    return atsValue >= threshold;
+
+    return (atsValue > 0 && atsValue >= threshold);
 }
 
 /**
@@ -152,14 +157,18 @@ function isCustomVariationGroupInStock(variationModel, threshold) {
 function isInStoreStock(product, storeId, threshold) {
     const StoreMgr = require('dw/catalog/StoreMgr');
     let store = StoreMgr.getStore(storeId);
+
     if (!store || !store.inventoryList) {
         return false;
     }
+
     let storeInventory = store.inventoryList;
     let inventoryRecord = storeInventory.getRecord(product.ID);
-    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= threshold) {
+
+    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= threshold && inventoryRecord.ATS.value > 0) { // comparing to zero explicitly so that a threshold of 0 wouldn't return true
         return true;
     }
+
     return false;
 }
 

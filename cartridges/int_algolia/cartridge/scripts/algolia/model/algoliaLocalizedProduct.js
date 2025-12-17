@@ -527,7 +527,7 @@ var aggregatedValueHandlers = {
                 var storeElInventory = storeEl.storeInventory;
                 if (storeElInventory) {
                     var inventoryRecord = storeElInventory.getRecord(product.ID);
-                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= ALGOLIA_IN_STOCK_THRESHOLD) {
+                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= ALGOLIA_IN_STOCK_THRESHOLD && inventoryRecord.ATS.value > 0) { // comparing to zero explicitly so that a threshold of 0 wouldn't return true
                         storeArray.push(storeEl.id);
                     }
                 }
