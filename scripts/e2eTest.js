@@ -77,11 +77,11 @@ async function main() {
     await deployCode();
 
     // We test two different record models:
-    const recordModels = ['master-level', 'variant-level'];
+    const recordModels = ['master-level', 'variation-level'];
 
     const indexPrefixes = {
         'master-level': 'test_ci_master',
-        'variant-level': 'test_ci_variant'
+        'variation-level': 'test_ci_variation'
     };
 
     for (const model of recordModels) {
