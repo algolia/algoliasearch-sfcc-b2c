@@ -136,8 +136,8 @@ function isCustomVariationGroupInStock(variationModel, threshold) {
     const variantsIt = variationModel.getSelectedVariants().iterator();
     while (variantsIt.hasNext()) {
         let variant = variantsIt.next();
-        let variantAtsValue = variant.getAvailabilityModel().getInventoryRecord().getATS().getValue();
-        if (variantAtsValue >= threshold) {
+        let variantATSValue = variant.getAvailabilityModel().getInventoryRecord().getATS().getValue();
+        if (variantATSValue > 0 && variantATSValue >= threshold) {
             return true;
         }
     }
