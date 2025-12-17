@@ -10,7 +10,7 @@ var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProdu
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
 
-const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+const ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
 
 /**
  * Get the lowest promotional price for product

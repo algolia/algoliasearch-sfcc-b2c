@@ -98,7 +98,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
  * @returns {dw.system.Status} Status
  */
 exports.inventoryUpdate = function (order) {
-    let ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+    let ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
     let RECORD_MODEL = algoliaData.getPreference('RecordModel');
     let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
 
