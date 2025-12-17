@@ -118,6 +118,8 @@ function isInStock(product, threshold) {
                 }
             }
         }
+
+        return false;
     }
 
     var invRecord = availabilityModel.getInventoryRecord();
