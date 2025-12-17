@@ -134,7 +134,7 @@
                 <type>double</type>
                 <mandatory-flag>true</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
-                <default-value>0.0</default-value>
+                <default-value>1.0</default-value>
             </attribute-definition>
 
             <attribute-definition attribute-id="Algolia_AdditionalAttributes">
