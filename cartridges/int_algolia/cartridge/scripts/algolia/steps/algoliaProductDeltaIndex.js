@@ -386,7 +386,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
                 // masters that DON'T have the specified variation attribute -- treat them as regular masters
                 if (!variationAttribute) {
-                    logger.info('Specified variation attribute "' + VARIATION_ATTRIBUTE_ID + '" not found for master product "' + product.ID + '", falling back to master-type record.');
+                    logger.info('Specified variation attribute "' + VARIATION_ATTRIBUTE_ID + '" not found for master product "' + product.ID + '", falling back to master-level record.');
 
                     let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
 
