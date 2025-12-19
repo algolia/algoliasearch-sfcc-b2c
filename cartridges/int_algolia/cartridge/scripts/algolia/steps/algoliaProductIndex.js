@@ -313,7 +313,7 @@ exports.process = function(product, parameters, stepExecution) {
 
             // masters that DON'T have the specified variation attribute -- treat them as regular masters
             if (!variationAttribute) {
-                logger.info('Specified variation attribute "' + VARIATION_ATTRIBUTE_ID + '" not found for master product "' + product.ID + '", falling back to master-type record.');
+                logger.info('Specified variation attribute "' + VARIATION_ATTRIBUTE_ID + '" not found for master product "' + product.ID + '", falling back to master-level record.');
 
                 let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                 for (let l = 0; l < siteLocales.size(); ++l) {
