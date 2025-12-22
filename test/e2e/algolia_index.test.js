@@ -56,7 +56,7 @@ describe('Algolia Integration', () => {
 
     const testProducts = [
         {
-            type: 'variation',
+            type: 'variant',
             id: process.env.TEST_PRODUCT_ID,
             expectedFields: ['variationAttributes', 'prices']
         },
@@ -73,7 +73,7 @@ describe('Algolia Integration', () => {
             return;
         }
         // Skip variation product test if running in master-level mode
-        if (recordModel === 'master-level' && product.type === 'variation') {
+        if (recordModel === 'master-level' && product.type === 'variant') {
             return;
         }
 
