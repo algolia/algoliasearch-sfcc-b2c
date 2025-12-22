@@ -470,7 +470,7 @@ var aggregatedValueHandlers = {
         currentSession.setCurrency(currentCurrency);
         return promotionalPrices;
     },
-    variants: function(product, parameters) { // only used for MASTER_LEVEL and VARIATION_GROUP_LEVEL
+    variants: function(product, parameters) { // only called when record model is either MASTER_LEVEL or VARIATION_GROUP_LEVEL
         const variants = [];
 
         if (product.isMaster() || product.isVariationGroup()) {
@@ -508,8 +508,7 @@ var aggregatedValueHandlers = {
             }
             return variants;
 
-        // check if simple product, but only if model is master-level or attribute-sliced
-        } else {
+        } else if (jobHelper.isStandardProduct(product)) { // check if simple product
 
             // not checking for stock, we already know the product is in stock at this point
             let baseModel = {
@@ -528,6 +527,8 @@ var aggregatedValueHandlers = {
             variants.push(localizedVariant);
 
             return variants;
+        } else {
+            return null;
         }
     },
     _tags: function(product) {

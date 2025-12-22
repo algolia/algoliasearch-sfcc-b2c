@@ -165,7 +165,6 @@ function enableInstantSearch(config) {
                 ]
             }),
 
-            // "new arrival" refinement panel
             toggleRefinementWithPanel({
                 container: '#algolia-newarrival-placeholder',
                 attribute: 'newArrival',
