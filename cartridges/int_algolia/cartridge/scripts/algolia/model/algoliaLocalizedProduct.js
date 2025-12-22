@@ -513,7 +513,6 @@ var aggregatedValueHandlers = {
             // not checking for stock, we already know the product is in stock at this point
             let baseModel = {
                 in_stock: true,
-                variantID: '',
             };
 
             // create a model to serve as the `variants` array in the record
