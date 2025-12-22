@@ -470,7 +470,7 @@ var aggregatedValueHandlers = {
         currentSession.setCurrency(currentCurrency);
         return promotionalPrices;
     },
-    variants: function(product, parameters) {
+    variants: function(product, parameters) { // only used for MASTER_LEVEL and VARIATION_GROUP_LEVEL
         const variants = [];
 
         if (product.isMaster() || product.isVariationGroup()) {
@@ -509,7 +509,7 @@ var aggregatedValueHandlers = {
             return variants;
 
         // check if simple product, but only if model is master-level or attribute-sliced
-        } else if (jobHelper.isSimpleProduct(product) && (parameters.recordModel === MASTER_LEVEL || parameters.recordModel === VARIATION_GROUP_LEVEL)) {
+        } else {
 
             // not checking for stock, we already know the product is in stock at this point
             let baseModel = {
@@ -528,8 +528,6 @@ var aggregatedValueHandlers = {
             variants.push(localizedVariant);
 
             return variants;
-        } else {
-            return null;
         }
     },
     _tags: function(product) {
@@ -568,12 +566,11 @@ var aggregatedValueHandlers = {
  * @param {boolean?} [parameters.isVariant] -  Indicates if the model is meant to live in a parent record
  * @param {Object?} [parameters.variationModel] - variationModel of a master
  * @param {string?} [parameters.variationValueID] - variationValueID to append to the objectID
- * @param {string?} [parameters.recordModel] - the recordModel being used (VARIANT_LEVEL, MASTER_LEVEL or VARIATION_GROUP_LEVEL)
  * @constructor
  */
 function algoliaLocalizedProduct(parameters) {
     const product = parameters.product;
-    const attributeList = parameters.attributeList;
+    const attributeList = parameters.attributeList || [];
     const baseModel = parameters.baseModel;
 
     request.setLocale(parameters.locale || 'default');
@@ -581,7 +578,7 @@ function algoliaLocalizedProduct(parameters) {
     if (empty(product)) {
         this.id = null;
     } else {
-        if (parameters.isVariant && jobHelper.isSimpleProduct(product)) { // set `variantID` explicitly to null in the `variants` array object for simple products
+        if (parameters.isVariant && jobHelper.isStandardProduct(product)) { // set `variantID` explicitly to null in the `variants` array object for simple products
             this.variantID = null;
         } else if (parameters.isVariant) { // if variant, but building model for the record, not the `variants` array
             this.variantID = product.ID;
