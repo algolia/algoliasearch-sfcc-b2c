@@ -303,7 +303,8 @@ var aggregatedValueHandlers = {
         var colorAttribute = variationModel.getProductVariationAttribute('color');
         return (colorAttribute && variationModel.getSelectedValue(colorAttribute))
             ? variationModel.getSelectedValue(colorAttribute).displayValue
-            : product.custom.color;
+            : product.custom.color; // this is a workaround to retrieve color values which are otherwise not returned properly by the API via the variation model, likely due to an SFCC bug. It either returns the color value that `getSelectedValue()` couldn't or `null` as before.
+
     },
     refinementColor: function (product) {
         return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementColor')
@@ -325,7 +326,7 @@ var aggregatedValueHandlers = {
         var sizeAttribute = variationModel.getProductVariationAttribute('size');
         return (sizeAttribute && variationModel.getSelectedValue(sizeAttribute))
             ? variationModel.getSelectedValue(sizeAttribute).displayValue
-            : product.custom.size;
+            : product.custom.size; // this is a workaround to retrieve size values which are otherwise not returned properly by the API via the variation model, likely due to an SFCC bug. It either returns the size value that `getSelectedValue()` couldn't or `null` as before.
     },
     refinementSize: function (product) {
         return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementSize')
