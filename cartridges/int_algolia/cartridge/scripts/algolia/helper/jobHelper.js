@@ -809,20 +809,6 @@ function getAttributes(additionalAttributes) {
     };
 }
 
-/**
- * Returns true if supplied product is a standard product, false otherwise
- * A standard product is a product that is neither a master nor a variant
- * @param {dw.catalog.Product | dw.catalog.Variant} product
- * @returns {Boolean} whether the product is a simple product or not
- */
-function isStandardProduct(product) {
-    if (product.isMaster() || product.isVariant() || product.isVariationGroup()) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
 module.exports = {
     // productsIndexJob & categoryIndexJob
     appendObjToXML: appendObjToXML,
@@ -853,5 +839,4 @@ module.exports = {
 
     getDefaultAttributeConfig: getDefaultAttributeConfig,
     getAttributes: getAttributes,
-    isStandardProduct: isStandardProduct,
 };

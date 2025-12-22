@@ -503,26 +503,17 @@ var aggregatedValueHandlers = {
             }
             return variants;
 
-        } else if (jobHelper.isStandardProduct(product)) { // check if simple product
-
-            // not checking for stock, we already know the product is in stock at this point
-            let baseModel = {
-                in_stock: true,
-            };
-
+        } else { // simple product
             // create a model to serve as the `variants` array in the record
             var localizedVariant = new algoliaLocalizedProduct({
                 product: product,
                 locale: request.getLocale(),
                 attributeList: parameters.variantAttributes,
                 isVariant: true, // otherwise the variant object will have an 'objectID'
-                baseModel: baseModel,
             });
             variants.push(localizedVariant);
 
             return variants;
-        } else {
-            return null;
         }
     },
     _tags: function(product) {
@@ -574,8 +565,10 @@ function algoliaLocalizedProduct(parameters) {
         this.id = null;
     } else {
         if (parameters.isVariant) {
+            let isSimpleProduct = !product.isMaster() && !product.isVariant() && !product.isVariationGroup();
+
             // set `variantID` explicitly to null in the `variants` array object for simple products
-            this.variantID = jobHelper.isStandardProduct(product) ? null : product.ID;
+            this.variantID = isSimpleProduct ? null : product.ID;
         } else if (parameters.variationModel) { // VARIATION_GROUP_LEVEL indexing, master case
             this.objectID = product.ID + '-' + parameters.variationValueID;
         } else { // all other cases
