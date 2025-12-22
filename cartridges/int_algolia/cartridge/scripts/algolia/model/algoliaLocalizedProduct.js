@@ -578,10 +578,9 @@ function algoliaLocalizedProduct(parameters) {
     if (empty(product)) {
         this.id = null;
     } else {
-        if (parameters.isVariant && jobHelper.isStandardProduct(product)) { // set `variantID` explicitly to null in the `variants` array object for simple products
-            this.variantID = null;
-        } else if (parameters.isVariant) { // if variant, but building model for the record, not the `variants` array
-            this.variantID = product.ID;
+        if (parameters.isVariant) {
+            // set `variantID` explicitly to null in the `variants` array object for simple products
+            this.variantID = jobHelper.isStandardProduct(product) ? null : product.ID;
         } else if (parameters.variationModel) { // VARIATION_GROUP_LEVEL indexing, master case
             this.objectID = product.ID + '-' + parameters.variationValueID;
         } else { // all other cases
