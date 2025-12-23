@@ -382,8 +382,7 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product) {
-        let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
-        return inStock;
+        return productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
     },
     image_groups: function (product, parameters) {
         var imageGroupsArr = [];

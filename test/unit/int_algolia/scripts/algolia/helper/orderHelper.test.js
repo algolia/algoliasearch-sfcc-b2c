@@ -2,7 +2,6 @@
 
 const orderHelper = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/orderHelper');
 const MasterVariantMock = require('../../../../../mocks/dw/catalog/MasterProduct');
-const Variant = require('../../../../../mocks/dw/catalog/Variant');
 const VariantMock = require('../../../../../mocks/dw/catalog/Variant');
 const collectionHelper = require('../../../../../mocks/helpers/collectionHelper');
 
