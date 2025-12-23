@@ -656,7 +656,7 @@ function generateVariantRecords(parameters) {
  * i.e. split master into custom variation groups by the supplied variationAttributeID
  * NOTE: This implementation doesn't use SFCC variation groups, but works in a similar manner without having to explicitly deifne SFCC variation groups for masters with multiple variation attributes.
  * Masters with multiple variation attributes are split (sliced) into multiple masters by the supplied variation attribute by the code.
- * Example: if a master has four sizes and three colors (12 variants total) and the variation attribute to slice by is "color", the master will be split up into three records, one for each color value (red, green, blue),
+ * Example: if a master has four sizes and three colors (12 variants total) and the variation attribute to slice by is "color", it will be split up into three records, one for each color value (red, green, blue),
  * with each record having four size variants in the `variants` array. If there are multiple locales, this is done for all locales, so the output is three records per locale.
  *
  * @param {Object} parameters - model parameters

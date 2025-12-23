@@ -110,7 +110,7 @@
         // text input unless "Record model" is "Attribute-sliced"
         $('select#RecordModel').on('change', function() {
             var isAttributeSlicedRecordModelSelected = $(this).val() === 'attribute-sliced';
-            $('input#AttributeSlicedRecordModel_GroupingAttribute').prop('disabled', !isAttributeSlicedRecordModelSelected);
+            $('input#AttributeSlicedRecordModel_GroupingAttribute').prop('readonly', !isAttributeSlicedRecordModelSelected);
         }).trigger('change');
 
         $resumeIndexingBtn.on('click', handleActionClick);
