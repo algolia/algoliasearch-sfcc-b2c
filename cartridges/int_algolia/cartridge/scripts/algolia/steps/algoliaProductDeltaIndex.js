@@ -560,7 +560,6 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         variantAttributes: variantAttributes,
                         baseModel: baseModel,
                         fullRecordUpdate: fullRecordUpdate,
-                        recordModel: recordModel,
                     });
                 }
 
