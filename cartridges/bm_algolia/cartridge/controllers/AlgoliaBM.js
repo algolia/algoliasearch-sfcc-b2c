@@ -35,7 +35,7 @@ function handleSettings() {
     var adminApikey = params.AdminApiKey.value || '';
     var searchApikey = params.SearchApiKey.value || '';
     var indexPrefix = params.IndexPrefix.value || '';
-    var algoliaAttributeSlicedMasterRecord_GroupingAttribute = params.AttributeSlicedMasterRecord_GroupingAttribute.value || '';
+    var algoliaAttributeSlicedRecordModel_GroupingAttribute = params.AttributeSlicedRecordModel_GroupingAttribute.value || '';
 
     var adminValidation = {};
 
@@ -80,7 +80,7 @@ function handleSettings() {
         algoliaData.setPreference('AdminApiKey', adminApikey);
         algoliaData.setPreference('IndexPrefix', indexPrefix);
         algoliaData.setPreference('RecordModel', params.RecordModel.value);
-        algoliaData.setPreference('AttributeSlicedMasterRecord_GroupingAttribute', algoliaAttributeSlicedMasterRecord_GroupingAttribute);
+        algoliaData.setPreference('AttributeSlicedRecordModel_GroupingAttribute', algoliaAttributeSlicedRecordModel_GroupingAttribute);
         algoliaData.setSetOfStrings('LocalesForIndexing', params.LocalesForIndexing.value);
         algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);

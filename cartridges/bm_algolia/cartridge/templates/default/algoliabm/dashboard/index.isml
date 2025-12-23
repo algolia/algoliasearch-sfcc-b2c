@@ -183,7 +183,7 @@
                     </td>
                 </tr>
 
-                <iscomment> Algolia_AttributeSlicedMasterRecord_GroupingAttribute </iscomment>
+                <iscomment> Algolia_AttributeSlicedRecordModel_GroupingAttribute </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.attributeslicedmasterrecord.groupingattribute', 'algolia', null)}" />
@@ -192,7 +192,7 @@
                     </td>
 
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('AttributeSlicedMasterRecord_GroupingAttribute') ? pdict.algoliaData.getPreference('AttributeSlicedMasterRecord_GroupingAttribute') : ''}" id="AttributeSlicedMasterRecord_GroupingAttribute" name="AttributeSlicedMasterRecord_GroupingAttribute" placeholder="${Resource.msg('algolia.label.util.optional.onlyusedwithattributeslicedrecordmodel', 'algolia', null)}"/>
+                        <input type="text" value="${pdict.algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute') ? pdict.algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute') : ''}" id="AttributeSlicedRecordModel_GroupingAttribute" name="AttributeSlicedRecordModel_GroupingAttribute" placeholder="${Resource.msg('algolia.label.util.optional.onlyusedwithattributeslicedrecordmodel', 'algolia', null)}"/>
                     </td>
                 </tr>
 

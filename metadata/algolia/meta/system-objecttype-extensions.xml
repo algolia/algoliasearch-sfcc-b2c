@@ -183,15 +183,16 @@ Like with the Base product record type, all records (incl. simple products) have
                 </value-definitions>
             </attribute-definition>
 
-            <attribute-definition attribute-id="Algolia_AttributeSlicedMasterRecord_GroupingAttribute">
-                <display-name xml:lang="x-default">Variation attribute to group masters by when using the "Attribute-sliced master-level" record model</display-name>
-                <description xml:lang="x-default">Choose the attribute that masters with multiple variation attributes are grouped by when using the Attribute-sliced master-level record model.&#13;
+            <attribute-definition attribute-id="Algolia_AttributeSlicedRecordModel_GroupingAttribute">
+                <display-name xml:lang="x-default">Variation attribute to group masters by when using the "Attribute-sliced" record model</display-name>
+                <description xml:lang="x-default">Choose the attribute that masters with multiple variation attributes are grouped by when using the Attribute-sliced record model.&#13;
 Example: if a master has four sizes and three colors (12 variants total) and the variation attribute to group by is "color", the master will be split up into three records, one for each color value (red, green, blue), with each record having four size variants.&#13;
-This preference is only used with the "Attribute-sliced master-level" record model.</description>
+This preference is only used with the "Attribute-sliced" record model.</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
                 <externally-managed-flag>false</externally-managed-flag>
                 <min-length>0</min-length>
+                <default-value>color</default-value>
             </attribute-definition>
 
             <attribute-definition attribute-id="Algolia_IndexOutOfStock">
@@ -305,7 +306,7 @@ This preference is only used with the "Attribute-sliced master-level" record mod
                 <attribute attribute-id="Algolia_AdditionalAttributes"/>
                 <attribute attribute-id="Algolia_IndexPrefix"/>
                 <attribute attribute-id="Algolia_RecordModel"/>
-                <attribute attribute-id="Algolia_AttributeSlicedMasterRecord_GroupingAttribute"/>
+                <attribute attribute-id="Algolia_AttributeSlicedRecordModel_GroupingAttribute"/>
                 <attribute attribute-id="Algolia_LocalesForIndexing"/>
                 <attribute attribute-id="Algolia_EnableInsights"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>

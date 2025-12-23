@@ -9,7 +9,7 @@ let mockConfig = {
     InStockThreshold: 10,
     RecordModel: 'master-level',
     AdditionalAttributes: ['storeAvailability', 'short_description', 'brand'],
-    AttributeSlicedMasterRecord_GroupingAttribute: 'color',
+    AttributeSlicedRecordModel_GroupingAttribute: 'color',
 };
 
 const algoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
@@ -24,8 +24,8 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
                 return mockConfig.RecordModel;
             case 'IndexOutOfStock':
                 return mockConfig.IndexOutOfStock;
-            case 'AttributeSlicedMasterRecord_GroupingAttribute':
-                return mockConfig.AttributeSlicedMasterRecord_GroupingAttribute;
+            case 'AttributeSlicedRecordModel_GroupingAttribute':
+                return mockConfig.AttributeSlicedRecordModel_GroupingAttribute;
             default:
                 return null;
         }

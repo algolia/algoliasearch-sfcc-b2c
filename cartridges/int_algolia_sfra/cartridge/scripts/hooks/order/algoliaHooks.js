@@ -18,7 +18,7 @@ const RECORD_MODEL_TYPE = {
     VARIANT_LEVEL: 'variant-level',
     ATTRIBUTE_SLICED: 'attribute-sliced',
 };
-const variationAttributeForAttributeSlicedMasterLevelRecordModel = algoliaData.getPreference('AttributeSlicedMasterRecord_GroupingAttribute');
+const variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
 
 /**
  * Creates the necessary configuration for a product based on the record model type.
@@ -33,7 +33,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
     let productConfig = {};
 
     let productVariationModel = product.getVariationModel();
-    let variationAttribute = productVariationModel.getProductVariationAttribute(variationAttributeForAttributeSlicedMasterLevelRecordModel);
+    let variationAttribute = productVariationModel.getProductVariationAttribute(variationAttributeForAttributeSlicedRecordModel);
 
     if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && product.master) {
         let masterProduct = product.master ? product : product.getMasterProduct();

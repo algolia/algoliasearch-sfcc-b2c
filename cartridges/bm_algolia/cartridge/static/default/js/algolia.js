@@ -106,11 +106,11 @@
             $dialogContainer.dialog('open');
         });
 
-        // Disables the "Grouping attribute for the Attribute-sliced master-level record model"
-        // text input unless "Record model" is "Attribute-sliced master-level"
+        // Disables the "Grouping attribute for the Attribute-sliced record model"
+        // text input unless "Record model" is "Attribute-sliced"
         $('select#RecordModel').on('change', function() {
-            var isAttributeSlicedMasterLevelRecordModelSelected = $(this).val() === 'attribute-sliced-master-level';
-            $('input#AttributeSlicedMasterRecord_GroupingAttribute').prop('disabled', !isAttributeSlicedMasterLevelRecordModelSelected);
+            var isAttributeSlicedRecordModelSelected = $(this).val() === 'attribute-sliced';
+            $('input#AttributeSlicedRecordModel_GroupingAttribute').prop('disabled', !isAttributeSlicedRecordModelSelected);
         }).trigger('change');
 
         $resumeIndexingBtn.on('click', handleActionClick);
