@@ -212,6 +212,7 @@ describe('process', () => {
     });
     test('attribute-sliced indexing', () => {
         global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced';
+        global.customPreferences['Algolia_AttributeSlicedRecordModel_GroupingAttribute'] = 'color';
         mockAdditionalAttributes = [];
         mockLocalesForIndexing = ['en'];
 

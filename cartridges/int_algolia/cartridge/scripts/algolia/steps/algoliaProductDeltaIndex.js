@@ -35,11 +35,11 @@ const RECORD_MODEL_TYPE = {
     VARIANT_LEVEL: 'variant-level',
     ATTRIBUTE_SLICED: 'attribute-sliced',
 }
-const VARIATION_ATTRIBUTE_ID = 'color';
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
+var variationAttributeForAttributeSlicedRecordModel; // e.g. "color"
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -84,6 +84,12 @@ exports.beforeStep = function(parameters, stepExecution) {
     ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
     recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
+    variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
+
+    // throw an error if no "Grouping attribute for the Attribute-sliced record model" is defined when using the "Attribute-sliced" record model
+    if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL && empty(variationAttributeForAttributeSlicedRecordModel)) {
+        throw new Error('You need to define a grouping attribute for the Attribute-sliced record model in the Algolia BM module!');
+    }
 
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
@@ -390,11 +396,11 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
             if (product.master) {
                 let variationModel = product.getVariationModel();
-                let variationAttribute = variationModel.getProductVariationAttribute(VARIATION_ATTRIBUTE_ID);
+                let variationAttribute = variationModel.getProductVariationAttribute(variationAttributeForAttributeSlicedRecordModel);
 
                 // masters that DON'T have the specified variation attribute -- treat them as regular masters
                 if (!variationAttribute) {
-                    logger.info('Specified variation attribute "' + VARIATION_ATTRIBUTE_ID + '" not found for master product "' + product.ID + '", falling back to master-level record.');
+                    logger.info('Specified variation attribute "' + variationAttributeForAttributeSlicedRecordModel + '" not found for master product "' + product.ID + '", falling back to master-type record.');
 
                     let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
 
@@ -439,7 +445,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     variantAttributes: variantAttributes,
                     nonLocalizedAttributes: nonLocalizedAttributes,
                     attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
-                    variationAttributeID: VARIATION_ATTRIBUTE_ID,
+                    variationAttributeID: variationAttributeForAttributeSlicedRecordModel,
                 });
 
                 for (let l = 0; l < siteLocales.size(); ++l) {

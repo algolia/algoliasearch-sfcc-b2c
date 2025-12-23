@@ -105,3 +105,10 @@ tr {
 .customModule-card {
     font-family: Helvetica Neue, sans-serif !important;
 }
+input[readonly] {
+    background-color: #eee;
+    color: #666;
+    cursor: not-allowed;
+    border: 1px solid rgb(118, 118, 118);
+    border-radius: 2px;
+}

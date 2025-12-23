@@ -2,6 +2,7 @@
 
 /* globals jQuery */
 /* @deprecated */
+
 (function ($) {
     $(document).ready(function () {
         var $siteStatusRow = $('.site-status-row');
@@ -105,6 +106,14 @@
             $dialogContainer.dialog('open');
         });
 
+        // Disables the "Grouping attribute for the Attribute-sliced record model"
+        // text input unless "Record model" is "Attribute-sliced"
+        $('select#RecordModel').on('change', function() {
+            var isAttributeSlicedRecordModelSelected = $(this).val() === 'attribute-sliced';
+            $('input#AttributeSlicedRecordModel_GroupingAttribute').prop('readonly', !isAttributeSlicedRecordModelSelected);
+        }).trigger('change');
+
         $resumeIndexingBtn.on('click', handleActionClick);
+
     });
 }(jQuery));
