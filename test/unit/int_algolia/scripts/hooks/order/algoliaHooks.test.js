@@ -159,11 +159,11 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         expect(operations).toMatchSnapshot();
     });
 
-    test('handleStandardShipment should generate correct operations for attribute-sliced master record model - out of stock - Standard Shipment', function () {
+    test('handleStandardShipment should generate correct operations for attribute-sliced record model - out of stock - Standard Shipment', function () {
         const shipment = testData.mockShipmentStandard;
         const threshold = 10;
         const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
-        const recordModel = 'attribute-sliced-master-level';
+        const recordModel = 'attribute-sliced';
 
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
@@ -224,11 +224,11 @@ describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Ind
         expect(operations).toMatchSnapshot();
     });
 
-    test('handleInStorePickupShipment should generate correct operations for attribute-sliced-master-level record model - out of stock - BOPIS Shipment', function () {
+    test('handleInStorePickupShipment should generate correct operations for attribute-sliced record model - out of stock - BOPIS Shipment', function () {
         const shipment = testData.mockShipmentInStore;
         const threshold = 5;
         const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
-        const recordModel = 'attribute-sliced-master-level';
+        const recordModel = 'attribute-sliced';
 
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
@@ -290,11 +290,11 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         expect(operations).toMatchSnapshot();
     });
 
-    test('handleStandardShipment should generate delete operations for attribute-sliced-master-level record model - out of stock - Standard Shipment', function () {
+    test('handleStandardShipment should generate delete operations for attribute-sliced record model - out of stock - Standard Shipment', function () {
         const shipment = testData.mockShipmentStandard;
         const threshold = 10;
         const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
-        const recordModel = 'attribute-sliced-master-level';
+        const recordModel = 'attribute-sliced';
 
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
@@ -404,11 +404,11 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         expect(operations).toMatchSnapshot();
     });
 
-    test('handleInStorePickupShipment should generate no operations for attribute-sliced-master-level record model - in stock - BOPIS Shipment', function () {
+    test('handleInStorePickupShipment should generate no operations for attribute-sliced record model - in stock - BOPIS Shipment', function () {
         const shipment = testData.mockShipmentInStore;
         const threshold = 1;
         const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
-        const recordModel = 'attribute-sliced-master-level';
+        const recordModel = 'attribute-sliced';
 
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
@@ -458,11 +458,11 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         expect(operations).toMatchSnapshot();
     });
 
-    test('handleStandardShipment should generate no operations for attribute-sliced-master-level record model - in stock - Standard Shipment', function () {
+    test('handleStandardShipment should generate no operations for attribute-sliced record model - in stock - Standard Shipment', function () {
         const shipment = testData.mockShipmentStandard;
         const threshold = 1;
         const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
-        const recordModel = 'attribute-sliced-master-level';
+        const recordModel = 'attribute-sliced';
 
         const operations = algoliaHooks.handleStandardShipment(
             shipment,

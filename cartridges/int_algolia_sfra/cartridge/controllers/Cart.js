@@ -11,7 +11,7 @@ server.extend(base);
 const RECORD_MODEL_TYPE = {
     MASTER_LEVEL: 'master-level',
     VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED_MASTER_LEVEL: 'attribute-sliced-master-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
 }
 
 server.append('Show', function (req, res, next) {

@@ -16,7 +16,7 @@ let generateAlgoliaOperations = orderHelper.generateAlgoliaOperations;
 const RECORD_MODEL_TYPE = {
     MASTER_LEVEL: 'master-level',
     VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED_MASTER_LEVEL: 'attribute-sliced-master-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
 };
 const VARIATION_ATTRIBUTE_ID = 'color';
 
@@ -45,7 +45,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
         productConfig.variantAttributes = attributesConfig.variantAttributes;
         productConfig.attributeList = attributesConfig.masterAttributes;
         productConfig.product = masterProduct;
-    } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL && variationAttribute) {
+    } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED && variationAttribute) {
         let masterProduct = product.master ? product : product.getMasterProduct();
         productConfig.baseModel = new AlgoliaLocalizedProduct({
             product: masterProduct,
@@ -157,7 +157,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
 
                 let productOps = generateAlgoliaOperations(productConfig);
                 algoliaOperations = algoliaOperations.concat(productOps);
-            } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL) {
+            } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
                 let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                 productConfig.attributeList = ['variants'];
 
@@ -209,7 +209,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                     let productOps = generateAlgoliaOperations(productConfig);
                     algoliaOperations = algoliaOperations.concat(productOps);
-                } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL) {
+                } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
                     let attrArray = ['variants'];
                     if (additionalAttributes.indexOf('in_stock') > -1) {
                         attrArray.push('in_stock');
@@ -252,7 +252,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     } else {
                         algoliaOperations = algoliaOperations.concat(productOps);
                     }
-                } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL) {
+                } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
                     let isGroupInStock = productFilter.isCustomVariationGroupInStock(productConfig.variationModel, threshold);
                     if (!isGroupInStock) {
                         productOps.forEach(function(productOp) {

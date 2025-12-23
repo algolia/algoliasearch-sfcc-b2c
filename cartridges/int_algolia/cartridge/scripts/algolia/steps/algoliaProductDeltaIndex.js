@@ -33,7 +33,7 @@ var fullRecordUpdate = false;
 const RECORD_MODEL_TYPE = {
     MASTER_LEVEL: 'master-level',
     VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED_MASTER_LEVEL: 'attribute-sliced-master-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
 }
 const VARIATION_ATTRIBUTE_ID = 'color';
 
@@ -83,7 +83,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     // Algolia preferences
     ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
-    recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced-master-level'
+    recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
 
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
@@ -167,7 +167,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL) {
+    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
@@ -382,7 +382,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 jobReport.recordsToSend += algoliaOperations.length;
                 return algoliaOperations;
             }
-        } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL) {
+        } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
             if (product.isVariant()) {
                 // This variant will be processed when we handle its master product, skip it for now.
                 return [];
@@ -432,7 +432,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 }
 
                 // masters that have the specified variation attribute
-                let recordsPerLocale = jobHelper.generateAttributeSlicedMasterRecords({
+                let recordsPerLocale = jobHelper.generateAttributeSlicedRecords({
                     locales: siteLocales,
                     baseProduct: product,
                     baseProductAttributes: masterAttributes,
@@ -445,8 +445,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 for (let l = 0; l < siteLocales.size(); ++l) {
                     let locale = siteLocales.get(l);
                     let indexName = algoliaData.calculateIndexName('products', locale);
-                    let attributeSlicedMasterRecords = recordsPerLocale[locale];
-                    attributeSlicedMasterRecords.forEach(function (record) {
+                    let attributeSlicedRecords = recordsPerLocale[locale];
+                    attributeSlicedRecords.forEach(function (record) {
                         if (INDEX_OUT_OF_STOCK || (record.variants && (record.variants.length > 0))) {
                             processedVariantsToSend += record.variants.length;
                             algoliaOperations.push(
@@ -515,7 +515,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
         // VARIANT_LEVEL indexing logic, masters and their variants are already processed by this point.
         // This block also processes all products not handled above for the other models
-        // (MASTER_LEVEL and ATTRIBUTE_SLICED_MASTER_LEVEL) that are not masters or variants: simple products, option products, product sets, bundles
+        // (MASTER_LEVEL and ATTRIBUTE_SLICED) that are not masters or variants: simple products, option products, product sets, bundles
 
         let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
         if (productFilter.isInclude(product) && (inStock || INDEX_OUT_OF_STOCK)) {
@@ -546,7 +546,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     });
 
                 } else {
-                    // for MASTER_LEVEL and ATTRIBUTE_SLICED_MASTER_LEVEL, generate records for simple products where variant attributes are pushed to the first and only object of the `variants` array
+                    // for MASTER_LEVEL and ATTRIBUTE_SLICED, generate records for simple products where variant attributes are pushed to the first and only object of the `variants` array
                     localizedProduct = new AlgoliaLocalizedProduct({
                         product: product,
                         locale: locale,

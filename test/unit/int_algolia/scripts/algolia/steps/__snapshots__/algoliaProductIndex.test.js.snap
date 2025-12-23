@@ -2103,7 +2103,7 @@ exports[`process partialRecordUpdate 1`] = `
 ]
 `;
 
-exports[`process attribute-sliced-master-level indexing - product without variation attribute 1`] = `
+exports[`process attribute-sliced indexing - product without variation attribute 1`] = `
 [
   AlgoliaOperation {
     "action": "addObject",
@@ -2192,7 +2192,7 @@ exports[`process attribute-sliced-master-level indexing - product without variat
 ]
 `;
 
-exports[`process attribute-sliced-master-level indexing 1`] = `
+exports[`process attribute-sliced indexing 1`] = `
 [
   AlgoliaOperation {
     "action": "addObject",

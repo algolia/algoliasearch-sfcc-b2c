@@ -68,7 +68,7 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
 ]
 `;
 
-exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleStandardShipment should generate delete operations for attribute-sliced-master-level record model - out of stock - Standard Shipment 1`] = `
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: false) handleStandardShipment should generate delete operations for attribute-sliced record model - out of stock - Standard Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "deleteObject",
@@ -94,7 +94,7 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
 ]
 `;
 
-exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleStandardShipment should generate correct operations for attribute-sliced master record model - out of stock - Standard Shipment 1`] = `
+exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfStock: true) handleStandardShipment should generate correct operations for attribute-sliced record model - out of stock - Standard Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "partialUpdateObject",
@@ -464,7 +464,7 @@ exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Inde
 ]
 `;
 
-exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for attribute-sliced-master-level record model - out of stock - BOPIS Shipment 1`] = `
+exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, IndexOutOfStock: true) handleInStorePickupShipment should generate correct operations for attribute-sliced record model - out of stock - BOPIS Shipment 1`] = `
 [
   AlgoliaOperation {
     "action": "partialUpdateObject",

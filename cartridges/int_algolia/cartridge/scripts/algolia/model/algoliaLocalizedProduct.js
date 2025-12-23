@@ -17,7 +17,7 @@ var productFilter = require('*/cartridge/scripts/algolia/filters/productFilter')
 const RECORD_MODEL_TYPE = {
     MASTER_LEVEL: 'master-level',
     VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED_MASTER_LEVEL: 'attribute-sliced-master-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
 }
 
 var extendedProductAttributesConfig;
@@ -575,7 +575,7 @@ function algoliaLocalizedProduct(parameters) {
 
             // set `variantID` explicitly to null in the `variants` array object for simple products
             this.variantID = isSimpleProduct ? null : product.getID();
-        } else if (parameters.variationModel) { // ATTRIBUTE_SLICED_MASTER_LEVEL indexing, master case
+        } else if (parameters.variationModel) { // ATTRIBUTE_SLICED indexing, master case
             this.objectID = product.getID() + '-' + parameters.variationValueID;
         } else { // all other cases
             this.objectID = product.getID();

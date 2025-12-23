@@ -165,7 +165,7 @@ function getSourcesArray(config) {
                 transformResponse: function ({ hits }) {
                     return hits[0].map(hit => {
                         if (hit.variants) {
-                            // master-level / attribute-sliced master-level indexing. We need to copy some variant attributes to the root
+                            // master-level / attribute-sliced indexing. We need to copy some variant attributes to the root
                             const selectedVariant = hit.variants.find(variant => {
                                 return variant.variantID === hit.defaultVariantID;
                             }) || hit.variants[0];

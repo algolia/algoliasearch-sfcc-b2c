@@ -175,9 +175,9 @@
                                 <isif condition="${recordModel === 'master-level'}"> selected="selected"</isif>>
                                 <isprint value="${Resource.msg('algolia.preference.recordmodel.masterlevel', 'algolia', null)}"/>
                             </option>
-                            <option value="attribute-sliced-master-level"
-                                <isif condition="${recordModel === 'attribute-sliced-master-level'}"> selected="selected"</isif>>
-                                <isprint value="${Resource.msg('algolia.preference.recordmodel.attributeslicedmasterlevel', 'algolia', null)}"/>
+                            <option value="attribute-sliced"
+                                <isif condition="${recordModel === 'attribute-sliced'}"> selected="selected"</isif>>
+                                <isprint value="${Resource.msg('algolia.preference.recordmodel.attributesliced', 'algolia', null)}"/>
                             </option>
                         </select>
                     </td>
