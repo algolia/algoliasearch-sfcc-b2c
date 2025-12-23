@@ -652,7 +652,7 @@ function generateVariantRecords(parameters) {
 }
 
 /**
- * For a given master product and variationAttributeID, generate all attribute-sliced master records for each locale,
+ * For a given master product and variationAttributeID, generate all attribute-sliced records for each locale,
  * i.e. split master into custom variation groups by the supplied variationAttributeID
  * NOTE: This implementation doesn't use SFCC variation groups, but works in a similar manner without having to explicitly deifne SFCC variation groups for masters with multiple variation attributes.
  * Masters with multiple variation attributes are split (sliced) into multiple masters by the supplied variation attribute by the code.
@@ -682,7 +682,7 @@ function generateVariantRecords(parameters) {
  *   'fr_FR': [ ... ],
  * }
  */
-function generateProductVariationGroupRecords(parameters) {
+function generateAttributeSlicedRecords(parameters) {
     const AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
     const attributesComputedFromBaseProduct = parameters.attributesComputedFromBaseProduct || [];
@@ -835,7 +835,7 @@ module.exports = {
     getNextProductModel: getNextProductModel,
 
     generateVariantRecords: generateVariantRecords,
-    generateProductVariationGroupRecords: generateProductVariationGroupRecords,
+    generateAttributeSlicedRecords: generateAttributeSlicedRecords,
 
     // delta jobs
     isObjectsArrayEmpty: isObjectsArrayEmpty,

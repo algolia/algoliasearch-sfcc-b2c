@@ -7,7 +7,7 @@ var logger;
 
 // job step parameters
 var paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage, paramLocalesForIndexing;
-var paramRecordModel;
+var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, AlgoliaJobReport;
@@ -26,11 +26,14 @@ var lastIndexingTasks = {};
 
 var extendedProductAttributesConfig;
 
-// eslint-disable-next-line no-unused-vars
-const VARIANT_LEVEL = 'variant-level'; // constant is not used explicitly, but leaving it here for consistency
-const MASTER_LEVEL = 'master-level';
-const VARIATION_GROUP_LEVEL = 'variation-group-level';
+const RECORD_MODEL_TYPE = {
+    MASTER_LEVEL: 'master-level',
+    VARIANT_LEVEL: 'variant-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
+}
 const VARIATION_ATTRIBUTE_ID = 'color';
+
+// Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
 
@@ -69,8 +72,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+
+    // Algolia preferences
     ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
+    recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
 
     // Try to load `productAttributesConfig.js`, which can be used to override the configs in `algoliaProductConfig.js`.
     // By default this file does not exist. For an example configuration, see `productAttributesConfig.example.js`.
@@ -90,7 +96,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'partialRecordUpdate'; // 'partialRecordUpdate' (default), 'fullRecordUpdate' or 'fullCatalogReindex'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
-    paramRecordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' (default), 'master-level', 'variation-group-level'
     paramLocalesForIndexing = algoliaData.csvStringToArray(parameters.localesForIndexing);
 
     /* --- attributeListOverride parameter --- */
@@ -129,7 +134,7 @@ exports.beforeStep = function(parameters, stepExecution) {
             break;
     }
     logger.info('indexingMethod parameter: ' + paramIndexingMethod);
-    logger.info('Record model: ' + paramRecordModel);
+    logger.info('Record model: ' + recordModel);
 
     /* --- categorize attributes (master/variant, non-localized, shared) --- */
     attributesToSend.forEach(function(attribute) {
@@ -156,7 +161,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (paramRecordModel === MASTER_LEVEL || paramRecordModel === VARIATION_GROUP_LEVEL) {
+    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
@@ -259,7 +264,7 @@ exports.process = function(product, parameters, stepExecution) {
 
     /* --- MAIN LOGIC --- */
 
-    if (paramRecordModel === MASTER_LEVEL) {
+    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
         if (product.isVariant()) {
             // This variant will be processed when we handle its master product, skip it for now.
             return [];
@@ -299,7 +304,7 @@ exports.process = function(product, parameters, stepExecution) {
             jobReport.recordsToSend += algoliaOperations.length;
             return algoliaOperations;
         }
-    } else if (paramRecordModel === VARIATION_GROUP_LEVEL) {
+    } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
         if (product.isVariant()) {
             // This variant will be processed when we handle its master product, skip it for now.
             return [];
@@ -345,7 +350,7 @@ exports.process = function(product, parameters, stepExecution) {
             }
 
             // masters that have the specified variation attribute
-            let recordsPerLocale = jobHelper.generateProductVariationGroupRecords({
+            let recordsPerLocale = jobHelper.generateAttributeSlicedRecords({
                 locales: siteLocales,
                 baseProduct: product,
                 baseProductAttributes: masterAttributes,
@@ -421,7 +426,7 @@ exports.process = function(product, parameters, stepExecution) {
 
     // VARIANT_LEVEL indexing logic, masters and their variants are already processed by this point.
     // This block also processes all products not handled above for the other models
-    // (MASTER_LEVEL and VARIATION_GROUP_LEVEL) that are not masters or variants: simple products, option products, product sets, bundles
+    // (MASTER_LEVEL and ATTRIBUTE_SLICED) that are not masters or variants: simple products, option products, product sets, bundles
 
     // check for availability, taking into account the `Algolia_IndexOutOfStock` site preference
     if (productFilter.isInclude(product)) {
@@ -447,7 +452,7 @@ exports.process = function(product, parameters, stepExecution) {
                 indexName += '.tmp';
             }
 
-            if (paramRecordModel === VARIANT_LEVEL) {
+            if (recordModel === RECORD_MODEL_TYPE.VARIANT_LEVEL) {
 
                 // for variant-level indexing, generate a flat record where all attributes are at the root level
                 localizedProduct = new AlgoliaLocalizedProduct({
@@ -459,7 +464,7 @@ exports.process = function(product, parameters, stepExecution) {
                 });
 
             } else {
-                // for MASTER_LEVEL and VARIATION_GROUP_LEVEL, generate records for simple products where variant attributes are pushed to the first and only object of the `variants` array
+                // for MASTER_LEVEL and ATTRIBUTE_SLICED, generate records for simple products where variant attributes are pushed to the first and only object of the `variants` array
                 localizedProduct = new AlgoliaLocalizedProduct({
                     product: product,
                     locale: locale,
@@ -467,7 +472,7 @@ exports.process = function(product, parameters, stepExecution) {
                     variantAttributes: variantAttributes,
                     baseModel: baseModel,
                     fullRecordUpdate: fullRecordUpdate,
-                    recordModel: paramRecordModel,
+
                 });
             }
 

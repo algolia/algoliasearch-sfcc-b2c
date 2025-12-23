@@ -2103,7 +2103,7 @@ exports[`process partialRecordUpdate 1`] = `
 ]
 `;
 
-exports[`process variation-group-level indexing - product without variation attribute 1`] = `
+exports[`process attribute-sliced indexing - product without variation attribute 1`] = `
 [
   AlgoliaOperation {
     "action": "addObject",
@@ -2192,7 +2192,7 @@ exports[`process variation-group-level indexing - product without variation attr
 ]
 `;
 
-exports[`process variation-group-level indexing 1`] = `
+exports[`process attribute-sliced indexing 1`] = `
 [
   AlgoliaOperation {
     "action": "addObject",

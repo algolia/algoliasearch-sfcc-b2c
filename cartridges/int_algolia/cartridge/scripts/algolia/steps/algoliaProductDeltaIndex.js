@@ -8,7 +8,7 @@ var logger;
 
 // job step parameters
 var paramConsumer, paramDeltaExportJobName, paramAttributeListOverride, paramIndexingMethod, paramFailureThresholdPercentage, paramLocalesForIndexing;
-var paramRecordModel;
+var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
@@ -30,10 +30,14 @@ var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on
 const deleteIndexingOperation = 'deleteObject';
 var fullRecordUpdate = false;
 
-const VARIANT_LEVEL = 'variant-level';
-const MASTER_LEVEL = 'master-level';
-const VARIATION_GROUP_LEVEL = 'variation-group-level';
+const RECORD_MODEL_TYPE = {
+    MASTER_LEVEL: 'master-level',
+    VARIANT_LEVEL: 'variant-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
+}
 const VARIATION_ATTRIBUTE_ID = 'color';
+
+// Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
 
@@ -76,8 +80,10 @@ exports.beforeStep = function(parameters, stepExecution) {
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 
+    // Algolia preferences
     ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
+    recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
 
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
@@ -95,7 +101,6 @@ exports.beforeStep = function(parameters, stepExecution) {
     paramDeltaExportJobName = parameters.deltaExportJobName.trim();
     paramAttributeListOverride = algoliaData.csvStringToArray(parameters.attributeListOverride); // attributeListOverride - pass it along to sending method
     paramIndexingMethod = parameters.indexingMethod || 'fullRecordUpdate'; // 'fullRecordUpdate' (default) or 'partialRecordUpdate'
-    paramRecordModel = algoliaData.getPreference('RecordModel') || VARIANT_LEVEL; // 'variant-level' (default), 'master-level'
     paramFailureThresholdPercentage = parameters.failureThresholdPercentage || 0;
     paramLocalesForIndexing = algoliaData.csvStringToArray(parameters.localesForIndexing);
 
@@ -134,7 +139,7 @@ exports.beforeStep = function(parameters, stepExecution) {
             break;
     }
     logger.info('indexingMethod parameter: ' + paramIndexingMethod);
-    logger.info('Record model: ' + paramRecordModel);
+    logger.info('Record model: ' + recordModel);
 
 
     /* --- categorize attributes (master/variant, non-localized, shared) --- */
@@ -162,7 +167,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (paramRecordModel === MASTER_LEVEL || paramRecordModel === VARIATION_GROUP_LEVEL) {
+    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
@@ -337,7 +342,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
     /* --- MAIN LOGIC --- */
 
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
-        if (paramRecordModel === MASTER_LEVEL) {
+        if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
             if (product.isVariant()) {
                 // This variant will be processed when we handle its master product, skip it for now.
                 return [];
@@ -377,7 +382,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 jobReport.recordsToSend += algoliaOperations.length;
                 return algoliaOperations;
             }
-        } else if (paramRecordModel === VARIATION_GROUP_LEVEL) {
+        } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
             if (product.isVariant()) {
                 // This variant will be processed when we handle its master product, skip it for now.
                 return [];
@@ -427,7 +432,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 }
 
                 // masters that have the specified variation attribute
-                let recordsPerLocale = jobHelper.generateProductVariationGroupRecords({
+                let recordsPerLocale = jobHelper.generateAttributeSlicedRecords({
                     locales: siteLocales,
                     baseProduct: product,
                     baseProductAttributes: masterAttributes,
@@ -440,18 +445,18 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 for (let l = 0; l < siteLocales.size(); ++l) {
                     let locale = siteLocales.get(l);
                     let indexName = algoliaData.calculateIndexName('products', locale);
-                    let variationGroupRecords = recordsPerLocale[locale];
-                    variationGroupRecords.forEach(function (variationGroupRecord) {
-                        if (INDEX_OUT_OF_STOCK || (variationGroupRecord.variants && (variationGroupRecord.variants.length > 0))) {
-                            processedVariantsToSend += variationGroupRecord.variants.length;
+                    let attributeSlicedRecords = recordsPerLocale[locale];
+                    attributeSlicedRecords.forEach(function (record) {
+                        if (INDEX_OUT_OF_STOCK || (record.variants && (record.variants.length > 0))) {
+                            processedVariantsToSend += record.variants.length;
                             algoliaOperations.push(
-                                new jobHelper.AlgoliaOperation(baseIndexingOperation, variationGroupRecord, indexName)
+                                new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName)
                             );
                         } else {
-                            // No variants to index - delete the variation group from Algolia
-                            logger.info('No more variants in stock for variation group ' + variationGroupRecord.objectID + ' - will be removed from Algolia index');
+                            // No variants to index - delete the custom variation group record from Algolia
+                            logger.info('No more variants in stock for custom variation group ' + record.objectID + ' - will be removed from Algolia index');
                             algoliaOperations.push(
-                                new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: variationGroupRecord.objectID }, indexName)
+                                new jobHelper.AlgoliaOperation(deleteIndexingOperation, { objectID: record.objectID }, indexName)
                             );
                         }
                     });
@@ -510,7 +515,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
         // VARIANT_LEVEL indexing logic, masters and their variants are already processed by this point.
         // This block also processes all products not handled above for the other models
-        // (MASTER_LEVEL and VARIATION_GROUP_LEVEL) that are not masters or variants: simple products, option products, product sets, bundles
+        // (MASTER_LEVEL and ATTRIBUTE_SLICED) that are not masters or variants: simple products, option products, product sets, bundles
 
         let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
         if (productFilter.isInclude(product) && (inStock || INDEX_OUT_OF_STOCK)) {
@@ -529,7 +534,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
                 let localizedProduct;
 
-                if (paramRecordModel === VARIANT_LEVEL) {
+                if (recordModel === RECORD_MODEL_TYPE.VARIANT_LEVEL) {
 
                     // for variant-level indexing, generate a flat record where all attributes are at the root level
                     localizedProduct = new AlgoliaLocalizedProduct({
@@ -541,7 +546,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     });
 
                 } else {
-                    // for MASTER_LEVEL and VARIATION_GROUP_LEVEL, generate records for simple products where variant attributes are pushed to the first and only object of the `variants` array
+                    // for MASTER_LEVEL and ATTRIBUTE_SLICED, generate records for simple products where variant attributes are pushed to the first and only object of the `variants` array
                     localizedProduct = new AlgoliaLocalizedProduct({
                         product: product,
                         locale: locale,
@@ -549,7 +554,6 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         variantAttributes: variantAttributes,
                         baseModel: baseModel,
                         fullRecordUpdate: fullRecordUpdate,
-                        recordModel: paramRecordModel,
                     });
                 }
 
