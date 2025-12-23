@@ -53,12 +53,12 @@ describe('productFilter.isInStock', () => {
     test('Variation group with in-stock variant is considered in stock', () => {
         const inStockVariant = new VariantMock({ ats: 3 });
 
-        const master = new MasterProductMock({
+        const variationGroup = new MasterProductMock({
             variationGroup: true,
             variants: [inStockVariant]
         });
 
-        const inStock = productFilter.isInStock(master, 1);
+        const inStock = productFilter.isInStock(variationGroup, 1);
         expect(inStock).toBe(true);
     });
 });
@@ -206,7 +206,7 @@ describe('productFilter.isInclude', () => {
         const variationGroupProduct = new MasterProductMock({
             variationGroup: true
         });
-        
+
         const result = productFilter.isInclude(variationGroupProduct);
         expect(result).toBe(false);
     });

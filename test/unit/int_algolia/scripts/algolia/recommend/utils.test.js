@@ -25,7 +25,7 @@ describe('getAnchorProductIDs', () => {
     };
 
     const variationGroupProduct = {
-        ID: 'variationGroupProduct',
+        ID: 'variationGroupProduct1',
         isVariationGroup: jest.fn(() => true),
         isVariant: jest.fn(() => false),
         master: false,
