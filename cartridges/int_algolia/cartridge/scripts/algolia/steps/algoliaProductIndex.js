@@ -472,7 +472,7 @@ exports.process = function(product, parameters, stepExecution) {
                     variantAttributes: variantAttributes,
                     baseModel: baseModel,
                     fullRecordUpdate: fullRecordUpdate,
-                    recordModel: recordModel,
+
                 });
             }
 
