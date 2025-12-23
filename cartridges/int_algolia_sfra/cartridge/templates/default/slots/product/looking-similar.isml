@@ -1,4 +1,4 @@
 <div class="row">
-    <div class="col-md-12" id="lookingSimilar" data-object-ids="${require('*/cartridge/scripts/algolia/recommend/utils').getAnchorProductIds(slotcontent)}">
+    <div class="col-md-12" id="lookingSimilar" data-object-ids="${require('*/cartridge/scripts/algolia/recommend/utils').getAnchorProductIDs(slotcontent)}">
     </div>
 </div>

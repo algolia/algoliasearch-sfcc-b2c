@@ -235,6 +235,7 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
       "objectID": "25592581M-JJB52A0",
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": false,
           "price": {
             "EUR": 92.88,
@@ -246,6 +247,7 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
           "variantID": "701644031206M",
         },
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": false,
           "price": {
             "EUR": 92.88,
@@ -266,6 +268,7 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
       "objectID": "25592581M-JJB52A0",
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Combo rose vif",
           "in_stock": false,
           "price": {
             "EUR": 92.88,
@@ -277,6 +280,7 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
           "variantID": "701644031206M",
         },
         algoliaLocalizedProduct {
+          "color": "Combo rose vif",
           "in_stock": false,
           "price": {
             "EUR": 92.88,
@@ -297,6 +301,7 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
       "objectID": "25592581M-JJB52A0",
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": false,
           "price": {
             "EUR": 92.88,
@@ -308,6 +313,7 @@ exports[`Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSto
           "variantID": "701644031206M",
         },
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": false,
           "price": {
             "EUR": 92.88,
@@ -599,6 +605,7 @@ exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Inde
       "objectID": "25592581M-JJB52A0",
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
@@ -610,6 +617,7 @@ exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Inde
           "variantID": "701644031206M",
         },
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
@@ -630,6 +638,7 @@ exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Inde
       "objectID": "25592581M-JJB52A0",
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Combo rose vif",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
@@ -641,6 +650,7 @@ exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Inde
           "variantID": "701644031206M",
         },
         algoliaLocalizedProduct {
+          "color": "Combo rose vif",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
@@ -661,6 +671,7 @@ exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Inde
       "objectID": "25592581M-JJB52A0",
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
@@ -672,6 +683,7 @@ exports[`Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Inde
           "variantID": "701644031206M",
         },
         algoliaLocalizedProduct {
+          "color": "Hot Pink Combo",
           "in_stock": true,
           "price": {
             "EUR": 92.88,

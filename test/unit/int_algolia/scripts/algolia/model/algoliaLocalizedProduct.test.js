@@ -89,7 +89,7 @@ jest.mock('dw/catalog/StoreMgr', () => {
             inventoryList: null
         }
     ];
-    
+
     // Create a map-like object with the same stores
     const storeMap = {
         empty: false,
@@ -101,7 +101,7 @@ jest.mock('dw/catalog/StoreMgr', () => {
             };
         }
     };
-    
+
     return {
         searchStoresByCoordinates: jest.fn().mockImplementation(() => {
             return storeMap;

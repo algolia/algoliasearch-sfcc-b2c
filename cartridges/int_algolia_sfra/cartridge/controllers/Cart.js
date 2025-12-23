@@ -38,7 +38,7 @@ server.append('AddProduct', function (req, res, next) {
         try {
             if (isBaseRecordModel) {
                 var product = ProductMgr.getProduct(productId);
-                algoliaProductData.pid = product.masterProduct.ID;
+                algoliaProductData.pid = product.getMasterProduct().getID();
             } else {
                 algoliaProductData.pid = productId;
             }
