@@ -186,9 +186,9 @@
                 <iscomment> Algolia_AttributeSlicedRecordModel_GroupingAttribute </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.attributeslicedmasterrecord.groupingattribute', 'algolia', null)}" />
+                        <isprint value="${Resource.msg('algolia.label.preference.attributesliced.groupingattribute', 'algolia', null)}" />
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
-                        <div class="tooltip">${Resource.msg('algolia.label.preference.attributeslicedmasterrecord.groupingattribute.help', 'algolia', null)}</div>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.attributesliced.groupingattribute.help', 'algolia', null)}</div>
                     </td>
 
                     <td class="table_detail w e s">
