@@ -611,6 +611,7 @@ function generateVariantRecords(parameters) {
     // Fetch shared attributes such as 'colorVariations' only once (for each locale), to set them later in each variant
     const sharedAttributesPerLocale = {};
     const algoliaRecordsPerLocale = {};
+
     for (let l = 0; l < parameters.locales.size(); ++l) {
         let locale = parameters.locales.get(l);
         sharedAttributesPerLocale[locale] = new AlgoliaLocalizedProduct({
@@ -837,5 +838,5 @@ module.exports = {
     updateCPObjectFromXML: updateCPObjectFromXML,
 
     getDefaultAttributeConfig: getDefaultAttributeConfig,
-    getAttributes: getAttributes
+    getAttributes: getAttributes,
 };

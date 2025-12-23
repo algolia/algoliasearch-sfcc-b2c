@@ -165,6 +165,7 @@ function enableInstantSearch(config) {
                 ]
             }),
 
+            // "new arrival" refinement panel
             toggleRefinementWithPanel({
                 container: '#algolia-newarrival-placeholder',
                 attribute: 'newArrival',
@@ -181,6 +182,7 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.newArrivals
             }),
 
+            // "brand" refinement panel
             refinementListWithPanel({
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
@@ -197,6 +199,7 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.brandPanelTitle
             }),
 
+            // "price" refinement panel
             rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
                 attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'variation-group-level' ?
@@ -215,6 +218,7 @@ function enableInstantSearch(config) {
                 }
             }),
 
+            // "size" refinement panel
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
                 attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'variation-group-level' ?
@@ -233,9 +237,10 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.sizePanelTitle
             }),
 
+            // "color" refinement panel
             refinementListWithPanel({
                 container: '#algolia-color-list-placeholder',
-                attribute: algoliaData.recordModel === 'master-level' ? 'variants.color' : 'color',
+                attribute: algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'variation-group-level' ? 'variants.color' : 'color',
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -249,6 +254,7 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.colorPanelTitle
             }),
 
+            // "storeAvailability" refinement panel
             refinementListWithPanel({
                 container: '#algolia-store-list-placeholder',
                 attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'variation-group-level' ?
@@ -419,11 +425,8 @@ function enableInstantSearch(config) {
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
                             let colorFacets = [];
-                            if (algoliaData.recordModel === 'master-level') {
+                            if (algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'variation-group-level') {
                                 colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
-                            } else if (algoliaData.recordModel === 'variation-group-level') {
-                                // Color is at the root level for variation-group-level
-                                colorFacets = results._state.disjunctiveFacetsRefinements['color'] || [];
                             }
 
                             if (colorFacets.length > 0 && sizeFacets.length > 0) {

@@ -8,11 +8,14 @@ class Product {
         this.ID = ID || '25592581M';
         this.assignedToSiteCatalog = true;
         this.brand = null;
+        this.bundle = false;
         this.images = images || PRODUCT_IMAGES;
         this.online = online;
         this.searchable = searchable;
         this.master = !variationGroup;
+        this.optionProduct = false;
         this.pageKeywords = null;
+        this.productSet = false;
         this.variant = false;
         this.variationGroup = variationGroup;
         this.defaultVariant = null;
@@ -127,7 +130,15 @@ class Product {
     isVariationGroup() {
         return this.variationGroup;
     }
-
+    isOptionProduct() {
+        return this.optionProduct;
+    }
+    isBundle() {
+        return this.bundle;
+    }
+    isProductSet() {
+        return this.productSet;
+    }
     get availabilityModel() {
         return this.getAvailabilityModel();
     }

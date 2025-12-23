@@ -278,6 +278,7 @@ exports.process = function(product, parameters, stepExecution) {
                 if (paramIndexingMethod === 'fullCatalogReindex') {
                     indexName += '.tmp';
                 }
+
                 let localizedMaster = new AlgoliaLocalizedProduct({
                     product: product,
                     locale: locale,
@@ -353,6 +354,7 @@ exports.process = function(product, parameters, stepExecution) {
                 attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
                 variationAttributeId: VARIATION_ATTRIBUTE_ID,
             });
+
             for (let l = 0; l < siteLocales.size(); ++l) {
                 let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
@@ -373,6 +375,8 @@ exports.process = function(product, parameters, stepExecution) {
             jobReport.recordsToSend += algoliaOperations.length;
             return algoliaOperations;
         }
+
+    // VARIANT_LEVEL model, handling products that have common attributes
     } else if (attributesComputedFromBaseProduct.length > 0) {
         // When there are attributes shared in all variants (such as 'colorVariations')
         // we work with the master products. This permits to fetch those attributes only once.
@@ -384,7 +388,7 @@ exports.process = function(product, parameters, stepExecution) {
             if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
                 return [];
             }
-            var recordsPerLocale = jobHelper.generateVariantRecords({
+            let recordsPerLocale = jobHelper.generateVariantRecords({
                 masterProduct: product,
                 locales: siteLocales,
                 attributeList: attributesToSend,
@@ -392,13 +396,14 @@ exports.process = function(product, parameters, stepExecution) {
                 attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
                 fullRecordUpdate: fullRecordUpdate,
             });
+
             for (let l = 0; l < siteLocales.size(); ++l) {
                 let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
                 if (paramIndexingMethod === 'fullCatalogReindex') {
                     indexName += '.tmp';
                 }
-                var records = recordsPerLocale[locale];
+                let records = recordsPerLocale[locale];
                 records.forEach(function (record) {
                     if (INDEX_OUT_OF_STOCK || record.in_stock) {
                         processedVariantsToSend++;
@@ -414,8 +419,9 @@ exports.process = function(product, parameters, stepExecution) {
         }
     }
 
-    // VARIANT_LEVEL indexing logic
-    // Also process all products not handled above for the other models: simple products, option products, product sets, ...
+    // VARIANT_LEVEL indexing logic, masters and their variants are already processed by this point.
+    // This block also processes all products not handled above for the other models
+    // (MASTER_LEVEL and VARIATION_GROUP_LEVEL) that are not masters or variants: simple products, option products, product sets, bundles
 
     // check for availability, taking into account the `Algolia_IndexOutOfStock` site preference
     if (productFilter.isInclude(product)) {
@@ -425,14 +431,46 @@ exports.process = function(product, parameters, stepExecution) {
         }
 
         // Pre-fetch a partial model containing all non-localized attributes, to avoid re-fetching them for each locale
-        var baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedAttributes, fullRecordUpdate: fullRecordUpdate });
+        let baseModel = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: nonLocalizedAttributes,
+            fullRecordUpdate: fullRecordUpdate,
+        });
+
         for (let l = 0; l < siteLocales.size(); ++l) {
-            var locale = siteLocales.get(l);
-            var indexName = algoliaData.calculateIndexName('products', locale);
+            let locale = siteLocales.get(l);
+            let indexName = algoliaData.calculateIndexName('products', locale);
+            let localizedProduct;
 
-            if (paramIndexingMethod === 'fullCatalogReindex') indexName += '.tmp';
+            if (paramIndexingMethod === 'fullCatalogReindex') {
+                indexName += '.tmp';
+            }
 
-            let localizedProduct = new AlgoliaLocalizedProduct({ product: product, locale: locale, attributeList: attributesToSend, baseModel: baseModel, fullRecordUpdate: fullRecordUpdate });
+            if (paramRecordModel === VARIANT_LEVEL) {
+
+                // for variant-level indexing, generate a flat record where all attributes are at the root level
+                localizedProduct = new AlgoliaLocalizedProduct({
+                    product: product,
+                    locale: locale,
+                    attributeList: attributesToSend,
+                    baseModel: baseModel,
+                    fullRecordUpdate: fullRecordUpdate,
+                });
+
+            } else {
+                // for MASTER_LEVEL and VARIATION_GROUP_LEVEL, generate records for simple products where variant attributes are pushed to the first and only object of the `variants` array
+                localizedProduct = new AlgoliaLocalizedProduct({
+                    product: product,
+                    locale: locale,
+                    attributeList: masterAttributes,
+                    variantAttributes: variantAttributes,
+                    baseModel: baseModel,
+                    fullRecordUpdate: fullRecordUpdate,
+                    recordModel: paramRecordModel,
+                });
+            }
+
             algoliaOperations.push(new jobHelper.AlgoliaOperation(indexingOperation, localizedProduct, indexName));
         }
 

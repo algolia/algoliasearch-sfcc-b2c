@@ -465,42 +465,56 @@ var aggregatedValueHandlers = {
         currentSession.setCurrency(currentCurrency);
         return promotionalPrices;
     },
-    variants: function(product, parameters) {
-        if (!product.isMaster() && !product.isVariationGroup()) {
-            return null;
-        }
-
+    variants: function(product, parameters) { // only called when record model is either MASTER_LEVEL or VARIATION_GROUP_LEVEL
         const variants = [];
-        let variantsIt;
-        if (parameters.variationModel) {
-            variantsIt = parameters.variationModel.getSelectedVariants().iterator();
-        } else {
-            variantsIt = product.variants.iterator();
-        }
-        while (variantsIt.hasNext()) {
-            var variant = variantsIt.next();
 
-            if (!productFilter.isInclude(variant)) {
-                continue;
+        if (product.isMaster() || product.isVariationGroup()) {
+            let variantsIt;
+
+            if (parameters.variationModel) {
+                variantsIt = parameters.variationModel.getSelectedVariants().iterator();
+            } else {
+                variantsIt = product.variants.iterator();
             }
 
-            let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
-            if (!inStock && !INDEX_OUT_OF_STOCK) {
-                continue;
+            while (variantsIt.hasNext()) {
+                var variant = variantsIt.next();
+
+                if (!productFilter.isInclude(variant)) {
+                    continue;
+                }
+
+                let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
+                if (!inStock && !INDEX_OUT_OF_STOCK) {
+                    continue;
+                }
+
+                // creating baseModel so that inStock is not calculated again in algoliaLocalizedProduct
+                let baseModel = { in_stock: inStock };
+
+                let localizedVariant = new algoliaLocalizedProduct({
+                    product: variant,
+                    locale: request.getLocale(),
+                    attributeList: parameters.variantAttributes,
+                    isVariant: true,
+                    baseModel: baseModel,
+                });
+                variants.push(localizedVariant);
             }
+            return variants;
 
-            var baseModel = { in_stock: inStock };
-
+        } else { // simple product
+            // create a model to serve as the `variants` array in the record
             var localizedVariant = new algoliaLocalizedProduct({
-                product: variant,
+                product: product,
                 locale: request.getLocale(),
                 attributeList: parameters.variantAttributes,
-                isVariant: true,
-                baseModel: baseModel,
+                isVariant: true, // otherwise the variant object will have an 'objectID'
             });
             variants.push(localizedVariant);
+
+            return variants;
         }
-        return variants;
     },
     _tags: function(product) {
         return ['id:' + product.ID];
@@ -532,15 +546,17 @@ var aggregatedValueHandlers = {
  * @param {dw.catalog.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
  * @param {Array} parameters.attributeList list of attributes to be fetched
- * @param {Array} parameters.variantAttributes list of variant attributes (for product-level model)
- * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
- * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
- * @param {boolean?} parameters.isVariant - (optional) Indicate if the model is meant to live in a parent record
+ * @param {Array?} [parameters.variantAttributes] list of variant attributes (for product-level model)
+ * @param {Object?} [parameters.baseModel] - A base model object that contains some pre-fetched properties
+ * @param {boolean?} [parameters.fullRecordUpdate] - Indicates if the model is meant to fully replace the existing record or just update it partially
+ * @param {boolean?} [parameters.isVariant] -  Indicates if the model is meant to live in a parent record
+ * @param {Object?} [parameters.variationModel] - variationModel of a master
+ * @param {string?} [parameters.variationValueID] - variationValueID to append to the objectID
  * @constructor
  */
 function algoliaLocalizedProduct(parameters) {
     const product = parameters.product;
-    const attributeList = parameters.attributeList;
+    const attributeList = parameters.attributeList || [];
     const baseModel = parameters.baseModel;
 
     request.setLocale(parameters.locale || 'default');
@@ -549,19 +565,26 @@ function algoliaLocalizedProduct(parameters) {
         this.id = null;
     } else {
         if (parameters.isVariant) {
-            this.variantID = product.ID;
-        } else if (parameters.variationModel) {
+            let isSimpleProduct = !product.isMaster() && !product.isVariant() && !product.isVariationGroup();
+
+            // set `variantID` explicitly to null in the `variants` array object for simple products
+            this.variantID = isSimpleProduct ? null : product.ID;
+        } else if (parameters.variationModel) { // VARIATION_GROUP_LEVEL indexing, master case
             this.objectID = product.ID + '-' + parameters.variationValueID;
-        } else {
+        } else { // all other cases
             this.objectID = product.ID;
         }
 
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
 
+            // if the supplied baseModel contains the attribute, use the supplied value to avoid hitting the database...
             var baseAttributeValue = ObjectHelper.getAttributeValue(baseModel, attributeName);
             if (baseAttributeValue) {
                 ObjectHelper.setAttributeValue(this, attributeName, baseAttributeValue);
+
+            // ...otherwise get the value directly from the product
+            // -- try productAttributesConfig.js (optional file) first...
             } else if (extendedProductAttributesConfig[attributeName]) {
                 var attributeConfig = extendedProductAttributesConfig[attributeName];
                 if (typeof attributeConfig.attribute === 'function') {
@@ -569,8 +592,12 @@ function algoliaLocalizedProduct(parameters) {
                 } else if (attributeConfig.attribute) {
                     this[attributeName] = ObjectHelper.getAttributeValue(product, attributeConfig.attribute);
                 }
+
+            // ...try aggregatedValueHandlers next...
             } else if (aggregatedValueHandlers[attributeName]) {
                 this[attributeName] = aggregatedValueHandlers[attributeName](product, parameters);
+
+            // if all else fails, fall back to algoliaProductConfig v2 and get the value from the product based on that
             } else {
                 var config = algoliaProductConfig.attributeConfig_v2[attributeName];
 
@@ -585,6 +612,8 @@ function algoliaLocalizedProduct(parameters) {
                 );
             }
         }
+
+        // apply any customizations in productRecordCustomizer.js (optional file)
         productModelCustomizer.customizeLocalizedProductModel(this, attributeList);
         if (extendedProductRecordCustomizer) {
             extendedProductRecordCustomizer(this);
