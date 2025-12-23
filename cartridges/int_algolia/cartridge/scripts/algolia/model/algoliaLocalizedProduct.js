@@ -231,7 +231,7 @@ function getCategoryHierarchyIds(category) {
 }
 
 /**
- * Handler complex and calculated Product attributes
+ * Handler for complex and calculated Product attributes
  */
 var aggregatedValueHandlers = {
     masterID: function(product) {

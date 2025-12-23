@@ -695,7 +695,6 @@ exports[`process variation-group-level indexing 1`] = `
         "womens-clothing",
         "womens-clothing-bottoms",
       ],
-      "color": "Combo rose vif",
       "colorVariations": [
         {
           "color": "Combo rose vif",
@@ -803,6 +802,7 @@ exports[`process variation-group-level indexing 1`] = `
       "variant": false,
       "variants": [
         algoliaLocalizedProduct {
+          "color": "Combo rose vif",
           "in_stock": true,
           "price": {
             "EUR": 92.88,
