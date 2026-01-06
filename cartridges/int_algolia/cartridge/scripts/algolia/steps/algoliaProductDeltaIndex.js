@@ -454,7 +454,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     let attributeSlicedRecords = recordsPerLocale[locale];
                     attributeSlicedRecords.forEach(function (record) {
                         if (INDEX_OUT_OF_STOCK || (record.variants && (record.variants.length > 0))) {
-                            processedVariantsToSend += record.variants.length;
+                            processedVariantsToSend += record.variants ? record.variants.length : 0;
                             algoliaOperations.push(
                                 new jobHelper.AlgoliaOperation(baseIndexingOperation, record, indexName)
                             );
