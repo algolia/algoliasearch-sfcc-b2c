@@ -165,7 +165,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
         let inStoreStock = isInStoreStock(product, storeId, threshold);
         if (!inStoreStock && additionalAttributes.indexOf('storeAvailability') > -1) {
 
-            switch(recordModel) {
+            switch (recordModel) {
 
                 case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
                 case RECORD_MODEL_TYPE.MASTER_LEVEL: {
@@ -176,7 +176,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
                     algoliaOperations = algoliaOperations.concat(productOps);
                     break;
                 }
-                case RECORD_MODEL_TYPE. VARIANT_LEVEL: {
+                case RECORD_MODEL_TYPE.VARIANT_LEVEL: {
                     let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                     productConfig.attributeList = ['storeAvailability'];
 
@@ -213,7 +213,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
         if (!isInStock) {
 
             if (indexOutOfStock) {
-                switch(recordModel) {
+                switch (recordModel) {
 
                     case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
                     case RECORD_MODEL_TYPE.MASTER_LEVEL: {
@@ -246,7 +246,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                 let productOps = generateAlgoliaOperations(productConfig);
 
-                switch(recordModel) {
+                switch (recordModel) {
 
                     case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED: {
                         if (productConfig.product.isMaster()) {
