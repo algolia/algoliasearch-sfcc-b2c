@@ -38,6 +38,9 @@ class ProductVariationModel {
         };
         return productVariationAttributes[id][request.getLocale()];
     }
+    getMaster() {
+        return this.master || null;
+    }
     getSelectedValue(attribute) {
         return this.mockedProductVariationAttributeValuesById[this.variationAttributes[attribute.ID]];
     }
