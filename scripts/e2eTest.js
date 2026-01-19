@@ -2,7 +2,7 @@
  * Orchestrates all steps in the end-to-end flow:
  * 1. Checks required environment variables
  * 2. Deploys code (already zipped and prepared by "npm run prepare:code")
- * 3. For each record model (master-level, variation-level):
+ * 3. For each record model (master-level, variant-level):
  *    a) Import site preferences
  *    b) Run the SFCC job
  *    c) Run Variation Index Tests (Jest)
@@ -77,11 +77,11 @@ async function main() {
     await deployCode();
 
     // We test two different record models:
-    const recordModels = ['master-level', 'variation-level'];
+    const recordModels = ['master-level', 'variant-level'];
 
     const indexPrefixes = {
         'master-level': 'test_ci_master',
-        'variation-level': 'test_ci_variation'
+        'variant-level': 'test_ci_variant'
     };
 
     for (const model of recordModels) {

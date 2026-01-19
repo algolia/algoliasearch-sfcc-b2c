@@ -7,7 +7,12 @@ var ProductMgr = require('dw/catalog/ProductMgr');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 server.extend(base);
-const MASTER_LEVEL = 'master-level';
+
+const RECORD_MODEL_TYPE = {
+    MASTER_LEVEL: 'master-level',
+    VARIANT_LEVEL: 'variant-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
+}
 
 server.append('Show', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableRecommend')) {
@@ -30,7 +35,7 @@ server.append('Show', function (req, res, next) {
 server.append('AddProduct', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableInsights')) {
 
-        var isBaseRecordModel = algoliaData.getPreference('RecordModel') === MASTER_LEVEL;
+        var isBaseRecordModel = algoliaData.getPreference('RecordModel') === RECORD_MODEL_TYPE.MASTER_LEVEL;
         var productId = req.form.pid;
         var viewData = res.getViewData();
         var algoliaProductData = {};
@@ -38,7 +43,7 @@ server.append('AddProduct', function (req, res, next) {
         try {
             if (isBaseRecordModel) {
                 var product = ProductMgr.getProduct(productId);
-                algoliaProductData.pid = product.masterProduct.ID;
+                algoliaProductData.pid = product.getMasterProduct().getID();
             } else {
                 algoliaProductData.pid = productId;
             }

@@ -29,11 +29,11 @@ describe('productFilter.isInStock', () => {
     test('Master product with in-stock variant is considered in stock', () => {
         const inStockVariant = new VariantMock({ ats: 5 });
         const outOfStockVariant = new VariantMock({ ats: 0 });
-        
+
         const masterProduct = new MasterProductMock({
             variants: [outOfStockVariant, inStockVariant]
         });
-        
+
         const inStock = productFilter.isInStock(masterProduct, 1);
         expect(inStock).toBe(true);
     });
@@ -41,23 +41,23 @@ describe('productFilter.isInStock', () => {
     test('Master product with all out-of-stock variants is considered out of stock', () => {
         const outOfStockVariant1 = new VariantMock({ ats: 0 });
         const outOfStockVariant2 = new VariantMock({ ats: 0 });
-        
+
         const masterProduct = new MasterProductMock({
             variants: [outOfStockVariant1, outOfStockVariant2]
         });
-        
+
         const inStock = productFilter.isInStock(masterProduct, 1);
         expect(inStock).toBe(false);
     });
 
-    test('Variation group with in-stock variant is considered in stock', () => {
+    test('Attribute-sliced with in-stock variant is considered in stock', () => {
         const inStockVariant = new VariantMock({ ats: 3 });
-        
+
         const variationGroup = new MasterProductMock({
             variationGroup: true,
             variants: [inStockVariant]
         });
-        
+
         const inStock = productFilter.isInStock(variationGroup, 1);
         expect(inStock).toBe(true);
     });
@@ -101,7 +101,7 @@ describe('productFilter.isOnline', () => {
         const onlineProduct = new MasterProductMock({
             online: true
         });
-        
+
         const result = productFilter.isOnline(onlineProduct);
         expect(result).toBe(true);
     });
@@ -110,7 +110,7 @@ describe('productFilter.isOnline', () => {
         const offlineProduct = new MasterProductMock({
             online: false
         });
-        
+
         const result = productFilter.isOnline(offlineProduct);
         expect(result).toBe(false);
     });
@@ -127,7 +127,7 @@ describe('productFilter.isSearchable', () => {
         const searchableProduct = new MasterProductMock({
             searchable: true
         });
-        
+
         const result = productFilter.isSearchable(searchableProduct);
         expect(result).toBe(true);
     });
@@ -136,7 +136,7 @@ describe('productFilter.isSearchable', () => {
         const nonSearchableProduct = new MasterProductMock({
             searchable: false
         });
-        
+
         const result = productFilter.isSearchable(nonSearchableProduct);
         expect(result).toBe(false);
     });
@@ -151,7 +151,7 @@ describe('productFilter.hasOnlineCategory', () => {
 
     test('Product has online categories', () => {
         const productWithCategories = new MasterProductMock();
-        
+
         const result = productFilter.hasOnlineCategory(productWithCategories);
         expect(result).toBe(true);
     });
@@ -159,7 +159,7 @@ describe('productFilter.hasOnlineCategory', () => {
     test('Product has no categories', () => {
         const productWithoutCategories = new MasterProductMock();
         productWithoutCategories.getOnlineCategories = () => [];
-        
+
         const result = productFilter.hasOnlineCategory(productWithoutCategories);
         expect(result).toBe(false);
     });
@@ -167,7 +167,7 @@ describe('productFilter.hasOnlineCategory', () => {
     test('Product returns null for categories', () => {
         const productWithNullCategories = new MasterProductMock();
         productWithNullCategories.getOnlineCategories = () => null;
-        
+
         const result = productFilter.hasOnlineCategory(productWithNullCategories);
         expect(result).toBe(false);
     });
@@ -175,7 +175,7 @@ describe('productFilter.hasOnlineCategory', () => {
     test('Product returns undefined for categories', () => {
         const productWithUndefinedCategories = new MasterProductMock();
         productWithUndefinedCategories.getOnlineCategories = () => undefined;
-        
+
         const result = productFilter.hasOnlineCategory(productWithUndefinedCategories);
         expect(result).toBe(false);
     });
@@ -190,14 +190,14 @@ describe('productFilter.isInclude', () => {
 
     test('Valid product passes all filters', () => {
         const validProduct = new VariantMock();
-        
+
         const result = productFilter.isInclude(validProduct);
         expect(result).toBe(true);
     });
 
     test('Master product is excluded', () => {
         const masterProduct = new MasterProductMock();
-        
+
         const result = productFilter.isInclude(masterProduct);
         expect(result).toBe(false);
     });
@@ -206,7 +206,7 @@ describe('productFilter.isInclude', () => {
         const variationGroupProduct = new MasterProductMock({
             variationGroup: true
         });
-        
+
         const result = productFilter.isInclude(variationGroupProduct);
         expect(result).toBe(false);
     });
@@ -215,7 +215,7 @@ describe('productFilter.isInclude', () => {
         const offlineProduct = new VariantMock({
             online: false
         });
-        
+
         const result = productFilter.isInclude(offlineProduct);
         expect(result).toBe(false);
     });
@@ -224,7 +224,7 @@ describe('productFilter.isInclude', () => {
         const nonSearchableProduct = new VariantMock({
             searchable: false
         });
-        
+
         const result = productFilter.isInclude(nonSearchableProduct);
         expect(result).toBe(false);
     });
@@ -232,11 +232,11 @@ describe('productFilter.isInclude', () => {
     test('Product without online categories is excluded', () => {
         const masterWithoutCategories = new MasterProductMock();
         masterWithoutCategories.getOnlineCategories = () => [];
-        
+
         const productWithoutCategories = new VariantMock({
             masterProduct: masterWithoutCategories
         });
-        
+
         const result = productFilter.isInclude(productWithoutCategories);
         expect(result).toBe(false);
     });
@@ -300,11 +300,11 @@ describe('productFilter with custom configuration', () => {
         }), { virtual: true });
 
         const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
-        
+
         const offlineProduct = new VariantMock({
             online: false // Product is offline
         });
-        
+
         // Should include offline product when includeOfflineProducts is true
         const result = productFilter.isInclude(offlineProduct);
         expect(result).toBe(true);
@@ -319,11 +319,11 @@ describe('productFilter with custom configuration', () => {
         }), { virtual: true });
 
         const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
-        
+
         const nonSearchableProduct = new VariantMock({
             searchable: false // Product is not searchable
         });
-        
+
         // Should include non-searchable product when includeNotSearchableProducts is true
         const result = productFilter.isInclude(nonSearchableProduct);
         expect(result).toBe(true);
@@ -338,14 +338,14 @@ describe('productFilter with custom configuration', () => {
         }), { virtual: true });
 
         const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
-        
+
         const masterWithoutCategories = new MasterProductMock();
         masterWithoutCategories.getOnlineCategories = () => [];
-        
+
         const productWithoutCategories = new VariantMock({
             masterProduct: masterWithoutCategories
         });
-        
+
         // Should include product without categories when includeProductsWithoutOnlineCategories is true
         const result = productFilter.isInclude(productWithoutCategories);
         expect(result).toBe(true);
@@ -360,16 +360,16 @@ describe('productFilter with custom configuration', () => {
         }), { virtual: true });
 
         const productFilter = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/filters/productFilter');
-        
+
         const masterWithoutCategories = new MasterProductMock();
         masterWithoutCategories.getOnlineCategories = () => [];
-        
+
         const problematicProduct = new VariantMock({
             online: false,
             searchable: false,
             masterProduct: masterWithoutCategories
         });
-        
+
         // Should include product that fails all checks when all checks are disabled
         const result = productFilter.isInclude(problematicProduct);
         expect(result).toBe(true);

@@ -15,7 +15,7 @@ let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 function generateAlgoliaOperations(productConfig) {
     let algoliaOperations = [];
     let siteLocales = Site.getCurrent().getAllowedLocales();
-    
+
     for (let i = 0; i < siteLocales.size(); i++) {
         let locale = siteLocales[i];
         let indexName = algoliaData.calculateIndexName('products', locale);

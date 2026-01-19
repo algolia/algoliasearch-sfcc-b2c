@@ -1,4 +1,4 @@
-describe('getAnchorProductIds', () => {
+describe('getAnchorProductIDs', () => {
     const productMgrMock = require('dw/catalog/ProductMgr');
     const algoliaDataMock = jest.mock('*/cartridge/scripts/algolia/lib/algoliaData');
 
@@ -25,7 +25,7 @@ describe('getAnchorProductIds', () => {
     };
 
     const variationGroupProduct = {
-        ID: 'variantGroupProduct1',
+        ID: 'variationGroupProduct1',
         isVariationGroup: jest.fn(() => true),
         isVariant: jest.fn(() => false),
         master: false,
@@ -55,7 +55,7 @@ describe('getAnchorProductIds', () => {
         const slotcontent = {
             content: []
         };
-        expect(utils.getAnchorProductIds(slotcontent)).toBe('');
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe('');
     });
 
     it('should return anchor product IDs from session if available', () => {
@@ -64,7 +64,7 @@ describe('getAnchorProductIds', () => {
             content: []
         };
         productMgrMock.getProduct.mockReturnValue(variantProduct);
-        expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1']));
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe(JSON.stringify(['product1']));
     });
 
     it('should return product IDs from slot content if no anchor products in session', () => {
@@ -77,7 +77,7 @@ describe('getAnchorProductIds', () => {
             }]
         };
         productMgrMock.getProduct.mockReturnValue(variantProduct);
-        expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1', 'product1']));
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe(JSON.stringify(['product1', 'product1']));
     });
 
     it('should return a variant when we use variant-model and anchor product is a variant product', () => {
@@ -86,7 +86,7 @@ describe('getAnchorProductIds', () => {
             content: []
         };
         productMgrMock.getProduct.mockReturnValue(variantProduct);
-        expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1']));
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe(JSON.stringify(['product1']));
     });
 
     it('should return a variant when we use variant-model and anchor product is a master product', () => {
@@ -95,16 +95,16 @@ describe('getAnchorProductIds', () => {
             content: []
         };
         productMgrMock.getProduct.mockReturnValue(masterProduct);
-        expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1']));
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe(JSON.stringify(['product1']));
     });
 
-    it('should return a variant when we use variant-model and anchor product is a VG product', () => {
-        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['variantGroupProduct1']);
+    it('should return a variant when we use variant-model and anchor product is a variation group product', () => {
+        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['variationGroupProduct']);
         const slotcontent = {
             content: []
         };
         productMgrMock.getProduct.mockReturnValue(variationGroupProduct);
-        expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['product1']));
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe(JSON.stringify(['product1']));
     });
 
     it('should return a master when we use master-model and anchor product is a master product', () => {
@@ -114,17 +114,17 @@ describe('getAnchorProductIds', () => {
         };
         global.customPreferences.Algolia_RecordModel = 'master-level';
         productMgrMock.getProduct.mockReturnValue(masterProduct);
-        expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['masterProduct1']));
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe(JSON.stringify(['masterProduct1']));
     });
 
-    it('should return a master when we use master-model and anchor product is a VG product', () => {
-        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['variantGroupProduct1']);
+    it('should return a master when we use master-model and anchor product is a variation group product', () => {
+        global.session.privacy.algoliaAnchorProducts = JSON.stringify(['variationGroupProduct']);
         const slotcontent = {
             content: []
         };
         algoliaDataMock.getPreference.mockReturnValue('master-level');
         productMgrMock.getProduct.mockReturnValue(variationGroupProduct);
-        expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['masterProduct1']));
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe(JSON.stringify(['masterProduct1']));
     });
 
 
@@ -135,6 +135,6 @@ describe('getAnchorProductIds', () => {
         };
         algoliaDataMock.getPreference.mockReturnValue('master-level');
         productMgrMock.getProduct.mockReturnValue(variantProduct);
-        expect(utils.getAnchorProductIds(slotcontent)).toBe(JSON.stringify(['masterProduct1']));
+        expect(utils.getAnchorProductIDs(slotcontent)).toBe(JSON.stringify(['masterProduct1']));
     });
 });

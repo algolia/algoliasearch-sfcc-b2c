@@ -8,7 +8,8 @@ let mockConfig = {
     IndexOutOfStock: true,
     InStockThreshold: 10,
     RecordModel: 'master-level',
-    AdditionalAttributes: ['storeAvailability', 'short_description', 'brand']
+    AdditionalAttributes: ['storeAvailability', 'short_description', 'brand'],
+    AttributeSlicedRecordModel_GroupingAttribute: 'color',
 };
 
 const algoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
@@ -23,6 +24,8 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
                 return mockConfig.RecordModel;
             case 'IndexOutOfStock':
                 return mockConfig.IndexOutOfStock;
+            case 'AttributeSlicedRecordModel_GroupingAttribute':
+                return mockConfig.AttributeSlicedRecordModel_GroupingAttribute;
             default:
                 return null;
         }
@@ -159,6 +162,22 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         expect(operations).toMatchSnapshot();
     });
 
+    test('handleStandardShipment should generate correct operations for attribute-sliced record model - out of stock - Standard Shipment', function () {
+        const shipment = testData.mockShipmentStandard;
+        const threshold = 10;
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
+        const recordModel = 'attribute-sliced';
+
+        const operations = algoliaHooks.handleStandardShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
+        expect(operations).toMatchSnapshot();
+    });
+
     test('handleStandardShipment should generate correct operations for variant-level record model - out of stock - Standard Shipment', function () {
         // Arrange
         const shipment = testData.mockShipmentStandard;
@@ -205,6 +224,22 @@ describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Ind
         );
 
         // Assert
+        expect(operations).toMatchSnapshot();
+    });
+
+    test('handleInStorePickupShipment should generate correct operations for attribute-sliced record model - out of stock - BOPIS Shipment', function () {
+        const shipment = testData.mockShipmentInStore;
+        const threshold = 5;
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
+        const recordModel = 'attribute-sliced';
+
+        const operations = algoliaHooks.handleInStorePickupShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
         expect(operations).toMatchSnapshot();
     });
 
@@ -255,6 +290,22 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         );
 
         // Assert
+        expect(operations).toMatchSnapshot();
+    });
+
+    test('handleStandardShipment should generate delete operations for attribute-sliced record model - out of stock - Standard Shipment', function () {
+        const shipment = testData.mockShipmentStandard;
+        const threshold = 10;
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
+        const recordModel = 'attribute-sliced';
+
+        const operations = algoliaHooks.handleStandardShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
         expect(operations).toMatchSnapshot();
     });
 
@@ -356,6 +407,22 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         expect(operations).toMatchSnapshot();
     });
 
+    test('handleInStorePickupShipment should generate no operations for attribute-sliced record model - in stock - BOPIS Shipment', function () {
+        const shipment = testData.mockShipmentInStore;
+        const threshold = 1;
+        const additionalAttributes = ['storeAvailability', 'short_description', 'brand'];
+        const recordModel = 'attribute-sliced';
+
+        const operations = algoliaHooks.handleInStorePickupShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
+        expect(operations).toHaveLength(0);
+    });
+
     test('handleInStorePickupShipment should generate correct operations for variant-level record model - in stock - BOPIS Shipment', function () {
         // Arrange
         const shipment = testData.mockShipmentInStore;
@@ -392,6 +459,22 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
 
         // Assert
         expect(operations).toMatchSnapshot();
+    });
+
+    test('handleStandardShipment should generate no operations for attribute-sliced record model - in stock - Standard Shipment', function () {
+        const shipment = testData.mockShipmentStandard;
+        const threshold = 1;
+        const additionalAttributes = ['storeAvailability', 'in_stock', 'short_description', 'brand'];
+        const recordModel = 'attribute-sliced';
+
+        const operations = algoliaHooks.handleStandardShipment(
+            shipment,
+            threshold,
+            additionalAttributes,
+            recordModel
+        );
+
+        expect(operations).toHaveLength(0);
     });
 
     test('handleStandardShipment should generate correct operations for variant-level record model - in stock - Standard Shipment', function () {

@@ -231,12 +231,16 @@ function getCategoryHierarchyIds(category) {
 }
 
 /**
- * Handler complex and calculated Product attributes
+ * Handler for complex and calculated Product attributes
  */
 var aggregatedValueHandlers = {
     masterID: function(product) {
-        return product.isVariant() || product.isVariationGroup() ?
-            product.masterProduct.ID : null;
+        if (product.isVariant() || product.isVariationGroup()) {
+            return product.getMasterProduct().getID();
+        } else if (product.isMaster()) {
+            return product.getID();
+        }
+        return null;
     },
     defaultVariantID: function(product) {
         const defaultVariant = product.getVariationModel().getDefaultVariant();
@@ -247,7 +251,7 @@ var aggregatedValueHandlers = {
         productCategories = empty(productCategories) ? [] : productCategories.toArray();
 
         if (product.isVariant()) {
-            var masterProductCategories = product.masterProduct.getOnlineCategories();
+            var masterProductCategories = product.getMasterProduct().getOnlineCategories();
             masterProductCategories = empty(masterProductCategories) ? [] : masterProductCategories.toArray();
             productCategories = productCategories.concat(masterProductCategories);
         }
@@ -263,7 +267,7 @@ var aggregatedValueHandlers = {
         productCategories = empty(productCategories) ? [] : productCategories.toArray();
 
         if (product.isVariant()) {
-            var masterProductCategories = product.masterProduct.getOnlineCategories();
+            var masterProductCategories = product.getMasterProduct().getOnlineCategories();
             masterProductCategories = empty(masterProductCategories) ? [] : masterProductCategories.toArray();
             productCategories = productCategories.concat(masterProductCategories);
         }
@@ -276,10 +280,10 @@ var aggregatedValueHandlers = {
     primary_category_id: function (product) {
         var result = null;
         if (empty(product.primaryCategory)) {
-            var primaryCategory = product.isVariant() ? product.masterProduct.primaryCategory : null;
+            var primaryCategory = product.isVariant() ? product.getMasterProduct().getPrimaryCategory() : null;
             result = empty(primaryCategory) ? null : primaryCategory.ID;
         } else {
-            result = product.primaryCategory.ID;
+            result = product.getPrimaryCategory().getID();
         }
         return result;
     },
@@ -298,8 +302,8 @@ var aggregatedValueHandlers = {
         }
         return res;
     },
-    color: function (product) {
-        var variationModel = product.getVariationModel();
+    color: function (product, parameters) {
+        var variationModel = parameters.variationModel || product.getVariationModel();
         var colorAttribute = variationModel.getProductVariationAttribute('color');
         return (colorAttribute && variationModel.getSelectedValue(colorAttribute))
             ? variationModel.getSelectedValue(colorAttribute).displayValue
@@ -320,8 +324,8 @@ var aggregatedValueHandlers = {
         }
         return modelHelper.getColorVariations(masterProduct);
     },
-    size: function (product) {
-        var variationModel = product.getVariationModel();
+    size: function (product, parameters) {
+        var variationModel = parameters.variationModel || product.getVariationModel();
         var sizeAttribute = variationModel.getProductVariationAttribute('size');
         return (sizeAttribute && variationModel.getSelectedValue(sizeAttribute))
             ? variationModel.getSelectedValue(sizeAttribute).displayValue
@@ -386,14 +390,20 @@ var aggregatedValueHandlers = {
 
         return inStock;
     },
-    image_groups: function (product) {
+    image_groups: function (product, parameters) {
         var imageGroupsArr = [];
-        var imageGroup = modelHelper.getImageGroups(product.getImages('large'), 'large');
+        var imagesLarge = parameters.variationModel ?
+            parameters.variationModel.getImages('large') :
+            product.getImages('large');
+        var imageGroup = modelHelper.getImageGroups(imagesLarge, 'large');
         if (!empty(imageGroup)) {
             imageGroupsArr.push(imageGroup);
         }
 
-        imageGroup = modelHelper.getImageGroups(product.getImages('small'), 'small');
+        var imagesSmall = parameters.variationModel ?
+            parameters.variationModel.getImages('small') :
+            product.getImages('small');
+        imageGroup = modelHelper.getImageGroups(imagesSmall, 'small');
         if (!empty(imageGroup)) {
             imageGroupsArr.push(imageGroup);
         }
@@ -455,37 +465,56 @@ var aggregatedValueHandlers = {
         currentSession.setCurrency(currentCurrency);
         return promotionalPrices;
     },
-    variants: function(product, parameters) {
-        if (!product.isMaster() && !product.isVariationGroup()) {
-            return null;
-        }
-
+    variants: function(product, parameters) { // only called when record model is either MASTER_LEVEL or VARIATION_GROUP_LEVEL
         const variants = [];
-        const variantsIt = product.variants.iterator();
-        while (variantsIt.hasNext()) {
-            var variant = variantsIt.next();
 
-            if (!productFilter.isInclude(variant)) {
-                continue;
+        if (product.isMaster() || product.isVariationGroup()) {
+            let variantsIt;
+
+            if (parameters.variationModel) {
+                variantsIt = parameters.variationModel.getSelectedVariants().iterator();
+            } else {
+                variantsIt = product.variants.iterator();
             }
 
-            let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
-            if (!inStock && !INDEX_OUT_OF_STOCK) {
-                continue;
+            while (variantsIt.hasNext()) {
+                var variant = variantsIt.next();
+
+                if (!productFilter.isInclude(variant)) {
+                    continue;
+                }
+
+                let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
+                if (!inStock && !INDEX_OUT_OF_STOCK) {
+                    continue;
+                }
+
+                // creating baseModel so that inStock is not calculated again in algoliaLocalizedProduct
+                let baseModel = { in_stock: inStock };
+
+                let localizedVariant = new algoliaLocalizedProduct({
+                    product: variant,
+                    locale: request.getLocale(),
+                    attributeList: parameters.variantAttributes,
+                    isVariant: true,
+                    baseModel: baseModel,
+                });
+                variants.push(localizedVariant);
             }
+            return variants;
 
-            var baseModel = { in_stock: inStock };
-
+        } else { // simple product
+            // create a model to serve as the `variants` array in the record
             var localizedVariant = new algoliaLocalizedProduct({
-                product: variant,
+                product: product,
                 locale: request.getLocale(),
                 attributeList: parameters.variantAttributes,
-                isVariant: true,
-                baseModel: baseModel,
+                isVariant: true, // otherwise the variant object will have an 'objectID'
             });
             variants.push(localizedVariant);
+
+            return variants;
         }
-        return variants;
     },
     _tags: function(product) {
         return ['id:' + product.ID];
@@ -517,15 +546,17 @@ var aggregatedValueHandlers = {
  * @param {dw.catalog.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
  * @param {Array} parameters.attributeList list of attributes to be fetched
- * @param {Array} parameters.variantAttributes list of variant attributes (for product-level model)
- * @param {Object?} parameters.baseModel - (optional) A base model object that contains some pre-fetched properties
- * @param {boolean?} parameters.fullRecordUpdate - (optional) Indicate if the model is meant to fully replace the existing record
- * @param {boolean?} parameters.isVariant - (optional) Indicate if the model is meant to live in a parent record
+ * @param {Array?} [parameters.variantAttributes] list of variant attributes (for product-level model)
+ * @param {Object?} [parameters.baseModel] - A base model object that contains some pre-fetched properties
+ * @param {boolean?} [parameters.fullRecordUpdate] - Indicates if the model is meant to fully replace the existing record or just update it partially
+ * @param {boolean?} [parameters.isVariant] -  Indicates if the model is meant to live in a parent record
+ * @param {Object?} [parameters.variationModel] - variationModel of a master
+ * @param {string?} [parameters.variationValueID] - variationValueID to append to the objectID
  * @constructor
  */
 function algoliaLocalizedProduct(parameters) {
     const product = parameters.product;
-    const attributeList = parameters.attributeList;
+    const attributeList = parameters.attributeList || [];
     const baseModel = parameters.baseModel;
 
     request.setLocale(parameters.locale || 'default');
@@ -534,17 +565,26 @@ function algoliaLocalizedProduct(parameters) {
         this.id = null;
     } else {
         if (parameters.isVariant) {
-            this.variantID = product.ID;
-        } else {
-            this.objectID = product.ID;
+            let isSimpleProduct = !product.isMaster() && !product.isVariant() && !product.isVariationGroup();
+
+            // set `variantID` explicitly to null in the `variants` array object for simple products
+            this.variantID = isSimpleProduct ? null : product.getID();
+        } else if (parameters.variationModel) { // ATTRIBUTE_SLICED indexing, master case
+            this.objectID = product.getID() + '-' + parameters.variationValueID;
+        } else { // all other cases
+            this.objectID = product.getID();
         }
 
         for (var i = 0; i < attributeList.length; i += 1) {
             var attributeName = attributeList[i];
 
+            // if the supplied baseModel contains the attribute, use the supplied value to avoid hitting the database...
             var baseAttributeValue = ObjectHelper.getAttributeValue(baseModel, attributeName);
             if (baseAttributeValue) {
                 ObjectHelper.setAttributeValue(this, attributeName, baseAttributeValue);
+
+            // ...otherwise get the value directly from the product
+            // -- try productAttributesConfig.js (optional file) first...
             } else if (extendedProductAttributesConfig[attributeName]) {
                 var attributeConfig = extendedProductAttributesConfig[attributeName];
                 if (typeof attributeConfig.attribute === 'function') {
@@ -552,8 +592,12 @@ function algoliaLocalizedProduct(parameters) {
                 } else if (attributeConfig.attribute) {
                     this[attributeName] = ObjectHelper.getAttributeValue(product, attributeConfig.attribute);
                 }
+
+            // ...try aggregatedValueHandlers next...
             } else if (aggregatedValueHandlers[attributeName]) {
                 this[attributeName] = aggregatedValueHandlers[attributeName](product, parameters);
+
+            // if all else fails, fall back to algoliaProductConfig v2 and get the value from the product based on that
             } else {
                 var config = algoliaProductConfig.attributeConfig_v2[attributeName];
 
@@ -568,6 +612,8 @@ function algoliaLocalizedProduct(parameters) {
                 );
             }
         }
+
+        // apply any customizations in productRecordCustomizer.js (optional file)
         productModelCustomizer.customizeLocalizedProductModel(this, attributeList);
         if (extendedProductRecordCustomizer) {
             extendedProductRecordCustomizer(this);

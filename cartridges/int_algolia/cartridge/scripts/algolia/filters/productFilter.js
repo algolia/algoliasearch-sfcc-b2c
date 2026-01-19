@@ -56,33 +56,33 @@ function hasOnlineCategory(product) {
 /**
  * Product index filter function
  * Note: if you want to check filter status for master products, you should use isOnline and isSearchable, hasOnlineCategory functions separately.
- * @param {dw.catalog.Product} product - Product
+ * @param {dw.catalog.Product | dw.catalog.Variant} product - Product
  * @returns {boolean} - True if product should be included in the index, false if not.
  */
 function isInclude(product) {
     // Do not include Master product
-    if (product.master || product.variationGroup) return false;
+    if (product.isMaster() || product.isVariationGroup()) return false;
     // Do not include Option products
     // if (product.optionProduct) return false;
     // Do not include bundled product
     if (product.bundled && !(product.priceModel && product.priceModel.price && product.priceModel.price.available)) return false;
-    
+
     // Check online status
     if (!isOnline(product)) return false;
-    
+
     // Check searchable status
     if (!isSearchable(product)) return false;
-    
+
     // Check if product has at least one online category
     // Note: In SFCC, variant products don't have their own categories - getOnlineCategories() returns empty for variants
     // We must check categories on the master product instead
-    if (product.variant && product.getMasterProduct) {
+    if (product.isVariant()) { // dw.catalog.Variant
         var masterProduct = product.getMasterProduct();
         if (masterProduct && !hasOnlineCategory(masterProduct)) return false;
     } else {
         if (!hasOnlineCategory(product)) return false;
     }
-    
+
     return true;
 }
 
@@ -99,7 +99,7 @@ function isInStock(product, threshold) {
     }
 
     // even if one variant is in stock, we consider the product as in stock
-    if (product.master || product.variationGroup) {
+    if (product.isMaster() || product.isVariationGroup()) {
         const variantsIt = product.variants.iterator();
         while (variantsIt.hasNext()) {
             let variant = variantsIt.next();
@@ -119,6 +119,25 @@ function isInStock(product, threshold) {
     var invRecord = availabilityModel.getInventoryRecord();
     var atsValue = invRecord ? invRecord.getATS().getValue() : 0;
     return atsValue >= threshold;
+}
+
+/**
+ * Checks if at least one variant in a variation model is in stock.
+ * @param {dw.catalog.ProductVariationModel} variationModel
+ * @param {Number} threshold
+ * @returns {Boolean} whether at least one of the variants is in stock
+ */
+function isCustomVariationGroupInStock(variationModel, threshold) {
+    const variantsIt = variationModel.getSelectedVariants().iterator();
+    while (variantsIt.hasNext()) {
+        let variant = variantsIt.next();
+        let variantAtsValue = variant.getAvailabilityModel().getInventoryRecord().getATS().getValue();
+        if (variantAtsValue >= threshold) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -146,6 +165,7 @@ function isInStoreStock(product, storeId, threshold) {
 
 module.exports = {
     isInStock: isInStock,
+    isCustomVariationGroupInStock: isCustomVariationGroupInStock,
     isInclude: isInclude,
     isInStoreStock: isInStoreStock,
     isOnline: isOnline,

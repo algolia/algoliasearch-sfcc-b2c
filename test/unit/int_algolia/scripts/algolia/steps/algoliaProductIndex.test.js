@@ -3,6 +3,8 @@ const MasterVariantMock = require('../../../../../mocks/dw/catalog/MasterProduct
 const VariantMock = require('../../../../../mocks/dw/catalog/Variant');
 const ProductMgrMock = require('dw/catalog/ProductMgr');
 
+const imagesMocks = require('../../../../../mocks/data/images');
+
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
@@ -202,6 +204,65 @@ describe('process', () => {
             variantPinkSize4,
             variantPinkSize6,
         ]);
+
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
+
+        const algoliaOperations = job.process(masterProduct);
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+    test('attribute-sliced indexing', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced';
+        global.customPreferences['Algolia_AttributeSlicedRecordModel_GroupingAttribute'] = 'color';
+        mockAdditionalAttributes = [];
+        mockLocalesForIndexing = ['en'];
+
+        // Process a master product with two color variations and two size variations
+        const masterProduct = new MasterVariantMock({
+            variants: [
+                new VariantMock({
+                    ID: '701644031206M',
+                    variationAttributes: { color: 'JJB52A0', size: '004' },
+                }),
+                new VariantMock({
+                    ID: '701644031213M',
+                    variationAttributes: { color: 'JJB52A0', size: '006' },
+                }),
+                new VariantMock({
+                    ID: '701644031220M',
+                    variationAttributes: { color: 'JJC05A0', size: '004' },
+                    images: imagesMocks['JJC05A0'],
+                }),
+                new VariantMock({
+                    ID: '701644031237M',
+                    variationAttributes: { color: 'JJC05A0', size: '006' },
+                    images: imagesMocks['JJC05A0'],
+                })
+            ]
+        });
+
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
+
+        const algoliaOperations = job.process(masterProduct);
+        expect(algoliaOperations).toMatchSnapshot();
+    });
+    test('attribute-sliced indexing - product without variation attribute', () => {
+        global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced';
+        mockAdditionalAttributes = ['size'];
+        mockLocalesForIndexing = ['en'];
+
+        // Process a master product with two color variations and two size variations
+        const masterProduct = new MasterVariantMock({
+            variants: [
+                new VariantMock({
+                    ID: '701644031206M',
+                    variationAttributes: { size: '004' },
+                }),
+                new VariantMock({
+                    ID: '701644031213M',
+                    variationAttributes: { size: '006' },
+                }),
+            ]
+        });
 
         job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
 

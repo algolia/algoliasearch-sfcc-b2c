@@ -165,6 +165,7 @@ function enableInstantSearch(config) {
                 ]
             }),
 
+            // "new arrival" refinement panel
             toggleRefinementWithPanel({
                 container: '#algolia-newarrival-placeholder',
                 attribute: 'newArrival',
@@ -181,6 +182,7 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.newArrivals
             }),
 
+            // "brand" refinement panel
             refinementListWithPanel({
                 container: '#algolia-brand-list-placeholder',
                 attribute: 'brand',
@@ -197,10 +199,12 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.brandPanelTitle
             }),
 
+            // "price" refinement panel
             rangeInputWithPanel({
                 container: '#algolia-price-filter-placeholder',
-                attribute: (algoliaData.recordModel === 'master-level' ? 'variants.price.' : 'price.') +
-                    algoliaData.currencyCode,
+                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'attribute-sliced' ?
+                    `variants.price.${algoliaData.currencyCode}` :
+                    `price.${algoliaData.currencyCode}`,
                 cssClasses: {
                     form: 'flex-nowrap',
                     input: 'form-control form-control-sm',
@@ -214,9 +218,12 @@ function enableInstantSearch(config) {
                 }
             }),
 
+            // "size" refinement panel
             refinementListWithPanel({
                 container: '#algolia-size-list-placeholder',
-                attribute: algoliaData.recordModel === 'master-level' ? 'variants.size' : 'size',
+                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'attribute-sliced' ?
+                    'variants.size' :
+                    'size',
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -230,9 +237,10 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.sizePanelTitle
             }),
 
+            // "color" refinement panel
             refinementListWithPanel({
                 container: '#algolia-color-list-placeholder',
-                attribute: algoliaData.recordModel === 'master-level' ? 'variants.color' : 'color',
+                attribute: algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'attribute-sliced' ? 'variants.color' : 'color',
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -246,9 +254,12 @@ function enableInstantSearch(config) {
                 panelTitle: algoliaData.strings.colorPanelTitle
             }),
 
+            // "storeAvailability" refinement panel
             refinementListWithPanel({
                 container: '#algolia-store-list-placeholder',
-                attribute: 'storeAvailability',
+                attribute: algoliaData.recordModel === 'master-level' ||  algoliaData.recordModel === 'attribute-sliced' ?
+                    'variants.storeAvailability' :
+                    'storeAvailability',
                 cssClasses: {
                     list: 'store-list-facet',
                     item: 'store-facet-item',
@@ -306,7 +317,7 @@ function enableInstantSearch(config) {
                     empty: '',
                     item(hit, { html, components }) {
                         const shouldHideCallout = isPricingLazyLoad || !hit.calloutMsg;
-                        const productId = algoliaData.recordModel === 'master-level' ? (hit.defaultVariantID ? hit.defaultVariantID : hit.objectID) : hit.objectID;
+                        const productId = hit.defaultVariantID || hit.objectID;
                         const callOutMsgClassname = `callout-msg-placeholder-${productId}`;
                         return html`
                             <div class="product"
@@ -365,7 +376,7 @@ function enableInstantSearch(config) {
                                 </div>
                             </div>
                         `;
-                    }, 
+                    },
                 },
                 transformItems: function (items, { results }) {
                     displaySwatches = false;
@@ -413,7 +424,10 @@ function enableInstantSearch(config) {
                             // 1. Find the variant matching the selected facets, or use the default variant
                             let selectedVariant;
                             const sizeFacets = results._state.disjunctiveFacetsRefinements['variants.size'] || [];
-                            const colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
+                            let colorFacets = [];
+                            if (algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'attribute-sliced') {
+                                colorFacets = results._state.disjunctiveFacetsRefinements['variants.color'] || [];
+                            }
 
                             if (colorFacets.length > 0 && sizeFacets.length > 0) {
                                 // 1.1 If both facets are selected, find the variant that match both
@@ -448,7 +462,7 @@ function enableInstantSearch(config) {
                             // 2. Get the colorVariation corresponding to the selected variant, to display its image
                             if (item.colorVariations) {
                                 const colorVariation = item.colorVariations.find(i => {
-                                    return selectedVariant && i.color === selectedVariant.color
+                                    return i.color === item.color;
                                 }) || item.colorVariations[0];
                                 const imageGroup = colorVariation.image_groups.find(i => {
                                     return i.view_type === 'large'
@@ -553,7 +567,7 @@ function enableInstantSearch(config) {
     search.on('render', function () {
         if (isPricingLazyLoad && search.status === 'idle') {
             var items = search.renderState[algoliaData.productsIndex].infiniteHits.hits;
-            var productIDs = items.map((item) => algoliaData.recordModel === 'master-level' ? (item.defaultVariantID ? item.defaultVariantID : item.objectID) : item.objectID);
+            var productIDs = items.map((item) => item.defaultVariantID || item.objectID);
             fetchPromoPrices(productIDs).then(() => {
                 updateAllProductPrices();
             });
@@ -695,7 +709,7 @@ function fetchPromoPrices(productIDs) {
 
     // Filter out already fetched product IDs
     const unfetchedProductIDs = productIDs.filter(id => !fetchedPrices.has(id));
-    
+
     if (unfetchedProductIDs.length === 0) return Promise.resolve();
 
     return $.ajax({
@@ -830,8 +844,8 @@ function applyPromotions(item, algoliaData, activeCustomerPromos) {
 
 /**
  * Returns the pricebook's strikeout price (if available).
- * @param {Object} item 
- * @param {Object} algoliaData 
+ * @param {Object} item
+ * @param {Object} algoliaData
  * @returns {number|null} The highest pricebook price if it's greater than item.price, otherwise null.
  */
 function getPricebookStrikeoutPrice(item, algoliaData) {

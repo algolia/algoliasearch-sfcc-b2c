@@ -1,3 +1,4 @@
+const ArrayList = require('dw/util/ArrayList');
 const MasterProductMock = require("../../../../../mocks/dw/catalog/MasterProduct");
 const VariantMock = require("../../../../../mocks/dw/catalog/Variant");
 const collectionHelper = require("../../../../../mocks/helpers/collectionHelper");
@@ -33,10 +34,10 @@ describe('Job Helper', function () {
             variantPinkSize4,
             variantPinkSize6,
         ]);
-    
+
         const variantRecords = jobHelper.generateVariantRecords({
             masterProduct,
-            locales: collectionHelper.createCollection(['fr']),
+            locales: new ArrayList(['fr']),
             attributeList: ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'url', 'colorVariations'],
             nonLocalizedAttributes: [],
         });

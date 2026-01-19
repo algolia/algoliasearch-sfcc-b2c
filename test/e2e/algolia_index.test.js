@@ -18,7 +18,7 @@ describe('Algolia Integration', () => {
         try {
             await new Promise((resolve, reject) => {
                 sfcc.auth.auth(
-                    process.env.SFCC_OAUTH_CLIENT_ID, 
+                    process.env.SFCC_OAUTH_CLIENT_ID,
                     process.env.SFCC_OAUTH_CLIENT_SECRET,
                     (err, token) => {
                         if (err) {
@@ -56,7 +56,7 @@ describe('Algolia Integration', () => {
 
     const testProducts = [
         {
-            type: 'variation',
+            type: 'variant',
             id: process.env.TEST_PRODUCT_ID,
             expectedFields: ['variationAttributes', 'prices']
         },
@@ -68,12 +68,12 @@ describe('Algolia Integration', () => {
     ];
 
     testProducts.forEach(product => {
-        // Skip master product test if running in variation-level mode
-        if (recordModel === 'variation-level' && product.type === 'master') {
+        // Skip master product test if running in variant-level mode
+        if (recordModel === 'variant-level' && product.type === 'master') {
             return;
         }
         // Skip variation product test if running in master-level mode
-        if (recordModel === 'master-level' && product.type === 'variation') {
+        if (recordModel === 'master-level' && product.type === 'variant') {
             return;
         }
 

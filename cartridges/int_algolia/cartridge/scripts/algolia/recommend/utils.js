@@ -1,6 +1,10 @@
 'use strict';
 
-const MASTER_LEVEL = 'master-level';
+const RECORD_MODEL_TYPE = {
+    MASTER_LEVEL: 'master-level',
+    VARIANT_LEVEL: 'variant-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
+}
 
 /**
  * Get the product type
@@ -25,13 +29,13 @@ function getProductType(product) {
  */
 function getAppropriateProduct(product, recordModel) {
     const productType = getProductType(product);
-    if (recordModel === MASTER_LEVEL && productType !== 'Master') {
-        return product.masterProduct;
-    } else if (recordModel === MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
+    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && productType !== 'Master') {
+        return product.masterProduct; // @TODO: refactor to be safer: only Variants and Variation Groups have the `masterProduct` property, add checks
+    } else if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
         return product;
-    } else if (recordModel !== MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
+    } else if (recordModel !== RECORD_MODEL_TYPE.MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
         return product.variationModel.defaultVariant;
-    } else if (recordModel !== MASTER_LEVEL && productType === 'Variant') {
+    } else if (recordModel !== RECORD_MODEL_TYPE.MASTER_LEVEL && productType === 'Variant') {
         return product;
     }
     return product;
@@ -42,20 +46,20 @@ function getAppropriateProduct(product, recordModel) {
  * @param {Object} slotcontent - Slot content
  * @returns {string} The anchor product IDs
  */
-function getAnchorProductIds(slotcontent) {
-    const anchorProductIds = session.privacy.algoliaAnchorProducts;
-    let productIds = [];
+function getAnchorProductIDs(slotcontent) {
+    const anchorProductIDs = session.privacy.algoliaAnchorProducts;
+    let productIDs = [];
 
-    if (anchorProductIds) {
-        productIds = JSON.parse(anchorProductIds);
+    if (anchorProductIDs) {
+        productIDs = JSON.parse(anchorProductIDs);
     } else {
         for (let i = 0; i < slotcontent.content.length; i++) {
             let product = slotcontent.content[i];
-            productIds.push(product.ID);
+            productIDs.push(product.ID);
         }
     }
 
-    if (productIds.length === 0) {
+    if (productIDs.length === 0) {
         return '';
     }
 
@@ -63,21 +67,21 @@ function getAnchorProductIds(slotcontent) {
     const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     const recordModel = algoliaData.getPreference('RecordModel');
 
-    const anchorProductIdsArr = [];
+    const anchorProductIDsArr = [];
 
-    for (let i = 0; i < productIds.length; i++) {
-        var productId = productIds[i];
+    for (let i = 0; i < productIDs.length; i++) {
+        var productId = productIDs[i];
         var product = productMgr.getProduct(productId);
         var appropriateProduct = getAppropriateProduct(product, recordModel);
 
         if (appropriateProduct) {
-            anchorProductIdsArr.push(appropriateProduct.ID);
+            anchorProductIDsArr.push(appropriateProduct.ID);
         }
     }
 
-    return JSON.stringify(anchorProductIdsArr);
+    return JSON.stringify(anchorProductIDsArr);
 }
 
 module.exports = {
-    getAnchorProductIds: getAnchorProductIds
+    getAnchorProductIDs: getAnchorProductIDs
 };

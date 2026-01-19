@@ -100,7 +100,7 @@
                 <iscomment> Algolia_InStockThreshold </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}" encoding="jshtml" />
+                        <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}"/>
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.instock.help', 'algolia', null)}</div>
                     </td>
@@ -158,6 +158,7 @@
                 </tr>
 
                 <iscomment> Algolia_RecordModel </iscomment>
+                <isset name="recordModel" value="${pdict.algoliaData.getPreference('RecordModel')}" scope="page"/>
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.recordmodel', 'algolia', null)}" encoding="jshtml" />
@@ -166,15 +167,32 @@
                     </td>
                     <td class="table_detail w e s">
                         <select name="RecordModel" id="RecordModel">
-                            <isif condition="${pdict.algoliaData.getPreference('RecordModel') === 'variant-level'}">
-                                <option value="variant-level" selected="selected">Variation Product</option>
-                                <option value="master-level">Base Product</option>
-                            <iselse>
-                                <option value="variant-level">Variation Product</option>
-                                <option value="master-level" selected="selected">Base Product</option>
-                            </iselse>
-                            </isif>
+                            <option value="variant-level"
+                                <isif condition="${recordModel === 'variant-level'}"> selected="selected"</isif>>
+                                <isprint value="${Resource.msg('algolia.preference.recordmodel.variantlevel', 'algolia', null)}"/>
+                            </option>
+                            <option value="master-level"
+                                <isif condition="${recordModel === 'master-level'}"> selected="selected"</isif>>
+                                <isprint value="${Resource.msg('algolia.preference.recordmodel.masterlevel', 'algolia', null)}"/>
+                            </option>
+                            <option value="attribute-sliced"
+                                <isif condition="${recordModel === 'attribute-sliced'}"> selected="selected"</isif>>
+                                <isprint value="${Resource.msg('algolia.preference.recordmodel.attributesliced', 'algolia', null)}"/>
+                            </option>
                         </select>
+                    </td>
+                </tr>
+
+                <iscomment> Algolia_AttributeSlicedRecordModel_GroupingAttribute </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.attributesliced.groupingattribute', 'algolia', null)}" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.attributesliced.groupingattribute.help', 'algolia', null)}</div>
+                    </td>
+
+                    <td class="table_detail w e s">
+                        <input type="text" value="${pdict.algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute') ? pdict.algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute') : ''}" id="AttributeSlicedRecordModel_GroupingAttribute" name="AttributeSlicedRecordModel_GroupingAttribute" placeholder="${Resource.msg('algolia.label.util.optional.onlyusedwithattributeslicedrecordmodel', 'algolia', null)}"/>
                     </td>
                 </tr>
 
@@ -432,6 +450,7 @@
             document.getElementById("EnableContentSearch").disabled = !storefrontEnabled;
             document.getElementById("EnableRecommend").disabled = !storefrontEnabled;
         }
+
         updateStorefrontCheckboxes();
     </script>
 
