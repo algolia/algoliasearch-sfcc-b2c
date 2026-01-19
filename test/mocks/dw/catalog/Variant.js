@@ -27,6 +27,8 @@ class Variant extends MasterProduct {
                     }
                 }
             },
+            size: null,
+            color: null,
             displaySize: '14cm',
             refinementSize: '4',
             get algoliaTest() {
