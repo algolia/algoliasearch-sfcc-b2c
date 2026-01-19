@@ -27,13 +27,13 @@ const productFilterConfig = {
     // STOCK-RELATED SETTINGS (Managed via Business Manager UI)
     // ========================================================================
     //
-    // The following stock-related settings are already configurable via 
+    // The following stock-related settings are already configurable via
     // Business Manager UI under:
     // Administration > Site Preferences > Custom Site Preferences > Algolia
     //
-    // 1. InStockThreshold: 
+    // 1. InStockThreshold:
     //    - Controls the minimum ATS value to consider a product in stock
-    //    - Default: 0
+    //    - Default: 1
     //    - Used by productFilter.isInStock() function
     //
     // 2. IndexOutOfStock:

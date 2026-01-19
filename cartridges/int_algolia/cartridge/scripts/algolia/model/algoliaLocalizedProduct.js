@@ -28,7 +28,7 @@ try {
 } catch (e) { // eslint-disable-line no-unused-vars
 }
 
-var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold');
+var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
 var INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
 var ATTRIBUTE_LIST = algoliaData.getSetOfArray('AdditionalAttributes');
 const stores = [];
@@ -382,13 +382,7 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product) {
-        let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
-
-        if (!inStock && !INDEX_OUT_OF_STOCK) {
-            return undefined;
-        }
-
-        return inStock;
+        return productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
     },
     image_groups: function (product, parameters) {
         var imageGroupsArr = [];
@@ -527,7 +521,7 @@ var aggregatedValueHandlers = {
                 var storeElInventory = storeEl.storeInventory;
                 if (storeElInventory) {
                     var inventoryRecord = storeElInventory.getRecord(product.ID);
-                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= ALGOLIA_IN_STOCK_THRESHOLD) {
+                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= ALGOLIA_IN_STOCK_THRESHOLD && inventoryRecord.ATS.value > 0) { // comparing to zero explicitly so that a threshold of 0 wouldn't return true
                         storeArray.push(storeEl.id);
                     }
                 }

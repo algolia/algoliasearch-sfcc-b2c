@@ -9,7 +9,15 @@ const collectionHelper = require('../../../../../mocks/helpers/collectionHelper'
 describe('Order Helper', function () {
     test('generateAlgoliaOperations should create operations for all locales', function () {
         // Arrange
-        const masterProduct = new MasterVariantMock();
+        const masterProduct = new MasterVariantMock({
+            variants: [
+                new VariantMock({
+                    ID: '701644031206M',
+                    variationAttributes: { color: 'JJB52A0', size: '004' },
+                    ats: 5,
+                }),
+            ]
+        });
 
         const productConfig = {
             product: masterProduct,
@@ -40,7 +48,15 @@ describe('Order Helper', function () {
 
     test('generateAlgoliaOperations should handle stock status correctly', function () {
         // Arrange
-        const masterProduct = new MasterVariantMock();
+        const masterProduct = new MasterVariantMock({
+            variants: [
+                new VariantMock({
+                    ID: '701644031206M',
+                    variationAttributes: { color: 'JJB52A0', size: '004' },
+                    ats: 5,
+                }),
+            ]
+        });
 
         const productConfig = {
             product: masterProduct,
