@@ -100,7 +100,7 @@
                 <iscomment> Algolia_InStockThreshold </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}" encoding="jshtml" />
+                        <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}"/>
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.instock.help', 'algolia', null)}</div>
                     </td>
