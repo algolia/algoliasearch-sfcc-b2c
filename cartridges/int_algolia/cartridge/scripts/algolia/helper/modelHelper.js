@@ -143,7 +143,7 @@ function getAttributeSlicedModelRecordID(product) {
 
             if (!empty(variationAttribute)) { // attribute-sliced master record
                 let variationAttributeValue = productVariationModel.getSelectedValue(variationAttribute);
-                if (!empty (variationAttributeValue)) {
+                if (!empty(variationAttributeValue)) {
                     recordID = masterID + '-' + variationAttributeValue.getID();
                 } else {
                     recordID = masterID;
