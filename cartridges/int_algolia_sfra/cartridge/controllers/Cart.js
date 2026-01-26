@@ -56,7 +56,7 @@ server.append('AddProduct', function (req, res, next) {
                     algoliaProductData.pid = modelHelper.getAttributeSlicedModelRecordID(product);
                     break;
                 case RECORD_MODEL_TYPE.MASTER_LEVEL:
-                    algoliaProductData.pid = product.isVariant() ? product.getMasterProduct().getID() : product.getID(); // variant or simple product
+                    algoliaProductData.pid = product.isVariant() ? product.getMasterProduct().getID() : product.getID(); // returns master ID for variants, product ID for simple products
                     break;
                 case RECORD_MODEL_TYPE.VARIANT_LEVEL:
                     algoliaProductData.pid = productID;
