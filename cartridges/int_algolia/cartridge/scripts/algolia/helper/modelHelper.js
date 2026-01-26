@@ -121,7 +121,48 @@ function getImageGroups(imagesList, viewtype) {
     return result;
 }
 
+/**
+ * Build the attribute-sliced record product ID for a product.
+ * @param {dw.catalog.Product | dw.catalog.Variant} product Product or Variant
+ * @returns {string | null} Attribute-sliced product ID
+ */
+function getAttributeSlicedModelRecordID(product) {
+    const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+    let variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
+
+    let recordID = null;
+
+    if (!empty(product) && !empty(variationAttributeForAttributeSlicedRecordModel)) {
+        if (product.isMaster()) { // only for compatibility and reusability of the helper -- product added to the cart cannot be a master
+            recordID = product.getID();
+        } else if (product.isVariant()) {
+            let productVariationModel = product.getVariationModel();
+            let variationAttribute = productVariationModel.getProductVariationAttribute(variationAttributeForAttributeSlicedRecordModel);
+            let masterProduct = productVariationModel.getMaster();
+            let masterID = masterProduct.getID();
+
+            if (!empty(variationAttribute)) { // attribute-sliced master record
+                let variationAttributeValue = productVariationModel.getSelectedValue(variationAttribute);
+                if (!empty (variationAttributeValue)) {
+                    recordID = masterID + '-' + variationAttributeValue.getID();
+                } else {
+                    recordID = masterID;
+                }
+
+            } else {
+                recordID = masterID; // regular master record
+            }
+
+        } else { // simple product
+            recordID = product.getID();
+        }
+    };
+
+    return recordID;
+}
+
 module.exports = {
     getColorVariations: getColorVariations,
     getImageGroups: getImageGroups,
+    getAttributeSlicedModelRecordID: getAttributeSlicedModelRecordID,
 };
