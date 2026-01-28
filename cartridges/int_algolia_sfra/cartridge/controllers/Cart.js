@@ -5,6 +5,7 @@ var base = module.superModule;
 var BasketMgr = require('dw/order/BasketMgr');
 var ProductMgr = require('dw/catalog/ProductMgr');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 
 server.extend(base);
 
@@ -35,20 +36,35 @@ server.append('Show', function (req, res, next) {
 server.append('AddProduct', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableInsights')) {
 
-        var isBaseRecordModel = algoliaData.getPreference('RecordModel') === RECORD_MODEL_TYPE.MASTER_LEVEL;
-        var productId = req.form.pid;
+        let recordModel = algoliaData.getPreference('RecordModel');
+        var productID = req.form.pid;
         var viewData = res.getViewData();
         var algoliaProductData = {};
 
+        if (!productID) {
+            return next(); // prevent execution of the rest of the code
+        }
+
         try {
-            if (isBaseRecordModel) {
-                var product = ProductMgr.getProduct(productId);
-                algoliaProductData.pid = product.getMasterProduct().getID();
-            } else {
-                algoliaProductData.pid = productId;
+            var product = ProductMgr.getProduct(productID);
+            if (empty(product)) {
+                return next();
             }
+
+            switch (recordModel) {
+                case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
+                    algoliaProductData.pid = modelHelper.getAttributeSlicedModelRecordID(product);
+                    break;
+                case RECORD_MODEL_TYPE.MASTER_LEVEL:
+                    algoliaProductData.pid = product.isVariant() ? product.getMasterProduct().getID() : product.getID(); // returns master ID for variants, product ID for simple products
+                    break;
+                case RECORD_MODEL_TYPE.VARIANT_LEVEL:
+                    algoliaProductData.pid = productID;
+                    break;
+            }
+
         } catch (e) { // eslint-disable-line no-unused-vars
-            algoliaProductData.pid = productId;
+            algoliaProductData.pid = productID;
         }
 
         algoliaProductData.qty = req.form.quantity;
@@ -56,7 +72,7 @@ server.append('AddProduct', function (req, res, next) {
         var pli;
         //find the item in the cart by using the product id with for loop
         for (var i = 0; i < items.length; i++) {
-            if (items[i].id === productId) {
+            if (items[i].id === productID) {
                 pli = items[i];
                 break;
             }
