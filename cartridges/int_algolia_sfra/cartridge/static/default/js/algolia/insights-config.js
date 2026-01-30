@@ -46,32 +46,36 @@ function enableInsights(appId, searchApiKey, productsIndex) {
 
         const algoliaProductData = data.algoliaProductData;
 
-        const productInfo = {
-            price: algoliaProductData.price,
-            quantity: parseInt(algoliaProductData.qty),
-        };
+        if (algoliaProductData) {
+            const productInfo = {
+                price: algoliaProductData.price,
+                quantity: parseInt(algoliaProductData.qty),
+            };
 
-        if (algoliaProductData.discount) {
-            productInfo.discount = algoliaProductData.discount;
+            if (algoliaProductData.discount) {
+                productInfo.discount = algoliaProductData.discount;
+            }
+
+            currency = algoliaProductData.currency;
+
+            objectIDs.push('' + algoliaProductData.pid);
+            objectData.push(productInfo);
+
+            const algoliaEventType = 'addedToCartObjectIDsAfterSearch';
+            // pliUUID is defined only for a single product add to cart: https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/1d7d4d987d681a11b045746618aec744b4409540/cartridges/app_storefront_base/cartridge/controllers/Cart.js#L125
+            const eventName = data.pliUUID ? 'Product Add to cart' : 'Global Add to cart';
+
+            const algoliaEvent = {
+                eventName,
+                index,
+                objectIDs,
+                objectData,
+                currency,
+            };
+            window.aa(algoliaEventType, algoliaEvent, { inferQueryID: true });
+        } else {
+            console.warn('algoliaProductData is missing, Insights addedToCartObjectIDsAfterSearch event not sent! To make it work, make sure that Cart-AddProduct in the Algolia cartridge is executed.');
         }
-
-        currency = algoliaProductData.currency;
-
-        objectIDs.push('' + algoliaProductData.pid);
-        objectData.push(productInfo);
-
-        const algoliaEventType = 'addedToCartObjectIDsAfterSearch';
-        // pliUUID is defined only for a single product add to cart: https://github.com/SalesforceCommerceCloud/storefront-reference-architecture/blob/1d7d4d987d681a11b045746618aec744b4409540/cartridges/app_storefront_base/cartridge/controllers/Cart.js#L125
-        const eventName = data.pliUUID ? 'Product Add to cart' : 'Global Add to cart';
-
-        const algoliaEvent = {
-            eventName,
-            index,
-            objectIDs,
-            objectData,
-            currency,
-        };
-        window.aa(algoliaEventType, algoliaEvent, { inferQueryID: true });
     });
 
     // when on search page
@@ -124,11 +128,11 @@ function enableInsights(appId, searchApiKey, productsIndex) {
     }
 
     /**
-     * Finds Insights target
-     * @param {Object} startElement Element to start from
-     * @param {Object} endElement Element to stop searching at
-     * @returns {Object} Element found or null if not found
-     */
+    * Finds Insights target
+    * @param {Object} startElement Element to start from
+    * @param {Object} endElement Element to stop searching at
+    * @returns {Object} Element found or null if not found
+    */
     function findInsightsTarget(startElement, endElement) {
         var element = startElement;
         while (element && !element.hasAttribute('data-query-id')) {
