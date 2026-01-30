@@ -45,6 +45,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         let currency;
 
         const algoliaProductData = data.algoliaProductData;
+
         const productInfo = {
             price: algoliaProductData.price,
             quantity: parseInt(algoliaProductData.qty),
