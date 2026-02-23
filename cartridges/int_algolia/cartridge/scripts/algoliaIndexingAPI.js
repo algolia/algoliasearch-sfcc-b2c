@@ -1,7 +1,7 @@
 /**
- *  Client to communicate with Algolia's indexing API:
- *  https://www.algolia.com/doc/rest-api/search/#objects-endpoints
- **/
+*  Client to communicate with Algolia's indexing API:
+*  https://www.algolia.com/doc/rest-api/search/#objects-endpoints
+**/
 
 const waitTaskTimeout = require('*/algoliaconfig').waitTaskTimeout;
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
@@ -10,20 +10,34 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 var __jobInfo = {};
 
+const INDEXING_APIS = {
+    SEARCH_API: 'search-api',
+    INGESTION_API: 'ingestion-api',
+}
+
+const ANALYTICS_REGIONS = {
+    EU: 'eu',
+    US: 'us',
+}
+
+// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
+const indexingAPI = INDEXING_APIS.INGESTION_API;
+const analyticsRegion = ANALYTICS_REGIONS.EU;
+
 /**
- * Set information about the job using the API Client
- * @param {Object} jobInfo - object with the following structure: { "jobID": "", "stepID": "", "indexingMethod": "" }
- */
+* Set information about the job using the API Client
+* @param {Object} jobInfo - object with the following structure: { "jobID": "", "stepID": "", "indexingMethod": "" }
+*/
 function setJobInfo(jobInfo) {
     __jobInfo = jobInfo;
 }
 
 /**
- * Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
- * @param {string} indexName - name of the index to target
- * @param {Array} requestsArray - array of requests to send to Algolia
- * @returns {dw.svc.Result} - result of the call
- */
+* Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
+* @param {string} indexName - name of the index to target
+* @param {Array} requestsArray - array of requests to send to Algolia
+* @returns {dw.svc.Result} - result of the call
+*/
 function sendBatch(indexName, requestsArray) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -46,24 +60,44 @@ function sendBatch(indexName, requestsArray) {
 }
 
 /**
- * Send a batch of objects to Algolia Indexing API (multiple indices):
- * https://www.algolia.com/doc/rest-api/search/#batch-write-operations-multiple-indices
- * @param {AlgoliaOperation[]} requestsArray - array of requests to send to Algolia. Each operation must contain the `indexName` to target.
- * @returns {dw.svc.Result} - result of the call
- */
-function sendMultiIndexBatch(requestsArray) {
+ * Sends a request to either
+ * - the Search API's `multiple-batch` endpoint (https://www.algolia.com/doc/rest-api/search/multiple-batch) or
+ * - the Ingestion API's `push` endpoint (https://www.algolia.com/doc/rest-api/ingestion/push)
+ * based on the indexing API used.
+ * For the Ingestion API, the `push` endpoint can only accept single-index and single-action requests.
+ * When using the Ingestion API, requests have already been grouped by indexName and action by this point.
+* @param {Array | Object} requestPayload Array of requests when using the Search API or payload object for the Ingestion API. For the search API, each operation must contain the `indexName` to target, for the Ingestion API, indexName is part of the reuqest URL
+* @param {String} [indexName] Name of the target index (for Ingestion only)
+* @returns {dw.svc.Result} - result of the call
+*/
+function sendPayload(requestPayload, indexName) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
+    let retryableCallParameters = {};
 
-    var result = retryableCall(
-        indexingService,
-        {
-            method: 'POST',
-            path: '/1/indexes/*/batch',
-            body: {
-                requests: requestsArray,
+    switch (indexingAPI) {
+        case INDEXING_APIS.SEARCH_API:
+
+            retryableCallParameters = {
+                method: 'POST',
+                path: '/1/indexes/*/batch',
+                body: {
+                    requests: requestPayload,
+                }
             }
-        }
-    );
+            break;
+
+        case INDEXING_APIS.INGESTION_API:
+            indexingService.setURL('https://data.' + analyticsRegion + '.algolia.com/');
+            retryableCallParameters = {
+                method: 'POST',
+                path: '/1/push/' + indexName,
+                body: requestPayload,
+            }
+
+            break;
+    }
+
+    var result = retryableCall(indexingService, retryableCallParameters);
 
     if (!result.ok) {
         logger.error(result.getErrorMessage());
@@ -73,10 +107,10 @@ function sendMultiIndexBatch(requestsArray) {
 }
 
 /**
- * Delete index
- * @param {string} indexName - index to delete
- * @returns {dw.svc.Result} - result of the call
- */
+* Delete index
+* @param {string} indexName - index to delete
+* @returns {dw.svc.Result} - result of the call
+*/
 function deleteIndex(indexName) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -96,10 +130,10 @@ function deleteIndex(indexName) {
 }
 
 /**
- * Get index settings. https://www.algolia.com/doc/rest-api/search/#get-settings
- * @param {string} indexName - index to get the settings from
- * @returns {dw.svc.Result} - result of the call
- */
+* Get index settings. https://www.algolia.com/doc/rest-api/search/#get-settings
+* @param {string} indexName - index to get the settings from
+* @returns {dw.svc.Result} - result of the call
+*/
 function getIndexSettings(indexName) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -123,11 +157,11 @@ function getIndexSettings(indexName) {
 }
 
 /**
- * Set index settings. https://www.algolia.com/doc/rest-api/search/#set-settings
- * @param {string} indexName - targeted index
- * @param {string} indexSettings - index settings to set
- * @returns {dw.svc.Result} - result of the call
- */
+* Set index settings. https://www.algolia.com/doc/rest-api/search/#set-settings
+* @param {string} indexName - targeted index
+* @param {string} indexSettings - index settings to set
+* @returns {dw.svc.Result} - result of the call
+*/
 function setIndexSettings(indexName, indexSettings) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -148,11 +182,11 @@ function setIndexSettings(indexName, indexSettings) {
 }
 
 /**
- * Copy the settings of an index to another. https://www.algolia.com/doc/rest-api/search/#copymove-index
- * @param {string} indexNameSrc - index to copy
- * @param {string} indexNameDest - name of the destination index
- * @returns {dw.svc.Result} - result of the call
- */
+* Copy the settings of an index to another. https://www.algolia.com/doc/rest-api/search/#copymove-index
+* @param {string} indexNameSrc - index to copy
+* @param {string} indexNameDest - name of the destination index
+* @returns {dw.svc.Result} - result of the call
+*/
 function copyIndexSettings(indexNameSrc, indexNameDest) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -177,11 +211,11 @@ function copyIndexSettings(indexNameSrc, indexNameDest) {
 }
 
 /**
- * Move an index. https://www.algolia.com/doc/rest-api/search/#copymove-index
- * @param {string} indexNameSrc - index to move
- * @param {string} indexNameDest - new name of the index
- * @returns {dw.svc.Result} - result of the call
- */
+* Move an index. https://www.algolia.com/doc/rest-api/search/#copymove-index
+* @param {string} indexNameSrc - index to move
+* @param {string} indexNameDest - new name of the index
+* @returns {dw.svc.Result} - result of the call
+*/
 function moveIndex(indexNameSrc, indexNameDest) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -205,12 +239,12 @@ function moveIndex(indexNameSrc, indexNameDest) {
 }
 
 /**
- * Wait for an Algolia task to complete.
- * This method will call the /task endpoint until its status become 'published'
- * https://www.algolia.com/doc/rest-api/search/#get-a-tasks-status
- * @param {string} indexName - index name where the task was executed
- * @param {number} taskID - id of the task
- */
+* Wait for an Algolia task to complete.
+* This method will call the /task endpoint until its status become 'published'
+* https://www.algolia.com/doc/rest-api/search/#get-a-tasks-status
+* @param {string} indexName - index name where the task was executed
+* @param {number} taskID - id of the task
+*/
 function waitTask(indexName, taskID) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
     var maxWait = waitTaskTimeout || 10 * 60 * 1000;
@@ -242,7 +276,7 @@ function waitTask(indexName, taskID) {
 
 module.exports.setJobInfo = setJobInfo;
 module.exports.sendBatch = sendBatch;
-module.exports.sendMultiIndexBatch = sendMultiIndexBatch;
+module.exports.sendPayload = sendPayload;
 module.exports.deleteIndex = deleteIndex;
 module.exports.getIndexSettings = getIndexSettings;
 module.exports.setIndexSettings = setIndexSettings;

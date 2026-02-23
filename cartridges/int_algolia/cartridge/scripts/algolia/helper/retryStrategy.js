@@ -5,6 +5,20 @@ const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 const EXPIRATION_DELAY = 5 * 60 * 1000;
 
+const INDEXING_APIS = {
+    SEARCH_API: 'search-api',
+    INGESTION_API: 'ingestion-api',
+}
+
+const ANALYTICS_REGIONS = {
+    EU: 'eu',
+    US: 'us',
+}
+
+// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
+const indexingAPI = INDEXING_APIS.INGESTION_API;
+const analyticsRegion = ANALYTICS_REGIONS.EU;
+
 let statefulhosts;
 
 /**
@@ -34,13 +48,25 @@ StatefulHost.prototype.reset = function() {
  * Initialize the default hosts, based on the 'ApplicationID' custom preference
  */
 function initHosts() {
-    const appID = algoliaData.getPreference('ApplicationID')
-    statefulhosts = [
-        new StatefulHost(appID + '.algolia.net'),
-        new StatefulHost(appID + '-1.algolianet.com'),
-        new StatefulHost(appID + '-2.algolianet.com'),
-        new StatefulHost(appID + '-3.algolianet.com'),
-    ]
+    switch (indexingAPI) {
+        case INDEXING_APIS.SEARCH_API:
+            const appID = algoliaData.getPreference('ApplicationID');
+            statefulhosts = [
+                new StatefulHost(appID + '.algolia.net'),
+                new StatefulHost(appID + '-1.algolianet.com'),
+                new StatefulHost(appID + '-2.algolianet.com'),
+                new StatefulHost(appID + '-3.algolianet.com'),
+            ]
+            break;
+
+        case INDEXING_APIS.INGESTION_API:
+            statefulhosts = [
+                new StatefulHost('data.' + analyticsRegion + '.algolia.com'),
+            ]
+            break;
+    }
+
+
 }
 
 /**
@@ -118,7 +144,7 @@ function retryableCall(service, requestParams) {
         }
 
         Logger.error('Request error on ' + statefulhost.hostname + ': ' +
-          result.getError() + ' - ' + result.getErrorMessage());
+            result.getError() + ' - ' + result.getErrorMessage());
         if (!isTimeoutError(result)) {
             Logger.info('Marking host ' + statefulhost.hostname + ' down.');
             statefulhost.markDown();

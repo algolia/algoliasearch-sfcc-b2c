@@ -36,6 +36,20 @@ const RECORD_MODEL_TYPE = {
     ATTRIBUTE_SLICED: 'attribute-sliced',
 }
 
+const INDEXING_APIS = {
+    SEARCH_API: 'search-api',
+    INGESTION_API: 'ingestion-api',
+}
+
+const ANALYTICS_REGIONS = {
+    EU: 'eu',
+    US: 'us',
+}
+
+// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
+const indexingAPI = INDEXING_APIS.INGESTION_API;
+const analyticsRegion = ANALYTICS_REGIONS.EU;
+
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
@@ -607,9 +621,18 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         batch = batch.concat(algoliaOperationsArray[i].toArray());
     }
 
-    var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-    var result = retryableBatchRes.result;
-    jobReport.recordsFailed += retryableBatchRes.failedRecords;
+    let resultObj;
+    switch (indexingAPI) {
+        case INDEXING_APIS.SEARCH_API:
+            resultObj = reindexHelper.sendRetryableBatch(batch);
+            break;
+        case INDEXING_APIS.INGESTION_API:
+            resultObj = reindexHelper.groupPayloadsForIngestionAPI(batch);
+            break;
+    }
+
+    var result = resultObj.result;
+    jobReport.recordsFailed += resultObj.failedRecords;
 
     if (result.ok) {
         jobReport.recordsSent += batch.length;
