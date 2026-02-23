@@ -1,7 +1,7 @@
 /**
-*  Client to communicate with Algolia's indexing API:
-*  https://www.algolia.com/doc/rest-api/search/#objects-endpoints
-**/
+ *  Client to communicate with Algolia's indexing API:
+ *  https://www.algolia.com/doc/rest-api/search/#objects-endpoints
+ **/
 
 const waitTaskTimeout = require('*/algoliaconfig').waitTaskTimeout;
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
@@ -25,19 +25,19 @@ const indexingAPI = INDEXING_APIS.INGESTION_API;
 const analyticsRegion = ANALYTICS_REGIONS.EU;
 
 /**
-* Set information about the job using the API Client
-* @param {Object} jobInfo - object with the following structure: { "jobID": "", "stepID": "", "indexingMethod": "" }
-*/
+ * Set information about the job using the API Client
+ * @param {Object} jobInfo - object with the following structure: { "jobID": "", "stepID": "", "indexingMethod": "" }
+ */
 function setJobInfo(jobInfo) {
     __jobInfo = jobInfo;
 }
 
 /**
-* Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
-* @param {string} indexName - name of the index to target
-* @param {Array} requestsArray - array of requests to send to Algolia
-* @returns {dw.svc.Result} - result of the call
-*/
+ * Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
+ * @param {string} indexName - name of the index to target
+ * @param {Array} requestsArray - array of requests to send to Algolia
+ * @returns {dw.svc.Result} - result of the call
+ */
 function sendBatch(indexName, requestsArray) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -107,10 +107,10 @@ function sendPayload(requestPayload, indexName) {
 }
 
 /**
-* Delete index
-* @param {string} indexName - index to delete
-* @returns {dw.svc.Result} - result of the call
-*/
+ * Delete index
+ * @param {string} indexName - index to delete
+ * @returns {dw.svc.Result} - result of the call
+ */
 function deleteIndex(indexName) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -130,10 +130,10 @@ function deleteIndex(indexName) {
 }
 
 /**
-* Get index settings. https://www.algolia.com/doc/rest-api/search/#get-settings
-* @param {string} indexName - index to get the settings from
-* @returns {dw.svc.Result} - result of the call
-*/
+ * Get index settings. https://www.algolia.com/doc/rest-api/search/#get-settings
+ * @param {string} indexName - index to get the settings from
+ * @returns {dw.svc.Result} - result of the call
+ */
 function getIndexSettings(indexName) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -157,11 +157,11 @@ function getIndexSettings(indexName) {
 }
 
 /**
-* Set index settings. https://www.algolia.com/doc/rest-api/search/#set-settings
-* @param {string} indexName - targeted index
-* @param {string} indexSettings - index settings to set
-* @returns {dw.svc.Result} - result of the call
-*/
+ * Set index settings. https://www.algolia.com/doc/rest-api/search/#set-settings
+ * @param {string} indexName - targeted index
+ * @param {string} indexSettings - index settings to set
+ * @returns {dw.svc.Result} - result of the call
+ */
 function setIndexSettings(indexName, indexSettings) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -182,11 +182,11 @@ function setIndexSettings(indexName, indexSettings) {
 }
 
 /**
-* Copy the settings of an index to another. https://www.algolia.com/doc/rest-api/search/#copymove-index
-* @param {string} indexNameSrc - index to copy
-* @param {string} indexNameDest - name of the destination index
-* @returns {dw.svc.Result} - result of the call
-*/
+ * Copy the settings of an index to another. https://www.algolia.com/doc/rest-api/search/#copymove-index
+ * @param {string} indexNameSrc - index to copy
+ * @param {string} indexNameDest - name of the destination index
+ * @returns {dw.svc.Result} - result of the call
+ */
 function copyIndexSettings(indexNameSrc, indexNameDest) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -211,11 +211,11 @@ function copyIndexSettings(indexNameSrc, indexNameDest) {
 }
 
 /**
-* Move an index. https://www.algolia.com/doc/rest-api/search/#copymove-index
-* @param {string} indexNameSrc - index to move
-* @param {string} indexNameDest - new name of the index
-* @returns {dw.svc.Result} - result of the call
-*/
+ * Move an index. https://www.algolia.com/doc/rest-api/search/#copymove-index
+ * @param {string} indexNameSrc - index to move
+ * @param {string} indexNameDest - new name of the index
+ * @returns {dw.svc.Result} - result of the call
+ */
 function moveIndex(indexNameSrc, indexNameDest) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
 
@@ -239,12 +239,12 @@ function moveIndex(indexNameSrc, indexNameDest) {
 }
 
 /**
-* Wait for an Algolia task to complete.
-* This method will call the /task endpoint until its status become 'published'
-* https://www.algolia.com/doc/rest-api/search/#get-a-tasks-status
-* @param {string} indexName - index name where the task was executed
-* @param {number} taskID - id of the task
-*/
+ * Wait for an Algolia task to complete.
+ * This method will call the /task endpoint until its status become 'published'
+ * https://www.algolia.com/doc/rest-api/search/#get-a-tasks-status
+ * @param {string} indexName - index name where the task was executed
+ * @param {number} taskID - id of the task
+ */
 function waitTask(indexName, taskID) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
     var maxWait = waitTaskTimeout || 10 * 60 * 1000;
