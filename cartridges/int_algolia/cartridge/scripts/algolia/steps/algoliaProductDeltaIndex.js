@@ -41,14 +41,8 @@ const INDEXING_APIS = {
     INGESTION_API: 'ingestion-api',
 }
 
-const ANALYTICS_REGIONS = {
-    EU: 'eu',
-    US: 'us',
-}
-
 // TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
 const indexingAPI = INDEXING_APIS.INGESTION_API;
-const analyticsRegion = ANALYTICS_REGIONS.EU;
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;

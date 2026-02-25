@@ -1,19 +1,5 @@
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
-const INDEXING_APIS = {
-    SEARCH_API: 'search-api',
-    INGESTION_API: 'ingestion-api',
-}
-
-const ANALYTICS_REGIONS = {
-    EU: 'eu',
-    US: 'us',
-}
-
-// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
-const indexingAPI = INDEXING_APIS.INGESTION_API;
-const analyticsRegion = ANALYTICS_REGIONS.EU;
-
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
 
@@ -119,7 +105,7 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
 }
 
 /**
- * Sends an Algolia batch to either the multi-indices batch endpoint or the Ingestion push endpoint.
+ * Sends an Algolia batch to either the Search API `multiple-batch` endpoint or the Ingestion API `push by indexName` endpoint.
  * If records fail to be indexed (because e.g. they are too big), they are removed from the batch and the batch is retried.
  * @param {Object} batch - Algolia multi-indices batch
  * @param {String} [indexName] Target index -- only used with the Ingestion API
@@ -226,7 +212,7 @@ function groupPayloadsForIngestionAPI(payloadArray) {
         sortedPayloads[indexName][action].push(currentObject.body);
     }
 
-   let indices = Object.keys(sortedPayloads);
+    let indices = Object.keys(sortedPayloads);
 
     // iterate over the sorted batches by indexName and action, and send them
     for (let i = 0; i < indices.length; i++) {
@@ -252,6 +238,7 @@ function groupPayloadsForIngestionAPI(payloadArray) {
     }
 
     // returns the last OK result or the first failed one -- since we only need the OK/NOK from it, it's representative of the entire batch
+    result.failedRecords = failedRecords;
     return result;
 }
 

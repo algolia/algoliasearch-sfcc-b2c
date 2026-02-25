@@ -49,7 +49,7 @@ StatefulHost.prototype.reset = function() {
  */
 function initHosts() {
     switch (indexingAPI) {
-        case INDEXING_APIS.SEARCH_API:
+        case INDEXING_APIS.SEARCH_API: {
             const appID = algoliaData.getPreference('ApplicationID');
             statefulhosts = [
                 new StatefulHost(appID + '.algolia.net'),
@@ -58,15 +58,14 @@ function initHosts() {
                 new StatefulHost(appID + '-3.algolianet.com'),
             ]
             break;
-
-        case INDEXING_APIS.INGESTION_API:
+        }
+        case INDEXING_APIS.INGESTION_API: {
             statefulhosts = [
                 new StatefulHost('data.' + analyticsRegion + '.algolia.com'),
             ]
             break;
+        }
     }
-
-
 }
 
 /**
