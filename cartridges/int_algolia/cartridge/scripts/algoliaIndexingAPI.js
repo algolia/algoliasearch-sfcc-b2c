@@ -10,19 +10,14 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 var __jobInfo = {};
 
-const INDEXING_APIS = {
-    SEARCH_API: 'search-api',
-    INGESTION_API: 'ingestion-api',
-}
-
 const ANALYTICS_REGIONS = {
     EU: 'eu',
     US: 'us',
 }
 
-// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
-const indexingAPI = INDEXING_APIS.INGESTION_API;
+// TODO: make into site preference / retrieve programmatically
 const analyticsRegion = ANALYTICS_REGIONS.EU;
+
 
 /**
  * Set information about the job using the API Client
@@ -31,6 +26,8 @@ const analyticsRegion = ANALYTICS_REGIONS.EU;
 function setJobInfo(jobInfo) {
     __jobInfo = jobInfo;
 }
+
+/* --------------------------- Search API methods --------------------------- */
 
 /**
  * Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
@@ -60,44 +57,24 @@ function sendBatch(indexName, requestsArray) {
 }
 
 /**
- * Sends a request to either
- * - the Search API's `multiple-batch` endpoint (https://www.algolia.com/doc/rest-api/search/multiple-batch) or
- * - the Ingestion API's `push` endpoint (https://www.algolia.com/doc/rest-api/ingestion/push)
- * based on the indexing API used.
- * For the Ingestion API, the `push` endpoint can only accept single-index and single-action requests.
- * When using the Ingestion API, requests have already been grouped by indexName and action by this point.
-* @param {Array | Object} requestPayload Array of requests when using the Search API or payload object for the Ingestion API. For the search API, each operation must contain the `indexName` to target, for the Ingestion API, indexName is part of the reuqest URL
-* @param {String} [indexName] Name of the target index (for Ingestion only)
-* @returns {dw.svc.Result} - result of the call
-*/
-function sendPayload(requestPayload, indexName) {
+ * Send a batch of objects to Algolia Search API's `multiple-batch` endpoint
+ * https://www.algolia.com/doc/rest-api/search/multiple-batch
+ * @param {Array} requestsArray - array of requests to send to Algolia. Each operation must contain the `indexName` to target.
+ * @returns {dw.svc.Result} - result of the call
+ */
+function sendMultiIndexBatch(requestsArray) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
-    let retryableCallParameters = {};
 
-    switch (indexingAPI) {
-        case INDEXING_APIS.SEARCH_API:
-
-            retryableCallParameters = {
-                method: 'POST',
-                path: '/1/indexes/*/batch',
-                body: {
-                    requests: requestPayload,
-                }
+    var result = retryableCall(
+        indexingService,
+        {
+            method: 'POST',
+            path: '/1/indexes/*/batch',
+            body: {
+                requests: requestsArray,
             }
-            break;
-
-        case INDEXING_APIS.INGESTION_API:
-            indexingService.setURL('https://data.' + analyticsRegion + '.algolia.com/');
-            retryableCallParameters = {
-                method: 'POST',
-                path: '/1/push/' + indexName,
-                body: requestPayload,
-            }
-
-            break;
-    }
-
-    var result = retryableCall(indexingService, retryableCallParameters);
+        }
+    );
 
     if (!result.ok) {
         logger.error(result.getErrorMessage());
@@ -274,12 +251,44 @@ function waitTask(indexName, taskID) {
     throw new Error('Max wait time reached. TaskID: ' + taskID + '; index: ' + indexName);
 }
 
+/* --------------------------- Ingestion API methods --------------------------- */
+
+/**
+ * Sends a request to the Ingestion API's `push` endpoint (https://www.algolia.com/doc/rest-api/ingestion/push)
+ * The `push` endpoint can only accept single-index and single-action requests.
+ * When using the Ingestion API, requests have already been grouped by indexName and action by this point.
+* @param {Object} requestPayload payload object to be sent to the Ingestion API
+* @param {String} indexName name of the target index (for Ingestion only), used in the endpoint URL
+* @returns {dw.svc.Result} - result of the call
+*/
+function pushByIndexName(requestPayload, indexName) {
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
+
+    let retryableCallParameters = {
+        method: 'POST',
+        url: 'https://data.' + analyticsRegion + '.algolia.com',
+        path: '/1/push/' + indexName,
+        body: requestPayload,
+    }
+
+    var result = retryableCall(indexingService, retryableCallParameters);
+
+    if (!result.ok) {
+        logger.error(result.getErrorMessage());
+    }
+
+    return result;
+}
+
+
+
 module.exports.setJobInfo = setJobInfo;
 module.exports.sendBatch = sendBatch;
-module.exports.sendPayload = sendPayload;
+module.exports.sendMultiIndexBatch = sendMultiIndexBatch;
 module.exports.deleteIndex = deleteIndex;
 module.exports.getIndexSettings = getIndexSettings;
 module.exports.setIndexSettings = setIndexSettings;
 module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;
 module.exports.waitTask = waitTask;
+module.exports.pushByIndexName = pushByIndexName;

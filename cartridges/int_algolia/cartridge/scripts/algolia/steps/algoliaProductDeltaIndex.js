@@ -12,7 +12,7 @@ var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
-var fileHelper, jobHelper, reindexHelper;
+var fileHelper, jobHelper, requestHelper;
 
 // logging-related variables and constants
 var jobReport;
@@ -42,7 +42,7 @@ const INDEXING_APIS = {
 }
 
 // TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
-const indexingAPI = INDEXING_APIS.INGESTION_API;
+let indexingAPI = INDEXING_APIS.INGESTION_API;
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
@@ -80,7 +80,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
-    reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+    requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -617,22 +617,27 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
     let resultObj;
     switch (indexingAPI) {
-        case INDEXING_APIS.SEARCH_API:
-            resultObj = reindexHelper.sendRetryableBatch(batch);
+        case INDEXING_APIS.SEARCH_API: {
+            resultObj = requestHelper.sendRetryableBatch(batch);
             break;
-        case INDEXING_APIS.INGESTION_API:
-            resultObj = reindexHelper.groupPayloadsForIngestionAPI(batch);
+        }
+        case INDEXING_APIS.INGESTION_API: {
+            let sortedPayloads = requestHelper.groupPayloadsForIngestionAPI(batch);
+            resultObj = requestHelper.sendGroupedIngestionAPIPayloads(sortedPayloads);
             break;
+        }
     }
 
-    var result = resultObj.result;
+    // recordsFailed count is not necessarily accurate when using the Ingestion API
+    // An OK response from a sending call only means that the endpoint received the payload;
+    // "record too large" or other indexing-time errors can still happen -- check your Algolia Dashboard for these errors
+    let result = resultObj.result;
     jobReport.recordsFailed += resultObj.failedRecords;
 
     if (result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
     } else {
-        jobReport.recordsFailed += batch.length;
         jobReport.chunksFailed++;
     }
 }
@@ -699,3 +704,5 @@ exports.__getJobReport = function() {
 exports.__getLocalesForIndexing = function() {
     return siteLocales.toArray();
 }
+exports.__INDEXING_APIS = INDEXING_APIS;
+exports.__setIndexingAPI = function(api) { indexingAPI = api; }

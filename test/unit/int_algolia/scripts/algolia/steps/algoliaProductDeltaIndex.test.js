@@ -8,12 +8,15 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         setJobInfo: mockSetJobInfo,
         sendMultiIndexBatch: mockSendMultiIndexBatch,
+        pushByIndexName: jest.fn(),
     }
 }, {virtual: true});
-jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
-    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
+jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/requestHelper');
     return {
         sendRetryableBatch: originalModule.sendRetryableBatch,
+        groupPayloadsForIngestionAPI: originalModule.groupPayloadsForIngestionAPI,
+        sendGroupedIngestionAPIPayloads: originalModule.sendGroupedIngestionAPIPayloads,
     }
 }, {virtual: true});
 
@@ -133,6 +136,7 @@ describe('process', () => {
 
 test('send', () => {
     job.beforeStep(parameters, stepExecution);
+    job.__setIndexingAPI(job.__INDEXING_APIS.SEARCH_API);
 
     const algoliaOperationsChunk = [];
     for (let i = 0; i < 3; ++i) {

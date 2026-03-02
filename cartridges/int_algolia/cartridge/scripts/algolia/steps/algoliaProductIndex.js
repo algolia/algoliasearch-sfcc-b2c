@@ -11,7 +11,7 @@ var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, AlgoliaJobReport;
-var jobHelper, reindexHelper;
+var jobHelper, reindexHelper, requestHelper;
 var indexingOperation;
 var fullRecordUpdate = false;
 
@@ -67,6 +67,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+    requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -515,7 +516,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
     var result;
     try {
-        var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+        var retryableBatchRes = requestHelper.sendRetryableBatch(batch);
         result = retryableBatchRes.result;
         jobReport.recordsFailed += retryableBatchRes.failedRecords;
     } catch (e) {

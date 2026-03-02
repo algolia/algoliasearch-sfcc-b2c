@@ -34,7 +34,6 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaContentConfig', () => {
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
     return {
-        sendRetryableBatch: originalModule.sendRetryableBatch,
         deleteRetryableBatch: originalModule.deleteRetryableBatch,
         deleteTemporaryIndices: originalModule.deleteTemporaryIndices,
         waitForTasks: originalModule.waitForTasks,
@@ -44,6 +43,16 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
 }, {
     virtual: true
 });
+
+jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/requestHelper');
+    return {
+        sendRetryableBatch: originalModule.sendRetryableBatch,
+    }
+}, {
+    virtual: true
+});
+
 
 jest.mock('dw/util/Bytes', () => {
     class BytesMock {

@@ -2,6 +2,7 @@ const Result = require('dw/svc/Result')
 const Logger = require('dw/system/Logger');
 
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+const appID = algoliaData.getPreference('ApplicationID');
 
 const EXPIRATION_DELAY = 5 * 60 * 1000;
 
@@ -16,7 +17,7 @@ const ANALYTICS_REGIONS = {
 }
 
 // TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
-const indexingAPI = INDEXING_APIS.INGESTION_API;
+let indexingAPI = INDEXING_APIS.INGESTION_API;
 const analyticsRegion = ANALYTICS_REGIONS.EU;
 
 let statefulhosts;
@@ -50,7 +51,6 @@ StatefulHost.prototype.reset = function() {
 function initHosts() {
     switch (indexingAPI) {
         case INDEXING_APIS.SEARCH_API: {
-            const appID = algoliaData.getPreference('ApplicationID');
             statefulhosts = [
                 new StatefulHost(appID + '.algolia.net'),
                 new StatefulHost(appID + '-1.algolianet.com'),
@@ -161,3 +161,5 @@ module.exports.StatefulHost = StatefulHost;
 module.exports.initHosts = initHosts;
 module.exports.getAvailableHosts = getAvailableHosts;
 module.exports.isRetryable = isRetryable;
+module.exports._INDEXING_APIS = INDEXING_APIS;
+module.exports._setIndexingAPI = function(api) { indexingAPI = api; };
