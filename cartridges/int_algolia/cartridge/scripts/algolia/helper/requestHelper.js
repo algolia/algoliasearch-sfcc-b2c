@@ -4,7 +4,8 @@ const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
 /* --------------------------- Search API methods --------------------------- */
 
 /**
- * Sends an Algolia batch to either the Search API `multiple-batch` endpoint or the Ingestion API `push by indexName` endpoint.
+ * Sends an Algolia batch to the Search API `multiple-batch` endpoint
+ * https://www.algolia.com/doc/rest-api/search/multiple-batch
  * If records fail to be indexed (because e.g. they are too big), they are removed from the batch and the batch is retried.
  * @param {Object} batch - Algolia multi-indices batch
  * @param {String} [indexName] Target index -- only used with the Ingestion API
@@ -70,9 +71,36 @@ function sendRetryableBatch(batch) {
 /* --------------------------- Ingestion API methods --------------------------- */
 
 /**
- * Groups payload records by index name and action to build ingestion API batches.
+ * Groups records to be sent by index name and action to build ingestion API batches.
+ * The "deleteObject" action is currently only used with the algoliaProductDeltaIndex job
+ * and the real-time inventory update feature.
+ * Example input:
+ *  recordArray = [
+ *      {
+ *          action: "addObject",
+ *          body: {
+ *              defaultVariantID: "...",
+ *              image_groups: "[{ ... }, { ... }]",
+ *              masterID: "...",
+ *              name: "...",
+ *              objectID: "...",
+ *              short_description: "..."
+ *              variants: [{ ... }, { ... }],
+ *              ... any other record properties configured in BM ...
+ *          },
+ *          indexName: "...",
+ *      },
+ *      {
+ *          action: "deleteObject",
+ *          body: {
+ *              objectID: "..."
+ *          },
+ *          indexName: "...",
+ *      },
+ *      ...
+ *  ]
  * Example return object:
- * groupedPayloads = {
+ *  groupedRecords = {
  *     'indexName1': {
  *         'addObject': [
  *             { <recordBody10> }, { <recordBody11> }, ...
@@ -84,62 +112,62 @@ function sendRetryableBatch(batch) {
  *     },
  *     'indexName2': { ... },
  *     ...
- * }
- * @param {Object[]} payloadArray - Payload entries with `action` and `records`.
+ *  }
+ * @param {Object[]} recordArray - record entries with `action` and `records`.
  * @returns {Object} object containing records grouped by target index and action
  */
-function groupPayloadsForIngestionAPI(payloadArray) {
+function groupRecordsForIngestionAPI(recordArray) {
 
-    let groupedPayloads = {};
+    let groupedRecords = {};
 
     // group records by indexName and action
-    for (let i = 0; i < payloadArray.length; i ++) {
-        let currentObject = payloadArray[i];
+    for (let i = 0; i < recordArray.length; i ++) {
+        let currentObject = recordArray[i];
         let indexName = currentObject.indexName;
         let action = currentObject.action;
 
-        if (empty(groupedPayloads[indexName])) {
-            groupedPayloads[indexName] = {};
+        if (empty(groupedRecords[indexName])) {
+            groupedRecords[indexName] = {};
         }
 
-        if (empty(groupedPayloads[indexName][action])) {
-            groupedPayloads[indexName][action] = [];
+        if (empty(groupedRecords[indexName][action])) {
+            groupedRecords[indexName][action] = [];
         }
 
-        groupedPayloads[indexName][action].push(currentObject.body);
+        groupedRecords[indexName][action].push(currentObject.body);
     }
 
-    return groupedPayloads;
+    return groupedRecords;
 }
 
 /**
- * Sends Ingestion API payloads grouped by indexName and action
- * @param {Object} groupedPayloads - Records grouped by `indexName` and `action`.
+ * Sends Algolia records to the Ingestion API grouped by indexName and action
+ * @param {Object} groupedRecords - Records grouped by `indexName` and `action`.
  * @returns {Object} result object containing status and number of failed records
  */
-function sendGroupedIngestionAPIPayloads(groupedPayloads) {
-    let indices = Object.keys(groupedPayloads);
+function sendGroupedIngestionAPIRecords(groupedRecords) {
+    let indices = Object.keys(groupedRecords);
     let failedRecords = 0;
     let wasThereAnError = false;
 
     // iterate over the grouped batches by indexName and action, and send them
     for (let i = 0; i < indices.length; i++) {
         let indexName = indices[i];
-        let index = groupedPayloads[indexName];
+        let index = groupedRecords[indexName];
         let actions = Object.keys(index);
 
         for (let j = 0; j < actions.length; j++) {
             let action = actions[j];
 
-            let payloadToSend = {
+            let recordToSend = {
                 action: action,
                 records: index[action],
             }
 
-            let result = algoliaIndexingAPI.pushByIndexName(payloadToSend, indexName);
+            let result = algoliaIndexingAPI.pushByIndexName(recordToSend, indexName);
             if (!(result.ok)) {
                 wasThereAnError = true;
-                failedRecords += payloadToSend.records.length;
+                failedRecords += recordToSend.records.length;
             }
         }
     }
@@ -154,5 +182,5 @@ function sendGroupedIngestionAPIPayloads(groupedPayloads) {
 
 
 module.exports.sendRetryableBatch = sendRetryableBatch;
-module.exports.groupPayloadsForIngestionAPI = groupPayloadsForIngestionAPI;
-module.exports.sendGroupedIngestionAPIPayloads = sendGroupedIngestionAPIPayloads;
+module.exports.groupRecordsForIngestionAPI = groupRecordsForIngestionAPI;
+module.exports.sendGroupedIngestionAPIRecords = sendGroupedIngestionAPIRecords;

@@ -280,8 +280,6 @@ function pushByIndexName(requestPayload, indexName) {
     return result;
 }
 
-
-
 module.exports.setJobInfo = setJobInfo;
 module.exports.sendBatch = sendBatch;
 module.exports.sendMultiIndexBatch = sendMultiIndexBatch;

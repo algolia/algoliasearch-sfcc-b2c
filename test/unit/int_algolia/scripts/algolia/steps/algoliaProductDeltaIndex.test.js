@@ -15,8 +15,8 @@ jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/requestHelper');
     return {
         sendRetryableBatch: originalModule.sendRetryableBatch,
-        groupPayloadsForIngestionAPI: originalModule.groupPayloadsForIngestionAPI,
-        sendGroupedIngestionAPIPayloads: originalModule.sendGroupedIngestionAPIPayloads,
+        groupRecordsForIngestionAPI: originalModule.groupRecordsForIngestionAPI,
+        sendGroupedIngestionAPIRecords: originalModule.sendGroupedIngestionAPIRecords,
     }
 }, {virtual: true});
 

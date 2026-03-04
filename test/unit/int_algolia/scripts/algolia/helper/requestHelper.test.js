@@ -64,10 +64,10 @@ test('sendRetryableBatch', () => {
     expect(batch.length).toBe(4); // 2 records have been removed
 });
 
-test('groupPayloadsForIngestionAPI', () => {
-    // TODO: write test
+test('groupRecordsForIngestionAPI', () => {
+    // TODO: add test
 });
 
-test('sendGroupedIngestionAPIPayloads', () => {
-    // TODO: write test
+test('sendGroupedIngestionAPIRecords', () => {
+    // TODO: add test
 });

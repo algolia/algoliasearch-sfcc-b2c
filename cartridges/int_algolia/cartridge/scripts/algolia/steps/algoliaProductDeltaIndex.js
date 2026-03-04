@@ -622,8 +622,8 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
             break;
         }
         case INDEXING_APIS.INGESTION_API: {
-            let sortedPayloads = requestHelper.groupPayloadsForIngestionAPI(batch);
-            resultObj = requestHelper.sendGroupedIngestionAPIPayloads(sortedPayloads);
+            let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+            resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
             break;
         }
     }
@@ -638,6 +638,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
     } else {
+        jobReport.recordsFailed += batch.length;
         jobReport.chunksFailed++;
     }
 }
@@ -671,7 +672,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
 
             // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
             if (!empty(deltaExportZips)) {
-                logger.info('Moving the Delta export files to the "_completed" directory...')
+                logger.info('Moving the Delta export files to the "_completed" directory...');
                 fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_completedDir);
             }
         } else {
