@@ -5,7 +5,7 @@ let Status = require('dw/system/Status');
 
 let jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-let reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+let requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
 let productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 let AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
@@ -131,7 +131,7 @@ exports.inventoryUpdate = function (order) {
         }
 
         if (algoliaOperations.length > 0) {
-            reindexHelper.sendRetryableBatch(algoliaOperations);
+            requestHelper.sendRetryableBatch(algoliaOperations);
         }
     } catch (error) {
         Logger.error(

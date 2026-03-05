@@ -1,6 +1,6 @@
 'use strict';
 
-jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => ({
+jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => ({
     sendRetryableBatch: jest.fn().mockReturnValue({ ok: true })
 }), { virtual: true });
 

@@ -41,6 +41,7 @@ function runCategoryExport(parameters, stepExecution) {
     const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
     const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     const reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+    const requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
     const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
     const logger = jobHelper.getAlgoliaLogger();
@@ -122,7 +123,7 @@ function runCategoryExport(parameters, stepExecution) {
 
         var result;
         try {
-            var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+            var retryableBatchRes = requestHelper.sendRetryableBatch(batch);
             result = retryableBatchRes.result;
             jobReport.recordsFailed += retryableBatchRes.failedRecords;
         } catch (e) {
