@@ -10,6 +10,15 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 var __jobInfo = {};
 
+const ANALYTICS_REGIONS = {
+    EU: 'eu',
+    US: 'us',
+}
+
+// TODO: make into site preference / retrieve programmatically
+const analyticsRegion = ANALYTICS_REGIONS.EU;
+
+
 /**
  * Set information about the job using the API Client
  * @param {Object} jobInfo - object with the following structure: { "jobID": "", "stepID": "", "indexingMethod": "" }
@@ -17,6 +26,8 @@ var __jobInfo = {};
 function setJobInfo(jobInfo) {
     __jobInfo = jobInfo;
 }
+
+/* --------------------------- Search API methods --------------------------- */
 
 /**
  * Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
@@ -46,9 +57,9 @@ function sendBatch(indexName, requestsArray) {
 }
 
 /**
- * Send a batch of objects to Algolia Indexing API (multiple indices):
- * https://www.algolia.com/doc/rest-api/search/#batch-write-operations-multiple-indices
- * @param {AlgoliaOperation[]} requestsArray - array of requests to send to Algolia. Each operation must contain the `indexName` to target.
+ * Send a batch of objects to Algolia Search API's `multiple-batch` endpoint
+ * https://www.algolia.com/doc/rest-api/search/multiple-batch
+ * @param {Array} requestsArray - array of requests to send to Algolia. Each operation must contain the `indexName` to target.
  * @returns {dw.svc.Result} - result of the call
  */
 function sendMultiIndexBatch(requestsArray) {
@@ -240,6 +251,35 @@ function waitTask(indexName, taskID) {
     throw new Error('Max wait time reached. TaskID: ' + taskID + '; index: ' + indexName);
 }
 
+/* --------------------------- Ingestion API methods --------------------------- */
+
+/**
+ * Sends a request to the Ingestion API's `push` endpoint (https://www.algolia.com/doc/rest-api/ingestion/push)
+ * The `push` endpoint can only accept single-index and single-action requests.
+ * When using the Ingestion API, requests have already been grouped by indexName and action by this point.
+* @param {Object} requestPayload payload object to be sent to the Ingestion API
+* @param {String} indexName name of the target index (for Ingestion only), used in the endpoint URL
+* @returns {dw.svc.Result} - result of the call
+*/
+function pushByIndexName(requestPayload, indexName) {
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
+
+    let retryableCallParameters = {
+        method: 'POST',
+        url: 'https://data.' + analyticsRegion + '.algolia.com',
+        path: '/1/push/' + indexName,
+        body: requestPayload,
+    }
+
+    var result = retryableCall(indexingService, retryableCallParameters);
+
+    if (!result.ok) {
+        logger.error(result.getErrorMessage());
+    }
+
+    return result;
+}
+
 module.exports.setJobInfo = setJobInfo;
 module.exports.sendBatch = sendBatch;
 module.exports.sendMultiIndexBatch = sendMultiIndexBatch;
@@ -249,3 +289,4 @@ module.exports.setIndexSettings = setIndexSettings;
 module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;
 module.exports.waitTask = waitTask;
+module.exports.pushByIndexName = pushByIndexName;
