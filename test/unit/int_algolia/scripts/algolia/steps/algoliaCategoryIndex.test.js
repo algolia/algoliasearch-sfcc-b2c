@@ -87,13 +87,17 @@ const mockCopySettingsFromProdIndices = jest.fn();
 const mockDeleteTemporaryIndices = jest.fn();
 const mockFinishAtomicReindex = jest.fn();
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
-    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
     return {
-        sendRetryableBatch: originalModule.sendRetryableBatch,
         deleteTemporaryIndices: mockDeleteTemporaryIndices,
         copySettingsFromProdIndices: mockCopySettingsFromProdIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
         waitForTasks: jest.fn(),
+    };
+}, {virtual: true});
+jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/requestHelper');
+    return {
+        sendRetryableBatch: originalModule.sendRetryableBatch,
     };
 }, {virtual: true});
 

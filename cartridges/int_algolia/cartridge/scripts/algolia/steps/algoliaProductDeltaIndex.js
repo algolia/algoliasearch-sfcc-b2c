@@ -12,7 +12,7 @@ var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
-var fileHelper, jobHelper, reindexHelper;
+var fileHelper, jobHelper, requestHelper;
 
 // logging-related variables and constants
 var jobReport;
@@ -35,6 +35,14 @@ const RECORD_MODEL_TYPE = {
     VARIANT_LEVEL: 'variant-level',
     ATTRIBUTE_SLICED: 'attribute-sliced',
 }
+
+const INDEXING_APIS = {
+    SEARCH_API: 'search-api',
+    INGESTION_API: 'ingestion-api',
+}
+
+// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
+let indexingAPI = INDEXING_APIS.INGESTION_API;
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
@@ -72,7 +80,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
-    reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+    requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -607,9 +615,24 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         batch = batch.concat(algoliaOperationsArray[i].toArray());
     }
 
-    var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-    var result = retryableBatchRes.result;
-    jobReport.recordsFailed += retryableBatchRes.failedRecords;
+    let resultObj;
+    switch (indexingAPI) {
+        case INDEXING_APIS.SEARCH_API: {
+            resultObj = requestHelper.sendRetryableBatch(batch);
+            break;
+        }
+        case INDEXING_APIS.INGESTION_API: {
+            let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+            resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+            break;
+        }
+    }
+
+    // recordsFailed count is not necessarily accurate when using the Ingestion API
+    // An OK response from a sending call only means that the endpoint received the payload;
+    // "record too large" or other indexing-time errors can still happen -- check your Algolia Dashboard for these errors
+    let result = resultObj.result;
+    jobReport.recordsFailed += resultObj.failedRecords;
 
     if (result.ok) {
         jobReport.recordsSent += batch.length;
@@ -649,7 +672,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
 
             // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
             if (!empty(deltaExportZips)) {
-                logger.info('Moving the Delta export files to the "_completed" directory...')
+                logger.info('Moving the Delta export files to the "_completed" directory...');
                 fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_completedDir);
             }
         } else {
@@ -682,3 +705,5 @@ exports.__getJobReport = function() {
 exports.__getLocalesForIndexing = function() {
     return siteLocales.toArray();
 }
+exports.__INDEXING_APIS = INDEXING_APIS;
+exports.__setIndexingAPI = function(api) { indexingAPI = api; }
