@@ -17,7 +17,6 @@ const ANALYTICS_REGIONS = {
 }
 
 // TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
-let indexingAPI = INDEXING_APIS.INGESTION_API;
 const analyticsRegion = ANALYTICS_REGIONS.EU;
 
 let statefulhosts;
@@ -46,9 +45,10 @@ StatefulHost.prototype.reset = function() {
 }
 
 /**
- * Initialize the default hosts, based on the 'ApplicationID' custom preference
+ * Initialize the default hosts, based on the 'ApplicationID' custom preference and the selected indexingAPI
+ * @param {String} indexingAPI the indexing API to use for the call, Search API or Ingestion API
  */
-function initHosts() {
+function initHosts(indexingAPI) {
     switch (indexingAPI) {
         case INDEXING_APIS.SEARCH_API: {
             statefulhosts = [
@@ -72,11 +72,10 @@ function initHosts() {
  * Return the currently available hosts
  * @return {StatefulHost[]} The list of available hosts
  */
-function getAvailableHosts() {
+function getAvailableHosts(indexingAPI) {
     const res = [];
-    if (!statefulhosts) {
-        initHosts();
-    }
+    initHosts(indexingAPI);
+
     for (let i = 0; i < statefulhosts.length; ++i) {
         if (statefulhosts[i].isExpired()) {
             statefulhosts[i].reset();
@@ -121,15 +120,19 @@ function isRetryable(result) {
 /**
  * Main logic of the retry strategy.
  * For a given request parameters, sends the request to each available hosts until it gets a valid response.
- * Available hosts are calculated based on the 'ApplicationID' custom property.
+ * Available hosts are calculated based on the 'ApplicationID' custom property and the requestParams.indexingAPI parameter (Search or Ingestion)
  *
  * @param {dw.svc.HTTPService} service The service used to send the request
  * @param {Object} requestParams The request parameters
  * @return {dw.svc.Result} The first non-retryable result
  */
 function retryableCall(service, requestParams) {
+    // even with the Ingestion API selected for indexing globally, there are calls which
+    // need to be made to the Search API, so the hosts need to be defined on a call-by-call basis
+    let indexingAPI = requestParams.indexingAPI === INDEXING_APIS.INGESTION_API ? INDEXING_APIS.INGESTION_API : INDEXING_APIS.SEARCH_API;
+
     let result;
-    let hosts = getAvailableHosts();
+    let hosts = getAvailableHosts(indexingAPI);
     for (let i = 0; i < hosts.length; ++i) {
         let statefulhost = hosts[i];
         result = service.call({
@@ -161,5 +164,3 @@ module.exports.StatefulHost = StatefulHost;
 module.exports.initHosts = initHosts;
 module.exports.getAvailableHosts = getAvailableHosts;
 module.exports.isRetryable = isRetryable;
-module.exports._INDEXING_APIS = INDEXING_APIS;
-module.exports._setIndexingAPI = function(api) { indexingAPI = api; };
