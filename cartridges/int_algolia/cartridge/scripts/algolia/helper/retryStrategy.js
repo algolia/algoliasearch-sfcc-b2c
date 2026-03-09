@@ -19,7 +19,7 @@ const ANALYTICS_REGIONS = {
 // TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
 const analyticsRegion = ANALYTICS_REGIONS.EU;
 
-let statefulhosts;
+let statefulhosts = {};
 
 /**
  * Class keeping a host's state
@@ -49,20 +49,25 @@ StatefulHost.prototype.reset = function() {
  * @param {String} indexingAPI the indexing API to use for the call, Search API or Ingestion API
  */
 function initHosts(indexingAPI) {
+    // defaulting to 'search-api'
+    if (typeof indexingAPI === 'undefined') {
+        indexingAPI = INDEXING_APIS.SEARCH_API;
+    }
+
     switch (indexingAPI) {
+        case INDEXING_APIS.INGESTION_API: {
+            statefulhosts[INDEXING_APIS.INGESTION_API] = [
+                new StatefulHost('data.' + analyticsRegion + '.algolia.com'),
+            ];
+            break;
+        }
         case INDEXING_APIS.SEARCH_API: {
-            statefulhosts = [
+            statefulhosts[INDEXING_APIS.SEARCH_API] = [
                 new StatefulHost(appID + '.algolia.net'),
                 new StatefulHost(appID + '-1.algolianet.com'),
                 new StatefulHost(appID + '-2.algolianet.com'),
                 new StatefulHost(appID + '-3.algolianet.com'),
-            ]
-            break;
-        }
-        case INDEXING_APIS.INGESTION_API: {
-            statefulhosts = [
-                new StatefulHost('data.' + analyticsRegion + '.algolia.com'),
-            ]
+            ];
             break;
         }
     }
@@ -74,14 +79,22 @@ function initHosts(indexingAPI) {
  */
 function getAvailableHosts(indexingAPI) {
     const res = [];
-    initHosts(indexingAPI);
 
-    for (let i = 0; i < statefulhosts.length; ++i) {
-        if (statefulhosts[i].isExpired()) {
-            statefulhosts[i].reset();
+    // defaulting to 'search'api'
+    if (typeof indexingAPI === 'undefined') {
+        indexingAPI = INDEXING_APIS.SEARCH_API;
+    }
+
+    if (empty(statefulhosts[indexingAPI])) {
+        initHosts(indexingAPI);
+    }
+
+    for (let i = 0; i < statefulhosts[indexingAPI].length; ++i) {
+        if (statefulhosts[indexingAPI][i].isExpired()) {
+            statefulhosts[indexingAPI][i].reset();
         }
-        if (!statefulhosts[i].isDown) {
-            res.push(statefulhosts[i]);
+        if (!statefulhosts[indexingAPI][i].isDown) {
+            res.push(statefulhosts[indexingAPI][i]);
         }
     }
     if (res.length > 0) {
@@ -89,8 +102,8 @@ function getAvailableHosts(indexingAPI) {
     }
 
     Logger.info('All hosts are down, retrying them...');
-    for (let i = 0; i < statefulhosts.length; ++i) {
-        res.push(statefulhosts[i]);
+    for (let i = 0; i < statefulhosts[indexingAPI].length; ++i) {
+        res.push(statefulhosts[indexingAPI][i]);
     }
     return res;
 }

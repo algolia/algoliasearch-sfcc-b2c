@@ -32,6 +32,14 @@ const RECORD_MODEL_TYPE = {
     ATTRIBUTE_SLICED: 'attribute-sliced',
 }
 
+const INDEXING_APIS = {
+    SEARCH_API: 'search-api',
+    INGESTION_API: 'ingestion-api',
+}
+
+// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
+let indexingAPI = INDEXING_APIS.INGESTION_API;
+
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
@@ -514,11 +522,23 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         return;
     }
 
-    var result;
+    let resultObj, result;
+
     try {
-        var retryableBatchRes = requestHelper.sendRetryableBatch(batch);
-        result = retryableBatchRes.result;
-        jobReport.recordsFailed += retryableBatchRes.failedRecords;
+        // fullCatalogReindex should still use Search API due to there being no task associated with the temporary index created during atomic reindexing
+        // atomic reindexing clears the _collection arrays anyway, this is a known caveat which needs to be taken in to account when using atomic reindexing
+        if (indexingAPI === INDEXING_APIS.SEARCH_API || paramIndexingMethod === 'fullCatalogReindex') {
+            resultObj = requestHelper.sendRetryableBatch(batch);
+        } else { // INDEXING_APIS.INGESTION_API
+            let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+            resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+        }
+
+        // recordsFailed count is not necessarily accurate when using the Ingestion API
+        // An OK response from a sending call only means that the endpoint received the payload;
+        // "record too large" or other indexing-time errors can still happen -- check your Algolia Dashboard for these errors
+        result = resultObj.result;
+        jobReport.recordsFailed += resultObj.failedRecords;
     } catch (e) {
         logger.error('Error while sending batch to Algolia: ' + e);
     }
@@ -529,10 +549,12 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
         // Store Algolia indexing task IDs.
         // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
-        var taskIDs = result.object.body.taskID;
-        Object.keys(taskIDs).forEach(function (taskIndexName) {
-            lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
-        });
+        if (indexingAPI === INDEXING_APIS.SEARCH_API || paramIndexingMethod === 'fullCatalogReindex') {
+            var taskIDs = result.object.body.taskID;
+            Object.keys(taskIDs).forEach(function (taskIndexName) {
+                lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
+            });
+        }
     } else {
         jobReport.recordsFailed += batch.length;
         jobReport.chunksFailed++;
@@ -621,3 +643,5 @@ exports.__getLocalesForIndexing = function() {
 exports.__getJobReport = function() {
     return jobReport;
 }
+exports.__INDEXING_APIS = INDEXING_APIS;
+exports.__setIndexingAPI = function(api) { indexingAPI = api; }
