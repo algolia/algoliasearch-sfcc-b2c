@@ -10,6 +10,11 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 var __jobInfo = {};
 
+const INDEXING_APIS = {
+    SEARCH_API: 'search-api',
+    INGESTION_API: 'ingestion-api',
+}
+
 const ANALYTICS_REGIONS = {
     EU: 'eu',
     US: 'us',
@@ -269,6 +274,7 @@ function pushByIndexName(requestPayload, indexName) {
         url: 'https://data.' + analyticsRegion + '.algolia.com',
         path: '/1/push/' + indexName,
         body: requestPayload,
+        indexingAPI: INDEXING_APIS.INGESTION_API,
     }
 
     var result = retryableCall(indexingService, retryableCallParameters);

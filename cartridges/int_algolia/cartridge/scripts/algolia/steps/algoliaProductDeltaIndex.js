@@ -617,13 +617,14 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
     let resultObj;
     switch (indexingAPI) {
-        case INDEXING_APIS.SEARCH_API: {
-            resultObj = requestHelper.sendRetryableBatch(batch);
-            break;
-        }
         case INDEXING_APIS.INGESTION_API: {
             let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
             resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+            break;
+        }
+        case INDEXING_APIS.SEARCH_API:
+        default: {
+            resultObj = requestHelper.sendRetryableBatch(batch);
             break;
         }
     }

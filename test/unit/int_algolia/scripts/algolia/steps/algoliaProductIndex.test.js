@@ -280,6 +280,7 @@ describe('process', () => {
 describe('send', () => {
     test('normal batch', () => {
         job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.SEARCH_API);
 
         const algoliaOperationsChunk = [];
         for (let i = 0; i < 3; ++i) {
