@@ -525,8 +525,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     let resultObj, result;
 
     try {
-        // fullCatalogReindex should still use Search API due to there being no task associated with the temporary index created during atomic reindexing
-        // atomic reindexing clears the _collection arrays anyway, this is a known caveat which needs to be taken in to account when using atomic reindexing
+        // TODO: implement full reindexing via the Ingestion API
         if (indexingAPI === INDEXING_APIS.SEARCH_API || paramIndexingMethod === 'fullCatalogReindex') {
             resultObj = requestHelper.sendRetryableBatch(batch);
         } else { // INDEXING_APIS.INGESTION_API

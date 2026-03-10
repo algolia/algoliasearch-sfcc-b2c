@@ -49,11 +49,6 @@ StatefulHost.prototype.reset = function() {
  * @param {String} indexingAPI the indexing API to use for the call, Search API or Ingestion API
  */
 function initHosts(indexingAPI) {
-    // defaulting to 'search-api'
-    if (typeof indexingAPI === 'undefined') {
-        indexingAPI = INDEXING_APIS.SEARCH_API;
-    }
-
     switch (indexingAPI) {
         case INDEXING_APIS.INGESTION_API: {
             statefulhosts[INDEXING_APIS.INGESTION_API] = [
@@ -61,6 +56,7 @@ function initHosts(indexingAPI) {
             ];
             break;
         }
+        default:
         case INDEXING_APIS.SEARCH_API: {
             statefulhosts[INDEXING_APIS.SEARCH_API] = [
                 new StatefulHost(appID + '.algolia.net'),
