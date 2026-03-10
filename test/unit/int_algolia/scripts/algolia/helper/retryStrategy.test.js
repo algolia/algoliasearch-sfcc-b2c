@@ -26,8 +26,6 @@ beforeEach(() => {
 })
 
 test('StatefulHost', () => {
-    retryStrategy._setIndexingAPI(retryStrategy._INDEXING_APIS.SEARCH_API);
-
     const statefulhost = new retryStrategy.StatefulHost('http://test.com');
     expect(statefulhost.hostname).toBe('http://test.com');
     expect(statefulhost.isDown).toBe(false);
@@ -46,9 +44,7 @@ test('StatefulHost', () => {
 });
 
 test('defaultHosts', () => {
-    retryStrategy._setIndexingAPI(retryStrategy._INDEXING_APIS.SEARCH_API);
-
-    expect(retryStrategy.getAvailableHosts()
+    expect(retryStrategy.getAvailableHosts('search-api')
         .map(statefulhost => statefulhost.hostname)).toEqual([
         `${appID}.algolia.net`,
         `${appID}-1.algolianet.com`,
@@ -58,7 +54,6 @@ test('defaultHosts', () => {
 });
 
 test('isRetryable', () => {
-    retryStrategy._setIndexingAPI(retryStrategy._INDEXING_APIS.SEARCH_API);
     const getUnavailableReasonMock = jest.fn();
     const getErrorMock = jest.fn().mockReturnValue(0);
 
@@ -85,7 +80,6 @@ test('isRetryable', () => {
 });
 
 test('retryableCall - success on 3rd server', () => {
-    retryStrategy._setIndexingAPI(retryStrategy._INDEXING_APIS.SEARCH_API);
     const serverErrorResult = {
         ok: false,
         getUnavailableReason: jest.fn(),
@@ -115,7 +109,6 @@ test('retryableCall - success on 3rd server', () => {
 });
 
 test('retryableCall - error', () => {
-    retryStrategy._setIndexingAPI(retryStrategy._INDEXING_APIS.SEARCH_API);
     const serverErrorResult = {
         ok: false,
         getUnavailableReason: jest.fn(),
