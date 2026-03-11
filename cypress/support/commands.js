@@ -41,8 +41,12 @@ Cypress.Commands.add('closeCookieConsent', () => {
     cy.session('consent-tracking', () => {
         const host = Cypress.env('SANDBOX_HOST');
         cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
-        cy.get('#consent-tracking .affirm', { timeout: 10000 }).click();
-        cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
+        cy.get('body').then(($body) => {
+            if ($body.find('#consent-tracking.show').length) {
+                cy.get('#consent-tracking .affirm').click();
+                cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
+            }
+        });
     });
 });
 
