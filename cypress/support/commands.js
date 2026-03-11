@@ -29,15 +29,11 @@ Cypress.Commands.add('closeCookieConsent', () => {
     const host = Cypress.env('SANDBOX_HOST');
     // Visit your website's homepage or search page
     cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
-    // Wait for the page to load
-    cy.get('body', { timeout: 20000 }).should('be.visible');
-    // Handle the cookie consent pop-up
-    cy.get('body').then(($body) => {
-        if ($body.find('.affirm').length) {
-            // If the affirm button exists, click it
-            cy.get('.affirm').click();
+    // Wait for the tracking consent modal to appear
+    cy.get('#consent-tracking .affirm', { timeout: 10000 }).then(($affirm) => {
+        if ($affirm.length) {
+            cy.wrap($affirm).click();
         } else {
-            // If the affirm button does not exist, log a message
             cy.log('No cookie consent pop-up found.');
         }
     });
