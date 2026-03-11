@@ -24,7 +24,19 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-// Close cookie consent pop-up using cy.session() to persist cookies across retries
+// Automatically dismiss the cookie consent modal after every cy.visit()
+Cypress.Commands.overwrite('visit', (originalFn, url, options) => {
+    return originalFn(url, options).then(() => {
+        cy.get('body').then(($body) => {
+            if ($body.find('#consent-tracking.show').length) {
+                cy.get('#consent-tracking .affirm').click();
+                cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
+            }
+        });
+    });
+});
+
+// Close cookie consent pop-up (visits a page and dismisses the modal)
 Cypress.Commands.add('closeCookieConsent', () => {
     cy.session('consent-tracking', () => {
         const host = Cypress.env('SANDBOX_HOST');
