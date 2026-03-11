@@ -27,12 +27,16 @@
 // Close cookie consent pop-up
 Cypress.Commands.add('closeCookieConsent', () => {
     const host = Cypress.env('SANDBOX_HOST');
+    cy.intercept('**/ConsentTracking-SetSession*').as('consentTracking');
     // Visit your website's homepage or search page
     cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
-    // Wait for the tracking consent modal to appear
+    // Wait for the tracking consent modal to appear (may be slow on CI)
     cy.get('#consent-tracking .affirm', { timeout: 10000 }).then(($affirm) => {
         if ($affirm.length) {
             cy.wrap($affirm).click();
+            // Wait for the consent to be persisted in the session
+            // before navigating away
+            cy.wait('@consentTracking');
         } else {
             cy.log('No cookie consent pop-up found.');
         }
