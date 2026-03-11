@@ -24,31 +24,13 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-// Dismiss the cookie consent modal if it's present on the current page
-Cypress.Commands.add('dismissConsentModal', () => {
-    cy.get('body').then(($body) => {
-        if ($body.find('#consent-tracking.show').length) {
-            cy.get('#consent-tracking .affirm').click();
-            cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
-        }
-    });
-});
-
-// Close cookie consent pop-up (visits a page and dismisses the modal)
+// Close cookie consent pop-up using cy.session() to persist cookies across retries
 Cypress.Commands.add('closeCookieConsent', () => {
-    const host = Cypress.env('SANDBOX_HOST');
-    // Visit your website's homepage or search page
-    cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
-    // Wait for the tracking consent modal to appear (may be slow on CI)
-    cy.get('#consent-tracking .affirm', { timeout: 10000 }).then(($affirm) => {
-        if ($affirm.length) {
-            cy.wrap($affirm).click();
-            // Wait for the modal to fully disappear before navigating away,
-            // ensuring the consent has been persisted in the session
-            cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
-        } else {
-            cy.log('No cookie consent pop-up found.');
-        }
+    cy.session('consent-tracking', () => {
+        const host = Cypress.env('SANDBOX_HOST');
+        cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
+        cy.get('#consent-tracking .affirm', { timeout: 10000 }).click();
+        cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
     });
 });
 
