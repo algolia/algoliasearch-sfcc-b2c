@@ -195,6 +195,34 @@ This preference is only used with the "Attribute-sliced" record model.</descript
                 <default-value>color</default-value>
             </attribute-definition>
 
+            <attribute-definition attribute-id="Algolia_IndexingAPI">
+                <display-name xml:lang="x-default">Indexing API</display-name>
+                <description xml:lang="x-default">The indexing API to use. The Ingestion API enables features such as Transformations and Collections, but has some performance overhead. If you're unsure, use the Search API. Default: Search API.</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <value-definitions>
+                    <value-definition default="true">
+                        <display xml:lang="x-default">Search API</display>
+                        <value>search-api</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Ingestion API</display>
+                        <value>ingestion-api</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_AnalyticsRegion">
+                <display-name xml:lang="x-default">Analytics Region ("eu" or "us", for Ingestion API only)</display-name>
+                <description xml:lang="x-default">Your Algolia application's analytics region, required when selecting the Ingestion API for indexing. Available values: "us" and "eu". You can check your analytics region in the Infrastructure &gt; Analytics section of the Algolia dashboard.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <regex>^(us|eu)$</regex>
+            </attribute-definition>
+
             <attribute-definition attribute-id="Algolia_IndexOutOfStock">
                 <display-name xml:lang="x-default">Index Out of Stock</display-name>
                 <description xml:lang="x-default">Index out of stock products</description>
@@ -307,6 +335,8 @@ This preference is only used with the "Attribute-sliced" record model.</descript
                 <attribute attribute-id="Algolia_IndexPrefix"/>
                 <attribute attribute-id="Algolia_RecordModel"/>
                 <attribute attribute-id="Algolia_AttributeSlicedRecordModel_GroupingAttribute"/>
+                <attribute attribute-id="Algolia_IndexingAPI"/>
+                <attribute attribute-id="Algolia_AnalyticsRegion"/>
                 <attribute attribute-id="Algolia_LocalesForIndexing"/>
                 <attribute attribute-id="Algolia_EnableInsights"/>
                 <attribute attribute-id="Algolia_EnableSSR"/>
