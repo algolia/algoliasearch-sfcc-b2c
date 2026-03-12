@@ -11,8 +11,6 @@ let productName;
  */
 context('Inventory real-time update', () => {
     before(() => {
-        cy.closeCookieConsent();
-
         email = Cypress.env('TEST_SHOPPER_EMAIL');
         password = Cypress.env('TEST_SHOPPER_PASSWORD');
 
@@ -25,6 +23,10 @@ context('Inventory real-time update', () => {
             // Login after we have the product name
             cy.loginSFRA(email, password);
         });
+    });
+
+    beforeEach(() => {
+        cy.closeCookieConsent();
     });
 
     it('Places order and ensures product removed from Algolia (out of stock)', () => {
