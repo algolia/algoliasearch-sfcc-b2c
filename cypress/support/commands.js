@@ -24,21 +24,14 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
 
-// Close cookie consent pop-up
+// Close cookie consent pop-up (visits a page and dismisses the modal)
 Cypress.Commands.add('closeCookieConsent', () => {
     const host = Cypress.env('SANDBOX_HOST');
-    // Visit your website's homepage or search page
     cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
-    // Wait for the page to load
-    cy.get('body', { timeout: 20000 }).should('be.visible');
-    // Handle the cookie consent pop-up
     cy.get('body').then(($body) => {
-        if ($body.find('.affirm').length) {
-            // If the affirm button exists, click it
-            cy.get('.affirm').click();
-        } else {
-            // If the affirm button does not exist, log a message
-            cy.log('No cookie consent pop-up found.');
+        if ($body.find('#consent-tracking').length) {
+            cy.get('#consent-tracking .affirm').click();
+            cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
         }
     });
 });
