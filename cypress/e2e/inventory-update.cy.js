@@ -11,6 +11,8 @@ let productName;
  */
 context('Inventory real-time update', () => {
     before(() => {
+        cy.closeCookieConsent();
+
         email = Cypress.env('TEST_SHOPPER_EMAIL');
         password = Cypress.env('TEST_SHOPPER_PASSWORD');
 
@@ -31,13 +33,13 @@ context('Inventory real-time update', () => {
 
     it('Places order and ensures product removed from Algolia (out of stock)', () => {
         const host = Cypress.env('SANDBOX_HOST');
-        
+
         // Navigate to homepage first
         cy.visit(`https://${host}/s/RefArch/home`);
-        
+
         // Wait for page to load and search input to be available
         cy.get('#autocomplete-0-input', { timeout: 20000 }).should('be.visible');
-        
+
         // Arrange: Search and open PDP
         cy.get('#autocomplete-0-input').clear()
         cy.get('#autocomplete-0-input').type(productName);
