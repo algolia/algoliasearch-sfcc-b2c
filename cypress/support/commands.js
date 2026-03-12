@@ -29,7 +29,7 @@ Cypress.Commands.add('closeCookieConsent', () => {
     const host = Cypress.env('SANDBOX_HOST');
     cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
     cy.get('body').then(($body) => {
-        if ($body.find('#consent-tracking.show').length) {
+        if ($body.find('#consent-tracking').length) {
             cy.get('#consent-tracking .affirm').click();
             cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
         }
