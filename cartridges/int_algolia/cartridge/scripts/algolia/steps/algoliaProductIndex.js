@@ -37,13 +37,17 @@ const INDEXING_APIS = {
     INGESTION_API: 'ingestion-api',
 }
 
-// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
-let indexingAPI = INDEXING_APIS.INGESTION_API;
+const ANALYTICS_REGIONS = {
+    EU: 'eu',
+    US: 'us',
+}
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
 var variationAttributeForAttributeSlicedRecordModel // e.g. "color"
+var indexingAPI;
+var analyticsRegion;
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -87,6 +91,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
     recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
     variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
+    indexingAPI = algoliaData.getPreference('IndexingAPI') || 'search-api'; // "search-api" (default) or "ingestion-api"
+    analyticsRegion = algoliaData.getPreference('AnalyticsRegion'); // "us" or "eu"
+
+    // throw an error if "AnalyticsRegion" is not set or has an invalid value when "Indexing API" is set to "Ingestion API"
+    if (indexingAPI === INDEXING_APIS.INGESTION_API && (analyticsRegion !== ANALYTICS_REGIONS.EU && analyticsRegion !== ANALYTICS_REGIONS.US)) {
+        throw new Error('You need to define a valid Analytics Region ("us" or "eu") in the Algolia BM module when using the Ingestion as the indexing API! Analytics Region configured currently: "' + analyticsRegion + '"');
+    }
 
     // throw an error if no "Grouping attribute for the Attribute-sliced record model" is defined when using the "Attribute-sliced" record model
     if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL && empty(variationAttributeForAttributeSlicedRecordModel)) {
@@ -229,7 +240,6 @@ exports.beforeStep = function(parameters, stepExecution) {
             throw e;
         }
     }
-
 
     /* --- getting all products assigned to the site --- */
     products = ProductMgr.queryAllSiteProducts();
