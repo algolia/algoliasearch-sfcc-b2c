@@ -102,7 +102,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     // throw an error if "AnalyticsRegion" is not set or has an invalid value when "Indexing API" is set to "Ingestion API"
     if (indexingAPI === INDEXING_APIS.INGESTION_API && (analyticsRegion !== ANALYTICS_REGIONS.EU && analyticsRegion !== ANALYTICS_REGIONS.US)) {
-        throw new Error('You need to define a valid Analytics Region ("us" or "eu") in the Algolia BM module when using the Ingestion as the indexing API! Analytics Region configured currently: "' + analyticsRegion + '"');
+        throw new Error('You need to define a valid Analytics region ("us" or "eu") in the Algolia BM module when using the Ingestion as the indexing API! Analytics region configured currently: "' + analyticsRegion + '"');
     }
 
     // throw an error if no "Grouping attribute for the Attribute-sliced record model" is defined when using the "Attribute-sliced" record model

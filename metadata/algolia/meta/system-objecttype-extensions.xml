@@ -214,7 +214,7 @@ This preference is only used with the "Attribute-sliced" record model.</descript
             </attribute-definition>
 
             <attribute-definition attribute-id="Algolia_AnalyticsRegion">
-                <display-name xml:lang="x-default">Analytics Region ("eu" or "us", for Ingestion API only)</display-name>
+                <display-name xml:lang="x-default">Analytics region ("eu" or "us", for Ingestion API only)</display-name>
                 <description xml:lang="x-default">Your Algolia application's analytics region, required when selecting the Ingestion API for indexing. Available values: "us" and "eu". You can check your analytics region in the Infrastructure &gt; Analytics section of the Algolia dashboard.</description>
                 <type>string</type>
                 <mandatory-flag>false</mandatory-flag>
