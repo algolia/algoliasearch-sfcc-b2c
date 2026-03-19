@@ -358,9 +358,10 @@ function csvStringToArray(string, separator) {
 function getAlgoliaSitePreferences() {
     let algoliaSitePreferences = {};
     let algoliaSitePrefPrefix = 'Algolia_';
-    let allPreferences = Object.keys(Site.getCurrent().getPreferences().getCustom());
+    let allSitePreferences = Object.keys(Site.getCurrent().getPreferences().getCustom());
 
-    let algoliaPreferenceKeys = allPreferences.filter(function(sitePref) {
+    // filtering for Algolia site preferences only, leaving out `AdminApiKey`
+    let algoliaPreferenceKeys = allSitePreferences.filter(function(sitePref) {
         return ((sitePref.indexOf(algoliaSitePrefPrefix) === 0) && sitePref.indexOf('Algolia_AdminApiKey') !== 0);
     });
 
@@ -369,15 +370,11 @@ function getAlgoliaSitePreferences() {
         let sitePrefKey = sitePrefKeyWithPrefix.substring(algoliaSitePrefPrefix.length); // site preference key without the "Algolia_" prefix
 
         let sitePrefValue = getPreference(sitePrefKey);
-        try {
-            if (typeof sitePrefValue === 'object') {
-                // some preferences are returned as SFCC data types that can't be stringified, returning them as array instead
-                algoliaSitePreferences[sitePrefKey] = getSetOfArray(sitePrefKey);
-            } else {
-                algoliaSitePreferences[sitePrefKey] = sitePrefValue;
-            }
-        } catch(e) {
-            algoliaSitePreferences[sitePrefKey] = e.message;
+        if (typeof sitePrefValue === 'object') {
+            // some preferences are returned as SFCC data types that can't be stringified, returning them as an array instead
+            algoliaSitePreferences[sitePrefKey] = getSetOfArray(sitePrefKey);
+        } else {
+            algoliaSitePreferences[sitePrefKey] = sitePrefValue;
         }
     }
 
