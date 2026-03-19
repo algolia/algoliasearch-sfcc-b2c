@@ -68,6 +68,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
                     return [];
             }
         },
+        getAlgoliaSitePreferences: jest.fn(),
     }
 }, {virtual: true});
 

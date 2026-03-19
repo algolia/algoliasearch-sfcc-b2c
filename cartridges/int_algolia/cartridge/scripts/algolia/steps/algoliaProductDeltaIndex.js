@@ -100,6 +100,12 @@ exports.beforeStep = function(parameters, stepExecution) {
     indexingAPI = algoliaData.getPreference('IndexingAPI') || 'search-api'; // "search-api" (default) or "ingestion-api"
     analyticsRegion = algoliaData.getPreference('AnalyticsRegion'); // "us" or "eu"
 
+    // logging cartridge version
+    logger.info('Algolia for Salesforce B2C Commerce cartridge version: ' + algoliaData.clientSideData.version);
+
+    // logging all site preference values except for `Algolia_AdminApiKey`
+    logger.info('algoliaSitePreferences: ' + JSON.stringify(algoliaData.getAlgoliaSitePreferences()));
+
     // throw an error if "AnalyticsRegion" is not set or has an invalid value when "Indexing API" is set to "Ingestion API"
     if (indexingAPI === INDEXING_APIS.INGESTION_API && (analyticsRegion !== ANALYTICS_REGIONS.EU && analyticsRegion !== ANALYTICS_REGIONS.US)) {
         throw new Error('You need to define a valid Analytics region ("us" or "eu") in the Algolia BM module when using the Ingestion as the indexing API! Analytics region configured currently: "' + analyticsRegion + '"');
@@ -112,7 +118,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
-        logger.info('Configuration file "productAttributesConfig.js" loaded')
+        logger.info('Configuration file "productAttributesConfig.js" loaded');
     } catch (e) { // eslint-disable-line no-unused-vars
         extendedProductAttributesConfig = {};
     }
@@ -208,11 +214,11 @@ exports.beforeStep = function(parameters, stepExecution) {
         if (siteLocales.indexOf(locale) < 0) {
             throw new Error('Locale "' + locale + '" is not enabled on ' + Site.getCurrent().getName());
         }
-    })
+    });
     if (localesForIndexing.length > 0) {
         siteLocales = new ArrayList(localesForIndexing);
     }
-    logger.info('Will index ' + siteLocales.size() + ' locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
+    logger.info('Will index ' + siteLocales.size() + ' locale(s) for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
     jobReport.siteLocales = siteLocales.size();
 
 
@@ -236,7 +242,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     // return OK if the folder doesn't exist, this means that the CatalogDeltaExport job step finished OK but didn't have any output (there were no changes)
     if (!l0_deltaExportDir.exists()) {
         logger.info('Export directory does not exist (' + l0_deltaExportDir.getFullPath() +
-            '). There haven\'t been any changes to the catalog yet or the "consumer" and "deltaExportJobName" parameters do not match for both job steps.')
+            '). There haven\'t been any changes to the catalog yet or the "consumer" and "deltaExportJobName" parameters do not match for both job steps.');
         return; // return with an empty changedProducts object
     }
 
@@ -318,7 +324,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         changedProductsIterator = new CPObjectIterator(changedProducts);
         logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
     } else {
-        logger.info('Moving the Delta export files to the "' + l1_failedDir.getName() + '" directory...')
+        logger.info('Moving the Delta export files to the "' + l1_failedDir.getName() + '" directory...');
         fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_failedDir);
     }
 }
