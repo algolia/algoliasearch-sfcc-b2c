@@ -28,10 +28,10 @@ describe('Algolia Search', () => {
             // Ensure we're on the homepage
             const host = Cypress.env('SANDBOX_HOST');
             cy.visit(`https://${host}/s/RefArch/home`);
-            
+
             // Wait for search input to be available
             cy.get('#autocomplete-0-input', { timeout: 20000 }).should('be.visible');
-            
+
             // Type a search query
             cy.get('#autocomplete-0-input').type(scenario.query);
 

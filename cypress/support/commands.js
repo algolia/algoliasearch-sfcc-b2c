@@ -31,7 +31,10 @@ Cypress.Commands.add('closeCookieConsent', () => {
     cy.get('body').then(($body) => {
         if ($body.find('#consent-tracking').length) {
             cy.get('#consent-tracking .affirm').click();
-            cy.get('#consent-tracking', { timeout: 10000 }).should('not.be.visible');
+            // banner is removed from the DOM when accepted, not just hidden; callback retries until defaultCommandTimeout
+            cy.get('body').should(($b) => {
+                expect($b.find('#consent-tracking').length).to.eq(0);
+            });
         }
     });
 });
