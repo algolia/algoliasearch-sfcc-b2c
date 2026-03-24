@@ -12,33 +12,6 @@ var algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexi
 const BMHelper = require('../scripts/helper/BMHelper');
 var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 
-/**
- * @description Fresh dashboard pdict per call (empty errors); set pdictValues.errors.* when needed.
- * latestReports is assigned in renderDashboard immediately before the template runs since it shouldn't be cached.
- * @returns {Object} pdict for index.isml
- */
-function getDashboardPdict() {
-    return {
-        setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
-        algoliaData: algoliaData,
-        errors: {
-            adminErrorMessage: '',
-            adminWarningMessage: '',
-            analyticsRegionErrorMessage: '',
-            errorMessage: ''
-        }
-    };
-}
-
-/**
- * @description Render dashboard ISML (refreshes latestReports so data is current at render time).
- * @param {Object} pdictValues pdict to be passed to the template
- * @returns {void}
- */
-function renderDashboard(pdictValues) {
-    pdictValues.latestReports = BMHelper.getLatestCOReportsByJob();
-    ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
-}
 
 /**
  * @description Render default template
@@ -59,7 +32,7 @@ function handleSettings() {
     var indexPrefix = params.IndexPrefix.value || '';
     var algoliaAttributeSlicedRecordModel_GroupingAttribute = params.AttributeSlicedRecordModel_GroupingAttribute.value || '';
     var indexingAPI = params.IndexingAPI.value || 'search-api';
-    var analyticsRegion = params.AnalyticsRegion.value || '';
+    var analyticsRegion = (params.AnalyticsRegion.value || '').trim().toLowerCase();
 
     var adminValidation = {};
     var pdictValues = getDashboardPdict();
@@ -99,9 +72,8 @@ function handleSettings() {
             return;
         }
 
-        // validate AnalyticsRegion
-        var analyticsRegionNormalized = analyticsRegion.trim().toLowerCase();
-        if (analyticsRegionNormalized !== 'eu' && analyticsRegionNormalized !== 'us') {
+        // validate AnalyticsRegion (empty allowed so that it doesn't force a value for initial setup; non-empty must be eu or us)
+        if (analyticsRegion && analyticsRegion !== 'eu' && analyticsRegion !== 'us') {
             pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
             renderDashboard(pdictValues);
             return;
@@ -118,7 +90,7 @@ function handleSettings() {
         algoliaData.setPreference('RecordModel', params.RecordModel.value);
         algoliaData.setPreference('AttributeSlicedRecordModel_GroupingAttribute', algoliaAttributeSlicedRecordModel_GroupingAttribute);
         algoliaData.setPreference('IndexingAPI', indexingAPI);
-        algoliaData.setPreference('AnalyticsRegion', analyticsRegionNormalized);
+        algoliaData.setPreference('AnalyticsRegion', analyticsRegion);
         algoliaData.setSetOfStrings('LocalesForIndexing', params.LocalesForIndexing.value);
         algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
@@ -138,6 +110,34 @@ function handleSettings() {
         pdictValues.errors.adminWarningMessage = adminValidation.warning;
     }
     renderDashboard(pdictValues);
+}
+
+/**
+ * @description Render dashboard ISML (refreshes latestReports so data is current at render time).
+ * @param {Object} pdictValues pdict to be passed to the template
+ * @returns {void}
+ */
+function renderDashboard(pdictValues) {
+    pdictValues.latestReports = BMHelper.getLatestCOReportsByJob();
+    ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+}
+
+/**
+ * @description Fresh dashboard pdict per call (empty errors); set pdictValues.errors.* when needed.
+ * latestReports is assigned in renderDashboard immediately before the template runs since it shouldn't be cached.
+ * @returns {Object} pdict for index.isml
+ */
+function getDashboardPdict() {
+    return {
+        setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
+        algoliaData: algoliaData,
+        errors: {
+            adminErrorMessage: '',
+            adminWarningMessage: '',
+            analyticsRegionErrorMessage: '',
+            errorMessage: ''
+        }
+    };
 }
 
 /**
