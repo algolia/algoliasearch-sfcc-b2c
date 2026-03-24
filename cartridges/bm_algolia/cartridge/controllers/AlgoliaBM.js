@@ -13,17 +13,39 @@ const BMHelper = require('../scripts/helper/BMHelper');
 var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 
 /**
+ * @description Fresh dashboard pdict per call (empty errors); set pdictValues.errors.* when needed.
+ * latestReports is assigned in renderDashboard immediately before the template runs since it shouldn't be cached.
+ * @returns {Object} pdict for index.isml
+ */
+function getDashboardPdict() {
+    return {
+        setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
+        algoliaData: algoliaData,
+        errors: {
+            adminErrorMessage: '',
+            adminWarningMessage: '',
+            analyticsRegionErrorMessage: '',
+            errorMessage: ''
+        }
+    };
+}
+
+/**
+ * @description Render dashboard ISML (refreshes latestReports so data is current at render time).
+ * @param {Object} pdictValues pdict to be passed to the template
+ * @returns {void}
+ */
+function renderDashboard(pdictValues) {
+    pdictValues.latestReports = BMHelper.getLatestCOReportsByJob();
+    ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+}
+
+/**
  * @description Render default template
  * @returns {void} ISML.renderTemplate
  */
 function start() {
-    var pdictValues = {
-        setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
-        algoliaData: algoliaData,
-        latestReports: BMHelper.getLatestCOReportsByJob(),
-    };
-
-    ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+    renderDashboard(getDashboardPdict());
 }
 
 /**
@@ -40,6 +62,7 @@ function handleSettings() {
     var analyticsRegion = params.AnalyticsRegion.value || '';
 
     var adminValidation = {};
+    var pdictValues = getDashboardPdict();
 
     try {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
@@ -68,8 +91,19 @@ function handleSettings() {
             finalIndexPrefix
         );
 
+        // validate AdminApiKey
         if (adminValidation.error) {
-            showDashboardWithMessages(adminValidation);
+            pdictValues.errors.adminErrorMessage = adminValidation.errorMessage;
+            pdictValues.errors.adminWarningMessage = adminValidation.warning || '';
+            renderDashboard(pdictValues);
+            return;
+        }
+
+        // validate AnalyticsRegion
+        var analyticsRegionNormalized = analyticsRegion.trim().toLowerCase();
+        if (analyticsRegionNormalized !== 'eu' && analyticsRegionNormalized !== 'us') {
+            pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
+            renderDashboard(pdictValues);
             return;
         }
 
@@ -84,7 +118,7 @@ function handleSettings() {
         algoliaData.setPreference('RecordModel', params.RecordModel.value);
         algoliaData.setPreference('AttributeSlicedRecordModel_GroupingAttribute', algoliaAttributeSlicedRecordModel_GroupingAttribute);
         algoliaData.setPreference('IndexingAPI', indexingAPI);
-        algoliaData.setPreference('AnalyticsRegion', analyticsRegion.toLowerCase());
+        algoliaData.setPreference('AnalyticsRegion', analyticsRegionNormalized);
         algoliaData.setSetOfStrings('LocalesForIndexing', params.LocalesForIndexing.value);
         algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
@@ -95,36 +129,15 @@ function handleSettings() {
         algoliaData.setPreference('EnableRealTimeInventoryHook', algoliaEnableRealTimeInventoryHook);
     } catch (error) {
         Logger.error(error);
-        showDashboardWithMessages(adminValidation, error.message);
-        return;
-    }
-
-    if (adminValidation.error) {
-        showDashboardWithMessages(adminValidation, '');
+        pdictValues.errors.errorMessage = error.message;
+        renderDashboard(pdictValues);
         return;
     }
 
     if (adminValidation.warning) {
-        showDashboardWithMessages(adminValidation, '');
-    } else {
-        start();
+        pdictValues.errors.adminWarningMessage = adminValidation.warning;
     }
-}
-
-/**
- * Helper to re-render the dashboard with an error message
- * @param {Object} adminValidation   admin key check results
- * @param {string} errorMessage      optional error message
- */
-function showDashboardWithMessages(adminValidation, errorMessage) {
-    ISML.renderTemplate('algoliabm/dashboard/index', {
-        setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
-        algoliaData: algoliaData,
-        latestReports: BMHelper.getLatestCOReportsByJob(),
-        adminErrorMessage: adminValidation.errorMessage,
-        adminWarningMessage: adminValidation.warning,
-        errorMessage: errorMessage
-    });
+    renderDashboard(pdictValues);
 }
 
 /**
