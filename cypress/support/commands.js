@@ -31,8 +31,8 @@ Cypress.Commands.add('closeCookieConsent', () => {
     cy.get('body').then(($body) => {
         if ($body.find('#consent-tracking').length) {
             cy.get('#consent-tracking .affirm').click();
+            cy.get('#consent-tracking').should('not.exist');
         }
-        cy.get('#consent-tracking').should('not.exist');
     });
 });
 
