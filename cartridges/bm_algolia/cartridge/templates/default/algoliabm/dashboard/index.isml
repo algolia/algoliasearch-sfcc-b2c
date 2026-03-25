@@ -332,7 +332,7 @@
                     </td>
                 </tr>
                     <isprint value="${Resource.msg('algolia.label.util.version', 'algolia', null)}" encoding="jshtml" />
-                    <isprint value="${require('*/cartridge/scripts/algolia/lib/algoliaData').clientSideData.version}" encoding="jshtml" />
+                    <isprint value="${pdict.algoliaData.clientSideData.version}" encoding="jshtml" />
             </tbody>
         </table>
         </form>

@@ -94,6 +94,12 @@ exports.beforeStep = function(parameters, stepExecution) {
     indexingAPI = algoliaData.getPreference('IndexingAPI') || 'search-api'; // "search-api" (default) or "ingestion-api"
     analyticsRegion = algoliaData.getPreference('AnalyticsRegion'); // "us" or "eu"
 
+    // logging cartridge version
+    logger.info('Algolia for Salesforce B2C Commerce cartridge version: ' + algoliaData.clientSideData.version);
+
+    // logging all site preference values except for `Algolia_AdminApiKey`
+    logger.info('algoliaSitePreferences: ' + JSON.stringify(algoliaData.getAlgoliaSitePreferences()));
+
     // throw an error if "AnalyticsRegion" is not set or has an invalid value when "Indexing API" is set to "Ingestion API"
     if (indexingAPI === INDEXING_APIS.INGESTION_API && (analyticsRegion !== ANALYTICS_REGIONS.EU && analyticsRegion !== ANALYTICS_REGIONS.US)) {
         throw new Error('You need to define a valid Analytics region ("us" or "eu") in the Algolia BM module when using the Ingestion as the indexing API! Analytics region configured currently: "' + analyticsRegion + '"');
@@ -108,7 +114,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     // By default this file does not exist. For an example configuration, see `productAttributesConfig.example.js`.
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
-        logger.info('Configuration file "productAttributesConfig.js" loaded')
+        logger.info('Configuration file "productAttributesConfig.js" loaded');
     } catch (e) { // eslint-disable-line no-unused-vars
         extendedProductAttributesConfig = {};
     }
@@ -213,7 +219,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         siteLocales = new ArrayList(localesForIndexing);
     }
 
-    logger.info('Will index ' + siteLocales.size() + ' locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
+    logger.info('Will index ' + siteLocales.size() + ' locale(s) for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
     jobReport.siteLocales = siteLocales.size();
 
     /* --- preparing job for sending data to Algolia --- */
@@ -244,7 +250,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     /* --- getting all products assigned to the site --- */
     products = ProductMgr.queryAllSiteProducts();
     logger.info('failureThresholdPercentage parameter: ' + paramFailureThresholdPercentage);
-    logger.info('Starting indexing...')
+    logger.info('Starting indexing...');
 }
 
 /**
