@@ -36,6 +36,8 @@ function handleSettings() {
     var searchApikey = params.SearchApiKey.value || '';
     var indexPrefix = params.IndexPrefix.value || '';
     var algoliaAttributeSlicedRecordModel_GroupingAttribute = params.AttributeSlicedRecordModel_GroupingAttribute.value || '';
+    var indexingAPI = params.IndexingAPI.value || 'search-api';
+    var analyticsRegion = params.AnalyticsRegion.value || '';
 
     var adminValidation = {};
 
@@ -81,6 +83,8 @@ function handleSettings() {
         algoliaData.setPreference('IndexPrefix', indexPrefix);
         algoliaData.setPreference('RecordModel', params.RecordModel.value);
         algoliaData.setPreference('AttributeSlicedRecordModel_GroupingAttribute', algoliaAttributeSlicedRecordModel_GroupingAttribute);
+        algoliaData.setPreference('IndexingAPI', indexingAPI);
+        algoliaData.setPreference('AnalyticsRegion', analyticsRegion.toLowerCase());
         algoliaData.setSetOfStrings('LocalesForIndexing', params.LocalesForIndexing.value);
         algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);

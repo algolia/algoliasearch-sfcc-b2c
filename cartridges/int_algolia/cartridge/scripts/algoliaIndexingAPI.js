@@ -5,6 +5,7 @@
 
 const waitTaskTimeout = require('*/algoliaconfig').waitTaskTimeout;
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
+const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 const retryableCall = require('*/cartridge/scripts/algolia/helper/retryStrategy').retryableCall;
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
@@ -15,14 +16,7 @@ const INDEXING_APIS = {
     INGESTION_API: 'ingestion-api',
 }
 
-const ANALYTICS_REGIONS = {
-    EU: 'eu',
-    US: 'us',
-}
-
-// TODO: make into site preference / retrieve programmatically
-const analyticsRegion = ANALYTICS_REGIONS.EU;
-
+const analyticsRegion = algoliaData.getPreference('AnalyticsRegion');
 
 /**
  * Set information about the job using the API Client

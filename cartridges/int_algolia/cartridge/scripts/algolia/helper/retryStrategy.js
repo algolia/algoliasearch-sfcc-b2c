@@ -11,13 +11,7 @@ const INDEXING_APIS = {
     INGESTION_API: 'ingestion-api',
 }
 
-const ANALYTICS_REGIONS = {
-    EU: 'eu',
-    US: 'us',
-}
-
-// TODO: make these into site preferences -- return analyticsRegion programmatically if possible - getIndexSettings?
-const analyticsRegion = ANALYTICS_REGIONS.EU;
+const analyticsRegion = algoliaData.getPreference('AnalyticsRegion');
 
 let statefulhosts = {};
 
