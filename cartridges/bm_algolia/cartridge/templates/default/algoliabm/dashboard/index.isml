@@ -77,14 +77,14 @@
                         <div class="tooltip">
                             <isprint value="${Resource.msg('algolia.label.preference.adminkey.help', 'algolia', null)}" />
                         </div>
-                        <isif condition="${pdict.adminWarningMessage}">
+                        <isif condition="${pdict.errors.adminWarningMessage}">
                             <div class="warning-message yellow narrow">
-                                ${pdict.adminWarningMessage}
+                                ${pdict.errors.adminWarningMessage}
                             </div>
                         </isif>
-                        <isif condition="${pdict.adminErrorMessage}">
+                        <isif condition="${pdict.errors.adminErrorMessage}">
                             <div class="error-message red narrow">
-                                ${pdict.adminErrorMessage}
+                                ${pdict.errors.adminErrorMessage}
                             </div>
                         </isif>
                     </td>
@@ -226,6 +226,11 @@
                         <isprint value="${Resource.msg('algolia.label.preference.analyticsregion', 'algolia', null)}"/>
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.analyticsregion.help', 'algolia', null)}</div>
+                        <isif condition="${pdict.errors.analyticsRegionErrorMessage}">
+                            <div class="error-message red narrow">
+                                ${pdict.errors.analyticsRegionErrorMessage}
+                            </div>
+                        </isif>
                     </td>
                     <td class="table_detail w e s">
                         <input type="text" value="${pdict.algoliaData.getPreference('AnalyticsRegion')}" id="AnalyticsRegion" name="AnalyticsRegion" placeholder="${Resource.msg('algolia.label.util.optional.onlyusedwithingestionapi', 'algolia', null)}" autocomplete="off"/>
