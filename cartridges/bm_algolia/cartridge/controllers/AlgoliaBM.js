@@ -68,15 +68,24 @@ function handleSettings() {
         if (adminValidation.error) {
             pdictValues.errors.adminErrorMessage = adminValidation.errorMessage;
             pdictValues.errors.adminWarningMessage = adminValidation.warning || '';
-            renderDashboard(pdictValues);
-            return;
+        }
+
+        if (adminValidation.warning) {
+            pdictValues.errors.adminWarningMessage = adminValidation.warning;
         }
 
         // validate AnalyticsRegion (empty allowed so that it doesn't force a value for initial setup; non-empty must be eu or us)
         if (analyticsRegion && analyticsRegion !== 'eu' && analyticsRegion !== 'us') {
             pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
-            renderDashboard(pdictValues);
-            return;
+        }
+
+        // if any of the errors are set, render the dashboard with the errors before saving the preferences
+        let errorKeys = Object.keys(pdictValues.errors);
+        for (let i = 0; i < errorKeys.length; i++) {
+            let errorKey = errorKeys[i];
+            if (!empty(pdictValues.errors[errorKey])) {
+                return renderDashboard(pdictValues);
+            }
         }
 
         // If we get here, the check is fine or not applicable. Save settings:
@@ -102,13 +111,9 @@ function handleSettings() {
     } catch (error) {
         Logger.error(error);
         pdictValues.errors.errorMessage = error.message;
-        renderDashboard(pdictValues);
-        return;
+        return renderDashboard(pdictValues);
     }
 
-    if (adminValidation.warning) {
-        pdictValues.errors.adminWarningMessage = adminValidation.warning;
-    }
     renderDashboard(pdictValues);
 }
 
