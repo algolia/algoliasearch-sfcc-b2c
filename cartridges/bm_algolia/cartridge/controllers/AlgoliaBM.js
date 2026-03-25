@@ -12,18 +12,13 @@ var algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexi
 const BMHelper = require('../scripts/helper/BMHelper');
 var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
 
+
 /**
  * @description Render default template
  * @returns {void} ISML.renderTemplate
  */
 function start() {
-    var pdictValues = {
-        setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
-        algoliaData: algoliaData,
-        latestReports: BMHelper.getLatestCOReportsByJob(),
-    };
-
-    ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+    renderDashboard(getDashboardPdict());
 }
 
 /**
@@ -37,9 +32,10 @@ function handleSettings() {
     var indexPrefix = params.IndexPrefix.value || '';
     var algoliaAttributeSlicedRecordModel_GroupingAttribute = params.AttributeSlicedRecordModel_GroupingAttribute.value || '';
     var indexingAPI = params.IndexingAPI.value || 'search-api';
-    var analyticsRegion = params.AnalyticsRegion.value || '';
+    var analyticsRegion = (params.AnalyticsRegion.value || '').trim().toLowerCase();
 
     var adminValidation = {};
+    var pdictValues = getDashboardPdict();
 
     try {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
@@ -68,9 +64,28 @@ function handleSettings() {
             finalIndexPrefix
         );
 
+        // validate AdminApiKey
         if (adminValidation.error) {
-            showDashboardWithMessages(adminValidation);
-            return;
+            pdictValues.errors.adminErrorMessage = adminValidation.errorMessage;
+            pdictValues.errors.adminWarningMessage = adminValidation.warning || '';
+        }
+
+        if (adminValidation.warning) {
+            pdictValues.errors.adminWarningMessage = adminValidation.warning;
+        }
+
+        // validate AnalyticsRegion (empty allowed so that it doesn't force a value for initial setup; non-empty must be eu or us)
+        if (analyticsRegion && analyticsRegion !== 'eu' && analyticsRegion !== 'us') {
+            pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
+        }
+
+        // if any of the errors are set, render the dashboard with the errors before saving the preferences
+        let errorKeys = Object.keys(pdictValues.errors);
+        for (let i = 0; i < errorKeys.length; i++) {
+            let errorKey = errorKeys[i];
+            if (!empty(pdictValues.errors[errorKey])) {
+                return renderDashboard(pdictValues);
+            }
         }
 
         // If we get here, the check is fine or not applicable. Save settings:
@@ -84,7 +99,7 @@ function handleSettings() {
         algoliaData.setPreference('RecordModel', params.RecordModel.value);
         algoliaData.setPreference('AttributeSlicedRecordModel_GroupingAttribute', algoliaAttributeSlicedRecordModel_GroupingAttribute);
         algoliaData.setPreference('IndexingAPI', indexingAPI);
-        algoliaData.setPreference('AnalyticsRegion', analyticsRegion.toLowerCase());
+        algoliaData.setPreference('AnalyticsRegion', analyticsRegion);
         algoliaData.setSetOfStrings('LocalesForIndexing', params.LocalesForIndexing.value);
         algoliaData.setPreference('EnableInsights', params.EnableInsights.submitted);
         algoliaData.setPreference('EnableSSR', params.EnableSSR.submitted);
@@ -95,36 +110,39 @@ function handleSettings() {
         algoliaData.setPreference('EnableRealTimeInventoryHook', algoliaEnableRealTimeInventoryHook);
     } catch (error) {
         Logger.error(error);
-        showDashboardWithMessages(adminValidation, error.message);
-        return;
+        pdictValues.errors.errorMessage = error.message;
+        return renderDashboard(pdictValues);
     }
 
-    if (adminValidation.error) {
-        showDashboardWithMessages(adminValidation, '');
-        return;
-    }
-
-    if (adminValidation.warning) {
-        showDashboardWithMessages(adminValidation, '');
-    } else {
-        start();
-    }
+    renderDashboard(pdictValues);
 }
 
 /**
- * Helper to re-render the dashboard with an error message
- * @param {Object} adminValidation   admin key check results
- * @param {string} errorMessage      optional error message
+ * @description Render dashboard ISML (refreshes latestReports so data is current at render time).
+ * @param {Object} pdictValues pdict to be passed to the template
+ * @returns {void}
  */
-function showDashboardWithMessages(adminValidation, errorMessage) {
-    ISML.renderTemplate('algoliabm/dashboard/index', {
+function renderDashboard(pdictValues) {
+    pdictValues.latestReports = BMHelper.getLatestCOReportsByJob();
+    ISML.renderTemplate('algoliabm/dashboard/index', pdictValues);
+}
+
+/**
+ * @description Fresh dashboard pdict per call (empty errors); set pdictValues.errors.* when needed.
+ * latestReports is assigned in renderDashboard immediately before the template runs since it shouldn't be cached.
+ * @returns {Object} pdict for index.isml
+ */
+function getDashboardPdict() {
+    return {
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData,
-        latestReports: BMHelper.getLatestCOReportsByJob(),
-        adminErrorMessage: adminValidation.errorMessage,
-        adminWarningMessage: adminValidation.warning,
-        errorMessage: errorMessage
-    });
+        errors: {
+            adminErrorMessage: '',
+            adminWarningMessage: '',
+            analyticsRegionErrorMessage: '',
+            errorMessage: ''
+        }
+    };
 }
 
 /**
