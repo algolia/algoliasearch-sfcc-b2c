@@ -87,7 +87,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
 
     // throw an error if no "Grouping attribute for the Attribute-sliced record model" is defined when using the "Attribute-sliced" record model
-    if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED_MASTER_LEVEL && empty(variationAttributeForAttributeSlicedRecordModel)) {
+    if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED && empty(variationAttributeForAttributeSlicedRecordModel)) {
         throw new Error('You need to define a grouping attribute for the Attribute-sliced record model in the Algolia BM module!');
     }
 

@@ -36,9 +36,9 @@ async function runSFCCJob() {
                             console.log('Current jobs:', JSON.stringify(result, null, 2));
                             // The result might be wrapped in a body property
                             const jobs = result.body || result;
-                            const runningJob = jobs.find(job => 
-                                job.job_id === jobId && 
-                                job.status !== 'finished' && 
+                            const runningJob = jobs.find(job =>
+                                job.job_id === jobId &&
+                                job.status !== 'finished' &&
                                 job.status !== 'failed'
                             );
                             if (runningJob) {
@@ -62,7 +62,7 @@ async function runSFCCJob() {
 
         // Poll for Job Completion
         let attempts = 0;
-        const maxAttempts = 15;
+        const maxAttempts = 25;
         const delay = 15000; // 15 seconds
 
         while (attempts < maxAttempts) {
