@@ -220,8 +220,9 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     }
 
     var result;
+    var retryableBatchRes;
     try {
-        var retryableBatchRes = requestHelper.sendRetryableBatch(batch);
+        retryableBatchRes = requestHelper.sendRetryableBatch(batch);
         result = retryableBatchRes.result;
     } catch (e) {
         logger.error('Error while sending batch to Algolia: ' + e);
@@ -230,16 +231,18 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     if (result && result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
-        jobReport.recordsFailed += retryableBatchRes.failedRecords;
+        jobReport.recordsFailed += retryableBatchRes.failedRecords || 0;
 
         // Store Algolia indexing task IDs.
         // When performing a fullContentReindex, afterStep will wait for the last indexing tasks to complete.
-        var taskIDs = result.object.body.taskID;
-        Object.keys(taskIDs).forEach(function (taskIndexName) {
-            lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
-        });
+        if (result.object && result.object.body && result.object.body.taskID) {
+            var taskIDs = result.object.body.taskID;
+            Object.keys(taskIDs).forEach(function (taskIndexName) {
+                lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
+            });
+        }
     } else {
-        jobReport.recordsFailed += batch.length;
+        jobReport.recordsFailed += retryableBatchRes ? retryableBatchRes.failedRecords : batch.length;
         jobReport.chunksFailed++;
     }
 }

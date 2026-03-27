@@ -538,13 +538,16 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         return;
     }
 
+    // fullCatalogReindex still uses Search API (multiple-batch); must match failure/success accounting below
+    var sendViaSearchAPI = indexingAPI === INDEXING_APIS.SEARCH_API || paramIndexingMethod === 'fullCatalogReindex';
+
     let resultObj, result;
 
     try {
         // TODO: implement full reindexing via the Ingestion API
-        if (indexingAPI === INDEXING_APIS.SEARCH_API || paramIndexingMethod === 'fullCatalogReindex') {
+        if (sendViaSearchAPI) {
             resultObj = requestHelper.sendRetryableBatch(batch);
-        } else { // INDEXING_APIS.INGESTION_API
+        } else {
             let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
             resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
         }
@@ -561,18 +564,25 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     if (result && result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
-        jobReport.recordsFailed += resultObj.failedRecords;
+        // Search send path: failedRecords = removed-only after a successful final batch; Ingestion path: 0 here
+        jobReport.recordsFailed += resultObj.failedRecords || 0;
 
         // Store Algolia indexing task IDs.
         // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
-        if (indexingAPI === INDEXING_APIS.SEARCH_API || paramIndexingMethod === 'fullCatalogReindex') {
+        if (sendViaSearchAPI && result.object && result.object.body && result.object.body.taskID) {
             var taskIDs = result.object.body.taskID;
             Object.keys(taskIDs).forEach(function (taskIndexName) {
                 lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
             });
         }
     } else {
-        jobReport.recordsFailed += batch.length;
+        if (!sendViaSearchAPI && resultObj) {
+            jobReport.recordsSent += resultObj.sentRecords || 0;
+            jobReport.recordsFailed += resultObj.failedRecords || 0;
+        } else {
+            // Search send path (or missing resultObj): sendRetryableBatch.failedRecords is the original batch size when the last call did not succeed
+            jobReport.recordsFailed += (resultObj && resultObj.failedRecords) ? resultObj.failedRecords : batch.length;
+        }
         jobReport.chunksFailed++;
     }
 }

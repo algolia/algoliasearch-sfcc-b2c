@@ -122,8 +122,9 @@ function runCategoryExport(parameters, stepExecution) {
         logger.info('Sending a batch of ' + batch.length + ' records for locale ' + locale);
 
         var result;
+        var retryableBatchRes;
         try {
-            var retryableBatchRes = requestHelper.sendRetryableBatch(batch);
+            retryableBatchRes = requestHelper.sendRetryableBatch(batch);
             result = retryableBatchRes.result;
         } catch (e) {
             logger.error('Error while sending batch to Algolia: ' + e);
@@ -132,17 +133,23 @@ function runCategoryExport(parameters, stepExecution) {
         if (result && result.ok) {
             jobReport.recordsSent += batch.length;
             jobReport.chunksSent++;
-            jobReport.recordsFailed += retryableBatchRes.failedRecords;
+            jobReport.recordsFailed += retryableBatchRes.failedRecords || 0;
 
             // Store Algolia indexing task IDs
-            var taskIDs = result.object.body.taskID;
-            Object.keys(taskIDs).forEach(function (taskIndexName) {
-                lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
-            });
+            if (result.object && result.object.body && result.object.body.taskID) {
+                var taskIDs = result.object.body.taskID;
+                Object.keys(taskIDs).forEach(function (taskIndexName) {
+                    lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
+                });
+            }
         } else {
-            let errorMessage = 'Failed to send categories: ' + result.errorMessage + ', stopping job.';
+            let algoliaErrDetail = '';
+            if (result && typeof result.getErrorMessage === 'function') {
+                algoliaErrDetail = result.getErrorMessage();
+            }
+            let errorMessage = 'Failed to send categories: ' + algoliaErrDetail + ', stopping job.';
 
-            jobReport.recordsFailed += batch.length;
+            jobReport.recordsFailed += retryableBatchRes ? retryableBatchRes.failedRecords : batch.length;
             jobReport.chunksFailed++;
             jobReport.error = true;
             jobReport.errorMessage = errorMessage;
@@ -156,12 +163,8 @@ function runCategoryExport(parameters, stepExecution) {
         }
     }
 
-    if (jobReport.recordsFailed === 0) {
-        reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
-    } else {
-        jobReport.error = true;
-        jobReport.errorMessage = 'Some records failed to be indexed (check the logs for details). Not moving temporary indices to production.';
-    }
+    // All locale batches returned OK from Algolia (oversized records are dropped inside sendRetryableBatch; recordsFailed > 0 is OK)
+    reindexHelper.finishAtomicReindex('categories', siteLocales.toArray(), lastIndexingTasks);
 
     jobReport.endTime = new Date();
     jobReport.writeToCustomObject();

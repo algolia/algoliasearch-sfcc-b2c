@@ -7,14 +7,16 @@ const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
  * Sends an Algolia batch to the Search API `multiple-batch` endpoint
  * https://www.algolia.com/doc/rest-api/search/multiple-batch
  * If records fail to be indexed (because e.g. they are too big), they are removed from the batch and the batch is retried.
- * @param {Object} batch - Algolia multi-indices batch
- * @param {String} [indexName] Target index -- only used with the Ingestion API
- * @return {Object} returns an object with the last call result and the number of failed records.
+ * @param {Object[]} batch - Algolia multi-index batch operations (action, indexName, body)
+ * @return {Object} Last API `result` and `failedRecords`
+ * On success, `failedRecords` is only the count removed during retry (e.g. too big).
+ * On failure, `failedRecords` is the original batch size (no operation from this call completed successfully).
  */
 function sendRetryableBatch(batch) {
     var MAX_ATTEMPTS = 50;
     var attempt = 0;
     var failedRecords = 0;
+    let originalBatchLength = batch.length;
     let result = algoliaIndexingAPI.sendMultiIndexBatch(batch);
 
     while (result.error && attempt < MAX_ATTEMPTS) {
@@ -62,10 +64,11 @@ function sendRetryableBatch(batch) {
     if (attempt === MAX_ATTEMPTS) {
         logger.error('[Retryable batch] Too many products are in error, aborting the batch...');
     }
+
     return {
         result: result,
-        failedRecords: failedRecords,
-    }
+        failedRecords: (!(result && result.ok)) ? originalBatchLength : failedRecords,
+    };
 }
 
 /* --------------------------- Ingestion API methods --------------------------- */
@@ -143,11 +146,12 @@ function groupRecordsForIngestionAPI(recordArray) {
 /**
  * Sends Algolia records to the Ingestion API grouped by indexName and action
  * @param {Object} groupedRecords - Records grouped by `indexName` and `action`.
- * @returns {Object} result object containing status and number of failed records
+ * @returns {Object} result, failedRecords (per failed HTTP call), sentRecords (per successful HTTP call)
  */
 function sendGroupedIngestionAPIRecords(groupedRecords) {
     let indices = Object.keys(groupedRecords);
     let failedRecords = 0;
+    let sentRecords = 0;
     let wasThereAnError = false;
 
     // iterate over the grouped batches by indexName and action, and send them
@@ -168,6 +172,8 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
             if (!(result.ok)) {
                 wasThereAnError = true;
                 failedRecords += recordToSend.records.length;
+            } else {
+                sentRecords += recordToSend.records.length;
             }
         }
     }
@@ -177,7 +183,8 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
             ok: !wasThereAnError,
         },
         failedRecords: failedRecords,
-    }
+        sentRecords: sentRecords,
+    };
 }
 
 

@@ -654,9 +654,14 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     if (result && result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
-        jobReport.recordsFailed += resultObj.failedRecords;
+        jobReport.recordsFailed += resultObj.failedRecords || 0;
     } else {
-        jobReport.recordsFailed += batch.length;
+        if (indexingAPI === INDEXING_APIS.INGESTION_API && resultObj) {
+            jobReport.recordsSent += resultObj.sentRecords || 0;
+            jobReport.recordsFailed += resultObj.failedRecords || 0;
+        } else {
+            jobReport.recordsFailed += (resultObj && resultObj.failedRecords) ? resultObj.failedRecords : batch.length;
+        }
         jobReport.chunksFailed++;
     }
 }
