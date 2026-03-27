@@ -125,7 +125,6 @@ function runCategoryExport(parameters, stepExecution) {
         try {
             var retryableBatchRes = requestHelper.sendRetryableBatch(batch);
             result = retryableBatchRes.result;
-            jobReport.recordsFailed += retryableBatchRes.failedRecords;
         } catch (e) {
             logger.error('Error while sending batch to Algolia: ' + e);
         }
@@ -133,6 +132,7 @@ function runCategoryExport(parameters, stepExecution) {
         if (result && result.ok) {
             jobReport.recordsSent += batch.length;
             jobReport.chunksSent++;
+            jobReport.recordsFailed += retryableBatchRes.failedRecords;
 
             // Store Algolia indexing task IDs
             var taskIDs = result.object.body.taskID;

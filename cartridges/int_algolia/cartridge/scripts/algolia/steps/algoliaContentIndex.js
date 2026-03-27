@@ -223,7 +223,6 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     try {
         var retryableBatchRes = requestHelper.sendRetryableBatch(batch);
         result = retryableBatchRes.result;
-        jobReport.recordsFailed += retryableBatchRes.failedRecords;
     } catch (e) {
         logger.error('Error while sending batch to Algolia: ' + e);
     }
@@ -231,6 +230,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     if (result && result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
+        jobReport.recordsFailed += retryableBatchRes.failedRecords;
 
         // Store Algolia indexing task IDs.
         // When performing a fullContentReindex, afterStep will wait for the last indexing tasks to complete.

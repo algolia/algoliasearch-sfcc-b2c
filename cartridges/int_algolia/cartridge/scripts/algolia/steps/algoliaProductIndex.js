@@ -553,7 +553,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         // An OK response from a sending call only means that the endpoint received the payload;
         // "record too large" or other indexing-time errors can still happen -- check your Algolia Dashboard for these errors
         result = resultObj.result;
-        jobReport.recordsFailed += resultObj.failedRecords;
+
     } catch (e) {
         logger.error('Error while sending batch to Algolia: ' + e);
     }
@@ -561,6 +561,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
     if (result && result.ok) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
+        jobReport.recordsFailed += resultObj.failedRecords;
 
         // Store Algolia indexing task IDs.
         // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
