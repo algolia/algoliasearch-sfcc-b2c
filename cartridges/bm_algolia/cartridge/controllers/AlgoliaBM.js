@@ -65,13 +65,12 @@ function handleSettings() {
         );
 
         // validate AdminApiKey
-        if (adminValidation.error) {
+        if (!empty(adminValidation.error)) {
             pdictValues.errors.adminErrorMessage = adminValidation.errorMessage;
-            pdictValues.errors.adminWarningMessage = adminValidation.warning || '';
         }
 
-        if (adminValidation.warning) {
-            pdictValues.errors.adminWarningMessage = adminValidation.warning;
+        if (!empty(adminValidation.warning)) {
+            pdictValues.warnings.adminWarningMessage = adminValidation.warning;
         }
 
         // validate AnalyticsRegion (empty allowed so that it doesn't force a value for initial setup; non-empty must be eu or us)
@@ -79,7 +78,7 @@ function handleSettings() {
             pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
         }
 
-        // if any of the errors are set, render the dashboard with the errors before saving the preferences
+        // if any of the errors are set, render the dashboard with the errors and don't save the preferences -- warnings do not block saving the preferences
         let errorKeys = Object.keys(pdictValues.errors);
         for (let i = 0; i < errorKeys.length; i++) {
             let errorKey = errorKeys[i];
@@ -138,10 +137,12 @@ function getDashboardPdict() {
         algoliaData: algoliaData,
         errors: {
             adminErrorMessage: '',
-            adminWarningMessage: '',
             analyticsRegionErrorMessage: '',
             errorMessage: ''
-        }
+        },
+        warnings: {
+            adminWarningMessage: '',
+        },
     };
 }
 
