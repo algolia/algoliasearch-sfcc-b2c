@@ -13,6 +13,13 @@ let orderHelper = require('*/cartridge/scripts/algolia/helper/orderHelper');
 let isInStoreStock = productFilter.isInStoreStock;
 let generateAlgoliaOperations = orderHelper.generateAlgoliaOperations;
 
+const indexingAPI = algoliaData.getPreference('IndexingAPI') || 'search-api'; // "search-api" (default) or "ingestion-api"
+
+const INDEXING_APIS = {
+    SEARCH_API: 'search-api',
+    INGESTION_API: 'ingestion-api',
+}
+
 const RECORD_MODEL_TYPE = {
     ATTRIBUTE_SLICED: 'attribute-sliced',
     MASTER_LEVEL: 'master-level',
@@ -131,7 +138,18 @@ exports.inventoryUpdate = function (order) {
         }
 
         if (algoliaOperations.length > 0) {
-            requestHelper.sendRetryableBatch(algoliaOperations);
+            switch (indexingAPI) {
+                case INDEXING_APIS.INGESTION_API: {
+                    let sortedRecords = requestHelper.groupRecordsForIngestionAPI(algoliaOperations);
+                    requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+                    break;
+                }
+                case INDEXING_APIS.SEARCH_API:
+                default: {
+                    requestHelper.sendRetryableBatch(algoliaOperations);
+                    break;
+                }
+            }
         }
     } catch (error) {
         Logger.error(
@@ -341,7 +359,6 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                         });
                         break;
                     }
-
                 }
             }
         }
