@@ -77,9 +77,9 @@
                         <div class="tooltip">
                             <isprint value="${Resource.msg('algolia.label.preference.adminkey.help', 'algolia', null)}" />
                         </div>
-                        <isif condition="${pdict.errors.adminWarningMessage}">
+                        <isif condition="${pdict.warnings.adminWarningMessage}">
                             <div class="warning-message yellow narrow">
-                                ${pdict.errors.adminWarningMessage}
+                                ${pdict.warnings.adminWarningMessage}
                             </div>
                         </isif>
                         <isif condition="${pdict.errors.adminErrorMessage}">
