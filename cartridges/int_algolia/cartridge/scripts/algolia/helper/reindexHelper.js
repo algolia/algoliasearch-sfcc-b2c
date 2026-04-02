@@ -2,6 +2,9 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
+const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+
+const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
 
 /**
  * Delete the temporary indices corresponding to the given type and locales
@@ -74,11 +77,13 @@ function moveTemporaryIndices(indexType, locales) {
  * This method takes the "taskID" object structure returned by the multi-indices batch write operation and wait for each task to complete.
  * https://www.algolia.com/doc/rest-api/search/#batch-write-operations-multiple-indices
  * @param {Object} taskIDs - object containing a map of { "<indexName>": <taskID>, "<indexName2>: <taskID> }
+ * @param {string} [indexingAPI] - which API to poll: 'search-api' (default) or 'ingestion-api'
  */
-function waitForTasks(taskIDs) {
+function waitForTasks(taskIDs, indexingAPI) {
+    indexingAPI = indexingAPI || INDEXING_APIS.SEARCH_API;
     Object.keys(taskIDs).forEach(function (indexName) {
         logger.info('Waiting for task ' + taskIDs[indexName] + ' on index ' + indexName);
-        algoliaIndexingAPI.waitTask(indexName, taskIDs[indexName]);
+        algoliaIndexingAPI.waitTask(indexName, taskIDs[indexName], indexingAPI);
     });
 }
 
@@ -90,15 +95,17 @@ function waitForTasks(taskIDs) {
  * @param {string} indexType - 'products' or 'categories'
  * @param {string[]} locales - locales for which the reindex was triggered
  * @param {Object} lastIndexingTasks - Task IDs of the last reindex tasks to wait for, for each locale. Under the form: { "<indexName1>": <taskID>, "<indexName2>": <taskID> }
+ * @param {string} [indexingAPI] - which API is used for indexing: 'search-api' (default) or 'ingestion-api'. Determines how to poll for task completion.
  */
-function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
+function finishAtomicReindex(indexType, locales, lastIndexingTasks, indexingAPI) {
     logger.info('[FinishReindex] copying index settings from production...');
     var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
 
-    logger.info('[FinishReindex] Waiting for the last indexing tasks to complete... ' + JSON.stringify(lastIndexingTasks));
-    waitForTasks(lastIndexingTasks);
-    logger.info('[FinishReindex] Waiting for the last copy settings tasks to complete... ' + JSON.stringify(copySettingsTasks));
-    waitForTasks(copySettingsTasks);
+    logger.info('[FinishReindex] Waiting for the last indexing tasks...');
+    waitForTasks(lastIndexingTasks, indexingAPI);
+
+    logger.info('[FinishReindex] Waiting for copy settings tasks...');
+    waitForTasks(copySettingsTasks); // defaults to Search API
 
     logger.info('[FinishReindex] Moving temporary indices to production...');
     moveTemporaryIndices(indexType, locales);

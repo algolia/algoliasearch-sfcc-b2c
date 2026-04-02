@@ -11,10 +11,8 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 var __jobInfo = {};
 
-const INDEXING_APIS = {
-    SEARCH_API: 'search-api',
-    INGESTION_API: 'ingestion-api',
-}
+const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
 
 const analyticsRegion = algoliaData.getPreference('AnalyticsRegion');
 
@@ -216,16 +214,28 @@ function moveIndex(indexNameSrc, indexNameDest) {
 
 /**
  * Wait for an Algolia task to complete.
- * This method will call the /task endpoint until its status become 'published'
- * https://www.algolia.com/doc/rest-api/search/#get-a-tasks-status
+ * For Search API: polls /1/indexes/{indexName}/task/{taskID} until status is 'published'.
+ * For Ingestion API: polls /1/runs/{runID} until status is 'finished' (throws on failure outcome).
  * @param {string} indexName - index name where the task was executed
- * @param {number} taskID - id of the task
+ * @param {string|number} taskID - Search API taskID or Ingestion API runID
+ * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
  */
-function waitTask(indexName, taskID) {
+function waitTask(indexName, taskID, indexingAPI) {
+    indexingAPI = indexingAPI || INDEXING_APIS.SEARCH_API;
     var indexingService = algoliaIndexingService.getService(__jobInfo);
     var maxWait = waitTaskTimeout || 10 * 60 * 1000;
     var start = Date.now();
     var nbRequestsSent = 0;
+    var path;
+
+    switch (indexingAPI) {
+        case INDEXING_APIS.SEARCH_API:
+            path = '/1/indexes/' + indexName + '/task/' + taskID;
+            break;
+        case INDEXING_APIS.INGESTION_API:
+            path = '/1/runs/' + taskID;
+            break;
+    }
 
     while (Date.now() < start + maxWait) {
         ++nbRequestsSent;
@@ -233,16 +243,31 @@ function waitTask(indexName, taskID) {
             indexingService,
             {
                 method: 'GET',
-                path: '/1/indexes/' + indexName + '/task/' + taskID,
+                path: path,
+                indexingAPI: indexingAPI,
             }
         );
 
         if (!result.ok) {
             logger.error(result.getErrorMessage());
         } else {
-            if (result.object.body.status === 'published') {
-                logger.info('Task ' + taskID + ' published. (' + nbRequestsSent + ' requests sent).');
-                return;
+            switch (indexingAPI) {
+                case INDEXING_APIS.SEARCH_API:
+                    if (result.object.body.status === 'published') {
+                        logger.info('Task ' + taskID + ' published. (' + nbRequestsSent + ' requests sent).');
+                        return;
+                    }
+                    break;
+                case INDEXING_APIS.INGESTION_API:
+                    if (result.object.body.status === 'finished') {
+                        if (result.object.body.outcome === 'failure') {
+                            logger.error('Run ' + taskID + ' failed: ' + result.object.body.reason);
+                            throw new Error('Run ' + taskID + ' failed: ' + result.object.body.reason);
+                        }
+                        logger.info('Run ' + taskID + ' finished. (' + nbRequestsSent + ' requests sent).');
+                        return;
+                    }
+                    break;
             }
         }
     }
@@ -262,11 +287,12 @@ function waitTask(indexName, taskID) {
 */
 function pushByIndexName(requestPayload, indexName) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
+    var referenceIndexName = indexName.replace('.tmp', ''); // used for atomic reindexing
 
     let retryableCallParameters = {
         method: 'POST',
         url: 'https://data.' + analyticsRegion + '.algolia.com',
-        path: '/1/push/' + indexName,
+        path: '/1/push/' + indexName + '?referenceIndexName=' + referenceIndexName,
         body: requestPayload,
         indexingAPI: INDEXING_APIS.INGESTION_API,
     }

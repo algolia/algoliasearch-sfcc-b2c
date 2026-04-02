@@ -149,8 +149,8 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
     let indices = Object.keys(groupedRecords);
     let failedRecords = 0;
     let wasThereAnError = false;
+    let runIDs = {};
 
-    // iterate over the grouped batches by indexName and action, and send them
     for (let i = 0; i < indices.length; i++) {
         let indexName = indices[i];
         let index = groupedRecords[indexName];
@@ -158,14 +158,16 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
 
         for (let j = 0; j < actions.length; j++) {
             let action = actions[j];
-
             let recordToSend = {
                 action: action,
                 records: index[action],
             }
-
             let result = algoliaIndexingAPI.pushByIndexName(recordToSend, indexName);
-            if (!(result.ok)) {
+            if (result.ok) {
+                // Keep the latest runID per index (last run finishing
+                // guarantees prior runs for the same task are also done)
+                runIDs[indexName] = result.object.body.runID;
+            } else {
                 wasThereAnError = true;
                 failedRecords += recordToSend.records.length;
             }
@@ -175,6 +177,9 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
     return {
         result: {
             ok: !wasThereAnError,
+            object: {
+                body: { runID: runIDs }
+            }
         },
         failedRecords: failedRecords,
     }

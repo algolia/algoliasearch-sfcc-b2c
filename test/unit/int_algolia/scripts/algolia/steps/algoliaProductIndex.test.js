@@ -353,7 +353,8 @@ describe('afterStep', () => {
             expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
                 'products',
                 expect.arrayContaining(['default', 'fr', 'en']),
-                {"test_index_fr": 42, "test_index_en": 51}
+                {"test_index_fr": 42, "test_index_en": 51},
+                'search-api'
             );
             expect(job.__getJobReport().error).toBe(false);
         });

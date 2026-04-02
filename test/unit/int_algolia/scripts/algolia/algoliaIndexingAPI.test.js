@@ -125,7 +125,7 @@ test('moveIndex', () => {
     });
 });
 
-test('waitForTask', () => {
+test('waitForTask - Search API (default)', () => {
     mockRetryableCall
         .mockReturnValue({
             ok: true,
@@ -145,5 +145,38 @@ test('waitForTask', () => {
     expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
         method: 'GET',
         path: '/1/indexes/testIndex/task/33',
+        indexingAPI: 'search-api',
     });
+});
+
+test('waitForTask - Ingestion API', () => {
+    mockRetryableCall
+        .mockReturnValue({
+            ok: true,
+            object: { body: { status: 'finished', outcome: 'success' }}
+        })
+        .mockReturnValueOnce({
+            ok: true,
+            object: { body: { status: 'started' }}
+        });
+    indexingAPI.waitTask('testIndex', 'run-uuid-123', 'ingestion-api');
+
+    expect(mockRetryableCall).toHaveBeenCalledTimes(2);
+    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+        method: 'GET',
+        path: '/1/runs/run-uuid-123',
+        indexingAPI: 'ingestion-api',
+    });
+});
+
+test('waitForTask - Ingestion API failure throws', () => {
+    mockRetryableCall
+        .mockReturnValue({
+            ok: true,
+            object: { body: { status: 'finished', outcome: 'failure', reason: 'too many errors' }}
+        });
+
+    expect(() => {
+        indexingAPI.waitTask('testIndex', 'run-uuid-456', 'ingestion-api');
+    }).toThrow('Run run-uuid-456 failed: too many errors');
 });

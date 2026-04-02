@@ -30,21 +30,10 @@ var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on
 const deleteIndexingOperation = 'deleteObject';
 var fullRecordUpdate = false;
 
-const RECORD_MODEL_TYPE = {
-    MASTER_LEVEL: 'master-level',
-    VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED: 'attribute-sliced',
-}
-
-const INDEXING_APIS = {
-    SEARCH_API: 'search-api',
-    INGESTION_API: 'ingestion-api',
-}
-
-const ANALYTICS_REGIONS = {
-    EU: 'eu',
-    US: 'us',
-}
+const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+const RECORD_MODEL_TYPES = algoliaConstants.RECORD_MODEL_TYPES;
+const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
+const ANALYTICS_REGIONS = algoliaConstants.ANALYTICS_REGIONS;
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
@@ -112,7 +101,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     }
 
     // throw an error if no "Grouping attribute for the Attribute-sliced record model" is defined when using the "Attribute-sliced" record model
-    if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED && empty(variationAttributeForAttributeSlicedRecordModel)) {
+    if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED && empty(variationAttributeForAttributeSlicedRecordModel)) {
         throw new Error('You need to define a grouping attribute for the Attribute-sliced record model in the Algolia BM module!');
     }
 
@@ -198,7 +187,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
+    if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
@@ -233,8 +222,6 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     // ----------------------------- Extracting productIDs from the output of the Delta Export -----------------------------
 
-
-    var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
     // creating working folder (same as the delta export output folder) - if there were no previous changes, the delta export job step won't create it
     l0_deltaExportDir = new File(algoliaConstants.ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramDeltaExportJobName); // Impex/src/platform/outbox/algolia/productDeltaExport
@@ -373,7 +360,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
     /* --- MAIN LOGIC --- */
 
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
-        if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
+        if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL) {
             if (product.isVariant()) {
                 // This variant will be processed when we handle its master product, skip it for now.
                 return [];
@@ -413,7 +400,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 jobReport.recordsToSend += algoliaOperations.length;
                 return algoliaOperations;
             }
-        } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
+        } else if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED) {
             if (product.isVariant()) {
                 // This variant will be processed when we handle its master product, skip it for now.
                 return [];
@@ -565,7 +552,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
                 let localizedProduct;
 
-                if (recordModel === RECORD_MODEL_TYPE.VARIANT_LEVEL) {
+                if (recordModel === RECORD_MODEL_TYPES.VARIANT_LEVEL) {
 
                     // for variant-level indexing, generate a flat record where all attributes are at the root level
                     localizedProduct = new AlgoliaLocalizedProduct({

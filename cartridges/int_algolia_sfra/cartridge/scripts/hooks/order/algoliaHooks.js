@@ -15,16 +15,9 @@ let generateAlgoliaOperations = orderHelper.generateAlgoliaOperations;
 
 const indexingAPI = algoliaData.getPreference('IndexingAPI') || 'search-api'; // "search-api" (default) or "ingestion-api"
 
-const INDEXING_APIS = {
-    SEARCH_API: 'search-api',
-    INGESTION_API: 'ingestion-api',
-}
-
-const RECORD_MODEL_TYPE = {
-    ATTRIBUTE_SLICED: 'attribute-sliced',
-    MASTER_LEVEL: 'master-level',
-    VARIANT_LEVEL: 'variant-level',
-};
+const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
+const RECORD_MODEL_TYPES = algoliaConstants.RECORD_MODEL_TYPES;
 
 const variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
 
@@ -47,8 +40,8 @@ function createProductConfig(product, recordModel, additionalAttributes) {
     let masterProduct = productVariationModel.getMaster();
 
     switch (recordModel) {
-        case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
-        case RECORD_MODEL_TYPE.MASTER_LEVEL:
+        case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
+        case RECORD_MODEL_TYPES.MASTER_LEVEL:
 
             if (!empty(masterProduct)) { // product has a master, so it must be a variant
                 productConfig.baseModel = new AlgoliaLocalizedProduct({
@@ -57,7 +50,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
                     attributeList: attributesConfig.nonLocalizedMasterAttributes,
                 });
 
-                if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED && !empty(variationAttribute)) {
+                if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED && !empty(variationAttribute)) {
                     let variationAttributeValue = productVariationModel.getSelectedValue(variationAttribute);
 
                     // Set the variation model to represent the current variation group
@@ -84,7 +77,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
 
             }
             break;
-        case RECORD_MODEL_TYPE.VARIANT_LEVEL:
+        case RECORD_MODEL_TYPES.VARIANT_LEVEL:
             // Variant-level indexing for variant product
             productConfig.baseModel = new AlgoliaLocalizedProduct({
                 product: product,
@@ -185,8 +178,8 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
 
             switch (recordModel) {
 
-                case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
-                case RECORD_MODEL_TYPE.MASTER_LEVEL: {
+                case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
+                case RECORD_MODEL_TYPES.MASTER_LEVEL: {
                     let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                     productConfig.attributeList = ['variants'];
 
@@ -194,7 +187,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
                     algoliaOperations = algoliaOperations.concat(productOps);
                     break;
                 }
-                case RECORD_MODEL_TYPE.VARIANT_LEVEL: {
+                case RECORD_MODEL_TYPES.VARIANT_LEVEL: {
                     let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                     productConfig.attributeList = ['storeAvailability'];
 
@@ -233,8 +226,8 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
             if (indexOutOfStock) {
                 switch (recordModel) {
 
-                    case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
-                    case RECORD_MODEL_TYPE.MASTER_LEVEL: {
+                    case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
+                    case RECORD_MODEL_TYPES.MASTER_LEVEL: {
                         let attrArray = ['variants'];
                         if (additionalAttributes.indexOf('in_stock') > -1) {
                             attrArray.push('in_stock');
@@ -248,7 +241,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                         break;
                     }
 
-                    case RECORD_MODEL_TYPE.VARIANT_LEVEL: {
+                    case RECORD_MODEL_TYPES.VARIANT_LEVEL: {
                         let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                         productConfig.attributeList = ['in_stock'];
 
@@ -266,7 +259,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                 switch (recordModel) {
 
-                    case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED: {
+                    case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED: {
                         if (productConfig.product.isMaster()) {
 
                             if (!empty(productConfig.variationModel)) { // variation group
@@ -317,7 +310,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                         break;
                     }
 
-                    case RECORD_MODEL_TYPE.MASTER_LEVEL: {
+                    case RECORD_MODEL_TYPES.MASTER_LEVEL: {
                         if (productConfig.product.isMaster()) { // master
                             let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), threshold);
                             if (!isMasterInStock) {
@@ -347,7 +340,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                         break;
                     }
 
-                    case RECORD_MODEL_TYPE.VARIANT_LEVEL: {
+                    case RECORD_MODEL_TYPES.VARIANT_LEVEL: {
                         productOps.forEach(function(productOp) {
                             algoliaOperations = algoliaOperations.concat(
                                 new jobHelper.AlgoliaOperation(

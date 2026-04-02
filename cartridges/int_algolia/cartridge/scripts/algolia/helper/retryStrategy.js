@@ -2,14 +2,13 @@ const Result = require('dw/svc/Result')
 const Logger = require('dw/system/Logger');
 
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+
 const appID = algoliaData.getPreference('ApplicationID');
 
-const EXPIRATION_DELAY = 5 * 60 * 1000;
+const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
 
-const INDEXING_APIS = {
-    SEARCH_API: 'search-api',
-    INGESTION_API: 'ingestion-api',
-}
+const EXPIRATION_DELAY = 5 * 60 * 1000;
 
 const analyticsRegion = algoliaData.getPreference('AnalyticsRegion');
 
