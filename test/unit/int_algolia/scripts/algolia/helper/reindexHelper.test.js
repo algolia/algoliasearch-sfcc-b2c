@@ -83,28 +83,23 @@ test('moveTemporaryIndices', () => {
     expect(mockMoveIndex).nthCalledWith(2, 'test_index___products__en.tmp', 'test_index___products__en');
 });
 
-test('waitForTasks - defaults to Search API', () => {
-    mockWaitTask
-        .mockReturnValue({
-            ok: true,
-            object: { body: { status: 'published' }}
-        });
+test('waitForTasks', () => {
     reindexHelper.waitForTasks({ 'testIndex': 33, 'testIndex2': 51 });
 
     expect(mockWaitTask).toHaveBeenCalledTimes(2);
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 33, 'search-api');
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 51, 'search-api');
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 33);
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 51);
 });
 
-test('waitForTasks - passes indexingAPI through', () => {
-    mockWaitTask
-        .mockReturnValue({
-            ok: true,
-            object: { body: { status: 'published' }}
-        });
-    reindexHelper.waitForTasks({ 'testIndex': 33, 'testIndex2': 51 }, 'ingestion-api');
+test('waitForRuns', () => {
+    reindexHelper.waitForRuns({
+        'testIndex': ['run-1', 'run-2', 'run-3'],
+        'testIndex2': ['run-4'],
+    });
 
-    expect(mockWaitTask).toHaveBeenCalledTimes(2);
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 33, 'ingestion-api');
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 51, 'ingestion-api');
+    expect(mockWaitTask).toHaveBeenCalledTimes(4);
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-1', 'ingestion-api');
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-2', 'ingestion-api');
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-3', 'ingestion-api');
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 'run-4', 'ingestion-api');
 });

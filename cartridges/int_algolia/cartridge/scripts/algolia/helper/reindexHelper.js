@@ -73,17 +73,30 @@ function moveTemporaryIndices(indexType, locales) {
 }
 
 /**
- * Wait for multiple Algolia tasks to complete.
- * This method takes the "taskID" object structure returned by the multi-indices batch write operation and wait for each task to complete.
- * https://www.algolia.com/doc/rest-api/search/#batch-write-operations-multiple-indices
- * @param {Object} taskIDs - object containing a map of { "<indexName>": <taskID>, "<indexName2>: <taskID> }
- * @param {string} [indexingAPI] - which API to poll: 'search-api' (default) or 'ingestion-api'
+ * Wait for multiple Search API tasks to complete.
+ * Polls each task via /1/indexes/{indexName}/task/{taskID} until status is 'published'.
+ * @param {Object} taskIDs - { "<indexName>": <taskID> }
  */
-function waitForTasks(taskIDs, indexingAPI) {
-    indexingAPI = indexingAPI || INDEXING_APIS.SEARCH_API;
+function waitForTasks(taskIDs) {
     Object.keys(taskIDs).forEach(function (indexName) {
-        logger.info('Waiting for task ' + taskIDs[indexName] + ' on index ' + indexName);
-        algoliaIndexingAPI.waitTask(indexName, taskIDs[indexName], indexingAPI);
+        logger.info('Waiting for Search API task ' + taskIDs[indexName] + ' on index ' + indexName);
+        algoliaIndexingAPI.waitTask(indexName, taskIDs[indexName]);
+    });
+}
+
+/**
+ * Wait for multiple Ingestion API runs to complete.
+ * Polls each run via /1/runs/{runID} until status is 'finished'.
+ * Ingestion runs have no sequential processing guarantee, so all runIDs must be tracked and waited on.
+ * @param {Object} runIDs - { "<indexName>": [<runID>, ...] }
+ */
+function waitForRuns(runIDs) {
+    Object.keys(runIDs).forEach(function (indexName) {
+        var ids = runIDs[indexName];
+        ids.forEach(function (runID) {
+            logger.info('Waiting for Ingestion API run ' + runID + ' on index ' + indexName);
+            algoliaIndexingAPI.waitTask(indexName, runID, INDEXING_APIS.INGESTION_API);
+        });
     });
 }
 
@@ -94,18 +107,26 @@ function waitForTasks(taskIDs, indexingAPI) {
  *   - Move the temporary indices to production
  * @param {string} indexType - 'products' or 'categories'
  * @param {string[]} locales - locales for which the reindex was triggered
- * @param {Object} lastIndexingTasks - Task IDs of the last reindex tasks to wait for, for each locale. Under the form: { "<indexName1>": <taskID>, "<indexName2>": <taskID> }
- * @param {string} [indexingAPI] - which API is used for indexing: 'search-api' (default) or 'ingestion-api'. Determines how to poll for task completion.
+ * @param {Object} lastIndexingTasks - Search API: { indexName: taskID }; Ingestion API: { indexName: [runID, ...] }
+ * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
  */
 function finishAtomicReindex(indexType, locales, lastIndexingTasks, indexingAPI) {
     logger.info('[FinishReindex] copying index settings from production...');
     var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
 
     logger.info('[FinishReindex] Waiting for the last indexing tasks...');
-    waitForTasks(lastIndexingTasks, indexingAPI);
+    switch (indexingAPI) {
+        default:
+        case INDEXING_APIS.SEARCH_API:
+            waitForTasks(lastIndexingTasks);
+            break;
+        case INDEXING_APIS.INGESTION_API:
+            waitForRuns(lastIndexingTasks);
+            break;
+    }
 
     logger.info('[FinishReindex] Waiting for copy settings tasks...');
-    waitForTasks(copySettingsTasks); // defaults to Search API
+    waitForTasks(copySettingsTasks);
 
     logger.info('[FinishReindex] Moving temporary indices to production...');
     moveTemporaryIndices(indexType, locales);
@@ -114,6 +135,7 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks, indexingAPI)
 module.exports.deleteTemporaryIndices = deleteTemporaryIndices;
 module.exports.finishAtomicReindex = finishAtomicReindex;
 module.exports.waitForTasks = waitForTasks;
+module.exports.waitForRuns = waitForRuns;
 
 // For unit testing
 module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;

@@ -164,8 +164,6 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
             }
             let result = algoliaIndexingAPI.pushByIndexName(recordToSend, indexName);
             if (result.ok) {
-                // Keep the latest runID per index (last run finishing
-                // guarantees prior runs for the same task are also done)
                 runIDs[indexName] = result.object.body.runID;
             } else {
                 wasThereAnError = true;
