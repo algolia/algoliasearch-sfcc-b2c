@@ -285,13 +285,22 @@ function waitTask(indexName, taskID, indexingAPI, eventID) {
 * @returns {dw.svc.Result} - result of the call
 */
 function pushByIndexName(requestPayload, indexName) {
-    var indexingService = algoliaIndexingService.getService(__jobInfo);
-    var referenceIndexName = indexName.replace('.tmp', ''); // used for atomic reindexing
+    let indexingService = algoliaIndexingService.getService(__jobInfo);
+    let referenceIndexName, referenceIndexNameParam = '';
+    let isAtomicReindexing = indexName.indexOf('.tmp') !== -1;
+
+    // When using atomic reindexing with the Ingestion API, the referenceIndexName parameter
+    // needs to be set so that a task does not need to be created for the temporary index.
+    // See https://www.algolia.com/doc/rest-api/ingestion/push#parameter-reference-index-name
+    if (isAtomicReindexing) {
+        referenceIndexName = indexName.replace('.tmp', '');
+        referenceIndexNameParam = '?referenceIndexName=' + referenceIndexName;
+    }
 
     let retryableCallParameters = {
         method: 'POST',
         url: 'https://data.' + analyticsRegion + '.algolia.com',
-        path: '/1/push/' + indexName + '?referenceIndexName=' + referenceIndexName,
+        path: '/1/push/' + indexName + referenceIndexNameParam,
         body: requestPayload,
         indexingAPI: INDEXING_APIS.INGESTION_API,
     }
