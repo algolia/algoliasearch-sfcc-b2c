@@ -91,15 +91,21 @@ test('waitForTasks', () => {
     expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 51);
 });
 
-test('waitForRuns', () => {
-    reindexHelper.waitForRuns({
-        'testIndex': ['run-1', 'run-2', 'run-3'],
-        'testIndex2': ['run-4'],
+test('waitForEvents', () => {
+    reindexHelper.waitForEvents({
+        'testIndex': [
+            { runID: 'run-1', eventID: 'evt-1' },
+            { runID: 'run-2', eventID: 'evt-2' },
+            { runID: 'run-3', eventID: 'evt-3' },
+        ],
+        'testIndex2': [
+            { runID: 'run-4', eventID: 'evt-4' },
+        ],
     });
 
     expect(mockWaitTask).toHaveBeenCalledTimes(4);
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-1', 'ingestion-api');
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-2', 'ingestion-api');
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-3', 'ingestion-api');
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 'run-4', 'ingestion-api');
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-1', 'ingestion-api', 'evt-1');
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-2', 'ingestion-api', 'evt-2');
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-3', 'ingestion-api', 'evt-3');
+    expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 'run-4', 'ingestion-api', 'evt-4');
 });

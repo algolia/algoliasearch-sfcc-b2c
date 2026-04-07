@@ -85,17 +85,17 @@ function waitForTasks(taskIDs) {
 }
 
 /**
- * Wait for multiple Ingestion API runs to complete.
- * Polls each run via /1/runs/{runID} until status is 'finished'.
- * Ingestion runs have no sequential processing guarantee, so all runIDs must be tracked and waited on.
- * @param {Object} runIDs - { "<indexName>": [<runID>, ...] }
+ * Wait for multiple Ingestion API events to become available.
+ * Polls each event via /1/runs/{runID}/events/{eventID} until it returns a non-404 response.
+ * Ingestion events have no sequential processing guarantee, so all must be tracked and waited on.
+ * @param {Object} eventsByIndex - { "<indexName>": [{ runID: <string>, eventID: <string> }, ...] }
  */
-function waitForRuns(runIDs) {
-    Object.keys(runIDs).forEach(function (indexName) {
-        var ids = runIDs[indexName];
-        ids.forEach(function (runID) {
-            logger.info('Waiting for Ingestion API run ' + runID + ' on index ' + indexName);
-            algoliaIndexingAPI.waitTask(indexName, runID, INDEXING_APIS.INGESTION_API);
+function waitForEvents(eventsByIndex) {
+    Object.keys(eventsByIndex).forEach(function (indexName) {
+        var events = eventsByIndex[indexName];
+        events.forEach(function (event) {
+            logger.info('Waiting for Ingestion API event ' + event.eventID + ' (run ' + event.runID + ') on index ' + indexName);
+            algoliaIndexingAPI.waitTask(indexName, event.runID, INDEXING_APIS.INGESTION_API, event.eventID);
         });
     });
 }
@@ -121,7 +121,7 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks, indexingAPI)
             waitForTasks(lastIndexingTasks);
             break;
         case INDEXING_APIS.INGESTION_API:
-            waitForRuns(lastIndexingTasks);
+            waitForEvents(lastIndexingTasks);
             break;
     }
 
@@ -135,7 +135,7 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks, indexingAPI)
 module.exports.deleteTemporaryIndices = deleteTemporaryIndices;
 module.exports.finishAtomicReindex = finishAtomicReindex;
 module.exports.waitForTasks = waitForTasks;
-module.exports.waitForRuns = waitForRuns;
+module.exports.waitForEvents = waitForEvents;
 
 // For unit testing
 module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;

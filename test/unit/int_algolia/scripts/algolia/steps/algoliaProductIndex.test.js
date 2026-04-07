@@ -20,7 +20,7 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
         moveTemporaryIndices: mockMoveTemporaryIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
         waitForTasks: jest.fn(),
-        waitForRuns: jest.fn(),
+        waitForEvents: jest.fn(),
     };
 }, {virtual: true});
 

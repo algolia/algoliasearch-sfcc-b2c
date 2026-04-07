@@ -215,12 +215,14 @@ function moveIndex(indexNameSrc, indexNameDest) {
 /**
  * Wait for an Algolia task to complete.
  * For Search API: polls /1/indexes/{indexName}/task/{taskID} until status is 'published'.
- * For Ingestion API: polls /1/runs/{runID} until status is 'finished' (throws on failure outcome).
+ * For Ingestion API: polls /1/runs/{runID}/events/{eventID} until it returns a non-404 response,
+ *   mirroring the approach used by the official Algolia JS client.
  * @param {string} indexName - index name where the task was executed
  * @param {string|number} taskID - Search API taskID or Ingestion API runID
  * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
+ * @param {string} [eventID] - Ingestion API eventID (required when indexingAPI is 'ingestion-api')
  */
-function waitTask(indexName, taskID, indexingAPI) {
+function waitTask(indexName, taskID, indexingAPI, eventID) {
     indexingAPI = indexingAPI || INDEXING_APIS.SEARCH_API;
     var indexingService = algoliaIndexingService.getService(__jobInfo);
     var maxWait = waitTaskTimeout || 10 * 60 * 1000;
@@ -233,7 +235,7 @@ function waitTask(indexName, taskID, indexingAPI) {
             path = '/1/indexes/' + indexName + '/task/' + taskID;
             break;
         case INDEXING_APIS.INGESTION_API:
-            path = '/1/runs/' + taskID;
+            path = '/1/runs/' + taskID + '/events/' + eventID;
             break;
     }
 
@@ -249,7 +251,11 @@ function waitTask(indexName, taskID, indexingAPI) {
         );
 
         if (!result.ok) {
-            logger.error(result.getErrorMessage());
+            if (indexingAPI === INDEXING_APIS.INGESTION_API && result.error === 404) {
+                // Event not yet available, continue polling
+            } else {
+                logger.error(result.getErrorMessage());
+            }
         } else {
             switch (indexingAPI) {
                 case INDEXING_APIS.SEARCH_API:
@@ -259,15 +265,8 @@ function waitTask(indexName, taskID, indexingAPI) {
                     }
                     break;
                 case INDEXING_APIS.INGESTION_API:
-                    if (result.object.body.status === 'finished') {
-                        if (result.object.body.outcome === 'failure') {
-                            logger.error('Run ' + taskID + ' failed: ' + result.object.body.reason);
-                            throw new Error('Run ' + taskID + ' failed: ' + result.object.body.reason);
-                        }
-                        logger.info('Run ' + taskID + ' finished. (' + nbRequestsSent + ' requests sent).');
-                        return;
-                    }
-                    break;
+                    logger.info('Event ' + eventID + ' (run ' + taskID + ') retrieved. (' + nbRequestsSent + ' requests sent).');
+                    return;
             }
         }
     }

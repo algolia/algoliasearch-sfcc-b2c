@@ -149,34 +149,28 @@ test('waitForTask - Search API (default)', () => {
     });
 });
 
-test('waitForTask - Ingestion API', () => {
+test('waitForTask - Ingestion API polls event endpoint until non-404', () => {
     mockRetryableCall
-        .mockReturnValue({
-            ok: true,
-            object: { body: { status: 'finished', outcome: 'success' }}
+        .mockReturnValueOnce({
+            ok: false,
+            error: 404,
+            getErrorMessage: () => 'Not found',
         })
         .mockReturnValueOnce({
-            ok: true,
-            object: { body: { status: 'started' }}
-        });
-    indexingAPI.waitTask('testIndex', 'run-uuid-123', 'ingestion-api');
-
-    expect(mockRetryableCall).toHaveBeenCalledTimes(2);
-    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
-        method: 'GET',
-        path: '/1/runs/run-uuid-123',
-        indexingAPI: 'ingestion-api',
-    });
-});
-
-test('waitForTask - Ingestion API failure throws', () => {
-    mockRetryableCall
+            ok: false,
+            error: 404,
+            getErrorMessage: () => 'Not found',
+        })
         .mockReturnValue({
             ok: true,
-            object: { body: { status: 'finished', outcome: 'failure', reason: 'too many errors' }}
+            object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123', status: 'succeeded', type: 'record', batchSize: 10 }}
         });
+    indexingAPI.waitTask('testIndex', 'run-uuid-123', 'ingestion-api', 'evt-abc');
 
-    expect(() => {
-        indexingAPI.waitTask('testIndex', 'run-uuid-456', 'ingestion-api');
-    }).toThrow('Run run-uuid-456 failed: too many errors');
+    expect(mockRetryableCall).toHaveBeenCalledTimes(3);
+    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+        method: 'GET',
+        path: '/1/runs/run-uuid-123/events/evt-abc',
+        indexingAPI: 'ingestion-api',
+    });
 });

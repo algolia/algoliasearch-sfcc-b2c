@@ -149,7 +149,7 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
     let indices = Object.keys(groupedRecords);
     let failedRecords = 0;
     let wasThereAnError = false;
-    let runIDs = {};
+    let events = {};
 
     for (let i = 0; i < indices.length; i++) {
         let indexName = indices[i];
@@ -164,7 +164,10 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
             }
             let result = algoliaIndexingAPI.pushByIndexName(recordToSend, indexName);
             if (result.ok) {
-                runIDs[indexName] = result.object.body.runID;
+                events[indexName] = {
+                    runID: result.object.body.runID,
+                    eventID: result.object.body.eventID,
+                };
             } else {
                 wasThereAnError = true;
                 failedRecords += recordToSend.records.length;
@@ -176,7 +179,7 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
         result: {
             ok: !wasThereAnError,
             object: {
-                body: { runID: runIDs }
+                body: { events: events }
             }
         },
         failedRecords: failedRecords,

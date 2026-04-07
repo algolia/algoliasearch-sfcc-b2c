@@ -550,26 +550,25 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         jobReport.recordsSent += batch.length;
         jobReport.chunksSent++;
 
-        // Store Algolia indexing task/run IDs per index.
+        // Store Algolia indexing task/event IDs per index.
         // When performing a fullCatalogReindex, afterStep waits for these to complete before moving temp to prod.
         // For Search API, taskIDs are sequential per index — the last one completing guarantees all prior
         // are done, so we only keep the latest value.
-        // For Ingestion API, runs have no sequential processing guarantee — we must track all runIDs.
-        var taskIDs;
+        // For Ingestion API, events have no sequential processing guarantee — we must track all of them.
         switch (indexingAPI) {
             case INDEXING_APIS.SEARCH_API:
-                taskIDs = result.object.body.taskID;
+                var taskIDs = result.object.body.taskID;
                 Object.keys(taskIDs).forEach(function (taskIndexName) {
                     lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
                 });
                 break;
             case INDEXING_APIS.INGESTION_API:
-                taskIDs = result.object.body.runID;
-                Object.keys(taskIDs).forEach(function (taskIndexName) {
+                var events = result.object.body.events;
+                Object.keys(events).forEach(function (taskIndexName) {
                     if (!lastIndexingTasks[taskIndexName]) {
                         lastIndexingTasks[taskIndexName] = [];
                     }
-                    lastIndexingTasks[taskIndexName].push(taskIDs[taskIndexName]);
+                    lastIndexingTasks[taskIndexName].push(events[taskIndexName]);
                 });
                 break;
         }
