@@ -28,6 +28,7 @@ const mockMoveIndex = jest.fn().mockReturnValue({
 const mockGetIndexSettings = jest.fn();
 const mockSetIndexSettings = jest.fn();
 const mockWaitTask = jest.fn();
+const mockWaitForRunEvent = jest.fn();
 const mockSendMultiIndexBatch = jest.fn();
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
@@ -37,6 +38,7 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
         copyIndexSettings: mockCopySettingsFromProdIndices,
         moveIndex: mockMoveIndex,
         waitTask: mockWaitTask,
+        waitForRunEvent: mockWaitForRunEvent,
         sendMultiIndexBatch: mockSendMultiIndexBatch,
         pushByIndexName: jest.fn(),
     }
@@ -103,9 +105,9 @@ test('waitForEvents', () => {
         ],
     });
 
-    expect(mockWaitTask).toHaveBeenCalledTimes(4);
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-1', 'ingestion-api', 'evt-1');
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-2', 'ingestion-api', 'evt-2');
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 'run-3', 'ingestion-api', 'evt-3');
-    expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 'run-4', 'ingestion-api', 'evt-4');
+    expect(mockWaitForRunEvent).toHaveBeenCalledTimes(4);
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-1');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-2', 'evt-2');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-3', 'evt-3');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-4', 'evt-4');
 });

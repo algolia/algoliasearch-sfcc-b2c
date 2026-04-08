@@ -95,7 +95,7 @@ function waitForEvents(eventsByIndex) {
         var events = eventsByIndex[indexName];
         events.forEach(function (event) {
             logger.info('Waiting for Ingestion API event ' + event.eventID + ' (run ' + event.runID + ') on index ' + indexName);
-            algoliaIndexingAPI.waitTask(indexName, event.runID, INDEXING_APIS.INGESTION_API, event.eventID);
+            algoliaIndexingAPI.waitForRunEvent(event.runID, event.eventID);
         });
     });
 }

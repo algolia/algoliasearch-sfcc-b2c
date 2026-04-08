@@ -125,7 +125,7 @@ test('moveIndex', () => {
     });
 });
 
-test('waitForTask - Search API (default)', () => {
+test('waitForTask', () => {
     mockRetryableCall
         .mockReturnValue({
             ok: true,
@@ -145,32 +145,44 @@ test('waitForTask - Search API (default)', () => {
     expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
         method: 'GET',
         path: '/1/indexes/testIndex/task/33',
-        indexingAPI: 'search-api',
     });
 });
 
-test('waitForTask - Ingestion API polls event endpoint until non-404', () => {
-    mockRetryableCall
-        .mockReturnValueOnce({
-            ok: false,
-            error: 404,
-            getErrorMessage: () => 'Not found',
-        })
-        .mockReturnValueOnce({
-            ok: false,
-            error: 404,
-            getErrorMessage: () => 'Not found',
-        })
-        .mockReturnValue({
-            ok: true,
-            object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123', status: 'succeeded', type: 'record', batchSize: 10 }}
-        });
-    indexingAPI.waitTask('testIndex', 'run-uuid-123', 'ingestion-api', 'evt-abc');
+describe('waitForRunEvent', () => {
+    test('polls event endpoint until non-404', () => {
+        mockRetryableCall
+            .mockReturnValueOnce({
+                ok: false,
+                error: 404,
+                getErrorMessage: () => 'Not found',
+            })
+            .mockReturnValueOnce({
+                ok: false,
+                error: 404,
+                getErrorMessage: () => 'Not found',
+            })
+            .mockReturnValue({
+                ok: true,
+                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123', status: 'succeeded', type: 'record', batchSize: 10 }}
+            });
+        indexingAPI.waitForRunEvent('run-uuid-123', 'evt-abc');
 
-    expect(mockRetryableCall).toHaveBeenCalledTimes(3);
-    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
-        method: 'GET',
-        path: '/1/runs/run-uuid-123/events/evt-abc',
-        indexingAPI: 'ingestion-api',
+        expect(mockRetryableCall).toHaveBeenCalledTimes(3);
+        expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+            method: 'GET',
+            path: '/1/runs/run-uuid-123/events/evt-abc',
+            indexingAPI: 'ingestion-api',
+        });
+    });
+
+    test('returns immediately on first success', () => {
+        mockRetryableCall
+            .mockReturnValue({
+                ok: true,
+                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123' }}
+            });
+        indexingAPI.waitForRunEvent('run-uuid-123', 'evt-abc');
+
+        expect(mockRetryableCall).toHaveBeenCalledTimes(1);
     });
 });

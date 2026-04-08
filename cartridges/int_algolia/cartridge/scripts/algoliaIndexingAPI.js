@@ -214,30 +214,16 @@ function moveIndex(indexNameSrc, indexNameDest) {
 
 /**
  * Wait for an Algolia task to complete.
- * For Search API: polls /1/indexes/{indexName}/task/{taskID} until status is 'published'.
- * For Ingestion API: polls /1/runs/{runID}/events/{eventID} until it returns a non-404 response,
- *   mirroring the approach used by the official Algolia JS client.
+ * This method will call the /task endpoint until its status become 'published'
+ * https://www.algolia.com/doc/rest-api/search/#get-a-tasks-status
  * @param {string} indexName - index name where the task was executed
- * @param {string|number} taskID - Search API taskID or Ingestion API runID
- * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
- * @param {string} [eventID] - Ingestion API eventID (required when indexingAPI is 'ingestion-api')
+ * @param {number} taskID - id of the task
  */
-function waitTask(indexName, taskID, indexingAPI, eventID) {
-    indexingAPI = indexingAPI || INDEXING_APIS.SEARCH_API;
+function waitTask(indexName, taskID) {
     var indexingService = algoliaIndexingService.getService(__jobInfo);
     var maxWait = waitTaskTimeout || 10 * 60 * 1000;
     var start = Date.now();
     var nbRequestsSent = 0;
-    var path;
-
-    switch (indexingAPI) {
-        case INDEXING_APIS.SEARCH_API:
-            path = '/1/indexes/' + indexName + '/task/' + taskID;
-            break;
-        case INDEXING_APIS.INGESTION_API:
-            path = '/1/runs/' + taskID + '/events/' + eventID;
-            break;
-    }
 
     while (Date.now() < start + maxWait) {
         ++nbRequestsSent;
@@ -245,28 +231,16 @@ function waitTask(indexName, taskID, indexingAPI, eventID) {
             indexingService,
             {
                 method: 'GET',
-                path: path,
-                indexingAPI: indexingAPI,
+                path: '/1/indexes/' + indexName + '/task/' + taskID,
             }
         );
 
         if (!result.ok) {
-            if (indexingAPI === INDEXING_APIS.INGESTION_API && result.error === 404) {
-                // Event not yet available, continue polling
-            } else {
-                logger.error(result.getErrorMessage());
-            }
+            logger.error(result.getErrorMessage());
         } else {
-            switch (indexingAPI) {
-                case INDEXING_APIS.SEARCH_API:
-                    if (result.object.body.status === 'published') {
-                        logger.info('Task ' + taskID + ' published. (' + nbRequestsSent + ' requests sent).');
-                        return;
-                    }
-                    break;
-                case INDEXING_APIS.INGESTION_API:
-                    logger.info('Event ' + eventID + ' (run ' + taskID + ') retrieved. (' + nbRequestsSent + ' requests sent).');
-                    return;
+            if (result.object.body.status === 'published') {
+                logger.info('Task ' + taskID + ' published. (' + nbRequestsSent + ' requests sent).');
+                return;
             }
         }
     }
@@ -314,6 +288,47 @@ function pushByIndexName(requestPayload, indexName) {
     return result;
 }
 
+/**
+ * Wait for an Ingestion API run event to become available.
+ * Polls GET /1/runs/{runID}/events/{eventID} until it returns a non-404 response,
+ * mirroring the approach used by the official Algolia JS API client.
+ * @param {string} runID - Ingestion API run ID
+ * @param {string} eventID - Ingestion API event ID
+ */
+function waitForRunEvent(runID, eventID) {
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
+    var maxWait = waitTaskTimeout || 10 * 60 * 1000;
+    var start = Date.now();
+    var nbRequestsSent = 0;
+    var path = '/1/runs/' + runID + '/events/' + eventID;
+
+    while (Date.now() < start + maxWait) {
+        ++nbRequestsSent;
+
+        var result = retryableCall(
+            indexingService,
+            {
+                method: 'GET',
+                path: path,
+                indexingAPI: INDEXING_APIS.INGESTION_API,
+            }
+        );
+
+        if (!result.ok) {
+            if (result.error === 404) {
+                // Event not yet available, continue polling
+            } else {
+                logger.error(result.getErrorMessage());
+            }
+        } else {
+            logger.info('Event ' + eventID + ' (run ' + runID + ') retrieved. (' + nbRequestsSent + ' requests sent).');
+            return;
+        }
+    }
+    logger.error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
+    throw new Error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
+}
+
 module.exports.setJobInfo = setJobInfo;
 module.exports.sendBatch = sendBatch;
 module.exports.sendMultiIndexBatch = sendMultiIndexBatch;
@@ -324,3 +339,4 @@ module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;
 module.exports.waitTask = waitTask;
 module.exports.pushByIndexName = pushByIndexName;
+module.exports.waitForRunEvent = waitForRunEvent;
