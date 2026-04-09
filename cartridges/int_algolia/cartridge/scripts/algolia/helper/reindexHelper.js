@@ -107,10 +107,10 @@ function waitForEvents(eventsByIndex) {
  *   - Move the temporary indices to production
  * @param {string} indexType - 'products' or 'categories'
  * @param {string[]} locales - locales for which the reindex was triggered
- * @param {Object} lastIndexingTasks - Search API: { indexName: taskID }; Ingestion API: { indexName: [{ runID, eventID }, ...] }
+ * @param {Object} indexingTasksToWaitFor - Search API: { indexName: taskID }; Ingestion API: { indexName: [{ runID, eventID }, ...] }
  * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
  */
-function finishAtomicReindex(indexType, locales, lastIndexingTasks, indexingAPI) {
+function finishAtomicReindex(indexType, locales, indexingTasksToWaitFor, indexingAPI) {
     logger.info('[FinishReindex] copying index settings from production...');
     var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
 
@@ -118,10 +118,10 @@ function finishAtomicReindex(indexType, locales, lastIndexingTasks, indexingAPI)
     switch (indexingAPI) {
         default:
         case INDEXING_APIS.SEARCH_API:
-            waitForTasks(lastIndexingTasks);
+            waitForTasks(indexingTasksToWaitFor);
             break;
         case INDEXING_APIS.INGESTION_API:
-            waitForEvents(lastIndexingTasks);
+            waitForEvents(indexingTasksToWaitFor);
             break;
     }
 

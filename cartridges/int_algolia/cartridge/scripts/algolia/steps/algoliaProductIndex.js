@@ -22,7 +22,7 @@ var products = [], siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
 var nonLocalizedAttributes = [], nonLocalizedMasterAttributes = [];
 var attributesComputedFromBaseProduct = [];
-var lastIndexingTasks = {};
+var indexingTasksToWaitFor = {};
 
 var extendedProductAttributesConfig;
 
@@ -559,16 +559,16 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
             case INDEXING_APIS.SEARCH_API:
                 var taskIDs = result.object.body.taskID;
                 Object.keys(taskIDs).forEach(function (taskIndexName) {
-                    lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
+                    indexingTasksToWaitFor[taskIndexName] = taskIDs[taskIndexName];
                 });
                 break;
             case INDEXING_APIS.INGESTION_API:
                 var events = result.object.body.events;
                 Object.keys(events).forEach(function (taskIndexName) {
-                    if (!lastIndexingTasks[taskIndexName]) {
-                        lastIndexingTasks[taskIndexName] = [];
+                    if (!indexingTasksToWaitFor[taskIndexName]) {
+                        indexingTasksToWaitFor[taskIndexName] = [];
                     }
-                    lastIndexingTasks[taskIndexName] = lastIndexingTasks[taskIndexName].concat(events[taskIndexName]);
+                    indexingTasksToWaitFor[taskIndexName] = indexingTasksToWaitFor[taskIndexName].concat(events[taskIndexName]);
                 });
                 break;
         }
@@ -629,7 +629,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
     if (paramIndexingMethod === 'fullCatalogReindex') {
         if (!jobReport.error) {
             // proceed with the atomic reindexing only if everything went fine
-            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks, indexingAPI);
+            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), indexingTasksToWaitFor, indexingAPI);
         } else {
             jobReport.errorMessage += ' Temporary indices were not moved to production.';
         }
@@ -648,8 +648,8 @@ exports.afterStep = function(success, parameters, stepExecution) {
 }
 
 // For testing
-exports.__setLastIndexingTasks = function(indexingTasks) {
-    lastIndexingTasks = indexingTasks;
+exports.__setIndexingTasksToWaitFor = function(indexingTasks) {
+    indexingTasksToWaitFor = indexingTasks;
 };
 exports.__getAttributesToSend = function() {
     return attributesToSend;

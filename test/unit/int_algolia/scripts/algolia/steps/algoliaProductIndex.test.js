@@ -319,7 +319,7 @@ describe('send', () => {
 
 describe('afterStep', () => {
     beforeAll(() => {
-        job.__setLastIndexingTasks({ "test_index_fr": 42, "test_index_en": 51 });
+        job.__setIndexingTasksToWaitFor({ "test_index_fr": 42, "test_index_en": 51 });
     });
 
     describe('partialRecordUpdate', () => {
