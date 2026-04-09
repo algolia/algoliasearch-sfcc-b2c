@@ -273,7 +273,6 @@ function pushByIndexName(requestPayload, indexName) {
 
     let retryableCallParameters = {
         method: 'POST',
-        url: 'https://data.' + analyticsRegion + '.algolia.com',
         path: '/1/push/' + indexName + referenceIndexNameParam,
         body: requestPayload,
         indexingAPI: INDEXING_APIS.INGESTION_API,

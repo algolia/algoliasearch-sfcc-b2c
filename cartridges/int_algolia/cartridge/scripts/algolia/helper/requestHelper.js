@@ -164,10 +164,13 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
             }
             let result = algoliaIndexingAPI.pushByIndexName(recordToSend, indexName);
             if (result.ok) {
-                events[indexName] = {
+                if (!events[indexName]) {
+                    events[indexName] = [];
+                }
+                events[indexName].push({
                     runID: result.object.body.runID,
                     eventID: result.object.body.eventID,
-                };
+                });
             } else {
                 wasThereAnError = true;
                 failedRecords += recordToSend.records.length;

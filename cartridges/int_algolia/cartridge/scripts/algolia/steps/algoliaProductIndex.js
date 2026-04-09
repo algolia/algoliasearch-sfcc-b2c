@@ -568,7 +568,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
                     if (!lastIndexingTasks[taskIndexName]) {
                         lastIndexingTasks[taskIndexName] = [];
                     }
-                    lastIndexingTasks[taskIndexName].push(events[taskIndexName]);
+                    lastIndexingTasks[taskIndexName] = lastIndexingTasks[taskIndexName].concat(events[taskIndexName]);
                 });
                 break;
         }

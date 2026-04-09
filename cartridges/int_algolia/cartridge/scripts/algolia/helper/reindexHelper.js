@@ -107,7 +107,7 @@ function waitForEvents(eventsByIndex) {
  *   - Move the temporary indices to production
  * @param {string} indexType - 'products' or 'categories'
  * @param {string[]} locales - locales for which the reindex was triggered
- * @param {Object} lastIndexingTasks - Search API: { indexName: taskID }; Ingestion API: { indexName: [runID, ...] }
+ * @param {Object} lastIndexingTasks - Search API: { indexName: taskID }; Ingestion API: { indexName: [{ runID, eventID }, ...] }
  * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
  */
 function finishAtomicReindex(indexType, locales, lastIndexingTasks, indexingAPI) {
