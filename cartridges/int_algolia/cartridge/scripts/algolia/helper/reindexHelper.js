@@ -73,9 +73,10 @@ function moveTemporaryIndices(indexType, locales) {
 }
 
 /**
- * Wait for multiple Search API tasks to complete.
- * Polls each task via /1/indexes/{indexName}/task/{taskID} until status is 'published'.
- * @param {Object} taskIDs - { "<indexName>": <taskID> }
+ * Wait for multiple Algolia tasks to complete.
+ * This method takes the "taskID" object structure returned by the multi-indices batch write operation and wait for each task to complete.
+ * https://www.algolia.com/doc/rest-api/search/#batch-write-operations-multiple-indices
+ * @param {Object} taskIDs - object containing a map of { "<indexName>": <taskID>, "<indexName2>: <taskID> }
  */
 function waitForTasks(taskIDs) {
     Object.keys(taskIDs).forEach(function (indexName) {
@@ -114,7 +115,7 @@ function finishAtomicReindex(indexType, locales, indexingTasksToWaitFor, indexin
     logger.info('[FinishReindex] copying index settings from production...');
     var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
 
-    logger.info('[FinishReindex] Waiting for the last indexing tasks...');
+    logger.info('[FinishReindex] Waiting for indexing tasks to finish...');
     switch (indexingAPI) {
         default:
         case INDEXING_APIS.SEARCH_API:
@@ -125,7 +126,7 @@ function finishAtomicReindex(indexType, locales, indexingTasksToWaitFor, indexin
             break;
     }
 
-    logger.info('[FinishReindex] Waiting for copy settings tasks...');
+    logger.info('[FinishReindex] Waiting for copy settings tasks to finish...');
     waitForTasks(copySettingsTasks);
 
     logger.info('[FinishReindex] Moving temporary indices to production...');

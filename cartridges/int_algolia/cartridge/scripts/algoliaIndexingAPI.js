@@ -5,7 +5,6 @@
 
 const waitTaskTimeout = require('*/algoliaconfig').waitTaskTimeout;
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
-const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 const retryableCall = require('*/cartridge/scripts/algolia/helper/retryStrategy').retryableCall;
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
@@ -13,8 +12,6 @@ var __jobInfo = {};
 
 const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
-
-const analyticsRegion = algoliaData.getPreference('AnalyticsRegion');
 
 /**
  * Set information about the job using the API Client
