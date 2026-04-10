@@ -95,19 +95,13 @@ test('waitForTasks', () => {
 
 test('waitForEvents', () => {
     reindexHelper.waitForEvents({
-        'testIndex': [
-            { runID: 'run-1', eventID: 'evt-1' },
-            { runID: 'run-2', eventID: 'evt-2' },
-            { runID: 'run-3', eventID: 'evt-3' },
-        ],
-        'testIndex2': [
-            { runID: 'run-4', eventID: 'evt-4' },
-        ],
+        'run-1': ['evt-1', 'evt-2', 'evt-3'],
+        'run-2': ['evt-4'],
     });
 
     expect(mockWaitForRunEvent).toHaveBeenCalledTimes(4);
     expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-1');
-    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-2', 'evt-2');
-    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-3', 'evt-3');
-    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-4', 'evt-4');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-2');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-3');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-2', 'evt-4');
 });

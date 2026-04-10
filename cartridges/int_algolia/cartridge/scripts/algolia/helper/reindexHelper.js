@@ -80,7 +80,7 @@ function moveTemporaryIndices(indexType, locales) {
  */
 function waitForTasks(taskIDs) {
     Object.keys(taskIDs).forEach(function (indexName) {
-        logger.info('Waiting for Search API task ' + taskIDs[indexName] + ' on index ' + indexName);
+        logger.debug('[waitForTasks][SearchAPI][indexName: ' + indexName + '][taskID: ' + taskIDs[indexName] + '] Waiting for task...');
         algoliaIndexingAPI.waitTask(indexName, taskIDs[indexName]);
     });
 }
@@ -89,14 +89,13 @@ function waitForTasks(taskIDs) {
  * Wait for multiple Ingestion API events to become available.
  * Polls each event via /1/runs/{runID}/events/{eventID} until it returns a non-404 response.
  * Ingestion events have no sequential processing guarantee, so all must be tracked and waited on.
- * @param {Object} eventsByIndex - { "<indexName>": [{ runID: <string>, eventID: <string> }, ...] }
+ * @param {Object} indexingEvents - { "<runID>": [<eventID>, ...] }
  */
-function waitForEvents(eventsByIndex) {
-    Object.keys(eventsByIndex).forEach(function (indexName) {
-        var events = eventsByIndex[indexName];
-        events.forEach(function (event) {
-            logger.info('Waiting for Ingestion API event ' + event.eventID + ' (run ' + event.runID + ') on index ' + indexName);
-            algoliaIndexingAPI.waitForRunEvent(event.runID, event.eventID);
+function waitForEvents(indexingEvents) {
+    Object.keys(indexingEvents).forEach(function (runID) {
+        indexingEvents[runID].forEach(function (eventID) {
+            logger.debug('[waitForEvents][IngestionAPI][runID: ' + runID + '][eventID: ' + eventID + '] Waiting for event...');
+            algoliaIndexingAPI.waitForRunEvent(runID, eventID);
         });
     });
 }
@@ -108,7 +107,7 @@ function waitForEvents(eventsByIndex) {
  *   - Move the temporary indices to production
  * @param {string} indexType - 'products' or 'categories'
  * @param {string[]} locales - locales for which the reindex was triggered
- * @param {Object} indexingTasksToWaitFor - Search API: { indexName: taskID }; Ingestion API: { indexName: [{ runID, eventID }, ...] }
+ * @param {Object} indexingTasksToWaitFor - Search API: { indexName: taskID }; Ingestion API: { runID: [eventID, ...] }
  * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
  */
 function finishAtomicReindex(indexType, locales, indexingTasksToWaitFor, indexingAPI) {

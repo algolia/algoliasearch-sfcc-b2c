@@ -534,7 +534,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
             resultObj = requestHelper.sendRetryableBatch(batch);
         } else { // INDEXING_APIS.INGESTION_API
             let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
-            resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+            resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords, paramIndexingMethod);
         }
 
         // recordsFailed count is not necessarily accurate when using the Ingestion API
@@ -555,22 +555,27 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         // For Search API, taskIDs are sequential per index — the last one completing guarantees all prior
         // are done, so we only keep the latest value.
         // For Ingestion API, events have no sequential processing guarantee — we must track all of them.
-        switch (indexingAPI) {
-            case INDEXING_APIS.SEARCH_API:
-                var taskIDs = result.object.body.taskID;
-                Object.keys(taskIDs).forEach(function (taskIndexName) {
-                    indexingTasksToWaitFor[taskIndexName] = taskIDs[taskIndexName];
-                });
-                break;
-            case INDEXING_APIS.INGESTION_API:
-                var events = result.object.body.events;
-                Object.keys(events).forEach(function (taskIndexName) {
-                    if (!indexingTasksToWaitFor[taskIndexName]) {
-                        indexingTasksToWaitFor[taskIndexName] = [];
-                    }
-                    indexingTasksToWaitFor[taskIndexName] = indexingTasksToWaitFor[taskIndexName].concat(events[taskIndexName]);
-                });
-                break;
+        if (paramIndexingMethod === 'fullCatalogReindex') {
+            switch (indexingAPI) {
+                default:
+                case INDEXING_APIS.SEARCH_API: {
+                    let taskIDs = result.object.body.taskID;
+                    Object.keys(taskIDs).forEach(function (taskIndexName) {
+                        indexingTasksToWaitFor[taskIndexName] = taskIDs[taskIndexName];
+                    });
+                    break;
+                }
+                case INDEXING_APIS.INGESTION_API: {
+                    let indexingEvents = result.object.body.indexingEvents;
+                    Object.keys(indexingEvents).forEach(function (runID) {
+                        if (!indexingTasksToWaitFor[runID]) {
+                            indexingTasksToWaitFor[runID] = [];
+                        }
+                        indexingTasksToWaitFor[runID] = indexingTasksToWaitFor[runID].concat(indexingEvents[runID]);
+                    });
+                    break;
+                }
+            }
         }
     } else {
         jobReport.recordsFailed += batch.length;

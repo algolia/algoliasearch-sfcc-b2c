@@ -251,20 +251,19 @@ function waitTask(indexName, taskID) {
  * Sends a request to the Ingestion API's `push` endpoint (https://www.algolia.com/doc/rest-api/ingestion/push)
  * The `push` endpoint can only accept single-index and single-action requests.
  * When using the Ingestion API, requests have already been grouped by indexName and action by this point.
-* @param {Object} requestPayload payload object to be sent to the Ingestion API
-* @param {String} indexName name of the target index (for Ingestion only), used in the endpoint URL
-* @returns {dw.svc.Result} - result of the call
-*/
-function pushByIndexName(requestPayload, indexName) {
+ * @param {Object} requestPayload payload object to be sent to the Ingestion API
+ * @param {String} indexName name of the target index (for Ingestion only), used in the endpoint URL
+ * @param {string} [indexingMethod] - the indexing method (e.g. 'fullCatalogReindex'). When set to 'fullCatalogReindex',
+ *   the referenceIndexName query parameter is appended so that a task does not need to be created for the .tmp index.
+ *   See https://www.algolia.com/doc/rest-api/ingestion/push#parameter-reference-index-name
+ * @returns {dw.svc.Result} - result of the call
+ */
+function pushByIndexName(requestPayload, indexName, indexingMethod) {
     let indexingService = algoliaIndexingService.getService(__jobInfo);
-    let referenceIndexName, referenceIndexNameParam = '';
-    let isAtomicReindexing = indexName.indexOf('.tmp') !== -1;
+    let referenceIndexNameParam = '';
 
-    // When using atomic reindexing with the Ingestion API, the referenceIndexName parameter
-    // needs to be set so that a task does not need to be created for the temporary index.
-    // See https://www.algolia.com/doc/rest-api/ingestion/push#parameter-reference-index-name
-    if (isAtomicReindexing) {
-        referenceIndexName = indexName.replace('.tmp', '');
+    if (indexingMethod === 'fullCatalogReindex') {
+        let referenceIndexName = indexName.slice(0, -4);
         referenceIndexNameParam = '?referenceIndexName=' + referenceIndexName;
     }
 
@@ -275,10 +274,10 @@ function pushByIndexName(requestPayload, indexName) {
         indexingAPI: INDEXING_APIS.INGESTION_API,
     }
 
-    var result = retryableCall(indexingService, retryableCallParameters);
+    let result = retryableCall(indexingService, retryableCallParameters);
 
     if (!result.ok) {
-        logger.error(result.getErrorMessage());
+        logger.error('[pushByIndexName][indexName: ' + indexName + '][path: ' + retryableCallParameters.path + '] Error: ' + result.getErrorMessage());
     }
 
     return result;
@@ -314,10 +313,10 @@ function waitForRunEvent(runID, eventID) {
             if (result.error === 404) {
                 // Event not yet available, continue polling
             } else {
-                logger.error(result.getErrorMessage());
+                logger.error('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '], Event retrieval error: ' + result.getErrorMessage());
             }
         } else {
-            logger.info('Event ' + eventID + ' (run ' + runID + ') retrieved. (' + nbRequestsSent + ' requests sent).');
+            logger.debug('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieved. (' + nbRequestsSent + ' requests sent).');
             return;
         }
     }
