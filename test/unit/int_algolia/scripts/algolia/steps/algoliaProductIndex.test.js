@@ -24,10 +24,14 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     };
 }, {virtual: true});
 
+const mockGroupRecordsForIngestionAPI = jest.fn();
+const mockSendGroupedIngestionAPIRecords = jest.fn();
 jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/requestHelper');
     return {
         sendRetryableBatch: originalModule.sendRetryableBatch,
+        groupRecordsForIngestionAPI: mockGroupRecordsForIngestionAPI,
+        sendGroupedIngestionAPIRecords: mockSendGroupedIngestionAPIRecords,
     };
 }, {virtual: true});
 
@@ -314,6 +318,80 @@ describe('send', () => {
         job.send(algoliaOperationsChunk);
 
         expect(mockSendMultiIndexBatch).not.toHaveBeenCalled();
+    });
+
+    test('Ingestion API - events accumulated across multiple chunks', () => {
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+        job.__setIndexingTasksToWaitFor({});
+
+        function makeChunk() {
+            const algoliaOperationsChunk = [];
+            for (let i = 0; i < 2; ++i) {
+                const ops = [
+                    { action: 'addObject', indexName: 'test_en.tmp', body: { id: String(i) } },
+                    { action: 'addObject', indexName: 'test_fr.tmp', body: { id: String(i) } },
+                ];
+                ops.toArray = function () { return ops; };
+                algoliaOperationsChunk.push(ops);
+            }
+            algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
+            return algoliaOperationsChunk;
+        }
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords
+            .mockReturnValueOnce({
+                result: {
+                    ok: true,
+                    object: {
+                        body: {
+                            indexingEvents: {
+                                'run-en': ['evt-1'],
+                                'run-fr': ['evt-2'],
+                            }
+                        }
+                    }
+                },
+                failedRecords: 0,
+            })
+            .mockReturnValueOnce({
+                result: {
+                    ok: true,
+                    object: {
+                        body: {
+                            indexingEvents: {
+                                'run-en': ['evt-3'],
+                                'run-fr': ['evt-4'],
+                            }
+                        }
+                    }
+                },
+                failedRecords: 0,
+            });
+
+        job.send(makeChunk());
+        job.send(makeChunk());
+
+        expect(mockGroupRecordsForIngestionAPI).toHaveBeenCalledTimes(2);
+        expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledTimes(2);
+
+        // Verify accumulated events via afterStep → finishAtomicReindex
+        mockFinishAtomicReindex.mockClear();
+        job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+        job.__getJobReport().recordsFailed = 0;
+        job.__getJobReport().recordsToSend = 100;
+        job.afterStep(true);
+
+        expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
+            'products',
+            expect.arrayContaining(['default', 'fr', 'en']),
+            {
+                'run-en': ['evt-1', 'evt-3'],
+                'run-fr': ['evt-2', 'evt-4'],
+            },
+            'ingestion-api'
+        );
     });
 });
 

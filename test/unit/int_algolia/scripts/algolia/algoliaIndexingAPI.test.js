@@ -148,6 +148,44 @@ test('waitForTask', () => {
     });
 });
 
+describe('pushByIndexName', () => {
+    test('sends to Ingestion API without referenceIndexName for non-tmp index', () => {
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        indexingAPI.pushByIndexName(payload, 'my_index');
+
+        expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+            method: 'POST',
+            path: '/1/push/my_index',
+            body: payload,
+            indexingAPI: 'ingestion-api',
+        });
+    });
+
+    test('appends referenceIndexName query param for fullCatalogReindex', () => {
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        indexingAPI.pushByIndexName(payload, 'my_index.tmp', 'fullCatalogReindex');
+
+        expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+            method: 'POST',
+            path: '/1/push/my_index.tmp?referenceIndexName=my_index',
+            body: payload,
+            indexingAPI: 'ingestion-api',
+        });
+    });
+
+    test('does not append referenceIndexName without fullCatalogReindex even for .tmp index', () => {
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        indexingAPI.pushByIndexName(payload, 'my_index.tmp');
+
+        expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
+            method: 'POST',
+            path: '/1/push/my_index.tmp',
+            body: payload,
+            indexingAPI: 'ingestion-api',
+        });
+    });
+});
+
 describe('waitForRunEvent', () => {
     test('polls event endpoint until non-404', () => {
         mockRetryableCall
