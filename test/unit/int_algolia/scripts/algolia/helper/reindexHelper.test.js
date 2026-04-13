@@ -105,3 +105,80 @@ test('waitForEvents', () => {
     expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-3');
     expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-2', 'evt-4');
 });
+
+describe('finishAtomicReindex', () => {
+    beforeEach(() => {
+        mockGetIndexSettings.mockReturnValue({
+            ok: true,
+            object: { body: { attributesForFaceting: ['price.USD'] } },
+        });
+        mockCopySettingsFromProdIndices.mockReturnValue({
+            ok: true,
+            object: { body: { taskID: 99, updatedAt: '2023-10-01T12:00:00.000Z' } },
+        });
+        mockWaitTask.mockClear();
+        mockWaitForRunEvent.mockClear();
+        mockMoveIndex.mockClear();
+    });
+
+    test('Search API - calls waitForTasks for indexing tasks, copy settings tasks, then moveTemporaryIndices', () => {
+        const indexingTasks = { 'test_index___products__fr.tmp': 100, 'test_index___products__en.tmp': 101 };
+
+        reindexHelper.finishAtomicReindex('products', ['fr', 'en'], indexingTasks, 'search-api');
+
+        // copySettingsFromProdIndices called first (via getIndexSettings + copyIndexSettings)
+        expect(mockGetIndexSettings).toHaveBeenCalledTimes(2);
+
+        // waitTask called for: indexing tasks (2) + copy settings tasks (2)
+        expect(mockWaitTask).toHaveBeenCalledWith('test_index___products__fr.tmp', 100);
+        expect(mockWaitTask).toHaveBeenCalledWith('test_index___products__en.tmp', 101);
+
+        // waitForRunEvent should NOT be called for Search API
+        expect(mockWaitForRunEvent).not.toHaveBeenCalled();
+
+        // moveTemporaryIndices called
+        expect(mockMoveIndex).toHaveBeenCalledTimes(2);
+        expect(mockMoveIndex).toHaveBeenCalledWith('test_index___products__fr.tmp', 'test_index___products__fr');
+        expect(mockMoveIndex).toHaveBeenCalledWith('test_index___products__en.tmp', 'test_index___products__en');
+    });
+
+    test('Ingestion API - calls waitForEvents instead of waitForTasks for indexing events', () => {
+        const indexingEvents = {
+            'run-1': ['evt-1', 'evt-2'],
+            'run-2': ['evt-3'],
+        };
+
+        reindexHelper.finishAtomicReindex('products', ['fr', 'en'], indexingEvents, 'ingestion-api');
+
+        // waitForRunEvent called for each event
+        expect(mockWaitForRunEvent).toHaveBeenCalledTimes(3);
+        expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-1');
+        expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-2');
+        expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-2', 'evt-3');
+
+        // waitTask still called for copy settings tasks
+        expect(mockWaitTask).toHaveBeenCalled();
+
+        // moveTemporaryIndices called
+        expect(mockMoveIndex).toHaveBeenCalledTimes(2);
+    });
+
+    test('default (undefined) indexingAPI uses Search API path', () => {
+        const indexingTasks = { 'test_index___products__fr.tmp': 200 };
+
+        reindexHelper.finishAtomicReindex('products', ['fr'], indexingTasks);
+
+        expect(mockWaitTask).toHaveBeenCalledWith('test_index___products__fr.tmp', 200);
+        expect(mockWaitForRunEvent).not.toHaveBeenCalled();
+        expect(mockMoveIndex).toHaveBeenCalledTimes(1);
+    });
+
+    test('Ingestion API with empty indexingEvents - still copies settings and moves indices', () => {
+        reindexHelper.finishAtomicReindex('products', ['fr'], {}, 'ingestion-api');
+
+        expect(mockWaitForRunEvent).not.toHaveBeenCalled();
+        // copy settings wait + move still happens
+        expect(mockWaitTask).toHaveBeenCalled();
+        expect(mockMoveIndex).toHaveBeenCalledTimes(1);
+    });
+});

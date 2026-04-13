@@ -11,12 +11,14 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
         pushByIndexName: jest.fn(),
     }
 }, {virtual: true});
+const mockGroupRecordsForIngestionAPI = jest.fn();
+const mockSendGroupedIngestionAPIRecords = jest.fn();
 jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/requestHelper');
     return {
         sendRetryableBatch: originalModule.sendRetryableBatch,
-        groupRecordsForIngestionAPI: originalModule.groupRecordsForIngestionAPI,
-        sendGroupedIngestionAPIRecords: originalModule.sendGroupedIngestionAPIRecords,
+        groupRecordsForIngestionAPI: mockGroupRecordsForIngestionAPI,
+        sendGroupedIngestionAPIRecords: mockSendGroupedIngestionAPIRecords,
     }
 }, {virtual: true});
 
@@ -61,6 +63,10 @@ const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/
 
 beforeEach(() => {
     mockLocalesForIndexing = [];
+    mockGroupRecordsForIngestionAPI.mockReset();
+    mockSendGroupedIngestionAPIRecords.mockReset();
+    delete global.customPreferences['Algolia_IndexingAPI'];
+    delete global.customPreferences['Algolia_AnalyticsRegion'];
 });
 
 describe('beforeStep', () => {
@@ -80,6 +86,25 @@ describe('beforeStep', () => {
         mockLocalesForIndexing = ['fr'];
         job.beforeStep({ localesForIndexing: 'en, fr', ...parameters }, stepExecution);
         expect(job.__getLocalesForIndexing()).toStrictEqual(['en', 'fr']);
+    });
+
+    test('Ingestion API with invalid AnalyticsRegion throws', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        global.customPreferences['Algolia_AnalyticsRegion'] = 'invalid';
+        expect(() => job.beforeStep(parameters, stepExecution))
+            .toThrow('You need to define a valid Analytics region');
+    });
+
+    test('Ingestion API with missing AnalyticsRegion throws', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        expect(() => job.beforeStep(parameters, stepExecution))
+            .toThrow('You need to define a valid Analytics region');
+    });
+
+    test('Ingestion API with valid AnalyticsRegion does not throw', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        global.customPreferences['Algolia_AnalyticsRegion'] = 'us';
+        expect(() => job.beforeStep(parameters, stepExecution)).not.toThrow();
     });
 });
 
@@ -135,28 +160,84 @@ describe('process', () => {
     });
 });
 
-test('send', () => {
-    job.beforeStep(parameters, stepExecution);
-    job.__setIndexingAPI(job.__INDEXING_APIS.SEARCH_API);
-
-    const algoliaOperationsChunk = [];
-    for (let i = 0; i < 3; ++i) {
-        const algoliaOperations = [
-            { action: 'addObject', indexName: 'test_en', body: { id: `${i}` } },
-            { action: 'addObject', indexName: 'test_fr', body: { id: `${i}` } },
-        ];
-        algoliaOperations.toArray = function () {
-            return algoliaOperations;
-        };
-        algoliaOperationsChunk.push(algoliaOperations);
-    }
-    algoliaOperationsChunk.toArray = function () {
+describe('send', () => {
+    function makeChunk(count) {
+        const algoliaOperationsChunk = [];
+        for (let i = 0; i < count; ++i) {
+            const ops = [
+                { action: 'addObject', indexName: 'test_en', body: { id: String(i) } },
+                { action: 'addObject', indexName: 'test_fr', body: { id: String(i) } },
+            ];
+            ops.toArray = function () { return ops; };
+            algoliaOperationsChunk.push(ops);
+        }
+        algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
         return algoliaOperationsChunk;
-    };
+    }
 
-    job.send(algoliaOperationsChunk);
+    test('Search API - sends multi-index batch', () => {
+        job.beforeStep(parameters, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.SEARCH_API);
 
-    expect(mockSendMultiIndexBatch).toHaveBeenCalledWith(algoliaOperationsChunk.flat());
+        const chunk = makeChunk(3);
+        job.send(chunk);
+
+        expect(mockSendMultiIndexBatch).toHaveBeenCalledWith(chunk.flat());
+    });
+
+    test('Ingestion API - calls groupRecordsForIngestionAPI and sendGroupedIngestionAPIRecords', () => {
+        job.beforeStep(parameters, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        const grouped = { 'test_en': { 'addObject': [{ id: '0' }, { id: '1' }] } };
+        mockGroupRecordsForIngestionAPI.mockReturnValue(grouped);
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: true, object: { body: {} } },
+            failedRecords: 0,
+        });
+
+        const chunk = makeChunk(2);
+        job.send(chunk);
+
+        expect(mockGroupRecordsForIngestionAPI).toHaveBeenCalledWith(chunk.flat());
+        expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledWith(grouped);
+        expect(job.__getJobReport().recordsSent).toBeGreaterThan(0);
+        expect(job.__getJobReport().chunksSent).toBeGreaterThan(0);
+    });
+
+    test('Ingestion API - failure updates jobReport', () => {
+        job.beforeStep(parameters, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: false },
+            failedRecords: 2,
+        });
+
+        const chunk = makeChunk(2);
+        const batchLength = chunk.flat().length;
+        job.send(chunk);
+
+        // failedRecords from resultObj (2) + batch.length from the !result.ok branch
+        expect(job.__getJobReport().recordsFailed).toBe(2 + batchLength);
+        expect(job.__getJobReport().chunksFailed).toBe(1);
+    });
+
+    test('Ingestion API - does not pass indexingMethod (no fullCatalogReindex in delta)', () => {
+        job.beforeStep(parameters, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: true, object: { body: {} } },
+            failedRecords: 0,
+        });
+
+        job.send(makeChunk(1));
+
+        expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledWith({});
+    });
 });
 
 describe('afterStep', () => {

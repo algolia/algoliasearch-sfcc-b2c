@@ -223,4 +223,82 @@ describe('waitForRunEvent', () => {
 
         expect(mockRetryableCall).toHaveBeenCalledTimes(1);
     });
+
+    test('continues polling on non-404 error', () => {
+        mockRetryableCall
+            .mockReturnValueOnce({
+                ok: false,
+                error: 500,
+                getErrorMessage: () => 'Internal Server Error',
+            })
+            .mockReturnValueOnce({
+                ok: false,
+                error: 404,
+                getErrorMessage: () => 'Not found',
+            })
+            .mockReturnValue({
+                ok: true,
+                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123' }}
+            });
+
+        indexingAPI.waitForRunEvent('run-uuid-123', 'evt-abc');
+
+        expect(mockRetryableCall).toHaveBeenCalledTimes(3);
+    });
+
+    test('throws on timeout when event never becomes available', () => {
+        const originalDateNow = Date.now;
+        let callCount = 0;
+        Date.now = jest.fn(() => {
+            callCount++;
+            if (callCount <= 2) return 0;
+            return 999999999;
+        });
+
+        mockRetryableCall.mockReturnValue({
+            ok: false,
+            error: 404,
+            getErrorMessage: () => 'Not found',
+        });
+
+        expect(() => {
+            indexingAPI.waitForRunEvent('run-timeout', 'evt-timeout');
+        }).toThrow('Max wait time reached. Run: run-timeout; event: evt-timeout');
+
+        Date.now = originalDateNow;
+    });
+});
+
+describe('pushByIndexName - failure', () => {
+    test('returns failed result when retryableCall fails', () => {
+        mockRetryableCall.mockReturnValue({
+            ok: false,
+            getErrorMessage: () => 'Service unavailable',
+        });
+
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        const result = indexingAPI.pushByIndexName(payload, 'my_index');
+
+        expect(result.ok).toBe(false);
+        expect(mockRetryableCall).toHaveBeenCalledWith(mockService, expect.objectContaining({
+            method: 'POST',
+            path: '/1/push/my_index',
+            indexingAPI: 'ingestion-api',
+        }));
+    });
+
+    test('returns failed result for fullCatalogReindex path', () => {
+        mockRetryableCall.mockReturnValue({
+            ok: false,
+            getErrorMessage: () => 'Bad request',
+        });
+
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        const result = indexingAPI.pushByIndexName(payload, 'my_index.tmp', 'fullCatalogReindex');
+
+        expect(result.ok).toBe(false);
+        expect(mockRetryableCall).toHaveBeenCalledWith(mockService, expect.objectContaining({
+            path: '/1/push/my_index.tmp?referenceIndexName=my_index',
+        }));
+    });
 });

@@ -393,6 +393,118 @@ describe('send', () => {
             'ingestion-api'
         );
     });
+
+    test('Ingestion API - non-reindex method (partialRecordUpdate)', () => {
+        job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: true, object: { body: {} } },
+            failedRecords: 0,
+        });
+
+        function makeChunk() {
+            const algoliaOperationsChunk = [];
+            for (let i = 0; i < 2; ++i) {
+                const ops = [
+                    { action: 'partialUpdateObject', indexName: 'test_en', body: { id: String(i) } },
+                ];
+                ops.toArray = function () { return ops; };
+                algoliaOperationsChunk.push(ops);
+            }
+            algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
+            return algoliaOperationsChunk;
+        }
+
+        job.send(makeChunk());
+
+        expect(mockGroupRecordsForIngestionAPI).toHaveBeenCalled();
+        expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledWith({}, 'partialRecordUpdate');
+        expect(job.__getJobReport().recordsSent).toBeGreaterThan(0);
+    });
+
+    test('Ingestion API - failure updates jobReport', () => {
+        job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: false },
+            failedRecords: 3,
+        });
+
+        function makeChunk() {
+            const algoliaOperationsChunk = [];
+            const ops = [
+                { action: 'addObject', indexName: 'test_en', body: { id: '0' } },
+                { action: 'addObject', indexName: 'test_fr', body: { id: '0' } },
+            ];
+            ops.toArray = function () { return ops; };
+            algoliaOperationsChunk.push(ops);
+            algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
+            return algoliaOperationsChunk;
+        }
+
+        job.send(makeChunk());
+
+        // failedRecords from resultObj (3) + batch.length from the !result.ok branch (2)
+        expect(job.__getJobReport().recordsFailed).toBe(3 + 2);
+        expect(job.__getJobReport().chunksFailed).toBe(1);
+    });
+
+    test('Ingestion API - exception in send is caught', () => {
+        job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockImplementation(() => { throw new Error('Grouping error'); });
+
+        function makeChunk() {
+            const algoliaOperationsChunk = [];
+            const ops = [{ action: 'addObject', indexName: 'test_en', body: { id: '0' } }];
+            ops.toArray = function () { return ops; };
+            algoliaOperationsChunk.push(ops);
+            algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
+            return algoliaOperationsChunk;
+        }
+
+        // Should not throw - caught internally
+        expect(() => job.send(makeChunk())).not.toThrow();
+    });
+});
+
+describe('beforeStep - Ingestion API validation', () => {
+    test('throws if Ingestion API selected with invalid AnalyticsRegion', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        global.customPreferences['Algolia_AnalyticsRegion'] = 'invalid';
+        expect(() => job.beforeStep({}, stepExecution))
+            .toThrow('You need to define a valid Analytics region');
+        delete global.customPreferences['Algolia_IndexingAPI'];
+        delete global.customPreferences['Algolia_AnalyticsRegion'];
+    });
+
+    test('throws if Ingestion API selected with missing AnalyticsRegion', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        expect(() => job.beforeStep({}, stepExecution))
+            .toThrow('You need to define a valid Analytics region');
+        delete global.customPreferences['Algolia_IndexingAPI'];
+    });
+
+    test('does not throw if Ingestion API selected with valid AnalyticsRegion (us)', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        global.customPreferences['Algolia_AnalyticsRegion'] = 'us';
+        expect(() => job.beforeStep({}, stepExecution)).not.toThrow();
+        delete global.customPreferences['Algolia_IndexingAPI'];
+        delete global.customPreferences['Algolia_AnalyticsRegion'];
+    });
+
+    test('does not throw if Ingestion API selected with valid AnalyticsRegion (eu)', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        global.customPreferences['Algolia_AnalyticsRegion'] = 'eu';
+        expect(() => job.beforeStep({}, stepExecution)).not.toThrow();
+        delete global.customPreferences['Algolia_IndexingAPI'];
+        delete global.customPreferences['Algolia_AnalyticsRegion'];
+    });
 });
 
 describe('afterStep', () => {

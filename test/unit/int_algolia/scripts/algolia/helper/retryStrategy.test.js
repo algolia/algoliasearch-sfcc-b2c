@@ -10,12 +10,15 @@ jest.mock('dw/svc/Result', () => {
     }
 },
 {virtual: true});
+const analyticsRegion = 'us';
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
     return {
         getPreference: jest.fn((property) => {
             switch (property) {
                 case 'ApplicationID':
                     return appID;
+                case 'AnalyticsRegion':
+                    return analyticsRegion;
             }
         }),
     }
@@ -128,4 +131,74 @@ test('retryableCall - error', () => {
     expect(result.getErrorMessage()).toBe('Bad Gateway');
     // All hosts have been marked down, getAvailableHosts() reset them all at the next call
     expect(retryStrategy.getAvailableHosts()).toHaveLength(4);
+});
+
+describe('Ingestion API hosts', () => {
+    beforeEach(() => {
+        retryStrategy.initHosts('ingestion-api');
+    });
+
+    test('getAvailableHosts returns single Ingestion host based on AnalyticsRegion', () => {
+        const hosts = retryStrategy.getAvailableHosts('ingestion-api');
+        expect(hosts).toHaveLength(1);
+        expect(hosts[0].hostname).toBe('data.' + analyticsRegion + '.algolia.com');
+    });
+
+    test('Ingestion and Search API use separate host pools', () => {
+        const ingestionHosts = retryStrategy.getAvailableHosts('ingestion-api');
+        const searchHosts = retryStrategy.getAvailableHosts('search-api');
+
+        expect(ingestionHosts).toHaveLength(1);
+        expect(searchHosts).toHaveLength(4);
+        expect(ingestionHosts[0].hostname).not.toBe(searchHosts[0].hostname);
+    });
+
+    test('retryableCall with ingestion-api uses Ingestion host', () => {
+        const callMock = jest.fn().mockReturnValue({ ok: true });
+        const service = { call: callMock };
+
+        retryStrategy.retryableCall(service, {
+            method: 'POST',
+            path: '/1/push/my_index',
+            body: { action: 'addObject', records: [] },
+            indexingAPI: 'ingestion-api',
+        });
+
+        expect(callMock).toHaveBeenCalledTimes(1);
+        expect(callMock).toHaveBeenCalledWith(expect.objectContaining({
+            url: 'https://data.' + analyticsRegion + '.algolia.com/1/push/my_index',
+        }));
+    });
+
+    test('retryableCall retries single Ingestion host on failure then returns last result', () => {
+        const serverErrorResult = {
+            ok: false,
+            getUnavailableReason: jest.fn(),
+            getError: jest.fn().mockReturnValue(502),
+            getErrorMessage: jest.fn().mockReturnValue('Bad Gateway'),
+        };
+
+        const callMock = jest.fn().mockReturnValue(serverErrorResult);
+        const service = { call: callMock };
+
+        const result = retryStrategy.retryableCall(service, {
+            path: '/1/push/my_index',
+            indexingAPI: 'ingestion-api',
+        });
+
+        // Only 1 host for Ingestion, so only 1 attempt
+        expect(callMock).toHaveBeenCalledTimes(1);
+        expect(result.ok).toBe(false);
+    });
+
+    test('undefined indexingAPI defaults to Search API hosts', () => {
+        const callMock = jest.fn().mockReturnValue({ ok: true });
+        const service = { call: callMock };
+
+        retryStrategy.retryableCall(service, { path: '/test' });
+
+        expect(callMock).toHaveBeenCalledWith(expect.objectContaining({
+            url: expect.stringContaining(appID),
+        }));
+    });
 });
