@@ -20,6 +20,7 @@ jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
         moveTemporaryIndices: mockMoveTemporaryIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
         waitForTasks: jest.fn(),
+        waitForEvents: jest.fn(),
     };
 }, {virtual: true});
 
@@ -318,7 +319,7 @@ describe('send', () => {
 
 describe('afterStep', () => {
     beforeAll(() => {
-        job.__setLastIndexingTasks({ "test_index_fr": 42, "test_index_en": 51 });
+        job.__setIndexingTasksToWaitFor({ "test_index_fr": 42, "test_index_en": 51 });
     });
 
     describe('partialRecordUpdate', () => {
@@ -353,7 +354,8 @@ describe('afterStep', () => {
             expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
                 'products',
                 expect.arrayContaining(['default', 'fr', 'en']),
-                {"test_index_fr": 42, "test_index_en": 51}
+                {"test_index_fr": 42, "test_index_en": 51},
+                'search-api'
             );
             expect(job.__getJobReport().error).toBe(false);
         });

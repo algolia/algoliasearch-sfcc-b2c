@@ -28,6 +28,7 @@ const mockMoveIndex = jest.fn().mockReturnValue({
 const mockGetIndexSettings = jest.fn();
 const mockSetIndexSettings = jest.fn();
 const mockWaitTask = jest.fn();
+const mockWaitForRunEvent = jest.fn();
 const mockSendMultiIndexBatch = jest.fn();
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
@@ -37,6 +38,7 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
         copyIndexSettings: mockCopySettingsFromProdIndices,
         moveIndex: mockMoveIndex,
         waitTask: mockWaitTask,
+        waitForRunEvent: mockWaitForRunEvent,
         sendMultiIndexBatch: mockSendMultiIndexBatch,
         pushByIndexName: jest.fn(),
     }
@@ -84,14 +86,22 @@ test('moveTemporaryIndices', () => {
 });
 
 test('waitForTasks', () => {
-    mockWaitTask
-        .mockReturnValue({
-            ok: true,
-            object: { body: { status: 'published' }}
-        });
     reindexHelper.waitForTasks({ 'testIndex': 33, 'testIndex2': 51 });
 
     expect(mockWaitTask).toHaveBeenCalledTimes(2);
     expect(mockWaitTask).toHaveBeenCalledWith('testIndex', 33);
     expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 51);
+});
+
+test('waitForEvents', () => {
+    reindexHelper.waitForEvents({
+        'run-1': ['evt-1', 'evt-2', 'evt-3'],
+        'run-2': ['evt-4'],
+    });
+
+    expect(mockWaitForRunEvent).toHaveBeenCalledTimes(4);
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-1');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-2');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-3');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-2', 'evt-4');
 });

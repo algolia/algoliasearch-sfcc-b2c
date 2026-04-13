@@ -1,10 +1,7 @@
 'use strict';
 
-const RECORD_MODEL_TYPE = {
-    MASTER_LEVEL: 'master-level',
-    VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED: 'attribute-sliced',
-}
+const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+const RECORD_MODEL_TYPES = algoliaConstants.RECORD_MODEL_TYPES;
 
 /**
  * Get the product type
@@ -29,13 +26,13 @@ function getProductType(product) {
  */
 function getAppropriateProduct(product, recordModel) {
     const productType = getProductType(product);
-    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && productType !== 'Master') {
+    if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL && productType !== 'Master') {
         return product.masterProduct; // @TODO: refactor to be safer: only Variants and Variation Groups have the `masterProduct` property, add checks
-    } else if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
+    } else if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
         return product;
-    } else if (recordModel !== RECORD_MODEL_TYPE.MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
+    } else if (recordModel !== RECORD_MODEL_TYPES.MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
         return product.variationModel.defaultVariant;
-    } else if (recordModel !== RECORD_MODEL_TYPE.MASTER_LEVEL && productType === 'Variant') {
+    } else if (recordModel !== RECORD_MODEL_TYPES.MASTER_LEVEL && productType === 'Variant') {
         return product;
     }
     return product;

@@ -5,18 +5,13 @@
 
 const waitTaskTimeout = require('*/algoliaconfig').waitTaskTimeout;
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
-const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 const retryableCall = require('*/cartridge/scripts/algolia/helper/retryStrategy').retryableCall;
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 
 var __jobInfo = {};
 
-const INDEXING_APIS = {
-    SEARCH_API: 'search-api',
-    INGESTION_API: 'ingestion-api',
-}
-
-const analyticsRegion = algoliaData.getPreference('AnalyticsRegion');
+const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
 
 /**
  * Set information about the job using the API Client
@@ -256,28 +251,77 @@ function waitTask(indexName, taskID) {
  * Sends a request to the Ingestion API's `push` endpoint (https://www.algolia.com/doc/rest-api/ingestion/push)
  * The `push` endpoint can only accept single-index and single-action requests.
  * When using the Ingestion API, requests have already been grouped by indexName and action by this point.
-* @param {Object} requestPayload payload object to be sent to the Ingestion API
-* @param {String} indexName name of the target index (for Ingestion only), used in the endpoint URL
-* @returns {dw.svc.Result} - result of the call
-*/
-function pushByIndexName(requestPayload, indexName) {
-    var indexingService = algoliaIndexingService.getService(__jobInfo);
+ * @param {Object} requestPayload payload object to be sent to the Ingestion API
+ * @param {String} indexName name of the target index (for Ingestion only), used in the endpoint URL
+ * @param {string} [indexingMethod] - the indexing method (e.g. 'fullCatalogReindex'). When set to 'fullCatalogReindex',
+ *   the referenceIndexName query parameter is appended so that a task does not need to be created for the .tmp index.
+ *   See https://www.algolia.com/doc/rest-api/ingestion/push#parameter-reference-index-name
+ * @returns {dw.svc.Result} - result of the call
+ */
+function pushByIndexName(requestPayload, indexName, indexingMethod) {
+    let indexingService = algoliaIndexingService.getService(__jobInfo);
+    let referenceIndexNameParam = '';
+
+    if (indexingMethod === 'fullCatalogReindex') {
+        let referenceIndexName = indexName.slice(0, -4);
+        referenceIndexNameParam = '?referenceIndexName=' + referenceIndexName;
+    }
 
     let retryableCallParameters = {
         method: 'POST',
-        url: 'https://data.' + analyticsRegion + '.algolia.com',
-        path: '/1/push/' + indexName,
+        path: '/1/push/' + indexName + referenceIndexNameParam,
         body: requestPayload,
         indexingAPI: INDEXING_APIS.INGESTION_API,
     }
 
-    var result = retryableCall(indexingService, retryableCallParameters);
+    let result = retryableCall(indexingService, retryableCallParameters);
 
     if (!result.ok) {
-        logger.error(result.getErrorMessage());
+        logger.error('[pushByIndexName][indexName: ' + indexName + '][path: ' + retryableCallParameters.path + '] Error: ' + result.getErrorMessage());
     }
 
     return result;
+}
+
+/**
+ * Wait for an Ingestion API run event to become available.
+ * Polls GET /1/runs/{runID}/events/{eventID} until it returns a non-404 response,
+ * mirroring the approach used by the official Algolia JS API client.
+ * @param {string} runID - Ingestion API run ID
+ * @param {string} eventID - Ingestion API event ID
+ */
+function waitForRunEvent(runID, eventID) {
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
+    var maxWait = waitTaskTimeout || 10 * 60 * 1000;
+    var start = Date.now();
+    var nbRequestsSent = 0;
+    var path = '/1/runs/' + runID + '/events/' + eventID;
+
+    while (Date.now() < start + maxWait) {
+        ++nbRequestsSent;
+
+        var result = retryableCall(
+            indexingService,
+            {
+                method: 'GET',
+                path: path,
+                indexingAPI: INDEXING_APIS.INGESTION_API,
+            }
+        );
+
+        if (!result.ok) {
+            if (result.error === 404) {
+                // Event not yet available, continue polling
+            } else {
+                logger.error('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '], Event retrieval error: ' + result.getErrorMessage());
+            }
+        } else {
+            logger.debug('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieved. (' + nbRequestsSent + ' requests sent).');
+            return;
+        }
+    }
+    logger.error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
+    throw new Error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
 }
 
 module.exports.setJobInfo = setJobInfo;
@@ -290,3 +334,4 @@ module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;
 module.exports.waitTask = waitTask;
 module.exports.pushByIndexName = pushByIndexName;
+module.exports.waitForRunEvent = waitForRunEvent;

@@ -143,14 +143,15 @@ function groupRecordsForIngestionAPI(recordArray) {
 /**
  * Sends Algolia records to the Ingestion API grouped by indexName and action
  * @param {Object} groupedRecords - Records grouped by `indexName` and `action`.
+ * @param {string} [indexingMethod] - the indexing method (e.g. 'fullCatalogReindex'), forwarded to pushByIndexName
  * @returns {Object} result object containing status and number of failed records
  */
-function sendGroupedIngestionAPIRecords(groupedRecords) {
+function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
     let indices = Object.keys(groupedRecords);
     let failedRecords = 0;
     let wasThereAnError = false;
+    let indexingEvents = {};
 
-    // iterate over the grouped batches by indexName and action, and send them
     for (let i = 0; i < indices.length; i++) {
         let indexName = indices[i];
         let index = groupedRecords[indexName];
@@ -158,14 +159,19 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
 
         for (let j = 0; j < actions.length; j++) {
             let action = actions[j];
-
             let recordToSend = {
                 action: action,
                 records: index[action],
             }
-
-            let result = algoliaIndexingAPI.pushByIndexName(recordToSend, indexName);
-            if (!(result.ok)) {
+            let result = algoliaIndexingAPI.pushByIndexName(recordToSend, indexName, indexingMethod);
+            if (result.ok) {
+                let runID = result.object.body.runID;
+                let eventID = result.object.body.eventID;
+                if (!indexingEvents[runID]) {
+                    indexingEvents[runID] = [];
+                }
+                indexingEvents[runID].push(eventID);
+            } else {
                 wasThereAnError = true;
                 failedRecords += recordToSend.records.length;
             }
@@ -175,6 +181,9 @@ function sendGroupedIngestionAPIRecords(groupedRecords) {
     return {
         result: {
             ok: !wasThereAnError,
+            object: {
+                body: { indexingEvents: indexingEvents }
+            }
         },
         failedRecords: failedRecords,
     }

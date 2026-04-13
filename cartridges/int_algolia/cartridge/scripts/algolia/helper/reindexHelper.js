@@ -2,6 +2,9 @@ const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoli
 
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
+const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+
+const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
 
 /**
  * Delete the temporary indices corresponding to the given type and locales
@@ -77,8 +80,23 @@ function moveTemporaryIndices(indexType, locales) {
  */
 function waitForTasks(taskIDs) {
     Object.keys(taskIDs).forEach(function (indexName) {
-        logger.info('Waiting for task ' + taskIDs[indexName] + ' on index ' + indexName);
+        logger.debug('[waitForTasks][SearchAPI][indexName: ' + indexName + '][taskID: ' + taskIDs[indexName] + '] Waiting for task...');
         algoliaIndexingAPI.waitTask(indexName, taskIDs[indexName]);
+    });
+}
+
+/**
+ * Wait for multiple Ingestion API events to become available.
+ * Polls each event via /1/runs/{runID}/events/{eventID} until it returns a non-404 response.
+ * Ingestion events have no sequential processing guarantee, so all must be tracked and waited on.
+ * @param {Object} indexingEvents - { "<runID>": [<eventID>, ...] }
+ */
+function waitForEvents(indexingEvents) {
+    Object.keys(indexingEvents).forEach(function (runID) {
+        indexingEvents[runID].forEach(function (eventID) {
+            logger.debug('[waitForEvents][IngestionAPI][runID: ' + runID + '][eventID: ' + eventID + '] Waiting for event...');
+            algoliaIndexingAPI.waitForRunEvent(runID, eventID);
+        });
     });
 }
 
@@ -89,24 +107,40 @@ function waitForTasks(taskIDs) {
  *   - Move the temporary indices to production
  * @param {string} indexType - 'products' or 'categories'
  * @param {string[]} locales - locales for which the reindex was triggered
- * @param {Object} lastIndexingTasks - Task IDs of the last reindex tasks to wait for, for each locale. Under the form: { "<indexName1>": <taskID>, "<indexName2>": <taskID> }
+ * @param {Object} indexingTasksToWaitFor - Search API: { indexName: taskID }; Ingestion API: { runID: [eventID, ...] }
+ * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
  */
-function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
-    logger.info('[FinishReindex] copying index settings from production...');
-    var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
+function finishAtomicReindex(indexType, locales, indexingTasksToWaitFor, indexingAPI) {
 
-    logger.info('[FinishReindex] Waiting for the last indexing tasks to complete... ' + JSON.stringify(lastIndexingTasks));
-    waitForTasks(lastIndexingTasks);
-    logger.info('[FinishReindex] Waiting for the last copy settings tasks to complete... ' + JSON.stringify(copySettingsTasks));
+    logger.info('[finishAtomicReindex] Copying index settings from production...');
+    var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
+    logger.info('[finishAtomicReindex] Index settings copied.');
+
+    switch (indexingAPI) {
+        default:
+        case INDEXING_APIS.SEARCH_API:
+            logger.info('[finishAtomicReindex][SearchAPI] Waiting for indexing tasks to finish...');
+            waitForTasks(indexingTasksToWaitFor);
+            break;
+        case INDEXING_APIS.INGESTION_API:
+            logger.info('[finishAtomicReindex][IngestionAPI] Waiting for indexing events to finish...');
+            waitForEvents(indexingTasksToWaitFor);
+            break;
+    }
+
+    logger.info('[finishAtomicReindex] Indexing tasks finished. Waiting for copy settings tasks to finish...');
     waitForTasks(copySettingsTasks);
 
-    logger.info('[FinishReindex] Moving temporary indices to production...');
+    logger.info('[finishAtomicReindex] Settings copied. Moving temporary indices to production...');
     moveTemporaryIndices(indexType, locales);
+
+    logger.info('[finishAtomicReindex] Temporary indices moved to production.');
 }
 
 module.exports.deleteTemporaryIndices = deleteTemporaryIndices;
 module.exports.finishAtomicReindex = finishAtomicReindex;
 module.exports.waitForTasks = waitForTasks;
+module.exports.waitForEvents = waitForEvents;
 
 // For unit testing
 module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;
