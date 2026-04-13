@@ -186,6 +186,49 @@ describe('pushByIndexName', () => {
     });
 });
 
+describe('pushByIndexName - HTTP request snapshots', () => {
+    test('addObject push for fullCatalogReindex with realistic payload', () => {
+        const payload = {
+            action: 'addObject',
+            records: [
+                { objectID: 'M-25592581', name: 'Fitted Shirt', price: { USD: 29.99, EUR: 24.99 }, in_stock: true, variants: [{ objectID: '701644031206M', color: 'JJB52A0', size: '004' }] },
+                { objectID: 'M-25604524', name: 'Classic Jeans', price: { USD: 49.99, EUR: 39.99 }, in_stock: true, variants: [{ objectID: '701644031300M', color: 'BLK', size: '032' }] },
+            ],
+        };
+
+        indexingAPI.pushByIndexName(payload, 'test_products_en.tmp', 'fullCatalogReindex');
+
+        expect(mockRetryableCall.mock.calls[0][1]).toMatchSnapshot('fullCatalogReindex push request params');
+    });
+
+    test('deleteObject push for delta index', () => {
+        const payload = {
+            action: 'deleteObject',
+            records: [
+                { objectID: '701644031206M' },
+                { objectID: '701644031300M' },
+            ],
+        };
+
+        indexingAPI.pushByIndexName(payload, 'test_products_en');
+
+        expect(mockRetryableCall.mock.calls[0][1]).toMatchSnapshot('delta deleteObject push request params');
+    });
+
+    test('partialUpdateObject push for inventory update', () => {
+        const payload = {
+            action: 'partialUpdateObject',
+            records: [
+                { objectID: 'M-25592581', variants: [{ objectID: '701644031206M', in_stock: false }] },
+            ],
+        };
+
+        indexingAPI.pushByIndexName(payload, 'test_products_en');
+
+        expect(mockRetryableCall.mock.calls[0][1]).toMatchSnapshot('inventory update push request params');
+    });
+});
+
 describe('waitForRunEvent', () => {
     test('polls event endpoint until non-404', () => {
         mockRetryableCall

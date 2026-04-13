@@ -80,22 +80,22 @@ test('groupRecordsForIngestionAPI', () => {
 
     const result = requestHelper.groupRecordsForIngestionAPI(records);
 
-    expect(result).toEqual({
-        'index_en': {
-            'addObject': [
-                { objectID: '1', name: 'Product 1' },
-                { objectID: '2', name: 'Product 2' },
-            ],
-            'deleteObject': [
-                { objectID: '3' },
-            ],
-        },
-        'index_fr': {
-            'addObject': [
-                { objectID: '1', name: 'Produit 1' },
-            ],
-        },
-    });
+    expect(result).toMatchSnapshot('grouped records by index and action');
+});
+
+test('groupRecordsForIngestionAPI - realistic multi-locale product batch', () => {
+    const batch = [
+        { action: 'addObject', indexName: 'test_products_en.tmp', body: { objectID: 'M-25592581', name: 'Fitted Shirt', price: { USD: 29.99, EUR: 24.99 }, in_stock: true, variants: [{ objectID: '701644031206M', color: 'JJB52A0', size: '004' }] } },
+        { action: 'addObject', indexName: 'test_products_fr.tmp', body: { objectID: 'M-25592581', name: 'Chemise ajustée', price: { USD: 29.99, EUR: 24.99 }, in_stock: true, variants: [{ objectID: '701644031206M', color: 'JJB52A0', size: '004' }] } },
+        { action: 'addObject', indexName: 'test_products_en.tmp', body: { objectID: 'M-25604524', name: 'Classic Jeans', price: { USD: 49.99, EUR: 39.99 }, in_stock: true, variants: [{ objectID: '701644031300M', color: 'BLK', size: '032' }] } },
+        { action: 'addObject', indexName: 'test_products_fr.tmp', body: { objectID: 'M-25604524', name: 'Jean classique', price: { USD: 49.99, EUR: 39.99 }, in_stock: true, variants: [{ objectID: '701644031300M', color: 'BLK', size: '032' }] } },
+        { action: 'deleteObject', indexName: 'test_products_en.tmp', body: { objectID: 'M-99999999' } },
+        { action: 'deleteObject', indexName: 'test_products_fr.tmp', body: { objectID: 'M-99999999' } },
+    ];
+
+    const groupedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+
+    expect(groupedRecords).toMatchSnapshot('multi-locale grouped records with mixed actions');
 });
 
 describe('sendGroupedIngestionAPIRecords', () => {
@@ -216,5 +216,104 @@ describe('sendGroupedIngestionAPIRecords', () => {
             'index_en.tmp',
             'fullCatalogReindex'
         );
+    });
+});
+
+describe('Ingestion API payload snapshots', () => {
+    test('full reindex flow: grouping → push payloads → response', () => {
+        const batch = [
+            { action: 'addObject', indexName: 'test_products_en.tmp', body: { objectID: 'M-25592581', name: 'Fitted Shirt', price: { USD: 29.99, EUR: 24.99 }, in_stock: true, variants: [{ objectID: '701644031206M', color: 'JJB52A0', size: '004' }] } },
+            { action: 'addObject', indexName: 'test_products_fr.tmp', body: { objectID: 'M-25592581', name: 'Chemise ajustée', price: { USD: 29.99, EUR: 24.99 }, in_stock: true, variants: [{ objectID: '701644031206M', color: 'JJB52A0', size: '004' }] } },
+            { action: 'addObject', indexName: 'test_products_en.tmp', body: { objectID: 'M-25604524', name: 'Classic Jeans', price: { USD: 49.99, EUR: 39.99 }, in_stock: true, variants: [{ objectID: '701644031300M', color: 'BLK', size: '032' }] } },
+            { action: 'addObject', indexName: 'test_products_fr.tmp', body: { objectID: 'M-25604524', name: 'Jean classique', price: { USD: 49.99, EUR: 39.99 }, in_stock: true, variants: [{ objectID: '701644031300M', color: 'BLK', size: '032' }] } },
+        ];
+
+        const groupedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+        expect(groupedRecords).toMatchSnapshot('grouped records for fullCatalogReindex');
+
+        let callCount = 0;
+        mockPushByIndexName.mockImplementation((payload, indexName) => {
+            callCount++;
+            return {
+                ok: true,
+                object: { body: { runID: 'run-' + indexName.replace(/[^a-z]/g, ''), eventID: 'evt-' + callCount } },
+            };
+        });
+
+        const response = requestHelper.sendGroupedIngestionAPIRecords(groupedRecords, 'fullCatalogReindex');
+
+        mockPushByIndexName.mock.calls.forEach(function(call, i) {
+            expect({
+                payload: call[0],
+                indexName: call[1],
+                indexingMethod: call[2],
+            }).toMatchSnapshot('pushByIndexName call ' + (i + 1));
+        });
+
+        expect(response).toMatchSnapshot('sendGroupedIngestionAPIRecords response');
+    });
+
+    test('delta index flow: mixed addObject and deleteObject payloads', () => {
+        const batch = [
+            { action: 'addObject', indexName: 'test_products_en', body: { objectID: '701644031206M', name: 'Fitted Shirt', price: { USD: 29.99 }, in_stock: true } },
+            { action: 'addObject', indexName: 'test_products_fr', body: { objectID: '701644031206M', name: 'Chemise ajustée', price: { EUR: 24.99 }, in_stock: true } },
+            { action: 'deleteObject', indexName: 'test_products_en', body: { objectID: '701644031300M' } },
+            { action: 'deleteObject', indexName: 'test_products_fr', body: { objectID: '701644031300M' } },
+        ];
+
+        const groupedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+        expect(groupedRecords).toMatchSnapshot('grouped records for delta index');
+
+        let callCount = 0;
+        mockPushByIndexName.mockImplementation(() => {
+            callCount++;
+            return {
+                ok: true,
+                object: { body: { runID: 'run-delta', eventID: 'evt-' + callCount } },
+            };
+        });
+
+        const response = requestHelper.sendGroupedIngestionAPIRecords(groupedRecords);
+
+        mockPushByIndexName.mock.calls.forEach(function(call, i) {
+            expect({
+                payload: call[0],
+                indexName: call[1],
+                indexingMethod: call[2],
+            }).toMatchSnapshot('pushByIndexName call ' + (i + 1));
+        });
+
+        expect(response).toMatchSnapshot('sendGroupedIngestionAPIRecords response');
+    });
+
+    test('inventory update flow: single partialUpdateObject per locale', () => {
+        const batch = [
+            { action: 'partialUpdateObject', indexName: 'test_products_en', body: { objectID: 'M-25592581', variants: [{ objectID: '701644031206M', in_stock: false }] } },
+            { action: 'partialUpdateObject', indexName: 'test_products_fr', body: { objectID: 'M-25592581', variants: [{ objectID: '701644031206M', in_stock: false }] } },
+        ];
+
+        const groupedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+        expect(groupedRecords).toMatchSnapshot('grouped records for inventory update');
+
+        let callCount = 0;
+        mockPushByIndexName.mockImplementation(() => {
+            callCount++;
+            return {
+                ok: true,
+                object: { body: { runID: 'run-inv', eventID: 'evt-' + callCount } },
+            };
+        });
+
+        const response = requestHelper.sendGroupedIngestionAPIRecords(groupedRecords);
+
+        mockPushByIndexName.mock.calls.forEach(function(call, i) {
+            expect({
+                payload: call[0],
+                indexName: call[1],
+                indexingMethod: call[2],
+            }).toMatchSnapshot('pushByIndexName call ' + (i + 1));
+        });
+
+        expect(response).toMatchSnapshot('sendGroupedIngestionAPIRecords response');
     });
 });
