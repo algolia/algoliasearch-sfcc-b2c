@@ -111,25 +111,30 @@ function waitForEvents(indexingEvents) {
  * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
  */
 function finishAtomicReindex(indexType, locales, indexingTasksToWaitFor, indexingAPI) {
-    logger.info('[FinishReindex] copying index settings from production...');
-    var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
 
-    logger.info('[FinishReindex] Waiting for indexing tasks to finish...');
+    logger.info('[finishAtomicReindex] Copying index settings from production...');
+    var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
+    logger.info('[finishAtomicReindex] Index settings copied.');
+
     switch (indexingAPI) {
         default:
         case INDEXING_APIS.SEARCH_API:
+            logger.info('[finishAtomicReindex][SearchAPI] Waiting for indexing tasks to finish...');
             waitForTasks(indexingTasksToWaitFor);
             break;
         case INDEXING_APIS.INGESTION_API:
+            logger.info('[finishAtomicReindex][IngestionAPI] Waiting for indexing events to finish...');
             waitForEvents(indexingTasksToWaitFor);
             break;
     }
 
-    logger.info('[FinishReindex] Waiting for copy settings tasks to finish...');
+    logger.info('[finishAtomicReindex] Indexing tasks finished. Waiting for copy settings tasks to finish...');
     waitForTasks(copySettingsTasks);
 
-    logger.info('[FinishReindex] Moving temporary indices to production...');
+    logger.info('[finishAtomicReindex] Settings copied. Moving temporary indices to production...');
     moveTemporaryIndices(indexType, locales);
+
+    logger.info('[finishAtomicReindex] Temporary indices moved to production.');
 }
 
 module.exports.deleteTemporaryIndices = deleteTemporaryIndices;
