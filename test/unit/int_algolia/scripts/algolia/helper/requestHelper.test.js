@@ -236,7 +236,7 @@ describe('Ingestion API payload snapshots', () => {
             callCount++;
             return {
                 ok: true,
-                object: { body: { runID: 'run-' + indexName.replace(/[^a-z]/g, ''), eventID: 'evt-' + callCount } },
+                object: { body: { runID: 'run-' + indexName, eventID: 'evt-' + callCount } },
             };
         });
 
@@ -265,11 +265,11 @@ describe('Ingestion API payload snapshots', () => {
         expect(groupedRecords).toMatchSnapshot('grouped records for delta index');
 
         let callCount = 0;
-        mockPushByIndexName.mockImplementation(() => {
+        mockPushByIndexName.mockImplementation((payload, indexName) => {
             callCount++;
             return {
                 ok: true,
-                object: { body: { runID: 'run-delta', eventID: 'evt-' + callCount } },
+                object: { body: { runID: 'run-' + indexName, eventID: 'evt-' + callCount } },
             };
         });
 
@@ -296,11 +296,11 @@ describe('Ingestion API payload snapshots', () => {
         expect(groupedRecords).toMatchSnapshot('grouped records for inventory update');
 
         let callCount = 0;
-        mockPushByIndexName.mockImplementation(() => {
+        mockPushByIndexName.mockImplementation((payload, indexName) => {
             callCount++;
             return {
                 ok: true,
-                object: { body: { runID: 'run-inv', eventID: 'evt-' + callCount } },
+                object: { body: { runID: 'run-' + indexName, eventID: 'evt-' + callCount } },
             };
         });
 

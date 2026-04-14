@@ -116,9 +116,11 @@ exports[`Ingestion API payload snapshots delta index flow: mixed addObject and d
     "object": {
       "body": {
         "indexingEvents": {
-          "run-delta": [
+          "run-test_products_en": [
             "evt-1",
             "evt-2",
+          ],
+          "run-test_products_fr": [
             "evt-3",
             "evt-4",
           ],
@@ -302,10 +304,10 @@ exports[`Ingestion API payload snapshots full reindex flow: grouping → push pa
     "object": {
       "body": {
         "indexingEvents": {
-          "run-testproductsentmp": [
+          "run-test_products_en.tmp": [
             "evt-1",
           ],
-          "run-testproductsfrtmp": [
+          "run-test_products_fr.tmp": [
             "evt-2",
           ],
         },
@@ -396,8 +398,10 @@ exports[`Ingestion API payload snapshots inventory update flow: single partialUp
     "object": {
       "body": {
         "indexingEvents": {
-          "run-inv": [
+          "run-test_products_en": [
             "evt-1",
+          ],
+          "run-test_products_fr": [
             "evt-2",
           ],
         },
