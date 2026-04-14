@@ -1,0 +1,87 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`pushByIndexName - HTTP request snapshots addObject push for fullCatalogReindex with realistic payload: fullCatalogReindex push request params 1`] = `
+{
+  "body": {
+    "action": "addObject",
+    "records": [
+      {
+        "in_stock": true,
+        "name": "Fitted Shirt",
+        "objectID": "M-25592581",
+        "price": {
+          "EUR": 24.99,
+          "USD": 29.99,
+        },
+        "variants": [
+          {
+            "color": "JJB52A0",
+            "objectID": "701644031206M",
+            "size": "004",
+          },
+        ],
+      },
+      {
+        "in_stock": true,
+        "name": "Classic Jeans",
+        "objectID": "M-25604524",
+        "price": {
+          "EUR": 39.99,
+          "USD": 49.99,
+        },
+        "variants": [
+          {
+            "color": "BLK",
+            "objectID": "701644031300M",
+            "size": "032",
+          },
+        ],
+      },
+    ],
+  },
+  "indexingAPI": "ingestion-api",
+  "method": "POST",
+  "path": "/1/push/test_products_en.tmp?referenceIndexName=test_products_en",
+}
+`;
+
+exports[`pushByIndexName - HTTP request snapshots deleteObject push for delta index: delta deleteObject push request params 1`] = `
+{
+  "body": {
+    "action": "deleteObject",
+    "records": [
+      {
+        "objectID": "701644031206M",
+      },
+      {
+        "objectID": "701644031300M",
+      },
+    ],
+  },
+  "indexingAPI": "ingestion-api",
+  "method": "POST",
+  "path": "/1/push/test_products_en",
+}
+`;
+
+exports[`pushByIndexName - HTTP request snapshots partialUpdateObject push for inventory update: inventory update push request params 1`] = `
+{
+  "body": {
+    "action": "partialUpdateObject",
+    "records": [
+      {
+        "objectID": "M-25592581",
+        "variants": [
+          {
+            "in_stock": false,
+            "objectID": "701644031206M",
+          },
+        ],
+      },
+    ],
+  },
+  "indexingAPI": "ingestion-api",
+  "method": "POST",
+  "path": "/1/push/test_products_en",
+}
+`;
