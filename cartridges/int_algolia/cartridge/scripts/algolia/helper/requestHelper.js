@@ -7,8 +7,8 @@ const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
  * Sends an Algolia batch to the Search API `multiple-batch` endpoint
  * https://www.algolia.com/doc/rest-api/search/multiple-batch
  * If records fail to be indexed (because e.g. they are too big), they are removed from the batch and the batch is retried.
- * @param {Object} batch - Algolia multi-indices batch
- * @param {String} [indexName] Target index -- only used with the Ingestion API
+ * Note: this function mutates the batch array by splicing out failed records.
+ * @param {Object[]} batch - Algolia multi-indices batch
  * @return {Object} returns an object with the last call result and the number of failed records.
  */
 function sendRetryableBatch(batch) {
@@ -144,7 +144,7 @@ function groupRecordsForIngestionAPI(recordArray) {
  * Sends Algolia records to the Ingestion API grouped by indexName and action
  * @param {Object} groupedRecords - Records grouped by `indexName` and `action`.
  * @param {string} [indexingMethod] - the indexing method (e.g. 'fullCatalogReindex'), forwarded to pushByIndexName
- * @returns {Object} result object containing status and number of failed records
+ * @returns {Object} result object containing { result, failedRecords, sentRecords }
  */
 function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
     let indices = Object.keys(groupedRecords);
