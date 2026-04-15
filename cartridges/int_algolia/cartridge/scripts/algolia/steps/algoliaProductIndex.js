@@ -527,45 +527,31 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         return;
     }
 
-    let resultObj, result;
+    switch (indexingAPI) {
+        case INDEXING_APIS.INGESTION_API: {
+            // With the Ingestion API, an OK response only means the payload was accepted;
+            // record-level errors (e.g. "record too big") happen asynchronously — check the Algolia Dashboard.
+            // sentRecords/failedRecords reflect transport-level success per push call.
+            let resultObj;
+            try {
+                let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+                resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords, paramIndexingMethod);
+            } catch (e) {
+                logger.error('Error while sending batch to Algolia: ' + e);
+            }
 
-    try {
-        if (indexingAPI === INDEXING_APIS.SEARCH_API) {
-            resultObj = requestHelper.sendRetryableBatch(batch);
-        } else { // INDEXING_APIS.INGESTION_API
-            let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
-            resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords, paramIndexingMethod);
-        }
-
-        // recordsFailed count is not necessarily accurate when using the Ingestion API
-        // An OK response from a sending call only means that the endpoint received the payload;
-        // "record too large" or other indexing-time errors can still happen -- check your Algolia Dashboard for these errors
-        result = resultObj.result;
-        jobReport.recordsFailed += resultObj.failedRecords;
-    } catch (e) {
-        logger.error('Error while sending batch to Algolia: ' + e);
-    }
-
-    if (result && result.ok) {
-        jobReport.recordsSent += batch.length;
-        jobReport.chunksSent++;
-
-        // Store Algolia indexing task/event IDs per index.
-        // When performing a fullCatalogReindex, afterStep waits for these to complete before moving temp to prod.
-        // For Search API, taskIDs are sequential per index — the last one completing guarantees all prior
-        // are done, so we only keep the latest value.
-        // For Ingestion API, events have no sequential processing guarantee — we must track all of them.
-        if (paramIndexingMethod === 'fullCatalogReindex') {
-            switch (indexingAPI) {
-                default:
-                case INDEXING_APIS.SEARCH_API: {
-                    let taskIDs = result.object.body.taskID;
-                    Object.keys(taskIDs).forEach(function (taskIndexName) {
-                        indexingTasksToWaitFor[taskIndexName] = taskIDs[taskIndexName];
-                    });
-                    break;
+            if (resultObj) {
+                jobReport.recordsSent += resultObj.sentRecords;
+                jobReport.recordsFailed += resultObj.failedRecords;
+                if (resultObj.failedRecords > 0) {
+                    jobReport.chunksFailed++;
+                } else {
+                    jobReport.chunksSent++;
                 }
-                case INDEXING_APIS.INGESTION_API: {
+
+                // Store Ingestion API event IDs for fullCatalogReindex
+                if (paramIndexingMethod === 'fullCatalogReindex') {
+                    let result = resultObj.result;
                     let indexingEvents = result.object.body.indexingEvents;
                     Object.keys(indexingEvents).forEach(function (runID) {
                         if (!indexingTasksToWaitFor[runID]) {
@@ -573,13 +559,45 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
                         }
                         indexingTasksToWaitFor[runID] = indexingTasksToWaitFor[runID].concat(indexingEvents[runID]);
                     });
-                    break;
                 }
+            } else {
+                jobReport.recordsFailed += batch.length;
+                jobReport.chunksFailed++;
             }
+            break;
         }
-    } else {
-        jobReport.recordsFailed += batch.length;
-        jobReport.chunksFailed++;
+        case INDEXING_APIS.SEARCH_API:
+        default: {
+            // Search API: sendRetryableBatch mutates the batch array by splicing out failed records,
+            // so batch.length reflects only the remaining records after retries.
+            let resultObj, result;
+            try {
+                resultObj = requestHelper.sendRetryableBatch(batch);
+                result = resultObj.result;
+            } catch (e) {
+                logger.error('Error while sending batch to Algolia: ' + e);
+            }
+
+            jobReport.recordsFailed += resultObj ? resultObj.failedRecords : 0;
+
+            if (result && result.ok) {
+                jobReport.recordsSent += batch.length;
+                jobReport.chunksSent++;
+
+                // Store Search API task IDs for fullCatalogReindex.
+                // taskIDs are sequential per index — the last one guarantees all prior are done.
+                if (paramIndexingMethod === 'fullCatalogReindex') {
+                    let taskIDs = result.object.body.taskID;
+                    Object.keys(taskIDs).forEach(function (taskIndexName) {
+                        indexingTasksToWaitFor[taskIndexName] = taskIDs[taskIndexName];
+                    });
+                }
+            } else {
+                jobReport.recordsFailed += batch.length;
+                jobReport.chunksFailed++;
+            }
+            break;
+        }
     }
 }
 

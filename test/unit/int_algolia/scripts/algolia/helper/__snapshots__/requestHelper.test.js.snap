@@ -129,6 +129,7 @@ exports[`Ingestion API payload snapshots delta index flow: mixed addObject and d
     },
     "ok": true,
   },
+  "sentRecords": 4,
 }
 `;
 
@@ -315,6 +316,7 @@ exports[`Ingestion API payload snapshots full reindex flow: grouping → push pa
     },
     "ok": true,
   },
+  "sentRecords": 4,
 }
 `;
 
@@ -409,6 +411,7 @@ exports[`Ingestion API payload snapshots inventory update flow: single partialUp
     },
     "ok": true,
   },
+  "sentRecords": 2,
 }
 `;
 

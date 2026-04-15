@@ -619,32 +619,56 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         batch = batch.concat(algoliaOperationsArray[i].toArray());
     }
 
-    let resultObj;
     switch (indexingAPI) {
         case INDEXING_APIS.INGESTION_API: {
-            let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
-            resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+            // With the Ingestion API, an OK response only means the payload was accepted;
+            // record-level errors (e.g. "record too big") happen asynchronously — check the Algolia Dashboard.
+            // sentRecords/failedRecords reflect transport-level success per push call.
+            let resultObj;
+            try {
+                let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+                resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+            } catch (e) {
+                logger.error('Error while sending batch to Algolia: ' + e);
+            }
+
+            if (resultObj) {
+                jobReport.recordsSent += resultObj.sentRecords;
+                jobReport.recordsFailed += resultObj.failedRecords;
+                if (resultObj.failedRecords > 0) {
+                    jobReport.chunksFailed++;
+                } else {
+                    jobReport.chunksSent++;
+                }
+            } else {
+                jobReport.recordsFailed += batch.length;
+                jobReport.chunksFailed++;
+            }
             break;
         }
         case INDEXING_APIS.SEARCH_API:
         default: {
-            resultObj = requestHelper.sendRetryableBatch(batch);
+            // Search API: sendRetryableBatch mutates the batch array by splicing out failed records,
+            // so batch.length reflects only the remaining records after retries.
+            let resultObj, result;
+            try {
+                resultObj = requestHelper.sendRetryableBatch(batch);
+                result = resultObj.result;
+            } catch (e) {
+                logger.error('Error while sending batch to Algolia: ' + e);
+            }
+
+            jobReport.recordsFailed += resultObj ? resultObj.failedRecords : 0;
+
+            if (result && result.ok) {
+                jobReport.recordsSent += batch.length;
+                jobReport.chunksSent++;
+            } else {
+                jobReport.recordsFailed += batch.length;
+                jobReport.chunksFailed++;
+            }
             break;
         }
-    }
-
-    // recordsFailed count is not necessarily accurate when using the Ingestion API
-    // An OK response from a sending call only means that the endpoint received the payload;
-    // "record too large" or other indexing-time errors can still happen -- check your Algolia Dashboard for these errors
-    let result = resultObj.result;
-    jobReport.recordsFailed += resultObj.failedRecords;
-
-    if (result.ok) {
-        jobReport.recordsSent += batch.length;
-        jobReport.chunksSent++;
-    } else {
-        jobReport.recordsFailed += batch.length;
-        jobReport.chunksFailed++;
     }
 }
 
