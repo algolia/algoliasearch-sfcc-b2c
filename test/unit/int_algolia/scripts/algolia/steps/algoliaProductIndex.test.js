@@ -354,6 +354,7 @@ describe('send', () => {
                     }
                 },
                 failedRecords: 0,
+                sentRecords: 4,
             })
             .mockReturnValueOnce({
                 result: {
@@ -368,6 +369,7 @@ describe('send', () => {
                     }
                 },
                 failedRecords: 0,
+                sentRecords: 4,
             });
 
         job.send(makeChunk());
@@ -402,6 +404,7 @@ describe('send', () => {
         mockSendGroupedIngestionAPIRecords.mockReturnValue({
             result: { ok: true, object: { body: {} } },
             failedRecords: 0,
+            sentRecords: 2,
         });
 
         function makeChunk() {
@@ -421,7 +424,7 @@ describe('send', () => {
 
         expect(mockGroupRecordsForIngestionAPI).toHaveBeenCalled();
         expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledWith({}, 'partialRecordUpdate');
-        expect(job.__getJobReport().recordsSent).toBeGreaterThan(0);
+        expect(job.__getJobReport().recordsSent).toBe(2);
     });
 
     test('Ingestion API - failure updates jobReport', () => {
@@ -432,6 +435,7 @@ describe('send', () => {
         mockSendGroupedIngestionAPIRecords.mockReturnValue({
             result: { ok: false },
             failedRecords: 3,
+            sentRecords: 2,
         });
 
         function makeChunk() {
@@ -448,8 +452,8 @@ describe('send', () => {
 
         job.send(makeChunk());
 
-        // failedRecords from resultObj (3) + batch.length from the !result.ok branch (2)
-        expect(job.__getJobReport().recordsFailed).toBe(3 + 2);
+        expect(job.__getJobReport().recordsFailed).toBe(3);
+        expect(job.__getJobReport().recordsSent).toBe(2);
         expect(job.__getJobReport().chunksFailed).toBe(1);
     });
 
@@ -470,6 +474,8 @@ describe('send', () => {
 
         // Should not throw - caught internally
         expect(() => job.send(makeChunk())).not.toThrow();
+        expect(job.__getJobReport().recordsFailed).toBe(1);
+        expect(job.__getJobReport().chunksFailed).toBe(1);
     });
 });
 

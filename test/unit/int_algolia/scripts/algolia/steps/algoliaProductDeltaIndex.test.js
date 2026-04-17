@@ -194,6 +194,7 @@ describe('send', () => {
         mockSendGroupedIngestionAPIRecords.mockReturnValue({
             result: { ok: true, object: { body: {} } },
             failedRecords: 0,
+            sentRecords: 4,
         });
 
         const chunk = makeChunk(2);
@@ -201,7 +202,7 @@ describe('send', () => {
 
         expect(mockGroupRecordsForIngestionAPI).toHaveBeenCalledWith(chunk.flat());
         expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledWith(grouped);
-        expect(job.__getJobReport().recordsSent).toBeGreaterThan(0);
+        expect(job.__getJobReport().recordsSent).toBe(4);
         expect(job.__getJobReport().chunksSent).toBeGreaterThan(0);
     });
 
@@ -213,14 +214,14 @@ describe('send', () => {
         mockSendGroupedIngestionAPIRecords.mockReturnValue({
             result: { ok: false },
             failedRecords: 2,
+            sentRecords: 2,
         });
 
         const chunk = makeChunk(2);
-        const batchLength = chunk.flat().length;
         job.send(chunk);
 
-        // failedRecords from resultObj (2) + batch.length from the !result.ok branch
-        expect(job.__getJobReport().recordsFailed).toBe(2 + batchLength);
+        expect(job.__getJobReport().recordsFailed).toBe(2);
+        expect(job.__getJobReport().recordsSent).toBe(2);
         expect(job.__getJobReport().chunksFailed).toBe(1);
     });
 
@@ -232,6 +233,7 @@ describe('send', () => {
         mockSendGroupedIngestionAPIRecords.mockReturnValue({
             result: { ok: true, object: { body: {} } },
             failedRecords: 0,
+            sentRecords: 2,
         });
 
         job.send(makeChunk(1));

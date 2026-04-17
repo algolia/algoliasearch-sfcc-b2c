@@ -134,6 +134,7 @@ describe('sendGroupedIngestionAPIRecords', () => {
         );
         expect(res.result.ok).toBe(true);
         expect(res.failedRecords).toBe(0);
+        expect(res.sentRecords).toBe(3);
         expect(res.result.object.body.indexingEvents).toEqual({
             'run-en': ['evt-1'],
             'run-fr': ['evt-2'],
@@ -165,6 +166,7 @@ describe('sendGroupedIngestionAPIRecords', () => {
         expect(mockPushByIndexName).toHaveBeenCalledTimes(2);
         expect(res.result.ok).toBe(false);
         expect(res.failedRecords).toBe(1);
+        expect(res.sentRecords).toBe(2);
         expect(res.result.object.body.indexingEvents).toEqual({
             'run-en': ['evt-1'],
         });
@@ -192,6 +194,7 @@ describe('sendGroupedIngestionAPIRecords', () => {
         expect(mockPushByIndexName).toHaveBeenCalledTimes(2);
         expect(res.result.ok).toBe(true);
         expect(res.failedRecords).toBe(0);
+        expect(res.sentRecords).toBe(2);
         expect(res.result.object.body.indexingEvents).toEqual({
             'run-en': ['evt-1', 'evt-2'],
         });
