@@ -278,9 +278,11 @@ function toTmp(indexName) {
  * @returns {string} the primary index name, e.g. 'products_en'
  */
 function fromTmp(tmpIndexName) {
+    // Note: String.prototype.endsWith is ES6 and is NOT available in SFCC compat mode 18.10's
+    // Rhino engine. Use slice() for the suffix check instead.
     if (typeof tmpIndexName !== 'string'
-        || !tmpIndexName.endsWith(TMP_INDEX_SUFFIX)
-        || tmpIndexName.length <= TMP_INDEX_SUFFIX.length) {
+        || tmpIndexName.length <= TMP_INDEX_SUFFIX.length
+        || tmpIndexName.slice(-TMP_INDEX_SUFFIX.length) !== TMP_INDEX_SUFFIX) {
         throw new Error('[fromTmp] expected a temporary index name ending in "' +
             TMP_INDEX_SUFFIX + '". Got: "' + tmpIndexName + '"');
     }
