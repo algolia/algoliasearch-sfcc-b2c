@@ -16,9 +16,9 @@ const indexingAPI = require('../../../../../cartridges/int_algolia/cartridge/scr
 const jobHelper = require('../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper');
 
 // Replace the backoff spin-wait with a no-op so polling loops in tests complete instantly.
-// `algoliaIndexingAPI` calls `jobHelper.sleepMs(...)` through the module reference,
+// `algoliaIndexingAPI` calls `jobHelper.sleepFor(...)` through the module reference,
 // so this spy intercepts every call from production code.
-jest.spyOn(jobHelper, 'sleepMs').mockImplementation(function () {});
+jest.spyOn(jobHelper, 'sleepFor').mockImplementation(function () {});
 
 beforeEach(() => {
     mockRetryableCall.mockReturnValue({

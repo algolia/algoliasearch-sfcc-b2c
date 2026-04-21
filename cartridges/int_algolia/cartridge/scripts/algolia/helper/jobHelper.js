@@ -278,8 +278,6 @@ function toTmp(indexName) {
  * @returns {string} the primary index name, e.g. 'products_en'
  */
 function fromTmp(tmpIndexName) {
-    // Note: String.prototype.endsWith is ES6 and is NOT available in SFCC compat mode 18.10's
-    // Rhino engine. Use slice() for the suffix check instead.
     if (typeof tmpIndexName !== 'string'
         || tmpIndexName.length <= TMP_INDEX_SUFFIX.length
         || tmpIndexName.slice(-TMP_INDEX_SUFFIX.length) !== TMP_INDEX_SUFFIX) {
@@ -292,11 +290,9 @@ function fromTmp(tmpIndexName) {
 /**
  * Sleeps for the given number of milliseconds. Uses a spin-wait because the SFCC job
  * script context does not expose setTimeout / setInterval.
- * Unit tests should replace this via `jest.mock` of jobHelper so polling loops complete
- * instantly without pegging the worker thread.
  * @param {number} ms - duration to sleep, in milliseconds
  */
-function sleepMs(ms) {
+function sleepFor(ms) {
     var end = Date.now() + ms;
     // eslint-disable-next-line no-empty
     while (Date.now() < end) {}
@@ -866,7 +862,7 @@ module.exports = {
     getAlgoliaLogger: getAlgoliaLogger,
     toTmp: toTmp,
     fromTmp: fromTmp,
-    sleepMs: sleepMs,
+    sleepFor: sleepFor,
     logError: logError,
     logFileError: logFileError,
     logInfo: logInfo,

@@ -248,7 +248,7 @@ function waitTask(indexName, taskID) {
             }
         }
 
-        jobHelper.sleepMs(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
+        jobHelper.sleepFor(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
     }
     logger.error('Max wait time reached... TaskID: ' + taskID + '; index: ' + indexName);
     throw new Error('Max wait time reached. TaskID: ' + taskID + '; index: ' + indexName);
@@ -330,7 +330,7 @@ function waitForRunEvent(runID, eventID) {
             throw new Error('waitForRunEvent failed for run ' + runID + ', event ' + eventID + ': ' + result.getErrorMessage());
         }
 
-        jobHelper.sleepMs(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
+        jobHelper.sleepFor(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
     }
     logger.error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
     throw new Error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
