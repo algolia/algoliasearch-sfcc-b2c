@@ -13,13 +13,7 @@ let orderHelper = require('*/cartridge/scripts/algolia/helper/orderHelper');
 let isInStoreStock = productFilter.isInStoreStock;
 let generateAlgoliaOperations = orderHelper.generateAlgoliaOperations;
 
-const indexingAPI = algoliaData.getPreference('IndexingAPI') || 'search-api'; // "search-api" (default) or "ingestion-api"
-
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
-const RECORD_MODEL_TYPES = algoliaConstants.RECORD_MODEL_TYPES;
-
-const variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
+const { INDEXING_APIS, RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Creates the necessary configuration for a product based on the record model type.
@@ -33,6 +27,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
     let attributesConfig = jobHelper.getAttributes(additionalAttributes);
     let productConfig = {};
 
+    let variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
     let productVariationModel = product.getVariationModel();
     let variationAttribute = productVariationModel.getProductVariationAttribute(variationAttributeForAttributeSlicedRecordModel);
 
@@ -98,6 +93,14 @@ function createProductConfig(product, recordModel, additionalAttributes) {
  * @returns {dw.system.Status} Status
  */
 exports.inventoryUpdate = function (order) {
+    // Gate the hook centrally so the preference also applies to OCAPI order creations,
+    // not just the SFRA `CheckoutServices-PlaceOrder` path.
+    if (!algoliaData.getPreference('Enable') || !algoliaData.getPreference('EnableRealTimeInventoryHook')) {
+        return new Status(Status.OK);
+    }
+
+    let indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API;
+
     let ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
     let RECORD_MODEL = algoliaData.getPreference('RecordModel');
     let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');

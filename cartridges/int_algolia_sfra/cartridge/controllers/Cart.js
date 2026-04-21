@@ -9,8 +9,7 @@ var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 
 server.extend(base);
 
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-const RECORD_MODEL_TYPES = algoliaConstants.RECORD_MODEL_TYPES;
+const { RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 server.append('Show', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableRecommend')) {

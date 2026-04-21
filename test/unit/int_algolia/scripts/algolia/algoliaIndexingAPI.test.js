@@ -13,6 +13,12 @@ jest.mock('*/cartridge/scripts/algolia/helper/retryStrategy', () => {
 }, {virtual: true});
 
 const indexingAPI = require('../../../../../cartridges/int_algolia/cartridge/scripts/algoliaIndexingAPI');
+const jobHelper = require('../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper');
+
+// Replace the backoff spin-wait with a no-op so polling loops in tests complete instantly.
+// `algoliaIndexingAPI` calls `jobHelper.sleepMs(...)` through the module reference,
+// so this spy intercepts every call from production code.
+jest.spyOn(jobHelper, 'sleepMs').mockImplementation(function () {});
 
 beforeEach(() => {
     mockRetryableCall.mockReturnValue({
@@ -184,6 +190,23 @@ describe('pushByIndexName', () => {
             indexingAPI: 'ingestion-api',
         });
     });
+
+    // fullCatalogReindex derives referenceIndexName by stripping the trailing ".tmp".
+    // Passing a production (non-.tmp) index name in this mode would silently truncate it,
+    // so pushByIndexName must fail fast.
+    test('throws when fullCatalogReindex is used with a non-.tmp index name', () => {
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        expect(() => indexingAPI.pushByIndexName(payload, 'products_en', 'fullCatalogReindex'))
+            .toThrow(/must end in|temporary index name ending in/i);
+        expect(mockRetryableCall).not.toHaveBeenCalled();
+    });
+
+    test('throws when fullCatalogReindex is used with the bare .tmp suffix', () => {
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        expect(() => indexingAPI.pushByIndexName(payload, '.tmp', 'fullCatalogReindex'))
+            .toThrow(/temporary index name ending in/i);
+        expect(mockRetryableCall).not.toHaveBeenCalled();
+    });
 });
 
 describe('pushByIndexName - HTTP request snapshots', () => {
@@ -309,6 +332,26 @@ describe('waitForRunEvent', () => {
         }).toThrow('Max wait time reached. Run: run-timeout; event: evt-timeout');
 
         Date.now = originalDateNow;
+    });
+
+    // a terminal 4xx (e.g. 401/403) is not retryable and must fail fast
+    // rather than keep hot-looping until maxWait elapses.
+    test.each([
+        [401, 'Unauthorized'],
+        [403, 'Forbidden'],
+        [400, 'Bad Request'],
+    ])('fails fast on terminal HTTP %i without retrying', (status, msg) => {
+        mockRetryableCall.mockReturnValue({
+            ok: false,
+            error: status,
+            getErrorMessage: () => msg,
+        });
+
+        expect(() => {
+            indexingAPI.waitForRunEvent('run-terminal', 'evt-terminal');
+        }).toThrow(new RegExp('terminal status ' + status));
+
+        expect(mockRetryableCall).toHaveBeenCalledTimes(1);
     });
 });
 

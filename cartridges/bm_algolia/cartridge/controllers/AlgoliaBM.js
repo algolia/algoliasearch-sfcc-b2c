@@ -11,7 +11,7 @@ var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
 var algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
 const BMHelper = require('../scripts/helper/BMHelper');
 var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
-
+const { INDEXING_APIS, ANALYTICS_REGIONS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * @description Render default template
@@ -31,7 +31,7 @@ function handleSettings() {
     var searchApikey = params.SearchApiKey.value || '';
     var indexPrefix = params.IndexPrefix.value || '';
     var algoliaAttributeSlicedRecordModel_GroupingAttribute = params.AttributeSlicedRecordModel_GroupingAttribute.value || '';
-    var indexingAPI = params.IndexingAPI.value || 'search-api';
+    var indexingAPI = params.IndexingAPI.value || INDEXING_APIS.SEARCH_API;
     var analyticsRegion = (params.AnalyticsRegion.value || '').trim().toLowerCase();
 
     var adminValidation = {};
@@ -64,6 +64,9 @@ function handleSettings() {
             finalIndexPrefix
         );
 
+        // Run all validators up-front so errors are aggregated and shown in a single render pass.
+        // Warnings never block saving.
+
         // validate AdminApiKey
         if (!empty(adminValidation.error)) {
             pdictValues.errors.adminErrorMessage = adminValidation.errorMessage;
@@ -74,17 +77,16 @@ function handleSettings() {
         }
 
         // validate AnalyticsRegion (empty allowed so that it doesn't force a value for initial setup; non-empty must be eu or us)
-        if (analyticsRegion && analyticsRegion !== 'eu' && analyticsRegion !== 'us') {
+        if (analyticsRegion && analyticsRegion !== ANALYTICS_REGIONS.EU && analyticsRegion !== ANALYTICS_REGIONS.US) {
             pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
         }
 
-        // if any of the errors are set, render the dashboard with the errors and don't save the preferences -- warnings do not block saving the preferences
-        let errorKeys = Object.keys(pdictValues.errors);
-        for (let i = 0; i < errorKeys.length; i++) {
-            let errorKey = errorKeys[i];
-            if (!empty(pdictValues.errors[errorKey])) {
-                return renderDashboard(pdictValues);
-            }
+        // Decide once whether any validator produced an error; warnings never block saving.
+        let hasError = Object.keys(pdictValues.errors).some(function (errorKey) {
+            return !empty(pdictValues.errors[errorKey]);
+        });
+        if (hasError) {
+            return renderDashboard(pdictValues);
         }
 
         // If we get here, the check is fine or not applicable. Save settings:

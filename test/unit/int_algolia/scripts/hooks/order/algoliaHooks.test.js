@@ -15,6 +15,8 @@ let mockConfig = {
     RecordModel: 'master-level',
     AdditionalAttributes: ['storeAvailability', 'short_description', 'brand'],
     AttributeSlicedRecordModel_GroupingAttribute: 'color',
+    Enable: true,
+    EnableRealTimeInventoryHook: true,
 };
 
 const algoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
@@ -33,6 +35,10 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
                 return mockConfig.AttributeSlicedRecordModel_GroupingAttribute;
             case 'IndexingAPI':
                 return mockConfig.IndexingAPI || null;
+            case 'Enable':
+                return mockConfig.Enable;
+            case 'EnableRealTimeInventoryHook':
+                return mockConfig.EnableRealTimeInventoryHook;
             default:
                 return null;
         }
@@ -676,5 +682,41 @@ describe('inventoryUpdate', () => {
 
         expect(mockSendRetryableBatch).toHaveBeenCalled();
         expect(result.status).toBe(0);
+    });
+
+    // The hook is also triggered by OCAPI order creation, which bypasses the
+    // SFRA-level EnableRealTimeInventoryHook gate. The hook itself must honour it.
+    test('short-circuits when EnableRealTimeInventoryHook preference is false', () => {
+        mockConfig.EnableRealTimeInventoryHook = false;
+
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-GATE-OFF',
+            getShipments: () => [testData.mockShipmentStandard],
+        };
+
+        const result = algoliaHooks.inventoryUpdate(mockOrder);
+
+        expect(mockSendRetryableBatch).not.toHaveBeenCalled();
+        expect(mockSendGroupedIngestionAPIRecords).not.toHaveBeenCalled();
+        expect(result.status).toBe(0);
+
+        mockConfig.EnableRealTimeInventoryHook = true;
+    });
+
+    test('short-circuits when Enable preference is false', () => {
+        mockConfig.Enable = false;
+
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-DISABLED',
+            getShipments: () => [testData.mockShipmentStandard],
+        };
+
+        const result = algoliaHooks.inventoryUpdate(mockOrder);
+
+        expect(mockSendRetryableBatch).not.toHaveBeenCalled();
+        expect(mockSendGroupedIngestionAPIRecords).not.toHaveBeenCalled();
+        expect(result.status).toBe(0);
+
+        mockConfig.Enable = true;
     });
 });

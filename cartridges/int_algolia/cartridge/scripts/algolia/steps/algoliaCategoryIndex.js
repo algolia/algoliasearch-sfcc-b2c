@@ -44,6 +44,7 @@ function runCategoryExport(parameters, stepExecution) {
     const requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
     const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+    const toTmp = jobHelper.toTmp;
     const logger = jobHelper.getAlgoliaLogger();
 
     var currentSite = Site.getCurrent();
@@ -100,7 +101,7 @@ function runCategoryExport(parameters, stepExecution) {
     for (let l = 0; l < siteLocales.size(); ++l) {
         var locale = siteLocales.get(l);
         var topLevelCategories = siteRootCategory.getOnlineSubCategories().iterator();
-        var tmpIndexName = algoliaData.calculateIndexName('categories', locale) + '.tmp';
+        var tmpIndexName = toTmp(algoliaData.calculateIndexName('categories', locale));
         var batch = [];
 
         while (topLevelCategories.hasNext()) {

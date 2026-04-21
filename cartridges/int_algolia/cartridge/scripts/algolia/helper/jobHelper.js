@@ -1,6 +1,7 @@
 'use strict';
 
 var algoliaLogger = require('dw/system/Logger').getLogger('algolia');
+var { TMP_INDEX_SUFFIX, ALGOLIA_FILES_FOLDER } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Function to convert array to XML object
@@ -260,6 +261,46 @@ function getAlgoliaLogger() {
 }
 
 /**
+ * Appends the temporary index suffix to a primary index name.
+ * @param {string} indexName primary index name, e.g. 'products_en'
+ * @returns {string} the temporary index name, e.g. 'products_en.tmp'
+ */
+function toTmp(indexName) {
+    return indexName + TMP_INDEX_SUFFIX;
+}
+
+/**
+ * Strips the temporary index suffix from a `.tmp` index name.
+ * Throws if `tmpIndexName` does not end in the expected suffix, or would
+ * reduce to an empty primary name -- this prevents silently producing an
+ * invalid `referenceIndexName` at API call sites.
+ * @param {string} tmpIndexName temporary index name, e.g. 'products_en.tmp'
+ * @returns {string} the primary index name, e.g. 'products_en'
+ */
+function fromTmp(tmpIndexName) {
+    if (typeof tmpIndexName !== 'string'
+        || !tmpIndexName.endsWith(TMP_INDEX_SUFFIX)
+        || tmpIndexName.length <= TMP_INDEX_SUFFIX.length) {
+        throw new Error('[fromTmp] expected a temporary index name ending in "' +
+            TMP_INDEX_SUFFIX + '". Got: "' + tmpIndexName + '"');
+    }
+    return tmpIndexName.slice(0, -TMP_INDEX_SUFFIX.length);
+}
+
+/**
+ * Sleeps for the given number of milliseconds. Uses a spin-wait because the SFCC job
+ * script context does not expose setTimeout / setInterval.
+ * Unit tests should replace this via `jest.mock` of jobHelper so polling loops complete
+ * instantly without pegging the worker thread.
+ * @param {number} ms - duration to sleep, in milliseconds
+ */
+function sleepMs(ms) {
+    var end = Date.now() + ms;
+    // eslint-disable-next-line no-empty
+    while (Date.now() < end) {}
+}
+
+/**
  * Parse error message and write it to log
  * @param {string} errorMessage Error message
  */
@@ -304,13 +345,12 @@ function logFileInfo(file, infoMessage) {
  */
 function checkAlgoliaFolder() {
     var File = require('dw/io/File');
-    var algoliaFolderName = require('*/cartridge/scripts/algolia/lib/algoliaConstants').ALGOLIA_FILES_FOLDER;
     var result = false;
     try {
-        var algoliaFolder = new File(algoliaFolderName);
+        var algoliaFolder = new File(ALGOLIA_FILES_FOLDER);
         result = algoliaFolder.exists() ? true : algoliaFolder.mkdirs();
     } catch (error) {
-        logFileError(algoliaFolderName, 'Error creating directory path', error);
+        logFileError(ALGOLIA_FILES_FOLDER, 'Error creating directory path', error);
         result = false;
     }
     return result;
@@ -822,6 +862,9 @@ module.exports = {
     hasSameProperties: hasSameProperties,
     readXMLObjectFromStream: readXMLObjectFromStream,
     getAlgoliaLogger: getAlgoliaLogger,
+    toTmp: toTmp,
+    fromTmp: fromTmp,
+    sleepMs: sleepMs,
     logError: logError,
     logFileError: logFileError,
     logInfo: logInfo,

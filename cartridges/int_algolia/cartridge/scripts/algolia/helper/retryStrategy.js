@@ -5,8 +5,7 @@ const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 const appID = algoliaData.getPreference('ApplicationID');
 
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
+const { INDEXING_APIS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 const EXPIRATION_DELAY = 5 * 60 * 1000;
 
@@ -49,8 +48,8 @@ function initHosts(indexingAPI) {
             ];
             break;
         }
-        default:
-        case INDEXING_APIS.SEARCH_API: {
+        case INDEXING_APIS.SEARCH_API:
+        default: {
             statefulhosts[INDEXING_APIS.SEARCH_API] = [
                 new StatefulHost(appID + '.algolia.net'),
                 new StatefulHost(appID + '-1.algolianet.com'),
@@ -149,7 +148,10 @@ function retryableCall(service, requestParams) {
 
         Logger.error('Request error on ' + statefulhost.hostname + ': ' +
             result.getError() + ' - ' + result.getErrorMessage());
-        if (!isTimeoutError(result)) {
+        // Skip host markdown when the pool has only one host
+        // Marking it down would route every retry to a known-bad host for the full EXPIRATION_DELAY window;
+        // leaving it healthy lets the retry loop keep attempting the only available endpoint.
+        if (!isTimeoutError(result) && statefulhosts[indexingAPI].length > 1) {
             Logger.info('Marking host ' + statefulhost.hostname + ' down.');
             statefulhost.markDown();
         }

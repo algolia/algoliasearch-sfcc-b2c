@@ -165,8 +165,7 @@ exports.process = function(content, parameters, stepExecution) {
 
     for (let l = 0; l < siteLocales.size(); ++l) {
         var locale = siteLocales[l];
-        var indexName = algoliaData.calculateIndexName('contents', locale);
-        indexName += '.tmp';
+        var indexName = jobHelper.toTmp(algoliaData.calculateIndexName('contents', locale));
         let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, includedContent: includedContent });
         let splits = [];
         let splittingTag = parameters.splittingTag;
