@@ -6,6 +6,7 @@ let Status = require('dw/system/Status');
 let jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 let requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
+let algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
 let productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 let AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
@@ -101,6 +102,14 @@ exports.inventoryUpdate = function (order) {
 
     let indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API;
 
+    // Tag outgoing requests with hook context so x-algolia-agent carries the indexingAPI
+    // value instead of leaking whatever __jobInfo a prior consumer left on the module.
+    algoliaIndexingAPI.setJobInfo({
+        jobID: 'realtime-inventory-hook',
+        stepID: 'inventoryUpdate',
+        indexingAPI: indexingAPI,
+    });
+
     let ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
     let RECORD_MODEL = algoliaData.getPreference('RecordModel');
     let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
@@ -134,15 +143,30 @@ exports.inventoryUpdate = function (order) {
         }
 
         if (algoliaOperations.length > 0) {
+            // The real-time inventory hook fires synchronously from order.afterPOST; we do not
+            // retry failed records. Surface transport-level failures in the error log so they
+            // are visible in Log Center rather than silently dropped.
             switch (indexingAPI) {
                 case INDEXING_APIS.INGESTION_API: {
                     let sortedRecords = requestHelper.groupRecordsForIngestionAPI(algoliaOperations);
-                    requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+                    let ingestionResult = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+                    if (ingestionResult && ingestionResult.failedRecords > 0) {
+                        Logger.warn('Algolia real-time inventory update dropped ' + ingestionResult.failedRecords
+                            + '/' + algoliaOperations.length + ' record(s) for order ' + order.orderNo
+                            + ' (Ingestion API). Product search results may show stale stock until the next reindex.');
+                    }
                     break;
                 }
                 case INDEXING_APIS.SEARCH_API:
                 default: {
-                    requestHelper.sendRetryableBatch(algoliaOperations);
+                    let searchResult = requestHelper.sendRetryableBatch(algoliaOperations);
+                    let searchOk = searchResult && searchResult.result && searchResult.result.ok;
+                    if (!searchOk || (searchResult && searchResult.failedRecords > 0)) {
+                        var failedCount = (searchResult && searchResult.failedRecords) || algoliaOperations.length;
+                        Logger.warn('Algolia real-time inventory update dropped ' + failedCount
+                            + '/' + algoliaOperations.length + ' record(s) for order ' + order.orderNo
+                            + ' (Search API). Product search results may show stale stock until the next reindex.');
+                    }
                     break;
                 }
             }

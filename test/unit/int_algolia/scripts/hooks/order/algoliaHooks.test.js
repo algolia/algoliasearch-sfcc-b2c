@@ -1,12 +1,17 @@
 'use strict';
 
-const mockSendRetryableBatch = jest.fn().mockReturnValue({ ok: true });
+const mockSendRetryableBatch = jest.fn().mockReturnValue({ result: { ok: true }, failedRecords: 0 });
 const mockGroupRecordsForIngestionAPI = jest.fn().mockReturnValue({});
-const mockSendGroupedIngestionAPIRecords = jest.fn();
+const mockSendGroupedIngestionAPIRecords = jest.fn().mockReturnValue({ result: { ok: true }, failedRecords: 0, sentRecords: 0 });
 jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => ({
     sendRetryableBatch: mockSendRetryableBatch,
     groupRecordsForIngestionAPI: mockGroupRecordsForIngestionAPI,
     sendGroupedIngestionAPIRecords: mockSendGroupedIngestionAPIRecords,
+}), { virtual: true });
+
+const mockSetJobInfo = jest.fn();
+jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => ({
+    setJobInfo: mockSetJobInfo,
 }), { virtual: true });
 
 let mockConfig = {

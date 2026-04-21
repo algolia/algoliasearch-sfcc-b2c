@@ -283,33 +283,11 @@ describe('waitForRunEvent', () => {
         mockRetryableCall
             .mockReturnValue({
                 ok: true,
-                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123' }}
+                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123', status: 'succeeded' }}
             });
         indexingAPI.waitForRunEvent('run-uuid-123', 'evt-abc');
 
         expect(mockRetryableCall).toHaveBeenCalledTimes(1);
-    });
-
-    test('continues polling on non-404 error', () => {
-        mockRetryableCall
-            .mockReturnValueOnce({
-                ok: false,
-                error: 500,
-                getErrorMessage: () => 'Internal Server Error',
-            })
-            .mockReturnValueOnce({
-                ok: false,
-                error: 404,
-                getErrorMessage: () => 'Not found',
-            })
-            .mockReturnValue({
-                ok: true,
-                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123' }}
-            });
-
-        indexingAPI.waitForRunEvent('run-uuid-123', 'evt-abc');
-
-        expect(mockRetryableCall).toHaveBeenCalledTimes(3);
     });
 
     test('throws on timeout when event never becomes available', () => {
@@ -334,13 +312,15 @@ describe('waitForRunEvent', () => {
         Date.now = originalDateNow;
     });
 
-    // a terminal 4xx (e.g. 401/403) is not retryable and must fail fast
-    // rather than keep hot-looping until maxWait elapses.
+    // Any non-404 response from the event endpoint (auth, malformed request, server error)
+    // is terminal -- keeping to poll would loop for the full maxWait (10min) and hide the
+    // real error from the operator.
     test.each([
+        [400, 'Bad Request'],
         [401, 'Unauthorized'],
         [403, 'Forbidden'],
-        [400, 'Bad Request'],
-    ])('fails fast on terminal HTTP %i without retrying', (status, msg) => {
+        [500, 'Internal Server Error'],
+    ])('throws fast on non-404 HTTP %i without retrying', (status, msg) => {
         mockRetryableCall.mockReturnValue({
             ok: false,
             error: status,
@@ -348,8 +328,8 @@ describe('waitForRunEvent', () => {
         });
 
         expect(() => {
-            indexingAPI.waitForRunEvent('run-terminal', 'evt-terminal');
-        }).toThrow(new RegExp('terminal status ' + status));
+            indexingAPI.waitForRunEvent('run-err', 'evt-err');
+        }).toThrow(/waitForRunEvent failed/);
 
         expect(mockRetryableCall).toHaveBeenCalledTimes(1);
     });

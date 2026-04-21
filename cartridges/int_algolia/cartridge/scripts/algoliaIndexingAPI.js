@@ -209,6 +209,13 @@ function moveIndex(indexNameSrc, indexNameDest) {
     return result;
 }
 
+// Polling backoff shared by `waitTask` and `waitForRunEvent`. Mirrors the official Algolia
+// clients' createIterablePromise defaults: step up by 200 ms per attempt, cap at 5 s.
+// Without a sleep between polls, these loops would hot-spin against Algolia for the full
+// maxWait window whenever a task/event is not yet ready.
+const POLLING_DELAY_STEP_MS = 200;
+const POLLING_MAX_DELAY_MS = 5000;
+
 /**
  * Wait for an Algolia task to complete.
  * This method will call the /task endpoint until its status become 'published'
@@ -234,22 +241,20 @@ function waitTask(indexName, taskID) {
 
         if (!result.ok) {
             logger.error(result.getErrorMessage());
-        } else if (result.object.body.status === 'published') {
-            logger.debug('[waitTask][indexName: ' + indexName + '][taskID: ' + taskID + '] Task published ('
-                + nbRequestsSent + ' requests, ' + (Date.now() - start) + 'ms).');
-            return;
+        } else {
+            if (result.object.body.status === 'published') {
+                logger.info('Task ' + taskID + ' published. (' + nbRequestsSent + ' requests sent).');
+                return;
+            }
         }
+
+        jobHelper.sleepMs(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
     }
     logger.error('Max wait time reached... TaskID: ' + taskID + '; index: ' + indexName);
     throw new Error('Max wait time reached. TaskID: ' + taskID + '; index: ' + indexName);
 }
 
 /* --------------------------- Ingestion API methods --------------------------- */
-
-// Ingestion API `waitForRunEvent` polling backoff profile.
-// Mirrors `@algolia/client-common`'s createIterablePromise defaults.
-const WAIT_FOR_EVENT_INITIAL_DELAY_MS = 200;
-const WAIT_FOR_EVENT_MAX_DELAY_MS = 5000;
 
 /**
  * Sends a request to the Ingestion API's `push` endpoint (https://www.algolia.com/doc/rest-api/ingestion/push)
@@ -291,25 +296,9 @@ function pushByIndexName(requestPayload, indexName, indexingMethod) {
 }
 
 /**
- * Returns the HTTP status code of a non-OK `dw.svc.Result` in a way that is
- * compatible with both the production SFCC runtime (where `result.error` is set)
- * and the unit-test mocks (which expose only `getError()`).
- * @param {dw.svc.Result} result the call result
- * @returns {number} the HTTP status code, or 0 when not available
- */
-function getResultStatus(result) {
-    if (result && typeof result.getError === 'function') {
-        var code = result.getError();
-        if (typeof code === 'number') return code;
-    }
-    return (result && typeof result.error === 'number') ? result.error : 0;
-}
-
-/**
  * Wait for an Ingestion API run event to become available.
- * Polls GET /1/runs/{runID}/events/{eventID} with capped exponential backoff.
- * Terminates early on terminal 4xx statuses (401/403/...) to avoid hot-looping
- * on a permanent error.
+ * Polls GET /1/runs/{runID}/events/{eventID} until it returns a non-404 response,
+ * mirroring the approach used by the Algolia clients.
  * @param {string} runID - Ingestion API run ID
  * @param {string} eventID - Ingestion API event ID
  */
@@ -319,7 +308,6 @@ function waitForRunEvent(runID, eventID) {
     var start = Date.now();
     var nbRequestsSent = 0;
     var path = '/1/runs/' + runID + '/events/' + eventID;
-    var delay = WAIT_FOR_EVENT_INITIAL_DELAY_MS;
 
     while (Date.now() < start + maxWait) {
         ++nbRequestsSent;
@@ -334,30 +322,15 @@ function waitForRunEvent(runID, eventID) {
         );
 
         if (result.ok) {
-            logger.debug('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieved ('
-                + nbRequestsSent + ' requests, ' + (Date.now() - start) + 'ms).');
+            logger.debug('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieved. (' + nbRequestsSent + ' requests sent).');
             return;
         }
-
-        var status = getResultStatus(result);
-
-        // 404 = event not yet available, poll again with backoff.
-        // Any other 4xx is terminal (bad auth, malformed request, ...) - fail fast.
-        // 5xx is transient -- retry with backoff.
-        if (status >= 400 && status < 500 && status !== 404) {
-            logger.error('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Terminal HTTP '
-                + status + ': ' + result.getErrorMessage());
-            throw new Error('waitForRunEvent failed with terminal status ' + status
-                + ' for run ' + runID + ', event ' + eventID);
+        if (result.error !== 404) {
+            logger.error('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieval error: ' + result.getErrorMessage());
+            throw new Error('waitForRunEvent failed for run ' + runID + ', event ' + eventID + ': ' + result.getErrorMessage());
         }
 
-        if (status !== 404) {
-            logger.warn('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Retryable error (HTTP '
-                + status + '): ' + result.getErrorMessage());
-        }
-
-        jobHelper.sleepMs(delay);
-        delay = Math.min(delay * 2, WAIT_FOR_EVENT_MAX_DELAY_MS);
+        jobHelper.sleepMs(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
     }
     logger.error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
     throw new Error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
