@@ -209,9 +209,9 @@ function moveIndex(indexNameSrc, indexNameDest) {
     return result;
 }
 
-// Polling backoff shared by `waitTask` and `waitForRunEvent`. Mirrors the official Algolia
-// clients' createIterablePromise defaults: step up by 200 ms per attempt, cap at 5 s.
-// Without a sleep between polls, these loops would hot-spin against Algolia for the full
+// Polling backoff shared by `waitTask` and `waitForRunEvent`. Mirrors the Algolia clients'
+// createIterablePromise defaults: step up by 200 ms per attempt, cap at 5 seconds.
+// Without a sleep between polls, these loops would hot-spin against the API for the full
 // maxWait window whenever a task/event is not yet ready.
 const POLLING_DELAY_STEP_MS = 200;
 const POLLING_MAX_DELAY_MS = 5000;
@@ -264,7 +264,6 @@ function waitTask(indexName, taskID) {
  * @param {String} indexName name of the target index (for Ingestion only), used in the endpoint URL
  * @param {string} [indexingMethod] - the indexing method (e.g. 'fullCatalogReindex'). When set to 'fullCatalogReindex',
  *   the referenceIndexName query parameter is appended so that a task does not need to be created for the .tmp index.
- *   With this indexing method, `indexName` MUST end in `.tmp` - callers are required to append the suffix.
  *   See https://www.algolia.com/doc/rest-api/ingestion/push#parameter-reference-index-name
  * @returns {dw.svc.Result} - result of the call
  */

@@ -64,9 +64,6 @@ function handleSettings() {
             finalIndexPrefix
         );
 
-        // Run all validators up-front so errors are aggregated and shown in a single render pass.
-        // Warnings never block saving.
-
         // validate AdminApiKey
         if (!empty(adminValidation.error)) {
             pdictValues.errors.adminErrorMessage = adminValidation.errorMessage;
@@ -81,7 +78,7 @@ function handleSettings() {
             pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
         }
 
-        // Decide once whether any validator produced an error; warnings never block saving.
+        // decide once whether any validator produced an error -- warnings never block saving
         let hasError = Object.keys(pdictValues.errors).some(function (errorKey) {
             return !empty(pdictValues.errors[errorKey]);
         });

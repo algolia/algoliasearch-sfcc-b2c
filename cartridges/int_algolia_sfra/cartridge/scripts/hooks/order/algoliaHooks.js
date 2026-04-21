@@ -94,16 +94,14 @@ function createProductConfig(product, recordModel, additionalAttributes) {
  * @returns {dw.system.Status} Status
  */
 exports.inventoryUpdate = function (order) {
-    // Gate the hook centrally so the preference also applies to OCAPI order creations,
-    // not just the SFRA `CheckoutServices-PlaceOrder` path.
+    // Gate both preferences at the hook level so they apply uniformly to storefront order placements AND OCAPI order creations.
     if (!algoliaData.getPreference('Enable') || !algoliaData.getPreference('EnableRealTimeInventoryHook')) {
         return new Status(Status.OK);
     }
 
     let indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API;
 
-    // Tag outgoing requests with hook context so x-algolia-agent carries the indexingAPI
-    // value instead of leaking whatever __jobInfo a prior consumer left on the module.
+    // Tag the outgoing requests so Algolia logs can distinguish them from job-driven requests
     algoliaIndexingAPI.setJobInfo({
         jobID: 'realtime-inventory-hook',
         stepID: 'inventoryUpdate',
@@ -143,9 +141,8 @@ exports.inventoryUpdate = function (order) {
         }
 
         if (algoliaOperations.length > 0) {
-            // The real-time inventory hook fires synchronously from order.afterPOST; we do not
-            // retry failed records. Surface transport-level failures in the error log so they
-            // are visible in Log Center rather than silently dropped.
+            // The real-time inventory hook fires synchronously from order.afterPOST, we do not retry failed records.
+            // Transport-level failures are logged so they are visible in Log Center rather than silently dropped.
             switch (indexingAPI) {
                 case INDEXING_APIS.INGESTION_API: {
                     let sortedRecords = requestHelper.groupRecordsForIngestionAPI(algoliaOperations);

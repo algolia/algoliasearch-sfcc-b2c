@@ -148,9 +148,8 @@ function retryableCall(service, requestParams) {
 
         Logger.error('Request error on ' + statefulhost.hostname + ': ' +
             result.getError() + ' - ' + result.getErrorMessage());
+
         // Skip host markdown when the pool has only one host
-        // Marking it down would route every retry to a known-bad host for the full EXPIRATION_DELAY window;
-        // leaving it healthy lets the retry loop keep attempting the only available endpoint.
         if (!isTimeoutError(result) && statefulhosts[indexingAPI].length > 1) {
             Logger.info('Marking host ' + statefulhost.hostname + ' down.');
             statefulhost.markDown();

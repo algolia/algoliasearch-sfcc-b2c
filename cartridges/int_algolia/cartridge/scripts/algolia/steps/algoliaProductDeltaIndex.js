@@ -637,8 +637,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
             if (resultObj) {
                 // Parity with Search API: a chunk counts as "sent" whenever the transport accepted any of it,
-                // and as "failed" when nothing was accepted. `failureThresholdPercentage` (evaluated in
-                // afterStep) owns the pass/fail decision.
+                // and as "failed" when nothing was accepted. `failureThresholdPercentage` (evaluated in afterStep) owns the pass/fail decision.
                 jobReport.recordsSent += resultObj.sentRecords;
                 jobReport.recordsFailed += resultObj.failedRecords;
                 if (resultObj.sentRecords > 0) {

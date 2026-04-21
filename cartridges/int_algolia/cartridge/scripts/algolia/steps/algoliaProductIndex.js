@@ -541,15 +541,13 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
             if (resultObj) {
                 // Parity with Search API: a chunk counts as "sent" whenever the transport accepted any of it,
                 // even if a subset of records failed. If nothing was accepted, count the chunk as failed.
-                // `failureThresholdPercentage` (evaluated in afterStep) owns the decision whether to
-                // proceed with the atomic swap.
+                // `failureThresholdPercentage` (evaluated in afterStep) owns the decision whether to proceed with the atomic swap.
                 jobReport.recordsSent += resultObj.sentRecords;
                 jobReport.recordsFailed += resultObj.failedRecords;
                 if (resultObj.sentRecords > 0) {
                     jobReport.chunksSent++;
 
-                    // Store Ingestion API event IDs for fullCatalogReindex (only populated when at least
-                    // one group was accepted -- empty otherwise, so the forEach is a no-op).
+                    // Store Ingestion API event IDs for fullCatalogReindex (only populated when at least one group was accepted, empty otherwise)
                     if (paramIndexingMethod === 'fullCatalogReindex') {
                         let indexingEvents = resultObj.result.object.body.indexingEvents;
                         Object.keys(indexingEvents).forEach(function (runID) {
