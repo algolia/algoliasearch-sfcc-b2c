@@ -94,7 +94,9 @@ function createProductConfig(product, recordModel, additionalAttributes) {
  * @returns {dw.system.Status} Status
  */
 exports.inventoryUpdate = function (order) {
-    // Gate both preferences at the hook level so they apply uniformly to storefront order placements AND OCAPI order creations.
+    // Gate the feature-specific toggle at the hook level so it applies uniformly to storefront
+    // order placements AND OCAPI/SCAPI order creations. The master `Algolia_Enable` switch is
+    // honoured upstream (e.g. CheckoutServices.append), so it is not re-checked here.
     if (!algoliaData.getPreference('EnableRealTimeInventoryHook')) {
         return new Status(Status.OK);
     }

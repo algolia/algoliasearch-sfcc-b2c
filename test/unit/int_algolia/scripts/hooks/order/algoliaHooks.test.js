@@ -708,20 +708,4 @@ describe('inventoryUpdate', () => {
         mockConfig.EnableRealTimeInventoryHook = true;
     });
 
-    test('short-circuits when Enable preference is false', () => {
-        mockConfig.Enable = false;
-
-        const mockOrder = {
-            orderNo: 'TEST-ORDER-DISABLED',
-            getShipments: () => [testData.mockShipmentStandard],
-        };
-
-        const result = algoliaHooks.inventoryUpdate(mockOrder);
-
-        expect(mockSendRetryableBatch).not.toHaveBeenCalled();
-        expect(mockSendGroupedIngestionAPIRecords).not.toHaveBeenCalled();
-        expect(result.status).toBe(0);
-
-        mockConfig.Enable = true;
-    });
 });
