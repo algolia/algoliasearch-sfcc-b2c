@@ -95,7 +95,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
  */
 exports.inventoryUpdate = function (order) {
     // Gate both preferences at the hook level so they apply uniformly to storefront order placements AND OCAPI order creations.
-    if (!algoliaData.getPreference('Enable') || !algoliaData.getPreference('EnableRealTimeInventoryHook')) {
+    if (!algoliaData.getPreference('EnableRealTimeInventoryHook')) {
         return new Status(Status.OK);
     }
 
