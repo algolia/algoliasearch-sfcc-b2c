@@ -1,12 +1,17 @@
 'use strict';
 
-const mockSendRetryableBatch = jest.fn().mockReturnValue({ ok: true });
+const mockSendRetryableBatch = jest.fn().mockReturnValue({ result: { ok: true }, failedRecords: 0 });
 const mockGroupRecordsForIngestionAPI = jest.fn().mockReturnValue({});
-const mockSendGroupedIngestionAPIRecords = jest.fn();
+const mockSendGroupedIngestionAPIRecords = jest.fn().mockReturnValue({ result: { ok: true }, failedRecords: 0, sentRecords: 0 });
 jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => ({
     sendRetryableBatch: mockSendRetryableBatch,
     groupRecordsForIngestionAPI: mockGroupRecordsForIngestionAPI,
     sendGroupedIngestionAPIRecords: mockSendGroupedIngestionAPIRecords,
+}), { virtual: true });
+
+const mockSetJobInfo = jest.fn();
+jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => ({
+    setJobInfo: mockSetJobInfo,
 }), { virtual: true });
 
 let mockConfig = {
@@ -15,6 +20,8 @@ let mockConfig = {
     RecordModel: 'master-level',
     AdditionalAttributes: ['storeAvailability', 'short_description', 'brand'],
     AttributeSlicedRecordModel_GroupingAttribute: 'color',
+    Enable: true,
+    EnableRealTimeInventoryHook: true,
 };
 
 const algoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
@@ -33,6 +40,10 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
                 return mockConfig.AttributeSlicedRecordModel_GroupingAttribute;
             case 'IndexingAPI':
                 return mockConfig.IndexingAPI || null;
+            case 'Enable':
+                return mockConfig.Enable;
+            case 'EnableRealTimeInventoryHook':
+                return mockConfig.EnableRealTimeInventoryHook;
             default:
                 return null;
         }
@@ -677,4 +688,24 @@ describe('inventoryUpdate', () => {
         expect(mockSendRetryableBatch).toHaveBeenCalled();
         expect(result.status).toBe(0);
     });
+
+    // The hook is also triggered by OCAPI order creation, which bypasses the
+    // SFRA-level EnableRealTimeInventoryHook gate. The hook itself must honour it.
+    test('short-circuits when EnableRealTimeInventoryHook preference is false', () => {
+        mockConfig.EnableRealTimeInventoryHook = false;
+
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-GATE-OFF',
+            getShipments: () => [testData.mockShipmentStandard],
+        };
+
+        const result = algoliaHooks.inventoryUpdate(mockOrder);
+
+        expect(mockSendRetryableBatch).not.toHaveBeenCalled();
+        expect(mockSendGroupedIngestionAPIRecords).not.toHaveBeenCalled();
+        expect(result.status).toBe(0);
+
+        mockConfig.EnableRealTimeInventoryHook = true;
+    });
+
 });

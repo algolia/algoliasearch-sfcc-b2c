@@ -30,10 +30,12 @@ var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on
 const deleteIndexingOperation = 'deleteObject';
 var fullRecordUpdate = false;
 
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-const RECORD_MODEL_TYPES = algoliaConstants.RECORD_MODEL_TYPES;
-const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
-const ANALYTICS_REGIONS = algoliaConstants.ANALYTICS_REGIONS;
+const {
+    RECORD_MODEL_TYPES,
+    INDEXING_APIS,
+    ANALYTICS_REGIONS,
+    ALGOLIA_DELTA_EXPORT_BASE_FOLDER,
+} = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
@@ -86,7 +88,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
     recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
     variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
-    indexingAPI = algoliaData.getPreference('IndexingAPI') || 'search-api'; // "search-api" (default) or "ingestion-api"
+    indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API; // "search-api" (default) or "ingestion-api"
     analyticsRegion = algoliaData.getPreference('AnalyticsRegion'); // "us" or "eu"
 
     // logging cartridge version
@@ -215,6 +217,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         jobID: stepExecution.getJobExecution().getJobID(),
         stepID: stepExecution.getStepID(),
         indexingMethod: paramIndexingMethod,
+        indexingAPI: indexingAPI,
     });
 
     logger.info('failureThresholdPercentage parameter: ' + paramFailureThresholdPercentage);
@@ -224,7 +227,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
 
     // creating working folder (same as the delta export output folder) - if there were no previous changes, the delta export job step won't create it
-    l0_deltaExportDir = new File(algoliaConstants.ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramDeltaExportJobName); // Impex/src/platform/outbox/algolia/productDeltaExport
+    l0_deltaExportDir = new File(ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramDeltaExportJobName); // Impex/src/platform/outbox/algolia/productDeltaExport
 
     // return OK if the folder doesn't exist, this means that the CatalogDeltaExport job step finished OK but didn't have any output (there were no changes)
     if (!l0_deltaExportDir.exists()) {
@@ -633,12 +636,14 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
             }
 
             if (resultObj) {
+                // Parity with Search API: a chunk counts as "sent" whenever the transport accepted any of it,
+                // and as "failed" when nothing was accepted. `failureThresholdPercentage` (evaluated in afterStep) owns the pass/fail decision.
                 jobReport.recordsSent += resultObj.sentRecords;
                 jobReport.recordsFailed += resultObj.failedRecords;
-                if (resultObj.failedRecords > 0) {
-                    jobReport.chunksFailed++;
-                } else {
+                if (resultObj.sentRecords > 0) {
                     jobReport.chunksSent++;
+                } else {
+                    jobReport.chunksFailed++;
                 }
             } else {
                 jobReport.recordsFailed += batch.length;

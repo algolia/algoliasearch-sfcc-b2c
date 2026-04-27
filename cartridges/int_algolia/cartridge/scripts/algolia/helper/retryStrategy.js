@@ -5,10 +5,15 @@ const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 
 const appID = algoliaData.getPreference('ApplicationID');
 
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
+const { INDEXING_APIS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 const EXPIRATION_DELAY = 5 * 60 * 1000;
+
+// The Search API exposes multiple hosts and absorbs transient errors by failing
+// over to the next one, so 1 attempt per host is sufficient. The Ingestion API
+// exposes a single host, so we retry the same host a few times to absorb transients
+// instead of giving up after one error. 3 mirrors the Algolia JS client default retry budget.
+const INGESTION_MAX_ATTEMPTS = 3;
 
 const analyticsRegion = algoliaData.getPreference('AnalyticsRegion');
 
@@ -49,8 +54,8 @@ function initHosts(indexingAPI) {
             ];
             break;
         }
-        default:
-        case INDEXING_APIS.SEARCH_API: {
+        case INDEXING_APIS.SEARCH_API:
+        default: {
             statefulhosts[INDEXING_APIS.SEARCH_API] = [
                 new StatefulHost(appID + '.algolia.net'),
                 new StatefulHost(appID + '-1.algolianet.com'),
@@ -135,27 +140,39 @@ function retryableCall(service, requestParams) {
 
     let result;
     let hosts = getAvailableHosts(indexingAPI);
+    let isIngestion = indexingAPI === INDEXING_APIS.INGESTION_API;
+    let attemptsPerHost = isIngestion ? INGESTION_MAX_ATTEMPTS : 1;
+
     for (let i = 0; i < hosts.length; ++i) {
         let statefulhost = hosts[i];
-        result = service.call({
-            method: requestParams.method,
-            url: 'https://' + statefulhost.hostname + requestParams.path,
-            body: requestParams.body,
-        });
 
-        if (result.ok || !isRetryable(result)) {
-            return result;
+        for (let attempt = 0; attempt < attemptsPerHost; attempt++) {
+            result = service.call({
+                method: requestParams.method,
+                url: 'https://' + statefulhost.hostname + requestParams.path,
+                body: requestParams.body,
+            });
+
+            if (result.ok || !isRetryable(result)) {
+                return result;
+            }
+
+            Logger.error('Request error on ' + statefulhost.hostname +
+                ' (attempt ' + (attempt + 1) + '/' + attemptsPerHost + '): ' +
+                result.getError() + ' - ' + result.getErrorMessage());
         }
 
-        Logger.error('Request error on ' + statefulhost.hostname + ': ' +
-            result.getError() + ' - ' + result.getErrorMessage());
-        if (!isTimeoutError(result)) {
+        // Search API pools mark the host down so the next call to getAvailableHosts skips it.
+        // Ingestion API has a single host: there is no other host to fail over to, and
+        // getAvailableHosts would reset the marked-down host on the next call anyway via
+        // its "all hosts down -> retry them all" branch, so we rely on the in-place retry above.
+        if (!isTimeoutError(result) && !isIngestion) {
             Logger.info('Marking host ' + statefulhost.hostname + ' down.');
             statefulhost.markDown();
         }
     }
 
-    // All hosts have been tried, return the last result
+    // All hosts (and per-host attempts) have been tried, return the last result
     return result;
 }
 

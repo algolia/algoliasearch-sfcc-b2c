@@ -13,6 +13,12 @@ jest.mock('*/cartridge/scripts/algolia/helper/retryStrategy', () => {
 }, {virtual: true});
 
 const indexingAPI = require('../../../../../cartridges/int_algolia/cartridge/scripts/algoliaIndexingAPI');
+const jobHelper = require('../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/jobHelper');
+
+// Replace the backoff spin-wait with a no-op so polling loops in tests complete instantly.
+// `algoliaIndexingAPI` calls `jobHelper.sleepFor(...)` through the module reference,
+// so this spy intercepts every call from production code.
+jest.spyOn(jobHelper, 'sleepFor').mockImplementation(function () {});
 
 beforeEach(() => {
     mockRetryableCall.mockReturnValue({
@@ -184,6 +190,23 @@ describe('pushByIndexName', () => {
             indexingAPI: 'ingestion-api',
         });
     });
+
+    // fullCatalogReindex derives referenceIndexName by stripping the trailing ".tmp".
+    // Passing a production (non-.tmp) index name in this mode would silently truncate it,
+    // so pushByIndexName must fail fast.
+    test('throws when fullCatalogReindex is used with a non-.tmp index name', () => {
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        expect(() => indexingAPI.pushByIndexName(payload, 'products_en', 'fullCatalogReindex'))
+            .toThrow(/must end in|temporary index name ending in/i);
+        expect(mockRetryableCall).not.toHaveBeenCalled();
+    });
+
+    test('throws when fullCatalogReindex is used with the bare .tmp suffix', () => {
+        const payload = { action: 'addObject', records: [{ objectID: '1' }] };
+        expect(() => indexingAPI.pushByIndexName(payload, '.tmp', 'fullCatalogReindex'))
+            .toThrow(/temporary index name ending in/i);
+        expect(mockRetryableCall).not.toHaveBeenCalled();
+    });
 });
 
 describe('pushByIndexName - HTTP request snapshots', () => {
@@ -260,33 +283,11 @@ describe('waitForRunEvent', () => {
         mockRetryableCall
             .mockReturnValue({
                 ok: true,
-                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123' }}
+                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123', status: 'succeeded' }}
             });
         indexingAPI.waitForRunEvent('run-uuid-123', 'evt-abc');
 
         expect(mockRetryableCall).toHaveBeenCalledTimes(1);
-    });
-
-    test('continues polling on non-404 error', () => {
-        mockRetryableCall
-            .mockReturnValueOnce({
-                ok: false,
-                error: 500,
-                getErrorMessage: () => 'Internal Server Error',
-            })
-            .mockReturnValueOnce({
-                ok: false,
-                error: 404,
-                getErrorMessage: () => 'Not found',
-            })
-            .mockReturnValue({
-                ok: true,
-                object: { body: { eventID: 'evt-abc', runID: 'run-uuid-123' }}
-            });
-
-        indexingAPI.waitForRunEvent('run-uuid-123', 'evt-abc');
-
-        expect(mockRetryableCall).toHaveBeenCalledTimes(3);
     });
 
     test('throws on timeout when event never becomes available', () => {
@@ -309,6 +310,28 @@ describe('waitForRunEvent', () => {
         }).toThrow('Max wait time reached. Run: run-timeout; event: evt-timeout');
 
         Date.now = originalDateNow;
+    });
+
+    // Any non-404 response from the event endpoint (auth, malformed request, server error)
+    // is terminal -- keeping to poll would loop for the full maxWait (10min) and hide the
+    // real error from the operator.
+    test.each([
+        [400, 'Bad Request'],
+        [401, 'Unauthorized'],
+        [403, 'Forbidden'],
+        [500, 'Internal Server Error'],
+    ])('throws fast on non-404 HTTP %i without retrying', (status, msg) => {
+        mockRetryableCall.mockReturnValue({
+            ok: false,
+            error: status,
+            getErrorMessage: () => msg,
+        });
+
+        expect(() => {
+            indexingAPI.waitForRunEvent('run-err', 'evt-err');
+        }).toThrow(/waitForRunEvent failed/);
+
+        expect(mockRetryableCall).toHaveBeenCalledTimes(1);
     });
 });
 

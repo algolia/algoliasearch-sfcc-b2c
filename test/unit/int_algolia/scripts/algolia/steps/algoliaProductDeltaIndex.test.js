@@ -114,7 +114,8 @@ describe('process', () => {
         expect(mockSetJobInfo).toHaveBeenCalledWith({
             jobID: 'TestJobID',
             stepID: 'TestStepID',
-            indexingMethod: 'fullRecordUpdate'
+            indexingMethod: 'fullRecordUpdate',
+            indexingAPI: 'search-api'
         });
         var algoliaOperations = job.process({productID: '701644031206M', available: true});
         expect(algoliaOperations).toMatchSnapshot();
@@ -126,7 +127,8 @@ describe('process', () => {
         expect(mockSetJobInfo).toHaveBeenCalledWith({
             jobID: 'TestJobID',
             stepID: 'TestStepID',
-            indexingMethod: 'fullRecordUpdate'
+            indexingMethod: 'fullRecordUpdate',
+            indexingAPI: 'search-api'
         });
         var algoliaOperations = job.process({productID: '25592581M', available: true});
         expect(algoliaOperations).toMatchSnapshot();
@@ -140,7 +142,8 @@ describe('process', () => {
         expect(mockSetJobInfo).toHaveBeenCalledWith({
             jobID: 'TestJobID',
             stepID: 'TestStepID',
-            indexingMethod: 'fullRecordUpdate'
+            indexingMethod: 'fullRecordUpdate',
+            indexingAPI: 'search-api'
         });
         var algoliaOperations = job.process({productID: '25592581M', available: true});
         expect(algoliaOperations).toMatchSnapshot();
@@ -153,7 +156,8 @@ describe('process', () => {
         expect(mockSetJobInfo).toHaveBeenCalledWith({
             jobID: 'TestJobID',
             stepID: 'TestStepID',
-            indexingMethod: 'fullRecordUpdate'
+            indexingMethod: 'fullRecordUpdate',
+            indexingAPI: 'search-api'
         });
         var algoliaOperations = job.process({productID: '25592581M', available: true});
         expect(algoliaOperations).toMatchSnapshot();
@@ -206,7 +210,9 @@ describe('send', () => {
         expect(job.__getJobReport().chunksSent).toBeGreaterThan(0);
     });
 
-    test('Ingestion API - failure updates jobReport', () => {
+    // Parity with the Search API: chunksSent++ whenever the transport accepted any records;
+    // failureThresholdPercentage in afterStep owns the overall pass/fail decision.
+    test('Ingestion API - partial failure counts the chunk as sent, not failed', () => {
         job.beforeStep(parameters, stepExecution);
         job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
 
@@ -222,7 +228,8 @@ describe('send', () => {
 
         expect(job.__getJobReport().recordsFailed).toBe(2);
         expect(job.__getJobReport().recordsSent).toBe(2);
-        expect(job.__getJobReport().chunksFailed).toBe(1);
+        expect(job.__getJobReport().chunksSent).toBe(1);
+        expect(job.__getJobReport().chunksFailed).toBe(0);
     });
 
     test('Ingestion API - does not pass indexingMethod (no fullCatalogReindex in delta)', () => {

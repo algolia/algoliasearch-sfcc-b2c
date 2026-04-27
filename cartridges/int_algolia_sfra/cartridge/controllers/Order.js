@@ -9,8 +9,7 @@ var OrderMgr = require('dw/order/OrderMgr');
 
 server.extend(base);
 
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-const RECORD_MODEL_TYPES = algoliaConstants.RECORD_MODEL_TYPES;
+const { RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 server.append('Confirm', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableInsights')) {

@@ -1,7 +1,6 @@
 'use strict';
 
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-const RECORD_MODEL_TYPES = algoliaConstants.RECORD_MODEL_TYPES;
+const { RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Get the product type

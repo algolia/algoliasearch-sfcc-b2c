@@ -46,7 +46,8 @@ function getService(jobInfo) {
         '; CM: ' + System.getCompatibilityMode() +
         '; JobID: ' + (jobInfo ? jobInfo.jobID : 'unknown') +
         '; StepID: ' + (jobInfo ? jobInfo.stepID : 'unknown') +
-        (jobInfo && jobInfo.indexingMethod ? '; IndexingMethod: ' + jobInfo.indexingMethod : '')
+        (jobInfo && jobInfo.indexingMethod ? '; IndexingMethod: ' + jobInfo.indexingMethod : '') +
+        (jobInfo && jobInfo.indexingAPI ? '; IndexingAPI: ' + jobInfo.indexingAPI : '')
     );
 
     return indexingService;

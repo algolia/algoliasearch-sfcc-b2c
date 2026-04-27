@@ -1,10 +1,10 @@
-const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+const logger = jobHelper.getAlgoliaLogger();
+const toTmp = jobHelper.toTmp;
 
 const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-
-const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
+const { INDEXING_APIS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Delete the temporary indices corresponding to the given type and locales
@@ -15,7 +15,7 @@ const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
 function deleteTemporaryIndices(indexType, locales) {
     var deletionTasks = {};
     locales.forEach(function(locale) {
-        var tmpIndexName = algoliaData.calculateIndexName(indexType, locale) + '.tmp';
+        var tmpIndexName = toTmp(algoliaData.calculateIndexName(indexType, locale));
         var res = algoliaIndexingAPI.deleteIndex(tmpIndexName);
         if (res.ok) {
             logger.info(tmpIndexName + ' deleted. ' + JSON.stringify(res.object.body));
@@ -37,7 +37,7 @@ function copySettingsFromProdIndices(indexType, locales) {
     var copySettingsTasks = {};
     locales.forEach(function(locale) {
         var indexName = algoliaData.calculateIndexName(indexType, locale);
-        var tmpIndexName = indexName + '.tmp';
+        var tmpIndexName = toTmp(indexName);
         var getSettingsRes = algoliaIndexingAPI.getIndexSettings(indexName);
         if (getSettingsRes.ok) {
             var copySettingsRes = algoliaIndexingAPI.copyIndexSettings(indexName, tmpIndexName);
@@ -62,7 +62,7 @@ function copySettingsFromProdIndices(indexType, locales) {
 function moveTemporaryIndices(indexType, locales) {
     locales.forEach(function(locale) {
         var indexName = algoliaData.calculateIndexName(indexType, locale);
-        var tmpIndexName = indexName + '.tmp';
+        var tmpIndexName = toTmp(indexName);
         var res = algoliaIndexingAPI.moveIndex(tmpIndexName, indexName);
         if (res.ok) {
             logger.info('Index ' + tmpIndexName + ' moved to ' + indexName + '. ' + JSON.stringify(res.object.body));
@@ -117,14 +117,14 @@ function finishAtomicReindex(indexType, locales, indexingTasksToWaitFor, indexin
     logger.info('[finishAtomicReindex] Index settings copied.');
 
     switch (indexingAPI) {
-        default:
-        case INDEXING_APIS.SEARCH_API:
-            logger.info('[finishAtomicReindex][SearchAPI] Waiting for indexing tasks to finish...');
-            waitForTasks(indexingTasksToWaitFor);
-            break;
         case INDEXING_APIS.INGESTION_API:
             logger.info('[finishAtomicReindex][IngestionAPI] Waiting for indexing events to finish...');
             waitForEvents(indexingTasksToWaitFor);
+            break;
+        case INDEXING_APIS.SEARCH_API:
+        default:
+            logger.info('[finishAtomicReindex][SearchAPI] Waiting for indexing tasks to finish...');
+            waitForTasks(indexingTasksToWaitFor);
             break;
     }
 

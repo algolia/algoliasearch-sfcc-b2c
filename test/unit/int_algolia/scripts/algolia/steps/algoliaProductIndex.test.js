@@ -131,7 +131,7 @@ describe('beforeStep', () => {
 describe('process', () => {
     test('default', () => {
         job.beforeStep({}, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate', indexingAPI: 'search-api' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -141,7 +141,7 @@ describe('process', () => {
     });
     test('partialRecordUpdate', () => {
         job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate', indexingAPI: 'search-api' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -151,7 +151,7 @@ describe('process', () => {
     });
     test('fullRecordUpdate', () => {
         job.beforeStep({ indexingMethod: 'fullRecordUpdate' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullRecordUpdate' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullRecordUpdate', indexingAPI: 'search-api' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -161,7 +161,7 @@ describe('process', () => {
     });
     test('fullCatalogReindex', () => {
         job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullCatalogReindex' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullCatalogReindex', indexingAPI: 'search-api' });
         expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith(
             'products',
             expect.arrayContaining(['default', 'fr', 'en'])
@@ -427,7 +427,9 @@ describe('send', () => {
         expect(job.__getJobReport().recordsSent).toBe(2);
     });
 
-    test('Ingestion API - failure updates jobReport', () => {
+    // Parity with the Search API: chunksSent++ whenever the transport accepted any records;
+    // the overall pass/fail decision is driven by failureThresholdPercentage in afterStep.
+    test('Ingestion API - partial failure counts the chunk as sent, not failed', () => {
         job.beforeStep({}, stepExecution);
         job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
 
@@ -454,7 +456,8 @@ describe('send', () => {
 
         expect(job.__getJobReport().recordsFailed).toBe(3);
         expect(job.__getJobReport().recordsSent).toBe(2);
-        expect(job.__getJobReport().chunksFailed).toBe(1);
+        expect(job.__getJobReport().chunksSent).toBe(1);
+        expect(job.__getJobReport().chunksFailed).toBe(0);
     });
 
     test('Ingestion API - exception in send is caught', () => {

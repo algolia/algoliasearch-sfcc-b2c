@@ -186,9 +186,54 @@ describe('Ingestion API hosts', () => {
             indexingAPI: 'ingestion-api',
         });
 
-        // Only 1 host for Ingestion, so only 1 attempt
+        // Ingestion API: in-place retry up to INGESTION_MAX_ATTEMPTS (3) times
+        // before giving up, so we get 3 attempts on the same host.
+        expect(callMock).toHaveBeenCalledTimes(3);
+        expect(result.ok).toBe(false);
+    });
+
+    test('retryableCall returns first non-retryable Ingestion result without further attempts', () => {
+        const clientErrorResult = {
+            ok: false,
+            getUnavailableReason: jest.fn(),
+            getError: jest.fn().mockReturnValue(404),
+            getErrorMessage: jest.fn().mockReturnValue('Not Found'),
+        };
+
+        const callMock = jest.fn().mockReturnValue(clientErrorResult);
+        const service = { call: callMock };
+
+        const result = retryStrategy.retryableCall(service, {
+            path: '/1/runs/run-x/events/evt-y',
+            indexingAPI: 'ingestion-api',
+        });
+
+        // 4xx is not retryable, so we must short-circuit on the first attempt
+        // (this is what waitForRunEvent relies on to treat 404 as "not ready yet").
         expect(callMock).toHaveBeenCalledTimes(1);
         expect(result.ok).toBe(false);
+    });
+
+    test('retryableCall succeeds on second in-place attempt for Ingestion', () => {
+        const serverErrorResult = {
+            ok: false,
+            getUnavailableReason: jest.fn(),
+            getError: jest.fn().mockReturnValue(502),
+            getErrorMessage: jest.fn().mockReturnValue('Bad Gateway'),
+        };
+
+        const callMock = jest.fn()
+            .mockReturnValueOnce(serverErrorResult)
+            .mockReturnValueOnce({ ok: true });
+        const service = { call: callMock };
+
+        const result = retryStrategy.retryableCall(service, {
+            path: '/1/push/my_index',
+            indexingAPI: 'ingestion-api',
+        });
+
+        expect(callMock).toHaveBeenCalledTimes(2);
+        expect(result.ok).toBe(true);
     });
 
     test('undefined indexingAPI defaults to Search API hosts', () => {

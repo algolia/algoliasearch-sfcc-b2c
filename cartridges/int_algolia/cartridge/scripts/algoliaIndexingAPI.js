@@ -6,12 +6,12 @@
 const waitTaskTimeout = require('*/algoliaconfig').waitTaskTimeout;
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
 const retryableCall = require('*/cartridge/scripts/algolia/helper/retryStrategy').retryableCall;
-const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+const logger = jobHelper.getAlgoliaLogger();
 
 var __jobInfo = {};
 
-const algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-const INDEXING_APIS = algoliaConstants.INDEXING_APIS;
+const { INDEXING_APIS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Set information about the job using the API Client
@@ -209,6 +209,13 @@ function moveIndex(indexNameSrc, indexNameDest) {
     return result;
 }
 
+// Polling backoff shared by `waitTask` and `waitForRunEvent`. Mirrors the Algolia clients'
+// createIterablePromise defaults: step up by 200 ms per attempt, cap at 5 seconds.
+// Without a sleep between polls, these loops would hot-spin against the API for the full
+// maxWait window whenever a task/event is not yet ready.
+const POLLING_DELAY_STEP_MS = 200;
+const POLLING_MAX_DELAY_MS = 5000;
+
 /**
  * Wait for an Algolia task to complete.
  * This method will call the /task endpoint until its status become 'published'
@@ -240,6 +247,8 @@ function waitTask(indexName, taskID) {
                 return;
             }
         }
+
+        jobHelper.sleepFor(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
     }
     logger.error('Max wait time reached... TaskID: ' + taskID + '; index: ' + indexName);
     throw new Error('Max wait time reached. TaskID: ' + taskID + '; index: ' + indexName);
@@ -263,8 +272,10 @@ function pushByIndexName(requestPayload, indexName, indexingMethod) {
     let referenceIndexNameParam = '';
 
     if (indexingMethod === 'fullCatalogReindex') {
-        let referenceIndexName = indexName.slice(0, -4);
-        referenceIndexNameParam = '?referenceIndexName=' + referenceIndexName;
+        // `referenceIndexName` is the primary (non-`.tmp`) counterpart of `indexName`.
+        // `jobHelper.fromTmp` throws if `indexName` is not a valid `.tmp` name -- this prevents
+        // silently producing a truncated production index name in the query string.
+        referenceIndexNameParam = '?referenceIndexName=' + jobHelper.fromTmp(indexName);
     }
 
     let retryableCallParameters = {
@@ -286,7 +297,7 @@ function pushByIndexName(requestPayload, indexName, indexingMethod) {
 /**
  * Wait for an Ingestion API run event to become available.
  * Polls GET /1/runs/{runID}/events/{eventID} until it returns a non-404 response,
- * mirroring the approach used by the official Algolia JS API client.
+ * mirroring the approach used by the Algolia clients.
  * @param {string} runID - Ingestion API run ID
  * @param {string} eventID - Ingestion API event ID
  */
@@ -309,16 +320,16 @@ function waitForRunEvent(runID, eventID) {
             }
         );
 
-        if (!result.ok) {
-            if (result.error === 404) {
-                // Event not yet available, continue polling
-            } else {
-                logger.error('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '], Event retrieval error: ' + result.getErrorMessage());
-            }
-        } else {
+        if (result.ok) {
             logger.debug('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieved. (' + nbRequestsSent + ' requests sent).');
             return;
         }
+        if (result.error !== 404) {
+            logger.error('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieval error: ' + result.getErrorMessage());
+            throw new Error('waitForRunEvent failed for run ' + runID + ', event ' + eventID + ': ' + result.getErrorMessage());
+        }
+
+        jobHelper.sleepFor(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
     }
     logger.error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
     throw new Error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
