@@ -34,7 +34,7 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
         expect(result.errorMessage).toContain('MSG:algolia.error.key.validation');
     });
 
-    it('should require admin ACLs when some required permissions are missing', () => {
+    it('should require admin ACL entries when some required permissions are missing', () => {
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
@@ -56,12 +56,12 @@ describe('algoliaServiceHelper.validateAPIKey', () => {
         expect(result.errorMessage).toMatch(/MSGF:algolia.error.missing.permissions/);
     });
 
-    it('should allow extra ACLs and return a warning', () => {
+    it('should allow extra ACL entries and return a warning', () => {
         mockService.call.mockReturnValueOnce({
             ok: true,
             object: {
                 body: {
-                    // All required ACLs plus an extra one.
+                    // All required ACL entries plus an extra one.
                     acl: ['addObject', 'deleteObject', 'deleteIndex', 'settings', 'extraACL'],
                     indexes: []
                 }
