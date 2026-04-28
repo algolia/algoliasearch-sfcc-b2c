@@ -61,7 +61,8 @@ function handleSettings() {
             serviceAdmin,
             applicationID,
             adminApikey,
-            finalIndexPrefix
+            finalIndexPrefix,
+            indexingAPI
         );
 
         // validate AdminApiKey
