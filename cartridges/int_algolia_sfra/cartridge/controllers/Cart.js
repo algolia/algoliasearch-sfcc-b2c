@@ -9,11 +9,7 @@ var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 
 server.extend(base);
 
-const RECORD_MODEL_TYPE = {
-    MASTER_LEVEL: 'master-level',
-    VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED: 'attribute-sliced',
-}
+const { RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 server.append('Show', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableRecommend')) {
@@ -52,13 +48,13 @@ server.append('AddProduct', function (req, res, next) {
             }
 
             switch (recordModel) {
-                case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
+                case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
                     algoliaProductData.pid = modelHelper.getAttributeSlicedModelRecordID(product);
                     break;
-                case RECORD_MODEL_TYPE.MASTER_LEVEL:
+                case RECORD_MODEL_TYPES.MASTER_LEVEL:
                     algoliaProductData.pid = product.isVariant() ? product.getMasterProduct().getID() : product.getID(); // returns master ID for variants, product ID for simple products
                     break;
-                case RECORD_MODEL_TYPE.VARIANT_LEVEL:
+                case RECORD_MODEL_TYPES.VARIANT_LEVEL:
                     algoliaProductData.pid = productID;
                     break;
             }

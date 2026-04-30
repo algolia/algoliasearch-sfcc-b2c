@@ -1,7 +1,10 @@
-const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+const logger = jobHelper.getAlgoliaLogger();
+const toTmp = jobHelper.toTmp;
 
-var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
+const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
+const algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
+const { INDEXING_APIS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Delete the temporary indices corresponding to the given type and locales
@@ -12,7 +15,7 @@ var algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
 function deleteTemporaryIndices(indexType, locales) {
     var deletionTasks = {};
     locales.forEach(function(locale) {
-        var tmpIndexName = algoliaData.calculateIndexName(indexType, locale) + '.tmp';
+        var tmpIndexName = toTmp(algoliaData.calculateIndexName(indexType, locale));
         var res = algoliaIndexingAPI.deleteIndex(tmpIndexName);
         if (res.ok) {
             logger.info(tmpIndexName + ' deleted. ' + JSON.stringify(res.object.body));
@@ -34,7 +37,7 @@ function copySettingsFromProdIndices(indexType, locales) {
     var copySettingsTasks = {};
     locales.forEach(function(locale) {
         var indexName = algoliaData.calculateIndexName(indexType, locale);
-        var tmpIndexName = indexName + '.tmp';
+        var tmpIndexName = toTmp(indexName);
         var getSettingsRes = algoliaIndexingAPI.getIndexSettings(indexName);
         if (getSettingsRes.ok) {
             var copySettingsRes = algoliaIndexingAPI.copyIndexSettings(indexName, tmpIndexName);
@@ -59,7 +62,7 @@ function copySettingsFromProdIndices(indexType, locales) {
 function moveTemporaryIndices(indexType, locales) {
     locales.forEach(function(locale) {
         var indexName = algoliaData.calculateIndexName(indexType, locale);
-        var tmpIndexName = indexName + '.tmp';
+        var tmpIndexName = toTmp(indexName);
         var res = algoliaIndexingAPI.moveIndex(tmpIndexName, indexName);
         if (res.ok) {
             logger.info('Index ' + tmpIndexName + ' moved to ' + indexName + '. ' + JSON.stringify(res.object.body));
@@ -77,8 +80,23 @@ function moveTemporaryIndices(indexType, locales) {
  */
 function waitForTasks(taskIDs) {
     Object.keys(taskIDs).forEach(function (indexName) {
-        logger.info('Waiting for task ' + taskIDs[indexName] + ' on index ' + indexName);
+        logger.debug('[waitForTasks][SearchAPI][indexName: ' + indexName + '][taskID: ' + taskIDs[indexName] + '] Waiting for task...');
         algoliaIndexingAPI.waitTask(indexName, taskIDs[indexName]);
+    });
+}
+
+/**
+ * Wait for multiple Ingestion API events to become available.
+ * Polls each event via /1/runs/{runID}/events/{eventID} until it returns a non-404 response.
+ * Ingestion events have no sequential processing guarantee, so all must be tracked and waited on.
+ * @param {Object} indexingEvents - { "<runID>": [<eventID>, ...] }
+ */
+function waitForEvents(indexingEvents) {
+    Object.keys(indexingEvents).forEach(function (runID) {
+        indexingEvents[runID].forEach(function (eventID) {
+            logger.debug('[waitForEvents][IngestionAPI][runID: ' + runID + '][eventID: ' + eventID + '] Waiting for event...');
+            algoliaIndexingAPI.waitForRunEvent(runID, eventID);
+        });
     });
 }
 
@@ -89,86 +107,40 @@ function waitForTasks(taskIDs) {
  *   - Move the temporary indices to production
  * @param {string} indexType - 'products' or 'categories'
  * @param {string[]} locales - locales for which the reindex was triggered
- * @param {Object} lastIndexingTasks - Task IDs of the last reindex tasks to wait for, for each locale. Under the form: { "<indexName1>": <taskID>, "<indexName2>": <taskID> }
+ * @param {Object} indexingTasksToWaitFor - Search API: { indexName: taskID }; Ingestion API: { runID: [eventID, ...] }
+ * @param {string} [indexingAPI] - 'search-api' (default) or 'ingestion-api'
  */
-function finishAtomicReindex(indexType, locales, lastIndexingTasks) {
-    logger.info('[FinishReindex] copying index settings from production...');
-    var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
+function finishAtomicReindex(indexType, locales, indexingTasksToWaitFor, indexingAPI) {
 
-    logger.info('[FinishReindex] Waiting for the last indexing tasks to complete... ' + JSON.stringify(lastIndexingTasks));
-    waitForTasks(lastIndexingTasks);
-    logger.info('[FinishReindex] Waiting for the last copy settings tasks to complete... ' + JSON.stringify(copySettingsTasks));
+    logger.info('[finishAtomicReindex] Copying index settings from production...');
+    var copySettingsTasks = copySettingsFromProdIndices(indexType, locales);
+    logger.info('[finishAtomicReindex] Index settings copied.');
+
+    switch (indexingAPI) {
+        case INDEXING_APIS.INGESTION_API:
+            logger.info('[finishAtomicReindex][IngestionAPI] Waiting for indexing events to finish...');
+            waitForEvents(indexingTasksToWaitFor);
+            break;
+        case INDEXING_APIS.SEARCH_API:
+        default:
+            logger.info('[finishAtomicReindex][SearchAPI] Waiting for indexing tasks to finish...');
+            waitForTasks(indexingTasksToWaitFor);
+            break;
+    }
+
+    logger.info('[finishAtomicReindex] Indexing tasks finished. Waiting for copy settings tasks to finish...');
     waitForTasks(copySettingsTasks);
 
-    logger.info('[FinishReindex] Moving temporary indices to production...');
+    logger.info('[finishAtomicReindex] Settings copied. Moving temporary indices to production...');
     moveTemporaryIndices(indexType, locales);
-}
 
-/**
- * Sends an Algolia batch to the multi-indices batch endpoint.
- * If records fail to be indexed (because e.g. they are too big), they are removed from the batch and the batch is retried.
- * @param {Object} batch - Algolia multi-indices batch
- * @return {{failedRecords: number}} returns an object with the last call result and the number of failed records.
- */
-function sendRetryableBatch(batch) {
-    var MAX_ATTEMPTS = 50;
-    var attempt = 0;
-    var failedRecords = 0;
-    var result = algoliaIndexingAPI.sendMultiIndexBatch(batch);
-    while (result.error && attempt < MAX_ATTEMPTS) {
-        ++attempt;
-        try {
-            var apiResponse = JSON.parse(result.getErrorMessage());
-            // When records are failing, Algolia returns the following (those are examples for records too big):
-            // - For Classic: {"message":"Record at the position 6 objectID=008884303996M is too big size=11072/10000 bytes. Please have a look at [...]", "position":6,"objectID":"008884303996M","status":400}
-            // - For Current: {"message":"Record 008884303996M is too big: size: 11072 byte(s), maximum allowed: 100000 byte(s). Please have a look at [...]","status":400}
-            if (!apiResponse.objectID && (!apiResponse.message || !apiResponse.message.indexOf('is too big') > 0)) {
-                // No identified objectID, and not an "is too big" error. Nothing else to do
-                break;
-            }
-            var objectIdToRemove;
-            if (apiResponse.objectID) {
-                objectIdToRemove = apiResponse.objectID
-            } else {
-                var match = apiResponse.message.match(/^Record (.*) is too big/);
-                if (match) {
-                    objectIdToRemove = match[1];
-                }
-            }
-            logger.info('[Retryable batch] Removing records for product "' + objectIdToRemove + '"');
-            var removedRecords = 0;
-            for (var i = batch.length - 1; i >= 0; --i) {
-                if (batch[i].body.objectID === objectIdToRemove) {
-                    batch.splice(i, 1);
-                    failedRecords++;
-                    removedRecords++;
-                }
-            }
-            if (removedRecords === 0) {
-                logger.warn('[Retryable batch] could not remove any record. Not retrying the batch.');
-                break;
-            }
-            logger.info('[Retryable batch] Removed ' + removedRecords + ' records. Retrying batch...');
-            result = algoliaIndexingAPI.sendMultiIndexBatch(batch);
-        } catch(e) {
-            // Error message is not JSON, ignoring
-            logger.error('[Retryable batch] Error while parsing response: ' + e.message);
-            break;
-        }
-    }
-    if (attempt === MAX_ATTEMPTS) {
-        logger.error('[Retryable batch] Too many products are in error, aborting the batch...');
-    }
-    return {
-        result: result,
-        failedRecords: failedRecords,
-    }
+    logger.info('[finishAtomicReindex] Temporary indices moved to production.');
 }
 
 module.exports.deleteTemporaryIndices = deleteTemporaryIndices;
 module.exports.finishAtomicReindex = finishAtomicReindex;
 module.exports.waitForTasks = waitForTasks;
-module.exports.sendRetryableBatch = sendRetryableBatch;
+module.exports.waitForEvents = waitForEvents;
 
 // For unit testing
 module.exports.copySettingsFromProdIndices = copySettingsFromProdIndices;

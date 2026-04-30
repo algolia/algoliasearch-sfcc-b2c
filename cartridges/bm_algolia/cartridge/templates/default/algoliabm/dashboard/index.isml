@@ -31,7 +31,7 @@
     </table>
 
     <div>
-        <form action="${pdict.setttingsUpdateUrl}" class="form-horizontal" method="post">
+        <form action="${pdict.setttingsUpdateUrl}" class="form-horizontal" autocomplete="off" method="post">
         <input type="hidden" name="csrf_token" />
         <table border="0" cellpadding="0" cellspacing="0" width="100%" id="algolia-bm-settings">
             <tbody>
@@ -77,14 +77,14 @@
                         <div class="tooltip">
                             <isprint value="${Resource.msg('algolia.label.preference.adminkey.help', 'algolia', null)}" />
                         </div>
-                        <isif condition="${pdict.adminWarningMessage}">
+                        <isif condition="${pdict.warnings.adminWarningMessage}">
                             <div class="warning-message yellow narrow">
-                                ${pdict.adminWarningMessage}
+                                ${pdict.warnings.adminWarningMessage}
                             </div>
                         </isif>
-                        <isif condition="${pdict.adminErrorMessage}">
+                        <isif condition="${pdict.errors.adminErrorMessage}">
                             <div class="error-message red narrow">
-                                ${pdict.adminErrorMessage}
+                                ${pdict.errors.adminErrorMessage}
                             </div>
                         </isif>
                     </td>
@@ -184,6 +184,7 @@
                 </tr>
 
                 <iscomment> Algolia_AttributeSlicedRecordModel_GroupingAttribute </iscomment>
+                <isset name="attributeSlicedGroupingAttribute" value="${pdict.algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute')}" scope="page"/>
                 <tr>
                     <td class="table_detail w s" colspan="1">
                         <isprint value="${Resource.msg('algolia.label.preference.attributesliced.groupingattribute', 'algolia', null)}" />
@@ -192,7 +193,47 @@
                     </td>
 
                     <td class="table_detail w e s">
-                        <input type="text" value="${pdict.algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute') ? pdict.algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute') : ''}" id="AttributeSlicedRecordModel_GroupingAttribute" name="AttributeSlicedRecordModel_GroupingAttribute" placeholder="${Resource.msg('algolia.label.util.optional.onlyusedwithattributeslicedrecordmodel', 'algolia', null)}"/>
+                        <input type="text" value="${!empty(attributeSlicedGroupingAttribute) ? attributeSlicedGroupingAttribute : ''}" id="AttributeSlicedRecordModel_GroupingAttribute" name="AttributeSlicedRecordModel_GroupingAttribute" placeholder="${Resource.msg('algolia.label.util.optional.onlyusedwithattributeslicedrecordmodel', 'algolia', null)}"/>
+                    </td>
+                </tr>
+
+                <iscomment> Algolia_IndexingAPI </iscomment>
+                <isset name="indexingAPI" value="${pdict.algoliaData.getPreference('IndexingAPI')}" scope="page"/>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.indexingapi', 'algolia', null)}" encoding="jshtml" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.indexingapi.help', 'algolia', null)}</div>
+                    </td>
+                    <td class="table_detail w e s">
+                        <select name="IndexingAPI" id="IndexingAPI">
+                            <option value="search-api"
+                                <isif condition="${indexingAPI === 'search-api' || empty(indexingAPI)}"> selected="selected"</isif>>
+                                <isprint value="${Resource.msg('algolia.preference.indexingapi.searchapi', 'algolia', null)}"/>
+                            </option>
+                            <option value="ingestion-api"
+                                <isif condition="${indexingAPI === 'ingestion-api'}"> selected="selected"</isif>>
+                                <isprint value="${Resource.msg('algolia.preference.indexingapi.ingestionapi', 'algolia', null)}"/>
+                            </option>
+                        </select>
+                    </td>
+                </tr>
+
+                <iscomment> Algolia_AnalyticsRegion </iscomment>
+                <isset name="analyticsRegion" value="${pdict.algoliaData.getPreference('AnalyticsRegion')}" scope="page"/>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.analyticsregion', 'algolia', null)}"/>
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.analyticsregion.help', 'algolia', null)}</div>
+                        <isif condition="${pdict.errors.analyticsRegionErrorMessage}">
+                            <div class="error-message red narrow">
+                                ${pdict.errors.analyticsRegionErrorMessage}
+                            </div>
+                        </isif>
+                    </td>
+                    <td class="table_detail w e s">
+                        <input type="text" value="${pdict.algoliaData.getPreference('AnalyticsRegion')}" id="AnalyticsRegion" name="AnalyticsRegion" placeholder="${Resource.msg('algolia.label.util.optional.onlyusedwithingestionapi', 'algolia', null)}" autocomplete="off"/>
                     </td>
                 </tr>
 
@@ -296,7 +337,7 @@
                     </td>
                 </tr>
                     <isprint value="${Resource.msg('algolia.label.util.version', 'algolia', null)}" encoding="jshtml" />
-                    <isprint value="${require('*/cartridge/scripts/algolia/lib/algoliaData').clientSideData.version}" encoding="jshtml" />
+                    <isprint value="${pdict.algoliaData.clientSideData.version}" encoding="jshtml" />
             </tbody>
         </table>
         </form>

@@ -109,11 +109,16 @@
         // Disables the "Grouping attribute for the Attribute-sliced record model"
         // text input unless "Record model" is "Attribute-sliced"
         $('select#RecordModel').on('change', function() {
-            var isAttributeSlicedRecordModelSelected = $(this).val() === 'attribute-sliced';
+            let isAttributeSlicedRecordModelSelected = $(this).val() === 'attribute-sliced';
             $('input#AttributeSlicedRecordModel_GroupingAttribute').prop('readonly', !isAttributeSlicedRecordModelSelected);
         }).trigger('change');
 
         $resumeIndexingBtn.on('click', handleActionClick);
 
+        // Disables the "Analytics Region" text input unless "Indexing API" is "Ingestion API"
+        $('select#IndexingAPI').on('change', function() {
+            let isIngestionAPISelected = $(this).val() === 'ingestion-api';
+            $('input#AnalyticsRegion').prop('readonly', !isIngestionAPISelected);
+        }).trigger('change');
     });
 }(jQuery));

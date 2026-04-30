@@ -73,4 +73,54 @@ describe('Job Helper', function () {
         // Check non-localized master attributes
         expect(result.nonLocalizedMasterAttributes).toContain('categoryPageId');
     });
+
+    describe('toTmp', () => {
+        it('appends the tmp suffix to a primary index name', () => {
+            expect(jobHelper.toTmp('products_en')).toBe('products_en.tmp');
+        });
+
+        it('is idempotent with fromTmp (round-trips)', () => {
+            const primary = 'test_index___products__en_US';
+            expect(jobHelper.fromTmp(jobHelper.toTmp(primary))).toBe(primary);
+        });
+
+        it('appends the suffix even if the input already ends in .tmp (by design)', () => {
+            // Callers are responsible for not double-tagging; this documents current behavior.
+            expect(jobHelper.toTmp('products_en.tmp')).toBe('products_en.tmp.tmp');
+        });
+    });
+
+    describe('fromTmp', () => {
+        it('strips the tmp suffix from a valid tmp index name', () => {
+            expect(jobHelper.fromTmp('products_en.tmp')).toBe('products_en');
+        });
+
+        it('throws when the input does not end in .tmp', () => {
+            expect(() => jobHelper.fromTmp('products_en'))
+                .toThrow(/temporary index name ending in/i);
+        });
+
+        it('throws when the input is exactly ".tmp" (would yield empty primary)', () => {
+            expect(() => jobHelper.fromTmp('.tmp'))
+                .toThrow(/temporary index name ending in/i);
+        });
+
+        it('throws when the input is an empty string', () => {
+            expect(() => jobHelper.fromTmp(''))
+                .toThrow(/temporary index name ending in/i);
+        });
+
+        it('throws when the input is not a string', () => {
+            expect(() => jobHelper.fromTmp(undefined))
+                .toThrow(/temporary index name ending in/i);
+            expect(() => jobHelper.fromTmp(null))
+                .toThrow(/temporary index name ending in/i);
+            expect(() => jobHelper.fromTmp(42))
+                .toThrow(/temporary index name ending in/i);
+        });
+
+        it('only strips the final suffix, not intermediate occurrences', () => {
+            expect(jobHelper.fromTmp('name.tmp.tmp')).toBe('name.tmp');
+        });
+    });
 });

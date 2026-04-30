@@ -1,7 +1,17 @@
 'use strict';
 
-jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => ({
-    sendRetryableBatch: jest.fn().mockReturnValue({ ok: true })
+const mockSendRetryableBatch = jest.fn().mockReturnValue({ result: { ok: true }, failedRecords: 0 });
+const mockGroupRecordsForIngestionAPI = jest.fn().mockReturnValue({});
+const mockSendGroupedIngestionAPIRecords = jest.fn().mockReturnValue({ result: { ok: true }, failedRecords: 0, sentRecords: 0 });
+jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => ({
+    sendRetryableBatch: mockSendRetryableBatch,
+    groupRecordsForIngestionAPI: mockGroupRecordsForIngestionAPI,
+    sendGroupedIngestionAPIRecords: mockSendGroupedIngestionAPIRecords,
+}), { virtual: true });
+
+const mockSetJobInfo = jest.fn();
+jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => ({
+    setJobInfo: mockSetJobInfo,
 }), { virtual: true });
 
 let mockConfig = {
@@ -10,6 +20,8 @@ let mockConfig = {
     RecordModel: 'master-level',
     AdditionalAttributes: ['storeAvailability', 'short_description', 'brand'],
     AttributeSlicedRecordModel_GroupingAttribute: 'color',
+    Enable: true,
+    EnableRealTimeInventoryHook: true,
 };
 
 const algoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
@@ -26,6 +38,12 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
                 return mockConfig.IndexOutOfStock;
             case 'AttributeSlicedRecordModel_GroupingAttribute':
                 return mockConfig.AttributeSlicedRecordModel_GroupingAttribute;
+            case 'IndexingAPI':
+                return mockConfig.IndexingAPI || null;
+            case 'Enable':
+                return mockConfig.Enable;
+            case 'EnableRealTimeInventoryHook':
+                return mockConfig.EnableRealTimeInventoryHook;
             default:
                 return null;
         }
@@ -582,4 +600,112 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Assert
         expect(operations).toMatchSnapshot();
     });
+});
+
+describe('inventoryUpdate', () => {
+    let testData;
+
+    beforeEach(() => {
+        mockConfig.InStockThreshold = 10;
+        mockConfig.IndexOutOfStock = true;
+        testData = setupTestData();
+        mockSendRetryableBatch.mockClear();
+        mockGroupRecordsForIngestionAPI.mockClear();
+        mockSendGroupedIngestionAPIRecords.mockClear();
+    });
+
+    test('Search API (default) - calls sendRetryableBatch', () => {
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-001',
+            getShipments: () => [testData.mockShipmentStandard],
+        };
+
+        const result = algoliaHooks.inventoryUpdate(mockOrder);
+
+        expect(mockSendRetryableBatch).toHaveBeenCalled();
+        expect(mockGroupRecordsForIngestionAPI).not.toHaveBeenCalled();
+        expect(result.status).toBe(0); // Status.OK
+    });
+
+    test('Search API - does not send when no operations are generated', () => {
+        mockConfig.InStockThreshold = 1;
+        const freshTestData = setupTestData();
+
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-002',
+            getShipments: () => [freshTestData.mockShipmentStandard],
+        };
+
+        const result = algoliaHooks.inventoryUpdate(mockOrder);
+
+        expect(mockSendRetryableBatch).not.toHaveBeenCalled();
+        expect(result.status).toBe(0);
+    });
+
+    test('Ingestion API - calls groupRecordsForIngestionAPI and sendGroupedIngestionAPIRecords', () => {
+        mockConfig.IndexingAPI = 'ingestion-api';
+
+        let algoliaHooksIngestion;
+        jest.isolateModules(() => {
+            algoliaHooksIngestion = require('../../../../../../cartridges/int_algolia_sfra/cartridge/scripts/hooks/order/algoliaHooks');
+        });
+
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-003',
+            getShipments: () => [testData.mockShipmentStandard],
+        };
+
+        algoliaHooksIngestion.inventoryUpdate(mockOrder);
+
+        expect(mockGroupRecordsForIngestionAPI).toHaveBeenCalled();
+        expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalled();
+        expect(mockSendRetryableBatch).not.toHaveBeenCalled();
+
+        mockConfig.IndexingAPI = null;
+    });
+
+    test('returns Status.OK even when an error occurs', () => {
+        mockSendRetryableBatch.mockImplementation(() => { throw new Error('Service failure'); });
+
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-004',
+            getShipments: () => [testData.mockShipmentStandard],
+        };
+
+        const result = algoliaHooks.inventoryUpdate(mockOrder);
+
+        expect(result.status).toBe(0); // Status.OK
+    });
+
+    test('handles multiple shipments (standard + instore)', () => {
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-005',
+            getShipments: () => [testData.mockShipmentStandard, testData.mockShipmentInStore],
+        };
+
+        const result = algoliaHooks.inventoryUpdate(mockOrder);
+
+        expect(mockSendRetryableBatch).toHaveBeenCalled();
+        expect(result.status).toBe(0);
+    });
+
+    // The hook is also triggered by OCAPI order creation, which bypasses the
+    // SFRA-level EnableRealTimeInventoryHook gate. The hook itself must honour it.
+    test('short-circuits when EnableRealTimeInventoryHook preference is false', () => {
+        mockConfig.EnableRealTimeInventoryHook = false;
+
+        const mockOrder = {
+            orderNo: 'TEST-ORDER-GATE-OFF',
+            getShipments: () => [testData.mockShipmentStandard],
+        };
+
+        const result = algoliaHooks.inventoryUpdate(mockOrder);
+
+        expect(mockSendRetryableBatch).not.toHaveBeenCalled();
+        expect(mockSendGroupedIngestionAPIRecords).not.toHaveBeenCalled();
+        expect(result.status).toBe(0);
+
+        mockConfig.EnableRealTimeInventoryHook = true;
+    });
+
 });

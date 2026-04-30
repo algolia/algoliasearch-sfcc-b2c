@@ -11,7 +11,7 @@ var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, AlgoliaJobReport;
-var jobHelper, reindexHelper;
+var jobHelper, reindexHelper, requestHelper;
 var indexingOperation;
 var fullRecordUpdate = false;
 
@@ -22,20 +22,18 @@ var products = [], siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
 var nonLocalizedAttributes = [], nonLocalizedMasterAttributes = [];
 var attributesComputedFromBaseProduct = [];
-var lastIndexingTasks = {};
+var indexingTasksToWaitFor = {};
 
 var extendedProductAttributesConfig;
 
-const RECORD_MODEL_TYPE = {
-    MASTER_LEVEL: 'master-level',
-    VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED: 'attribute-sliced',
-}
+const { RECORD_MODEL_TYPES, INDEXING_APIS, ANALYTICS_REGIONS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
 var variationAttributeForAttributeSlicedRecordModel // e.g. "color"
+var indexingAPI;
+var analyticsRegion;
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -67,6 +65,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+    requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -78,9 +77,22 @@ exports.beforeStep = function(parameters, stepExecution) {
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
     recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
     variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
+    indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API; // "search-api" (default) or "ingestion-api"
+    analyticsRegion = algoliaData.getPreference('AnalyticsRegion'); // "us" or "eu"
+
+    // logging cartridge version
+    logger.info('Algolia for Salesforce B2C Commerce cartridge version: ' + algoliaData.clientSideData.version);
+
+    // logging all site preference values except for `Algolia_AdminApiKey`
+    logger.info('algoliaSitePreferences: ' + JSON.stringify(algoliaData.getAlgoliaSitePreferences()));
+
+    // throw an error if "AnalyticsRegion" is not set or has an invalid value when "Indexing API" is set to "Ingestion API"
+    if (indexingAPI === INDEXING_APIS.INGESTION_API && (analyticsRegion !== ANALYTICS_REGIONS.EU && analyticsRegion !== ANALYTICS_REGIONS.US)) {
+        throw new Error('You need to define a valid Analytics region ("us" or "eu") in the Algolia BM module when using the Ingestion as the indexing API! Analytics region configured currently: "' + analyticsRegion + '"');
+    }
 
     // throw an error if no "Grouping attribute for the Attribute-sliced record model" is defined when using the "Attribute-sliced" record model
-    if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED && empty(variationAttributeForAttributeSlicedRecordModel)) {
+    if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED && empty(variationAttributeForAttributeSlicedRecordModel)) {
         throw new Error('You need to define a grouping attribute for the Attribute-sliced record model in the Algolia BM module!');
     }
 
@@ -88,7 +100,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     // By default this file does not exist. For an example configuration, see `productAttributesConfig.example.js`.
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
-        logger.info('Configuration file "productAttributesConfig.js" loaded')
+        logger.info('Configuration file "productAttributesConfig.js" loaded');
     } catch (e) { // eslint-disable-line no-unused-vars
         extendedProductAttributesConfig = {};
     }
@@ -167,7 +179,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
+    if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
@@ -193,7 +205,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         siteLocales = new ArrayList(localesForIndexing);
     }
 
-    logger.info('Will index ' + siteLocales.size() + ' locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
+    logger.info('Will index ' + siteLocales.size() + ' locale(s) for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
     jobReport.siteLocales = siteLocales.size();
 
     /* --- preparing job for sending data to Algolia --- */
@@ -202,6 +214,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         jobID: stepExecution.getJobExecution().getJobID(),
         stepID: stepExecution.getStepID(),
         indexingMethod: paramIndexingMethod,
+        indexingAPI: indexingAPI,
     });
 
     /* --- removing any leftover temporary indices --- */
@@ -221,11 +234,10 @@ exports.beforeStep = function(parameters, stepExecution) {
         }
     }
 
-
     /* --- getting all products assigned to the site --- */
     products = ProductMgr.queryAllSiteProducts();
     logger.info('failureThresholdPercentage parameter: ' + paramFailureThresholdPercentage);
-    logger.info('Starting indexing...')
+    logger.info('Starting indexing...');
 }
 
 /**
@@ -270,7 +282,7 @@ exports.process = function(product, parameters, stepExecution) {
 
     /* --- MAIN LOGIC --- */
 
-    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
+    if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL) {
         if (product.isVariant()) {
             // This variant will be processed when we handle its master product, skip it for now.
             return [];
@@ -287,7 +299,7 @@ exports.process = function(product, parameters, stepExecution) {
                 let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
                 if (paramIndexingMethod === 'fullCatalogReindex') {
-                    indexName += '.tmp';
+                    indexName = jobHelper.toTmp(indexName);
                 }
 
                 let localizedMaster = new AlgoliaLocalizedProduct({
@@ -310,7 +322,7 @@ exports.process = function(product, parameters, stepExecution) {
             jobReport.recordsToSend += algoliaOperations.length;
             return algoliaOperations;
         }
-    } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
+    } else if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED) {
         if (product.isVariant()) {
             // This variant will be processed when we handle its master product, skip it for now.
             return [];
@@ -332,7 +344,7 @@ exports.process = function(product, parameters, stepExecution) {
                     let locale = siteLocales.get(l);
                     let indexName = algoliaData.calculateIndexName('products', locale);
                     if (paramIndexingMethod === 'fullCatalogReindex') {
-                        indexName += '.tmp';
+                        indexName = jobHelper.toTmp(indexName);
                     }
                     let localizedMaster = new AlgoliaLocalizedProduct({
                         product: product,
@@ -370,7 +382,7 @@ exports.process = function(product, parameters, stepExecution) {
                 let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
                 if (paramIndexingMethod === 'fullCatalogReindex') {
-                    indexName += '.tmp';
+                    indexName = jobHelper.toTmp(indexName);
                 }
                 let attributeSlicedRecords = recordsPerLocale[locale];
                 attributeSlicedRecords.forEach(function (record) {
@@ -412,7 +424,7 @@ exports.process = function(product, parameters, stepExecution) {
                 let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
                 if (paramIndexingMethod === 'fullCatalogReindex') {
-                    indexName += '.tmp';
+                    indexName = jobHelper.toTmp(indexName);
                 }
                 let records = recordsPerLocale[locale];
                 records.forEach(function (record) {
@@ -455,10 +467,10 @@ exports.process = function(product, parameters, stepExecution) {
             let localizedProduct;
 
             if (paramIndexingMethod === 'fullCatalogReindex') {
-                indexName += '.tmp';
+                indexName = jobHelper.toTmp(indexName);
             }
 
-            if (recordModel === RECORD_MODEL_TYPE.VARIANT_LEVEL) {
+            if (recordModel === RECORD_MODEL_TYPES.VARIANT_LEVEL) {
 
                 // for variant-level indexing, generate a flat record where all attributes are at the root level
                 localizedProduct = new AlgoliaLocalizedProduct({
@@ -513,28 +525,79 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         return;
     }
 
-    var result;
-    try {
-        var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-        result = retryableBatchRes.result;
-        jobReport.recordsFailed += retryableBatchRes.failedRecords;
-    } catch (e) {
-        logger.error('Error while sending batch to Algolia: ' + e);
-    }
+    switch (indexingAPI) {
+        case INDEXING_APIS.INGESTION_API: {
+            // With the Ingestion API, an OK response only means the payload was accepted;
+            // record-level errors (e.g. "record too big") happen asynchronously — check the Algolia Dashboard.
+            // sentRecords/failedRecords reflect transport-level success per push call.
+            let resultObj;
+            try {
+                let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+                resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords, paramIndexingMethod);
+            } catch (e) {
+                logger.error('Error while sending batch to Algolia: ' + e);
+            }
 
-    if (result && result.ok) {
-        jobReport.recordsSent += batch.length;
-        jobReport.chunksSent++;
+            if (resultObj) {
+                // Parity with Search API: a chunk counts as "sent" whenever the transport accepted any of it,
+                // even if a subset of records failed. If nothing was accepted, count the chunk as failed.
+                // `failureThresholdPercentage` (evaluated in afterStep) owns the decision whether to proceed with the atomic swap.
+                jobReport.recordsSent += resultObj.sentRecords;
+                jobReport.recordsFailed += resultObj.failedRecords;
+                if (resultObj.sentRecords > 0) {
+                    jobReport.chunksSent++;
 
-        // Store Algolia indexing task IDs.
-        // When performing a fullCatalogReindex, afterStep will wait for the last indexing tasks to complete.
-        var taskIDs = result.object.body.taskID;
-        Object.keys(taskIDs).forEach(function (taskIndexName) {
-            lastIndexingTasks[taskIndexName] = taskIDs[taskIndexName];
-        });
-    } else {
-        jobReport.recordsFailed += batch.length;
-        jobReport.chunksFailed++;
+                    // Store Ingestion API event IDs for fullCatalogReindex (only populated when at least one group was accepted, empty otherwise)
+                    if (paramIndexingMethod === 'fullCatalogReindex') {
+                        let indexingEvents = resultObj.result.object.body.indexingEvents;
+                        Object.keys(indexingEvents).forEach(function (runID) {
+                            if (!indexingTasksToWaitFor[runID]) {
+                                indexingTasksToWaitFor[runID] = [];
+                            }
+                            indexingTasksToWaitFor[runID] = indexingTasksToWaitFor[runID].concat(indexingEvents[runID]);
+                        });
+                    }
+                } else {
+                    jobReport.chunksFailed++;
+                }
+            } else {
+                jobReport.recordsFailed += batch.length;
+                jobReport.chunksFailed++;
+            }
+            break;
+        }
+        case INDEXING_APIS.SEARCH_API:
+        default: {
+            // Search API: sendRetryableBatch mutates the batch array by splicing out failed records,
+            // so batch.length reflects only the remaining records after retries.
+            let resultObj, result;
+            try {
+                resultObj = requestHelper.sendRetryableBatch(batch);
+                result = resultObj.result;
+            } catch (e) {
+                logger.error('Error while sending batch to Algolia: ' + e);
+            }
+
+            jobReport.recordsFailed += resultObj ? resultObj.failedRecords : 0;
+
+            if (result && result.ok) {
+                jobReport.recordsSent += batch.length;
+                jobReport.chunksSent++;
+
+                // Store Search API task IDs for fullCatalogReindex.
+                // taskIDs are sequential per index — the last one guarantees all prior are done.
+                if (paramIndexingMethod === 'fullCatalogReindex') {
+                    let taskIDs = result.object.body.taskID;
+                    Object.keys(taskIDs).forEach(function (taskIndexName) {
+                        indexingTasksToWaitFor[taskIndexName] = taskIDs[taskIndexName];
+                    });
+                }
+            } else {
+                jobReport.recordsFailed += batch.length;
+                jobReport.chunksFailed++;
+            }
+            break;
+        }
     }
 }
 
@@ -589,7 +652,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
     if (paramIndexingMethod === 'fullCatalogReindex') {
         if (!jobReport.error) {
             // proceed with the atomic reindexing only if everything went fine
-            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), lastIndexingTasks);
+            reindexHelper.finishAtomicReindex('products', siteLocales.toArray(), indexingTasksToWaitFor, indexingAPI);
         } else {
             jobReport.errorMessage += ' Temporary indices were not moved to production.';
         }
@@ -608,8 +671,8 @@ exports.afterStep = function(success, parameters, stepExecution) {
 }
 
 // For testing
-exports.__setLastIndexingTasks = function(indexingTasks) {
-    lastIndexingTasks = indexingTasks;
+exports.__setIndexingTasksToWaitFor = function(indexingTasks) {
+    indexingTasksToWaitFor = indexingTasks;
 };
 exports.__getAttributesToSend = function() {
     return attributesToSend;
@@ -620,3 +683,5 @@ exports.__getLocalesForIndexing = function() {
 exports.__getJobReport = function() {
     return jobReport;
 }
+exports.__INDEXING_APIS = INDEXING_APIS;
+exports.__setIndexingAPI = function(api) { indexingAPI = api; }

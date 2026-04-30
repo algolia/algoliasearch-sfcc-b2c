@@ -6,9 +6,12 @@
 const waitTaskTimeout = require('*/algoliaconfig').waitTaskTimeout;
 const algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
 const retryableCall = require('*/cartridge/scripts/algolia/helper/retryStrategy').retryableCall;
-const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
+const jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
+const logger = jobHelper.getAlgoliaLogger();
 
 var __jobInfo = {};
+
+const { INDEXING_APIS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Set information about the job using the API Client
@@ -17,6 +20,8 @@ var __jobInfo = {};
 function setJobInfo(jobInfo) {
     __jobInfo = jobInfo;
 }
+
+/* --------------------------- Search API methods --------------------------- */
 
 /**
  * Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
@@ -46,9 +51,9 @@ function sendBatch(indexName, requestsArray) {
 }
 
 /**
- * Send a batch of objects to Algolia Indexing API (multiple indices):
- * https://www.algolia.com/doc/rest-api/search/#batch-write-operations-multiple-indices
- * @param {AlgoliaOperation[]} requestsArray - array of requests to send to Algolia. Each operation must contain the `indexName` to target.
+ * Send a batch of objects to Algolia Search API's `multiple-batch` endpoint
+ * https://www.algolia.com/doc/rest-api/search/multiple-batch
+ * @param {Array} requestsArray - array of requests to send to Algolia. Each operation must contain the `indexName` to target.
  * @returns {dw.svc.Result} - result of the call
  */
 function sendMultiIndexBatch(requestsArray) {
@@ -204,6 +209,13 @@ function moveIndex(indexNameSrc, indexNameDest) {
     return result;
 }
 
+// Polling backoff shared by `waitTask` and `waitForRunEvent`. Mirrors the Algolia clients'
+// createIterablePromise defaults: step up by 200 ms per attempt, cap at 5 seconds.
+// Without a sleep between polls, these loops would hot-spin against the API for the full
+// maxWait window whenever a task/event is not yet ready.
+const POLLING_DELAY_STEP_MS = 200;
+const POLLING_MAX_DELAY_MS = 5000;
+
 /**
  * Wait for an Algolia task to complete.
  * This method will call the /task endpoint until its status become 'published'
@@ -235,9 +247,92 @@ function waitTask(indexName, taskID) {
                 return;
             }
         }
+
+        jobHelper.sleepFor(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
     }
     logger.error('Max wait time reached... TaskID: ' + taskID + '; index: ' + indexName);
     throw new Error('Max wait time reached. TaskID: ' + taskID + '; index: ' + indexName);
+}
+
+/* --------------------------- Ingestion API methods --------------------------- */
+
+/**
+ * Sends a request to the Ingestion API's `push` endpoint (https://www.algolia.com/doc/rest-api/ingestion/push)
+ * The `push` endpoint can only accept single-index and single-action requests.
+ * When using the Ingestion API, requests have already been grouped by indexName and action by this point.
+ * @param {Object} requestPayload payload object to be sent to the Ingestion API
+ * @param {String} indexName name of the target index (for Ingestion only), used in the endpoint URL
+ * @param {string} [indexingMethod] - the indexing method (e.g. 'fullCatalogReindex'). When set to 'fullCatalogReindex',
+ *   the referenceIndexName query parameter is appended so that a task does not need to be created for the .tmp index.
+ *   See https://www.algolia.com/doc/rest-api/ingestion/push#parameter-reference-index-name
+ * @returns {dw.svc.Result} - result of the call
+ */
+function pushByIndexName(requestPayload, indexName, indexingMethod) {
+    let indexingService = algoliaIndexingService.getService(__jobInfo);
+    let referenceIndexNameParam = '';
+
+    if (indexingMethod === 'fullCatalogReindex') {
+        // `referenceIndexName` is the primary (non-`.tmp`) counterpart of `indexName`.
+        // `jobHelper.fromTmp` throws if `indexName` is not a valid `.tmp` name -- this prevents
+        // silently producing a truncated production index name in the query string.
+        referenceIndexNameParam = '?referenceIndexName=' + jobHelper.fromTmp(indexName);
+    }
+
+    let retryableCallParameters = {
+        method: 'POST',
+        path: '/1/push/' + indexName + referenceIndexNameParam,
+        body: requestPayload,
+        indexingAPI: INDEXING_APIS.INGESTION_API,
+    }
+
+    let result = retryableCall(indexingService, retryableCallParameters);
+
+    if (!result.ok) {
+        logger.error('[pushByIndexName][indexName: ' + indexName + '][path: ' + retryableCallParameters.path + '] Error: ' + result.getErrorMessage());
+    }
+
+    return result;
+}
+
+/**
+ * Wait for an Ingestion API run event to become available.
+ * Polls GET /1/runs/{runID}/events/{eventID} until it returns a non-404 response,
+ * mirroring the approach used by the Algolia clients.
+ * @param {string} runID - Ingestion API run ID
+ * @param {string} eventID - Ingestion API event ID
+ */
+function waitForRunEvent(runID, eventID) {
+    var indexingService = algoliaIndexingService.getService(__jobInfo);
+    var maxWait = waitTaskTimeout || 10 * 60 * 1000;
+    var start = Date.now();
+    var nbRequestsSent = 0;
+    var path = '/1/runs/' + runID + '/events/' + eventID;
+
+    while (Date.now() < start + maxWait) {
+        ++nbRequestsSent;
+
+        var result = retryableCall(
+            indexingService,
+            {
+                method: 'GET',
+                path: path,
+                indexingAPI: INDEXING_APIS.INGESTION_API,
+            }
+        );
+
+        if (result.ok) {
+            logger.debug('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieved. (' + nbRequestsSent + ' requests sent).');
+            return;
+        }
+        if (result.error !== 404) {
+            logger.error('[waitForRunEvent][runID: ' + runID + '][eventID: ' + eventID + '] Event retrieval error: ' + result.getErrorMessage());
+            throw new Error('waitForRunEvent failed for run ' + runID + ', event ' + eventID + ': ' + result.getErrorMessage());
+        }
+
+        jobHelper.sleepFor(Math.min(nbRequestsSent * POLLING_DELAY_STEP_MS, POLLING_MAX_DELAY_MS));
+    }
+    logger.error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
+    throw new Error('Max wait time reached. Run: ' + runID + '; event: ' + eventID);
 }
 
 module.exports.setJobInfo = setJobInfo;
@@ -249,3 +344,5 @@ module.exports.setIndexSettings = setIndexSettings;
 module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;
 module.exports.waitTask = waitTask;
+module.exports.pushByIndexName = pushByIndexName;
+module.exports.waitForRunEvent = waitForRunEvent;

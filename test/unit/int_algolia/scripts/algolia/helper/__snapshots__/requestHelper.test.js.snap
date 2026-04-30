@@ -1,0 +1,533 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Ingestion API payload snapshots delta index flow: mixed addObject and deleteObject payloads: grouped records for delta index 1`] = `
+{
+  "test_products_en": {
+    "addObject": [
+      {
+        "in_stock": true,
+        "name": "Fitted Shirt",
+        "objectID": "701644031206M",
+        "price": {
+          "USD": 29.99,
+        },
+      },
+    ],
+    "deleteObject": [
+      {
+        "objectID": "701644031300M",
+      },
+    ],
+  },
+  "test_products_fr": {
+    "addObject": [
+      {
+        "in_stock": true,
+        "name": "Chemise ajustée",
+        "objectID": "701644031206M",
+        "price": {
+          "EUR": 24.99,
+        },
+      },
+    ],
+    "deleteObject": [
+      {
+        "objectID": "701644031300M",
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots delta index flow: mixed addObject and deleteObject payloads: pushByIndexName call 1 1`] = `
+{
+  "indexName": "test_products_en",
+  "indexingMethod": undefined,
+  "payload": {
+    "action": "addObject",
+    "records": [
+      {
+        "in_stock": true,
+        "name": "Fitted Shirt",
+        "objectID": "701644031206M",
+        "price": {
+          "USD": 29.99,
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots delta index flow: mixed addObject and deleteObject payloads: pushByIndexName call 2 1`] = `
+{
+  "indexName": "test_products_en",
+  "indexingMethod": undefined,
+  "payload": {
+    "action": "deleteObject",
+    "records": [
+      {
+        "objectID": "701644031300M",
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots delta index flow: mixed addObject and deleteObject payloads: pushByIndexName call 3 1`] = `
+{
+  "indexName": "test_products_fr",
+  "indexingMethod": undefined,
+  "payload": {
+    "action": "addObject",
+    "records": [
+      {
+        "in_stock": true,
+        "name": "Chemise ajustée",
+        "objectID": "701644031206M",
+        "price": {
+          "EUR": 24.99,
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots delta index flow: mixed addObject and deleteObject payloads: pushByIndexName call 4 1`] = `
+{
+  "indexName": "test_products_fr",
+  "indexingMethod": undefined,
+  "payload": {
+    "action": "deleteObject",
+    "records": [
+      {
+        "objectID": "701644031300M",
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots delta index flow: mixed addObject and deleteObject payloads: sendGroupedIngestionAPIRecords response 1`] = `
+{
+  "failedRecords": 0,
+  "result": {
+    "object": {
+      "body": {
+        "indexingEvents": {
+          "run-test_products_en": [
+            "evt-1",
+            "evt-2",
+          ],
+          "run-test_products_fr": [
+            "evt-3",
+            "evt-4",
+          ],
+        },
+      },
+    },
+    "ok": true,
+  },
+  "sentRecords": 4,
+}
+`;
+
+exports[`Ingestion API payload snapshots full reindex flow: grouping → push payloads → response: grouped records for fullCatalogReindex 1`] = `
+{
+  "test_products_en.tmp": {
+    "addObject": [
+      {
+        "in_stock": true,
+        "name": "Fitted Shirt",
+        "objectID": "M-25592581",
+        "price": {
+          "EUR": 24.99,
+          "USD": 29.99,
+        },
+        "variants": [
+          {
+            "color": "JJB52A0",
+            "objectID": "701644031206M",
+            "size": "004",
+          },
+        ],
+      },
+      {
+        "in_stock": true,
+        "name": "Classic Jeans",
+        "objectID": "M-25604524",
+        "price": {
+          "EUR": 39.99,
+          "USD": 49.99,
+        },
+        "variants": [
+          {
+            "color": "BLK",
+            "objectID": "701644031300M",
+            "size": "032",
+          },
+        ],
+      },
+    ],
+  },
+  "test_products_fr.tmp": {
+    "addObject": [
+      {
+        "in_stock": true,
+        "name": "Chemise ajustée",
+        "objectID": "M-25592581",
+        "price": {
+          "EUR": 24.99,
+          "USD": 29.99,
+        },
+        "variants": [
+          {
+            "color": "JJB52A0",
+            "objectID": "701644031206M",
+            "size": "004",
+          },
+        ],
+      },
+      {
+        "in_stock": true,
+        "name": "Jean classique",
+        "objectID": "M-25604524",
+        "price": {
+          "EUR": 39.99,
+          "USD": 49.99,
+        },
+        "variants": [
+          {
+            "color": "BLK",
+            "objectID": "701644031300M",
+            "size": "032",
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots full reindex flow: grouping → push payloads → response: pushByIndexName call 1 1`] = `
+{
+  "indexName": "test_products_en.tmp",
+  "indexingMethod": "fullCatalogReindex",
+  "payload": {
+    "action": "addObject",
+    "records": [
+      {
+        "in_stock": true,
+        "name": "Fitted Shirt",
+        "objectID": "M-25592581",
+        "price": {
+          "EUR": 24.99,
+          "USD": 29.99,
+        },
+        "variants": [
+          {
+            "color": "JJB52A0",
+            "objectID": "701644031206M",
+            "size": "004",
+          },
+        ],
+      },
+      {
+        "in_stock": true,
+        "name": "Classic Jeans",
+        "objectID": "M-25604524",
+        "price": {
+          "EUR": 39.99,
+          "USD": 49.99,
+        },
+        "variants": [
+          {
+            "color": "BLK",
+            "objectID": "701644031300M",
+            "size": "032",
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots full reindex flow: grouping → push payloads → response: pushByIndexName call 2 1`] = `
+{
+  "indexName": "test_products_fr.tmp",
+  "indexingMethod": "fullCatalogReindex",
+  "payload": {
+    "action": "addObject",
+    "records": [
+      {
+        "in_stock": true,
+        "name": "Chemise ajustée",
+        "objectID": "M-25592581",
+        "price": {
+          "EUR": 24.99,
+          "USD": 29.99,
+        },
+        "variants": [
+          {
+            "color": "JJB52A0",
+            "objectID": "701644031206M",
+            "size": "004",
+          },
+        ],
+      },
+      {
+        "in_stock": true,
+        "name": "Jean classique",
+        "objectID": "M-25604524",
+        "price": {
+          "EUR": 39.99,
+          "USD": 49.99,
+        },
+        "variants": [
+          {
+            "color": "BLK",
+            "objectID": "701644031300M",
+            "size": "032",
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots full reindex flow: grouping → push payloads → response: sendGroupedIngestionAPIRecords response 1`] = `
+{
+  "failedRecords": 0,
+  "result": {
+    "object": {
+      "body": {
+        "indexingEvents": {
+          "run-test_products_en.tmp": [
+            "evt-1",
+          ],
+          "run-test_products_fr.tmp": [
+            "evt-2",
+          ],
+        },
+      },
+    },
+    "ok": true,
+  },
+  "sentRecords": 4,
+}
+`;
+
+exports[`Ingestion API payload snapshots inventory update flow: single partialUpdateObject per locale: grouped records for inventory update 1`] = `
+{
+  "test_products_en": {
+    "partialUpdateObject": [
+      {
+        "objectID": "M-25592581",
+        "variants": [
+          {
+            "in_stock": false,
+            "objectID": "701644031206M",
+          },
+        ],
+      },
+    ],
+  },
+  "test_products_fr": {
+    "partialUpdateObject": [
+      {
+        "objectID": "M-25592581",
+        "variants": [
+          {
+            "in_stock": false,
+            "objectID": "701644031206M",
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots inventory update flow: single partialUpdateObject per locale: pushByIndexName call 1 1`] = `
+{
+  "indexName": "test_products_en",
+  "indexingMethod": undefined,
+  "payload": {
+    "action": "partialUpdateObject",
+    "records": [
+      {
+        "objectID": "M-25592581",
+        "variants": [
+          {
+            "in_stock": false,
+            "objectID": "701644031206M",
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots inventory update flow: single partialUpdateObject per locale: pushByIndexName call 2 1`] = `
+{
+  "indexName": "test_products_fr",
+  "indexingMethod": undefined,
+  "payload": {
+    "action": "partialUpdateObject",
+    "records": [
+      {
+        "objectID": "M-25592581",
+        "variants": [
+          {
+            "in_stock": false,
+            "objectID": "701644031206M",
+          },
+        ],
+      },
+    ],
+  },
+}
+`;
+
+exports[`Ingestion API payload snapshots inventory update flow: single partialUpdateObject per locale: sendGroupedIngestionAPIRecords response 1`] = `
+{
+  "failedRecords": 0,
+  "result": {
+    "object": {
+      "body": {
+        "indexingEvents": {
+          "run-test_products_en": [
+            "evt-1",
+          ],
+          "run-test_products_fr": [
+            "evt-2",
+          ],
+        },
+      },
+    },
+    "ok": true,
+  },
+  "sentRecords": 2,
+}
+`;
+
+exports[`groupRecordsForIngestionAPI - realistic multi-locale product batch: multi-locale grouped records with mixed actions 1`] = `
+{
+  "test_products_en.tmp": {
+    "addObject": [
+      {
+        "in_stock": true,
+        "name": "Fitted Shirt",
+        "objectID": "M-25592581",
+        "price": {
+          "EUR": 24.99,
+          "USD": 29.99,
+        },
+        "variants": [
+          {
+            "color": "JJB52A0",
+            "objectID": "701644031206M",
+            "size": "004",
+          },
+        ],
+      },
+      {
+        "in_stock": true,
+        "name": "Classic Jeans",
+        "objectID": "M-25604524",
+        "price": {
+          "EUR": 39.99,
+          "USD": 49.99,
+        },
+        "variants": [
+          {
+            "color": "BLK",
+            "objectID": "701644031300M",
+            "size": "032",
+          },
+        ],
+      },
+    ],
+    "deleteObject": [
+      {
+        "objectID": "M-99999999",
+      },
+    ],
+  },
+  "test_products_fr.tmp": {
+    "addObject": [
+      {
+        "in_stock": true,
+        "name": "Chemise ajustée",
+        "objectID": "M-25592581",
+        "price": {
+          "EUR": 24.99,
+          "USD": 29.99,
+        },
+        "variants": [
+          {
+            "color": "JJB52A0",
+            "objectID": "701644031206M",
+            "size": "004",
+          },
+        ],
+      },
+      {
+        "in_stock": true,
+        "name": "Jean classique",
+        "objectID": "M-25604524",
+        "price": {
+          "EUR": 39.99,
+          "USD": 49.99,
+        },
+        "variants": [
+          {
+            "color": "BLK",
+            "objectID": "701644031300M",
+            "size": "032",
+          },
+        ],
+      },
+    ],
+    "deleteObject": [
+      {
+        "objectID": "M-99999999",
+      },
+    ],
+  },
+}
+`;
+
+exports[`groupRecordsForIngestionAPI: grouped records by index and action 1`] = `
+{
+  "index_en": {
+    "addObject": [
+      {
+        "name": "Product 1",
+        "objectID": "1",
+      },
+      {
+        "name": "Product 2",
+        "objectID": "2",
+      },
+    ],
+    "deleteObject": [
+      {
+        "objectID": "3",
+      },
+    ],
+  },
+  "index_fr": {
+    "addObject": [
+      {
+        "name": "Produit 1",
+        "objectID": "1",
+      },
+    ],
+  },
+}
+`;

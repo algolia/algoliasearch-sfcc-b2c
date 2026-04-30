@@ -12,7 +12,7 @@ var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
-var fileHelper, jobHelper, reindexHelper;
+var fileHelper, jobHelper, requestHelper;
 
 // logging-related variables and constants
 var jobReport;
@@ -30,16 +30,19 @@ var baseIndexingOperation; // 'addObject' or 'partialUpdateObject', depending on
 const deleteIndexingOperation = 'deleteObject';
 var fullRecordUpdate = false;
 
-const RECORD_MODEL_TYPE = {
-    MASTER_LEVEL: 'master-level',
-    VARIANT_LEVEL: 'variant-level',
-    ATTRIBUTE_SLICED: 'attribute-sliced',
-}
+const {
+    RECORD_MODEL_TYPES,
+    INDEXING_APIS,
+    ANALYTICS_REGIONS,
+    ALGOLIA_DELTA_EXPORT_BASE_FOLDER,
+} = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 // Algolia preferences
 var ALGOLIA_IN_STOCK_THRESHOLD;
 var INDEX_OUT_OF_STOCK;
 var variationAttributeForAttributeSlicedRecordModel; // e.g. "color"
+var indexingAPI;
+var analyticsRegion;
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -72,7 +75,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
-    reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+    requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -85,15 +88,28 @@ exports.beforeStep = function(parameters, stepExecution) {
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
     recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
     variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
+    indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API; // "search-api" (default) or "ingestion-api"
+    analyticsRegion = algoliaData.getPreference('AnalyticsRegion'); // "us" or "eu"
+
+    // logging cartridge version
+    logger.info('Algolia for Salesforce B2C Commerce cartridge version: ' + algoliaData.clientSideData.version);
+
+    // logging all site preference values except for `Algolia_AdminApiKey`
+    logger.info('algoliaSitePreferences: ' + JSON.stringify(algoliaData.getAlgoliaSitePreferences()));
+
+    // throw an error if "AnalyticsRegion" is not set or has an invalid value when "Indexing API" is set to "Ingestion API"
+    if (indexingAPI === INDEXING_APIS.INGESTION_API && (analyticsRegion !== ANALYTICS_REGIONS.EU && analyticsRegion !== ANALYTICS_REGIONS.US)) {
+        throw new Error('You need to define a valid Analytics region ("us" or "eu") in the Algolia BM module when using the Ingestion as the indexing API! Analytics region configured currently: "' + analyticsRegion + '"');
+    }
 
     // throw an error if no "Grouping attribute for the Attribute-sliced record model" is defined when using the "Attribute-sliced" record model
-    if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED && empty(variationAttributeForAttributeSlicedRecordModel)) {
+    if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED && empty(variationAttributeForAttributeSlicedRecordModel)) {
         throw new Error('You need to define a grouping attribute for the Attribute-sliced record model in the Algolia BM module!');
     }
 
     try {
         extendedProductAttributesConfig = require('*/cartridge/configuration/productAttributesConfig.js');
-        logger.info('Configuration file "productAttributesConfig.js" loaded')
+        logger.info('Configuration file "productAttributesConfig.js" loaded');
     } catch (e) { // eslint-disable-line no-unused-vars
         extendedProductAttributesConfig = {};
     }
@@ -173,7 +189,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Non-localized attributes: ' + JSON.stringify(nonLocalizedAttributes));
     logger.info('Attributes computed from base product and shared with siblings: ' + JSON.stringify(attributesComputedFromBaseProduct));
 
-    if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
+    if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL || recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED) {
         logger.info('Master attributes: ' + JSON.stringify(masterAttributes));
         logger.info('Non-localized master attributes: ' + JSON.stringify(nonLocalizedMasterAttributes));
         logger.info('Variant attributes: ' + JSON.stringify(variantAttributes));
@@ -189,11 +205,11 @@ exports.beforeStep = function(parameters, stepExecution) {
         if (siteLocales.indexOf(locale) < 0) {
             throw new Error('Locale "' + locale + '" is not enabled on ' + Site.getCurrent().getName());
         }
-    })
+    });
     if (localesForIndexing.length > 0) {
         siteLocales = new ArrayList(localesForIndexing);
     }
-    logger.info('Will index ' + siteLocales.size() + ' locales for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
+    logger.info('Will index ' + siteLocales.size() + ' locale(s) for ' + Site.getCurrent().getName() + ': ' + siteLocales.toArray());
     jobReport.siteLocales = siteLocales.size();
 
 
@@ -201,6 +217,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         jobID: stepExecution.getJobExecution().getJobID(),
         stepID: stepExecution.getStepID(),
         indexingMethod: paramIndexingMethod,
+        indexingAPI: indexingAPI,
     });
 
     logger.info('failureThresholdPercentage parameter: ' + paramFailureThresholdPercentage);
@@ -209,15 +226,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     // ----------------------------- Extracting productIDs from the output of the Delta Export -----------------------------
 
 
-    var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-
     // creating working folder (same as the delta export output folder) - if there were no previous changes, the delta export job step won't create it
-    l0_deltaExportDir = new File(algoliaConstants.ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramDeltaExportJobName); // Impex/src/platform/outbox/algolia/productDeltaExport
+    l0_deltaExportDir = new File(ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramDeltaExportJobName); // Impex/src/platform/outbox/algolia/productDeltaExport
 
     // return OK if the folder doesn't exist, this means that the CatalogDeltaExport job step finished OK but didn't have any output (there were no changes)
     if (!l0_deltaExportDir.exists()) {
         logger.info('Export directory does not exist (' + l0_deltaExportDir.getFullPath() +
-            '). There haven\'t been any changes to the catalog yet or the "consumer" and "deltaExportJobName" parameters do not match for both job steps.')
+            '). There haven\'t been any changes to the catalog yet or the "consumer" and "deltaExportJobName" parameters do not match for both job steps.');
         return; // return with an empty changedProducts object
     }
 
@@ -299,7 +314,7 @@ exports.beforeStep = function(parameters, stepExecution) {
         changedProductsIterator = new CPObjectIterator(changedProducts);
         logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
     } else {
-        logger.info('Moving the Delta export files to the "' + l1_failedDir.getName() + '" directory...')
+        logger.info('Moving the Delta export files to the "' + l1_failedDir.getName() + '" directory...');
         fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_failedDir);
     }
 }
@@ -348,7 +363,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
     /* --- MAIN LOGIC --- */
 
     if (!empty(product) && cpObj.available && product.isAssignedToSiteCatalog()) {
-        if (recordModel === RECORD_MODEL_TYPE.MASTER_LEVEL) {
+        if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL) {
             if (product.isVariant()) {
                 // This variant will be processed when we handle its master product, skip it for now.
                 return [];
@@ -388,7 +403,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 jobReport.recordsToSend += algoliaOperations.length;
                 return algoliaOperations;
             }
-        } else if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED) {
+        } else if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED) {
             if (product.isVariant()) {
                 // This variant will be processed when we handle its master product, skip it for now.
                 return [];
@@ -540,7 +555,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
 
                 let localizedProduct;
 
-                if (recordModel === RECORD_MODEL_TYPE.VARIANT_LEVEL) {
+                if (recordModel === RECORD_MODEL_TYPES.VARIANT_LEVEL) {
 
                     // for variant-level indexing, generate a flat record where all attributes are at the root level
                     localizedProduct = new AlgoliaLocalizedProduct({
@@ -607,16 +622,58 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
         batch = batch.concat(algoliaOperationsArray[i].toArray());
     }
 
-    var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
-    var result = retryableBatchRes.result;
-    jobReport.recordsFailed += retryableBatchRes.failedRecords;
+    switch (indexingAPI) {
+        case INDEXING_APIS.INGESTION_API: {
+            // With the Ingestion API, an OK response only means the payload was accepted;
+            // record-level errors (e.g. "record too big") happen asynchronously — check the Algolia Dashboard.
+            // sentRecords/failedRecords reflect transport-level success per push call.
+            let resultObj;
+            try {
+                let sortedRecords = requestHelper.groupRecordsForIngestionAPI(batch);
+                resultObj = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+            } catch (e) {
+                logger.error('Error while sending batch to Algolia: ' + e);
+            }
 
-    if (result.ok) {
-        jobReport.recordsSent += batch.length;
-        jobReport.chunksSent++;
-    } else {
-        jobReport.recordsFailed += batch.length;
-        jobReport.chunksFailed++;
+            if (resultObj) {
+                // Parity with Search API: a chunk counts as "sent" whenever the transport accepted any of it,
+                // and as "failed" when nothing was accepted. `failureThresholdPercentage` (evaluated in afterStep) owns the pass/fail decision.
+                jobReport.recordsSent += resultObj.sentRecords;
+                jobReport.recordsFailed += resultObj.failedRecords;
+                if (resultObj.sentRecords > 0) {
+                    jobReport.chunksSent++;
+                } else {
+                    jobReport.chunksFailed++;
+                }
+            } else {
+                jobReport.recordsFailed += batch.length;
+                jobReport.chunksFailed++;
+            }
+            break;
+        }
+        case INDEXING_APIS.SEARCH_API:
+        default: {
+            // Search API: sendRetryableBatch mutates the batch array by splicing out failed records,
+            // so batch.length reflects only the remaining records after retries.
+            let resultObj, result;
+            try {
+                resultObj = requestHelper.sendRetryableBatch(batch);
+                result = resultObj.result;
+            } catch (e) {
+                logger.error('Error while sending batch to Algolia: ' + e);
+            }
+
+            jobReport.recordsFailed += resultObj ? resultObj.failedRecords : 0;
+
+            if (result && result.ok) {
+                jobReport.recordsSent += batch.length;
+                jobReport.chunksSent++;
+            } else {
+                jobReport.recordsFailed += batch.length;
+                jobReport.chunksFailed++;
+            }
+            break;
+        }
     }
 }
 
@@ -649,7 +706,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
 
             // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
             if (!empty(deltaExportZips)) {
-                logger.info('Moving the Delta export files to the "_completed" directory...')
+                logger.info('Moving the Delta export files to the "_completed" directory...');
                 fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_completedDir);
             }
         } else {
@@ -682,3 +739,5 @@ exports.__getJobReport = function() {
 exports.__getLocalesForIndexing = function() {
     return siteLocales.toArray();
 }
+exports.__INDEXING_APIS = INDEXING_APIS;
+exports.__setIndexingAPI = function(api) { indexingAPI = api; }

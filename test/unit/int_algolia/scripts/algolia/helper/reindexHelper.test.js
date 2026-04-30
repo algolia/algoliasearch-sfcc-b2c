@@ -28,6 +28,7 @@ const mockMoveIndex = jest.fn().mockReturnValue({
 const mockGetIndexSettings = jest.fn();
 const mockSetIndexSettings = jest.fn();
 const mockWaitTask = jest.fn();
+const mockWaitForRunEvent = jest.fn();
 const mockSendMultiIndexBatch = jest.fn();
 jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
@@ -37,7 +38,9 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
         copyIndexSettings: mockCopySettingsFromProdIndices,
         moveIndex: mockMoveIndex,
         waitTask: mockWaitTask,
+        waitForRunEvent: mockWaitForRunEvent,
         sendMultiIndexBatch: mockSendMultiIndexBatch,
+        pushByIndexName: jest.fn(),
     }
 }, {virtual: true});
 
@@ -83,11 +86,6 @@ test('moveTemporaryIndices', () => {
 });
 
 test('waitForTasks', () => {
-    mockWaitTask
-        .mockReturnValue({
-            ok: true,
-            object: { body: { status: 'published' }}
-        });
     reindexHelper.waitForTasks({ 'testIndex': 33, 'testIndex2': 51 });
 
     expect(mockWaitTask).toHaveBeenCalledTimes(2);
@@ -95,52 +93,92 @@ test('waitForTasks', () => {
     expect(mockWaitTask).toHaveBeenCalledWith('testIndex2', 51);
 });
 
-test('sendRetryableBatch', () => {
-    const batch = [
-        {
-            action: 'addObject',
-            indexName: 'test_index_fr_FR',
-            body: { objectID: 'record1', name: 'record1' },
-        },
-        {
-            action: 'addObject',
-            indexName: 'test_index_en_US',
-            body: { objectID: 'record1', name: 'record1' },
-        },
-        {
-            action: 'addObject',
-            indexName: 'test_index_fr_FR',
-            body: { objectID: 'record2', name: 'record2' },
-        },
-        {
-            action: 'addObject',
-            indexName: 'test_index_en_US',
-            body: { objectID: 'record2', name: 'record2' },
-        }
-        ,
-        {
-            action: 'addObject',
-            indexName: 'test_index_fr_FR',
-            body: { objectID: 'record3', name: 'record3' },
-        },
-        {
-            action: 'addObject',
-            indexName: 'test_index_en_US',
-            body: { objectID: 'record3', name: 'record3' },
-        }
-    ];
-    mockSendMultiIndexBatch.mockReturnValueOnce({
-        error: true,
-        getErrorMessage: () => '{"message":"Record at the position 0 objectID=record1 is too big size=11072/10000 bytes. Please have a look at https://www.algolia.com/doc/guides/sending-and-managing-data/prepare-your-data/in-depth/index-and-records-size-and-usage-limitations/#record-size-limits","position":2,"objectID":"record2","status":400}'
-    });
-    mockSendMultiIndexBatch.mockReturnValue({
-        ok: true,
+test('waitForEvents', () => {
+    reindexHelper.waitForEvents({
+        'run-1': ['evt-1', 'evt-2', 'evt-3'],
+        'run-2': ['evt-4'],
     });
 
-    const res = reindexHelper.sendRetryableBatch(batch);
+    expect(mockWaitForRunEvent).toHaveBeenCalledTimes(4);
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-1');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-2');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-3');
+    expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-2', 'evt-4');
+});
 
-    expect(mockSendMultiIndexBatch).toHaveBeenCalledTimes(2);
-    expect(res.result.ok).toBe(true);
-    expect(res.failedRecords).toBe(2);
-    expect(batch.length).toBe(4); // 2 records have been removed
+describe('finishAtomicReindex', () => {
+    beforeEach(() => {
+        mockGetIndexSettings.mockReturnValue({
+            ok: true,
+            object: { body: { attributesForFaceting: ['price.USD'] } },
+        });
+        mockCopySettingsFromProdIndices.mockReturnValue({
+            ok: true,
+            object: { body: { taskID: 99, updatedAt: '2023-10-01T12:00:00.000Z' } },
+        });
+        mockWaitTask.mockClear();
+        mockWaitForRunEvent.mockClear();
+        mockMoveIndex.mockClear();
+    });
+
+    test('Search API - calls waitForTasks for indexing tasks, copy settings tasks, then moveTemporaryIndices', () => {
+        const indexingTasks = { 'test_index___products__fr.tmp': 100, 'test_index___products__en.tmp': 101 };
+
+        reindexHelper.finishAtomicReindex('products', ['fr', 'en'], indexingTasks, 'search-api');
+
+        // copySettingsFromProdIndices called first (via getIndexSettings + copyIndexSettings)
+        expect(mockGetIndexSettings).toHaveBeenCalledTimes(2);
+
+        // waitTask called for: indexing tasks (2) + copy settings tasks (2)
+        expect(mockWaitTask).toHaveBeenCalledWith('test_index___products__fr.tmp', 100);
+        expect(mockWaitTask).toHaveBeenCalledWith('test_index___products__en.tmp', 101);
+
+        // waitForRunEvent should NOT be called for Search API
+        expect(mockWaitForRunEvent).not.toHaveBeenCalled();
+
+        // moveTemporaryIndices called
+        expect(mockMoveIndex).toHaveBeenCalledTimes(2);
+        expect(mockMoveIndex).toHaveBeenCalledWith('test_index___products__fr.tmp', 'test_index___products__fr');
+        expect(mockMoveIndex).toHaveBeenCalledWith('test_index___products__en.tmp', 'test_index___products__en');
+    });
+
+    test('Ingestion API - calls waitForEvents instead of waitForTasks for indexing events', () => {
+        const indexingEvents = {
+            'run-1': ['evt-1', 'evt-2'],
+            'run-2': ['evt-3'],
+        };
+
+        reindexHelper.finishAtomicReindex('products', ['fr', 'en'], indexingEvents, 'ingestion-api');
+
+        // waitForRunEvent called for each event
+        expect(mockWaitForRunEvent).toHaveBeenCalledTimes(3);
+        expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-1');
+        expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-1', 'evt-2');
+        expect(mockWaitForRunEvent).toHaveBeenCalledWith('run-2', 'evt-3');
+
+        // waitTask still called for copy settings tasks
+        expect(mockWaitTask).toHaveBeenCalled();
+
+        // moveTemporaryIndices called
+        expect(mockMoveIndex).toHaveBeenCalledTimes(2);
+    });
+
+    test('default (undefined) indexingAPI uses Search API path', () => {
+        const indexingTasks = { 'test_index___products__fr.tmp': 200 };
+
+        reindexHelper.finishAtomicReindex('products', ['fr'], indexingTasks);
+
+        expect(mockWaitTask).toHaveBeenCalledWith('test_index___products__fr.tmp', 200);
+        expect(mockWaitForRunEvent).not.toHaveBeenCalled();
+        expect(mockMoveIndex).toHaveBeenCalledTimes(1);
+    });
+
+    test('Ingestion API with empty indexingEvents - still copies settings and moves indices', () => {
+        reindexHelper.finishAtomicReindex('products', ['fr'], {}, 'ingestion-api');
+
+        expect(mockWaitForRunEvent).not.toHaveBeenCalled();
+        // copy settings wait + move still happens
+        expect(mockWaitTask).toHaveBeenCalled();
+        expect(mockMoveIndex).toHaveBeenCalledTimes(1);
+    });
 });

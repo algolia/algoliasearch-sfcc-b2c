@@ -5,7 +5,8 @@ let Status = require('dw/system/Status');
 
 let jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
 let algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-let reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+let requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
+let algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
 let productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 let AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 
@@ -13,13 +14,7 @@ let orderHelper = require('*/cartridge/scripts/algolia/helper/orderHelper');
 let isInStoreStock = productFilter.isInStoreStock;
 let generateAlgoliaOperations = orderHelper.generateAlgoliaOperations;
 
-const RECORD_MODEL_TYPE = {
-    ATTRIBUTE_SLICED: 'attribute-sliced',
-    MASTER_LEVEL: 'master-level',
-    VARIANT_LEVEL: 'variant-level',
-};
-
-const variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
+const { INDEXING_APIS, RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Creates the necessary configuration for a product based on the record model type.
@@ -33,6 +28,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
     let attributesConfig = jobHelper.getAttributes(additionalAttributes);
     let productConfig = {};
 
+    let variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
     let productVariationModel = product.getVariationModel();
     let variationAttribute = productVariationModel.getProductVariationAttribute(variationAttributeForAttributeSlicedRecordModel);
 
@@ -40,8 +36,8 @@ function createProductConfig(product, recordModel, additionalAttributes) {
     let masterProduct = productVariationModel.getMaster();
 
     switch (recordModel) {
-        case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
-        case RECORD_MODEL_TYPE.MASTER_LEVEL:
+        case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
+        case RECORD_MODEL_TYPES.MASTER_LEVEL:
 
             if (!empty(masterProduct)) { // product has a master, so it must be a variant
                 productConfig.baseModel = new AlgoliaLocalizedProduct({
@@ -50,7 +46,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
                     attributeList: attributesConfig.nonLocalizedMasterAttributes,
                 });
 
-                if (recordModel === RECORD_MODEL_TYPE.ATTRIBUTE_SLICED && !empty(variationAttribute)) {
+                if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED && !empty(variationAttribute)) {
                     let variationAttributeValue = productVariationModel.getSelectedValue(variationAttribute);
 
                     // Set the variation model to represent the current variation group
@@ -77,7 +73,7 @@ function createProductConfig(product, recordModel, additionalAttributes) {
 
             }
             break;
-        case RECORD_MODEL_TYPE.VARIANT_LEVEL:
+        case RECORD_MODEL_TYPES.VARIANT_LEVEL:
             // Variant-level indexing for variant product
             productConfig.baseModel = new AlgoliaLocalizedProduct({
                 product: product,
@@ -98,6 +94,22 @@ function createProductConfig(product, recordModel, additionalAttributes) {
  * @returns {dw.system.Status} Status
  */
 exports.inventoryUpdate = function (order) {
+    // Gate the feature-specific toggle at the hook level so it applies uniformly to storefront
+    // order placements AND OCAPI/SCAPI order creations. The master `Algolia_Enable` switch is
+    // honoured upstream (e.g. CheckoutServices.append), so it is not re-checked here.
+    if (!algoliaData.getPreference('EnableRealTimeInventoryHook')) {
+        return new Status(Status.OK);
+    }
+
+    let indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API;
+
+    // Tag the outgoing requests so Algolia logs can distinguish them from job-driven requests
+    algoliaIndexingAPI.setJobInfo({
+        jobID: 'realtime-inventory-hook',
+        stepID: 'inventoryUpdate',
+        indexingAPI: indexingAPI,
+    });
+
     let ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
     let RECORD_MODEL = algoliaData.getPreference('RecordModel');
     let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
@@ -131,7 +143,32 @@ exports.inventoryUpdate = function (order) {
         }
 
         if (algoliaOperations.length > 0) {
-            reindexHelper.sendRetryableBatch(algoliaOperations);
+            // The real-time inventory hook fires synchronously from order.afterPOST, we do not retry failed records.
+            // Transport-level failures are logged so they are visible in Log Center rather than silently dropped.
+            switch (indexingAPI) {
+                case INDEXING_APIS.INGESTION_API: {
+                    let sortedRecords = requestHelper.groupRecordsForIngestionAPI(algoliaOperations);
+                    let ingestionResult = requestHelper.sendGroupedIngestionAPIRecords(sortedRecords);
+                    if (ingestionResult && ingestionResult.failedRecords > 0) {
+                        Logger.warn('Algolia real-time inventory update dropped ' + ingestionResult.failedRecords
+                            + '/' + algoliaOperations.length + ' record(s) for order ' + order.orderNo
+                            + ' (Ingestion API). Product search results may show stale stock until the next reindex.');
+                    }
+                    break;
+                }
+                case INDEXING_APIS.SEARCH_API:
+                default: {
+                    let searchResult = requestHelper.sendRetryableBatch(algoliaOperations);
+                    let searchOk = searchResult && searchResult.result && searchResult.result.ok;
+                    if (!searchOk || (searchResult && searchResult.failedRecords > 0)) {
+                        var failedCount = (searchResult && searchResult.failedRecords) || algoliaOperations.length;
+                        Logger.warn('Algolia real-time inventory update dropped ' + failedCount
+                            + '/' + algoliaOperations.length + ' record(s) for order ' + order.orderNo
+                            + ' (Search API). Product search results may show stale stock until the next reindex.');
+                    }
+                    break;
+                }
+            }
         }
     } catch (error) {
         Logger.error(
@@ -167,8 +204,8 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
 
             switch (recordModel) {
 
-                case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
-                case RECORD_MODEL_TYPE.MASTER_LEVEL: {
+                case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
+                case RECORD_MODEL_TYPES.MASTER_LEVEL: {
                     let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                     productConfig.attributeList = ['variants'];
 
@@ -176,7 +213,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
                     algoliaOperations = algoliaOperations.concat(productOps);
                     break;
                 }
-                case RECORD_MODEL_TYPE.VARIANT_LEVEL: {
+                case RECORD_MODEL_TYPES.VARIANT_LEVEL: {
                     let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                     productConfig.attributeList = ['storeAvailability'];
 
@@ -215,8 +252,8 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
             if (indexOutOfStock) {
                 switch (recordModel) {
 
-                    case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED:
-                    case RECORD_MODEL_TYPE.MASTER_LEVEL: {
+                    case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
+                    case RECORD_MODEL_TYPES.MASTER_LEVEL: {
                         let attrArray = ['variants'];
                         if (additionalAttributes.indexOf('in_stock') > -1) {
                             attrArray.push('in_stock');
@@ -230,7 +267,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                         break;
                     }
 
-                    case RECORD_MODEL_TYPE.VARIANT_LEVEL: {
+                    case RECORD_MODEL_TYPES.VARIANT_LEVEL: {
                         let productConfig = createProductConfig(product, recordModel, additionalAttributes);
                         productConfig.attributeList = ['in_stock'];
 
@@ -248,7 +285,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                 switch (recordModel) {
 
-                    case RECORD_MODEL_TYPE.ATTRIBUTE_SLICED: {
+                    case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED: {
                         if (productConfig.product.isMaster()) {
 
                             if (!empty(productConfig.variationModel)) { // variation group
@@ -299,7 +336,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                         break;
                     }
 
-                    case RECORD_MODEL_TYPE.MASTER_LEVEL: {
+                    case RECORD_MODEL_TYPES.MASTER_LEVEL: {
                         if (productConfig.product.isMaster()) { // master
                             let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), threshold);
                             if (!isMasterInStock) {
@@ -329,7 +366,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                         break;
                     }
 
-                    case RECORD_MODEL_TYPE.VARIANT_LEVEL: {
+                    case RECORD_MODEL_TYPES.VARIANT_LEVEL: {
                         productOps.forEach(function(productOp) {
                             algoliaOperations = algoliaOperations.concat(
                                 new jobHelper.AlgoliaOperation(
@@ -341,7 +378,6 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                         });
                         break;
                     }
-
                 }
             }
         }

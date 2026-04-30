@@ -20,6 +20,31 @@ const ALGOLIA_LOG_FILE = ALGOLIA_FILES_FOLDER + currentSiteID + ALGOLIA_LOG_FILE
 const ALGOLIA_DELTA_EXPORT_BASE_FOLDER = File.IMPEX + '/src/platform/outbox/';
 const ALGOLIA_DELTA_EXPORT_UPDATE_FILE_NAME = currentSiteID + '_product_update.xml';
 
+const INDEXING_APIS = {
+    SEARCH_API: 'search-api',
+    INGESTION_API: 'ingestion-api',
+}
+
+// ACL requirements per indexing API mode. Used by the BM module to validate the configured API key against the
+// actual endpoints the cartridge calls at runtime, so customers don't need to grant a broader ACL than necessary.
+// ACL reference: https://www.algolia.com/doc/guides/security/api-keys/
+const REQUIRED_ACL_BY_INDEXING_API = {};
+REQUIRED_ACL_BY_INDEXING_API[INDEXING_APIS.SEARCH_API] = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
+REQUIRED_ACL_BY_INDEXING_API[INDEXING_APIS.INGESTION_API] = ['addObject', 'deleteObject', 'deleteIndex', 'settings', 'editSettings'];
+
+const RECORD_MODEL_TYPES = {
+    MASTER_LEVEL: 'master-level',
+    VARIANT_LEVEL: 'variant-level',
+    ATTRIBUTE_SLICED: 'attribute-sliced',
+}
+
+const ANALYTICS_REGIONS = {
+    EU: 'eu',
+    US: 'us',
+}
+
+const TMP_INDEX_SUFFIX = '.tmp';
+
 module.exports = {
     ALGOLIA_FILES_FOLDER: ALGOLIA_FILES_FOLDER,
     SNAPSHOT_PRODUCTS_FILE_NAME: SNAPSHOT_PRODUCTS_FILE_NAME,
@@ -35,4 +60,11 @@ module.exports = {
 
     ALGOLIA_DELTA_EXPORT_BASE_FOLDER: ALGOLIA_DELTA_EXPORT_BASE_FOLDER,
     ALGOLIA_DELTA_EXPORT_UPDATE_FILE_NAME: ALGOLIA_DELTA_EXPORT_UPDATE_FILE_NAME,
+
+    INDEXING_APIS: INDEXING_APIS,
+    REQUIRED_ACL_BY_INDEXING_API: REQUIRED_ACL_BY_INDEXING_API,
+    RECORD_MODEL_TYPES: RECORD_MODEL_TYPES,
+    ANALYTICS_REGIONS: ANALYTICS_REGIONS,
+
+    TMP_INDEX_SUFFIX: TMP_INDEX_SUFFIX,
 };

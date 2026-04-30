@@ -9,7 +9,7 @@ var logger;
 var paramAttributeList, paramFailureThresholdPercentage, includedContent, paramLocalesForIndexing;
 
 // Algolia requires
-var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, algoliaIndexingAPI, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig, ContentUtil;
+var algoliaData, AlgoliaLocalizedContent, jobHelper, reindexHelper, requestHelper, algoliaIndexingAPI, AlgoliaJobReport, algoliaSplitter, algoliaContentConfig, ContentUtil;
 var indexingOperation;
 
 // logging-related variables
@@ -29,6 +29,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     AlgoliaLocalizedContent = require('*/cartridge/scripts/algolia/model/algoliaLocalizedContent');
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     reindexHelper = require('*/cartridge/scripts/algolia/helper/reindexHelper');
+    requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     algoliaContentConfig = require('*/cartridge/scripts/algolia/lib/algoliaContentConfig');
@@ -164,8 +165,7 @@ exports.process = function(content, parameters, stepExecution) {
 
     for (let l = 0; l < siteLocales.size(); ++l) {
         var locale = siteLocales[l];
-        var indexName = algoliaData.calculateIndexName('contents', locale);
-        indexName += '.tmp';
+        var indexName = jobHelper.toTmp(algoliaData.calculateIndexName('contents', locale));
         let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, includedContent: includedContent });
         let splits = [];
         let splittingTag = parameters.splittingTag;
@@ -220,7 +220,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
     var result;
     try {
-        var retryableBatchRes = reindexHelper.sendRetryableBatch(batch);
+        var retryableBatchRes = requestHelper.sendRetryableBatch(batch);
         result = retryableBatchRes.result;
         jobReport.recordsFailed += retryableBatchRes.failedRecords;
     } catch (e) {

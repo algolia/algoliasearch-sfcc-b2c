@@ -7,6 +7,7 @@
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 const Resource = require('dw/web/Resource');
 const stringUtils = require('dw/util/StringUtils');
+const { INDEXING_APIS, REQUIRED_ACL_BY_INDEXING_API } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * Formats standard error message string
@@ -144,19 +145,23 @@ function callJsonService(title, service, params) {
 
 /**
  * Validates an Algolia API key’s permissions and index restrictions.
- * It retrieves key details from Algolia, then verifies that the key contains
- * all required ACLs and that the provided indexPrefix is covered by one of the allowed index patterns.
+ * It retrieves key details from Algolia, then verifies that the key’s ACL
+ * contains every entry required by the selected indexing API and that the
+ * provided indexPrefix is covered by one of the allowed index patterns.
  *
  * @param {dw.svc.Service} service - The service instance used for the API call.
  * @param {string} applicationID - The Algolia Application ID.
  * @param {string} apiKey - The API key to validate.
  * @param {string} indexPrefix - The index prefix to validate against.
+ * @param {string} [indexingAPI] - Selected indexing API ('search-api' or 'ingestion-api').
+ *                                 Defaults to 'search-api' when omitted to match the rest of the cartridge.
  * @returns {Object} An object with properties { error: Boolean, errorMessage: String, warning: String }.
  */
-function validateAPIKey(service, applicationID, apiKey, indexPrefix) {
+function validateAPIKey(service, applicationID, apiKey, indexPrefix, indexingAPI) {
 
-    // Define the required ACLs.
-    var requiredACLs = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
+    var selectedIndexingAPI = indexingAPI || INDEXING_APIS.SEARCH_API;
+    var requiredACL = REQUIRED_ACL_BY_INDEXING_API[selectedIndexingAPI]
+        || REQUIRED_ACL_BY_INDEXING_API[INDEXING_APIS.SEARCH_API];
 
     var response = service.call({
         method: 'GET',
@@ -171,16 +176,23 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix) {
     }
 
     var keyData = response.object.body;
-    var actualACLs = keyData.acl || [];
+    var actualACLPerms = keyData.acl || [];
 
-    // Check for missing required ACLs.
-    var missingACLs = requiredACLs.filter(function (acl) {
-        return actualACLs.indexOf(acl) === -1;
+    // Identify required ACL entries that are missing from the key.
+    var missingACLPerms = requiredACL.filter(function (entry) {
+        return actualACLPerms.indexOf(entry) === -1;
     });
-    if (missingACLs.length > 0) {
+    if (missingACLPerms.length > 0) {
         return {
             error: true,
-            errorMessage: Resource.msgf('algolia.error.missing.permissions', 'algolia', null, missingACLs.join(', '))
+            errorMessage: Resource.msgf(
+                'algolia.error.missing.permissions',
+                'algolia',
+                null,
+                selectedIndexingAPI,
+                missingACLPerms.join(', '),
+                requiredACL.join(', ')
+            )
         };
     }
 
@@ -208,16 +220,23 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix) {
         }
     }
 
-    // Identify any extra (excessive) ACLs.
-    var excessiveACLs = actualACLs.filter(function (acl) {
-        return requiredACLs.indexOf(acl) === -1;
+    // Identify ACL entries on the key that exceed what the selected indexing API requires.
+    var excessiveACL = actualACLPerms.filter(function (entry) {
+        return requiredACL.indexOf(entry) === -1;
     });
 
     return {
         error: false,
         errorMessage: '',
-        warning: excessiveACLs.length > 0
-            ? Resource.msgf('algolia.warning.excessive.permissions', 'algolia', null, excessiveACLs.join(', '))
+        warning: excessiveACL.length > 0
+            ? Resource.msgf(
+                'algolia.warning.excessive.permissions',
+                'algolia',
+                null,
+                selectedIndexingAPI,
+                excessiveACL.join(', '),
+                requiredACL.join(', ')
+            )
             : ''
     };
 }

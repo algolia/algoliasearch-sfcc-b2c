@@ -14,16 +14,27 @@ const mockCopySettingsFromProdIndices = jest.fn();
 const mockMoveTemporaryIndices = jest.fn();
 const mockFinishAtomicReindex = jest.fn();
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
-    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
     return {
-        sendRetryableBatch: originalModule.sendRetryableBatch,
         deleteTemporaryIndices: mockDeleteTemporaryIndices,
         copySettingsFromProdIndices: mockCopySettingsFromProdIndices,
         moveTemporaryIndices: mockMoveTemporaryIndices,
         finishAtomicReindex: mockFinishAtomicReindex,
         waitForTasks: jest.fn(),
+        waitForEvents: jest.fn(),
     };
 }, {virtual: true});
+
+const mockGroupRecordsForIngestionAPI = jest.fn();
+const mockSendGroupedIngestionAPIRecords = jest.fn();
+jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/requestHelper');
+    return {
+        sendRetryableBatch: originalModule.sendRetryableBatch,
+        groupRecordsForIngestionAPI: mockGroupRecordsForIngestionAPI,
+        sendGroupedIngestionAPIRecords: mockSendGroupedIngestionAPIRecords,
+    };
+}, {virtual: true});
+
 
 jest.mock('*/cartridge/scripts/services/algoliaIndexingService', () => {}, {virtual: true});
 
@@ -62,6 +73,7 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
                     return [];
             }
         },
+        getAlgoliaSitePreferences: jest.fn(),
     }
 }, {virtual: true});
 
@@ -119,7 +131,7 @@ describe('beforeStep', () => {
 describe('process', () => {
     test('default', () => {
         job.beforeStep({}, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate', indexingAPI: 'search-api' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -129,7 +141,7 @@ describe('process', () => {
     });
     test('partialRecordUpdate', () => {
         job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'partialRecordUpdate', indexingAPI: 'search-api' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -139,7 +151,7 @@ describe('process', () => {
     });
     test('fullRecordUpdate', () => {
         job.beforeStep({ indexingMethod: 'fullRecordUpdate' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullRecordUpdate' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullRecordUpdate', indexingAPI: 'search-api' });
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
         expect(mockDeleteTemporaryIndices).not.toHaveBeenCalled();
 
@@ -149,7 +161,7 @@ describe('process', () => {
     });
     test('fullCatalogReindex', () => {
         job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
-        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullCatalogReindex' });
+        expect(mockSetJobInfo).toHaveBeenCalledWith({ jobID: 'TestJobID', stepID: 'TestStepID', indexingMethod: 'fullCatalogReindex', indexingAPI: 'search-api' });
         expect(mockDeleteTemporaryIndices).toHaveBeenCalledWith(
             'products',
             expect.arrayContaining(['default', 'fr', 'en'])
@@ -274,6 +286,7 @@ describe('process', () => {
 describe('send', () => {
     test('normal batch', () => {
         job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.SEARCH_API);
 
         const algoliaOperationsChunk = [];
         for (let i = 0; i < 3; ++i) {
@@ -306,11 +319,206 @@ describe('send', () => {
 
         expect(mockSendMultiIndexBatch).not.toHaveBeenCalled();
     });
+
+    test('Ingestion API - events accumulated across multiple chunks', () => {
+        job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+        job.__setIndexingTasksToWaitFor({});
+
+        function makeChunk() {
+            const algoliaOperationsChunk = [];
+            for (let i = 0; i < 2; ++i) {
+                const ops = [
+                    { action: 'addObject', indexName: 'test_en.tmp', body: { id: String(i) } },
+                    { action: 'addObject', indexName: 'test_fr.tmp', body: { id: String(i) } },
+                ];
+                ops.toArray = function () { return ops; };
+                algoliaOperationsChunk.push(ops);
+            }
+            algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
+            return algoliaOperationsChunk;
+        }
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords
+            .mockReturnValueOnce({
+                result: {
+                    ok: true,
+                    object: {
+                        body: {
+                            indexingEvents: {
+                                'run-en': ['evt-1'],
+                                'run-fr': ['evt-2'],
+                            }
+                        }
+                    }
+                },
+                failedRecords: 0,
+                sentRecords: 4,
+            })
+            .mockReturnValueOnce({
+                result: {
+                    ok: true,
+                    object: {
+                        body: {
+                            indexingEvents: {
+                                'run-en': ['evt-3'],
+                                'run-fr': ['evt-4'],
+                            }
+                        }
+                    }
+                },
+                failedRecords: 0,
+                sentRecords: 4,
+            });
+
+        job.send(makeChunk());
+        job.send(makeChunk());
+
+        expect(mockGroupRecordsForIngestionAPI).toHaveBeenCalledTimes(2);
+        expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledTimes(2);
+
+        // Verify accumulated events via afterStep → finishAtomicReindex
+        mockFinishAtomicReindex.mockClear();
+        job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+        job.__getJobReport().recordsFailed = 0;
+        job.__getJobReport().recordsToSend = 100;
+        job.afterStep(true);
+
+        expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
+            'products',
+            expect.arrayContaining(['default', 'fr', 'en']),
+            {
+                'run-en': ['evt-1', 'evt-3'],
+                'run-fr': ['evt-2', 'evt-4'],
+            },
+            'ingestion-api'
+        );
+    });
+
+    test('Ingestion API - non-reindex method (partialRecordUpdate)', () => {
+        job.beforeStep({ indexingMethod: 'partialRecordUpdate' }, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: true, object: { body: {} } },
+            failedRecords: 0,
+            sentRecords: 2,
+        });
+
+        function makeChunk() {
+            const algoliaOperationsChunk = [];
+            for (let i = 0; i < 2; ++i) {
+                const ops = [
+                    { action: 'partialUpdateObject', indexName: 'test_en', body: { id: String(i) } },
+                ];
+                ops.toArray = function () { return ops; };
+                algoliaOperationsChunk.push(ops);
+            }
+            algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
+            return algoliaOperationsChunk;
+        }
+
+        job.send(makeChunk());
+
+        expect(mockGroupRecordsForIngestionAPI).toHaveBeenCalled();
+        expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledWith({}, 'partialRecordUpdate');
+        expect(job.__getJobReport().recordsSent).toBe(2);
+    });
+
+    // Parity with the Search API: chunksSent++ whenever the transport accepted any records;
+    // the overall pass/fail decision is driven by failureThresholdPercentage in afterStep.
+    test('Ingestion API - partial failure counts the chunk as sent, not failed', () => {
+        job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: false },
+            failedRecords: 3,
+            sentRecords: 2,
+        });
+
+        function makeChunk() {
+            const algoliaOperationsChunk = [];
+            const ops = [
+                { action: 'addObject', indexName: 'test_en', body: { id: '0' } },
+                { action: 'addObject', indexName: 'test_fr', body: { id: '0' } },
+            ];
+            ops.toArray = function () { return ops; };
+            algoliaOperationsChunk.push(ops);
+            algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
+            return algoliaOperationsChunk;
+        }
+
+        job.send(makeChunk());
+
+        expect(job.__getJobReport().recordsFailed).toBe(3);
+        expect(job.__getJobReport().recordsSent).toBe(2);
+        expect(job.__getJobReport().chunksSent).toBe(1);
+        expect(job.__getJobReport().chunksFailed).toBe(0);
+    });
+
+    test('Ingestion API - exception in send is caught', () => {
+        job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockImplementation(() => { throw new Error('Grouping error'); });
+
+        function makeChunk() {
+            const algoliaOperationsChunk = [];
+            const ops = [{ action: 'addObject', indexName: 'test_en', body: { id: '0' } }];
+            ops.toArray = function () { return ops; };
+            algoliaOperationsChunk.push(ops);
+            algoliaOperationsChunk.toArray = function () { return algoliaOperationsChunk; };
+            return algoliaOperationsChunk;
+        }
+
+        // Should not throw - caught internally
+        expect(() => job.send(makeChunk())).not.toThrow();
+        expect(job.__getJobReport().recordsFailed).toBe(1);
+        expect(job.__getJobReport().chunksFailed).toBe(1);
+    });
+});
+
+describe('beforeStep - Ingestion API validation', () => {
+    test('throws if Ingestion API selected with invalid AnalyticsRegion', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        global.customPreferences['Algolia_AnalyticsRegion'] = 'invalid';
+        expect(() => job.beforeStep({}, stepExecution))
+            .toThrow('You need to define a valid Analytics region');
+        delete global.customPreferences['Algolia_IndexingAPI'];
+        delete global.customPreferences['Algolia_AnalyticsRegion'];
+    });
+
+    test('throws if Ingestion API selected with missing AnalyticsRegion', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        expect(() => job.beforeStep({}, stepExecution))
+            .toThrow('You need to define a valid Analytics region');
+        delete global.customPreferences['Algolia_IndexingAPI'];
+    });
+
+    test('does not throw if Ingestion API selected with valid AnalyticsRegion (us)', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        global.customPreferences['Algolia_AnalyticsRegion'] = 'us';
+        expect(() => job.beforeStep({}, stepExecution)).not.toThrow();
+        delete global.customPreferences['Algolia_IndexingAPI'];
+        delete global.customPreferences['Algolia_AnalyticsRegion'];
+    });
+
+    test('does not throw if Ingestion API selected with valid AnalyticsRegion (eu)', () => {
+        global.customPreferences['Algolia_IndexingAPI'] = 'ingestion-api';
+        global.customPreferences['Algolia_AnalyticsRegion'] = 'eu';
+        expect(() => job.beforeStep({}, stepExecution)).not.toThrow();
+        delete global.customPreferences['Algolia_IndexingAPI'];
+        delete global.customPreferences['Algolia_AnalyticsRegion'];
+    });
 });
 
 describe('afterStep', () => {
     beforeAll(() => {
-        job.__setLastIndexingTasks({ "test_index_fr": 42, "test_index_en": 51 });
+        job.__setIndexingTasksToWaitFor({ "test_index_fr": 42, "test_index_en": 51 });
     });
 
     describe('partialRecordUpdate', () => {
@@ -345,7 +553,8 @@ describe('afterStep', () => {
             expect(mockFinishAtomicReindex).toHaveBeenCalledWith(
                 'products',
                 expect.arrayContaining(['default', 'fr', 'en']),
-                {"test_index_fr": 42, "test_index_en": 51}
+                {"test_index_fr": 42, "test_index_en": 51},
+                'search-api'
             );
             expect(job.__getJobReport().error).toBe(false);
         });

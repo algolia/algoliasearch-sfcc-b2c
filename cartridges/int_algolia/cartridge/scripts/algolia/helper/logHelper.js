@@ -8,7 +8,11 @@ var FileReader = require('dw/io/FileReader'); // eslint-disable-line no-redeclar
 var XMLStreamReader = require('dw/io/XMLStreamReader');
 
 var jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
-var algoliaConstants = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+var {
+    ALGOLIA_LOG_FILE,
+    ALGOLIA_FILES_FOLDER,
+    ALGOLIA_LOG_FILE_NAME,
+} = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 var LOG_NODE_NAME = 'logger';
 
@@ -57,7 +61,7 @@ function getLogData(id, logFileName) {
         partialproductinventory: new LogJob(),
     };
 
-    var logFile = empty(logFileName) ? new File(algoliaConstants.ALGOLIA_LOG_FILE) : new File(logFileName);
+    var logFile = empty(logFileName) ? new File(ALGOLIA_LOG_FILE) : new File(logFileName);
 
     if (logFile.exists()) {
         var logFileReader = null;
@@ -69,7 +73,7 @@ function getLogData(id, logFileName) {
             logXMLFileReader = new XMLStreamReader(logFileReader);
             logData = readObject(logXMLFileReader, LOG_NODE_NAME);
         } catch (error) {
-            jobHelper.logFileError(algoliaConstants.ALGOLIA_LOG_FILE, 'Error open file to read', error);
+            jobHelper.logFileError(ALGOLIA_LOG_FILE, 'Error open file to read', error);
         }
 
         logXMLFileReader.close();
@@ -97,7 +101,7 @@ function getLogDataAllSites() {
     var sites = require('dw/system/Site').getAllSites();
     var result = [];
     for (var i = 0; i < sites.size(); i += 1) {
-        var logFileName = algoliaConstants.ALGOLIA_FILES_FOLDER + sites[i].getID() + algoliaConstants.ALGOLIA_LOG_FILE_NAME;
+        var logFileName = ALGOLIA_FILES_FOLDER + sites[i].getID() + ALGOLIA_LOG_FILE_NAME;
         var logFile = new File(logFileName);
 
         if (logFile.exists()) {
@@ -133,7 +137,7 @@ function setLogData(id, productLog) {
     var logData = getLogData(LOG_NODE_NAME);
     logData[id] = productLog;
     // Open Delta XML file to write
-    var logFile = new File(algoliaConstants.ALGOLIA_LOG_FILE);
+    var logFile = new File(ALGOLIA_LOG_FILE);
     var logFileWriter = null;
     var logXmlWriter = null;
     try {
