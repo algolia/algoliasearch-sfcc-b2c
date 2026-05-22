@@ -16,10 +16,29 @@ const productAttributesConfig = {
         attribute: 'searchRank',
         localized: false,
     },
-    revenueLast7Days: {
-        // Nested attributes are supported
+    // Active Data examples.
+    //
+    // The cartridge ships with built-in handlers for all 48 `dw.catalog.ProductActiveData`
+    // properties, indexed flat at the master record root (see `algoliaProductConfig.js` for details).
+    // Add the bare ID (e.g. `ordersWeek`, `revenueWeek`) to `Algolia_AdditionalAttributes` to enable
+    // that - no entry is required in this file.
+    //
+    // The two examples below cover the cases the built-in handlers do NOT cover:
+    //   1) Rename: publish an Active Data field under a different Algolia key.
+    //   2) Per-variant un-nest: place per-variant Active Data inside `variants[]`
+    //      as a flat field (not nested under `activeData`).
+    popularity: {
+        // Renaming: index `product.activeData.revenueWeek` under the Algolia key `popularity`.
         attribute: 'activeData.revenueWeek',
         localized: false,
+    },
+    revenueWeekPerVariant: {
+        // Per-variant un-nest: in the master-level and attribute-sliced models, place each
+        // variant's `activeData.revenueWeek` inside its `variants[]` entry as a flat
+        // `revenueWeekPerVariant` field, instead of nested under `activeData`.
+        attribute: 'activeData.revenueWeek',
+        localized: false,
+        variantAttribute: true,
     },
     categoryName: {
         attribute: 'primaryCategory.displayName',

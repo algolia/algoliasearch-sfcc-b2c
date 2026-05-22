@@ -3,8 +3,8 @@ const ProductVariationModel = require("./ProductVariationModel");
 
 // https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/api/class_dw_catalog_Variant.html
 class Variant extends MasterProduct {
-    constructor({ ID, variationAttributes, masterProduct, ats = 6, online = true, searchable = true } = {}) {
-        super({ ID: ID || '701644031206M' });
+    constructor({ ID, variationAttributes, masterProduct, ats = 6, online = true, searchable = true, activeData } = {}) {
+        super({ ID: ID || '701644031206M', activeData });
         this.master = false;
         this.variant = true;
         this.masterProduct = masterProduct || new MasterProduct();
