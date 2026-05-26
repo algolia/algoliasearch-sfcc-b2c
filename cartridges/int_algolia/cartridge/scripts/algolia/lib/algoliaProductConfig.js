@@ -311,14 +311,7 @@ var attributeConfig_v2 = {
     // a per-slice value, compute it in `productAttributesConfig.js` from the variants in the
     // slice; the dotted form (`activeData.<id>`) places each variant's own value inside its
     // `variants[i]` entry.
-    //
-    // Changed behavior: prior to this version, the cartridge had no built-in handler for
-    // these IDs. Typing one of them as a bare name into `Algolia_AdditionalAttributes`
-    // produced a null-valued field. After this change, the same bare-name entry produces
-    // the platform-aggregated master-level Active Data value. Any client who has a product
-    // custom attribute named the same as one of the 48 IDs, or a `productAttributesConfig.js`
-    // override whose key shadows one of these, should audit `Algolia_AdditionalAttributes`
-    // and `productAttributesConfig.js` after upgrade. See the release notes.
+
     ordersDay:           { attribute: 'activeData.ordersDay',           localized: false, variantAttribute: false },
     ordersWeek:          { attribute: 'activeData.ordersWeek',          localized: false, variantAttribute: false },
     ordersMonth:         { attribute: 'activeData.ordersMonth',         localized: false, variantAttribute: false },
