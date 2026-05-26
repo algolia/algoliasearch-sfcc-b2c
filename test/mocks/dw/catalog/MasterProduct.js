@@ -4,7 +4,7 @@ const collectionHelper = require('../../helpers/collectionHelper');
 // https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/api/class_dw_catalog_Product.html
 // The instantiated product is a master product.
 class Product {
-    constructor({ ID, online = true, searchable = true, variationGroup = false, images, variants = [] } = {}) {
+    constructor({ ID, online = true, searchable = true, variationGroup = false, images, variants = [], activeData } = {}) {
         this.ID = ID || '25592581M';
         this.assignedToSiteCatalog = true;
         this.brand = null;
@@ -20,6 +20,7 @@ class Product {
         this.variationGroup = variationGroup;
         this.defaultVariant = null;
         this.variants = collectionHelper.createCollection(variants);
+        this.activeData = activeData || null;
     }
 
     get name() {
