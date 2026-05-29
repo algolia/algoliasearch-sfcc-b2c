@@ -168,22 +168,18 @@
                         </isif>
                     </td>
                     <td class="table_detail w e s">
-                        <div class="multi-select-with-presets">
-                            <select multiple size="6" id="CustomRankingActiveData" name="CustomRankingActiveData">
+                        <div class="checkbox-list-with-presets">
+                            <fieldset class="active-data-checkbox-list" id="CustomRankingActiveData">
                                 <isloop items="${pdict.customRankingActiveDataOptions}" var="optionId">
                                     <isset name="isSelected" value="${pdict.customRankingActiveDataSelected && pdict.customRankingActiveDataSelected.indexOf(optionId) !== -1}" scope="page"/>
-                                    <option value="${optionId}" <isif condition="${isSelected}">selected="selected"</isif>>${optionId}</option>
+                                    <label class="active-data-option">
+                                        <input type="checkbox" name="CustomRankingActiveData" value="${optionId}" ${isSelected ? "checked" : ""} /> ${optionId}
+                                    </label>
                                 </isloop>
-                            </select>
+                            </fieldset>
                             <div class="preset-buttons">
                                 <button type="button" class="button" onclick="selectActiveDataAll(true);">
                                     <isprint value="${Resource.msg('algolia.label.button.selectall', 'algolia', null)}" encoding="jshtml" />
-                                </button>
-                                <button type="button" class="button" onclick="selectActiveDataBySuffix('Week');">
-                                    <isprint value="${Resource.msg('algolia.label.button.selectweek', 'algolia', null)}" encoding="jshtml" />
-                                </button>
-                                <button type="button" class="button" onclick="selectActiveDataBySuffix('Month');">
-                                    <isprint value="${Resource.msg('algolia.label.button.selectmonth', 'algolia', null)}" encoding="jshtml" />
                                 </button>
                                 <button type="button" class="button" onclick="selectActiveDataAll(false);">
                                     <isprint value="${Resource.msg('algolia.label.button.selectnone', 'algolia', null)}" encoding="jshtml" />
@@ -541,17 +537,9 @@
         }
 
         function selectActiveDataAll(state) {
-            var select = document.getElementById("CustomRankingActiveData");
-            if (!select) { return; }
-            for (let i = 0; i < select.options.length; i++) {
-                select.options[i].selected = state;
-            }
-        }
-        function selectActiveDataBySuffix(suffix) {
-            var select = document.getElementById("CustomRankingActiveData");
-            if (!select) { return; }
-            for (let i = 0; i < select.options.length; i++) {
-                select.options[i].selected = select.options[i].value.indexOf(suffix) !== -1;
+            var inputs = document.getElementsByName("CustomRankingActiveData");
+            for (let i = 0; i < inputs.length; i++) {
+                inputs[i].checked = state;
             }
         }
 

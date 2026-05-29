@@ -132,8 +132,9 @@ exports.beforeStep = function(parameters, stepExecution) {
             }
         });
 
-        // Merge the BM-managed multi-select preference. Same dedup contract: skip values already in the list,
-        // skip empty strings (defensive against the legacy setSetOfStrings('') -> [''] save path).
+        // Merge the BM-managed checkbox-list preference (Algolia_CustomRankingActiveData). Same dedup contract:
+        // skip values already in the list, skip empty strings (defensive against the legacy
+        // setSetOfStrings('') -> [''] save path).
         const customRankingActiveData = algoliaData.getSetOfArray('CustomRankingActiveData');
         customRankingActiveData.forEach(function(attribute) {
             if (attribute && attributesToSend.indexOf(attribute) < 0) {

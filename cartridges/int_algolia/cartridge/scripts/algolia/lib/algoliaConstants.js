@@ -46,7 +46,7 @@ const ANALYTICS_REGIONS = {
 const TMP_INDEX_SUFFIX = '.tmp';
 
 // Recommended dw.catalog.ProductActiveData fields exposed in the BM module's
-// "Active data for custom ranking" multi-select preference. Single source of truth
+// "Active data for custom ranking" checkbox-list preference. Single source of truth
 // for the BM ISML option list, the unretrievableAttributes validator, and any
 // future surface that needs the canonical recommendation set. The cartridge ships
 // with built-in handlers for all 48 ProductActiveData properties; the ones not

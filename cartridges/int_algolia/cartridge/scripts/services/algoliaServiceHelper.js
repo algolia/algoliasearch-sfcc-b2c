@@ -276,7 +276,6 @@ function validateUnretrievableAttributes(service, applicationID, indexPrefix, lo
         return emptyResult;
     }
 
-    /** @type {Array<{indexName: string, missing: Array<string>, status: string, error: string}>} */
     var details = [];
     var indicesWithGaps = [];
     var indicesNotFound = [];
@@ -290,7 +289,7 @@ function validateUnretrievableAttributes(service, applicationID, indexPrefix, lo
         }
 
         let indexName = indexPrefix + '__products__' + locale;
-        let entry = { indexName: indexName, missing: /** @type {Array<string>} */ ([]), status: 'ok', error: '' };
+        let entry = { indexName: indexName, missing: [], status: 'ok', error: '' };
 
         let response;
         try {
@@ -299,9 +298,8 @@ function validateUnretrievableAttributes(service, applicationID, indexPrefix, lo
                 url: 'https://' + applicationID + '.algolia.net/1/indexes/' + encodeURIComponent(indexName) + '/settings'
             });
         } catch (err) {
-            let caught = /** @type {any} */ (err);
             entry.status = 'unreachable';
-            entry.error = (caught && caught.message) ? caught.message : String(caught);
+            entry.error = (err && err.message) ? err.message : String(err);
             logger.warn('validateUnretrievableAttributes: ' + indexName + ' -> unreachable (call threw): ' + entry.error);
             details.push(entry);
             indicesUnreachable.push(indexName);

@@ -143,7 +143,7 @@ exports.beforeStep = function(parameters, stepExecution) {
             }
         });
 
-        // Merge the BM-managed multi-select preference (kept in sync with algoliaProductIndex.js).
+        // Merge the BM-managed checkbox-list preference (Algolia_CustomRankingActiveData), kept in sync with algoliaProductIndex.js.
         const customRankingActiveData = algoliaData.getSetOfArray('CustomRankingActiveData');
         customRankingActiveData.forEach(function(attribute) {
             if (attribute && attributesToSend.indexOf(attribute) < 0) {

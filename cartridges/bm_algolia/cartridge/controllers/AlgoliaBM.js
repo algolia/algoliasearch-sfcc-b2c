@@ -38,8 +38,9 @@ function handleSettings() {
     var unretrievableValidation = {};
     var pdictValues = getDashboardPdict();
 
-    // Multi-value httpParameter <select multiple>: convert the dw.util.Collection of strings to a plain JS array.
-    // Filter against the canonical option list so unexpected values (e.g. tampered POSTs) are dropped silently.
+    // Multi-value httpParameter (checkbox group sharing the name "CustomRankingActiveData"): convert the
+    // dw.util.Collection of submitted values to a plain JS array. Filter against the canonical option
+    // list so unexpected values (e.g. tampered POSTs) are dropped silently.
     var selectedActiveData = [];
     if (params.CustomRankingActiveData && params.CustomRankingActiveData.stringValues) {
         let rawValues = params.CustomRankingActiveData.stringValues.toArray();

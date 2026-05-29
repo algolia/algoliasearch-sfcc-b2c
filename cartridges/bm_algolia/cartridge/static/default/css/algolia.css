@@ -116,20 +116,41 @@ input[readonly] {
     border-radius: 2px;
 }
 
-.multi-select-with-presets {
+.checkbox-list-with-presets {
     display: flex;
     align-items: flex-start;
     gap: 12px;
     flex-wrap: wrap;
 }
-.multi-select-with-presets select {
-    min-width: 220px;
-}
-.multi-select-with-presets .preset-buttons {
+.checkbox-list-with-presets .preset-buttons {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
-.multi-select-with-presets .preset-buttons button {
+.checkbox-list-with-presets .preset-buttons button {
     min-width: 110px;
+}
+fieldset.active-data-checkbox-list,
+#CustomRankingActiveData.active-data-checkbox-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 220px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 4px 6px;
+    margin: 0;
+}
+.checkbox-list-with-presets .active-data-checkbox-list .active-data-option {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+    user-select: none;
+}
+.checkbox-list-with-presets .active-data-checkbox-list .active-data-option input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
 }
