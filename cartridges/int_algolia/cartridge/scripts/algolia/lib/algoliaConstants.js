@@ -45,6 +45,21 @@ const ANALYTICS_REGIONS = {
 
 const TMP_INDEX_SUFFIX = '.tmp';
 
+// Recommended dw.catalog.ProductActiveData fields exposed in the BM module's
+// "Active data for custom ranking" multi-select preference. Single source of truth
+// for the BM ISML option list, the unretrievableAttributes validator, and any
+// future surface that needs the canonical recommendation set. The cartridge ships
+// with built-in handlers for all 48 ProductActiveData properties; the ones not
+// listed here can still be added through the Additional Product Attributes preference.
+const CUSTOM_RANKING_ACTIVE_DATA_OPTIONS = [
+    'ordersWeek',
+    'revenueWeek',
+    'conversionWeek',
+    'ordersMonth',
+    'revenueMonth',
+    'conversionMonth'
+];
+
 module.exports = {
     ALGOLIA_FILES_FOLDER: ALGOLIA_FILES_FOLDER,
     SNAPSHOT_PRODUCTS_FILE_NAME: SNAPSHOT_PRODUCTS_FILE_NAME,
@@ -67,4 +82,6 @@ module.exports = {
     ANALYTICS_REGIONS: ANALYTICS_REGIONS,
 
     TMP_INDEX_SUFFIX: TMP_INDEX_SUFFIX,
+
+    CUSTOM_RANKING_ACTIVE_DATA_OPTIONS: CUSTOM_RANKING_ACTIVE_DATA_OPTIONS,
 };

@@ -241,8 +241,142 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, indexingAPI
     };
 }
 
+/**
+ * Compare a list of selected attribute IDs against the unretrievableAttributes setting of every product index
+ * the cartridge writes to (one per locale, derived from indexPrefix and the supplied locale list), and produce
+ * a copy-only warning listing the IDs that are missing from each index's unretrievableAttributes list.
+ *
+ * Soft-fail by design:
+ * - Empty selection or empty locale list short-circuits to {error: false, warning: ''}.
+ * - 404 (index does not exist yet, e.g. the customer hasn't run the indexing job once) is logged
+ *   and the index is skipped, never blocking save.
+ * - Network or auth errors are logged and the index is skipped, never blocking save.
+ * - The function never returns error: true; it only ever attaches a warning string.
+ *
+ * Replica indices are not enumerated by the cartridge -- the warning copy directs the user to set
+ * unretrievableAttributes on each replica or to use forwardToReplicas: true when applying settings.
+ *
+ * @param {dw.svc.HTTPService} service - configured indexing service (must already carry application ID and admin API key)
+ * @param {string} applicationID - Algolia application ID (used to build the per-call URL)
+ * @param {string} indexPrefix - effective index prefix used by the cartridge (already resolved against the site default)
+ * @param {Array<string>} locales - list of locales to check (e.g. Algolia_LocalesForIndexing or Site.getAllowedLocales())
+ * @param {Array<string>} selectedAttributes - attribute IDs selected in the BM module (typically a subset of CUSTOM_RANKING_ACTIVE_DATA_OPTIONS)
+ * @returns {Object} { error: boolean (always false), warning: String, notFoundNotice: String, unreachableNotice: String, details: Array<{indexName, missing, status, error}> }
+ */
+function validateUnretrievableAttributes(service, applicationID, indexPrefix, locales, selectedAttributes) {
+    var emptyResult = { error: false, warning: '', notFoundNotice: '', unreachableNotice: '', details: [] };
+
+    if (!selectedAttributes || selectedAttributes.length === 0) {
+        return emptyResult;
+    }
+    if (!locales || locales.length === 0) {
+        return emptyResult;
+    }
+    if (!indexPrefix || !applicationID) {
+        return emptyResult;
+    }
+
+    /** @type {Array<{indexName: string, missing: Array<string>, status: string, error: string}>} */
+    var details = [];
+    var indicesWithGaps = [];
+    var indicesNotFound = [];
+    var indicesUnreachable = [];
+    var indicesOk = [];
+
+    for (let i = 0; i < locales.length; i++) {
+        let locale = locales[i];
+        if (!locale) {
+            continue;
+        }
+
+        let indexName = indexPrefix + '__products__' + locale;
+        let entry = { indexName: indexName, missing: /** @type {Array<string>} */ ([]), status: 'ok', error: '' };
+
+        let response;
+        try {
+            response = service.call({
+                method: 'GET',
+                url: 'https://' + applicationID + '.algolia.net/1/indexes/' + encodeURIComponent(indexName) + '/settings'
+            });
+        } catch (err) {
+            let caught = /** @type {any} */ (err);
+            entry.status = 'unreachable';
+            entry.error = (caught && caught.message) ? caught.message : String(caught);
+            logger.warn('validateUnretrievableAttributes: ' + indexName + ' -> unreachable (call threw): ' + entry.error);
+            details.push(entry);
+            indicesUnreachable.push(indexName);
+            continue;
+        }
+
+        if (!response || !response.ok) {
+            // 404: index does not exist yet (e.g. customer hasn't run the indexing job).
+            // Other errors: auth, transient network. Either way, do not block save.
+            let statusCode = response && response.error;
+            if (statusCode === 404) {
+                entry.status = 'not-found';
+                entry.error = 'HTTP 404';
+                logger.info('validateUnretrievableAttributes: ' + indexName + ' -> not-found (run AlgoliaProductIndex_v2 to create it).');
+                indicesNotFound.push(indexName);
+            } else {
+                entry.status = 'unreachable';
+                entry.error = 'HTTP ' + statusCode + ': ' + ((response && response.errorMessage) || 'unknown');
+                logger.warn('validateUnretrievableAttributes: ' + indexName + ' -> unreachable: ' + entry.error);
+                indicesUnreachable.push(indexName);
+            }
+            details.push(entry);
+            continue;
+        }
+
+        let settings = (response.object && response.object.body) || {};
+        let configured = settings.unretrievableAttributes || [];
+        let missing = selectedAttributes.filter(function (attribute) {
+            return configured.indexOf(attribute) === -1;
+        });
+
+        entry.missing = missing;
+        details.push(entry);
+
+        if (missing.length > 0) {
+            entry.status = 'missing';
+            indicesWithGaps.push(indexName + ' (' + missing.join(', ') + ')');
+            logger.info('validateUnretrievableAttributes: ' + indexName + ' -> missing: ' + missing.join(', '));
+        } else {
+            indicesOk.push(indexName);
+            logger.info('validateUnretrievableAttributes: ' + indexName + ' -> ok (all selected fields configured).');
+        }
+    }
+
+    logger.info('validateUnretrievableAttributes: summary - ok=' + indicesOk.length +
+        ', missing=' + indicesWithGaps.length +
+        ', not-found=' + indicesNotFound.length +
+        ', unreachable=' + indicesUnreachable.length +
+        ' (selected: ' + selectedAttributes.join(',') + ')');
+
+    var warning = '';
+    if (indicesWithGaps.length > 0) {
+        warning = Resource.msgf('algolia.warning.unretrievable.missing', 'algolia', null, indicesWithGaps.join('; '));
+    }
+    var notFoundNotice = '';
+    if (indicesNotFound.length > 0) {
+        notFoundNotice = Resource.msgf('algolia.notice.unretrievable.notfound', 'algolia', null, indicesNotFound.join(', '));
+    }
+    var unreachableNotice = '';
+    if (indicesUnreachable.length > 0) {
+        unreachableNotice = Resource.msgf('algolia.notice.unretrievable.unreachable', 'algolia', null, indicesUnreachable.join(', '));
+    }
+
+    return {
+        error: false,
+        warning: warning,
+        notFoundNotice: notFoundNotice,
+        unreachableNotice: unreachableNotice,
+        details: details
+    };
+}
+
 module.exports = {
     callService: callService,
     callJsonService: callJsonService,
-    validateAPIKey: validateAPIKey
+    validateAPIKey: validateAPIKey,
+    validateUnretrievableAttributes: validateUnretrievableAttributes
 };

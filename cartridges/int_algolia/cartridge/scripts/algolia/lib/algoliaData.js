@@ -178,6 +178,20 @@ function setSetOfStrings(id, value) {
 }
 
 /**
+ * @description Set a set-of-string Algolia preference directly from an array, without going through a CSV string.
+ * Used by BM form handlers that already have an array (e.g. from a multi-value httpParameter or a multi-select <select>),
+ * and that want an empty selection to be saved as an empty array instead of [''].
+ * @param {string} id name of preference (without the "Algolia_" prefix)
+ * @param {Array<string>} values values to save; falsy or non-array inputs are saved as an empty array
+ */
+function setSetOfArray(id, values) {
+    Transaction.wrap(function () {
+        var toSave = Array.isArray(values) ? values : [];
+        currentSite.setCustomPreferenceValue('Algolia_' + id, toSave);
+    });
+}
+
+/**
  * @description Get category and product log data from log file for current Site
  * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastPartialPriceSyncLog | LastPartialInventorySyncLog | LastCategorySyncLog]
  * @returns {Object} log data
@@ -387,6 +401,7 @@ module.exports = {
     getSetOfArray: getSetOfArray,
     getSetOfStrings: getSetOfStrings,
     setSetOfStrings: setSetOfStrings,
+    setSetOfArray: setSetOfArray,
     getLogData: getLogData,
     setLogData: setLogData,
     getLogDataAllSites: getLogDataAllSites,

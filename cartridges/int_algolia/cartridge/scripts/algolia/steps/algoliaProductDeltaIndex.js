@@ -142,6 +142,14 @@ exports.beforeStep = function(parameters, stepExecution) {
                 attributesToSend.push(attribute);
             }
         });
+
+        // Merge the BM-managed multi-select preference (kept in sync with algoliaProductIndex.js).
+        const customRankingActiveData = algoliaData.getSetOfArray('CustomRankingActiveData');
+        customRankingActiveData.forEach(function(attribute) {
+            if (attribute && attributesToSend.indexOf(attribute) < 0) {
+                attributesToSend.push(attribute);
+            }
+        });
     } else {
         attributesToSend = paramAttributeListOverride;
     }
