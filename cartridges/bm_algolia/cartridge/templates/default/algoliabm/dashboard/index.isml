@@ -145,6 +145,54 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_CustomRankingActiveData </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.customrankingactivedata', 'algolia', null)}" encoding="jshtml" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.customrankingactivedata.help', 'algolia', null)}</div>
+                        <isif condition="${pdict.warnings.customRankingActiveDataWarning}">
+                            <div class="warning-message yellow narrow">
+                                ${pdict.warnings.customRankingActiveDataWarning}
+                            </div>
+                        </isif>
+                        <isif condition="${pdict.warnings.customRankingActiveDataNotFoundNotice}">
+                            <div class="info-message info-blue narrow">
+                                ${pdict.warnings.customRankingActiveDataNotFoundNotice}
+                            </div>
+                        </isif>
+                        <isif condition="${pdict.warnings.customRankingActiveDataUnreachableNotice}">
+                            <div class="warning-message yellow narrow">
+                                ${pdict.warnings.customRankingActiveDataUnreachableNotice}
+                            </div>
+                        </isif>
+                    </td>
+                    <td class="table_detail w e s">
+                        <div class="multi-select-with-presets">
+                            <select multiple size="6" id="CustomRankingActiveData" name="CustomRankingActiveData">
+                                <isloop items="${pdict.customRankingActiveDataOptions}" var="optionId">
+                                    <isset name="isSelected" value="${pdict.customRankingActiveDataSelected && pdict.customRankingActiveDataSelected.indexOf(optionId) !== -1}" scope="page"/>
+                                    <option value="${optionId}" <isif condition="${isSelected}">selected="selected"</isif>>${optionId}</option>
+                                </isloop>
+                            </select>
+                            <div class="preset-buttons">
+                                <button type="button" class="button" onclick="selectActiveDataAll(true);">
+                                    <isprint value="${Resource.msg('algolia.label.button.selectall', 'algolia', null)}" encoding="jshtml" />
+                                </button>
+                                <button type="button" class="button" onclick="selectActiveDataBySuffix('Week');">
+                                    <isprint value="${Resource.msg('algolia.label.button.selectweek', 'algolia', null)}" encoding="jshtml" />
+                                </button>
+                                <button type="button" class="button" onclick="selectActiveDataBySuffix('Month');">
+                                    <isprint value="${Resource.msg('algolia.label.button.selectmonth', 'algolia', null)}" encoding="jshtml" />
+                                </button>
+                                <button type="button" class="button" onclick="selectActiveDataAll(false);">
+                                    <isprint value="${Resource.msg('algolia.label.button.selectnone', 'algolia', null)}" encoding="jshtml" />
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
                 <iscomment> Algolia_IndexPrefix </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
@@ -490,6 +538,21 @@
             document.getElementById("EnableSSR").disabled = !storefrontEnabled;
             document.getElementById("EnableContentSearch").disabled = !storefrontEnabled;
             document.getElementById("EnableRecommend").disabled = !storefrontEnabled;
+        }
+
+        function selectActiveDataAll(state) {
+            var select = document.getElementById("CustomRankingActiveData");
+            if (!select) { return; }
+            for (let i = 0; i < select.options.length; i++) {
+                select.options[i].selected = state;
+            }
+        }
+        function selectActiveDataBySuffix(suffix) {
+            var select = document.getElementById("CustomRankingActiveData");
+            if (!select) { return; }
+            for (let i = 0; i < select.options.length; i++) {
+                select.options[i].selected = select.options[i].value.indexOf(suffix) !== -1;
+            }
         }
 
         updateStorefrontCheckboxes();

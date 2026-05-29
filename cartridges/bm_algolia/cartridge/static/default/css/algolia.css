@@ -70,6 +70,9 @@ table#algolia-report-table .cell-number {
     padding: 15px;
     margin-bottom: 20px;
 }
+.info-blue {
+    color: #31708f;
+}
 h2 {
     font-size: 1.5em;
     font-family: "Helvetica Neue",Helvetica,Arial,Verdana,sans-serif;
@@ -111,4 +114,22 @@ input[readonly] {
     cursor: not-allowed;
     border: 1px solid rgb(118, 118, 118);
     border-radius: 2px;
+}
+
+.multi-select-with-presets {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.multi-select-with-presets select {
+    min-width: 220px;
+}
+.multi-select-with-presets .preset-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.multi-select-with-presets .preset-buttons button {
+    min-width: 110px;
 }
