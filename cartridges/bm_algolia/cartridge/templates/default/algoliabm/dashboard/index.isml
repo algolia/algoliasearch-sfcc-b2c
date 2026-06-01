@@ -151,20 +151,14 @@
                         <isprint value="${Resource.msg('algolia.label.preference.customrankingactivedata', 'algolia', null)}" encoding="jshtml" />
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.customrankingactivedata.help', 'algolia', null)}</div>
-                        <isif condition="${pdict.warnings.customRankingActiveDataWarning}">
-                            <div class="warning-message yellow narrow">
-                                ${pdict.warnings.customRankingActiveDataWarning}
-                            </div>
+                        <isif condition="${!empty(pdict.warnings.customRankingActiveDataWarning)}">
+                            <div class="warning-message yellow narrow">${pdict.warnings.customRankingActiveDataWarning}</div>
                         </isif>
-                        <isif condition="${pdict.warnings.customRankingActiveDataNotFoundNotice}">
-                            <div class="info-message info-blue narrow">
-                                ${pdict.warnings.customRankingActiveDataNotFoundNotice}
-                            </div>
+                        <isif condition="${!empty(pdict.warnings.customRankingActiveDataNotFoundNotice)}">
+                            <div class="info-message info-blue narrow">${pdict.warnings.customRankingActiveDataNotFoundNotice}</div>
                         </isif>
-                        <isif condition="${pdict.warnings.customRankingActiveDataUnreachableNotice}">
-                            <div class="warning-message yellow narrow">
-                                ${pdict.warnings.customRankingActiveDataUnreachableNotice}
-                            </div>
+                        <isif condition="${!empty(pdict.warnings.customRankingActiveDataUnreachableNotice)}">
+                            <div class="warning-message yellow narrow">${pdict.warnings.customRankingActiveDataUnreachableNotice}</div>
                         </isif>
                     </td>
                     <td class="table_detail w e s">

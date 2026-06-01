@@ -350,17 +350,21 @@ function validateUnretrievableAttributes(service, applicationID, indexPrefix, lo
         ', unreachable=' + indicesUnreachable.length +
         ' (selected: ' + selectedAttributes.join(',') + ')');
 
+    // Render each index as a bullet on its own line.
+    function bulletList(items) {
+        return '\u2022 ' + items.join('\n\u2022 ');
+    }
     var warning = '';
     if (indicesWithGaps.length > 0) {
-        warning = Resource.msgf('algolia.warning.unretrievable.missing', 'algolia', null, indicesWithGaps.join('; '));
+        warning = Resource.msgf('algolia.warning.unretrievable.missing', 'algolia', null, bulletList(indicesWithGaps));
     }
     var notFoundNotice = '';
     if (indicesNotFound.length > 0) {
-        notFoundNotice = Resource.msgf('algolia.notice.unretrievable.notfound', 'algolia', null, indicesNotFound.join(', '));
+        notFoundNotice = Resource.msgf('algolia.notice.unretrievable.notfound', 'algolia', null, bulletList(indicesNotFound));
     }
     var unreachableNotice = '';
     if (indicesUnreachable.length > 0) {
-        unreachableNotice = Resource.msgf('algolia.notice.unretrievable.unreachable', 'algolia', null, indicesUnreachable.join(', '));
+        unreachableNotice = Resource.msgf('algolia.notice.unretrievable.unreachable', 'algolia', null, bulletList(indicesUnreachable));
     }
 
     return {

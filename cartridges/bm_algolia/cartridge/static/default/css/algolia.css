@@ -70,6 +70,12 @@ table#algolia-report-table .cell-number {
     padding: 15px;
     margin-bottom: 20px;
 }
+/* Preserve newline characters embedded in warning/info copy (e.g. one-index-per-line in the
+   unretrievableAttributes notices) while still collapsing runs of spaces. */
+.warning-message,
+.info-message {
+    white-space: pre-line;
+}
 .info-blue {
     color: #31708f;
 }

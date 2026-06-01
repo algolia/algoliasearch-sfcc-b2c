@@ -377,7 +377,6 @@ describe('algoliaServiceHelper.validateUnretrievableAttributes', () => {
         expect(result.details.map(d => d.status)).toEqual(['missing', 'not-found', 'unreachable', 'ok']);
     });
 
-
     it('builds the expected URL per locale', () => {
         mockService.call
             .mockReturnValue({ ok: true, object: { body: { unretrievableAttributes: ['ordersWeek'] } } });
