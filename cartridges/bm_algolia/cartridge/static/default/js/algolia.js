@@ -120,5 +120,12 @@
             let isIngestionAPISelected = $(this).val() === 'ingestion-api';
             $('input#AnalyticsRegion').prop('readonly', !isIngestionAPISelected);
         }).trigger('change');
+
+        // "Select All" / "Select None" preset buttons next to the "Active data for custom ranking"
+        // checkbox group. data-select-state="all" checks every box, "none" unchecks every box.
+        $('.js-active-data-toggle').on('click', function () {
+            let shouldCheck = $(this).data('select-state') === 'all';
+            $('input[name="CustomRankingActiveData"]').prop('checked', shouldCheck);
+        });
     });
 }(jQuery));

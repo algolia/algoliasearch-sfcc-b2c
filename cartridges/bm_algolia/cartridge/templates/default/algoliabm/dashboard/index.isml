@@ -172,10 +172,10 @@
                                 </isloop>
                             </fieldset>
                             <div class="preset-buttons">
-                                <button type="button" class="button" onclick="selectActiveDataAll(true);">
+                                <button type="button" class="button js-active-data-toggle" data-select-state="all">
                                     <isprint value="${Resource.msg('algolia.label.button.selectall', 'algolia', null)}" encoding="jshtml" />
                                 </button>
-                                <button type="button" class="button" onclick="selectActiveDataAll(false);">
+                                <button type="button" class="button js-active-data-toggle" data-select-state="none">
                                     <isprint value="${Resource.msg('algolia.label.button.selectnone', 'algolia', null)}" encoding="jshtml" />
                                 </button>
                             </div>
@@ -528,13 +528,6 @@
             document.getElementById("EnableSSR").disabled = !storefrontEnabled;
             document.getElementById("EnableContentSearch").disabled = !storefrontEnabled;
             document.getElementById("EnableRecommend").disabled = !storefrontEnabled;
-        }
-
-        function selectActiveDataAll(state) {
-            var inputs = document.getElementsByName("CustomRankingActiveData");
-            for (let i = 0; i < inputs.length; i++) {
-                inputs[i].checked = state;
-            }
         }
 
         updateStorefrontCheckboxes();
