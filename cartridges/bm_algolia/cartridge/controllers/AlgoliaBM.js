@@ -44,8 +44,8 @@ function handleSettings() {
     var selectedActiveData = [];
     if (params.CustomRankingActiveData && params.CustomRankingActiveData.stringValues) {
         let rawValues = params.CustomRankingActiveData.stringValues.toArray();
-        for (let avi = 0; avi < rawValues.length; avi++) {
-            let rawValue = rawValues[avi];
+        for (let i = 0; i < rawValues.length; i++) {
+            let rawValue = rawValues[i];
             if (rawValue && CUSTOM_RANKING_ACTIVE_DATA_OPTIONS.indexOf(rawValue) !== -1) {
                 selectedActiveData.push(rawValue);
             }
@@ -146,7 +146,7 @@ function handleSettings() {
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', applicationID);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
-        algoliaData.setSetOfArray('CustomRankingActiveData', selectedActiveData);
+        algoliaData.setSetOfStringFromArray('CustomRankingActiveData', selectedActiveData);
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
         algoliaData.setPreference('SearchApiKey', searchApikey);
         algoliaData.setPreference('AdminApiKey', adminApikey);

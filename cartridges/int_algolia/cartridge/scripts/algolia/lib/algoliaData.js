@@ -184,7 +184,7 @@ function setSetOfStrings(id, value) {
  * @param {string} id name of preference (without the "Algolia_" prefix)
  * @param {Array<string>} values values to save; falsy or non-array inputs are saved as an empty array
  */
-function setSetOfArray(id, values) {
+function setSetOfStringFromArray(id, values) {
     Transaction.wrap(function () {
         var toSave = Array.isArray(values) ? values : [];
         currentSite.setCustomPreferenceValue('Algolia_' + id, toSave);
@@ -401,7 +401,7 @@ module.exports = {
     getSetOfArray: getSetOfArray,
     getSetOfStrings: getSetOfStrings,
     setSetOfStrings: setSetOfStrings,
-    setSetOfArray: setSetOfArray,
+    setSetOfStringFromArray: setSetOfStringFromArray,
     getLogData: getLogData,
     setLogData: setLogData,
     getLogDataAllSites: getLogDataAllSites,
