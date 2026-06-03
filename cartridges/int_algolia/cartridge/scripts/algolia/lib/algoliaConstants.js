@@ -51,7 +51,7 @@ const TMP_INDEX_SUFFIX = '.tmp';
 // future surface that needs the canonical recommendation set. The cartridge ships
 // with built-in handlers for all 48 ProductActiveData properties; the ones not
 // listed here can still be added through the Additional Product Attributes preference.
-const CUSTOM_RANKING_ACTIVE_DATA_OPTIONS = [
+const ACTIVE_DATA_OPTIONS = [
     'ordersWeek',
     'revenueWeek',
     'conversionWeek',
@@ -83,5 +83,5 @@ module.exports = {
 
     TMP_INDEX_SUFFIX: TMP_INDEX_SUFFIX,
 
-    CUSTOM_RANKING_ACTIVE_DATA_OPTIONS: CUSTOM_RANKING_ACTIVE_DATA_OPTIONS,
+    ACTIVE_DATA_OPTIONS: ACTIVE_DATA_OPTIONS,
 };

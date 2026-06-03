@@ -260,7 +260,7 @@ function validateAPIKey(service, applicationID, apiKey, indexPrefix, indexingAPI
  * @param {string} applicationID - Algolia application ID (used to build the per-call URL)
  * @param {string} indexPrefix - effective index prefix used by the cartridge (already resolved against the site default)
  * @param {Array<string>} locales - list of locales to check (e.g. Algolia_LocalesForIndexing or Site.getAllowedLocales())
- * @param {Array<string>} selectedAttributes - attribute IDs selected in the BM module (typically a subset of CUSTOM_RANKING_ACTIVE_DATA_OPTIONS)
+ * @param {Array<string>} selectedAttributes - attribute IDs selected in the BM module (typically a subset of ACTIVE_DATA_OPTIONS)
  * @returns {Object} { error: boolean (always false), warning: String, notFoundNotice: String, unreachableNotice: String, details: Array<{indexName, missing, status, error}> }
  */
 function validateUnretrievableAttributes(service, applicationID, indexPrefix, locales, selectedAttributes) {

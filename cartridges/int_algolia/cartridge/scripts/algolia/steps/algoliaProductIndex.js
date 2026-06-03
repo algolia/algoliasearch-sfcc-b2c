@@ -118,7 +118,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- attributeListOverride parameter --- */
 
-    // If no overrides are defined in the job's `attributeListOverride` parameter, use the default attributes from `algoliaProductConfig.js` and add the ones from the site preferences `Algolia_AdditionalAttributes` and `Algolia_CustomRankingActiveData`.
+    // If no overrides are defined in the job's `attributeListOverride` parameter, use the default attributes from `algoliaProductConfig.js` and add the ones from the site preferences `Algolia_AdditionalAttributes` and `Algolia_ActiveData`.
     // If there is an override, send only the attributes defined there.
     if (empty(paramAttributeListOverride)) {
         variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
@@ -132,11 +132,11 @@ exports.beforeStep = function(parameters, stepExecution) {
             }
         });
 
-        // Merge the BM-managed checkbox-list preference (Algolia_CustomRankingActiveData). Same dedup contract:
+        // Merge the BM-managed checkbox-list preference (Algolia_ActiveData). Same dedup contract:
         // skip values already in the list, skip empty strings (defensive against the legacy
         // setSetOfStrings('') -> [''] save path).
-        const customRankingActiveData = algoliaData.getSetOfArray('CustomRankingActiveData');
-        customRankingActiveData.forEach(function(attribute) {
+        const activeData = algoliaData.getSetOfArray('ActiveData');
+        activeData.forEach(function(attribute) {
             if (attribute && attributesToSend.indexOf(attribute) < 0) {
                 attributesToSend.push(attribute);
             }

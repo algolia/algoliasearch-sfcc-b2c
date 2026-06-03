@@ -125,7 +125,7 @@
         // checkbox group. data-select-state="all" checks every box, "none" unchecks every box.
         $('.js-active-data-toggle').on('click', function () {
             let shouldCheck = $(this).data('select-state') === 'all';
-            $('input[name="CustomRankingActiveData"]').prop('checked', shouldCheck);
+            $('input[name="ActiveData"]').prop('checked', shouldCheck);
         });
     });
 }(jQuery));

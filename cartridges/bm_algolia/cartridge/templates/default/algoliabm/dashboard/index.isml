@@ -145,29 +145,29 @@
                     </td>
                 </tr>
 
-                <iscomment> Algolia_CustomRankingActiveData </iscomment>
+                <iscomment> Algolia_ActiveData </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">
-                        <isprint value="${Resource.msg('algolia.label.preference.customrankingactivedata', 'algolia', null)}" encoding="jshtml" />
+                        <isprint value="${Resource.msg('algolia.label.preference.activedata', 'algolia', null)}" encoding="jshtml" />
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
-                        <div class="tooltip">${Resource.msg('algolia.label.preference.customrankingactivedata.help', 'algolia', null)}</div>
-                        <isif condition="${!empty(pdict.warnings.customRankingActiveDataWarning)}">
-                            <div class="warning-message yellow narrow">${pdict.warnings.customRankingActiveDataWarning}</div>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.activedata.help', 'algolia', null)}</div>
+                        <isif condition="${!empty(pdict.warnings.activeDataWarning)}">
+                            <div class="warning-message yellow narrow">${pdict.warnings.activeDataWarning}</div>
                         </isif>
-                        <isif condition="${!empty(pdict.warnings.customRankingActiveDataNotFoundNotice)}">
-                            <div class="info-message info-blue narrow">${pdict.warnings.customRankingActiveDataNotFoundNotice}</div>
+                        <isif condition="${!empty(pdict.warnings.activeDataNotFoundNotice)}">
+                            <div class="info-message info-blue narrow">${pdict.warnings.activeDataNotFoundNotice}</div>
                         </isif>
-                        <isif condition="${!empty(pdict.warnings.customRankingActiveDataUnreachableNotice)}">
-                            <div class="warning-message yellow narrow">${pdict.warnings.customRankingActiveDataUnreachableNotice}</div>
+                        <isif condition="${!empty(pdict.warnings.activeDataUnreachableNotice)}">
+                            <div class="warning-message yellow narrow">${pdict.warnings.activeDataUnreachableNotice}</div>
                         </isif>
                     </td>
                     <td class="table_detail w e s">
                         <div class="checkbox-list-with-presets">
-                            <fieldset class="active-data-checkbox-list" id="CustomRankingActiveData">
-                                <isloop items="${pdict.customRankingActiveDataOptions}" var="optionId">
-                                    <isset name="isSelected" value="${pdict.customRankingActiveDataSelected && pdict.customRankingActiveDataSelected.indexOf(optionId) !== -1}" scope="page"/>
+                            <fieldset class="active-data-checkbox-list" id="ActiveData">
+                                <isloop items="${pdict.activeDataOptions}" var="optionId">
+                                    <isset name="isSelected" value="${pdict.activeDataSelected && pdict.activeDataSelected.indexOf(optionId) !== -1}" scope="page"/>
                                     <label class="active-data-option">
-                                        <input type="checkbox" name="CustomRankingActiveData" value="${optionId}" ${isSelected ? "checked" : ""} /> ${optionId}
+                                        <input type="checkbox" name="ActiveData" value="${optionId}" ${isSelected ? "checked" : ""} /> ${optionId}
                                     </label>
                                 </isloop>
                             </fieldset>

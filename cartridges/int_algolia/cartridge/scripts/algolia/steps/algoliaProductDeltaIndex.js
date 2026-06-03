@@ -143,9 +143,9 @@ exports.beforeStep = function(parameters, stepExecution) {
             }
         });
 
-        // Merge the BM-managed checkbox-list preference (Algolia_CustomRankingActiveData), kept in sync with algoliaProductIndex.js.
-        const customRankingActiveData = algoliaData.getSetOfArray('CustomRankingActiveData');
-        customRankingActiveData.forEach(function(attribute) {
+        // Merge the BM-managed checkbox-list preference (Algolia_ActiveData), kept in sync with algoliaProductIndex.js.
+        const activeData = algoliaData.getSetOfArray('ActiveData');
+        activeData.forEach(function(attribute) {
             if (attribute && attributesToSend.indexOf(attribute) < 0) {
                 attributesToSend.push(attribute);
             }

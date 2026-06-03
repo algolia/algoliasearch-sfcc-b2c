@@ -124,7 +124,7 @@ input[readonly] {
 
 .checkbox-list-with-presets {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 12px;
     flex-wrap: wrap;
 }
@@ -137,7 +137,7 @@ input[readonly] {
     min-width: 110px;
 }
 fieldset.active-data-checkbox-list,
-#CustomRankingActiveData.active-data-checkbox-list {
+#ActiveData.active-data-checkbox-list {
     display: flex;
     flex-direction: column;
     gap: 4px;

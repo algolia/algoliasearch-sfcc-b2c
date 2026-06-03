@@ -11,7 +11,7 @@ var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
 var algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
 const BMHelper = require('../scripts/helper/BMHelper');
 var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
-const { INDEXING_APIS, ANALYTICS_REGIONS, CUSTOM_RANKING_ACTIVE_DATA_OPTIONS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+const { INDEXING_APIS, ANALYTICS_REGIONS, ACTIVE_DATA_OPTIONS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * @description Render default template
@@ -38,20 +38,20 @@ function handleSettings() {
     var unretrievableValidation = {};
     var pdictValues = getDashboardPdict();
 
-    // Multi-value httpParameter (checkbox group sharing the name "CustomRankingActiveData"): convert the
+    // Multi-value httpParameter (checkbox group sharing the name "ActiveData"): convert the
     // dw.util.Collection of submitted values to a plain JS array. Filter against the canonical option
     // list so unexpected values (e.g. tampered POSTs) are dropped silently.
     var selectedActiveData = [];
-    if (params.CustomRankingActiveData && params.CustomRankingActiveData.stringValues) {
-        let rawValues = params.CustomRankingActiveData.stringValues.toArray();
+    if (params.ActiveData && params.ActiveData.stringValues) {
+        let rawValues = params.ActiveData.stringValues.toArray();
         for (let i = 0; i < rawValues.length; i++) {
             let rawValue = rawValues[i];
-            if (rawValue && CUSTOM_RANKING_ACTIVE_DATA_OPTIONS.indexOf(rawValue) !== -1) {
+            if (rawValue && ACTIVE_DATA_OPTIONS.indexOf(rawValue) !== -1) {
                 selectedActiveData.push(rawValue);
             }
         }
     }
-    pdictValues.customRankingActiveDataSelected = selectedActiveData;
+    pdictValues.activeDataSelected = selectedActiveData;
 
     try {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
@@ -124,13 +124,13 @@ function handleSettings() {
             );
 
             if (!empty(unretrievableValidation.warning)) {
-                pdictValues.warnings.customRankingActiveDataWarning = unretrievableValidation.warning;
+                pdictValues.warnings.activeDataWarning = unretrievableValidation.warning;
             }
             if (!empty(unretrievableValidation.notFoundNotice)) {
-                pdictValues.warnings.customRankingActiveDataNotFoundNotice = unretrievableValidation.notFoundNotice;
+                pdictValues.warnings.activeDataNotFoundNotice = unretrievableValidation.notFoundNotice;
             }
             if (!empty(unretrievableValidation.unreachableNotice)) {
-                pdictValues.warnings.customRankingActiveDataUnreachableNotice = unretrievableValidation.unreachableNotice;
+                pdictValues.warnings.activeDataUnreachableNotice = unretrievableValidation.unreachableNotice;
             }
         }
 
@@ -146,7 +146,7 @@ function handleSettings() {
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', applicationID);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
-        algoliaData.setSetOfStringFromArray('CustomRankingActiveData', selectedActiveData);
+        algoliaData.setSetOfStringFromArray('ActiveData', selectedActiveData);
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
         algoliaData.setPreference('SearchApiKey', searchApikey);
         algoliaData.setPreference('AdminApiKey', adminApikey);
@@ -191,8 +191,8 @@ function getDashboardPdict() {
     return {
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData,
-        customRankingActiveDataOptions: CUSTOM_RANKING_ACTIVE_DATA_OPTIONS,
-        customRankingActiveDataSelected: algoliaData.getSetOfArray('CustomRankingActiveData'),
+        activeDataOptions: ACTIVE_DATA_OPTIONS,
+        activeDataSelected: algoliaData.getSetOfArray('ActiveData'),
         errors: {
             adminErrorMessage: '',
             analyticsRegionErrorMessage: '',
@@ -200,9 +200,9 @@ function getDashboardPdict() {
         },
         warnings: {
             adminWarningMessage: '',
-            customRankingActiveDataWarning: '',
-            customRankingActiveDataNotFoundNotice: '',
-            customRankingActiveDataUnreachableNotice: '',
+            activeDataWarning: '',
+            activeDataNotFoundNotice: '',
+            activeDataUnreachableNotice: '',
         },
     };
 }
