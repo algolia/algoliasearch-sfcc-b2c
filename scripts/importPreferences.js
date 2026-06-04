@@ -29,7 +29,7 @@ function waitForJobCompletion(instance, jobId, executionId, token) {
                 }
 
                 const execStatus = status && status.status;
-                console.log(`Attempt ${attempts}: ${jobId} execution status - ${execStatus}`);
+                console.log('Attempt %d: %s execution status - %s', attempts, jobId, execStatus);
 
                 if (execStatus === 'OK') {
                     resolve();
@@ -155,7 +155,7 @@ async function importPreferences() {
                     reject(new Error('Site import was started but no execution id was returned: ' + JSON.stringify(result)));
                     return;
                 }
-                console.log('Site preferences import started (execution id: ' + executionId + ').');
+                console.log('Site preferences import started (execution id: %s).', executionId);
                 resolve(executionId);
             });
         });
