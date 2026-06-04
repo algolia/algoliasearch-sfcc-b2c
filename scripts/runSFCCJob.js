@@ -9,11 +9,16 @@ async function runSFCCJob() {
         const instance = process.env.SANDBOX_HOST;
         const jobId = 'AlgoliaProductIndex_v2';
 
+        // Force a full catalog reindex so the test index is rebuilt from scratch on every run.
+        // This removes any stale/wrong-shape records left over from previous runs (e.g. records
+        // written before the record-model preference was applied) instead of merging into them.
+        const jobParams = { indexingMethod: 'fullCatalogReindex' };
+
         // Run Job
         let jobExecution;
         try {
             jobExecution = await new Promise((resolve, reject) => {
-                sfcc.job.run(instance, jobId, {}, token, (err, result) => {
+                sfcc.job.run(instance, jobId, jobParams, token, (err, result) => {
                     if (err) {
                         console.error('Job run error:', err);
                         console.error('Error details:', JSON.stringify(err, null, 2));

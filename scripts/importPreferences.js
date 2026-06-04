@@ -5,6 +5,55 @@ const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
 
+/**
+ * Polls an SFCC job execution until it completes.
+ * @param {string} instance - The SFCC instance host.
+ * @param {string} jobId - The job ID to poll.
+ * @param {string} executionId - The job execution ID to poll.
+ * @param {string} token - The OAuth token to use for authentication.
+ * @returns {Promise<void>} Resolves when the execution status is 'OK', rejects on error or timeout.
+ */
+function waitForJobCompletion(instance, jobId, executionId, token) {
+    const maxAttempts = 60;
+    const delay = 5000; // 5 seconds
+
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+
+        function poll() {
+            attempts++;
+            sfcc.job.status(instance, jobId, executionId, token, (err, status) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                const execStatus = status && status.status;
+                console.log(`Attempt ${attempts}: ${jobId} execution status - ${execStatus}`);
+
+                if (execStatus === 'OK') {
+                    resolve();
+                    return;
+                }
+
+                if (execStatus === 'ERROR' || execStatus === 'error' || execStatus === 'failed') {
+                    reject(new Error(`${jobId} (execution ${executionId}) finished with status ${execStatus}.`));
+                    return;
+                }
+
+                if (attempts >= maxAttempts) {
+                    reject(new Error(`${jobId} (execution ${executionId}) did not complete within ${maxAttempts} attempts.`));
+                    return;
+                }
+
+                setTimeout(poll, delay);
+            });
+        }
+
+        poll();
+    });
+}
+
 async function importPreferences() {
     try {
         const token = await authenticate();
@@ -92,17 +141,29 @@ async function importPreferences() {
         });
 
         console.log('Importing site preferences...');
-        await new Promise((resolve, reject) => {
-            sfcc.instance.import(instance, 'site_import.zip', token, (err) => {
+        const importExecutionId = await new Promise((resolve, reject) => {
+            sfcc.instance.import(instance, 'site_import.zip', token, (err, result) => {
                 if (err) {
                     console.error('Import error:', err);
                     reject(err);
-                } else {
-                    console.log('Site preferences imported successfully.');
-                    resolve();
+                    return;
                 }
+                // `sfcc.instance.import` resolves as soon as the `sfcc-site-archive-import` job is
+                // accepted, not when it finishes. Capture the execution id so we can poll for completion.
+                const executionId = result && result.id;
+                if (!executionId) {
+                    reject(new Error('Site import was started but no execution id was returned: ' + JSON.stringify(result)));
+                    return;
+                }
+                console.log('Site preferences import started (execution id: ' + executionId + ').');
+                resolve(executionId);
             });
         });
+
+        // Wait for the import to actually finish before returning. Without this, the caller can run the
+        // indexing job while the preferences (e.g. Algolia_RecordModel, Algolia_IndexPrefix) are still
+        // being applied, which produces records in the wrong shape/index.
+        await waitForJobCompletion(instance, 'sfcc-site-archive-import', importExecutionId, token);
 
         console.log('Site preferences import completed successfully.');
     } catch (error) {
