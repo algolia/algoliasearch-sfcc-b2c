@@ -52,11 +52,117 @@ function enableInstantSearch(config) {
         query: config.urlQuery,
     };
 
+    // Custom URL routing: short, stable URL keys (q, category, brand, size, color, store, price, sort, page, etc.)
+    // instead of the default `simple` mapping's index-prefixed keys, with `arrayFormat: 'repeat'
+    // so `?brand=Apple&brand=Samsung` replaces `?brand[0]=Apple&brand[1]=Samsung`.
+    var isMaster = algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'attribute-sliced';
+    var sizeAttribute = isMaster ? 'variants.size' : 'size';
+    var colorAttribute = isMaster ? 'variants.color' : 'color';
+    var storeAttribute = isMaster ? 'variants.storeAvailability' : 'storeAvailability';
+    var priceAttribute = isMaster ? 'variants.price.' + algoliaData.currencyCode : 'price.' + algoliaData.currencyCode;
+
+    /**
+     * Compresses a hierarchicalMenu uiState slot (which stores cumulative paths at
+     * every level) into one segment per level so the URL reads as one value per level.
+     * Assumes category display names do not contain ' > '.
+     * @param {string[]} levels Cumulative paths, e.g. ['Womens', 'Womens > Clothing']
+     * @returns {string[]} One segment per level, e.g. ['Womens', 'Clothing']
+     */
+    function compressBreadcrumb(levels) {
+        return levels.map(function (level, i) {
+            return i === 0 ? level : level.split(' > ').pop();
+        });
+    }
+
+    /**
+     * Rebuilds the cumulative-path form the hierarchicalMenu widget expects in uiState
+     * from the per-level segments carried in the URL. Inverse of compressBreadcrumb.
+     * @param {string[]} segments One segment per level, e.g. ['Womens', 'Clothing']
+     * @returns {string[]} Cumulative paths, e.g. ['Womens', 'Womens > Clothing']
+     */
+    function expandBreadcrumb(segments) {
+        return segments.map(function (_, i) {
+            return segments.slice(0, i + 1).join(' > ');
+        });
+    }
+
+    var router = instantsearch.routers.history({
+        createURL: function (params) {
+            var qsModule = params.qsModule;
+            var routeState = params.routeState;
+            var location = params.location;
+            var port = location.port ? ':' + location.port : '';
+            var queryString = qsModule.stringify(routeState, { arrayFormat: 'repeat' });
+            var base = location.protocol + '//' + location.hostname + port + location.pathname;
+            return queryString ? base + '?' + queryString + location.hash : base + location.hash;
+        }
+    });
+
+    var stateMapping = {
+        stateToRoute: function (uiState) {
+            var indexUiState = uiState[productsIndex] || {};
+            var route = {};
+            if (indexUiState.query) route.q = indexUiState.query;
+            if (indexUiState.page) route.page = indexUiState.page;
+            if (indexUiState.sortBy === productsIndex) route.sort = 'best';
+            if (indexUiState.sortBy === productsIndexPriceAsc) route.sort = 'price-asc';
+            if (indexUiState.sortBy === productsIndexPriceDesc) route.sort = 'price-desc';
+            if (indexUiState.hierarchicalMenu && indexUiState.hierarchicalMenu['__primary_category.0']) {
+                route.category = compressBreadcrumb(indexUiState.hierarchicalMenu['__primary_category.0']);
+            }
+            if (indexUiState.hierarchicalMenu && indexUiState.hierarchicalMenu['newArrivalsCategory.0']) {
+                route.newArrivals = compressBreadcrumb(indexUiState.hierarchicalMenu['newArrivalsCategory.0']);
+            }
+            if (indexUiState.toggle && indexUiState.toggle.newArrival) route.newArrival = '1';
+            if (indexUiState.refinementList) {
+                if (indexUiState.refinementList.brand) route.brand = indexUiState.refinementList.brand;
+                if (indexUiState.refinementList[sizeAttribute]) route.size = indexUiState.refinementList[sizeAttribute];
+                if (indexUiState.refinementList[colorAttribute]) route.color = indexUiState.refinementList[colorAttribute];
+                if (indexUiState.refinementList[storeAttribute]) route.store = indexUiState.refinementList[storeAttribute];
+            }
+            if (indexUiState.range && indexUiState.range[priceAttribute]) route.price = indexUiState.range[priceAttribute];
+            return route;
+        },
+        routeToState: function (route) {
+            var indexUiState = {};
+            if (route.q) indexUiState.query = route.q;
+            if (route.page) indexUiState.page = Number(route.page);
+            if (route.sort === 'best') indexUiState.sortBy = productsIndex;
+            if (route.sort === 'price-asc') indexUiState.sortBy = productsIndexPriceAsc;
+            if (route.sort === 'price-desc') indexUiState.sortBy = productsIndexPriceDesc;
+            if (route.category) {
+                indexUiState.hierarchicalMenu = indexUiState.hierarchicalMenu || {};
+                indexUiState.hierarchicalMenu['__primary_category.0'] = expandBreadcrumb([].concat(route.category));
+            }
+            if (route.newArrivals) {
+                indexUiState.hierarchicalMenu = indexUiState.hierarchicalMenu || {};
+                indexUiState.hierarchicalMenu['newArrivalsCategory.0'] = expandBreadcrumb([].concat(route.newArrivals));
+            }
+            if (route.newArrival === '1') indexUiState.toggle = { newArrival: true };
+            var refinementList = {};
+            if (route.brand) refinementList.brand = [].concat(route.brand);
+            if (route.size) refinementList[sizeAttribute] = [].concat(route.size);
+            if (route.color) refinementList[colorAttribute] = [].concat(route.color);
+            if (route.store) refinementList[storeAttribute] = [].concat(route.store);
+            if (Object.keys(refinementList).length) indexUiState.refinementList = refinementList;
+            if (route.price) {
+                indexUiState.range = {};
+                indexUiState.range[priceAttribute] = route.price;
+            }
+            var ui = {};
+            ui[productsIndex] = indexUiState;
+            if (route.q) {
+                ui[contentsIndex] = { query: route.q };
+            }
+            return ui;
+        }
+    };
+
     var search = instantsearch({
         indexName: productsIndex,
         searchClient: config.searchClient,
         initialUiState: initialUiState,
-        routing: true,
+        routing: { router: router, stateMapping: stateMapping },
     });
 
     if (algoliaData.enableInsights) {
