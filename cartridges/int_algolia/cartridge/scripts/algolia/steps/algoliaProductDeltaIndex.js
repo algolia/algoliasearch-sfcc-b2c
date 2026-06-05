@@ -142,6 +142,14 @@ exports.beforeStep = function(parameters, stepExecution) {
                 attributesToSend.push(attribute);
             }
         });
+
+        // Merge the BM-managed checkbox-list preference (Algolia_ActiveData), kept in sync with algoliaProductIndex.js.
+        const activeData = algoliaData.getSetOfArray('ActiveData');
+        activeData.forEach(function(attribute) {
+            if (attribute && attributesToSend.indexOf(attribute) < 0) {
+                attributesToSend.push(attribute);
+            }
+        });
     } else {
         attributesToSend = paramAttributeListOverride;
     }

@@ -145,6 +145,44 @@
                     </td>
                 </tr>
 
+                <iscomment> Algolia_ActiveData </iscomment>
+                <tr>
+                    <td class="table_detail w s" colspan="1">
+                        <isprint value="${Resource.msg('algolia.label.preference.activedata', 'algolia', null)}" encoding="jshtml" />
+                        <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
+                        <div class="tooltip">${Resource.msg('algolia.label.preference.activedata.help', 'algolia', null)}</div>
+                        <isif condition="${!empty(pdict.warnings.activeDataWarning)}">
+                            <div class="warning-message yellow narrow">${pdict.warnings.activeDataWarning}</div>
+                        </isif>
+                        <isif condition="${!empty(pdict.warnings.activeDataNotFoundNotice)}">
+                            <div class="info-message info-blue narrow">${pdict.warnings.activeDataNotFoundNotice}</div>
+                        </isif>
+                        <isif condition="${!empty(pdict.warnings.activeDataUnreachableNotice)}">
+                            <div class="warning-message yellow narrow">${pdict.warnings.activeDataUnreachableNotice}</div>
+                        </isif>
+                    </td>
+                    <td class="table_detail w e s">
+                        <div class="checkbox-list-with-presets">
+                            <fieldset class="active-data-checkbox-list" id="ActiveData">
+                                <isloop items="${pdict.activeDataOptions}" var="optionId">
+                                    <isset name="isSelected" value="${pdict.activeDataSelected && pdict.activeDataSelected.indexOf(optionId) !== -1}" scope="page"/>
+                                    <label class="active-data-option">
+                                        <input type="checkbox" name="ActiveData" value="${optionId}" ${isSelected ? "checked" : ""} /> ${optionId}
+                                    </label>
+                                </isloop>
+                            </fieldset>
+                            <div class="preset-buttons">
+                                <button type="button" class="button js-active-data-toggle" data-select-state="all">
+                                    <isprint value="${Resource.msg('algolia.label.button.selectall', 'algolia', null)}" encoding="jshtml" />
+                                </button>
+                                <button type="button" class="button js-active-data-toggle" data-select-state="none">
+                                    <isprint value="${Resource.msg('algolia.label.button.selectnone', 'algolia', null)}" encoding="jshtml" />
+                                </button>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+
                 <iscomment> Algolia_IndexPrefix </iscomment>
                 <tr>
                     <td class="table_detail w s" colspan="1">

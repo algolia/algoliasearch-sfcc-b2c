@@ -118,7 +118,7 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- attributeListOverride parameter --- */
 
-    // If no overrides are defined in the job's `attributeListOverride` parameter, use the default attributes from `algoliaProductConfig.js` and add the ones from the site preference `Algolia_AdditionalAttributes`.
+    // If no overrides are defined in the job's `attributeListOverride` parameter, use the default attributes from `algoliaProductConfig.js` and add the ones from the site preferences `Algolia_AdditionalAttributes` and `Algolia_ActiveData`.
     // If there is an override, send only the attributes defined there.
     if (empty(paramAttributeListOverride)) {
         variantAttributes = algoliaProductConfig.defaultVariantAttributes_v2.slice();
@@ -128,6 +128,16 @@ exports.beforeStep = function(parameters, stepExecution) {
         const additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
         additionalAttributes.map(function(attribute) {
             if (attributesToSend.indexOf(attribute) < 0) {
+                attributesToSend.push(attribute);
+            }
+        });
+
+        // Merge the BM-managed checkbox-list preference (Algolia_ActiveData). Same dedup contract:
+        // skip values already in the list, skip empty strings (defensive against the legacy
+        // setSetOfStrings('') -> [''] save path).
+        const activeData = algoliaData.getSetOfArray('ActiveData');
+        activeData.forEach(function(attribute) {
+            if (attribute && attributesToSend.indexOf(attribute) < 0) {
                 attributesToSend.push(attribute);
             }
         });

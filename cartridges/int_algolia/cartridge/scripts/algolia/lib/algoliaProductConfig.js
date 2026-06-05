@@ -311,7 +311,6 @@ var attributeConfig_v2 = {
     // a per-slice value, compute it in `productAttributesConfig.js` from the variants in the
     // slice; the dotted form (`activeData.<id>`) places each variant's own value inside its
     // `variants[i]` entry.
-
     ordersDay:           { attribute: 'activeData.ordersDay',           localized: false, variantAttribute: false },
     ordersWeek:          { attribute: 'activeData.ordersWeek',          localized: false, variantAttribute: false },
     ordersMonth:         { attribute: 'activeData.ordersMonth',         localized: false, variantAttribute: false },

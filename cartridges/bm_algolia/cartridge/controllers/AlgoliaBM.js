@@ -11,7 +11,7 @@ var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
 var algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
 const BMHelper = require('../scripts/helper/BMHelper');
 var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
-const { INDEXING_APIS, ANALYTICS_REGIONS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
+const { INDEXING_APIS, ANALYTICS_REGIONS, ACTIVE_DATA_OPTIONS } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 /**
  * @description Render default template
@@ -35,7 +35,23 @@ function handleSettings() {
     var analyticsRegion = (params.AnalyticsRegion.value || '').trim().toLowerCase();
 
     var adminValidation = {};
+    var unretrievableValidation = {};
     var pdictValues = getDashboardPdict();
+
+    // Multi-value httpParameter (checkbox group sharing the name "ActiveData"): convert the
+    // dw.util.Collection of submitted values to a plain JS array. Filter against the canonical option
+    // list so unexpected values (e.g. tampered POSTs) are dropped silently.
+    var selectedActiveData = [];
+    if (params.ActiveData && params.ActiveData.stringValues) {
+        let rawValues = params.ActiveData.stringValues.toArray();
+        for (let i = 0; i < rawValues.length; i++) {
+            let rawValue = rawValues[i];
+            if (rawValue && ACTIVE_DATA_OPTIONS.indexOf(rawValue) !== -1) {
+                selectedActiveData.push(rawValue);
+            }
+        }
+    }
+    pdictValues.activeDataSelected = selectedActiveData;
 
     try {
         var algoliaEnable = ('Enable' in params) && (params.Enable.submitted === true);
@@ -79,6 +95,45 @@ function handleSettings() {
             pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
         }
 
+        // Verify that the active data fields the user is about to save are also marked unretrievable
+        // on every product index the cartridge writes to. Copy-only warning, soft-fails on missing
+        // indices and on auth/network errors. Skipped entirely when the admin key validation already
+        // failed (no point hammering Algolia with a key we know to be bad).
+        if (selectedActiveData.length > 0 && !adminValidation.error) {
+            // Resolve effective locales the cartridge will index: form value first, falling back to
+            // Algolia_LocalesForIndexing's saved value, falling back to the site's allowed locales.
+            let formLocales = algoliaData.csvStringToArray(params.LocalesForIndexing.value);
+            let localesToCheck = formLocales;
+            if (!localesToCheck || localesToCheck.length === 0) {
+                localesToCheck = algoliaData.getSetOfArray('LocalesForIndexing');
+            }
+            if (!localesToCheck || localesToCheck.length === 0) {
+                let allowed = require('dw/system/Site').getCurrent().getAllowedLocales();
+                localesToCheck = [];
+                for (let li = 0; li < allowed.size(); li++) {
+                    localesToCheck.push(allowed.get(li));
+                }
+            }
+
+            unretrievableValidation = algoliaServiceHelper.validateUnretrievableAttributes(
+                serviceAdmin,
+                applicationID,
+                finalIndexPrefix,
+                localesToCheck,
+                selectedActiveData
+            );
+
+            if (!empty(unretrievableValidation.warning)) {
+                pdictValues.warnings.activeDataWarning = unretrievableValidation.warning;
+            }
+            if (!empty(unretrievableValidation.notFoundNotice)) {
+                pdictValues.warnings.activeDataNotFoundNotice = unretrievableValidation.notFoundNotice;
+            }
+            if (!empty(unretrievableValidation.unreachableNotice)) {
+                pdictValues.warnings.activeDataUnreachableNotice = unretrievableValidation.unreachableNotice;
+            }
+        }
+
         // decide once whether any validator produced an error -- warnings never block saving
         let hasError = Object.keys(pdictValues.errors).some(function (errorKey) {
             return !empty(pdictValues.errors[errorKey]);
@@ -91,6 +146,7 @@ function handleSettings() {
         algoliaData.setPreference('Enable', algoliaEnable);
         algoliaData.setPreference('ApplicationID', applicationID);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
+        algoliaData.setSetOfStringFromArray('ActiveData', selectedActiveData);
         algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
         algoliaData.setPreference('SearchApiKey', searchApikey);
         algoliaData.setPreference('AdminApiKey', adminApikey);
@@ -135,6 +191,8 @@ function getDashboardPdict() {
     return {
         setttingsUpdateUrl: URLUtils.https('AlgoliaBM-HandleSettings'),
         algoliaData: algoliaData,
+        activeDataOptions: ACTIVE_DATA_OPTIONS,
+        activeDataSelected: algoliaData.getSetOfArray('ActiveData'),
         errors: {
             adminErrorMessage: '',
             analyticsRegionErrorMessage: '',
@@ -142,6 +200,9 @@ function getDashboardPdict() {
         },
         warnings: {
             adminWarningMessage: '',
+            activeDataWarning: '',
+            activeDataNotFoundNotice: '',
+            activeDataUnreachableNotice: '',
         },
     };
 }
