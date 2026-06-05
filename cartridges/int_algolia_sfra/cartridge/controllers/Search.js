@@ -4,6 +4,7 @@ var server = require('server');
 
 /* API includes */
 var CatalogMgr = require('dw/catalog/CatalogMgr');
+var URLUtils = require('dw/web/URLUtils');
 /* Local includes */
 var cache = require('*/cartridge/scripts/middleware/cache');
 var consentTracking = require('*/cartridge/scripts/middleware/consentTracking');
@@ -52,6 +53,15 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             res.cachePeriodUnit = 'hours';
             res.personalized = true;
 
+            // Canonical URL excludes refinements and pagination so that crawlers
+            // see a single representative URL per category (or per query),
+            var canonicalUrl;
+            if (cgid) {
+                canonicalUrl = URLUtils.url('Search-Show', 'cgid', cgid).abs().toString();
+            } else if (q) {
+                canonicalUrl = URLUtils.url('Search-Show', 'q', q).abs().toString();
+            }
+
             // server-side rendering to improve SEO - makes a server-side request to Algolia to return CLP search results
             // only triggered when the user-agent looks like a bot, as we want it triggered only for search engines bots (DuckDuckBot, GoogleBot, BingBot, YandexBot, Baiduspider, ...)
             var searchenginesbots = /bot|crawler|spider/i;
@@ -96,6 +106,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 contentHits: contentHits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q,
+                canonicalUrl: canonicalUrl,
                 activePromotions: activePromotions
             }
 
