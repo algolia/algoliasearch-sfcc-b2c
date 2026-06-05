@@ -81,7 +81,7 @@ async function runSFCCJob() {
             });
 
             const execStatus = status?.status;
-            console.log(`Attempt ${attempts}: Job execution status - ${execStatus}`);
+            console.info('Attempt %d: Job execution status - %s', attempts, execStatus);
 
             if (execStatus === 'OK') {
                 console.log('Job completed successfully.');
