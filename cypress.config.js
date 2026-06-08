@@ -4,11 +4,15 @@ require('dotenv').config();
 module.exports = defineConfig({
     e2e: {
         setupNodeEvents(on, config) {
-            // Copy environment variables to Cypress config
+            // Copy environment variables to Cypress config. ACCESS_TOKEN is deliberately
+            // excluded: the getProduct task mints its own short-lived token per call, and a
+            // token inherited from the parent process would already be expired by the time
+            // the tests run.
             config.env = {
                 ...config.env,
                 ...process.env,
             };
+            delete config.env.ACCESS_TOKEN;
 
             on('task', {
                 async getProduct({ id }) {
@@ -26,7 +30,7 @@ module.exports = defineConfig({
                     launchOptions.args.push('--disable-dev-shm-usage');     // Use /tmp instead of /dev/shm (limited in Docker)
                     launchOptions.args.push('--no-sandbox');                // Required for non-root CI environments
                     launchOptions.args.push('--disable-setuid-sandbox');    // Related sandbox permission flag
-                    
+
                     // Consistency flags to prevent flaky tests
                     launchOptions.args.push('--force-device-scale-factor=1');              // Consistent screenshots
                     launchOptions.args.push('--disable-smooth-scrolling');                 // Instant scrolling

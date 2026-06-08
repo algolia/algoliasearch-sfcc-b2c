@@ -1,6 +1,6 @@
 require('dotenv').config();
 const sfcc = require('sfcc-ci');
-const authenticate = require('./auth');
+const { getValidToken } = require('./ocapiClient');
 const path = require('path');
 const fs = require('fs');
 const archiver = require('archiver');
@@ -10,18 +10,28 @@ const archiver = require('archiver');
  * @param {string} instance - The SFCC instance host.
  * @param {string} jobId - The job ID to poll.
  * @param {string} executionId - The job execution ID to poll.
- * @param {string} token - The OAuth token to use for authentication.
  * @returns {Promise<void>} Resolves when the execution status is 'OK', rejects on error or timeout.
  */
-function waitForJobCompletion(instance, jobId, executionId, token) {
+function waitForJobCompletion(instance, jobId, executionId) {
     const maxAttempts = 60;
     const delay = 5000; // 5 seconds
 
     return new Promise((resolve, reject) => {
         let attempts = 0;
 
-        function poll() {
+        async function poll() {
             attempts++;
+
+            // Refresh the token each poll so it can never expire mid-run (sfcc-ci swallows an
+            // expired-token 401 without invoking the callback, which would otherwise hang here).
+            let token;
+            try {
+                token = await getValidToken();
+            } catch (tokenErr) {
+                reject(tokenErr);
+                return;
+            }
+
             sfcc.job.status(instance, jobId, executionId, token, (err, status) => {
                 if (err) {
                     reject(err);
@@ -56,7 +66,6 @@ function waitForJobCompletion(instance, jobId, executionId, token) {
 
 async function importPreferences() {
     try {
-        const token = await authenticate();
         const instance = process.env.SANDBOX_HOST;
 
         // "site_import" directory
@@ -128,8 +137,9 @@ async function importPreferences() {
         });
 
         console.log('Uploading site_import.zip...');
+        const uploadToken = await getValidToken();
         await new Promise((resolve, reject) => {
-            sfcc.instance.upload(instance, siteArchive, token, {}, (err) => {
+            sfcc.instance.upload(instance, siteArchive, uploadToken, {}, (err) => {
                 if (err) {
                     console.error('Upload error:', err);
                     reject(err);
@@ -141,8 +151,9 @@ async function importPreferences() {
         });
 
         console.log('Importing site preferences...');
+        const importToken = await getValidToken();
         const importExecutionId = await new Promise((resolve, reject) => {
-            sfcc.instance.import(instance, 'site_import.zip', token, (err, result) => {
+            sfcc.instance.import(instance, 'site_import.zip', importToken, (err, result) => {
                 if (err) {
                     console.error('Import error:', err);
                     reject(err);
@@ -163,7 +174,7 @@ async function importPreferences() {
         // Wait for the import to actually finish before returning. Without this, the caller can run the
         // indexing job while the preferences (e.g. Algolia_RecordModel, Algolia_IndexPrefix) are still
         // being applied, which produces records in the wrong shape/index.
-        await waitForJobCompletion(instance, 'sfcc-site-archive-import', importExecutionId, token);
+        await waitForJobCompletion(instance, 'sfcc-site-archive-import', importExecutionId);
 
         console.log('Site preferences import completed successfully.');
     } catch (error) {

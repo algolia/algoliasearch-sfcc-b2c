@@ -1,44 +1,15 @@
 require('dotenv').config();
 const { algoliasearch } = require('algoliasearch');
-const sfcc = require('sfcc-ci');
 const getProduct = require('../../scripts/getProduct');
 
 var productName;
 
 describe('Algolia Integration', () => {
-    beforeAll(async () => {
-        const sfccAuthVars = ['SFCC_OAUTH_CLIENT_ID', 'SFCC_OAUTH_CLIENT_SECRET'];
-        sfccAuthVars.forEach(envVar => {
-            if (!process.env[envVar]) {
-                throw new Error(`Missing SFCC authentication variable: ${envVar}`);
-            }
-        });
-
-        // Authenticate with SFCC using the JavaScript API
-        try {
-            await new Promise((resolve, reject) => {
-                sfcc.auth.auth(
-                    process.env.SFCC_OAUTH_CLIENT_ID,
-                    process.env.SFCC_OAUTH_CLIENT_SECRET,
-                    (err, token) => {
-                        if (err) {
-                            console.error('Failed to authenticate with SFCC:', err);
-                            reject(err);
-                            return;
-                        }
-                        process.env.ACCESS_TOKEN = token;
-                        console.log('Successfully authenticated with SFCC');
-                        resolve(token);
-                    }
-                );
-            });
-        } catch (error) {
-            console.error('Failed to authenticate with SFCC:', error);
-            throw error;
-        }
-
-        // Now verify other required environment variables
-        const requiredEnvVars = ['SANDBOX_HOST', 'ACCESS_TOKEN', 'ALGOLIA_APP_ID', 'ALGOLIA_API_KEY'];
+    beforeAll(() => {
+        // getProduct mints its own short-lived SFCC token per call, so no shared
+        // ACCESS_TOKEN is needed here. Validate credentials and config up front so the suite
+        // fails fast with a clear message if anything is missing.
+        const requiredEnvVars = ['SFCC_OAUTH_CLIENT_ID', 'SFCC_OAUTH_CLIENT_SECRET', 'SANDBOX_HOST', 'ALGOLIA_APP_ID', 'ALGOLIA_API_KEY'];
         requiredEnvVars.forEach(envVar => {
             if (!process.env[envVar]) {
                 throw new Error(`Missing required environment variable: ${envVar}`);

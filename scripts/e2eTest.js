@@ -18,7 +18,7 @@ const cypress = require('cypress');
 const deployCode = require('./deployCode');
 const importPreferences = require('./importPreferences');
 const runSFCCJob = require('./runSFCCJob');
-const authenticate = require('./auth');
+const { ocapiFetch } = require('./ocapiClient');
 
 // List of paths to clean up
 const cleanupPaths = [
@@ -92,9 +92,6 @@ async function main() {
 
         console.log('[INFO] Importing site preferences...');
         await importPreferences();
-
-        // Ensure token exists before OCAPI call
-        await ensureAccessToken();
 
         // Pre‑set ATS to 2 so first job picks it up
         console.log('[INFO] Updating inventory ATS to 2 before indexing job...');
@@ -184,17 +181,6 @@ async function runCypressTests() {
 }
 
 /**
- * Ensures ACCESS_TOKEN is available in env, otherwise authenticates and sets it.
- */
-async function ensureAccessToken() {
-    if (process.env.ACCESS_TOKEN) {
-        return;
-    }
-    const token = await authenticate();
-    process.env.ACCESS_TOKEN = token;
-}
-
-/**
  * Updates the inventory ATS for a given product.
  * @param {string} productId - The ID of the product to update.
  * @param {number} atsValue - The new ATS value to set.
@@ -204,11 +190,10 @@ async function updateInventoryATS(productId, atsValue) {
     const apiUrl = `https://${process.env.SANDBOX_HOST}/s/-/dw/data/v24_5/inventory_lists/${inventoryListId}/product_inventory_records/${productId}`;
     const body = { allocation: { amount: atsValue } };
 
-    const response = await fetch(apiUrl, {
+    const response = await ocapiFetch(apiUrl, {
         method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.ACCESS_TOKEN}`
         },
         body: JSON.stringify(body)
     });
