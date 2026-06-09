@@ -41,7 +41,7 @@ context('Inventory real-time update', () => {
         cy.get('#autocomplete-0-input', { timeout: 20000 }).should('be.visible');
 
         // Arrange: Search and open PDP
-        cy.get('#autocomplete-0-input').clear()
+        cy.get('#autocomplete-0-input').clear();
         cy.get('#autocomplete-0-input').type(productName);
         cy.get('.aa-PanelLayout').should('be.visible');
         cy.get('#autocomplete-0-input').type('{enter}');
