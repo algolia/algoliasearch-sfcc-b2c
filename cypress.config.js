@@ -55,8 +55,10 @@ module.exports = defineConfig({
         defaultCommandTimeout: 10000,
         requestTimeout: 10000,
         responseTimeout: 30000,
+        // TEMPORARY (diagnostic): runMode 0 so a cold-start failure fails fast at the real
+        // assertion and uploads its screenshot
         retries: {
-            runMode: 2,
+            runMode: 0,
             openMode: 0
         },
     },

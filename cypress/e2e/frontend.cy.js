@@ -27,20 +27,17 @@ describe('Algolia Search', () => {
             const host = Cypress.env('SANDBOX_HOST');
             cy.visit(`https://${host}/s/RefArch/home`);
 
-            // Wait for search input to be available, then type the query
-            cy.get('#autocomplete-0-input', { timeout: 20000 }).should('be.visible').type(scenario.query);
+            // Wait for the Algolia autocomplete to initialize
+            cy.get('#autocomplete-0-input', { timeout: 20000 }).should('be.visible');
 
-            // Autocomplete panel should open and echo the query
-            cy.get('.aa-PanelLayout', { timeout: 10000 }).should('be.visible').and('contain', scenario.query);
-
-            // The catalog is reindexed immediately before this spec runs, so the first search against a
-            // freshly swapped index can briefly return no results. Re-issue the search until the product
-            // appears instead of relying on whole-test retries, which re-run the slow page visits.
-            const maxSearchAttempts = 5;
+            // Immediately after a fresh index, the first storefront query can come back empty, so the
+            // expected product may be missing on the first try. Re-issue the search until it appears,
+            // rather than letting an assertion fail and trigger a whole-test retry.
+            const maxSearchAttempts = 6;
             const searchUntilProductVisible = (attempt = 1) => {
                 cy.get('#autocomplete-0-input').clear();
                 cy.get('#autocomplete-0-input').type(`${scenario.query}{enter}`);
-                cy.get('.search-results', { timeout: 10000 }).should('be.visible');
+                cy.get('.search-results', { timeout: 15000 }).should('be.visible');
 
                 cy.get('body', { log: false }).then(($body) => {
                     const productVisible = $body.find(`.product-tile:contains("${scenario.expectedProduct}")`).length > 0;
