@@ -55,11 +55,11 @@ function enableInstantSearch(config) {
     // Custom URL routing: short, stable URL keys (q, category, brand, size, color, store, price, sort, page, etc.)
     // instead of the default `simple` mapping's index-prefixed keys, with `arrayFormat: 'repeat'
     // so `?brand=Apple&brand=Samsung` replaces `?brand[0]=Apple&brand[1]=Samsung`.
-    var isMaster = algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'attribute-sliced';
-    var sizeAttribute = isMaster ? 'variants.size' : 'size';
-    var colorAttribute = isMaster ? 'variants.color' : 'color';
-    var storeAttribute = isMaster ? 'variants.storeAvailability' : 'storeAvailability';
-    var priceAttribute = isMaster ? 'variants.price.' + algoliaData.currencyCode : 'price.' + algoliaData.currencyCode;
+    const isMaster = algoliaData.recordModel === 'master-level' || algoliaData.recordModel === 'attribute-sliced';
+    const sizeAttribute = isMaster ? 'variants.size' : 'size';
+    const colorAttribute = isMaster ? 'variants.color' : 'color';
+    const storeAttribute = isMaster ? 'variants.storeAvailability' : 'storeAvailability';
+    const priceAttribute = isMaster ? 'variants.price.' + algoliaData.currencyCode : 'price.' + algoliaData.currencyCode;
 
     /**
      * Compresses a hierarchicalMenu uiState slot (which stores cumulative paths at
@@ -86,19 +86,23 @@ function enableInstantSearch(config) {
         });
     }
 
-    var router = instantsearch.routers.history({
+    // URL keys this mapping owns. Anything else already on the URL (lang, utm_*, ...) is
+    // preserved across refinements so locale and marketing parameters are not stripped.
+    const routeKeys = ['q', 'category', 'newArrivals', 'newArrival', 'brand', 'color', 'size', 'store', 'price', 'sort', 'page'];
+
+    const router = instantsearch.routers.history({
         createURL: function (params) {
-            var qsModule = params.qsModule;
-            var routeState = params.routeState;
-            var location = params.location;
-            var port = location.port ? ':' + location.port : '';
-            var queryString = qsModule.stringify(routeState, { arrayFormat: 'repeat' });
-            var base = location.protocol + '//' + location.hostname + port + location.pathname;
-            return queryString ? base + '?' + queryString + location.hash : base + location.hash;
+            const qsModule = params.qsModule;
+            const url = new URL(params.location.href);
+            const current = qsModule.parse(url.search.slice(1));
+            routeKeys.forEach(function (key) { delete current[key]; });
+            const merged = Object.assign({}, current, params.routeState);
+            url.search = qsModule.stringify(merged, { arrayFormat: 'repeat' });
+            return url.href;
         }
     });
 
-    var stateMapping = {
+    const stateMapping = {
         stateToRoute: function (uiState) {
             var indexUiState = uiState[productsIndex] || {};
             var route = {};
