@@ -66,6 +66,8 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
+    # A healthy run should finish well under this
+    timeout-minutes: 15
     env:
       CODE_VERSION: ${{ vars.CODE_VERSION }}
       ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
@@ -101,7 +103,7 @@ jobs:
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
       - name: Upload Cypress Screenshots
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
@@ -109,7 +111,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Cypress Videos
-        if: failure()
+        if: failure() || cancelled()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-videos

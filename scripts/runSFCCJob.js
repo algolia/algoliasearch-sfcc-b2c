@@ -1,19 +1,18 @@
 require('dotenv').config();
 const sfcc = require('sfcc-ci');
-const authenticate = require('./auth');
+const { getValidToken } = require('./ocapiClient');
 
 async function runSFCCJob() {
     try {
-        const token = await authenticate();
-
         const instance = process.env.SANDBOX_HOST;
         const jobId = 'AlgoliaProductIndex_v2';
 
         // Run Job
         let jobExecution;
         try {
+            const runToken = await getValidToken();
             jobExecution = await new Promise((resolve, reject) => {
-                sfcc.job.run(instance, jobId, {}, token, (err, result) => {
+                sfcc.job.run(instance, jobId, {}, runToken, (err, result) => {
                     if (err) {
                         console.error('Job run error:', err);
                         console.error('Error details:', JSON.stringify(err, null, 2));
@@ -28,8 +27,9 @@ async function runSFCCJob() {
             if (error.message && error.message.includes('JobAlreadyRunningException')) {
                 console.log('Job is already running. Will monitor its status...');
                 // Get the list of running jobs to find our job's execution ID
+                const listToken = await getValidToken();
                 jobExecution = await new Promise((resolve, reject) => {
-                    sfcc.job.list(instance, token, (err, result) => {
+                    sfcc.job.list(instance, listToken, (err, result) => {
                         if (err) {
                             reject(err);
                         } else {
@@ -68,6 +68,9 @@ async function runSFCCJob() {
         while (attempts < maxAttempts) {
             attempts++;
 
+            // Refresh the token each poll so it can never expire mid-run (sfcc-ci swallows an
+            // expired-token 401 without invoking the callback, which would otherwise hang here).
+            const token = await getValidToken();
             const status = await new Promise((resolve, reject) => {
                 sfcc.job.status(instance, jobId, jobExecutionId, token, (err, result) => {
                     if (err) {

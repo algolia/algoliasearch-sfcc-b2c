@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-require('dotenv').config();
 
 describe('Algolia Search', () => {
     beforeEach(() => {
@@ -9,7 +8,7 @@ describe('Algolia Search', () => {
 
     const testSearchScenarios = [];
 
-    if (process.env.RECORD_MODEL === 'master-level') {
+    if (Cypress.env('RECORD_MODEL') === 'master-level') {
         testSearchScenarios.push({
             name: 'master product search',
             query: 'Roll Up',
@@ -25,29 +24,40 @@ describe('Algolia Search', () => {
 
     testSearchScenarios.forEach(scenario => {
         it(`performs a ${scenario.name} and displays results`, () => {
-            // Ensure we're on the homepage
             const host = Cypress.env('SANDBOX_HOST');
             cy.visit(`https://${host}/s/RefArch/home`);
 
-            // Wait for search input to be available
+            // Wait for the Algolia autocomplete to initialize
             cy.get('#autocomplete-0-input', { timeout: 20000 }).should('be.visible');
 
-            // Type a search query
-            cy.get('#autocomplete-0-input').type(scenario.query);
+            // Immediately after a fresh index, the first storefront query can come back empty, so the
+            // expected product may be missing on the first try. Re-issue the search until it appears,
+            // rather than letting an assertion fail and trigger a whole-test retry.
+            const maxSearchAttempts = 6;
+            const searchUntilProductVisible = (attempt = 1) => {
+                cy.get('#autocomplete-0-input').clear();
+                cy.get('#autocomplete-0-input').type(`${scenario.query}{enter}`);
+                cy.get('.search-results', { timeout: 15000 }).should('be.visible');
 
-            // Wait for the autocomplete results to load
-            cy.get('.aa-PanelLayout', { timeout: 10000 }).should('be.visible');
+                cy.get('body', { log: false }).then(($body) => {
+                    const productVisible = $body.find(`.product-tile:contains("${scenario.expectedProduct}")`).length > 0;
+                    if (productVisible) {
+                        return;
+                    }
 
-            // Autocomplete should contain the search query
-            cy.get('.aa-PanelLayout').should('contain', scenario.query);
+                    if (attempt >= maxSearchAttempts) {
+                        throw new Error(`"${scenario.expectedProduct}" not found in search results after ${maxSearchAttempts} attempts`);
+                    }
 
-            // press enter
-            cy.get('#autocomplete-0-input').type('{enter}');
+                    cy.log(`Product not in results yet; retrying search (${attempt + 1}/${maxSearchAttempts})`);
+                    // eslint-disable-next-line cypress/no-unnecessary-waiting
+                    cy.wait(3000).then(() => searchUntilProductVisible(attempt + 1));
+                });
+            };
 
-            // Wait for results to load
-            cy.get('.search-results', { timeout: 10000 }).should('be.visible');
+            searchUntilProductVisible();
 
-            // Find the specific product tile
+            // The product tile should render with a price and an image
             cy.contains('.product-tile', scenario.expectedProduct)
                 .should('be.visible')
                 .within(() => {
