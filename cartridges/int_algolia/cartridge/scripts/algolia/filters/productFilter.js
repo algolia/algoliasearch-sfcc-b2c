@@ -67,7 +67,7 @@ function isInclude(product) {
     // Do not include bundled product
     if (product.isBundled()) {
         var priceModel = product.getPriceModel();
-        if (!(priceModel && priceModel.price && priceModel.price.available)) return false;
+        if (!(priceModel && priceModel.getPrice() && priceModel.getPrice().isAvailable())) return false;
     }
 
     // Check online status

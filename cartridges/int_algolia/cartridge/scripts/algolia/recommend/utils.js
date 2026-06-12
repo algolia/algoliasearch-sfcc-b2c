@@ -51,7 +51,7 @@ function getAnchorProductIDs(slotcontent) {
     } else {
         for (let i = 0; i < slotcontent.content.length; i++) {
             let product = slotcontent.content[i];
-            productIDs.push(product.ID);
+            productIDs.push(product.getID());
         }
     }
 
@@ -71,7 +71,7 @@ function getAnchorProductIDs(slotcontent) {
         var appropriateProduct = getAppropriateProduct(product, recordModel);
 
         if (appropriateProduct) {
-            anchorProductIDsArr.push(appropriateProduct.ID);
+            anchorProductIDsArr.push(appropriateProduct.getID());
         }
     }
 

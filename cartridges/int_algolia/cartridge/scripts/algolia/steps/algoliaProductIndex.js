@@ -258,7 +258,7 @@ exports.beforeStep = function(parameters, stepExecution) {
  */
 // eslint-disable-next-line no-unused-vars
 exports.getTotalCount = function(parameters, stepExecution) {
-    return products.count;
+    return products.getCount();
 }
 
 /**
@@ -347,7 +347,7 @@ exports.process = function(product, parameters, stepExecution) {
 
             // masters that DON'T have the specified variation attribute -- treat them as regular masters
             if (!variationAttribute) {
-                logger.info('Specified variation attribute "' + variationAttributeForAttributeSlicedRecordModel + '" not found for master product "' + product.ID + '", falling back to master-type record.');
+                logger.info('Specified variation attribute "' + variationAttributeForAttributeSlicedRecordModel + '" not found for master product "' + product.getID() + '", falling back to master-type record.');
 
                 let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
                 for (let l = 0; l < siteLocales.size(); ++l) {
@@ -636,7 +636,7 @@ exports.afterStep = function(success, parameters, stepExecution) {
         jobReport.errorMessage = 'An error occurred during the job. Please see the error log for more details.';
     }
 
-    logger.info('Total number of processed products: {0} / {1}', jobReport.processedItems, products.count);
+    logger.info('Total number of processed products: {0} / {1}', jobReport.processedItems, products.getCount());
     logger.info('Number of products marked for sending: {0}', jobReport.processedItemsToSend);
     logger.info('Number of locales configured for the site: {0}', jobReport.siteLocales);
     logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
@@ -648,11 +648,11 @@ exports.afterStep = function(success, parameters, stepExecution) {
         jobReport.error = true;
         jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
             paramFailureThresholdPercentage + '%). Check the logs for details.';
-    } else if (jobReport.processedItems !== products.count) {
+    } else if (jobReport.processedItems !== products.getCount()) {
         jobReport.error = true;
         jobReport.errorMessage =
             'Not all products were processed: ' +
-            jobReport.processedItems + ' / ' + products.count +
+            jobReport.processedItems + ' / ' + products.getCount() +
             '. Check the logs for details.';
     } else if (jobReport.chunksFailed > 0) {
         jobReport.error = true;

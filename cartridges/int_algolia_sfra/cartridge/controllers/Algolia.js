@@ -33,8 +33,8 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
             var apiPromotion = PromotionMgr.getPromotion(promotion.id);
             var promotionPrice = apiPromotion.getPromotionalPrice(apiProduct);
 
-            if (promotionPrice.value && promotionPrice.value < minPrice ) {
-                minPrice = promotionPrice.value;
+            if (promotionPrice.getValue() && promotionPrice.getValue() < minPrice ) {
+                minPrice = promotionPrice.getValue();
                 activePromotion = promotion;
             }
         }
@@ -46,8 +46,8 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
             };
         }
 
-        var defaultPrice = apiProduct.isProductSet() ? apiProduct.getPriceModel().minPrice : apiProduct.getPriceModel().price;
-        product.defaultPrice = defaultPrice.value;
+        var defaultPrice = apiProduct.isProductSet() ? apiProduct.getPriceModel().getMinPrice() : apiProduct.getPriceModel().getPrice();
+        product.defaultPrice = defaultPrice.getValue();
 
         productsArr.push(product);
     }

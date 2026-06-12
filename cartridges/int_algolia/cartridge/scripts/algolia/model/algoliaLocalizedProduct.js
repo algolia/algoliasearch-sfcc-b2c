@@ -109,7 +109,7 @@ function getPromotionalPrices(product, campaigns) {
                 if (price === dw.value.Money.NOT_AVAILABLE) {
                     return null;
                 }
-                let promoId = promotion.ID;
+                let promoId = promotion.getID();
                 return {
                     price: price.getValue(),
                     promoId: promoId
@@ -244,7 +244,7 @@ var aggregatedValueHandlers = {
     },
     defaultVariantID: function(product) {
         const defaultVariant = product.getVariationModel().getDefaultVariant();
-        return defaultVariant ? defaultVariant.ID : null;
+        return defaultVariant ? defaultVariant.getID() : null;
     },
     categories: function (product) {
         var productCategories = product.getOnlineCategories();
@@ -281,7 +281,7 @@ var aggregatedValueHandlers = {
         var result = null;
         if (empty(product.getPrimaryCategory())) {
             var primaryCategory = product.isVariant() ? product.getMasterProduct().getPrimaryCategory() : null;
-            result = empty(primaryCategory) ? null : primaryCategory.ID;
+            result = empty(primaryCategory) ? null : primaryCategory.getID();
         } else {
             result = product.getPrimaryCategory().getID();
         }
@@ -306,7 +306,7 @@ var aggregatedValueHandlers = {
         var variationModel = parameters.variationModel || product.getVariationModel();
         var colorAttribute = variationModel.getProductVariationAttribute('color');
         return (colorAttribute && variationModel.getSelectedValue(colorAttribute))
-            ? variationModel.getSelectedValue(colorAttribute).displayValue
+            ? variationModel.getSelectedValue(colorAttribute).getDisplayValue()
             : product.custom.color; // this is a workaround to retrieve color values which are otherwise not returned properly by the API via the variation model, likely due to an SFCC bug. It either returns the color value that `getSelectedValue()` couldn't or `null` as before.
 
     },
@@ -329,7 +329,7 @@ var aggregatedValueHandlers = {
         var variationModel = parameters.variationModel || product.getVariationModel();
         var sizeAttribute = variationModel.getProductVariationAttribute('size');
         return (sizeAttribute && variationModel.getSelectedValue(sizeAttribute))
-            ? variationModel.getSelectedValue(sizeAttribute).displayValue
+            ? variationModel.getSelectedValue(sizeAttribute).getDisplayValue()
             : product.custom.size; // this is a workaround to retrieve size values which are otherwise not returned properly by the API via the variation model, likely due to an SFCC bug. It either returns the size value that `getSelectedValue()` couldn't or `null` as before.
     },
     refinementSize: function (product) {
@@ -348,10 +348,10 @@ var aggregatedValueHandlers = {
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
             var currency = Currency.getCurrency(siteCurrencies.get(k));
             currentSession.setCurrency(currency);
-            var price = product.isProductSet() ? product.getPriceModel().minPrice : product.getPriceModel().price;
-            if (price.available) {
+            var price = product.isProductSet() ? product.getPriceModel().getMinPrice() : product.getPriceModel().getPrice();
+            if (price.isAvailable()) {
                 if (!productPrice) { productPrice = {}; }
-                productPrice[price.currencyCode] = price.value;
+                productPrice[price.getCurrencyCode()] = price.getValue();
             }
         }
         currentSession.setCurrency(currentCurrency);
@@ -364,19 +364,22 @@ var aggregatedValueHandlers = {
 
         while (sitePriceBooks.hasNext()) {
             var pricebook = sitePriceBooks.next();
-            if (siteCurrencies.indexOf(pricebook.currencyCode) < 0) {
+            var pricebookCurrencyCode = pricebook.getCurrencyCode();
+            if (siteCurrencies.indexOf(pricebookCurrencyCode) < 0) {
                 continue;
             }
-            var priceInfo = product.getPriceModel().getPriceBookPriceInfo(pricebook.ID);
+            var priceInfo = product.getPriceModel().getPriceBookPriceInfo(pricebook.getID());
             if (priceInfo) {
-                if (!pricebooks[pricebook.currencyCode]) {
-                    pricebooks[pricebook.currencyCode] = [];
+                if (!pricebooks[pricebookCurrencyCode]) {
+                    pricebooks[pricebookCurrencyCode] = [];
                 }
-                pricebooks[pricebook.currencyCode].push({
-                    price: priceInfo.price.value,
-                    onlineFrom: priceInfo.onlineFrom ? priceInfo.onlineFrom.getTime() : undefined,
-                    onlineTo: priceInfo.onlineTo ? priceInfo.onlineTo.getTime() : undefined,
-                    pricebookID: pricebook.ID,
+                var onlineFrom = priceInfo.getOnlineFrom();
+                var onlineTo = priceInfo.getOnlineTo();
+                pricebooks[pricebookCurrencyCode].push({
+                    price: priceInfo.getPrice().getValue(),
+                    onlineFrom: onlineFrom ? onlineFrom.getTime() : undefined,
+                    onlineTo: onlineTo ? onlineTo.getTime() : undefined,
+                    pricebookID: pricebook.getID(),
                 });
             }
         }
@@ -416,7 +419,7 @@ var aggregatedValueHandlers = {
     },
     url: function (product) {
         // Get product page url for the current locale
-        var productPageUrl = URLUtils.url('Product-Show', 'pid', product.ID);
+        var productPageUrl = URLUtils.url('Product-Show', 'pid', product.getID());
         return productPageUrl ? productPageUrl.toString() : null;
     },
     promotionalPrice: function (product) {
@@ -512,7 +515,7 @@ var aggregatedValueHandlers = {
         }
     },
     _tags: function(product) {
-        return ['id:' + product.ID];
+        return ['id:' + product.getID()];
     },
     storeAvailability: function(product) {
         var storeArray = [];

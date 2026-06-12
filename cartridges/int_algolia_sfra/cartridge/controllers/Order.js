@@ -30,9 +30,9 @@ server.append('Confirm', function (req, res, next) {
                 var algoliaProduct = {};
 
                 try {
-                    algoliaProduct.pid = algoliaData.getPreference('RecordModel') === RECORD_MODEL_TYPES.MASTER_LEVEL ? product.getMasterProduct().ID : product.ID;
+                    algoliaProduct.pid = algoliaData.getPreference('RecordModel') === RECORD_MODEL_TYPES.MASTER_LEVEL ? product.getMasterProduct().getID() : product.getID();
                 } catch (e) { // eslint-disable-line no-unused-vars
-                    algoliaProduct.pid = product.ID;
+                    algoliaProduct.pid = product.getID();
                 }
 
                 var price = priceFactory.getPrice(product);
@@ -41,7 +41,7 @@ server.append('Confirm', function (req, res, next) {
                     algoliaProduct.discount = +(price.list.value - price.sales.value).toFixed(2);
                 }
                 currency = price.sales.currency;
-                algoliaProduct.qty = pliArr[i].quantityValue;
+                algoliaProduct.qty = pliArr[i].getQuantityValue();
                 algoliaProducts.push(algoliaProduct);
             }
         };

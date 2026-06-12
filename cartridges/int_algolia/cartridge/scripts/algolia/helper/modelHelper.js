@@ -32,7 +32,7 @@ function getColorVariations(product, locale) {
         );
         if (!hasOrderableVariants) {
             logger.info(
-                'Product ' + product.ID + ' has no orderable variant for color ' + colorValue.value
+                'Product ' + product.getID() + ' has no orderable variant for color ' + colorValue.getValue()
             );
             continue;
         }
@@ -46,15 +46,15 @@ function getColorVariations(product, locale) {
                 variationURL: URLUtils.url(
                     'Product-Show',
                     'pid',
-                    product.ID,
+                    product.getID(),
                     variationModel.getHtmlName(colorVariationAttribute), // returns 'dwvar_' + product.ID + '_color',
-                    colorValue.value
+                    colorValue.getValue()
                 ).toString(),
-                color: colorValue.displayValue,
+                color: colorValue.getDisplayValue(),
             };
 
             if (IS_PWA) {
-                variationObject.colorCode = colorValue.value; // Required to create product detail page URL in PWA
+                variationObject.colorCode = colorValue.getValue(); // Required to create product detail page URL in PWA
             }
 
             colorVariations.push(variationObject);
@@ -73,7 +73,7 @@ function getColorVariations(product, locale) {
 function getColorVariationImagesGroup(variationModel, colorAttributeValue) {
     var imageGroupsArr = [];
 
-    variationModel.setSelectedAttributeValue('color', colorAttributeValue.ID);
+    variationModel.setSelectedAttributeValue('color', colorAttributeValue.getID());
 
     ['large', 'small', 'swatch'].forEach(function (viewtype) {
         var imagesList = variationModel.getImages(viewtype);
@@ -111,9 +111,10 @@ function getImageGroups(imagesList, viewtype) {
             title: {},
         };
 
-        image.alt = imagesList.get(i).alt;
-        image.dis_base_link = imagesList.get(i).absURL.toString();
-        image.title = imagesList.get(i).title;
+        var mediaFile = imagesList.get(i);
+        image.alt = mediaFile.getAlt();
+        image.dis_base_link = mediaFile.getAbsURL().toString();
+        image.title = mediaFile.getTitle();
 
         result.images.push(image);
     }
