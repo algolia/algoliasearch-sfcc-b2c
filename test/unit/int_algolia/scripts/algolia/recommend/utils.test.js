@@ -7,9 +7,9 @@ describe('getAnchorProductIDs', () => {
         isVariationGroup: jest.fn(() => false),
         isVariant: jest.fn(() => true),
         master: false,
-        masterProduct: {
+        getMasterProduct: jest.fn(() => ({
             ID: 'masterProduct1'
-        },
+        })),
     };
 
     const masterProduct = {
@@ -17,11 +17,11 @@ describe('getAnchorProductIDs', () => {
         isVariationGroup: jest.fn(() => false),
         isVariant: jest.fn(() => false),
         master: true,
-        variationModel: {
-            defaultVariant: {
+        getVariationModel: jest.fn(() => ({
+            getDefaultVariant: jest.fn(() => ({
                 ID: 'product1'
-            },
-        }
+            })),
+        })),
     };
 
     const variationGroupProduct = {
@@ -29,14 +29,14 @@ describe('getAnchorProductIDs', () => {
         isVariationGroup: jest.fn(() => true),
         isVariant: jest.fn(() => false),
         master: false,
-        variationModel: {
-            defaultVariant: {
+        getVariationModel: jest.fn(() => ({
+            getDefaultVariant: jest.fn(() => ({
                 ID: 'product1'
-            },
-        },
-        masterProduct: {
+            })),
+        })),
+        getMasterProduct: jest.fn(() => ({
             ID: 'masterProduct1'
-        },
+        })),
     };
 
     beforeEach(() => {

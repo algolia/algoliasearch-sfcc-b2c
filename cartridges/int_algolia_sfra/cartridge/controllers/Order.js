@@ -30,7 +30,7 @@ server.append('Confirm', function (req, res, next) {
                 var algoliaProduct = {};
 
                 try {
-                    algoliaProduct.pid = algoliaData.getPreference('RecordModel') === RECORD_MODEL_TYPES.MASTER_LEVEL ? product.masterProduct.ID : product.ID;
+                    algoliaProduct.pid = algoliaData.getPreference('RecordModel') === RECORD_MODEL_TYPES.MASTER_LEVEL ? product.getMasterProduct().ID : product.ID;
                 } catch (e) { // eslint-disable-line no-unused-vars
                     algoliaProduct.pid = product.ID;
                 }

@@ -46,7 +46,7 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
             };
         }
 
-        var defaultPrice = apiProduct.productSet ? apiProduct.priceModel.minPrice : apiProduct.priceModel.price;
+        var defaultPrice = apiProduct.isProductSet() ? apiProduct.getPriceModel().minPrice : apiProduct.getPriceModel().price;
         product.defaultPrice = defaultPrice.value;
 
         productsArr.push(product);

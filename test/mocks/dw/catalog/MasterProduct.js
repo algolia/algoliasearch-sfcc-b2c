@@ -143,6 +143,15 @@ class Product {
     isProductSet() {
         return this.productSet;
     }
+    isOnline() {
+        return this.online;
+    }
+    isSearchable() {
+        return this.searchable;
+    }
+    isBundled() {
+        return this.bundled || false;
+    }
     get availabilityModel() {
         return this.getAvailabilityModel();
     }

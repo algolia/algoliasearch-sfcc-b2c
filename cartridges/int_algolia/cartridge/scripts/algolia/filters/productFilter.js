@@ -23,7 +23,7 @@ function isOnline(product) {
     if (config.includeOfflineProducts === true) {
         return true;
     }
-    return product.online;
+    return product.isOnline();
 }
 
 /**
@@ -36,7 +36,7 @@ function isSearchable(product) {
     if (config.includeNotSearchableProducts === true) {
         return true;
     }
-    return product.searchable;
+    return product.isSearchable();
 }
 
 /**
@@ -65,7 +65,10 @@ function isInclude(product) {
     // Do not include Option products
     // if (product.optionProduct) return false;
     // Do not include bundled product
-    if (product.bundled && !(product.priceModel && product.priceModel.price && product.priceModel.price.available)) return false;
+    if (product.isBundled()) {
+        var priceModel = product.getPriceModel();
+        if (!(priceModel && priceModel.price && priceModel.price.available)) return false;
+    }
 
     // Check online status
     if (!isOnline(product)) return false;
@@ -100,7 +103,7 @@ function isInStock(product, threshold) {
 
     // even if one variant is in stock, we consider the product as in stock
     if (product.isMaster() || product.isVariationGroup()) {
-        const variantsIt = product.variants.iterator();
+        const variantsIt = product.getVariants().iterator();
 
         while (variantsIt.hasNext()) {
             let variant = variantsIt.next();

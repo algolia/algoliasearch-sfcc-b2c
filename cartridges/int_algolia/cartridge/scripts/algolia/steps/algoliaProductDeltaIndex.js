@@ -376,7 +376,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 // This variant will be processed when we handle its master product, skip it for now.
                 return [];
             }
-            if (product.master) {
+            if (product.isMaster()) {
                 let inStock = productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
 
                 if ((inStock || INDEX_OUT_OF_STOCK) &&
@@ -417,7 +417,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 return [];
             }
 
-            if (product.master) {
+            if (product.isMaster()) {
                 let variationModel = product.getVariationModel();
                 let variationAttribute = variationModel.getProductVariationAttribute(variationAttributeForAttributeSlicedRecordModel);
 
@@ -528,7 +528,7 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 });
 
                 // Check if we need a delete operation because of product filter because delta jobs are record updates not a full reindex
-                let variants = product.variants;
+                let variants = product.getVariants();
                 if (variants && variants.size() > 0) {
                     for (let v = 0; v < variants.size(); ++v) {
                         let variant = variants[v];

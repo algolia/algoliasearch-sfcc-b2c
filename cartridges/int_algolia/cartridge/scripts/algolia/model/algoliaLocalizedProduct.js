@@ -279,7 +279,7 @@ var aggregatedValueHandlers = {
     },
     primary_category_id: function (product) {
         var result = null;
-        if (empty(product.primaryCategory)) {
+        if (empty(product.getPrimaryCategory())) {
             var primaryCategory = product.isVariant() ? product.getMasterProduct().getPrimaryCategory() : null;
             result = empty(primaryCategory) ? null : primaryCategory.ID;
         } else {
@@ -289,9 +289,9 @@ var aggregatedValueHandlers = {
     },
     __primary_category: function (product) {
         var res = {};
-        var primaryCategory = product.primaryCategory;
+        var primaryCategory = product.getPrimaryCategory();
         if (empty(primaryCategory)) {
-            primaryCategory = product.isVariant() ? product.masterProduct.primaryCategory : null;
+            primaryCategory = product.isVariant() ? product.getMasterProduct().getPrimaryCategory() : null;
             if (empty(primaryCategory)) {
                 return null;
             }
@@ -319,7 +319,7 @@ var aggregatedValueHandlers = {
         if (product.isMaster() || product.isVariationGroup()) {
             return modelHelper.getColorVariations(product);
         }
-        const masterProduct = product.getVariationModel().master;
+        const masterProduct = product.getVariationModel().getMaster();
         if (!masterProduct) {
             return null;
         }
@@ -346,9 +346,9 @@ var aggregatedValueHandlers = {
         var currentCurrency = currentSession.getCurrency();
 
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
-            var currency = Currency.getCurrency(siteCurrencies[k]);
+            var currency = Currency.getCurrency(siteCurrencies.get(k));
             currentSession.setCurrency(currency);
-            var price = product.productSet ? product.priceModel.minPrice : product.priceModel.price;
+            var price = product.isProductSet() ? product.getPriceModel().minPrice : product.getPriceModel().price;
             if (price.available) {
                 if (!productPrice) { productPrice = {}; }
                 productPrice[price.currencyCode] = price.value;
@@ -367,7 +367,7 @@ var aggregatedValueHandlers = {
             if (siteCurrencies.indexOf(pricebook.currencyCode) < 0) {
                 continue;
             }
-            var priceInfo = product.priceModel.getPriceBookPriceInfo(pricebook.ID);
+            var priceInfo = product.getPriceModel().getPriceBookPriceInfo(pricebook.ID);
             if (priceInfo) {
                 if (!pricebooks[pricebook.currencyCode]) {
                     pricebooks[pricebook.currencyCode] = [];
@@ -428,7 +428,7 @@ var aggregatedValueHandlers = {
         var currentCurrency = currentSession.getCurrency();
 
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
-            var currency = Currency.getCurrency(siteCurrencies[k]);
+            var currency = Currency.getCurrency(siteCurrencies.get(k));
             currentSession.setCurrency(currency);
             var price = getPromotionalPrice(product);
             if (price) {
@@ -448,13 +448,13 @@ var aggregatedValueHandlers = {
         var currentCurrency = currentSession.getCurrency();
         var campaigns = PromotionMgr.getCampaigns().toArray();
         for (var k = 0; k < siteCurrenciesSize; k += 1) {
-            var currency = Currency.getCurrency(siteCurrencies[k]);
+            var currency = Currency.getCurrency(siteCurrencies.get(k));
             currentSession.setCurrency(currency);
             var promotionObjects = getPromotionalPrices(product, campaigns);
 
             if (promotionObjects.length > 0) {
                 if (!promotionalPrices) { promotionalPrices = {}; }
-                promotionalPrices[siteCurrencies[k]] = promotionObjects;
+                promotionalPrices[siteCurrencies.get(k)] = promotionObjects;
             }
         }
         currentSession.setCurrency(currentCurrency);
@@ -469,7 +469,7 @@ var aggregatedValueHandlers = {
             if (parameters.variationModel) {
                 variantsIt = parameters.variationModel.getSelectedVariants().iterator();
             } else {
-                variantsIt = product.variants.iterator();
+                variantsIt = product.getVariants().iterator();
             }
 
             while (variantsIt.hasNext()) {

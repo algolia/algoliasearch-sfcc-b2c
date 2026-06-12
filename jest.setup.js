@@ -131,6 +131,9 @@ jest.mock('dw/system/Site', () => {
                 },
                 getAllowedCurrencies: function () {
                     var arr = ['USD', 'EUR'];
+                    arr.get = function (i) {
+                        return arr[i];
+                    };
                     arr.size = function () {
                         return arr.length;
                     };

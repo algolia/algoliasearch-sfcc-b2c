@@ -297,7 +297,7 @@ exports.process = function(product, parameters, stepExecution) {
             // This variant will be processed when we handle its master product, skip it for now.
             return [];
         }
-        if (product.master) {
+        if (product.isMaster()) {
             // Check if master product meets basic criteria
             if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
                 return [];
@@ -337,7 +337,7 @@ exports.process = function(product, parameters, stepExecution) {
             // This variant will be processed when we handle its master product, skip it for now.
             return [];
         }
-        if (product.master) {
+        if (product.isMaster()) {
             if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
                 return [];
             }
@@ -417,7 +417,7 @@ exports.process = function(product, parameters, stepExecution) {
             // This variant will be processed when we handle its master product, skip it for now.
             return [];
         }
-        if (product.master) {
+        if (product.isMaster()) {
             if (!productFilter.isOnline(product) || !productFilter.isSearchable(product) || !productFilter.hasOnlineCategory(product)) {
                 return [];
             }

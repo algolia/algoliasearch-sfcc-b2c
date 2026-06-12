@@ -111,9 +111,9 @@ function getImageGroups(imagesList, viewtype) {
             title: {},
         };
 
-        image.alt = imagesList[i].alt;
-        image.dis_base_link = imagesList[i].absURL.toString();
-        image.title = imagesList[i].title;
+        image.alt = imagesList.get(i).alt;
+        image.dis_base_link = imagesList.get(i).absURL.toString();
+        image.title = imagesList.get(i).title;
 
         result.images.push(image);
     }
