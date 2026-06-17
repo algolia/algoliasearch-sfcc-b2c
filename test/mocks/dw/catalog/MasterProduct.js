@@ -11,6 +11,7 @@ class Product {
         this.assignedToSiteCatalog = true;
         this.brand = null;
         this.bundle = false;
+        this.bundled = false;
         this.images = images || PRODUCT_IMAGES;
         this.online = online;
         this.searchable = searchable;
@@ -147,7 +148,7 @@ class Product {
         return this.searchable;
     }
     isBundled() {
-        return this.bundled || false;
+        return this.bundled;
     }
     get availabilityModel() {
         return this.getAvailabilityModel();

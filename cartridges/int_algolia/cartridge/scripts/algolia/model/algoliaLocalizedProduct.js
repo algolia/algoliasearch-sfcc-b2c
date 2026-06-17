@@ -74,7 +74,7 @@ function getPromotionalPrice(product) {
     // find the lowest price
     if (promoPrices.length > 0) {
         lowestPromoPrice = promoPrices.reduce(function (a, b) {
-            return Math.min(a.value, b.value);
+            return a.getValue() <= b.getValue() ? a : b;
         });
     }
     return lowestPromoPrice;
