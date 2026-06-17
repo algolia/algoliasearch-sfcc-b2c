@@ -11,6 +11,7 @@ class Product {
         this.assignedToSiteCatalog = true;
         this.brand = null;
         this.bundle = false;
+        this.bundled = false;
         this.images = images || PRODUCT_IMAGES;
         this.online = online;
         this.searchable = searchable;
@@ -135,7 +136,7 @@ class Product {
         return this.optionProduct;
     }
     isBundle() {
-        return this.bundle;
+        return this.bundle || false;
     }
     isProductSet() {
         return this.productSet;
