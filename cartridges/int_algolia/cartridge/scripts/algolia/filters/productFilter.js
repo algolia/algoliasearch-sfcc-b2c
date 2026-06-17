@@ -69,6 +69,7 @@ function isInclude(product) {
         let priceModel = product.getPriceModel();
         if (!(priceModel && priceModel.getPrice() && priceModel.getPrice().isAvailable())) {
             return false;
+        }
     }
 
     // Check online status
