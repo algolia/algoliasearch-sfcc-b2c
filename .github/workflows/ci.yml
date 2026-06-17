@@ -66,6 +66,7 @@ jobs:
 
   e2e-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     env:
       CODE_VERSION: ${{ vars.CODE_VERSION }}
       ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
