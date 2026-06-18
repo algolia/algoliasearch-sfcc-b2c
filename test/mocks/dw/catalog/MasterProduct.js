@@ -136,7 +136,7 @@ class Product {
         return this.optionProduct;
     }
     isBundle() {
-        return this.bundle;
+        return this.bundle || false;
     }
     isProductSet() {
         return this.productSet;
@@ -148,7 +148,7 @@ class Product {
         return this.searchable;
     }
     isBundled() {
-        return this.bundled;
+        return this.bundled || false;
     }
     get availabilityModel() {
         return this.getAvailabilityModel();
