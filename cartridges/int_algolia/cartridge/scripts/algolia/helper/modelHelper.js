@@ -169,14 +169,14 @@ function getAttributeSlicedModelRecordID(product) {
  * @returns {Array<{id: string, storeInventory: dw.catalog.ProductInventoryList}>} stores with their inventory list
  */
 function getStoresWithInventory() {
-    var StoreMgr = require('dw/catalog/StoreMgr');
+    const StoreMgr = require('dw/catalog/StoreMgr');
+    const storesMap = StoreMgr.searchStoresByCoordinates(0, 0, 'mi', 99999999);
     var result = [];
-    var storesMap = StoreMgr.searchStoresByCoordinates(0, 0, 'mi', 99999999);
 
     if (storesMap && !storesMap.empty) {
         var storeObjects = storesMap.keySet().toArray();
-        for (var i = 0; i < storeObjects.length; i++) {
-            var store = storeObjects[i];
+        for (let i = 0; i < storeObjects.length; i++) {
+            let store = storeObjects[i];
             if (store && store.inventoryList) {
                 result.push({
                     id: store.ID,

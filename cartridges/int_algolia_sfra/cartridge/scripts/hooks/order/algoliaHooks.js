@@ -215,14 +215,14 @@ exports.inventoryUpdate = function (order) {
 function handleInStorePickupShipment(shipment, sitePreferences, stores, additionalAttributes, recordModel) {
     let algoliaOperations = [];
     let plis = shipment.getProductLineItems();
-    let threshold = sitePreferences.InStockThreshold;
+    let InStockThreshold = sitePreferences.InStockThreshold;
 
     for (let j = 0; j < plis.length; j++) {
         let pli = plis[j];
         let product = pli.getProduct();
         let storeId = shipment.custom.fromStoreId;
 
-        let inStoreStock = isInStoreStock(product, storeId, threshold);
+        let inStoreStock = isInStoreStock(product, storeId, InStockThreshold);
         if (!inStoreStock && additionalAttributes.indexOf('storeAvailability') > -1) {
 
             switch (recordModel) {
@@ -264,14 +264,14 @@ function handleInStorePickupShipment(shipment, sitePreferences, stores, addition
 function handleStandardShipment(shipment, sitePreferences, stores, additionalAttributes, recordModel) {
     let algoliaOperations = [];
     let plis = shipment.getProductLineItems();
-    let threshold = sitePreferences.InStockThreshold;
+    let InStockThreshold = sitePreferences.InStockThreshold;
     let indexOutOfStock = sitePreferences.IndexOutOfStock;
 
     for (let j = 0; j < plis.length; j++) {
         let pli = plis[j];
         let product = pli.getProduct(); // product can only be a Variant or a simple product
 
-        let isInStock = productFilter.isInStock(product, threshold);
+        let isInStock = productFilter.isInStock(product, InStockThreshold);
         if (!isInStock) {
 
             if (indexOutOfStock) {
@@ -315,7 +315,7 @@ function handleStandardShipment(shipment, sitePreferences, stores, additionalAtt
 
                             if (!empty(productConfig.variationModel)) { // variation group
 
-                                let isGroupInStock = productFilter.isCustomVariationGroupInStock(productConfig.variationModel, threshold);
+                                let isGroupInStock = productFilter.isCustomVariationGroupInStock(productConfig.variationModel, InStockThreshold);
                                 if (!isGroupInStock) {
                                     productOps.forEach(function(productOp) {
                                         algoliaOperations = algoliaOperations.concat(
@@ -330,7 +330,7 @@ function handleStandardShipment(shipment, sitePreferences, stores, additionalAtt
                                     algoliaOperations = algoliaOperations.concat(productOps);
                                 }
                             } else { // regular master
-                                let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), threshold);
+                                let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), InStockThreshold);
                                 if (!isMasterInStock) {
                                     productOps.forEach(function(productOp) {
                                         algoliaOperations = algoliaOperations.concat(
@@ -363,7 +363,7 @@ function handleStandardShipment(shipment, sitePreferences, stores, additionalAtt
 
                     case RECORD_MODEL_TYPES.MASTER_LEVEL: {
                         if (productConfig.product.isMaster()) { // master
-                            let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), threshold);
+                            let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), InStockThreshold);
                             if (!isMasterInStock) {
                                 productOps.forEach(function(productOp) {
                                     algoliaOperations = algoliaOperations.concat(

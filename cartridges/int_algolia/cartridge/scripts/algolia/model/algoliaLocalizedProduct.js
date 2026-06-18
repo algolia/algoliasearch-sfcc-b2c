@@ -29,18 +29,23 @@ try {
 }
 
 /**
- * Resolve the in-stock threshold for this model.
+ * Resolve the in-stock threshold for this construction.
  * Prefers the value injected by the caller (`parameters.sitePreferences.InStockThreshold`) and falls back to the
  * site preference when it is not supplied, so callers that do not inject still behave as before.
+ * The value is resolved once per construction and cached on the `parameters` object, so the in_stock, variants and
+ * storeAvailability handlers reuse it instead of re-reading the preference. The cache is per-construction, not
+ * module-level, which is what keeps successive constructions testable with different preference values.
  * @param {Object} parameters - the constructor parameters
  * @returns {number} the in-stock threshold
  */
 function resolveInStockThreshold(parameters) {
-    var sitePreferences = parameters.sitePreferences;
-    if (sitePreferences && sitePreferences.InStockThreshold !== undefined && sitePreferences.InStockThreshold !== null) {
-        return sitePreferences.InStockThreshold;
+    if (parameters.resolvedInStockThreshold === undefined) {
+        const sitePreferences = parameters.sitePreferences;
+        parameters.resolvedInStockThreshold = (!empty(sitePreferences) && !empty(sitePreferences.InStockThreshold))
+            ? sitePreferences.InStockThreshold
+            : (algoliaData.getPreference('InStockThreshold') || 1);
     }
-    return algoliaData.getPreference('InStockThreshold') || 1;
+    return parameters.resolvedInStockThreshold;
 }
 
 /**
@@ -51,8 +56,8 @@ function resolveInStockThreshold(parameters) {
  * @returns {boolean} whether out-of-stock products should be indexed
  */
 function resolveIndexOutOfStock(parameters) {
-    var sitePreferences = parameters.sitePreferences;
-    if (sitePreferences && sitePreferences.IndexOutOfStock !== undefined && sitePreferences.IndexOutOfStock !== null) {
+    const sitePreferences = parameters.sitePreferences;
+    if (!empty(sitePreferences) && !empty(sitePreferences.IndexOutOfStock)) {
         return sitePreferences.IndexOutOfStock;
     }
     return algoliaData.getPreference('IndexOutOfStock');
@@ -546,9 +551,9 @@ var aggregatedValueHandlers = {
         return ['id:' + product.getID()];
     },
     storeAvailability: function(product, parameters) {
+        const stores = resolveStores(parameters);
+        const inStockThreshold = resolveInStockThreshold(parameters);
         var storeArray = [];
-        var stores = resolveStores(parameters);
-        var inStockThreshold = resolveInStockThreshold(parameters);
         if (stores.length > 0) {
             for (var i = 0; i < stores.length; i++) {
                 var storeEl = stores[i];

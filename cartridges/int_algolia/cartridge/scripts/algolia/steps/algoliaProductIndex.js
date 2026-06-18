@@ -35,7 +35,6 @@ var variationAttributeForAttributeSlicedRecordModel // e.g. "color"
 var indexingAPI;
 var analyticsRegion;
 
-// Stock-related inputs passed to each AlgoliaLocalizedProduct, built once in beforeStep
 var sitePreferences;
 var stores = [];
 
