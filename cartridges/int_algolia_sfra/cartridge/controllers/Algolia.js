@@ -29,12 +29,13 @@ server.get('Price', cache.applyShortPromotionSensitiveCache, function (req, res,
         var apiProduct = ProductMgr.getProduct(product.id);
 
         for (var j = 0; j < promotions.length; j++) {
-            var promotion = promotions[j]
+            var promotion = promotions[j];
             var apiPromotion = PromotionMgr.getPromotion(promotion.id);
             var promotionPrice = apiPromotion.getPromotionalPrice(apiProduct);
+            var promotionValue = promotionPrice.getValue();
 
-            if (promotionPrice.getValue() && promotionPrice.getValue() < minPrice ) {
-                minPrice = promotionPrice.getValue();
+            if (promotionPrice.isAvailable() && promotionValue < minPrice) {
+                minPrice = promotionValue;
                 activePromotion = promotion;
             }
         }
