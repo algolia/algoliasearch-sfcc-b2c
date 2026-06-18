@@ -28,27 +28,49 @@ try {
 } catch (e) { // eslint-disable-line no-unused-vars
 }
 
-var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
-var INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
-var ATTRIBUTE_LIST = algoliaData.getSetOfArray('AdditionalAttributes');
-const stores = [];
-
-if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
-    var StoreMgr = require('dw/catalog/StoreMgr');
-    var storesMap = StoreMgr.searchStoresByCoordinates(0, 0, 'mi', 99999999);
-
-    if (storesMap && !storesMap.empty) {
-        var storeObjects = storesMap.keySet().toArray();
-        for (var l = 0; l < storeObjects.length; l++) {
-            var store = storeObjects[l];
-            if (store && store.inventoryList) {
-                stores.push({
-                    id: store.ID,
-                    storeInventory: store.inventoryList
-                });
-            }
-        }
+/**
+ * Resolve the in-stock threshold for this model.
+ * Prefers the value injected by the caller (`parameters.sitePreferences.InStockThreshold`) and falls back to the
+ * site preference when it is not supplied, so callers that do not inject still behave as before.
+ * @param {Object} parameters - the constructor parameters
+ * @returns {number} the in-stock threshold
+ */
+function resolveInStockThreshold(parameters) {
+    var sitePreferences = parameters.sitePreferences;
+    if (sitePreferences && sitePreferences.InStockThreshold !== undefined && sitePreferences.InStockThreshold !== null) {
+        return sitePreferences.InStockThreshold;
     }
+    return algoliaData.getPreference('InStockThreshold') || 1;
+}
+
+/**
+ * Resolve the "index out of stock" flag for this model.
+ * Prefers the value injected by the caller (`parameters.sitePreferences.IndexOutOfStock`) and falls back to the
+ * site preference when it is not supplied.
+ * @param {Object} parameters - the constructor parameters
+ * @returns {boolean} whether out-of-stock products should be indexed
+ */
+function resolveIndexOutOfStock(parameters) {
+    var sitePreferences = parameters.sitePreferences;
+    if (sitePreferences && sitePreferences.IndexOutOfStock !== undefined && sitePreferences.IndexOutOfStock !== null) {
+        return sitePreferences.IndexOutOfStock;
+    }
+    return algoliaData.getPreference('IndexOutOfStock');
+}
+
+/**
+ * Resolve the store-inventory list used to compute `storeAvailability`.
+ * Prefers the list injected by the caller (`parameters.stores`, built once at the job/hook level) and falls back to
+ * building it on demand when it is not supplied. In production the list is always injected, so the expensive scan
+ * runs once per job/hook rather than once per record.
+ * @param {Object} parameters - the constructor parameters
+ * @returns {Array<{id: string, storeInventory: dw.catalog.ProductInventoryList}>} stores with their inventory list
+ */
+function resolveStores(parameters) {
+    if (parameters.stores) {
+        return parameters.stores;
+    }
+    return modelHelper.getStoresWithInventory();
 }
 
 /**
@@ -385,8 +407,8 @@ var aggregatedValueHandlers = {
         }
         return pricebooks;
     },
-    in_stock: function (product) {
-        return productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+    in_stock: function (product, parameters) {
+        return productFilter.isInStock(product, resolveInStockThreshold(parameters));
     },
     image_groups: function (product, parameters) {
         var imageGroupsArr = [];
@@ -465,6 +487,8 @@ var aggregatedValueHandlers = {
     },
     variants: function(product, parameters) { // only called when record model is either MASTER_LEVEL or VARIATION_GROUP_LEVEL
         const variants = [];
+        const inStockThreshold = resolveInStockThreshold(parameters);
+        const indexOutOfStock = resolveIndexOutOfStock(parameters);
 
         if (product.isMaster() || product.isVariationGroup()) {
             let variantsIt;
@@ -482,8 +506,8 @@ var aggregatedValueHandlers = {
                     continue;
                 }
 
-                let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
-                if (!inStock && !INDEX_OUT_OF_STOCK) {
+                let inStock = productFilter.isInStock(variant, inStockThreshold);
+                if (!inStock && !indexOutOfStock) {
                     continue;
                 }
 
@@ -496,6 +520,8 @@ var aggregatedValueHandlers = {
                     attributeList: parameters.variantAttributes,
                     isVariant: true,
                     baseModel: baseModel,
+                    sitePreferences: parameters.sitePreferences,
+                    stores: parameters.stores,
                 });
                 variants.push(localizedVariant);
             }
@@ -508,6 +534,8 @@ var aggregatedValueHandlers = {
                 locale: request.getLocale(),
                 attributeList: parameters.variantAttributes,
                 isVariant: true, // otherwise the variant object will have an 'objectID'
+                sitePreferences: parameters.sitePreferences,
+                stores: parameters.stores,
             });
             variants.push(localizedVariant);
 
@@ -517,15 +545,17 @@ var aggregatedValueHandlers = {
     _tags: function(product) {
         return ['id:' + product.getID()];
     },
-    storeAvailability: function(product) {
+    storeAvailability: function(product, parameters) {
         var storeArray = [];
+        var stores = resolveStores(parameters);
+        var inStockThreshold = resolveInStockThreshold(parameters);
         if (stores.length > 0) {
             for (var i = 0; i < stores.length; i++) {
                 var storeEl = stores[i];
                 var storeElInventory = storeEl.storeInventory;
                 if (storeElInventory) {
                     var inventoryRecord = storeElInventory.getRecord(product.ID);
-                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= ALGOLIA_IN_STOCK_THRESHOLD && inventoryRecord.ATS.value > 0) { // comparing to zero explicitly so that a threshold of 0 wouldn't return true
+                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= inStockThreshold && inventoryRecord.ATS.value > 0) { // comparing to zero explicitly so that a threshold of 0 wouldn't return true
                         storeArray.push(storeEl.id);
                     }
                 }
@@ -539,7 +569,8 @@ var aggregatedValueHandlers = {
 }
 
 /**
- * AlgoliaLocalizedProduct class that represents a localized algoliaProduct ready to be indexed
+ * Represents a localized algoliaProduct ready to be indexed.
+ * @class
  * @param {Object} parameters - model parameters
  * @param {dw.catalog.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
@@ -550,6 +581,10 @@ var aggregatedValueHandlers = {
  * @param {boolean?} [parameters.isVariant] -  Indicates if the model is meant to live in a parent record
  * @param {Object?} [parameters.variationModel] - variationModel of a master
  * @param {string?} [parameters.variationValueID] - variationValueID to append to the objectID
+ * @param {Object?} [parameters.sitePreferences] - site preferences, keyed by preference ID. Falls back to algoliaData when omitted.
+ * @param {number?} [parameters.sitePreferences.InStockThreshold] - minimum ATS for a product to count as in stock
+ * @param {boolean?} [parameters.sitePreferences.IndexOutOfStock] - whether out-of-stock products should be indexed
+ * @param {Array?} [parameters.stores] - stores with their inventory list, used for `storeAvailability`. Built once at the job/hook level. Falls back to modelHelper.getStoresWithInventory() when omitted.
  * @constructor
  */
 function algoliaLocalizedProduct(parameters) {
@@ -618,18 +653,5 @@ function algoliaLocalizedProduct(parameters) {
         }
     }
 }
-
-// For testing - static methods on constructor
-algoliaLocalizedProduct.__setThreshold = function(threshold) {
-    ALGOLIA_IN_STOCK_THRESHOLD = threshold;
-};
-
-algoliaLocalizedProduct.__setIndexOutOfStock = function(indexOutOfStock) {
-    INDEX_OUT_OF_STOCK = indexOutOfStock;
-};
-
-algoliaLocalizedProduct.__setAttributeList = function(attributeList) {
-    ATTRIBUTE_LIST = attributeList;
-};
 
 module.exports = algoliaLocalizedProduct;

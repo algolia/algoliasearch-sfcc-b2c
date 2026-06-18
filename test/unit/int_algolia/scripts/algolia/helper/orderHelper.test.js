@@ -1,5 +1,13 @@
 'use strict';
 
+// generateAlgoliaOperations builds AlgoliaLocalizedProduct records. When a productConfig requests
+// `storeAvailability` without injecting a `stores` list, the model falls back to scanning all stores
+// via StoreMgr. Mock it as empty so the fallback returns an empty list (matching production, where the
+// order hook injects the list explicitly).
+jest.mock('dw/catalog/StoreMgr', () => ({
+    searchStoresByCoordinates: jest.fn().mockReturnValue({ empty: true })
+}), { virtual: true });
+
 const orderHelper = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/orderHelper');
 const MasterVariantMock = require('../../../../../mocks/dw/catalog/MasterProduct');
 const VariantMock = require('../../../../../mocks/dw/catalog/Variant');

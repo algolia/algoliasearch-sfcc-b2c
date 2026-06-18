@@ -11,7 +11,7 @@ var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, AlgoliaJobReport;
-var jobHelper, reindexHelper, requestHelper;
+var jobHelper, reindexHelper, requestHelper, modelHelper;
 var indexingOperation;
 var fullRecordUpdate = false;
 
@@ -34,6 +34,10 @@ var INDEX_OUT_OF_STOCK;
 var variationAttributeForAttributeSlicedRecordModel // e.g. "color"
 var indexingAPI;
 var analyticsRegion;
+
+// Stock-related inputs passed to each AlgoliaLocalizedProduct, built once in beforeStep
+var sitePreferences;
+var stores = [];
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -71,10 +75,15 @@ exports.beforeStep = function(parameters, stepExecution) {
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
     algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+    modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 
     // Algolia preferences
     ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
+    sitePreferences = {
+        InStockThreshold: ALGOLIA_IN_STOCK_THRESHOLD,
+        IndexOutOfStock: INDEX_OUT_OF_STOCK,
+    };
     recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
     variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
     indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API; // "search-api" (default) or "ingestion-api"
@@ -147,6 +156,11 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     logger.info('attributeListOverride parameter: ' + paramAttributeListOverride);
     logger.info('Actual attributes to be sent: ' + JSON.stringify(attributesToSend));
+
+    // Build the store-inventory list once (only when storeAvailability is indexed), to pass to each AlgoliaLocalizedProduct
+    if (attributesToSend.indexOf('storeAvailability') !== -1) {
+        stores = modelHelper.getStoresWithInventory();
+    }
 
 
     /* --- indexingMethod parameter --- */
@@ -304,7 +318,13 @@ exports.process = function(product, parameters, stepExecution) {
             }
 
             // Master-level indexing
-            let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+            let baseModel = new AlgoliaLocalizedProduct({
+                product: product,
+                locale: 'default',
+                attributeList: nonLocalizedMasterAttributes,
+                sitePreferences: sitePreferences,
+                stores: stores,
+            });
             for (let l = 0; l < siteLocales.size(); ++l) {
                 let locale = siteLocales.get(l);
                 let indexName = algoliaData.calculateIndexName('products', locale);
@@ -318,6 +338,8 @@ exports.process = function(product, parameters, stepExecution) {
                     attributeList: masterAttributes,
                     variantAttributes: variantAttributes,
                     baseModel: baseModel,
+                    sitePreferences: sitePreferences,
+                    stores: stores,
                 });
 
                 if (!INDEX_OUT_OF_STOCK && (localizedMaster && localizedMaster.variants && (localizedMaster.variants.length === 0))) {
@@ -349,7 +371,13 @@ exports.process = function(product, parameters, stepExecution) {
             if (!variationAttribute) {
                 logger.info('Specified variation attribute "' + variationAttributeForAttributeSlicedRecordModel + '" not found for master product "' + product.getID() + '", falling back to master-type record.');
 
-                let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                let baseModel = new AlgoliaLocalizedProduct({
+                    product: product,
+                    locale: 'default',
+                    attributeList: nonLocalizedMasterAttributes,
+                    sitePreferences: sitePreferences,
+                    stores: stores,
+                });
                 for (let l = 0; l < siteLocales.size(); ++l) {
                     let locale = siteLocales.get(l);
                     let indexName = algoliaData.calculateIndexName('products', locale);
@@ -362,6 +390,8 @@ exports.process = function(product, parameters, stepExecution) {
                         attributeList: masterAttributes,
                         variantAttributes: variantAttributes,
                         baseModel: baseModel,
+                        sitePreferences: sitePreferences,
+                        stores: stores,
                     });
 
                     if (!INDEX_OUT_OF_STOCK && (localizedMaster && localizedMaster.variants && (localizedMaster.variants.length === 0))) {
@@ -386,6 +416,8 @@ exports.process = function(product, parameters, stepExecution) {
                 nonLocalizedAttributes: nonLocalizedAttributes,
                 attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
                 variationAttributeID: variationAttributeForAttributeSlicedRecordModel,
+                sitePreferences: sitePreferences,
+                stores: stores,
             });
 
             for (let l = 0; l < siteLocales.size(); ++l) {
@@ -428,6 +460,8 @@ exports.process = function(product, parameters, stepExecution) {
                 nonLocalizedAttributes: nonLocalizedAttributes,
                 attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
                 fullRecordUpdate: fullRecordUpdate,
+                sitePreferences: sitePreferences,
+                stores: stores,
             });
 
             for (let l = 0; l < siteLocales.size(); ++l) {
@@ -469,6 +503,8 @@ exports.process = function(product, parameters, stepExecution) {
             locale: 'default',
             attributeList: nonLocalizedAttributes,
             fullRecordUpdate: fullRecordUpdate,
+            sitePreferences: sitePreferences,
+            stores: stores,
         });
 
         for (let l = 0; l < siteLocales.size(); ++l) {
@@ -489,6 +525,8 @@ exports.process = function(product, parameters, stepExecution) {
                     attributeList: attributesToSend,
                     baseModel: baseModel,
                     fullRecordUpdate: fullRecordUpdate,
+                    sitePreferences: sitePreferences,
+                    stores: stores,
                 });
 
             } else {
@@ -500,6 +538,8 @@ exports.process = function(product, parameters, stepExecution) {
                     variantAttributes: variantAttributes,
                     baseModel: baseModel,
                     fullRecordUpdate: fullRecordUpdate,
+                    sitePreferences: sitePreferences,
+                    stores: stores,
                 });
             }
 

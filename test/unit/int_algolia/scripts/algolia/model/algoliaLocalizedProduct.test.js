@@ -634,3 +634,75 @@ describe('storeAvailability Tests', function() {
         expect(algoliaProduct.storeAvailability.length).toBe(0);
     });
 });
+
+describe('constructor injection of stock preferences', function() {
+    // These tests construct the model several times within a single module load, with different injected
+    // preferences each time; successive constructions can use different values
+    // without reloading the module or relying on test-only setters.
+
+    test('in_stock reflects the injected InStockThreshold', function() {
+        const product = new ProductMock(); // default mock variant has an ATS of 6
+
+        const belowThreshold = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['in_stock'],
+            sitePreferences: { InStockThreshold: 7 }
+        });
+
+        const aboveThreshold = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['in_stock'],
+            sitePreferences: { InStockThreshold: 5 }
+        });
+
+        expect(belowThreshold.in_stock).toBe(false);
+        expect(aboveThreshold.in_stock).toBe(true);
+    });
+
+    test('storeAvailability reflects the injected InStockThreshold', function() {
+        const product = new ProductMock({ ID: 'product-low-stock' }); // ATS of 1 in store1
+
+        const strictThreshold = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['storeAvailability'],
+            sitePreferences: { InStockThreshold: 2 }
+        });
+
+        const lenientThreshold = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['storeAvailability'],
+            sitePreferences: { InStockThreshold: 1 }
+        });
+
+        expect(strictThreshold.storeAvailability).toEqual([]);
+        expect(lenientThreshold.storeAvailability).toEqual(['store1']);
+    });
+
+    test('storeAvailability uses the injected stores list instead of scanning all stores', function() {
+        const product = new ProductMock({ ID: 'product-injected' });
+        const injectedStores = [
+            {
+                id: 'injectedStore',
+                storeInventory: {
+                    getRecord: function() {
+                        return { ATS: { value: 5 } };
+                    }
+                }
+            }
+        ];
+
+        const algoliaProduct = new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['storeAvailability'],
+            sitePreferences: { InStockThreshold: 1 },
+            stores: injectedStores
+        });
+
+        expect(algoliaProduct.storeAvailability).toEqual(['injectedStore']);
+    });
+});

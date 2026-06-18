@@ -58,7 +58,6 @@ const stepExecution = {
     getStepID: () => 'TestStepID',
 };
 
-const algoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
 const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex');
 
 beforeEach(() => {
@@ -67,6 +66,7 @@ beforeEach(() => {
     mockSendGroupedIngestionAPIRecords.mockReset();
     delete global.customPreferences['Algolia_IndexingAPI'];
     delete global.customPreferences['Algolia_AnalyticsRegion'];
+    delete global.customPreferences['Algolia_InStockThreshold'];
 });
 
 describe('beforeStep', () => {
@@ -151,7 +151,7 @@ describe('process', () => {
     test('attribute-sliced indexing - out of stock', () => {
         global.customPreferences['Algolia_RecordModel'] = 'attribute-sliced';
         mockLocalesForIndexing = ['fr']
-        algoliaLocalizedProduct.__setThreshold(7); // Default mock variant has an ATS of 6
+        global.customPreferences['Algolia_InStockThreshold'] = 7; // Default mock variant has an ATS of 6
         job.beforeStep(parameters, stepExecution);
         expect(mockSetJobInfo).toHaveBeenCalledWith({
             jobID: 'TestJobID',
