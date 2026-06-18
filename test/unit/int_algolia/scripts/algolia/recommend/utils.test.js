@@ -4,39 +4,42 @@ describe('getAnchorProductIDs', () => {
 
     const variantProduct = {
         ID: 'product1',
+        getID: jest.fn(() => 'product1'),
         isVariationGroup: jest.fn(() => false),
         isVariant: jest.fn(() => true),
         master: false,
-        masterProduct: {
-            ID: 'masterProduct1'
-        },
+        getMasterProduct: jest.fn(() => ({
+            getID: jest.fn(() => 'masterProduct1')
+        })),
     };
 
     const masterProduct = {
         ID: 'masterProduct1',
+        getID: jest.fn(() => 'masterProduct1'),
         isVariationGroup: jest.fn(() => false),
         isVariant: jest.fn(() => false),
         master: true,
-        variationModel: {
-            defaultVariant: {
-                ID: 'product1'
-            },
-        }
+        getVariationModel: jest.fn(() => ({
+            getDefaultVariant: jest.fn(() => ({
+                getID: jest.fn(() => 'product1')
+            })),
+        })),
     };
 
     const variationGroupProduct = {
         ID: 'variationGroupProduct1',
+        getID: jest.fn(() => 'variationGroupProduct1'),
         isVariationGroup: jest.fn(() => true),
         isVariant: jest.fn(() => false),
         master: false,
-        variationModel: {
-            defaultVariant: {
-                ID: 'product1'
-            },
-        },
-        masterProduct: {
-            ID: 'masterProduct1'
-        },
+        getVariationModel: jest.fn(() => ({
+            getDefaultVariant: jest.fn(() => ({
+                getID: jest.fn(() => 'product1')
+            })),
+        })),
+        getMasterProduct: jest.fn(() => ({
+            getID: jest.fn(() => 'masterProduct1')
+        })),
     };
 
     beforeEach(() => {
@@ -71,9 +74,9 @@ describe('getAnchorProductIDs', () => {
         global.session.privacy.algoliaAnchorProducts = null;
         const slotcontent = {
             content: [{
-                ID: 'product1'
+                getID: jest.fn(() => 'product1')
             }, {
-                ID: 'product1'
+                getID: jest.fn(() => 'product1')
             }]
         };
         productMgrMock.getProduct.mockReturnValue(variantProduct);

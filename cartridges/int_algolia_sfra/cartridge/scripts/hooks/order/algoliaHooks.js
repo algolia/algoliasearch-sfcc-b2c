@@ -196,7 +196,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
 
     for (let j = 0; j < plis.length; j++) {
         let pli = plis[j];
-        let product = pli.product;
+        let product = pli.getProduct();
         let storeId = shipment.custom.fromStoreId;
 
         let inStoreStock = isInStoreStock(product, storeId, threshold);
@@ -244,7 +244,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
     for (let j = 0; j < plis.length; j++) {
         let pli = plis[j];
-        let product = pli.product; // product can only be a Variant or a simple product
+        let product = pli.getProduct(); // product can only be a Variant or a simple product
 
         let isInStock = productFilter.isInStock(product, threshold);
         if (!isInStock) {

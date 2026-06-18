@@ -19,7 +19,7 @@ function getCategoryUrl(category) {
  * @returns {string} - Final ID of the category
  */
 function getCategoryId(catalogId, category) {
-    return catalogId + '/' + category.ID;
+    return catalogId + '/' + category.getID();
 }
 
 /**

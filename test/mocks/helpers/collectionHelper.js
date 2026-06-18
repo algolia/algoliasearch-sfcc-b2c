@@ -2,6 +2,9 @@ function createCollection(array) {
     array.size = function() {
         return array.length;
     };
+    array.get = function(index) {
+        return array[index];
+    };
     array.iterator = function() {
         let nextIndex = 0;
 

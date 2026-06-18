@@ -1,4 +1,5 @@
 const collectionHelper = require('../../helpers/collectionHelper');
+const mediaFileHelper = require('../../helpers/mediaFileHelper');
 const ProductVariationAttributeValue = require('./ProductVariationAttributeValue');
 const mockImages = require('../../../mocks/data/images');
 
@@ -36,7 +37,13 @@ class ProductVariationModel {
                 fr: { ID: 'size', displayName: 'Taille' },
             },
         };
-        return productVariationAttributes[id][request.getLocale()];
+        const attribute = productVariationAttributes[id][request.getLocale()];
+        if (attribute && !attribute.getID) {
+            attribute.getID = function () {
+                return attribute.ID;
+            };
+        }
+        return attribute;
     }
     getMaster() {
         return this.master || null;
@@ -83,7 +90,7 @@ class ProductVariationModel {
         let locale = request.getLocale() || 'en';
         const images = mockImages[this.variationAttributes['color']] || this.images;
         const res = images[viewtype][locale] || images[viewtype]['en'];
-        return collectionHelper.createCollection(res);
+        return collectionHelper.createCollection(mediaFileHelper.decorate(res));
     }
 
     getHtmlName(variationAttribute) {

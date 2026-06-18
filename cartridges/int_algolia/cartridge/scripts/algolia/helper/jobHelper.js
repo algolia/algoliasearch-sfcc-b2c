@@ -741,13 +741,13 @@ function generateAttributeSlicedRecords(parameters) {
     let variationModel = parameters.baseProduct.getVariationModel();
     let variationAttribute = variationModel.getProductVariationAttribute(parameters.variationAttributeID);
     if (!variationAttribute) {
-        algoliaLogger.info('No ' + parameters.variationAttributeID + ' attribute found for product ' + parameters.baseProduct.ID);
+        algoliaLogger.info('No ' + parameters.variationAttributeID + ' attribute found for product ' + parameters.baseProduct.getID());
         return algoliaRecordsPerLocale;
     }
     let variationValues = variationModel.getAllValues(variationAttribute).iterator();
     while (variationValues.hasNext()) {
         let variationValue = variationValues.next();
-        variationModel.setSelectedAttributeValue(variationAttribute.ID, variationValue.ID);
+        variationModel.setSelectedAttributeValue(variationAttribute.getID(), variationValue.getID());
         let baseModel = new AlgoliaLocalizedProduct({
             product: parameters.baseProduct,
             locale: 'default',
@@ -766,7 +766,7 @@ function generateAttributeSlicedRecords(parameters) {
                 variantAttributes: parameters.variantAttributes,
                 baseModel: baseModel,
                 variationModel: variationModel,
-                variationValueID: variationValue.ID,
+                variationValueID: variationValue.getID(),
             });
             algoliaRecordsPerLocale[locale].push(localizedVariationGroup);
         }

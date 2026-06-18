@@ -9,6 +9,18 @@ class ProductVariationAttributeValue {
     get displayValue() {
         return this.displayValues[request.getLocale()] || this.displayValues['en'];
     }
+
+    getID() {
+        return this.ID;
+    }
+
+    getValue() {
+        return this.value;
+    }
+
+    getDisplayValue() {
+        return this.displayValues[request.getLocale()] || this.displayValues['en'];
+    }
 }
 
 module.exports = ProductVariationAttributeValue;

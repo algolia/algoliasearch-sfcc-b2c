@@ -19,6 +19,9 @@ jest.mock('dw/catalog/ProductMgr', () => {
         queryAllSiteProducts: jest.fn().mockReturnValue({
             close: jest.fn(),
             count: 4658,
+            getCount: function () {
+                return 4658;
+            },
         }),
         getProduct: jest.fn((id) => {
             const VariantMock = require('./test/mocks/dw/catalog/Variant');
@@ -42,7 +45,7 @@ jest.mock('dw/catalog/PriceBookMgr', () => {
     return {
         getSitePriceBooks: jest.fn(() => {
             const collectionHelper = require("./test/mocks/helpers/collectionHelper");
-            return collectionHelper.createCollection([
+            const priceBooks = [
                 {
                     ID: 'list-prices-usd',
                     currencyCode: 'USD',
@@ -59,7 +62,16 @@ jest.mock('dw/catalog/PriceBookMgr', () => {
                     ID: 'sale-prices-eur',
                     currencyCode: 'EUR',
                 },
-            ]);
+            ].map(function (priceBook) {
+                priceBook.getID = function () {
+                    return priceBook.ID;
+                };
+                priceBook.getCurrencyCode = function () {
+                    return priceBook.currencyCode;
+                };
+                return priceBook;
+            });
+            return collectionHelper.createCollection(priceBooks);
         }),
     }
 }, { virtual: true });
@@ -131,6 +143,9 @@ jest.mock('dw/system/Site', () => {
                 },
                 getAllowedCurrencies: function () {
                     var arr = ['USD', 'EUR'];
+                    arr.get = function (i) {
+                        return arr[i];
+                    };
                     arr.size = function () {
                         return arr.length;
                     };

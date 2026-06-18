@@ -26,11 +26,11 @@ function getProductType(product) {
 function getAppropriateProduct(product, recordModel) {
     const productType = getProductType(product);
     if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL && productType !== 'Master') {
-        return product.masterProduct; // @TODO: refactor to be safer: only Variants and Variation Groups have the `masterProduct` property, add checks
+        return product.getMasterProduct(); // @TODO: refactor to be safer: only Variants and Variation Groups have the `masterProduct` property, add checks
     } else if (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
         return product;
     } else if (recordModel !== RECORD_MODEL_TYPES.MASTER_LEVEL && (productType === 'Master' || productType === 'Variation Group')) {
-        return product.variationModel.defaultVariant;
+        return product.getVariationModel().getDefaultVariant();
     } else if (recordModel !== RECORD_MODEL_TYPES.MASTER_LEVEL && productType === 'Variant') {
         return product;
     }
@@ -51,7 +51,7 @@ function getAnchorProductIDs(slotcontent) {
     } else {
         for (let i = 0; i < slotcontent.content.length; i++) {
             let product = slotcontent.content[i];
-            productIDs.push(product.ID);
+            productIDs.push(product.getID());
         }
     }
 
@@ -71,7 +71,7 @@ function getAnchorProductIDs(slotcontent) {
         var appropriateProduct = getAppropriateProduct(product, recordModel);
 
         if (appropriateProduct) {
-            anchorProductIDsArr.push(appropriateProduct.ID);
+            anchorProductIDsArr.push(appropriateProduct.getID());
         }
     }
 

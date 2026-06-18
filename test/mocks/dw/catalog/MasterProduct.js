@@ -1,5 +1,7 @@
 const ProductVariationModel = require('./ProductVariationModel');
 const collectionHelper = require('../../helpers/collectionHelper');
+const mediaFileHelper = require('../../helpers/mediaFileHelper');
+const { createMoney } = require('../../helpers/moneyHelper');
 
 // https://salesforcecommercecloud.github.io/b2c-dev-doc/docs/current/scriptapi/html/api/class_dw_catalog_Product.html
 // The instantiated product is a master product.
@@ -9,6 +11,7 @@ class Product {
         this.assignedToSiteCatalog = true;
         this.brand = null;
         this.bundle = false;
+        this.bundled = false;
         this.images = images || PRODUCT_IMAGES;
         this.online = online;
         this.searchable = searchable;
@@ -102,22 +105,17 @@ class Product {
         const minPrice = Math.min(...prices);
         const maxPrice = Math.max(...prices);
         if (this.master) {
+            const currencyCode = request.getSession().getCurrency().currencyCode;
+            const priceMoney = createMoney(0, 'N/A', false);
+            const minPriceMoney = createMoney(minPrice, currencyCode, true);
+            const maxPriceMoney = createMoney(maxPrice, currencyCode, true);
             return {
-                price: {
-                    available: false,
-                    currencyCode: 'N/A',
-                    value: 0,
-                },
-                minPrice: {
-                    available: true,
-                    currencyCode: request.getSession().getCurrency().currencyCode,
-                    value: minPrice,
-                },
-                maxPrice: {
-                    available: true,
-                    currencyCode: request.getSession().getCurrency().currencyCode,
-                    value: maxPrice,
-                }
+                price: priceMoney,
+                minPrice: minPriceMoney,
+                maxPrice: maxPriceMoney,
+                getPrice: () => priceMoney,
+                getMinPrice: () => minPriceMoney,
+                getMaxPrice: () => maxPriceMoney,
             };
         }
     }
@@ -138,10 +136,19 @@ class Product {
         return this.optionProduct;
     }
     isBundle() {
-        return this.bundle;
+        return this.bundle || false;
     }
     isProductSet() {
         return this.productSet;
+    }
+    isOnline() {
+        return this.online;
+    }
+    isSearchable() {
+        return this.searchable;
+    }
+    isBundled() {
+        return this.bundled || false;
     }
     get availabilityModel() {
         return this.getAvailabilityModel();
@@ -300,7 +307,7 @@ class Product {
     getImages(viewtype) {
         const images = this.images[viewtype];
         const locale = request.getLocale();
-        return collectionHelper.createCollection(images[locale] || images['en']);
+        return collectionHelper.createCollection(mediaFileHelper.decorate(images[locale] || images['en']));
     }
 
     getVariants() {

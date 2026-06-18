@@ -131,14 +131,14 @@ function setupTestData() {
         shipmentType: 'instore',
         fromStoreId: 'store1',
         productLineItems: [{
-            product: mockVariant
+            getProduct: () => mockVariant
         }]
     });
 
     const mockShipmentStandard = new ShipmentMock({
         shipmentType: 'standard',
         productLineItems: [{
-            product: mockVariant2
+            getProduct: () => mockVariant2
         }]
     });
 
