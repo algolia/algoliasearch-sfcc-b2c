@@ -575,7 +575,6 @@ var aggregatedValueHandlers = {
 
 /**
  * Represents a localized algoliaProduct ready to be indexed.
- * @class
  * @param {Object} parameters - model parameters
  * @param {dw.catalog.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
