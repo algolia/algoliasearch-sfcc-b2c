@@ -1,5 +1,13 @@
 'use strict';
 
+// generateAlgoliaOperations builds AlgoliaLocalizedProduct records. When a productConfig requests
+// `storeAvailability` without injecting a `stores` list, the model falls back to scanning all stores
+// via StoreMgr. Mock it as empty so the fallback returns an empty list (matching production, where the
+// order hook injects the list explicitly).
+jest.mock('dw/catalog/StoreMgr', () => ({
+    searchStoresByCoordinates: jest.fn().mockReturnValue({ empty: true })
+}), { virtual: true });
+
 const orderHelper = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/orderHelper');
 const MasterVariantMock = require('../../../../../mocks/dw/catalog/MasterProduct');
 const VariantMock = require('../../../../../mocks/dw/catalog/Variant');
@@ -21,7 +29,8 @@ describe('Order Helper', function () {
 
         const productConfig = {
             product: masterProduct,
-            attributeList: ['variants', 'in_stock']
+            attributeList: ['variants', 'in_stock'],
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false }
         };
 
         // Act
@@ -60,7 +69,8 @@ describe('Order Helper', function () {
 
         const productConfig = {
             product: masterProduct,
-            attributeList: ['in_stock']  // Only update the stock status
+            attributeList: ['in_stock'],  // Only update the stock status
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false }
         };
 
         // Act
@@ -96,6 +106,7 @@ describe('Order Helper', function () {
             product: masterProduct,
             attributeList: ['variants'],
             variantAttributes: ['id', 'in_stock', 'storeAvailability'],
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false },
         };
 
         // Act
@@ -116,6 +127,7 @@ describe('Order Helper', function () {
         const productConfig = {
             product: variantProduct,
             attributeList: ['in_stock', 'storeAvailability'],
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false },
         };
 
         // Act

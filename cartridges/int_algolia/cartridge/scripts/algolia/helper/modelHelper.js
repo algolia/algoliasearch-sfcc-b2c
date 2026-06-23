@@ -162,8 +162,36 @@ function getAttributeSlicedModelRecordID(product) {
     return recordID;
 }
 
+/**
+ * Build the list of stores that have an inventory list, used to compute the `storeAvailability` attribute.
+ * The lookup is intentionally broad (whole world) so that every store assigned to the site is returned.
+ * This is expensive, so callers should build it once and pass it to AlgoliaLocalizedProduct via `parameters.stores`.
+ * @returns {Array<{id: string, storeInventory: dw.catalog.ProductInventoryList}>} stores with their inventory list
+ */
+function getStoresWithInventory() {
+    const StoreMgr = require('dw/catalog/StoreMgr');
+    const storesMap = StoreMgr.searchStoresByCoordinates(0, 0, 'mi', 99999999);
+    var result = [];
+
+    if (storesMap && !storesMap.empty) {
+        var storeObjects = storesMap.keySet().toArray();
+        for (let i = 0; i < storeObjects.length; i++) {
+            let store = storeObjects[i];
+            if (store && store.inventoryList) {
+                result.push({
+                    id: store.ID,
+                    storeInventory: store.inventoryList
+                });
+            }
+        }
+    }
+
+    return result;
+}
+
 module.exports = {
     getColorVariations: getColorVariations,
     getImageGroups: getImageGroups,
     getAttributeSlicedModelRecordID: getAttributeSlicedModelRecordID,
+    getStoresWithInventory: getStoresWithInventory,
 };

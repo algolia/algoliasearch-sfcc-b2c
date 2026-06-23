@@ -24,8 +24,6 @@ let mockConfig = {
     EnableRealTimeInventoryHook: true,
 };
 
-const algoliaLocalizedProduct = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
-
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => ({
     ...jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData'),
     getPreference: jest.fn().mockImplementation((id) => {
@@ -96,11 +94,6 @@ class ShipmentMock {
 
 // Helper function to setup common test data
 function setupTestData() {
-
-    algoliaLocalizedProduct.__setThreshold(mockConfig.InStockThreshold);
-    algoliaLocalizedProduct.__setIndexOutOfStock(mockConfig.IndexOutOfStock);
-    algoliaLocalizedProduct.__setAttributeList(mockConfig.AdditionalAttributes);
-
     const mockMasterProduct = new MasterVariantMock({
         inventoryList: {
             getRecord: jest.fn().mockReturnValue({ ATS: { value: 3 } })
@@ -171,7 +164,8 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         // Act
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -188,7 +182,8 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
 
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -206,7 +201,8 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         // Act
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -236,7 +232,8 @@ describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Ind
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -253,7 +250,8 @@ describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Ind
 
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -271,7 +269,8 @@ describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Ind
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -302,7 +301,8 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         // Act
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -319,7 +319,8 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
 
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -337,7 +338,8 @@ describe('Algolia Hooks - Out of Stock Tests (InStockThreshold: 10, IndexOutOfSt
         // Act
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -367,7 +369,8 @@ describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Ind
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -386,7 +389,8 @@ describe('Algolia Hooks - Out of Stock Tests for BOPIS (InStockThreshold: 5, Ind
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -416,7 +420,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -433,7 +438,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
 
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -451,7 +457,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -470,7 +477,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Act
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -487,7 +495,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
 
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -505,7 +514,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Act
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -535,7 +545,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -554,7 +565,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Act
         const operations = algoliaHooks.handleInStorePickupShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -573,7 +585,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Act
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );
@@ -592,7 +605,8 @@ describe('Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: 
         // Act
         const operations = algoliaHooks.handleStandardShipment(
             shipment,
-            threshold,
+            { InStockThreshold: threshold, IndexOutOfStock: mockConfig.IndexOutOfStock },
+            [],
             additionalAttributes,
             recordModel
         );

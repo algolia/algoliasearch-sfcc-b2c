@@ -6,7 +6,6 @@ var PriceBookMgr = require('dw/catalog/PriceBookMgr');
 var PromotionMgr = require('dw/campaign/PromotionMgr');
 var URLUtils = require('dw/web/URLUtils');
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
-var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
@@ -28,27 +27,19 @@ try {
 } catch (e) { // eslint-disable-line no-unused-vars
 }
 
-var ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
-var INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
-var ATTRIBUTE_LIST = algoliaData.getSetOfArray('AdditionalAttributes');
-const stores = [];
-
-if (ATTRIBUTE_LIST.indexOf('storeAvailability') !== -1) {
-    var StoreMgr = require('dw/catalog/StoreMgr');
-    var storesMap = StoreMgr.searchStoresByCoordinates(0, 0, 'mi', 99999999);
-
-    if (storesMap && !storesMap.empty) {
-        var storeObjects = storesMap.keySet().toArray();
-        for (var l = 0; l < storeObjects.length; l++) {
-            var store = storeObjects[l];
-            if (store && store.inventoryList) {
-                stores.push({
-                    id: store.ID,
-                    storeInventory: store.inventoryList
-                });
-            }
-        }
+/**
+ * Resolve the store-inventory list used to compute `storeAvailability`.
+ * Prefers the list injected by the caller (`parameters.stores`, built once at the job/hook level) and falls back to
+ * building it on demand when it is not supplied. In production the list is always injected, so the expensive scan
+ * runs once per job/hook rather than once per record.
+ * @param {Object} parameters - the constructor parameters
+ * @returns {Array<{id: string, storeInventory: dw.catalog.ProductInventoryList}>} stores with their inventory list
+ */
+function resolveStores(parameters) {
+    if (parameters.stores) {
+        return parameters.stores;
     }
+    return modelHelper.getStoresWithInventory();
 }
 
 /**
@@ -385,8 +376,8 @@ var aggregatedValueHandlers = {
         }
         return pricebooks;
     },
-    in_stock: function (product) {
-        return productFilter.isInStock(product, ALGOLIA_IN_STOCK_THRESHOLD);
+    in_stock: function (product, parameters) {
+        return productFilter.isInStock(product, parameters.sitePreferences.InStockThreshold);
     },
     image_groups: function (product, parameters) {
         var imageGroupsArr = [];
@@ -465,6 +456,8 @@ var aggregatedValueHandlers = {
     },
     variants: function(product, parameters) { // only called when record model is either MASTER_LEVEL or VARIATION_GROUP_LEVEL
         const variants = [];
+        const inStockThreshold = parameters.sitePreferences.InStockThreshold;
+        const indexOutOfStock = parameters.sitePreferences.IndexOutOfStock;
 
         if (product.isMaster() || product.isVariationGroup()) {
             let variantsIt;
@@ -482,8 +475,8 @@ var aggregatedValueHandlers = {
                     continue;
                 }
 
-                let inStock = productFilter.isInStock(variant, ALGOLIA_IN_STOCK_THRESHOLD);
-                if (!inStock && !INDEX_OUT_OF_STOCK) {
+                let inStock = productFilter.isInStock(variant, inStockThreshold);
+                if (!inStock && !indexOutOfStock) {
                     continue;
                 }
 
@@ -496,6 +489,8 @@ var aggregatedValueHandlers = {
                     attributeList: parameters.variantAttributes,
                     isVariant: true,
                     baseModel: baseModel,
+                    sitePreferences: parameters.sitePreferences,
+                    stores: parameters.stores,
                 });
                 variants.push(localizedVariant);
             }
@@ -508,6 +503,8 @@ var aggregatedValueHandlers = {
                 locale: request.getLocale(),
                 attributeList: parameters.variantAttributes,
                 isVariant: true, // otherwise the variant object will have an 'objectID'
+                sitePreferences: parameters.sitePreferences,
+                stores: parameters.stores,
             });
             variants.push(localizedVariant);
 
@@ -517,7 +514,9 @@ var aggregatedValueHandlers = {
     _tags: function(product) {
         return ['id:' + product.getID()];
     },
-    storeAvailability: function(product) {
+    storeAvailability: function(product, parameters) {
+        const stores = resolveStores(parameters);
+        const inStockThreshold = parameters.sitePreferences.InStockThreshold;
         var storeArray = [];
         if (stores.length > 0) {
             for (var i = 0; i < stores.length; i++) {
@@ -525,7 +524,7 @@ var aggregatedValueHandlers = {
                 var storeElInventory = storeEl.storeInventory;
                 if (storeElInventory) {
                     var inventoryRecord = storeElInventory.getRecord(product.ID);
-                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= ALGOLIA_IN_STOCK_THRESHOLD && inventoryRecord.ATS.value > 0) { // comparing to zero explicitly so that a threshold of 0 wouldn't return true
+                    if (inventoryRecord && inventoryRecord.ATS.value && inventoryRecord.ATS.value >= inStockThreshold && inventoryRecord.ATS.value > 0) { // comparing to zero explicitly so that a threshold of 0 wouldn't return true
                         storeArray.push(storeEl.id);
                     }
                 }
@@ -539,7 +538,7 @@ var aggregatedValueHandlers = {
 }
 
 /**
- * AlgoliaLocalizedProduct class that represents a localized algoliaProduct ready to be indexed
+ * Represents a localized algoliaProduct ready to be indexed.
  * @param {Object} parameters - model parameters
  * @param {dw.catalog.Product} parameters.product - Product
  * @param {string} parameters.locale - The requested locale
@@ -550,12 +549,30 @@ var aggregatedValueHandlers = {
  * @param {boolean?} [parameters.isVariant] -  Indicates if the model is meant to live in a parent record
  * @param {Object?} [parameters.variationModel] - variationModel of a master
  * @param {string?} [parameters.variationValueID] - variationValueID to append to the objectID
+ * @param {Object} [parameters.sitePreferences] - stock-related preferences resolved once by the caller (job or order hook); required when the attribute list contains in_stock, variants or storeAvailability
+ * @param {number} [parameters.sitePreferences.InStockThreshold] - minimum ATS for a product to count as in stock; required for in_stock, variants and storeAvailability
+ * @param {boolean} [parameters.sitePreferences.IndexOutOfStock] - whether out-of-stock products should be indexed; required for variants
+ * @param {Array?} [parameters.stores] - stores with their inventory list, used for `storeAvailability`. Built once at the job/hook level. Falls back to modelHelper.getStoresWithInventory() when omitted.
  * @constructor
  */
 function algoliaLocalizedProduct(parameters) {
     const product = parameters.product;
     const attributeList = parameters.attributeList || [];
     const baseModel = parameters.baseModel;
+
+    // in_stock, variants and storeAvailability are derived from the InStockThreshold and IndexOutOfStock site
+    // preferences, which the indexing jobs and the order hook resolve once and pass in. Validate them up front so a
+    // caller that requests those attributes without supplying the preferences fails before any record is built.
+    const indexVariants = attributeList.indexOf('variants') !== -1;
+    if (indexVariants || attributeList.indexOf('in_stock') !== -1 || attributeList.indexOf('storeAvailability') !== -1) {
+        const sitePreferences = parameters.sitePreferences;
+        if (empty(sitePreferences) || !('InStockThreshold' in sitePreferences)) {
+            throw new Error('AlgoliaLocalizedProduct: sitePreferences.InStockThreshold must be provided by the caller (indexing job or order hook) when indexing in_stock, variants or storeAvailability.');
+        }
+        if (indexVariants && !('IndexOutOfStock' in sitePreferences)) {
+            throw new Error('AlgoliaLocalizedProduct: sitePreferences.IndexOutOfStock must be provided by the caller (indexing job or order hook) when indexing variants.');
+        }
+    }
 
     request.setLocale(parameters.locale || 'default');
 
@@ -618,18 +635,5 @@ function algoliaLocalizedProduct(parameters) {
         }
     }
 }
-
-// For testing - static methods on constructor
-algoliaLocalizedProduct.__setThreshold = function(threshold) {
-    ALGOLIA_IN_STOCK_THRESHOLD = threshold;
-};
-
-algoliaLocalizedProduct.__setIndexOutOfStock = function(indexOutOfStock) {
-    INDEX_OUT_OF_STOCK = indexOutOfStock;
-};
-
-algoliaLocalizedProduct.__setAttributeList = function(attributeList) {
-    ATTRIBUTE_LIST = attributeList;
-};
 
 module.exports = algoliaLocalizedProduct;

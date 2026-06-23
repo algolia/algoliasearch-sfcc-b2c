@@ -9,6 +9,7 @@ let requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
 let algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
 let productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
 let AlgoliaLocalizedProduct = require('*/cartridge/scripts/algolia/model/algoliaLocalizedProduct');
+let modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 
 let orderHelper = require('*/cartridge/scripts/algolia/helper/orderHelper');
 let isInStoreStock = productFilter.isInStoreStock;
@@ -22,11 +23,15 @@ const { INDEXING_APIS, RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algol
  * @param {dw.catalog.Product | dw.catalog.Variant} product - The product to create config for.
  * @param {string} recordModel - The type of record model.
  * @param {Array} additionalAttributes - User-defined attributes to index.
+ * @param {Object} sitePreferences - site preferences forwarded to AlgoliaLocalizedProduct.
+ * @param {Array} stores - Stores with their inventory list forwarded to AlgoliaLocalizedProduct (for storeAvailability).
  * @returns {Object} Configuration object to pass to generateAlgoliaOperations.
  */
-function createProductConfig(product, recordModel, additionalAttributes) {
+function createProductConfig(product, recordModel, additionalAttributes, sitePreferences, stores) {
     let attributesConfig = jobHelper.getAttributes(additionalAttributes);
     let productConfig = {};
+    productConfig.sitePreferences = sitePreferences;
+    productConfig.stores = stores;
 
     let variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
     let productVariationModel = product.getVariationModel();
@@ -44,6 +49,8 @@ function createProductConfig(product, recordModel, additionalAttributes) {
                     product: masterProduct,
                     locale: 'default',
                     attributeList: attributesConfig.nonLocalizedMasterAttributes,
+                    sitePreferences: sitePreferences,
+                    stores: stores,
                 });
 
                 if (recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED && !empty(variationAttribute)) {
@@ -68,6 +75,8 @@ function createProductConfig(product, recordModel, additionalAttributes) {
                     locale: 'default',
                     attributeList: attributesConfig.masterAttributes,
                     variantAttributes: attributesConfig.variantAttributes,
+                    sitePreferences: sitePreferences,
+                    stores: stores,
                 });
                 productConfig.product = product;
 
@@ -79,6 +88,8 @@ function createProductConfig(product, recordModel, additionalAttributes) {
                 product: product,
                 locale: 'default',
                 attributeList: attributesConfig.variantAttributes,
+                sitePreferences: sitePreferences,
+                stores: stores,
             });
             productConfig.product = product;
             break;
@@ -111,8 +122,16 @@ exports.inventoryUpdate = function (order) {
     });
 
     let ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
+    let INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
     let RECORD_MODEL = algoliaData.getPreference('RecordModel');
     let additionalAttributes = algoliaData.getSetOfArray('AdditionalAttributes');
+
+    // Stock-related inputs built once per order and passed to each AlgoliaLocalizedProduct
+    let sitePreferences = {
+        InStockThreshold: ALGOLIA_IN_STOCK_THRESHOLD,
+        IndexOutOfStock: INDEX_OUT_OF_STOCK,
+    };
+    let stores = (additionalAttributes.indexOf('storeAvailability') !== -1) ? modelHelper.getStoresWithInventory() : [];
 
     try {
         let algoliaOperations = [];
@@ -125,7 +144,8 @@ exports.inventoryUpdate = function (order) {
                 algoliaOperations = algoliaOperations.concat(
                     handleInStorePickupShipment(
                         shipment,
-                        ALGOLIA_IN_STOCK_THRESHOLD,
+                        sitePreferences,
+                        stores,
                         additionalAttributes,
                         RECORD_MODEL
                     )
@@ -134,7 +154,8 @@ exports.inventoryUpdate = function (order) {
                 algoliaOperations = algoliaOperations.concat(
                     handleStandardShipment(
                         shipment,
-                        ALGOLIA_IN_STOCK_THRESHOLD,
+                        sitePreferences,
+                        stores,
                         additionalAttributes,
                         RECORD_MODEL
                     )
@@ -185,28 +206,30 @@ exports.inventoryUpdate = function (order) {
  * Handles logic for updating Algolia records for an in-store pickup shipment.
  *
  * @param {dw.order.Shipment} shipment - The shipment object to process.
- * @param {number} threshold - The in-stock threshold preference.
+ * @param {Object} sitePreferences - Site preferences
+ * @param {Array} stores - Stores with their inventory list forwarded to AlgoliaLocalizedProduct (for storeAvailability).
  * @param {Array} additionalAttributes - A list of additional attributes to manage.
  * @param {string} recordModel - The type of record model (master-level or variant-level).
  * @returns {Array} An array of Algolia operations to be executed.
  */
-function handleInStorePickupShipment(shipment, threshold, additionalAttributes, recordModel) {
+function handleInStorePickupShipment(shipment, sitePreferences, stores, additionalAttributes, recordModel) {
     let algoliaOperations = [];
     let plis = shipment.getProductLineItems();
+    let InStockThreshold = sitePreferences.InStockThreshold;
 
     for (let j = 0; j < plis.length; j++) {
         let pli = plis[j];
         let product = pli.getProduct();
         let storeId = shipment.custom.fromStoreId;
 
-        let inStoreStock = isInStoreStock(product, storeId, threshold);
+        let inStoreStock = isInStoreStock(product, storeId, InStockThreshold);
         if (!inStoreStock && additionalAttributes.indexOf('storeAvailability') > -1) {
 
             switch (recordModel) {
 
                 case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
                 case RECORD_MODEL_TYPES.MASTER_LEVEL: {
-                    let productConfig = createProductConfig(product, recordModel, additionalAttributes);
+                    let productConfig = createProductConfig(product, recordModel, additionalAttributes, sitePreferences, stores);
                     productConfig.attributeList = ['variants'];
 
                     let productOps = generateAlgoliaOperations(productConfig);
@@ -214,7 +237,7 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
                     break;
                 }
                 case RECORD_MODEL_TYPES.VARIANT_LEVEL: {
-                    let productConfig = createProductConfig(product, recordModel, additionalAttributes);
+                    let productConfig = createProductConfig(product, recordModel, additionalAttributes, sitePreferences, stores);
                     productConfig.attributeList = ['storeAvailability'];
 
                     let productOps = generateAlgoliaOperations(productConfig);
@@ -232,21 +255,23 @@ function handleInStorePickupShipment(shipment, threshold, additionalAttributes, 
  * Handles logic for updating Algolia records for a standard shipment.
  *
  * @param {dw.order.Shipment} shipment - The shipment object to process.
- * @param {number} threshold - The in-stock threshold preference.
+ * @param {Object} sitePreferences - Site preferences
+ * @param {Array} stores - Stores with their inventory list forwarded to AlgoliaLocalizedProduct (for storeAvailability).
  * @param {Array} additionalAttributes - A list of additional attributes to manage.
  * @param {string} recordModel - The type of record model (master-level or variant-level).
  * @returns {Array} An array of Algolia operations to be executed.
  */
-function handleStandardShipment(shipment, threshold, additionalAttributes, recordModel) {
+function handleStandardShipment(shipment, sitePreferences, stores, additionalAttributes, recordModel) {
     let algoliaOperations = [];
     let plis = shipment.getProductLineItems();
-    let indexOutOfStock = algoliaData.getPreference('IndexOutOfStock');
+    let InStockThreshold = sitePreferences.InStockThreshold;
+    let indexOutOfStock = sitePreferences.IndexOutOfStock;
 
     for (let j = 0; j < plis.length; j++) {
         let pli = plis[j];
         let product = pli.getProduct(); // product can only be a Variant or a simple product
 
-        let isInStock = productFilter.isInStock(product, threshold);
+        let isInStock = productFilter.isInStock(product, InStockThreshold);
         if (!isInStock) {
 
             if (indexOutOfStock) {
@@ -259,7 +284,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                             attrArray.push('in_stock');
                         }
 
-                        let productConfig = createProductConfig(product, recordModel, additionalAttributes);
+                        let productConfig = createProductConfig(product, recordModel, additionalAttributes, sitePreferences, stores);
                         productConfig.attributeList = attrArray;
 
                         let productOps = generateAlgoliaOperations(productConfig);
@@ -268,7 +293,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                     }
 
                     case RECORD_MODEL_TYPES.VARIANT_LEVEL: {
-                        let productConfig = createProductConfig(product, recordModel, additionalAttributes);
+                        let productConfig = createProductConfig(product, recordModel, additionalAttributes, sitePreferences, stores);
                         productConfig.attributeList = ['in_stock'];
 
                         let productOps = generateAlgoliaOperations(productConfig);
@@ -278,7 +303,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                 }
 
             } else { // Algolia_IndexOutOfStock === false
-                let productConfig = createProductConfig(product, recordModel, additionalAttributes);
+                let productConfig = createProductConfig(product, recordModel, additionalAttributes, sitePreferences, stores);
                 productConfig.attributeList = ['variants'];
 
                 let productOps = generateAlgoliaOperations(productConfig);
@@ -290,7 +315,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                             if (!empty(productConfig.variationModel)) { // variation group
 
-                                let isGroupInStock = productFilter.isCustomVariationGroupInStock(productConfig.variationModel, threshold);
+                                let isGroupInStock = productFilter.isCustomVariationGroupInStock(productConfig.variationModel, InStockThreshold);
                                 if (!isGroupInStock) {
                                     productOps.forEach(function(productOp) {
                                         algoliaOperations = algoliaOperations.concat(
@@ -305,7 +330,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
                                     algoliaOperations = algoliaOperations.concat(productOps);
                                 }
                             } else { // regular master
-                                let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), threshold);
+                                let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), InStockThreshold);
                                 if (!isMasterInStock) {
                                     productOps.forEach(function(productOp) {
                                         algoliaOperations = algoliaOperations.concat(
@@ -338,7 +363,7 @@ function handleStandardShipment(shipment, threshold, additionalAttributes, recor
 
                     case RECORD_MODEL_TYPES.MASTER_LEVEL: {
                         if (productConfig.product.isMaster()) { // master
-                            let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), threshold);
+                            let isMasterInStock = productFilter.isInStock(product.getMasterProduct(), InStockThreshold);
                             if (!isMasterInStock) {
                                 productOps.forEach(function(productOp) {
                                     algoliaOperations = algoliaOperations.concat(

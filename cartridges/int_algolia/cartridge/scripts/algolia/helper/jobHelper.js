@@ -637,6 +637,8 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
  * @param {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
  * @param {Array} parameters.attributesComputedFromBaseProduct - list of attributes computed from the masterProduct and shared in all variants
  * @param {Array} parameters.fullRecordUpdate - specify if the generated records are mean to replace entirely the existing ones
+ * @param {Object} [parameters.sitePreferences] - site preference values forwarded to AlgoliaLocalizedProduct
+ * @param {Array} [parameters.stores] - stores with their inventory list forwarded to AlgoliaLocalizedProduct (for storeAvailability)
  * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct
  */
 function generateVariantRecords(parameters) {
@@ -656,6 +658,8 @@ function generateVariantRecords(parameters) {
             product: parameters.masterProduct,
             locale: locale,
             attributeList: attributesComputedFromBaseProduct,
+            sitePreferences: parameters.sitePreferences,
+            stores: parameters.stores,
         });
         algoliaRecordsPerLocale[locale] = [];
     }
@@ -669,7 +673,9 @@ function generateVariantRecords(parameters) {
             product: variant,
             locale: 'default',
             attributeList: parameters.nonLocalizedAttributes,
-            fullRecordUpdate: parameters.fullRecordUpdate
+            fullRecordUpdate: parameters.fullRecordUpdate,
+            sitePreferences: parameters.sitePreferences,
+            stores: parameters.stores,
         });
         for (let l = 0; l < parameters.locales.size(); ++l) {
             let locale = parameters.locales.get(l);
@@ -682,6 +688,8 @@ function generateVariantRecords(parameters) {
                 locale: locale,
                 attributeList: parameters.attributeList,
                 baseModel: baseModel,
+                sitePreferences: parameters.sitePreferences,
+                stores: parameters.stores,
             });
             algoliaRecordsPerLocale[locale].push(localizedVariant);
         }
@@ -705,6 +713,8 @@ function generateVariantRecords(parameters) {
  * @property {Array} parameters.nonLocalizedAttributes - list of non-localized attributes
  * @property {Array} parameters.attributesComputedFromBaseProduct - list of attributes computed from the baseProduct and shared in all variants
  * @property {string} parameters.variationAttributeID - ID of the variation attribute used to group the variants (e.g. 'color')
+ * @property {Object} [parameters.sitePreferences] - site preference values forwarded to AlgoliaLocalizedProduct
+ * @property {Array} [parameters.stores] - stores with their inventory list forwarded to AlgoliaLocalizedProduct (for storeAvailability)
  * @returns {Object} An object containing, for each locale, an array of AlgoliaLocalizedProduct (one per variation value)
  * @example
  * {
@@ -734,6 +744,8 @@ function generateAttributeSlicedRecords(parameters) {
             product: parameters.baseProduct,
             locale: locale,
             attributeList: attributesComputedFromBaseProduct,
+            sitePreferences: parameters.sitePreferences,
+            stores: parameters.stores,
         });
         algoliaRecordsPerLocale[locale] = [];
     }
@@ -752,6 +764,8 @@ function generateAttributeSlicedRecords(parameters) {
             product: parameters.baseProduct,
             locale: 'default',
             attributeList: parameters.nonLocalizedAttributes,
+            sitePreferences: parameters.sitePreferences,
+            stores: parameters.stores,
         });
         for (let l = 0; l < parameters.locales.size(); ++l) {
             let locale = parameters.locales.get(l);
@@ -767,6 +781,8 @@ function generateAttributeSlicedRecords(parameters) {
                 baseModel: baseModel,
                 variationModel: variationModel,
                 variationValueID: variationValue.getID(),
+                sitePreferences: parameters.sitePreferences,
+                stores: parameters.stores,
             });
             algoliaRecordsPerLocale[locale].push(localizedVariationGroup);
         }

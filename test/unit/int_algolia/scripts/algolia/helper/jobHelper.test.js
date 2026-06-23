@@ -40,6 +40,7 @@ describe('Job Helper', function () {
             locales: new ArrayList(['fr']),
             attributeList: ['name', 'categoryPageId', '__primary_category', 'in_stock', 'price', 'url', 'colorVariations'],
             nonLocalizedAttributes: [],
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false },
         });
         expect(variantRecords).toMatchSnapshot();
     });

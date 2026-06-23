@@ -12,7 +12,7 @@ var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
-var fileHelper, jobHelper, requestHelper;
+var fileHelper, jobHelper, requestHelper, modelHelper;
 
 // logging-related variables and constants
 var jobReport;
@@ -43,6 +43,9 @@ var INDEX_OUT_OF_STOCK;
 var variationAttributeForAttributeSlicedRecordModel; // e.g. "color"
 var indexingAPI;
 var analyticsRegion;
+
+var sitePreferences;
+var stores = [];
 
 /*
  * Rough algorithm of chunk-oriented script module execution:
@@ -82,10 +85,15 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     CPObjectIterator = require('*/cartridge/scripts/algolia/helper/CPObjectIterator');
     AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
+    modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
 
     // Algolia preferences
     ALGOLIA_IN_STOCK_THRESHOLD = algoliaData.getPreference('InStockThreshold') || 1;
     INDEX_OUT_OF_STOCK = algoliaData.getPreference('IndexOutOfStock');
+    sitePreferences = {
+        InStockThreshold: ALGOLIA_IN_STOCK_THRESHOLD,
+        IndexOutOfStock: INDEX_OUT_OF_STOCK,
+    };
     recordModel = algoliaData.getPreference('RecordModel'); // 'variant-level' || 'master-level' || 'attribute-sliced'
     variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
     indexingAPI = algoliaData.getPreference('IndexingAPI') || INDEXING_APIS.SEARCH_API; // "search-api" (default) or "ingestion-api"
@@ -155,6 +163,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     }
     logger.info('attributeListOverride parameter: ' + paramAttributeListOverride);
     logger.info('Actual attributes to be sent: ' + JSON.stringify(attributesToSend));
+
+    // Build the store-inventory list once (only when storeAvailability is indexed), to pass to each AlgoliaLocalizedProduct
+    if (attributesToSend.indexOf('storeAvailability') !== -1) {
+        stores = modelHelper.getStoresWithInventory();
+    }
 
 
     /* --- indexingMethod parameter --- */
@@ -383,7 +396,13 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     productFilter.isOnline(product) &&
                     productFilter.isSearchable(product) &&
                     productFilter.hasOnlineCategory(product)) {
-                    let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                    let baseModel = new AlgoliaLocalizedProduct({
+                        product: product,
+                        locale: 'default',
+                        attributeList: nonLocalizedMasterAttributes,
+                        sitePreferences: sitePreferences,
+                        stores: stores,
+                    });
                     for (let l = 0; l < siteLocales.size(); ++l) {
                         let locale = siteLocales.get(l);
                         let indexName = algoliaData.calculateIndexName('products', locale);
@@ -393,6 +412,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
                             attributeList: masterAttributes,
                             variantAttributes: variantAttributes,
                             baseModel: baseModel,
+                            sitePreferences: sitePreferences,
+                            stores: stores,
                         });
                         processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
                         algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
@@ -431,7 +452,13 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         productFilter.isOnline(product) &&
                         productFilter.isSearchable(product) &&
                         productFilter.hasOnlineCategory(product)) {
-                        let baseModel = new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: nonLocalizedMasterAttributes });
+                        let baseModel = new AlgoliaLocalizedProduct({
+                            product: product,
+                            locale: 'default',
+                            attributeList: nonLocalizedMasterAttributes,
+                            sitePreferences: sitePreferences,
+                            stores: stores,
+                        });
                         for (let l = 0; l < siteLocales.size(); ++l) {
                             let locale = siteLocales.get(l);
                             let indexName = algoliaData.calculateIndexName('products', locale);
@@ -441,6 +468,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
                                 attributeList: masterAttributes,
                                 variantAttributes: variantAttributes,
                                 baseModel: baseModel,
+                                sitePreferences: sitePreferences,
+                                stores: stores,
                             });
                             processedVariantsToSend = localizedMaster.variants ? localizedMaster.variants.length : 0;
                             algoliaOperations.push(new jobHelper.AlgoliaOperation(baseIndexingOperation, localizedMaster, indexName));
@@ -469,6 +498,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
                     nonLocalizedAttributes: nonLocalizedAttributes,
                     attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
                     variationAttributeID: variationAttributeForAttributeSlicedRecordModel,
+                    sitePreferences: sitePreferences,
+                    stores: stores,
                 });
 
                 for (let l = 0; l < siteLocales.size(); ++l) {
@@ -511,6 +542,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 nonLocalizedAttributes: nonLocalizedAttributes,
                 attributesComputedFromBaseProduct: attributesComputedFromBaseProduct,
                 fullRecordUpdate: fullRecordUpdate,
+                sitePreferences: sitePreferences,
+                stores: stores,
             });
 
             for (let l = 0; l < siteLocales.size(); ++l) {
@@ -554,7 +587,9 @@ exports.process = function(cpObj, parameters, stepExecution) {
                 product: product,
                 locale: 'default',
                 attributeList: nonLocalizedAttributes,
-                fullRecordUpdate: fullRecordUpdate
+                fullRecordUpdate: fullRecordUpdate,
+                sitePreferences: sitePreferences,
+                stores: stores,
             });
 
             for (let l = 0; l < siteLocales.size(); l++) {
@@ -571,7 +606,9 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         locale: locale,
                         attributeList: attributesToSend,
                         baseModel: baseModel,
-                        fullRecordUpdate: fullRecordUpdate
+                        fullRecordUpdate: fullRecordUpdate,
+                        sitePreferences: sitePreferences,
+                        stores: stores,
                     });
 
                 } else {
@@ -583,6 +620,8 @@ exports.process = function(cpObj, parameters, stepExecution) {
                         variantAttributes: variantAttributes,
                         baseModel: baseModel,
                         fullRecordUpdate: fullRecordUpdate,
+                        sitePreferences: sitePreferences,
+                        stores: stores,
                     });
                 }
 
