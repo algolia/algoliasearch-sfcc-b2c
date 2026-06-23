@@ -243,6 +243,7 @@ describe('algoliaLocalizedProduct', function () {
                 product: product,
                 locale: 'default',
                 attributeList: attributes,
+                sitePreferences: { InStockThreshold: 2 },
             })
         ).toEqual(algoliaProductModel);
     });
@@ -359,6 +360,7 @@ describe('algoliaLocalizedProduct', function () {
                 product: product,
                 locale: 'fr',
                 attributeList: attributes,
+                sitePreferences: { InStockThreshold: 2 },
             })
         ).toEqual(algoliaProductModel);
     });
@@ -559,7 +561,8 @@ describe('storeAvailability Tests', function() {
         const algoliaProduct = new AlgoliaLocalizedProduct({
             product: product,
             locale: 'default',
-            attributeList: ['storeAvailability']
+            attributeList: ['storeAvailability'],
+            sitePreferences: { InStockThreshold: 2 }
         });
 
         expect(algoliaProduct.storeAvailability).toBeDefined();
@@ -577,7 +580,8 @@ describe('storeAvailability Tests', function() {
         const algoliaProduct = new AlgoliaLocalizedProduct({
             product: product,
             locale: 'default',
-            attributeList: ['storeAvailability']
+            attributeList: ['storeAvailability'],
+            sitePreferences: { InStockThreshold: 2 }
         });
 
         expect(algoliaProduct.storeAvailability).toBeDefined();
@@ -594,7 +598,8 @@ describe('storeAvailability Tests', function() {
         const algoliaProduct = new AlgoliaLocalizedProduct({
             product: product,
             locale: 'default',
-            attributeList: ['storeAvailability']
+            attributeList: ['storeAvailability'],
+            sitePreferences: { InStockThreshold: 2 }
         });
 
         expect(algoliaProduct.storeAvailability).toBeDefined();
@@ -610,7 +615,8 @@ describe('storeAvailability Tests', function() {
         const algoliaProduct = new AlgoliaLocalizedProduct({
             product: product,
             locale: 'default',
-            attributeList: ['storeAvailability']
+            attributeList: ['storeAvailability'],
+            sitePreferences: { InStockThreshold: 2 }
         });
 
         expect(algoliaProduct.storeAvailability).toBeDefined();
@@ -626,7 +632,8 @@ describe('storeAvailability Tests', function() {
         const algoliaProduct = new AlgoliaLocalizedProduct({
             product: product,
             locale: 'default',
-            attributeList: ['storeAvailability']
+            attributeList: ['storeAvailability'],
+            sitePreferences: { InStockThreshold: 2 }
         });
 
         expect(algoliaProduct.storeAvailability).toBeDefined();

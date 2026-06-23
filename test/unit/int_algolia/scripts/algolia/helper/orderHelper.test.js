@@ -29,7 +29,8 @@ describe('Order Helper', function () {
 
         const productConfig = {
             product: masterProduct,
-            attributeList: ['variants', 'in_stock']
+            attributeList: ['variants', 'in_stock'],
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false }
         };
 
         // Act
@@ -68,7 +69,8 @@ describe('Order Helper', function () {
 
         const productConfig = {
             product: masterProduct,
-            attributeList: ['in_stock']  // Only update the stock status
+            attributeList: ['in_stock'],  // Only update the stock status
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false }
         };
 
         // Act
@@ -104,6 +106,7 @@ describe('Order Helper', function () {
             product: masterProduct,
             attributeList: ['variants'],
             variantAttributes: ['id', 'in_stock', 'storeAvailability'],
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false },
         };
 
         // Act
@@ -124,6 +127,7 @@ describe('Order Helper', function () {
         const productConfig = {
             product: variantProduct,
             attributeList: ['in_stock', 'storeAvailability'],
+            sitePreferences: { InStockThreshold: 1, IndexOutOfStock: false },
         };
 
         // Act

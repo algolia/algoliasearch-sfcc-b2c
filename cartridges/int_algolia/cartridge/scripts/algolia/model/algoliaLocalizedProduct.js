@@ -6,7 +6,6 @@ var PriceBookMgr = require('dw/catalog/PriceBookMgr');
 var PromotionMgr = require('dw/campaign/PromotionMgr');
 var URLUtils = require('dw/web/URLUtils');
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
-var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var algoliaProductConfig = require('*/cartridge/scripts/algolia/lib/algoliaProductConfig');
 var productModelCustomizer = require('*/cartridge/scripts/algolia/customization/productModelCustomizer');
 var ObjectHelper = require('*/cartridge/scripts/algolia/helper/objectHelper');
@@ -26,41 +25,6 @@ try {
     extendedProductRecordCustomizer = require('*/cartridge/configuration/productRecordCustomizer.js');
     logger.info('Extension file "productRecordCustomizer.js" loaded');
 } catch (e) { // eslint-disable-line no-unused-vars
-}
-
-/**
- * Resolve the in-stock threshold for this construction.
- * Prefers the value injected by the caller (`parameters.sitePreferences.InStockThreshold`) and falls back to the
- * site preference when it is not supplied, so callers that do not inject still behave as before.
- * The value is resolved once per construction and cached on the `parameters` object, so the in_stock, variants and
- * storeAvailability handlers reuse it instead of re-reading the preference. The cache is per-construction, not
- * module-level, which is what keeps successive constructions testable with different preference values.
- * @param {Object} parameters - the constructor parameters
- * @returns {number} the in-stock threshold
- */
-function resolveInStockThreshold(parameters) {
-    if (parameters.resolvedInStockThreshold === undefined) {
-        const sitePreferences = parameters.sitePreferences;
-        parameters.resolvedInStockThreshold = (!empty(sitePreferences) && !empty(sitePreferences.InStockThreshold))
-            ? sitePreferences.InStockThreshold
-            : (algoliaData.getPreference('InStockThreshold') || 1);
-    }
-    return parameters.resolvedInStockThreshold;
-}
-
-/**
- * Resolve the "index out of stock" flag for this model.
- * Prefers the value injected by the caller (`parameters.sitePreferences.IndexOutOfStock`) and falls back to the
- * site preference when it is not supplied.
- * @param {Object} parameters - the constructor parameters
- * @returns {boolean} whether out-of-stock products should be indexed
- */
-function resolveIndexOutOfStock(parameters) {
-    const sitePreferences = parameters.sitePreferences;
-    if (!empty(sitePreferences) && !empty(sitePreferences.IndexOutOfStock)) {
-        return sitePreferences.IndexOutOfStock;
-    }
-    return algoliaData.getPreference('IndexOutOfStock');
 }
 
 /**
@@ -413,7 +377,7 @@ var aggregatedValueHandlers = {
         return pricebooks;
     },
     in_stock: function (product, parameters) {
-        return productFilter.isInStock(product, resolveInStockThreshold(parameters));
+        return productFilter.isInStock(product, parameters.sitePreferences.InStockThreshold);
     },
     image_groups: function (product, parameters) {
         var imageGroupsArr = [];
@@ -492,8 +456,8 @@ var aggregatedValueHandlers = {
     },
     variants: function(product, parameters) { // only called when record model is either MASTER_LEVEL or VARIATION_GROUP_LEVEL
         const variants = [];
-        const inStockThreshold = resolveInStockThreshold(parameters);
-        const indexOutOfStock = resolveIndexOutOfStock(parameters);
+        const inStockThreshold = parameters.sitePreferences.InStockThreshold;
+        const indexOutOfStock = parameters.sitePreferences.IndexOutOfStock;
 
         if (product.isMaster() || product.isVariationGroup()) {
             let variantsIt;
@@ -552,7 +516,7 @@ var aggregatedValueHandlers = {
     },
     storeAvailability: function(product, parameters) {
         const stores = resolveStores(parameters);
-        const inStockThreshold = resolveInStockThreshold(parameters);
+        const inStockThreshold = parameters.sitePreferences.InStockThreshold;
         var storeArray = [];
         if (stores.length > 0) {
             for (var i = 0; i < stores.length; i++) {
@@ -585,9 +549,9 @@ var aggregatedValueHandlers = {
  * @param {boolean?} [parameters.isVariant] -  Indicates if the model is meant to live in a parent record
  * @param {Object?} [parameters.variationModel] - variationModel of a master
  * @param {string?} [parameters.variationValueID] - variationValueID to append to the objectID
- * @param {Object?} [parameters.sitePreferences] - site preferences, keyed by preference ID. Falls back to algoliaData when omitted.
- * @param {number?} [parameters.sitePreferences.InStockThreshold] - minimum ATS for a product to count as in stock
- * @param {boolean?} [parameters.sitePreferences.IndexOutOfStock] - whether out-of-stock products should be indexed
+ * @param {Object} [parameters.sitePreferences] - stock-related preferences resolved once by the caller (job or order hook); required when the attribute list contains in_stock, variants or storeAvailability
+ * @param {number} [parameters.sitePreferences.InStockThreshold] - minimum ATS for a product to count as in stock; required for in_stock, variants and storeAvailability
+ * @param {boolean} [parameters.sitePreferences.IndexOutOfStock] - whether out-of-stock products should be indexed; required for variants
  * @param {Array?} [parameters.stores] - stores with their inventory list, used for `storeAvailability`. Built once at the job/hook level. Falls back to modelHelper.getStoresWithInventory() when omitted.
  * @constructor
  */
@@ -595,6 +559,20 @@ function algoliaLocalizedProduct(parameters) {
     const product = parameters.product;
     const attributeList = parameters.attributeList || [];
     const baseModel = parameters.baseModel;
+
+    // in_stock, variants and storeAvailability are derived from the InStockThreshold and IndexOutOfStock site
+    // preferences, which the indexing jobs and the order hook resolve once and pass in. Validate them up front so a
+    // caller that requests those attributes without supplying the preferences fails before any record is built.
+    const indexVariants = attributeList.indexOf('variants') !== -1;
+    if (indexVariants || attributeList.indexOf('in_stock') !== -1 || attributeList.indexOf('storeAvailability') !== -1) {
+        const sitePreferences = parameters.sitePreferences;
+        if (empty(sitePreferences) || !('InStockThreshold' in sitePreferences)) {
+            throw new Error('AlgoliaLocalizedProduct: sitePreferences.InStockThreshold must be provided by the caller (indexing job or order hook) when indexing in_stock, variants or storeAvailability.');
+        }
+        if (indexVariants && !('IndexOutOfStock' in sitePreferences)) {
+            throw new Error('AlgoliaLocalizedProduct: sitePreferences.IndexOutOfStock must be provided by the caller (indexing job or order hook) when indexing variants.');
+        }
+    }
 
     request.setLocale(parameters.locale || 'default');
 
