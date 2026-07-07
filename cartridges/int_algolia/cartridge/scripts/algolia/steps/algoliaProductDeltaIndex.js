@@ -250,10 +250,10 @@ exports.beforeStep = function(parameters, stepExecution) {
     // creating working folder (same as the delta export output folder) - if there were no previous changes, the delta export job step won't create it
     l0_deltaExportDir = new File(ALGOLIA_DELTA_EXPORT_BASE_FOLDER + paramConsumer + '/' + paramDeltaExportJobName); // Impex/src/platform/outbox/algolia/productDeltaExport
 
-    // return OK if the folder doesn't exist, this means that the CatalogDeltaExport job step finished OK but didn't have any output (there were no changes)
+    // return OK if the folder doesn't exist, this means the delta export (catalog, price book or inventory list) finished OK but didn't have any output (there were no changes)
     if (!l0_deltaExportDir.exists()) {
         logger.info('Export directory does not exist (' + l0_deltaExportDir.getFullPath() +
-            '). There haven\'t been any changes to the catalog yet or the "consumer" and "deltaExportJobName" parameters do not match for both job steps.');
+            '). There haven\'t been any changes yet, or the "consumer" and "deltaExportJobName" parameters do not match the delta export that produces the archives.');
         return; // return with an empty changedProducts object
     }
 
@@ -280,6 +280,16 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     l1_failedDir = new File(l0_deltaExportDir, '_failed');
     l1_failedDir.mkdir();
+
+    // A price book or inventory list delta names the object whose price-table or inventory record changed
+    // (usually a variant SKU, sometimes a master). The extraction normalizes each ID to the record level
+    // the model indexes at: at the 'master' level a changed variant is rolled up to its master, at the
+    // 'variant' level a changed master is fanned out to its variants so the inheriting variant records are
+    // rebuilt. The catalog path is left untouched because CatalogDeltaExport already emits both master and
+    // variants (MasterProductExport).
+    var recordLevel = (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL ||
+        recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED ||
+        attributesComputedFromBaseProduct.length > 0) ? 'master' : 'variant';
 
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
@@ -312,6 +322,58 @@ exports.beforeStep = function(parameters, stepExecution) {
 
                 // adding productsIDs from the XML to the list of changed productIDs
                 let result = jobHelper.updateCPObjectFromXML(catalogFile, changedProducts, 'catalog');
+
+                if (result.success) {
+                    jobReport.processedItems += result.nrProductsRead;
+                } else {
+                    // Mark the job in error if an error occurred while reading from any of the delta export zips
+                    jobReport.error = true;
+                    jobReport.errorMessage = result.errorMessage;
+                }
+            });
+        }
+
+        // -------------------- processing price book XMLs --------------------
+        // A Price Book delta export packs one XML per affected price book directly under "pricebooks/".
+        // A catalog archive has no such folder, so this block is a no-op for the catalog delta job.
+
+        var l4_pricebooksDir = new File(l3_uuidDir, 'pricebooks'); // _processing/000001.zip/<uuid>/pricebooks/
+
+        if (l4_pricebooksDir.exists() && l4_pricebooksDir.isDirectory()) {
+
+            // one <priceBookID>.xml per affected price book
+            var pricebookFiles = fileHelper.getAllXMLFilesInFolder(l4_pricebooksDir);
+
+            pricebookFiles.forEach(function(pricebookFile) {
+
+                // adding productIDs from the XML to the list of changed productIDs
+                let result = jobHelper.updateCPObjectFromXML(pricebookFile, changedProducts, 'pricebook', recordLevel);
+
+                if (result.success) {
+                    jobReport.processedItems += result.nrProductsRead;
+                } else {
+                    // Mark the job in error if an error occurred while reading from any of the delta export zips
+                    jobReport.error = true;
+                    jobReport.errorMessage = result.errorMessage;
+                }
+            });
+        }
+
+        // -------------------- processing inventory list XMLs --------------------
+        // An Inventory List delta export packs one XML per affected inventory list directly under "inventory-lists/".
+        // A catalog archive has no such folder, so this block is a no-op for the catalog delta job.
+
+        var l4_inventoryListsDir = new File(l3_uuidDir, 'inventory-lists'); // _processing/000001.zip/<uuid>/inventory-lists/
+
+        if (l4_inventoryListsDir.exists() && l4_inventoryListsDir.isDirectory()) {
+
+            // one <listID>.xml per affected inventory list
+            var inventoryListFiles = fileHelper.getAllXMLFilesInFolder(l4_inventoryListsDir);
+
+            inventoryListFiles.forEach(function(inventoryListFile) {
+
+                // adding productIDs from the XML to the list of changed productIDs
+                let result = jobHelper.updateCPObjectFromXML(inventoryListFile, changedProducts, 'inventory', recordLevel);
 
                 if (result.success) {
                     jobReport.processedItems += result.nrProductsRead;

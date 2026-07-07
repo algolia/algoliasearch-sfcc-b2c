@@ -114,6 +114,50 @@ Can perform full records updates or partial records updates. See the 'indexingMe
         <triggers/>
     </job>
 
+    <job job-id="AlgoliaProductPriceDeltaIndex_v2" priority="0">
+        <description>Send price updates to Algolia for the products whose price books changed since the last run, without iterating over every product assigned to the site.
+This job consumes the output of a scheduled B2C Price Book delta export. Create that delta export under Administration &gt; Site Development &gt; Delta Exports (needs to be enabled), select the price books to track, set its consumer to "algolia", set its name to match the "deltaExportJobName" parameter below, and give it its own schedule. There is no platform job step for a price book delta export, so it cannot run as a step here; it runs on the schedule attached to the delta export definition. This job reads the archives that export writes, retrieves and enriches the products, then sends full product records to Algolia.</description>
+        <parameters>
+            <parameter name="consumer">algolia</parameter>
+            <parameter name="deltaExportJobName">pricebookDeltaExport</parameter>
+        </parameters>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="algoliaProductDeltaIndex" type="custom.algoliaProductDeltaIndex" enforce-restart="false">
+                <description>Extracts the list of productIDs (of changed products) from the scheduled Price Book delta export, retrieves and enriches the products data, then sends full product records to Algolia. Products that no longer qualify for the index are removed.</description>
+                <parameters>
+                    <parameter name="consumer" job-parameter-ref="consumer"/>
+                    <parameter name="deltaExportJobName" job-parameter-ref="deltaExportJobName"/>
+                    <parameter name="indexingMethod">fullRecordUpdate</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers/>
+    </job>
+
+    <job job-id="AlgoliaProductInventoryDeltaIndex_v2" priority="0">
+        <description>Send inventory updates to Algolia for the products whose inventory lists changed since the last run, without iterating over every product assigned to the site.
+This job consumes the output of a scheduled B2C Inventory List delta export. Create that delta export under Administration &gt; Site Development &gt; Delta Exports (needs to be enabled), select the inventory lists to track, set its consumer to "algolia", set its name to match the "deltaExportJobName" parameter below, and give it its own schedule. There is no platform job step for an inventory list delta export, so it cannot run as a step here; it runs on the schedule attached to the delta export definition. This job reads the archives that export writes, retrieves and enriches the products, then sends full product records to Algolia. When the "Index Out of Stock" preference is off, a product that sells out is removed from the index and re-added once it returns to stock.</description>
+        <parameters>
+            <parameter name="consumer">algolia</parameter>
+            <parameter name="deltaExportJobName">inventoryDeltaExport</parameter>
+        </parameters>
+        <flow>
+            <context site-id="RefArch"/>
+            <step step-id="algoliaProductDeltaIndex" type="custom.algoliaProductDeltaIndex" enforce-restart="false">
+                <description>Extracts the list of productIDs (of changed products) from the scheduled Inventory List delta export, retrieves and enriches the products data, then sends full product records to Algolia. Products that no longer qualify for the index are removed.</description>
+                <parameters>
+                    <parameter name="consumer" job-parameter-ref="consumer"/>
+                    <parameter name="deltaExportJobName" job-parameter-ref="deltaExportJobName"/>
+                    <parameter name="indexingMethod">fullRecordUpdate</parameter>
+                </parameters>
+            </step>
+        </flow>
+        <rules/>
+        <triggers/>
+    </job>
+
     <job job-id="AlgoliaContentIndex_v2" priority="0">
         <description>Index all searchable content assets assigned to the selected site to Algolia.</description>
         <parameters/>
