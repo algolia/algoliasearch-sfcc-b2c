@@ -191,9 +191,14 @@ exports.beforeStep = function(parameters, stepExecution) {
             algoliaProductConfig.attributeConfig_v2[attribute] ||
             jobHelper.getDefaultAttributeConfig(attribute);
 
+        // variantAttributes/masterAttributes are pre-seeded with the defaults, some of which also
+        // appear in attributesToSend or Algolia_AdditionalAttributes; skip names already present so
+        // each attribute is only categorized (and later fetched) once per record.
         if (attributeConfig.variantAttribute) {
-            variantAttributes.push(attribute);
-        } else {
+            if (variantAttributes.indexOf(attribute) < 0) {
+                variantAttributes.push(attribute);
+            }
+        } else if (masterAttributes.indexOf(attribute) < 0) {
             masterAttributes.push(attribute);
         }
 

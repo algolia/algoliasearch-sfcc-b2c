@@ -843,9 +843,14 @@ function getAttributes(additionalAttributes) {
             algoliaProductConfig.attributeConfig_v2[attribute] ||
             getDefaultAttributeConfig(attribute);
 
+        // variantAttributes/masterAttributes are pre-seeded with the defaults, some of which also
+        // appear in defaultAttributes or the additionalAttributes argument; skip names already
+        // present so each attribute is only categorized (and later fetched) once per record.
         if (attributeConfig.variantAttribute) {
-            variantAttributes.push(attribute);
-        } else {
+            if (variantAttributes.indexOf(attribute) < 0) {
+                variantAttributes.push(attribute);
+            }
+        } else if (masterAttributes.indexOf(attribute) < 0) {
             masterAttributes.push(attribute);
         }
 
