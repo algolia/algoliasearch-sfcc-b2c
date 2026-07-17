@@ -286,6 +286,11 @@ exports.beforeStep = function(parameters, stepExecution) {
     l1_failedDir = new File(l0_deltaExportDir, '_failed');
     l1_failedDir.mkdir();
 
+    // A price book or inventory list delta contains the IDs of the products that were affected by the change (variant or master). The extraction normalizes each ID to the expected record level: at the 'master' level a changed variant is rolled up to its master, at the 'variant' level a changed master is fanned out to its variants so the inheriting variant records are rebuilt. The catalog path is left untouched because CatalogDeltaExport already emits both master and variants due to its MasterProductExport parameter set to true.
+    var recordLevel = (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL ||
+        recordModel === RECORD_MODEL_TYPES.ATTRIBUTE_SLICED ||
+        attributesComputedFromBaseProduct.length > 0) ? 'master' : 'variant';
+
     // process each export zip one by one
     deltaExportZips.forEach(function(filename) {
         logger.info('Processing ' + filename + '...');
@@ -339,7 +344,7 @@ exports.beforeStep = function(parameters, stepExecution) {
             let pricebookFiles = fileHelper.getAllXMLFilesInFolder(l4_pricebooksDir);
             pricebookFiles.forEach(function(pricebookFile) {
                 // adding productIDs from the XML to the list of changed productIDs
-                let result = jobHelper.updateCPObjectFromXML(pricebookFile, changedProducts, 'pricebook');
+                let result = jobHelper.updateCPObjectFromXML(pricebookFile, changedProducts, 'pricebook', recordLevel);
 
                 if (result.success) {
                     jobReport.processedItems += result.nrProductsRead;
@@ -363,7 +368,7 @@ exports.beforeStep = function(parameters, stepExecution) {
             inventoryListFiles.forEach(function(inventoryListFile) {
 
                 // adding productIDs from the XML to the list of changed productIDs
-                let result = jobHelper.updateCPObjectFromXML(inventoryListFile, changedProducts, 'inventory');
+                let result = jobHelper.updateCPObjectFromXML(inventoryListFile, changedProducts, 'inventory', recordLevel);
 
                 if (result.success) {
                     jobReport.processedItems += result.nrProductsRead;
