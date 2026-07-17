@@ -59,16 +59,16 @@ function getChildFolders(folder) {
 }
 
 /**
- * Returns an array of all XML files from the given folder
+ * Returns an array of all XML files from the given folder, sorted by name
  * @param {dw.io.File} folder Folder to list files in
- * @returns {Array} An array of strings
+ * @returns {dw.io.File[]} An array of File objects, one per .xml file directly in the folder
  */
 function getAllXMLFilesInFolder(folder) {
     if (empty(folder) || !folder.isDirectory()) {
         return [];
     } else {
         return folder.listFiles(function(file) {
-            return file.isFile() && file.getName().endsWith('.xml');
+            return file.isFile() && (/\.xml$/).test(file.getName());
         }).toArray().sort();
     }
 }
