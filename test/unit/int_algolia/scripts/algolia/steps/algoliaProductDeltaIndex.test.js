@@ -22,6 +22,24 @@ jest.mock('*/cartridge/scripts/algolia/helper/requestHelper', () => {
     }
 }, {virtual: true});
 
+let mockZipList = [];
+jest.mock('*/cartridge/scripts/algolia/helper/fileHelper', () => {
+    const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/fileHelper');
+    return {
+        ...originalModule,
+        getDeltaExportZipList: jest.fn(() => mockZipList),
+    }
+}, {virtual: true});
+
+const mockIsConsumed = jest.fn(() => false);
+const mockMarkConsumed = jest.fn(() => true);
+jest.mock('*/cartridge/scripts/algolia/helper/consumedArchiveTracker', () => {
+    return {
+        isConsumed: mockIsConsumed,
+        markConsumed: mockMarkConsumed,
+    }
+}, {virtual: true});
+
 let mockLocalesForIndexing;
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaData', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaData');
@@ -62,6 +80,7 @@ const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/
 
 beforeEach(() => {
     mockLocalesForIndexing = [];
+    mockZipList = [];
     mockGroupRecordsForIngestionAPI.mockReset();
     mockSendGroupedIngestionAPIRecords.mockReset();
     delete global.customPreferences['Algolia_IndexingAPI'];
@@ -246,6 +265,51 @@ describe('send', () => {
         job.send(makeChunk(1));
 
         expect(mockSendGroupedIngestionAPIRecords).toHaveBeenCalledWith({});
+    });
+});
+
+describe('archive consumption tracking', () => {
+    test('beforeStep skips archives already consumed by this site', () => {
+        mockZipList = ['000001.zip', '000002.zip'];
+        mockIsConsumed.mockReturnValue(true);
+
+        job.beforeStep(parameters, stepExecution);
+
+        expect(mockIsConsumed).toHaveBeenCalledWith('algolia', 'productDeltaExport', '000001.zip');
+        expect(mockIsConsumed).toHaveBeenCalledWith('algolia', 'productDeltaExport', '000002.zip');
+
+        // all archives were filtered out, so a successful run has nothing new to record
+        job.afterStep(true);
+        expect(mockMarkConsumed).not.toHaveBeenCalled();
+
+        mockIsConsumed.mockReturnValue(false);
+    });
+
+    test('afterStep records the consumed archives on success', () => {
+        job.beforeStep(parameters, stepExecution);
+        job.__setDeltaExportZips(['000001.zip', '000002.zip']);
+
+        job.afterStep(true);
+
+        expect(mockMarkConsumed).toHaveBeenCalledWith('algolia', 'productDeltaExport', ['000001.zip', '000002.zip'], 'TestJobID');
+    });
+
+    test('afterStep does not record the archives when the failure threshold is exceeded', () => {
+        job.beforeStep(parameters, stepExecution);
+        job.__setDeltaExportZips(['000001.zip']);
+        job.__getJobReport().recordsFailed = 6;
+        job.__getJobReport().recordsToSend = 100;
+
+        expect(() => job.afterStep(true)).toThrow();
+        expect(mockMarkConsumed).not.toHaveBeenCalled();
+    });
+
+    test('afterStep does not record the archives when a previous step phase failed', () => {
+        job.beforeStep(parameters, stepExecution);
+        job.__setDeltaExportZips(['000001.zip']);
+
+        expect(() => job.afterStep(false)).toThrow();
+        expect(mockMarkConsumed).not.toHaveBeenCalled();
     });
 });
 
