@@ -3,10 +3,10 @@
 
     <custom-type type-id="AlgoliaConsumedDeltaArchive">
         <display-name xml:lang="x-default">AlgoliaConsumedDeltaArchive</display-name>
-        <description xml:lang="x-default">Records a delta export archive that has been consumed by an Algolia delta indexing job for the current site. Archives are left in the outbox (the platform deletes them after 30 days), so this record is what prevents the same archive from being processed twice by the same site while letting other sites consume it independently.</description>
+        <description xml:lang="x-default">Records a delta export archive that has been consumed by an Algolia delta indexing job for the current site. Archives are left in the outbox (the platform deletes them after 30 days), so this record is what prevents the same archive from being processed twice by the same site while letting other sites consume it independently. The retention is longer than the platform's 30-day outbox retention so that a record always outlives its archive; an expired record with the archive still present would cause the archive to be reprocessed.</description>
         <staging-mode>no-staging</staging-mode>
         <storage-scope>site</storage-scope>
-        <retention-days>30</retention-days>
+        <retention-days>33</retention-days>
         <key-definition attribute-id="ID">
             <display-name xml:lang="x-default">Custom Object ID</display-name>
             <type>string</type>
@@ -54,6 +54,7 @@
             <attribute-group group-id="consumedArchive">
                 <display-name xml:lang="x-default">Consumed archive</display-name>
                 <description xml:lang="x-default">Information about the consumed delta export archive</description>
+                <attribute attribute-id="ID"/>
                 <attribute attribute-id="consumer"/>
                 <attribute attribute-id="deltaExportJobName"/>
                 <attribute attribute-id="archiveName"/>
