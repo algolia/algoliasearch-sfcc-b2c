@@ -269,14 +269,14 @@ describe('send', () => {
 });
 
 describe('archive consumption tracking', () => {
-    test('beforeStep skips archives already consumed by this site', () => {
+    test('beforeStep skips archives already consumed by this job', () => {
         mockZipList = ['000001.zip', '000002.zip'];
         mockIsConsumed.mockReturnValue(true);
 
         job.beforeStep(parameters, stepExecution);
 
-        expect(mockIsConsumed).toHaveBeenCalledWith('algolia', 'productDeltaExport', '000001.zip');
-        expect(mockIsConsumed).toHaveBeenCalledWith('algolia', 'productDeltaExport', '000002.zip');
+        expect(mockIsConsumed).toHaveBeenCalledWith('TestJobID', 'algolia', 'productDeltaExport', '000001.zip');
+        expect(mockIsConsumed).toHaveBeenCalledWith('TestJobID', 'algolia', 'productDeltaExport', '000002.zip');
 
         // all archives were filtered out, so a successful run has nothing new to record
         job.afterStep(true);
@@ -291,7 +291,7 @@ describe('archive consumption tracking', () => {
 
         job.afterStep(true);
 
-        expect(mockMarkConsumed).toHaveBeenCalledWith('algolia', 'productDeltaExport', ['000001.zip', '000002.zip'], 'TestJobID');
+        expect(mockMarkConsumed).toHaveBeenCalledWith('TestJobID', 'algolia', 'productDeltaExport', ['000001.zip', '000002.zip']);
     });
 
     test('afterStep does not record the archives when the failure threshold is exceeded', () => {

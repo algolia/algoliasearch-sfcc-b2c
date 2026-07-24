@@ -3,7 +3,7 @@
 
     <custom-type type-id="AlgoliaConsumedDeltaArchive">
         <display-name xml:lang="x-default">AlgoliaConsumedDeltaArchive</display-name>
-        <description xml:lang="x-default">Records a delta export archive that has been consumed by an Algolia delta indexing job for the current site. Archives are left in the outbox (the platform deletes them after 30 days), so this record is what prevents the same archive from being processed twice by the same site while letting other sites consume it independently. The retention is longer than the platform's 30-day outbox retention so that a record always outlives its archive; an expired record with the archive still present would cause the archive to be reprocessed.</description>
+        <description xml:lang="x-default">Records a delta export archive that has been consumed by an Algolia delta indexing job for the current site. Archives are left in the outbox (the platform deletes them after 30 days), so this record is what prevents the same archive from being processed twice by the same job while letting other consumers (other sites' jobs, or same-site jobs splitting the work) consume it independently. The retention is longer than the platform's 30-day outbox retention so that a record always outlives its archive; an expired record with the archive still present would cause the archive to be reprocessed.</description>
         <staging-mode>no-staging</staging-mode>
         <storage-scope>site</storage-scope>
         <retention-days>33</retention-days>
@@ -42,7 +42,7 @@
             </attribute-definition>
             <attribute-definition attribute-id="jobID">
                 <display-name xml:lang="x-default">Job ID</display-name>
-                <description xml:lang="x-default">The ID of the job run that consumed the archive.</description>
+                <description xml:lang="x-default">The ID of the job that consumed the archive. Part of the custom object key: consumption is tracked per job, so several jobs on the same site can consume the same delta export independently.</description>
                 <type>string</type>
                 <localizable-flag>false</localizable-flag>
                 <mandatory-flag>false</mandatory-flag>

@@ -266,12 +266,13 @@ exports.beforeStep = function(parameters, stepExecution) {
     // list all the delta export zips in the folder
     var allDeltaExportZips = fileHelper.getDeltaExportZipList(l0_deltaExportDir);
 
-    // skip the archives this site has already consumed - the archives are left in the outbox
-    // (the platform deletes them after 30 days) so that other sites sharing the same delta export
-    // definition can consume them independently
+    // skip the archives this job has already consumed - the archives are left in the outbox
+    // (the platform deletes them after 30 days) so that other consumers of the same delta export
+    // definition (other sites' jobs, or same-site jobs splitting the work e.g. by locale)
+    // can consume them independently
     deltaExportZips = allDeltaExportZips.filter(function(filename) {
-        if (consumedArchiveTracker.isConsumed(paramConsumer, paramDeltaExportJobName, filename)) {
-            logger.info('Skipping ' + filename + ' (already consumed by this site)');
+        if (consumedArchiveTracker.isConsumed(jobReport.jobID, paramConsumer, paramDeltaExportJobName, filename)) {
+            logger.info('Skipping ' + filename + ' (already consumed by this job)');
             return false;
         }
         return true;
@@ -814,11 +815,11 @@ exports.afterStep = function(success, parameters, stepExecution) {
             jobReport.error = false;
             jobReport.errorMessage = '';
 
-            // after the products have successfully been sent, record the consumed archives for this site
-            // (the archives are left in the outbox for other sites, the platform deletes them after 30 days)
+            // after the products have successfully been sent, record the consumed archives for this job
+            // (the archives are left in the outbox for other consumers, the platform deletes them after 30 days)
             if (!empty(deltaExportZips)) {
                 logger.info('Recording the consumed delta export archives: ' + deltaExportZips);
-                consumedArchiveTracker.markConsumed(paramConsumer, paramDeltaExportJobName, deltaExportZips, jobReport.jobID);
+                consumedArchiveTracker.markConsumed(jobReport.jobID, paramConsumer, paramDeltaExportJobName, deltaExportZips);
             }
         } else {
             jobReport.error = true;
