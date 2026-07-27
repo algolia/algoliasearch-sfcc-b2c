@@ -72,17 +72,27 @@ describe('markConsumed', () => {
         CustomObjectMgr.getCustomObject.mockReset();
     });
 
-    test('returns false when creating a custom object fails, but still records the others', () => {
+    test('a failure on one archive does not stop the others from being recorded', () => {
         CustomObjectMgr.getCustomObject.mockReturnValue(null);
         CustomObjectMgr.createCustomObject.mockImplementationOnce(() => {
             throw new Error('duplicate key');
         });
-        CustomObjectMgr.createCustomObject.mockImplementationOnce(() => ({ custom: {} }));
+        const survivingCustomObject = { custom: {} };
+        CustomObjectMgr.createCustomObject.mockImplementationOnce(() => survivingCustomObject);
 
         const success = consumedArchiveTracker.markConsumed('AlgoliaPriceDeltaIndex', 'algolia', 'pricebookDeltaExport', ['000001.zip', '000002.zip']);
 
+        // the archive that failed to record is reflected in the return value...
         expect(success).toBe(false);
+        // ...but the one after it is still recorded, with the correct key and attributes
         expect(CustomObjectMgr.createCustomObject).toHaveBeenCalledTimes(2);
+        expect(CustomObjectMgr.createCustomObject).toHaveBeenNthCalledWith(2, CUSTOM_OBJECT_TYPE, 'AlgoliaPriceDeltaIndex__algolia__pricebookDeltaExport__000002.zip');
+        expect(survivingCustomObject.custom).toEqual({
+            consumer: 'algolia',
+            deltaExportJobName: 'pricebookDeltaExport',
+            archiveName: '000002.zip',
+            jobID: 'AlgoliaPriceDeltaIndex',
+        });
 
         CustomObjectMgr.getCustomObject.mockReset();
     });
