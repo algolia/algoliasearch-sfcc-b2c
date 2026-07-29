@@ -1,6 +1,68 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
 
+    <custom-type type-id="AlgoliaConsumedDeltaArchive">
+        <display-name xml:lang="x-default">AlgoliaConsumedDeltaArchive</display-name>
+        <description xml:lang="x-default">Records a delta export archive that has been consumed by an Algolia delta indexing job for the current site. Archives are left in the outbox (the platform deletes them after 30 days), so this record is what prevents the same archive from being processed twice by the same job while letting other consumers (other sites' jobs, or same-site jobs splitting the work) consume it independently. The retention is longer than the platform's 30-day outbox retention so that a record always outlives its archive; an expired record with the archive still present would cause the archive to be reprocessed.</description>
+        <staging-mode>no-staging</staging-mode>
+        <storage-scope>site</storage-scope>
+        <retention-days>33</retention-days>
+        <key-definition attribute-id="ID">
+            <display-name xml:lang="x-default">Custom Object ID</display-name>
+            <type>string</type>
+            <min-length>0</min-length>
+        </key-definition>
+        <attribute-definitions>
+            <attribute-definition attribute-id="archiveName">
+                <display-name xml:lang="x-default">Archive name</display-name>
+                <description xml:lang="x-default">The file name of the consumed delta export archive (e.g. 000042.zip).</description>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="consumer">
+                <display-name xml:lang="x-default">Consumer</display-name>
+                <description xml:lang="x-default">The consumer name of the delta export the archive belongs to. Determines the WebDAV outbox folder together with the delta export job name.</description>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="deltaExportJobName">
+                <display-name xml:lang="x-default">Delta export job name</display-name>
+                <description xml:lang="x-default">The name of the delta export the archive belongs to. Determines the WebDAV outbox folder together with the consumer name.</description>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+            <attribute-definition attribute-id="jobID">
+                <display-name xml:lang="x-default">Job ID</display-name>
+                <description xml:lang="x-default">The ID of the job that consumed the archive. Part of the custom object key: consumption is tracked per job, so several jobs on the same site can consume the same delta export independently.</description>
+                <type>string</type>
+                <localizable-flag>false</localizable-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+        </attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="consumedArchive">
+                <display-name xml:lang="x-default">Consumed archive</display-name>
+                <description xml:lang="x-default">Information about the consumed delta export archive</description>
+                <attribute attribute-id="ID"/>
+                <attribute attribute-id="consumer"/>
+                <attribute attribute-id="deltaExportJobName"/>
+                <attribute attribute-id="archiveName"/>
+                <attribute attribute-id="jobID"/>
+            </attribute-group>
+        </group-definitions>
+    </custom-type>
+
     <custom-type type-id="AlgoliaJobReport">
         <display-name xml:lang="x-default">AlgoliaJobReport</display-name>
         <description xml:lang="x-default">Contains a report for a single Algolia job run.</description>

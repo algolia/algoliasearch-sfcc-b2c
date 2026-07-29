@@ -12,12 +12,12 @@ var recordModel;
 
 // Algolia requires
 var algoliaData, AlgoliaLocalizedProduct, algoliaProductConfig, algoliaIndexingAPI, productFilter, CPObjectIterator, AlgoliaJobReport;
-var fileHelper, jobHelper, requestHelper, modelHelper;
+var fileHelper, jobHelper, requestHelper, modelHelper, consumedArchiveTracker;
 
 // logging-related variables and constants
 var jobReport;
 
-var l0_deltaExportDir, l1_processingDir, l1_completedDir, l1_failedDir;
+var l0_deltaExportDir, l1_processingDir;
 var changedProducts = [], changedProductsIterator;
 var deltaExportZips, siteLocales, attributesToSend;
 var masterAttributes = [], variantAttributes = [];
@@ -79,6 +79,7 @@ exports.beforeStep = function(parameters, stepExecution) {
     jobHelper = require('*/cartridge/scripts/algolia/helper/jobHelper');
     fileHelper = require('*/cartridge/scripts/algolia/helper/fileHelper');
     requestHelper = require('*/cartridge/scripts/algolia/helper/requestHelper');
+    consumedArchiveTracker = require('*/cartridge/scripts/algolia/helper/consumedArchiveTracker');
     algoliaIndexingAPI = require('*/cartridge/scripts/algoliaIndexingAPI');
     logger = jobHelper.getAlgoliaLogger();
     productFilter = require('*/cartridge/scripts/algolia/filters/productFilter');
@@ -263,28 +264,35 @@ exports.beforeStep = function(parameters, stepExecution) {
     }
 
     // list all the delta export zips in the folder
-    deltaExportZips = fileHelper.getDeltaExportZipList(l0_deltaExportDir);
+    var allDeltaExportZips = fileHelper.getDeltaExportZipList(l0_deltaExportDir);
+
+    // skip the archives this job has already consumed - the archives are left in the outbox
+    // (the platform deletes them after 30 days) so that other consumers of the same delta export
+    // definition (other sites' jobs, or same-site jobs splitting the work e.g. by locale)
+    // can consume them independently
+    deltaExportZips = allDeltaExportZips.filter(function(filename) {
+        if (consumedArchiveTracker.isConsumed(jobReport.jobID, paramConsumer, paramDeltaExportJobName, filename)) {
+            logger.info('Skipping ' + filename + ' (already consumed by this job)');
+            return false;
+        }
+        return true;
+    });
 
     // if there are no files to process, there's no point in continuing
     if (empty(deltaExportZips)) {
-        logger.info('No delta exports found at ' + l0_deltaExportDir.getFullPath());
+        logger.info('No new delta exports to consume at ' + l0_deltaExportDir.getFullPath());
         return; // return with an empty changedProducts object
     }
     logger.info('Delta exports found: ' + deltaExportZips);
 
     // creating empty temporary "_processing" dir
-    l1_processingDir = new File(l0_deltaExportDir, '_processing');
+    // the folder name is site-specific: sites sharing one delta export definition read the same
+    // outbox folder, so a shared "_processing" dir could be wiped by a concurrently starting site job
+    l1_processingDir = new File(l0_deltaExportDir, '_processing_' + Site.getCurrent().getID());
     if (l1_processingDir.exists()) {
         fileHelper.removeFolderRecursively(l1_processingDir);
     }
     l1_processingDir.mkdir();
-
-    // creating "_completed" dir
-    l1_completedDir = new File(l0_deltaExportDir, '_completed');
-    l1_completedDir.mkdir(); // creating "_completed" folder -- does no harm if it already exists
-
-    l1_failedDir = new File(l0_deltaExportDir, '_failed');
-    l1_failedDir.mkdir();
 
     // A price book or inventory list delta contains the IDs of the products that were affected by the change (variant or master). The extraction normalizes each ID to the expected record level: at the 'master' level a changed variant is rolled up to its master, at the 'variant' level a changed master is fanned out to its variants so the inheriting variant records are rebuilt. The catalog path is left untouched because CatalogDeltaExport already emits both master and variants due to its MasterProductExport parameter set to true.
     var recordLevel = (recordModel === RECORD_MODEL_TYPES.MASTER_LEVEL ||
@@ -391,10 +399,9 @@ exports.beforeStep = function(parameters, stepExecution) {
     if (!jobReport.error) {
         changedProductsIterator = new CPObjectIterator(changedProducts);
         logger.info(jobReport.processedItems + ' updated products found. Starting indexing...');
-    } else {
-        logger.info('Moving the Delta export files to the "' + l1_failedDir.getName() + '" directory...');
-        fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_failedDir);
     }
+    // on extraction error the archives are left in place and not recorded as consumed,
+    // so the next run retries them (an archive caught mid-write parses fine on retry)
 }
 
 /**
@@ -808,10 +815,11 @@ exports.afterStep = function(success, parameters, stepExecution) {
             jobReport.error = false;
             jobReport.errorMessage = '';
 
-            // cleanup: after the products have successfully been sent, move the delta zips from which the productIDs have successfully been extracted and the corresponding products sent to "_completed"
+            // after the products have successfully been sent, record the consumed archives for this job
+            // (the archives are left in the outbox for other consumers, the platform deletes them after 30 days)
             if (!empty(deltaExportZips)) {
-                logger.info('Moving the Delta export files to the "_completed" directory...');
-                fileHelper.moveDeltaExportFiles(deltaExportZips, l0_deltaExportDir, l1_completedDir);
+                logger.info('Recording the consumed delta export archives: ' + deltaExportZips);
+                consumedArchiveTracker.markConsumed(jobReport.jobID, paramConsumer, paramDeltaExportJobName, deltaExportZips);
             }
         } else {
             jobReport.error = true;
@@ -845,3 +853,4 @@ exports.__getLocalesForIndexing = function() {
 }
 exports.__INDEXING_APIS = INDEXING_APIS;
 exports.__setIndexingAPI = function(api) { indexingAPI = api; }
+exports.__setDeltaExportZips = function(zips) { deltaExportZips = zips; }
