@@ -318,7 +318,6 @@ exports.beforeStep = function(parameters, stepExecution) {
         // this will create a structure like so: "l0_deltaExportDir/_processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/...
         var l2_tempZipDir = new File(l1_processingDir, filename);
         if (!l2_tempZipDir.mkdir()) { // mkdir() returns a success boolean
-            // fail loudly here - a silently skipped unzip would only fail further down with a misleading error
             throw new Error('Could not create the temporary directory "' + l2_tempZipDir.getFullPath() + '" for extracting ' + filename);
         }
         currentZipFile.unzip(l2_tempZipDir);
