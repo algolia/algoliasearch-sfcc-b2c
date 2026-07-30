@@ -81,6 +81,9 @@ const job = require('../../../../../../cartridges/int_algolia/cartridge/scripts/
 beforeEach(() => {
     mockLocalesForIndexing = [];
     mockZipList = [];
+    // return values set with mockReturnValue survive clearMocks, so restore the default
+    // here instead of at the end of the test bodies that override it
+    mockIsConsumed.mockReturnValue(false);
     mockGroupRecordsForIngestionAPI.mockReset();
     mockSendGroupedIngestionAPIRecords.mockReset();
     delete global.customPreferences['Algolia_IndexingAPI'];
@@ -281,8 +284,6 @@ describe('archive consumption tracking', () => {
         // all archives were filtered out, so a successful run has nothing new to record
         job.afterStep(true);
         expect(mockMarkConsumed).not.toHaveBeenCalled();
-
-        mockIsConsumed.mockReturnValue(false);
     });
 
     test('afterStep records the consumed archives on success', () => {

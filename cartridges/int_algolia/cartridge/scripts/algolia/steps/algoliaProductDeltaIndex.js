@@ -270,13 +270,21 @@ exports.beforeStep = function(parameters, stepExecution) {
     // (the platform deletes them after 30 days) so that other consumers of the same delta export
     // definition (other sites' jobs, or same-site jobs splitting the work e.g. by locale)
     // can consume them independently
+    var alreadyConsumedArchives = [];
     deltaExportZips = allDeltaExportZips.filter(function(filename) {
         if (consumedArchiveTracker.isConsumed(jobReport.jobID, paramConsumer, paramDeltaExportJobName, filename)) {
-            logger.info('Skipping ' + filename + ' (already consumed by this job)');
+            alreadyConsumedArchives.push(filename);
             return false;
         }
         return true;
     });
+
+    // consumed archives accumulate in the outbox until the platform deletes them, so log them
+    // as a single summary line to keep the log readable
+    if (alreadyConsumedArchives.length > 0) {
+        logger.info('Skipping ' + alreadyConsumedArchives.length + ' archive(s) already consumed by this job');
+        logger.debug('Archives already consumed by this job: ' + alreadyConsumedArchives.join(', '));
+    }
 
     // if there are no files to process, there's no point in continuing
     if (empty(deltaExportZips)) {
@@ -286,9 +294,12 @@ exports.beforeStep = function(parameters, stepExecution) {
     logger.info('Delta exports found: ' + deltaExportZips);
 
     // creating empty temporary "_processing" dir
-    // the folder name is site-specific: sites sharing one delta export definition read the same
-    // outbox folder, so a shared "_processing" dir could be wiped by a concurrently starting site job
-    l1_processingDir = new File(l0_deltaExportDir, '_processing_' + Site.getCurrent().getID());
+    // the folder name is site- and job-specific: consumers of a shared delta export definition
+    // (other sites' jobs, or same-site jobs splitting the work) read the same outbox folder, so a
+    // shared "_processing" dir could be wiped by a concurrently starting consumer job. The job ID
+    // is sanitized because job IDs can contain characters that are not safe in folder names.
+    var sanitizedJobID = jobReport.jobID.replace(/[^a-zA-Z0-9._-]/g, '_');
+    l1_processingDir = new File(l0_deltaExportDir, '_processing_' + Site.getCurrent().getID() + '_' + sanitizedJobID);
     if (l1_processingDir.exists()) {
         fileHelper.removeFolderRecursively(l1_processingDir);
     }
@@ -306,9 +317,11 @@ exports.beforeStep = function(parameters, stepExecution) {
 
         // this will create a structure like so: "l0_deltaExportDir/_processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/catalogs/...
         var l2_tempZipDir = new File(l1_processingDir, filename);
-        if (l2_tempZipDir.mkdir()) { // mkdir() returns a success boolean
-            currentZipFile.unzip(l2_tempZipDir);
+        if (!l2_tempZipDir.mkdir()) { // mkdir() returns a success boolean
+            // fail loudly here - a silently skipped unzip would only fail further down with a misleading error
+            throw new Error('Could not create the temporary directory "' + l2_tempZipDir.getFullPath() + '" for extracting ' + filename);
         }
+        currentZipFile.unzip(l2_tempZipDir);
 
         // there's a folder with a UUID as a name one level down, we need to open that
         var l3_uuidDir = fileHelper.getFirstChildFolder(l2_tempZipDir); // _processing/000001.zip/ebff9c4e-ac8c-4954-8303-8e68ec8b190d/

@@ -7,6 +7,13 @@ const consumedArchiveTracker = require('../../../../../../cartridges/int_algolia
 
 const CUSTOM_OBJECT_TYPE = 'AlgoliaConsumedDeltaArchive';
 
+// implementations set with mockReturnValue/mockImplementation survive clearMocks,
+// so restore them here instead of at the end of the test bodies (where a failing
+// assertion would skip the restore and leak state into the following tests)
+afterEach(() => {
+    CustomObjectMgr.getCustomObject.mockReset();
+});
+
 describe('isConsumed', () => {
     test('returns false when no custom object exists for the archive', () => {
         CustomObjectMgr.getCustomObject.mockReturnValueOnce(null);
@@ -26,11 +33,15 @@ describe('markConsumed', () => {
     test('creates one custom object per archive with the expected key and attributes', () => {
         CustomObjectMgr.getCustomObject.mockReturnValue(null);
         const createdCustomObjects = [];
-        CustomObjectMgr.createCustomObject.mockImplementation(() => {
+        const recordCreatedCustomObject = () => {
             const customObject = { custom: {} };
             createdCustomObjects.push(customObject);
             return customObject;
-        });
+        };
+        // "Once" implementations (one per expected create) don't outlive this test
+        CustomObjectMgr.createCustomObject
+            .mockImplementationOnce(recordCreatedCustomObject)
+            .mockImplementationOnce(recordCreatedCustomObject);
 
         const success = consumedArchiveTracker.markConsumed('AlgoliaInventoryDeltaIndex', 'algolia', 'inventoryDeltaExport', ['000001.zip', '000002.zip']);
 
@@ -44,8 +55,6 @@ describe('markConsumed', () => {
             archiveName: '000001.zip',
             jobID: 'AlgoliaInventoryDeltaIndex',
         });
-
-        CustomObjectMgr.getCustomObject.mockReset();
     });
 
     test('skips archives that are already recorded', () => {
@@ -68,8 +77,6 @@ describe('markConsumed', () => {
         expect(CustomObjectMgr.createCustomObject).toHaveBeenCalledTimes(2);
         expect(CustomObjectMgr.createCustomObject).toHaveBeenNthCalledWith(1, CUSTOM_OBJECT_TYPE, 'AlgoliaPriceDeltaIndex_locales1__algolia__pricebookDeltaExport__000001.zip');
         expect(CustomObjectMgr.createCustomObject).toHaveBeenNthCalledWith(2, CUSTOM_OBJECT_TYPE, 'AlgoliaPriceDeltaIndex_locales2__algolia__pricebookDeltaExport__000001.zip');
-
-        CustomObjectMgr.getCustomObject.mockReset();
     });
 
     test('a failure on one archive does not stop the others from being recorded', () => {
@@ -93,7 +100,5 @@ describe('markConsumed', () => {
             archiveName: '000002.zip',
             jobID: 'AlgoliaPriceDeltaIndex',
         });
-
-        CustomObjectMgr.getCustomObject.mockReset();
     });
 });
