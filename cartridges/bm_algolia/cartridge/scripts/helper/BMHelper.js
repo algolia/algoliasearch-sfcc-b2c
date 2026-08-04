@@ -30,9 +30,17 @@ function getLatestCOReportsByJob() {
     let reportsByJob = [];
     for (let i = 0; i < uniqueJobIDs.length; i++) {
         let jobID = uniqueJobIDs[i];
+
+        // Precompute the deep link once per job so the template never calls a platform
+        // API (URLUtils/CSRFProtection) during rendering. An empty string means the link
+        // could not be built and the template renders the job ID as plain text.
+        let jobBMLink = getJobBMLink(jobID);
+
         let reports = CustomObjectMgr.queryCustomObjects('AlgoliaJobReport', 'custom.jobID = {0} ', 'creationDate desc', jobID).asList().toArray();
         let formattedReports = reports.map(function(report) {
-            return new AlgoliaJobReport().formatCustomObject(report);
+            let formattedReport = new AlgoliaJobReport().formatCustomObject(report);
+            formattedReport.bmLink = jobBMLink;
+            return formattedReport;
         });
         reportsByJob.push(formattedReports.slice(0, nrReportsPerJob)); // last three reports only
     }
@@ -41,7 +49,7 @@ function getLatestCOReportsByJob() {
 }
 
 /**
- * Returns the Business Manager link for a job
+ * Returns the Business Manager link for a job, or an empty string if the link cannot be built
  * @param {string} jobID - the ID of the job
  * @returns {string} - the Business Manager link for the job
  */
@@ -49,12 +57,19 @@ function getJobBMLink(jobID) {
     const URLUtils = require('dw/web/URLUtils');
     const CSRFProtection = require('dw/web/CSRFProtection');
 
-    let csrfToken = CSRFProtection.generateToken();
-    let jobURL = URLUtils.https('ViewApplication-BM', 'csrf_token', csrfToken).toString() +
-        '#/?job#editor!id!' + jobID +
-        '!config!' + jobID + '!domain!Sites!tab!schedule-and-history';
+    try {
+        let csrfToken = CSRFProtection.generateToken();
+        let jobURL = URLUtils.https('ViewApplication-BM', 'csrf_token', csrfToken).toString() +
+            '#/?job#editor!id!' + jobID +
+            '!config!' + jobID + '!domain!Sites!tab!schedule-and-history';
 
-    return jobURL;
+        return jobURL;
+    } catch (e) { // eslint-disable-line no-unused-vars
+        // Building the deep link relies on CSRF token generation and URL resolution, both of
+        // which depend on the request context. If either fails, return an empty string so the
+        // caller can render the job ID as plain text instead of aborting the page.
+        return '';
+    }
 }
 
 module.exports = {

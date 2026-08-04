@@ -2,6 +2,16 @@ const CustomObjectMgr = require('dw/object/CustomObjectMgr');
 const AlgoliaJobReport = require('*/cartridge/scripts/algolia/helper/AlgoliaJobReport');
 const BMHelper = require('../../../../../cartridges/bm_algolia/cartridge/scripts/helper/BMHelper');
 
+/**
+ * Builds the BM deep link the mocked URLUtils/CSRFProtection produce for a job ID.
+ * @param {string} jobID the job ID
+ * @returns {string} the expected link
+ */
+function expectedBMLink(jobID) {
+    return 'https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/ViewApplication-BM?csrf_token=csrfToken#/?job#editor!id!' +
+        jobID + '!config!' + jobID + '!domain!Sites!tab!schedule-and-history';
+}
+
 describe('getLatestCOReportsByJob', () => {
     beforeEach(() => {
         jest.clearAllMocks();
@@ -52,17 +62,18 @@ describe('getLatestCOReportsByJob', () => {
             };
         });
 
+        // every formatted report carries the deep link of its job, precomputed by the helper
         const job1Reports = [
-            { custom: { jobID: 'job1' }, creationDate: new Date('2023-01-01') },
-            { custom: { jobID: 'job1' }, creationDate: new Date('2023-01-02') },
-            { custom: { jobID: 'job1' }, creationDate: new Date('2023-01-03') },
+            { custom: { jobID: 'job1' }, creationDate: new Date('2023-01-01'), bmLink: expectedBMLink('job1') },
+            { custom: { jobID: 'job1' }, creationDate: new Date('2023-01-02'), bmLink: expectedBMLink('job1') },
+            { custom: { jobID: 'job1' }, creationDate: new Date('2023-01-03'), bmLink: expectedBMLink('job1') },
         ];
         const job2Reports = [
-            { custom: { jobID: 'job2' }, creationDate: new Date('2023-01-01') },
-            { custom: { jobID: 'job2' }, creationDate: new Date('2023-01-02') },
+            { custom: { jobID: 'job2' }, creationDate: new Date('2023-01-01'), bmLink: expectedBMLink('job2') },
+            { custom: { jobID: 'job2' }, creationDate: new Date('2023-01-02'), bmLink: expectedBMLink('job2') },
         ];
         const job3Reports = [
-            { custom: { jobID: 'job3' }, creationDate: new Date('2023-01-01') },
+            { custom: { jobID: 'job3' }, creationDate: new Date('2023-01-01'), bmLink: expectedBMLink('job3') },
         ];
         AlgoliaJobReport.prototype.formatCustomObject = jest.fn((report) => report);
 
@@ -102,9 +113,22 @@ describe('getLatestCOReportsByJob', () => {
 });
 
 describe('getJobBMLink', () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
     it('should return the Business Manager link for a job', () => {
         const result = BMHelper.getJobBMLink('AlgoliaProductIndex_v2');
 
-        expect(result).toBe('https://test.commercecloud.salesforce.com/on/demandware.store/Sites-Algolia_SFRA-Site/default/ViewApplication-BM?csrf_token=csrfToken#/?job#editor!id!AlgoliaProductIndex_v2!config!AlgoliaProductIndex_v2!domain!Sites!tab!schedule-and-history');
+        expect(result).toBe(expectedBMLink('AlgoliaProductIndex_v2'));
+    });
+
+    it('should return an empty string when the link cannot be built', () => {
+        const CSRFProtection = require('dw/web/CSRFProtection');
+        jest.spyOn(CSRFProtection, 'generateToken').mockImplementation(() => {
+            throw new Error('No request context');
+        });
+
+        expect(BMHelper.getJobBMLink('AlgoliaProductIndex_v2')).toBe('');
     });
 });
