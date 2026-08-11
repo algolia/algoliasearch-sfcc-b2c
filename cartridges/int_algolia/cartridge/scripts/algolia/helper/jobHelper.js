@@ -521,15 +521,68 @@ function getObjectsArrayLength(objectsArray) {
 }
 
 /**
+ * The price and inventory delta exports contain the IDs of the products that were
+ * affected by the change (variant or master). This function resolves each ID to the
+ * set of IDs that correspond to actual indexed records under the current record
+ * model, so the consumer rebuilds the records a full index would hold rather than the
+ * raw object the delta happened to name.
+ * The record level the model indexes at (see `recordLevel` parameter) decides how
+ * that ID maps to records:
+ * - 'master' (`master-level` and `attribute-sliced` record models, or `variant-level`
+ * with attributes computed from the base product): the indexed record is the master,
+ * so a changed variant is rolled up to its master; masters and standalone products
+ * pass through.
+ * - 'variant' (`variant-level`): the indexed records are the variants, so a changed
+ * master is fanned out to its variants; variants and standalone products pass through.
+ * An ID that resolves to no product passes through so the consumer can issue a delete.
+ * @param {string} productID Product ID read from a delta archive entry
+ * @param {string} recordLevel The record level the model indexes at: 'master' or 'variant'
+ * @returns {string[]} array of IDs to record as changed for this entry
+ */
+function _resolveRecordIDs(productID, recordLevel) {
+    var ProductMgr = require('dw/catalog/ProductMgr');
+    var product = ProductMgr.getProduct(productID);
+
+    if (!product) {
+        return [productID];
+    }
+
+    if (recordLevel === 'master') {
+        if (product.isVariant()) {
+            var master = product.getMasterProduct();
+            return master ? [master.getID()] : [productID];
+        }
+        return [productID];
+    }
+
+    // 'variant' record level: a changed master fans out to its variants, so the inheriting variant records are rebuilt
+    if (product.isMaster()) {
+        var variants = product.getVariants();
+        var variantIDs = [];
+        if (variants) {
+            for (var i = 0; i < variants.size(); i++) {
+                variantIDs.push(variants[i].getID());
+            }
+        }
+        return variantIDs.length > 0 ? variantIDs : [productID];
+    }
+    return [productID];
+}
+
+/**
  * Retrieves the IDs of the products which have changed since the last update
  * (an attribute of the product's, its inventory levels or its price)
  * from the supplied XML and adds them to the changedProducts structure.
  * @param {dw.io.File} xmlFile The path to the XML file.
  * @param {Array} changedProducts An array of objects containing the changed products
  * @param {string} resourceType Type of export file: "catalog" | "inventory" | "pricebook"
+ * @param {string} [recordLevel] Record level used to normalize each price book or inventory entry to the
+ *        indexed records (see `_resolveRecordIDs`): 'master' rolls variants up to their master,
+ *        'variant' fans a master out to its variants. Not consulted for the catalog path, because
+ *        CatalogDeltaExport already emits both master and variants (MasterProductExport).
  * @returns {Object} The result object containing `success` (boolean) and `nrProductsRead` (number)
  */
-function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
+function updateCPObjectFromXML(xmlFile, changedProducts, resourceType, recordLevel) {
     var XMLStreamReader = require('dw/io/XMLStreamReader');
     var XMLStreamConstants = require('dw/io/XMLStreamConstants');
     var FileReader = require('dw/io/FileReader');
@@ -576,8 +629,11 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
                             if (xmlStreamReader.getLocalName() === 'record') { // <record> start element
                                 let productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <record product-id="">
 
-                                // adding new productID to structure or updating it if key already exists, always true
-                                _updateOrAddValue(changedProducts, productID, true);
+                                // normalize the changed SKU to the records the model indexes, then add each
+                                let resolvedIDs = _resolveRecordIDs(productID, recordLevel);
+                                for (let i = 0; i < resolvedIDs.length; i++) {
+                                    _updateOrAddValue(changedProducts, resolvedIDs[i], true);
+                                }
 
                                 resultObj.nrProductsRead++;
                             }
@@ -594,10 +650,13 @@ function updateCPObjectFromXML(xmlFile, changedProducts, resourceType) {
 
                         if (xmlEvent === XMLStreamConstants.START_ELEMENT) {
                             if (xmlStreamReader.getLocalName() === 'price-table') { // <price-table> start element
-                                var productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <price-table product-id="">
+                                let productID = xmlStreamReader.getAttributeValue(null, 'product-id'); // <price-table product-id="">
 
-                                // adding new productID to structure or updating it if key already exists, always true
-                                _updateOrAddValue(changedProducts, productID, true);
+                                // normalize the changed SKU to the records the model indexes, then add each
+                                let resolvedIDs = _resolveRecordIDs(productID, recordLevel);
+                                for (let r = 0; r < resolvedIDs.length; r++) {
+                                    _updateOrAddValue(changedProducts, resolvedIDs[r], true);
+                                }
 
                                 resultObj.nrProductsRead++;
                             }

@@ -219,7 +219,7 @@
                 "@supports-parallel-execution": true,
                 "@supports-site-context": true,
                 "@supports-organization-context": false,
-                "description": "Extracts the list of productIDs (of changed products) from a B2C Delta Export, retrieves and enriches the products data, then sends them to Algolia. Can perform full records updates or partial records updates. See the 'indexingMethod' parameter for details.",
+                "description": "Extracts the list of productIDs (of changed products) from a B2C Delta Export (catalog, price book or inventory list), retrieves and enriches the products data, then sends them to Algolia. Can perform full records updates or partial records updates. See the 'indexingMethod' parameter for details.",
                 "module": "int_algolia/cartridge/scripts/algolia/steps/algoliaProductDeltaIndex.js",
                 "read-function": "read",
                 "process-function": "process",

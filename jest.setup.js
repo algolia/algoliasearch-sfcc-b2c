@@ -295,6 +295,9 @@ jest.mock('*/cartridge/scripts/algolia/helper/CPObjectIterator', () => {
 jest.mock('*/cartridge/scripts/algolia/helper/orderHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/orderHelper')
 }, { virtual: true });
+jest.mock('*/cartridge/scripts/algolia/helper/consumedArchiveTracker', () => {
+    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/consumedArchiveTracker');
+}, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/fileHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/fileHelper');
 }, {virtual: true});

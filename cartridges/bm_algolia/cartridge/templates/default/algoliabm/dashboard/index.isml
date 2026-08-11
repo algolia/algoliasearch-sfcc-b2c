@@ -396,8 +396,6 @@
     <iselse/>
         <iscomment> displaying reports </iscomment>
 
-        <isset name="BMHelper" value="${require('~/cartridge/scripts/helper/BMHelper.js')}" scope="page"/>
-
         <isloop items="${pdict.latestReports}" var="job">
             <table border="1" cellpadding="0" cellspacing="0" id="algolia-report-table">
                 <tbody>
@@ -406,9 +404,13 @@
                         <isif condition="${status.first}">
                             <tr>
                                 <td class="table_header center tab-title" colspan="7">
-                                    <a href="${BMHelper.getJobBMLink(log.jobID)}" target="_blank">
+                                    <isif condition="${!empty(log.bmLink)}">
+                                        <a href="${log.bmLink}" target="_blank" rel="noreferrer">
+                                            <isprint value="${log.jobID}" encoding="jshtml" />
+                                        </a>
+                                    <iselse/>
                                         <isprint value="${log.jobID}" encoding="jshtml" />
-                                    </a>
+                                    </isif>
                                 </td>
                                 <td class="table_header center tab-title" colspan="1">
                                     ${Resource.msg('algolia.label.jobtype', 'algolia', null)} <isprint value="${log.jobType}" encoding="jshtml" />
