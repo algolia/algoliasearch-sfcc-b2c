@@ -564,7 +564,7 @@ function enableInstantSearch(config) {
                                 }) || item.variants[0];
                             }
 
-                            if (!item.color) {
+                            if (selectedVariant && !item.color) {
                                 // This permits to highlight the correct swatch
                                 item.color = selectedVariant.color;
                             }
@@ -574,11 +574,13 @@ function enableInstantSearch(config) {
                                 const colorVariation = item.colorVariations.find(i => {
                                     return i.color === item.color;
                                 }) || item.colorVariations[0];
-                                const imageGroup = colorVariation.image_groups.find(i => {
-                                    return i.view_type === 'large'
-                                }) || colorVariation.image_groups[0];
-                                if (imageGroup) {
-                                    item.image = imageGroup.images[0];
+                                if (colorVariation && colorVariation.image_groups) {
+                                    const imageGroup = colorVariation.image_groups.find(i => {
+                                        return i.view_type === 'large'
+                                    }) || colorVariation.image_groups[0];
+                                    if (imageGroup) {
+                                        item.image = imageGroup.images[0];
+                                    }
                                 }
                             }
 
