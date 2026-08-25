@@ -3,7 +3,7 @@
 var server = require('server');
 var base = module.superModule;
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var priceFactory = require('*/cartridge/scripts/factories/price')
+var priceHelper = require('*/cartridge/scripts/algolia/helper/priceHelper');
 
 var OrderMgr = require('dw/order/OrderMgr');
 
@@ -16,10 +16,17 @@ server.append('Confirm', function (req, res, next) {
 
         var viewData = res.getViewData();
         var order = viewData.order;
+
+        // The base controller renders its error template and continues the chain when the order
+        // cannot be resolved, so there is nothing to report on in that case.
+        if (!order) {
+            return next();
+        }
+
         var fullOrder = OrderMgr.getOrder(order.orderNumber);
         var plis = fullOrder.getAllProductLineItems();
         var algoliaProducts = [];
-        var currency;
+        var currency = fullOrder.getCurrencyCode();
 
         var pliArr = plis.toArray();
 
@@ -35,25 +42,32 @@ server.append('Confirm', function (req, res, next) {
                     algoliaProduct.pid = product.getID();
                 }
 
-                var price = priceFactory.getPrice(product);
-                algoliaProduct.price = price;
-                if (price.list) {
-                    algoliaProduct.discount = +(price.list.value - price.sales.value).toFixed(2);
+                var priceData = priceHelper.getLineItemPriceData(pliArr[i]);
+                if (!priceData) {
+                    continue;
                 }
-                currency = price.sales.currency;
+
+                algoliaProduct.price = priceData.price;
+                if ('discount' in priceData) {
+                    algoliaProduct.discount = priceData.discount;
+                }
                 algoliaProduct.qty = pliArr[i].getQuantityValue();
                 algoliaProducts.push(algoliaProduct);
             }
         };
 
-        const algoliaObj = {
-            items: algoliaProducts,
-            currency: currency
+        // An empty item list would produce a purchase event with no objectIDs, which the Insights
+        // API rejects, so the event is left unsent instead.
+        if (algoliaProducts.length > 0) {
+            const algoliaObj = {
+                items: algoliaProducts,
+                currency: currency
+            }
+
+            viewData.algoliaObj = algoliaObj;
+
+            res.setViewData(viewData);
         }
-
-        viewData.algoliaObj = algoliaObj;
-
-        res.setViewData(viewData);
     }
 
     next();

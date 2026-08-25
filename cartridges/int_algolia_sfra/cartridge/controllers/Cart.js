@@ -6,6 +6,8 @@ var BasketMgr = require('dw/order/BasketMgr');
 var ProductMgr = require('dw/catalog/ProductMgr');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
+var priceHelper = require('*/cartridge/scripts/algolia/helper/priceHelper');
+var algoliaLogger = require('dw/system/Logger').getLogger('algolia');
 
 server.extend(base);
 
@@ -64,23 +66,26 @@ server.append('AddProduct', function (req, res, next) {
         }
 
         algoliaProductData.qty = req.form.quantity;
-        var items = viewData.cart.items;
-        var pli;
-        //find the item in the cart by using the product id with for loop
-        for (var i = 0; i < items.length; i++) {
-            if (items[i].id === productID) {
-                pli = items[i];
-                break;
-            }
-        }
-        algoliaProductData.price = pli.price.sales.value;
 
-        if (pli.price.list) {
-            algoliaProductData.discount = +(
-                pli.price.list.value - pli.price.sales.value
-            ).toFixed(2);
+        // The line item is absent when the product was not added, in which case the base controller
+        // still runs this append, and when a product set was added, since the basket then holds the
+        // set's children rather than the posted product ID.
+        var lineItem = priceHelper.findProductLineItem(BasketMgr.getCurrentBasket(), productID);
+        if (!lineItem) {
+            algoliaLogger.warn('No basket line item found for product "{0}", add-to-cart event not sent.', productID);
+            return next();
         }
-        algoliaProductData.currency = pli.price.sales.currency;
+
+        var priceData = priceHelper.getLineItemPriceData(lineItem);
+        if (!priceData) {
+            return next();
+        }
+
+        algoliaProductData.price = priceData.price;
+        algoliaProductData.currency = priceData.currency;
+        if ('discount' in priceData) {
+            algoliaProductData.discount = priceData.discount;
+        }
 
         viewData.algoliaProductData = algoliaProductData;
     }
