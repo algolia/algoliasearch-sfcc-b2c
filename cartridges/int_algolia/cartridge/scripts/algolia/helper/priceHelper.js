@@ -27,6 +27,34 @@ function findProductLineItem(lineItemCtnr, productID) {
 }
 
 /**
+ * Finds a top-level product line item by its UUID.
+ *
+ * A UUID identifies one line item, where a product ID can match several: the same product sits on
+ * separate line items when it is added with different option values, and when it is split across
+ * shipments.
+ *
+ * @param {dw.order.LineItemCtnr} lineItemCtnr - the basket or order
+ * @param {string} lineItemUUID - the UUID of the line item to look for
+ * @returns {dw.order.ProductLineItem|null} the matching line item, or null
+ */
+function findLineItemByUUID(lineItemCtnr, lineItemUUID) {
+    if (!lineItemCtnr || !lineItemUUID) {
+        return null;
+    }
+
+    const lineItems = lineItemCtnr.getProductLineItems().iterator();
+
+    while (lineItems.hasNext()) {
+        let lineItem = lineItems.next();
+        if (lineItem.getUUID() === lineItemUUID) {
+            return lineItem;
+        }
+    }
+
+    return null;
+}
+
+/**
  * Reads the price actually charged for a line item, per unit, for use as Insights `objectData`.
  *
  * The Insights API defines `price` as the final per-item price inclusive of any discounts, and
@@ -108,4 +136,5 @@ function getLineItemPriceData(lineItem) {
 }
 
 module.exports.findProductLineItem = findProductLineItem;
+module.exports.findLineItemByUUID = findLineItemByUUID;
 module.exports.getLineItemPriceData = getLineItemPriceData;

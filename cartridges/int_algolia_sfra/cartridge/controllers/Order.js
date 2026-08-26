@@ -4,12 +4,12 @@ var server = require('server');
 var base = module.superModule;
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var priceHelper = require('*/cartridge/scripts/algolia/helper/priceHelper');
+var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
+var algoliaLogger = require('dw/system/Logger').getLogger('algolia');
 
 var OrderMgr = require('dw/order/OrderMgr');
 
 server.extend(base);
-
-const { RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 server.append('Confirm', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableInsights')) {
@@ -29,6 +29,7 @@ server.append('Confirm', function (req, res, next) {
         var plis = fullOrder.getProductLineItems();
         var algoliaProducts = [];
         var currency = fullOrder.getCurrencyCode();
+        var recordModel = algoliaData.getPreference('RecordModel');
 
         var pliArr = plis.toArray();
 
@@ -37,12 +38,22 @@ server.append('Confirm', function (req, res, next) {
 
             if (product) {
                 var algoliaProduct = {};
+                var recordID = null;
 
                 try {
-                    algoliaProduct.pid = algoliaData.getPreference('RecordModel') === RECORD_MODEL_TYPES.MASTER_LEVEL ? product.getMasterProduct().getID() : product.getID();
+                    recordID = modelHelper.getRecordIDForProduct(product, recordModel);
                 } catch (e) { // eslint-disable-line no-unused-vars
-                    algoliaProduct.pid = product.getID();
+                    recordID = null;
                 }
+
+                // Without a record ID there is nothing in the index to attach the revenue to, so
+                // the product is left out rather than reported under an ID the index does not hold.
+                if (!recordID) {
+                    algoliaLogger.warn('No "{0}" record ID resolved for product "{1}", it is not part of the purchase event.', recordModel, product.getID());
+                    continue;
+                }
+
+                algoliaProduct.pid = recordID;
 
                 var priceData = priceHelper.getLineItemPriceData(pliArr[i]);
                 if (!priceData) {

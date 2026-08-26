@@ -11,8 +11,6 @@ var algoliaLogger = require('dw/system/Logger').getLogger('algolia');
 
 server.extend(base);
 
-const { RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-
 server.append('Show', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableRecommend')) {
 
@@ -43,34 +41,40 @@ server.append('AddProduct', function (req, res, next) {
             return next(); // prevent execution of the rest of the code
         }
 
-        try {
-            var product = ProductMgr.getProduct(productID);
-            if (empty(product)) {
-                return next();
-            }
-
-            switch (recordModel) {
-                case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
-                    algoliaProductData.pid = modelHelper.getAttributeSlicedModelRecordID(product);
-                    break;
-                case RECORD_MODEL_TYPES.MASTER_LEVEL:
-                    algoliaProductData.pid = product.isVariant() ? product.getMasterProduct().getID() : product.getID(); // returns master ID for variants, product ID for simple products
-                    break;
-                case RECORD_MODEL_TYPES.VARIANT_LEVEL:
-                    algoliaProductData.pid = productID;
-                    break;
-            }
-
-        } catch (e) { // eslint-disable-line no-unused-vars
-            algoliaProductData.pid = productID;
+        var product = ProductMgr.getProduct(productID);
+        if (empty(product)) {
+            algoliaLogger.warn('No product found for ID "{0}", add-to-cart event not sent.', productID);
+            return next();
         }
+
+        var recordID = null;
+
+        try {
+            recordID = modelHelper.getRecordIDForProduct(product, recordModel);
+        } catch (e) { // eslint-disable-line no-unused-vars
+            recordID = null;
+        }
+
+        // Without a record ID there is nothing in the index to attach the event to.
+        if (!recordID) {
+            algoliaLogger.warn('No "{0}" record ID resolved for product "{1}", add-to-cart event not sent.', recordModel, productID);
+            return next();
+        }
+
+        algoliaProductData.pid = recordID;
 
         algoliaProductData.qty = req.form.quantity;
 
+        // The base controller reports the UUID of the line item it created or incremented, which
+        // identifies the configuration the shopper just added. The product ID is the fallback, for
+        // a customized base controller that does not report the UUID.
+        //
         // The line item is absent when the product was not added, in which case the base controller
         // still runs this append, and when a product set was added, since the basket then holds the
         // set's children rather than the posted product ID.
-        var lineItem = priceHelper.findProductLineItem(BasketMgr.getCurrentBasket(), productID);
+        var currentBasket = BasketMgr.getCurrentBasket();
+        var lineItem = priceHelper.findLineItemByUUID(currentBasket, viewData.pliUUID)
+            || priceHelper.findProductLineItem(currentBasket, productID);
         if (!lineItem) {
             algoliaLogger.warn('No basket line item found for product "{0}", add-to-cart event not sent.', productID);
             return next();

@@ -31,6 +31,7 @@ function lineItem(options) {
     const config = options || {};
     return {
         getProductID: () => config.productID || 'PRODUCT1',
+        getUUID: () => config.uuid || 'UUID1',
         getQuantityValue: () => (config.quantity === undefined ? 1 : config.quantity),
         getBasePrice: () => money(config.basePrice === undefined ? 50 : config.basePrice),
         getAdjustedPrice: () => money(config.adjustedPrice === undefined ? 50 : config.adjustedPrice),
@@ -93,6 +94,33 @@ describe('findProductLineItem', () => {
     test('returns null for a missing container or product ID', () => {
         expect(priceHelper.findProductLineItem(null, 'A')).toBeNull();
         expect(priceHelper.findProductLineItem(lineItemCtnr([]), null)).toBeNull();
+    });
+});
+
+describe('findLineItemByUUID', () => {
+    test('returns the line item matching the UUID', () => {
+        const wanted = lineItem({ uuid: 'U2' });
+        const basket = lineItemCtnr([lineItem({ uuid: 'U1' }), wanted]);
+        expect(priceHelper.findLineItemByUUID(basket, 'U2')).toBe(wanted);
+    });
+
+    test('tells apart two line items for the same product with different options', () => {
+        // SFRA creates a separate line item when a product is added with other option values, so
+        // the product ID alone cannot say which configuration was added.
+        const silver = lineItem({ productID: 'A', uuid: 'U1', adjustedPrice: 50 });
+        const gold = lineItem({ productID: 'A', uuid: 'U2', adjustedPrice: 70 });
+        const basket = lineItemCtnr([silver, gold]);
+        expect(priceHelper.findLineItemByUUID(basket, 'U2')).toBe(gold);
+        expect(priceHelper.findProductLineItem(basket, 'A')).toBe(silver);
+    });
+
+    test('returns null when no line item has the UUID', () => {
+        expect(priceHelper.findLineItemByUUID(lineItemCtnr([lineItem({ uuid: 'U1' })]), 'U2')).toBeNull();
+    });
+
+    test('returns null for a missing container or UUID', () => {
+        expect(priceHelper.findLineItemByUUID(null, 'U1')).toBeNull();
+        expect(priceHelper.findLineItemByUUID(lineItemCtnr([lineItem({ uuid: 'U1' })]), null)).toBeNull();
     });
 });
 
