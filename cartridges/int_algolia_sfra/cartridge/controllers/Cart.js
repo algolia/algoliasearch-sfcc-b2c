@@ -41,6 +41,15 @@ server.append('AddProduct', function (req, res, next) {
             return next(); // prevent execution of the rest of the code
         }
 
+        // The base controller reports an error when it rejected the add, for example when the
+        // requested quantity exceeds the available-to-sell inventory. The basket can still hold a
+        // line item for the product from an earlier add, so without this check the lookup below
+        // would find that line item and report an add-to-cart event for a product that was not
+        // added.
+        if (viewData.error) {
+            return next();
+        }
+
         var product = ProductMgr.getProduct(productID);
         if (empty(product)) {
             algoliaLogger.warn('No product found for ID "{0}", add-to-cart event not sent.', productID);
@@ -69,8 +78,7 @@ server.append('AddProduct', function (req, res, next) {
         // identifies the configuration the shopper just added. The product ID is the fallback, for
         // a customized base controller that does not report the UUID.
         //
-        // The line item is absent when the product was not added, in which case the base controller
-        // still runs this append, and when a product set was added, since the basket then holds the
+        // The line item is absent when a product set was added, since the basket then holds the
         // set's children rather than the posted product ID.
         var currentBasket = BasketMgr.getCurrentBasket();
         var lineItem = priceHelper.findLineItemByUUID(currentBasket, viewData.pliUUID)
