@@ -17,7 +17,7 @@ function findProductLineItem(lineItemCtnr, productID) {
     const lineItems = lineItemCtnr.getProductLineItems().iterator();
 
     while (lineItems.hasNext()) {
-        const lineItem = lineItems.next();
+        let lineItem = lineItems.next();
         if (lineItem.getProductID() === productID) {
             return lineItem;
         }

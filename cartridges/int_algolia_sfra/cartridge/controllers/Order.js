@@ -24,7 +24,9 @@ server.append('Confirm', function (req, res, next) {
         }
 
         var fullOrder = OrderMgr.getOrder(order.orderNumber);
-        var plis = fullOrder.getAllProductLineItems();
+        // Only the line items a shopper chose: option and bundled line items are dependent on a
+        // parent line item, and their prices are already part of the parent's reported price.
+        var plis = fullOrder.getProductLineItems();
         var algoliaProducts = [];
         var currency = fullOrder.getCurrencyCode();
 
