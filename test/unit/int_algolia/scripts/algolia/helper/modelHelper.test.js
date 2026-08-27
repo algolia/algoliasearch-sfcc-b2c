@@ -81,3 +81,62 @@ describe('getAttributeSlicedModelRecordID', () => {
         expect(modelHelper.getAttributeSlicedModelRecordID(simpleProduct)).toBe('SIMPLE1');
     });
 });
+
+describe('getRecordIDForProduct', () => {
+    const simpleProduct = {
+        isMaster: () => false,
+        isVariant: () => false,
+        getID: () => 'SIMPLE1',
+    };
+
+    let variantProduct;
+
+    beforeEach(() => {
+        algoliaDataMock.getPreference.mockReset();
+        if (!ProductVariationAttributeValueMock.prototype.getID) {
+            ProductVariationAttributeValueMock.prototype.getID = function getID() {
+                return this.ID;
+            };
+        }
+        variantProduct = new VariantMock({
+            ID: 'VAR1',
+            masterProduct: new MasterProductMock({ ID: 'MASTER1' }),
+            variationAttributes: { color: 'JJB52A0', size: '004' },
+        });
+    });
+
+    test('attribute-sliced: a variant is reported as its variation group', () => {
+        algoliaDataMock.getPreference.mockReturnValue('color');
+        expect(modelHelper.getRecordIDForProduct(variantProduct, 'attribute-sliced')).toBe('MASTER1-JJB52A0');
+    });
+
+    test('attribute-sliced: a product without variants keeps its own ID', () => {
+        algoliaDataMock.getPreference.mockReturnValue('color');
+        expect(modelHelper.getRecordIDForProduct(simpleProduct, 'attribute-sliced')).toBe('SIMPLE1');
+    });
+
+    test('attribute-sliced: null without a grouping attribute, since no record ID can be built', () => {
+        algoliaDataMock.getPreference.mockReturnValue('');
+        expect(modelHelper.getRecordIDForProduct(variantProduct, 'attribute-sliced')).toBeNull();
+    });
+
+    test('master-level: a variant is reported as its master', () => {
+        expect(modelHelper.getRecordIDForProduct(variantProduct, 'master-level')).toBe('MASTER1');
+    });
+
+    test('master-level: a product without a master keeps its own ID', () => {
+        expect(modelHelper.getRecordIDForProduct(simpleProduct, 'master-level')).toBe('SIMPLE1');
+    });
+
+    test('variant-level: the product keeps its own ID', () => {
+        expect(modelHelper.getRecordIDForProduct(variantProduct, 'variant-level')).toBe('VAR1');
+    });
+
+    test('an unrecognized record model falls back to the product ID', () => {
+        expect(modelHelper.getRecordIDForProduct(variantProduct, 'something-else')).toBe('VAR1');
+    });
+
+    test('returns null for a missing product', () => {
+        expect(modelHelper.getRecordIDForProduct(null, 'variant-level')).toBeNull();
+    });
+});

@@ -163,6 +163,35 @@ function getAttributeSlicedModelRecordID(product) {
 }
 
 /**
+ * Resolves the objectID a product is indexed under, for the configured record model.
+ *
+ * Conversion events have to name the record that exists in the index, which is not always the
+ * product's own ID: under the master-level model a variant is indexed as its master, and under the
+ * attribute-sliced model variants are not indexed at all, their variation group is.
+ *
+ * @param {dw.catalog.Product | dw.catalog.Variant} product Product or Variant
+ * @param {string} recordModel one of RECORD_MODEL_TYPES
+ * @returns {string | null} the record ID, or null when it cannot be resolved
+ */
+function getRecordIDForProduct(product, recordModel) {
+    const RECORD_MODEL_TYPES = require('*/cartridge/scripts/algolia/lib/algoliaConstants').RECORD_MODEL_TYPES;
+
+    if (empty(product)) {
+        return null;
+    }
+
+    switch (recordModel) {
+        case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
+            return getAttributeSlicedModelRecordID(product);
+        case RECORD_MODEL_TYPES.MASTER_LEVEL:
+            return product.isVariant() ? product.getMasterProduct().getID() : product.getID();
+        case RECORD_MODEL_TYPES.VARIANT_LEVEL:
+        default:
+            return product.getID();
+    }
+}
+
+/**
  * Build the list of stores that have an inventory list, used to compute the `storeAvailability` attribute.
  * The lookup is intentionally broad (whole world) so that every store assigned to the site is returned.
  * This is expensive, so callers should build it once and pass it to AlgoliaLocalizedProduct via `parameters.stores`.
@@ -193,5 +222,6 @@ module.exports = {
     getColorVariations: getColorVariations,
     getImageGroups: getImageGroups,
     getAttributeSlicedModelRecordID: getAttributeSlicedModelRecordID,
+    getRecordIDForProduct: getRecordIDForProduct,
     getStoresWithInventory: getStoresWithInventory,
 };

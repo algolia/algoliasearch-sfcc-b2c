@@ -6,10 +6,10 @@ var BasketMgr = require('dw/order/BasketMgr');
 var ProductMgr = require('dw/catalog/ProductMgr');
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
 var modelHelper = require('*/cartridge/scripts/algolia/helper/modelHelper');
+var priceHelper = require('*/cartridge/scripts/algolia/helper/priceHelper');
+var algoliaLogger = require('dw/system/Logger').getLogger('algolia');
 
 server.extend(base);
-
-const { RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 server.append('Show', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableRecommend')) {
@@ -41,46 +41,63 @@ server.append('AddProduct', function (req, res, next) {
             return next(); // prevent execution of the rest of the code
         }
 
-        try {
-            var product = ProductMgr.getProduct(productID);
-            if (empty(product)) {
-                return next();
-            }
-
-            switch (recordModel) {
-                case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
-                    algoliaProductData.pid = modelHelper.getAttributeSlicedModelRecordID(product);
-                    break;
-                case RECORD_MODEL_TYPES.MASTER_LEVEL:
-                    algoliaProductData.pid = product.isVariant() ? product.getMasterProduct().getID() : product.getID(); // returns master ID for variants, product ID for simple products
-                    break;
-                case RECORD_MODEL_TYPES.VARIANT_LEVEL:
-                    algoliaProductData.pid = productID;
-                    break;
-            }
-
-        } catch (e) { // eslint-disable-line no-unused-vars
-            algoliaProductData.pid = productID;
+        // The base controller reports an error when it rejected the add, for example when the
+        // requested quantity exceeds the available-to-sell inventory. The basket can still hold a
+        // line item for the product from an earlier add, so without this check the lookup below
+        // would find that line item and report an add-to-cart event for a product that was not
+        // added.
+        if (viewData.error) {
+            return next();
         }
+
+        var product = ProductMgr.getProduct(productID);
+        if (empty(product)) {
+            algoliaLogger.warn('No product found for ID "{0}", add-to-cart event not sent.', productID);
+            return next();
+        }
+
+        var recordID = null;
+
+        try {
+            recordID = modelHelper.getRecordIDForProduct(product, recordModel);
+        } catch (e) { // eslint-disable-line no-unused-vars
+            recordID = null;
+        }
+
+        // Without a record ID there is nothing in the index to attach the event to.
+        if (!recordID) {
+            algoliaLogger.warn('No "{0}" record ID resolved for product "{1}", add-to-cart event not sent.', recordModel, productID);
+            return next();
+        }
+
+        algoliaProductData.pid = recordID;
 
         algoliaProductData.qty = req.form.quantity;
-        var items = viewData.cart.items;
-        var pli;
-        //find the item in the cart by using the product id with for loop
-        for (var i = 0; i < items.length; i++) {
-            if (items[i].id === productID) {
-                pli = items[i];
-                break;
-            }
-        }
-        algoliaProductData.price = pli.price.sales.value;
 
-        if (pli.price.list) {
-            algoliaProductData.discount = +(
-                pli.price.list.value - pli.price.sales.value
-            ).toFixed(2);
+        // The base controller reports the UUID of the line item it created or incremented, which
+        // identifies the configuration the shopper just added. The product ID is the fallback, for
+        // a customized base controller that does not report the UUID.
+        //
+        // The line item is absent when a product set was added, since the basket then holds the
+        // set's children rather than the posted product ID.
+        var currentBasket = BasketMgr.getCurrentBasket();
+        var lineItem = priceHelper.findLineItemByUUID(currentBasket, viewData.pliUUID)
+            || priceHelper.findProductLineItem(currentBasket, productID);
+        if (!lineItem) {
+            algoliaLogger.warn('No basket line item found for product "{0}", add-to-cart event not sent.', productID);
+            return next();
         }
-        algoliaProductData.currency = pli.price.sales.currency;
+
+        var priceData = priceHelper.getLineItemPriceData(lineItem);
+        if (!priceData) {
+            return next();
+        }
+
+        algoliaProductData.price = priceData.price;
+        algoliaProductData.currency = priceData.currency;
+        if ('discount' in priceData) {
+            algoliaProductData.discount = priceData.discount;
+        }
 
         viewData.algoliaProductData = algoliaProductData;
     }

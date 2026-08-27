@@ -105,7 +105,7 @@ function enableInsights(appId, searchApiKey, productsIndex) {
 
         products.forEach((product) => {
             const productInfo = {
-                price: product.price.sales.value,
+                price: product.price,
                 quantity: product.qty,
             };
 
