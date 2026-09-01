@@ -165,9 +165,13 @@ function getAttributeSlicedModelRecordID(product) {
 /**
  * Resolves the objectID a product is indexed under, for the configured record model.
  *
- * Conversion events have to name the record that exists in the index, which is not always the
- * product's own ID: under the master-level model a variant is indexed as its master, and under the
- * attribute-sliced model variants are not indexed at all, their variation group is.
+ * Conversion events and Recommend anchors have to name the record that exists in the index, which
+ * is not always the product's own ID: under the master-level model a variant is indexed as its
+ * master, and under the attribute-sliced model variants are not indexed at all, their variation
+ * group is.
+ *
+ * Callers that can pass a master or a variation group, which are only indexed under the
+ * master-level model, are responsible for substituting an indexed product first.
  *
  * @param {dw.catalog.Product | dw.catalog.Variant} product Product or Variant
  * @param {string} recordModel one of RECORD_MODEL_TYPES
@@ -184,7 +188,10 @@ function getRecordIDForProduct(product, recordModel) {
         case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
             return getAttributeSlicedModelRecordID(product);
         case RECORD_MODEL_TYPES.MASTER_LEVEL:
-            return product.isVariant() ? product.getMasterProduct().getID() : product.getID();
+            // a variation group is not indexed either, its master carries the record
+            return (product.isVariant() || product.isVariationGroup())
+                ? product.getMasterProduct().getID()
+                : product.getID();
         case RECORD_MODEL_TYPES.VARIANT_LEVEL:
         default:
             return product.getID();

@@ -86,7 +86,16 @@ describe('getRecordIDForProduct', () => {
     const simpleProduct = {
         isMaster: () => false,
         isVariant: () => false,
+        isVariationGroup: () => false,
         getID: () => 'SIMPLE1',
+    };
+
+    const variationGroupProduct = {
+        isMaster: () => false,
+        isVariant: () => false,
+        isVariationGroup: () => true,
+        getMasterProduct: () => ({ getID: () => 'MASTER1' }),
+        getID: () => 'VG1',
     };
 
     let variantProduct;
@@ -126,6 +135,10 @@ describe('getRecordIDForProduct', () => {
 
     test('master-level: a product without a master keeps its own ID', () => {
         expect(modelHelper.getRecordIDForProduct(simpleProduct, 'master-level')).toBe('SIMPLE1');
+    });
+
+    test('master-level: a variation group is reported as its master, since it is not indexed', () => {
+        expect(modelHelper.getRecordIDForProduct(variationGroupProduct, 'master-level')).toBe('MASTER1');
     });
 
     test('variant-level: the product keeps its own ID', () => {
