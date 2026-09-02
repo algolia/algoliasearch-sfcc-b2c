@@ -2,21 +2,21 @@
 
 const { RECORD_MODEL_TYPES } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
-// Algolia bills one request per anchor objectID and blends every anchor's results into a single
-// list of four, so one anchor per cart line item costs more without showing more. A multi-query
-// above 50 entries is also rejected outright, which would fail the whole widget.
+// Since the number of distinct products in a cart can be high, we limit the number
+// of anchor products to 5 to avoid high costs for virtually no benefit.
 const MAX_ANCHOR_PRODUCTS = 5;
 
 /**
  * Resolves the objectID that recommendations for a product should be anchored on.
  *
  * The anchor has to name a record that exists in the index, which is not always the product's own
- * ID: under the master-level model a variant is indexed as its master, and under the
- * attribute-sliced model as the slice holding its grouping attribute value. Masters and variation
- * groups are only indexed under the master-level model, so under the other two they resolve to
- * their default variant, which is.
+ * ID. Under the master-level model a variant is indexed as its master. Under the attribute-sliced
+ * model it is indexed as the slice that holds its grouping attribute value.
  *
- * @param {dw.catalog.Product} product Product, variant or variation group, may be null
+ * Masters and variation groups only get a record of their own under the master-level model. Under
+ * the other two they are not indexed at all, so this anchors on their default variant instead.
+ *
+ * @param {dw.catalog.Product} product any catalog product, masters and VariationGroups included; may be null
  * @param {string} recordModel one of RECORD_MODEL_TYPES
  * @returns {string | null} the objectID to anchor on, or null when the product has no record
  */
