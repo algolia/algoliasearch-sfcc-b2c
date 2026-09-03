@@ -125,11 +125,17 @@ function getImageGroups(imagesList, viewtype) {
 /**
  * Build the attribute-sliced record product ID for a product.
  * @param {dw.catalog.Product | dw.catalog.Variant} product Product or Variant
+ * @param {string} [groupingAttribute] the grouping attribute the records are sliced by. Read from
+ *                                     the `Algolia_AttributeSlicedRecordModel_GroupingAttribute`
+ *                                     site preference when omitted; pass it in to avoid one
+ *                                     preference read per product.
  * @returns {string | null} Attribute-sliced product ID
  */
-function getAttributeSlicedModelRecordID(product) {
+function getAttributeSlicedModelRecordID(product, groupingAttribute) {
     const algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-    let variationAttributeForAttributeSlicedRecordModel = algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute');
+    let variationAttributeForAttributeSlicedRecordModel = empty(groupingAttribute)
+        ? algoliaData.getPreference('AttributeSlicedRecordModel_GroupingAttribute')
+        : groupingAttribute;
 
     let recordID = null;
 
@@ -167,17 +173,20 @@ function getAttributeSlicedModelRecordID(product) {
  *
  * Conversion events and Recommend anchors have to name the record that exists in the index, which
  * is not always the product's own ID: under the master-level model a variant is indexed as its
- * master, and under the attribute-sliced model variants are not indexed at all, their variation
- * group is.
+ * master, and under the attribute-sliced model a variant is indexed as one slice of its master,
+ * the one holding its grouping attribute value, with an objectID of `masterID-variationValueID`.
+ * Variation groups get a record of their own under none of the three models.
  *
  * Callers that can pass a master or a variation group, which are only indexed under the
  * master-level model, are responsible for substituting an indexed product first.
  *
  * @param {dw.catalog.Product | dw.catalog.Variant} product Product or Variant
  * @param {string} recordModel one of RECORD_MODEL_TYPES
+ * @param {string} [groupingAttribute] the grouping attribute, forwarded to
+ *                                     getAttributeSlicedModelRecordID() for the attribute-sliced model
  * @returns {string | null} the record ID, or null when it cannot be resolved
  */
-function getRecordIDForProduct(product, recordModel) {
+function getRecordIDForProduct(product, recordModel, groupingAttribute) {
     const RECORD_MODEL_TYPES = require('*/cartridge/scripts/algolia/lib/algoliaConstants').RECORD_MODEL_TYPES;
 
     if (empty(product)) {
@@ -186,7 +195,7 @@ function getRecordIDForProduct(product, recordModel) {
 
     switch (recordModel) {
         case RECORD_MODEL_TYPES.ATTRIBUTE_SLICED:
-            return getAttributeSlicedModelRecordID(product);
+            return getAttributeSlicedModelRecordID(product, groupingAttribute);
         case RECORD_MODEL_TYPES.MASTER_LEVEL:
             // a variation group is not indexed either, its master carries the record
             return (product.isVariant() || product.isVariationGroup())

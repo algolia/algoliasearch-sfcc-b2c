@@ -110,7 +110,12 @@ function getObjectIds(container) {
         const objectIDs = container.getAttribute('data-object-ids');
         if (!objectIDs) return null;
         var dataObjectIds = objectIDs.replace(/'/g, '"');
-        return JSON.parse(dataObjectIds);
+        var parsedObjectIds = JSON.parse(dataObjectIds);
+
+        // An empty array is truthy, so return null for it as well. The widgets that require an
+        // anchor check the return value and skip rendering, instead of issuing a request with no
+        // objectIDs.
+        return parsedObjectIds && parsedObjectIds.length ? parsedObjectIds : null;
     } catch (e) {
         console.error('Parsing error on objectIDs:', e);
         return null;

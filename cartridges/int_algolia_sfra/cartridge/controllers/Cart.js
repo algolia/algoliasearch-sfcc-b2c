@@ -14,13 +14,23 @@ server.extend(base);
 server.append('Show', function (req, res, next) {
     if (algoliaData.getPreference('Enable') && algoliaData.getPreference('EnableRecommend')) {
 
+        var recommendUtils = require('*/cartridge/scripts/algolia/recommend/utils');
         var algoliaAnchorProducts = [];
         var basket = BasketMgr.getCurrentOrNewBasket();
         var plisArr = basket.productLineItems.toArray();
 
-        plisArr.forEach(function(pli) {
-            algoliaAnchorProducts.push(pli.productID);
-        });
+        // Several line items can reference the same product, for example the same product added
+        // twice with different options, and the widgets anchor on at most MAX_ANCHOR_PRODUCTS
+        // objectIDs anyway. Writing only the distinct product IDs up to that number keeps the
+        // session string short, which matters because a `session.privacy` value is capped at 2000
+        // characters, and bounds the work the slot templates do when they resolve the anchors.
+        for (var i = 0; i < plisArr.length && algoliaAnchorProducts.length < recommendUtils.MAX_ANCHOR_PRODUCTS; i++) {
+            var lineItemProductID = plisArr[i].getProductID();
+
+            if (algoliaAnchorProducts.indexOf(lineItemProductID) === -1) {
+                algoliaAnchorProducts.push(lineItemProductID);
+            }
+        }
 
         session.privacy.algoliaAnchorProducts = JSON.stringify(algoliaAnchorProducts);
     }

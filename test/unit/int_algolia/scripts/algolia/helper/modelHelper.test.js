@@ -80,6 +80,17 @@ describe('getAttributeSlicedModelRecordID', () => {
         };
         expect(modelHelper.getAttributeSlicedModelRecordID(simpleProduct)).toBe('SIMPLE1');
     });
+
+    test('uses the grouping attribute passed in instead of reading the preference', () => {
+        const masterProduct = new MasterProductMock({ ID: 'MASTER1' });
+        const variantProduct = new VariantMock({
+            ID: 'VAR1',
+            masterProduct,
+            variationAttributes: { color: 'JJB52A0', size: '004' },
+        });
+        expect(modelHelper.getAttributeSlicedModelRecordID(variantProduct, 'color')).toBe('MASTER1-JJB52A0');
+        expect(algoliaDataMock.getPreference).not.toHaveBeenCalled();
+    });
 });
 
 describe('getRecordIDForProduct', () => {
@@ -114,9 +125,14 @@ describe('getRecordIDForProduct', () => {
         });
     });
 
-    test('attribute-sliced: a variant is reported as its variation group', () => {
+    test('attribute-sliced: a variant is reported as the slice holding its grouping attribute value', () => {
         algoliaDataMock.getPreference.mockReturnValue('color');
         expect(modelHelper.getRecordIDForProduct(variantProduct, 'attribute-sliced')).toBe('MASTER1-JJB52A0');
+    });
+
+    test('attribute-sliced: the grouping attribute can be passed in instead of read from the preference', () => {
+        expect(modelHelper.getRecordIDForProduct(variantProduct, 'attribute-sliced', 'color')).toBe('MASTER1-JJB52A0');
+        expect(algoliaDataMock.getPreference).not.toHaveBeenCalled();
     });
 
     test('attribute-sliced: a product without variants keeps its own ID', () => {
