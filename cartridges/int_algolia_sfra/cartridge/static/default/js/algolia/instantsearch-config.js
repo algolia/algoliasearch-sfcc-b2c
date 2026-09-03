@@ -294,11 +294,6 @@ function enableInstantSearch(config) {
                 limit: 20,
                 showMore: true,
                 showMoreLimit: 100,
-                cssClasses: {
-                    // InstantSearch always renders the show more button when showMore is on and only
-                    // disables it when there is nothing left to reveal, so hide it in that state.
-                    disabledShowMore: 'd-none'
-                },
                 templates: {
                     item(data, { html }) {
                         return html`
@@ -416,8 +411,7 @@ function enableInstantSearch(config) {
                     selectedItem: 'store-facet-selected',
                     label: 'store-facet-label',
                     noResults: 'store-facet-empty',
-                    showMore: 'store-facet-show-more',
-                    disabledShowMore: 'store-facet-show-more disabled'
+                    showMore: 'store-facet-show-more'
                 },
                 templates: {
                     item(data, { html }) {
@@ -460,7 +454,10 @@ function enableInstantSearch(config) {
                     root: 'col-12',
                     list: 'row product-grid',
                     item: 'col-6 col-sm-4',
-                    loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto'
+                    loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto',
+                    // The button is rendered on every page and only disabled once the last one is
+                    // reached, so hide it there rather than leaving a dead button under the grid.
+                    disabledLoadMore: 'd-none'
                 },
                 templates: {
                     showMoreText: algoliaData.strings.moreResults,
@@ -669,7 +666,8 @@ function enableInstantSearch(config) {
                             container: '#algolia-content-hits-placeholder',
                             cssClasses: {
                                 root: 'w-100',
-                                loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto'
+                                loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto',
+                                disabledLoadMore: 'd-none'
                             },
                             templates: {
                                 item: `
@@ -727,12 +725,30 @@ function enableInstantSearch(config) {
     });
 
     /**
+     * Hides the "show more" button in the state where it does nothing. The list widgets render the
+     * button whenever "showMore" is on and only disable it once the facet holds no more values than
+     * the widget already lists, which otherwise leaves dead text under a short list.
+     * @param {Object} options Options object of a menu, hierarchical menu or refinement list
+     * @returns {Object} The options, with the hiding class merged into cssClasses
+     */
+    function hideDisabledShowMore(options) {
+        if (!options.showMore) {
+            return options;
+        }
+        var cssClasses = Object.assign({}, options.cssClasses);
+        cssClasses.disabledShowMore = cssClasses.disabledShowMore
+            ? cssClasses.disabledShowMore + ' d-none'
+            : 'd-none';
+        return Object.assign({}, options, { cssClasses: cssClasses });
+    }
+
+    /**
      * Generates a menu with the Panel widget
      * @param {Object} options Options object
      * @returns {Object} The Panel widget
      */
     function hierarchicalMenuWithPanel(options) {
-        return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(options)
+        return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(hideDisabledShowMore(options))
     }
 
     /**
@@ -741,7 +757,7 @@ function enableInstantSearch(config) {
      * @returns {Object} The Panel widget
      */
     function menuWithPanel(options) {
-        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.menu)(options)
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.menu)(hideDisabledShowMore(options))
     }
 
     /**
@@ -750,7 +766,7 @@ function enableInstantSearch(config) {
      * @returns {Object} The Panel widget
      */
     function refinementListWithPanel(options) {
-        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(options)
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(hideDisabledShowMore(options))
     }
 
     /**

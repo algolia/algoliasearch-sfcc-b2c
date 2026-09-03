@@ -74,13 +74,6 @@ describe('collections refinement', () => {
         expect(findPanelWidget(captured.widgets, 'menu', '_collections')).toBeDefined();
     });
 
-    it('hides the show more control when there is nothing left to reveal', () => {
-        const { captured } = runEnableInstantSearch();
-
-        const options = findPanelWidget(captured.widgets, 'menu', '_collections').widget.options;
-        expect(options.cssClasses.disabledShowMore).toBe('d-none');
-    });
-
     it('labels the show more control from the localized strings', () => {
         const { captured, algoliaData } = runEnableInstantSearch();
 
@@ -126,6 +119,42 @@ describe('collections panel visibility', () => {
         const results = resultsFor({ brand: { Apple: 4 } });
 
         expect(hiddenCallbackFor('refinementList', 'brand')({ results: results })).toBe(false);
+    });
+});
+
+describe('show more button', () => {
+    // The list widgets render the button whenever showMore is on and only disable it once the facet
+    // holds no more values than the widget already lists, so the panel wrappers hide it in that state.
+
+    it('hides itself on the collections menu', () => {
+        const { captured } = runEnableInstantSearch();
+
+        const options = findPanelWidget(captured.widgets, 'menu', '_collections').widget.options;
+        expect(options.cssClasses.disabledShowMore).toBe('d-none');
+    });
+
+    it('hides itself on the store availability list, keeping its styling hook', () => {
+        const { captured } = runEnableInstantSearch();
+
+        const options = findPanelWidget(captured.widgets, 'refinementList', 'storeAvailability').widget.options;
+        expect(options.cssClasses.disabledShowMore).toBe('d-none');
+        expect(options.cssClasses.showMore).toBe('store-facet-show-more');
+    });
+
+    it('leaves widgets that do not offer a show more button untouched', () => {
+        const { captured } = runEnableInstantSearch();
+
+        const options = findPanelWidget(captured.widgets, 'refinementList', 'brand').widget.options;
+        expect(options.cssClasses).toBeUndefined();
+    });
+
+    it('hides the more results button on the product grid once the last page is reached', () => {
+        const { captured } = runEnableInstantSearch();
+
+        const hits = captured.widgets.find(function (widget) {
+            return widget && widget.type === 'infiniteHits';
+        });
+        expect(hits.options.cssClasses.disabledLoadMore).toBe('d-none');
     });
 });
 
