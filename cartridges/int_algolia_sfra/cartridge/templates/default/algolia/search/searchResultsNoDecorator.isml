@@ -67,6 +67,7 @@
                         <div id="algolia-clear-refinements-placeholder"></div>
 
                         <div class="refinements">
+                            <div id="algolia-collections-list-placeholder"></div>
                             <div id="algolia-categories-list-placeholder"></div>
                             <div id="algolia-newarrival-placeholder"></div>
                             <div id="algolia-newarrivals-list-placeholder"></div>

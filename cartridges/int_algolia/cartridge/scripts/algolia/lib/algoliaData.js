@@ -46,6 +46,7 @@ const clientSideData = {
         "colorPanelTitle": Resource.msg('label.tile.swatch.colors','algolia',null),
         "pricePanelTitle": Resource.msg('search.price','algolia',null),
         "categoryPanelTitle": Resource.msg('search.category','algolia',null),
+        "collectionsPanelTitle": Resource.msg('search.collections','algolia',null),
         "products": Resource.msg('search.suggest.products','algolia',null),
         "categories": Resource.msg('search.suggest.categories','algolia',null),
         "content": Resource.msg('search.suggest.content','algolia',null),

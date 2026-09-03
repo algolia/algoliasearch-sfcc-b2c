@@ -88,7 +88,7 @@ function enableInstantSearch(config) {
 
     // URL keys this mapping owns. Anything else already on the URL (lang, utm_*, ...) is
     // preserved across refinements so locale and marketing parameters are not stripped.
-    const routeKeys = ['q', 'category', 'newArrivals', 'newArrival', 'brand', 'color', 'size', 'store', 'price', 'sort', 'page'];
+    const routeKeys = ['q', 'category', 'collection', 'newArrivals', 'newArrival', 'brand', 'color', 'size', 'store', 'price', 'sort', 'page'];
 
     const router = instantsearch.routers.history({
         createURL: function (params) {
@@ -117,6 +117,11 @@ function enableInstantSearch(config) {
             if (indexUiState.hierarchicalMenu && indexUiState.hierarchicalMenu['newArrivalsCategory.0']) {
                 route.newArrivals = compressBreadcrumb(indexUiState.hierarchicalMenu['newArrivalsCategory.0']);
             }
+            // The collections menu registers as a hierarchical facet but carries a single flat value,
+            // so it needs neither compressBreadcrumb nor expandBreadcrumb.
+            if (indexUiState.menu && indexUiState.menu._collections) {
+                route.collection = indexUiState.menu._collections;
+            }
             if (indexUiState.toggle && indexUiState.toggle.newArrival) route.newArrival = '1';
             if (indexUiState.refinementList) {
                 if (indexUiState.refinementList.brand) route.brand = indexUiState.refinementList.brand;
@@ -141,6 +146,10 @@ function enableInstantSearch(config) {
             if (route.newArrivals) {
                 indexUiState.hierarchicalMenu = indexUiState.hierarchicalMenu || {};
                 indexUiState.hierarchicalMenu['newArrivalsCategory.0'] = expandBreadcrumb([].concat(route.newArrivals));
+            }
+            if (route.collection) {
+                // The menu is single-select, so a repeated parameter keeps its first value only.
+                indexUiState.menu = { _collections: [].concat(route.collection)[0] };
             }
             if (route.newArrival === '1') indexUiState.toggle = { newArrival: true };
             var refinementList = {};
@@ -273,6 +282,37 @@ function enableInstantSearch(config) {
                     {label: algoliaData.strings.priceAsc, value: productsIndexPriceAsc},
                     {label: algoliaData.strings.priceDesc, value: productsIndexPriceDesc}
                 ]
+            }),
+
+            // "collections" refinement panel. Algolia Collections write the "_collections" attribute onto
+            // records as they pass through the Ingestion pipeline. On an index that does not declare the
+            // attribute the facet comes back empty and the Panel hides itself, so the widget is registered
+            // unconditionally. Single-select, because a collection is a listing rather than a filter value.
+            menuWithPanel({
+                container: '#algolia-collections-list-placeholder',
+                attribute: '_collections',
+                limit: 20,
+                showMore: true,
+                showMoreLimit: 100,
+                cssClasses: {
+                    // InstantSearch always renders the show more button when showMore is on and only
+                    // disables it when there is nothing left to reveal, so hide it in that state.
+                    disabledShowMore: 'd-none'
+                },
+                templates: {
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
+                    showMoreText({ isShowingMore }) {
+                        return isShowingMore ? algoliaData.strings.showLess : algoliaData.strings.showMore;
+                    }
+                },
+                panelTitle: algoliaData.strings.collectionsPanelTitle
             }),
 
             // "new arrival" refinement panel
@@ -693,6 +733,15 @@ function enableInstantSearch(config) {
      */
     function hierarchicalMenuWithPanel(options) {
         return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(options)
+    }
+
+    /**
+     * Builds a single-select menu with the Panel widget
+     * @param {Object} options Options object
+     * @returns {Object} The Panel widget
+     */
+    function menuWithPanel(options) {
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.menu)(options)
     }
 
     /**
