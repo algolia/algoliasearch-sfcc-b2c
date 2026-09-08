@@ -1,8 +1,8 @@
 /**
- * `getAnchorRecordID` takes the record model and the site preference values as arguments, so the
- * tests for the record-model matrix and for the indexing filters need no global setup.
+ * `getAnchorRecordID` takes the record model and the grouping attribute as arguments, so the tests
+ * for the record-model matrix need no global setup.
  *
- * `getAnchorProductIDs` reads them itself, through the real `algoliaData.getPreference`, which
+ * `getAnchorProductIDs` reads both itself, through the real `algoliaData.getPreference`, which
  * resolves them from `global.customPreferences` via the Site mock. Setting that global is the only
  * way to drive it; a `jest.fn()` on algoliaData is not wired to it.
  */
@@ -11,27 +11,9 @@ const utils = require('../../../../../../cartridges/int_algolia/cartridge/script
 
 const emptySlotcontent = { content: [] };
 
-// Out-of-stock products are indexed, so the stock filter passes for every product. Tests that are
-// about stock pass their own preferences.
-const INDEX_EVERYTHING = { InStockThreshold: 1, IndexOutOfStock: true };
-const SLICED_BY_COLOR = { InStockThreshold: 1, IndexOutOfStock: true, AttributeSlicedRecordModel_GroupingAttribute: 'color' };
-
 /**
- * Builds an availability model whose inventory record reports the given available-to-sell quantity.
- * @param {number} ats available-to-sell quantity
- * @returns {Object} availability model mock
- */
-function availabilityModelWithATS(ats) {
-    return {
-        getInventoryRecord: jest.fn(() => ({
-            getATS: jest.fn(() => ({ getValue: jest.fn(() => ats) })),
-        })),
-    };
-}
-
-/**
- * Builds a product mock that answers false to every type predicate and passes every indexing
- * filter, so each test only has to describe what it is actually about.
+ * Builds a product mock that answers false to every type predicate, so each test only has to
+ * describe what it is actually about.
  * @param {string} id product ID
  * @param {Object} [overrides] properties to replace on the mock
  * @returns {Object} product mock
@@ -43,23 +25,7 @@ function productMock(id, overrides) {
         isMaster: jest.fn(() => false),
         isVariant: jest.fn(() => false),
         isVariationGroup: jest.fn(() => false),
-        isBundled: jest.fn(() => false),
-        isOnline: jest.fn(() => true),
-        isSearchable: jest.fn(() => true),
-        getOnlineCategories: jest.fn(() => [{ ID: 'category1' }]),
-        getAvailabilityModel: jest.fn(() => availabilityModelWithATS(10)),
     }, overrides || {});
-}
-
-/**
- * Builds the master a variant or variation group reports through getMasterProduct(). The real API
- * returns a full dw.catalog.Product there, so under the master-level model the filters run against
- * it directly.
- * @param {string} masterID master product ID
- * @returns {Object} master product mock
- */
-function masterProductRef(masterID) {
-    return masterMock(masterID, productMock(masterID + '-default', { isVariant: jest.fn(() => true) }));
 }
 
 /**
@@ -81,43 +47,21 @@ function variationModelWithDefault(defaultVariant) {
 function variantMock(id, masterID, overrides) {
     return productMock(id, Object.assign({
         isVariant: jest.fn(() => true),
-        getMasterProduct: jest.fn(() => masterProductRef(masterID)),
+        getMasterProduct: jest.fn(() => productMock(masterID, { isMaster: jest.fn(() => true) })),
     }, overrides || {}));
 }
 
 /**
- * Builds a dw.util.Collection-like list of variants that only answers iterator().
- * @param {Array} variants the variants to serve
- * @returns {Object} variant collection mock
- */
-function variantCollection(variants) {
-    return {
-        iterator: jest.fn(() => {
-            let index = 0;
-            return {
-                hasNext: jest.fn(() => index < variants.length),
-                next: jest.fn(() => variants[index++]),
-            };
-        }),
-    };
-}
-
-/**
- * Builds a master product. Its variants default to the one variant getDefaultVariant() reports.
+ * Builds a master product.
  * @param {string} id master product ID
  * @param {Object|null} defaultVariant the variant getDefaultVariant() reports
- * @param {Object} [overrides] properties to replace on the mock
- * @param {Array} [variants] every variant of the master, when it has more than the default one
  * @returns {Object} master product mock
  */
-function masterMock(id, defaultVariant, overrides, variants) {
-    const allVariants = variants || (defaultVariant ? [defaultVariant] : []);
-
-    return productMock(id, Object.assign({
+function masterMock(id, defaultVariant) {
+    return productMock(id, {
         isMaster: jest.fn(() => true),
         getVariationModel: jest.fn(() => variationModelWithDefault(defaultVariant)),
-        getVariants: jest.fn(() => variantCollection(allVariants)),
-    }, overrides || {}));
+    });
 }
 
 /**
@@ -130,7 +74,7 @@ function masterMock(id, defaultVariant, overrides, variants) {
 function variationGroupMock(id, masterID, defaultVariant) {
     return productMock(id, {
         isVariationGroup: jest.fn(() => true),
-        getMasterProduct: jest.fn(() => masterProductRef(masterID)),
+        getMasterProduct: jest.fn(() => productMock(masterID, { isMaster: jest.fn(() => true) })),
         getVariationModel: jest.fn(() => variationModelWithDefault(defaultVariant)),
     });
 }
@@ -148,7 +92,7 @@ function slicedVariantMock(id, masterID, colorValueID, overrides) {
     return variantMock(id, masterID, Object.assign({
         getVariationModel: jest.fn(() => ({
             getProductVariationAttribute: jest.fn(() => ({ getID: jest.fn(() => 'color') })),
-            getMaster: jest.fn(() => masterProductRef(masterID)),
+            getMaster: jest.fn(() => productMock(masterID, { isMaster: jest.fn(() => true) })),
             getSelectedValue: jest.fn(() => ({ getID: jest.fn(() => colorValueID) })),
         })),
     }, overrides || {}));
@@ -159,50 +103,50 @@ describe('getAnchorRecordID', () => {
         it('anchors a variant on its own ID', () => {
             const product = variantMock('variant1', 'master1');
 
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBe('variant1');
+            expect(utils.getAnchorRecordID(product, 'variant-level')).toBe('variant1');
         });
 
         it('anchors a master on its default variant, since masters are not indexed', () => {
             const product = masterMock('master1', variantMock('variant1', 'master1'));
 
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBe('variant1');
+            expect(utils.getAnchorRecordID(product, 'variant-level')).toBe('variant1');
         });
 
         it('anchors a variation group on its default variant', () => {
             const product = variationGroupMock('variationGroup1', 'master1', variantMock('variant1', 'master1'));
 
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBe('variant1');
+            expect(utils.getAnchorRecordID(product, 'variant-level')).toBe('variant1');
         });
 
         // The bug this ticket fixes. Before the change all four of these resolved to null and were
         // dropped, because anything that was not a variant or a variation group was treated as a
         // master and sent to getDefaultVariant().
         it('anchors a simple product on its own ID', () => {
-            expect(utils.getAnchorRecordID(productMock('simple1'), 'variant-level', INDEX_EVERYTHING)).toBe('simple1');
+            expect(utils.getAnchorRecordID(productMock('simple1'), 'variant-level')).toBe('simple1');
         });
 
         it('anchors a bundle on its own ID', () => {
             const bundle = productMock('bundle1', { isBundle: jest.fn(() => true) });
 
-            expect(utils.getAnchorRecordID(bundle, 'variant-level', INDEX_EVERYTHING)).toBe('bundle1');
+            expect(utils.getAnchorRecordID(bundle, 'variant-level')).toBe('bundle1');
         });
 
         it('anchors a product set on its own ID', () => {
             const productSet = productMock('set1', { isProductSet: jest.fn(() => true) });
 
-            expect(utils.getAnchorRecordID(productSet, 'variant-level', INDEX_EVERYTHING)).toBe('set1');
+            expect(utils.getAnchorRecordID(productSet, 'variant-level')).toBe('set1');
         });
 
         it('anchors an option product on its own ID', () => {
             const optionProduct = productMock('option1', { getOptionModel: jest.fn(() => ({})) });
 
-            expect(utils.getAnchorRecordID(optionProduct, 'variant-level', INDEX_EVERYTHING)).toBe('option1');
+            expect(utils.getAnchorRecordID(optionProduct, 'variant-level')).toBe('option1');
         });
 
         it('never reaches the variation model of a product that is not a master or a variation group', () => {
             const simpleProduct = productMock('simple1', { getVariationModel: jest.fn() });
 
-            utils.getAnchorRecordID(simpleProduct, 'variant-level', INDEX_EVERYTHING);
+            utils.getAnchorRecordID(simpleProduct, 'variant-level');
 
             expect(simpleProduct.getVariationModel).not.toHaveBeenCalled();
         });
@@ -212,35 +156,35 @@ describe('getAnchorRecordID', () => {
         it('anchors a variant on its master', () => {
             const product = variantMock('variant1', 'master1');
 
-            expect(utils.getAnchorRecordID(product, 'master-level', INDEX_EVERYTHING)).toBe('master1');
+            expect(utils.getAnchorRecordID(product, 'master-level')).toBe('master1');
         });
 
         it('anchors a master on its own ID', () => {
             const product = masterMock('master1', variantMock('variant1', 'master1'));
 
-            expect(utils.getAnchorRecordID(product, 'master-level', INDEX_EVERYTHING)).toBe('master1');
+            expect(utils.getAnchorRecordID(product, 'master-level')).toBe('master1');
         });
 
         it('anchors a variation group on its master, since variation groups are not indexed', () => {
             const product = variationGroupMock('variationGroup1', 'master1', variantMock('variant1', 'master1'));
 
-            expect(utils.getAnchorRecordID(product, 'master-level', INDEX_EVERYTHING)).toBe('master1');
+            expect(utils.getAnchorRecordID(product, 'master-level')).toBe('master1');
         });
 
         it('anchors a simple product on its own ID', () => {
-            expect(utils.getAnchorRecordID(productMock('simple1'), 'master-level', INDEX_EVERYTHING)).toBe('simple1');
+            expect(utils.getAnchorRecordID(productMock('simple1'), 'master-level')).toBe('simple1');
         });
 
         it('anchors a bundle on its own ID', () => {
             const bundle = productMock('bundle1', { isBundle: jest.fn(() => true) });
 
-            expect(utils.getAnchorRecordID(bundle, 'master-level', INDEX_EVERYTHING)).toBe('bundle1');
+            expect(utils.getAnchorRecordID(bundle, 'master-level')).toBe('bundle1');
         });
 
         it('never reaches the variation model, since no product resolves to a default variant', () => {
             const product = masterMock('master1', variantMock('variant1', 'master1'));
 
-            utils.getAnchorRecordID(product, 'master-level', INDEX_EVERYTHING);
+            utils.getAnchorRecordID(product, 'master-level');
 
             expect(product.getVariationModel).not.toHaveBeenCalled();
         });
@@ -252,21 +196,21 @@ describe('getAnchorRecordID', () => {
         it('anchors a variant on the slice holding its grouping attribute value', () => {
             const product = slicedVariantMock('013742003154M', '25720054M', 'JJG03XX');
 
-            expect(utils.getAnchorRecordID(product, 'attribute-sliced', SLICED_BY_COLOR)).toBe('25720054M-JJG03XX');
+            expect(utils.getAnchorRecordID(product, 'attribute-sliced', 'color')).toBe('25720054M-JJG03XX');
         });
 
         it('anchors a master on the slice holding its default variant', () => {
             const defaultVariant = slicedVariantMock('013742003154M', '25720054M', 'JJG03XX');
             const product = masterMock('25720054M', defaultVariant);
 
-            expect(utils.getAnchorRecordID(product, 'attribute-sliced', SLICED_BY_COLOR)).toBe('25720054M-JJG03XX');
+            expect(utils.getAnchorRecordID(product, 'attribute-sliced', 'color')).toBe('25720054M-JJG03XX');
         });
 
         it('anchors a variation group on the slice holding its default variant', () => {
             const defaultVariant = slicedVariantMock('013742003154M', '25720054M', 'JJG03XX');
             const product = variationGroupMock('variationGroup1', '25720054M', defaultVariant);
 
-            expect(utils.getAnchorRecordID(product, 'attribute-sliced', SLICED_BY_COLOR)).toBe('25720054M-JJG03XX');
+            expect(utils.getAnchorRecordID(product, 'attribute-sliced', 'color')).toBe('25720054M-JJG03XX');
         });
 
         // A master that does not have the grouping attribute is written as a single master-level
@@ -275,49 +219,36 @@ describe('getAnchorRecordID', () => {
             const product = variantMock('variant1', 'master1', {
                 getVariationModel: jest.fn(() => ({
                     getProductVariationAttribute: jest.fn(() => null),
-                    getMaster: jest.fn(() => masterProductRef('master1')),
+                    getMaster: jest.fn(() => productMock('master1', { isMaster: jest.fn(() => true) })),
                 })),
             });
 
-            expect(utils.getAnchorRecordID(product, 'attribute-sliced', SLICED_BY_COLOR)).toBe('master1');
+            expect(utils.getAnchorRecordID(product, 'attribute-sliced', 'color')).toBe('master1');
         });
 
         it('anchors a simple product on its own ID', () => {
-            expect(utils.getAnchorRecordID(productMock('simple1'), 'attribute-sliced', SLICED_BY_COLOR)).toBe('simple1');
+            expect(utils.getAnchorRecordID(productMock('simple1'), 'attribute-sliced', 'color')).toBe('simple1');
         });
 
         it('anchors a bundle on its own ID', () => {
             const bundle = productMock('bundle1', { isBundle: jest.fn(() => true) });
 
-            expect(utils.getAnchorRecordID(bundle, 'attribute-sliced', SLICED_BY_COLOR)).toBe('bundle1');
+            expect(utils.getAnchorRecordID(bundle, 'attribute-sliced', 'color')).toBe('bundle1');
         });
 
         it('returns null when no grouping attribute is configured, since no record ID can be built', () => {
             const product = slicedVariantMock('013742003154M', '25720054M', 'JJG03XX');
 
-            expect(utils.getAnchorRecordID(product, 'attribute-sliced', INDEX_EVERYTHING)).toBeNull();
+            expect(utils.getAnchorRecordID(product, 'attribute-sliced')).toBeNull();
         });
 
-        // Every slice is built from the master, so an offline master has no slice records at all,
-        // however online its individual variants are.
-        it('returns null for a variant of an offline master', () => {
-            const offlineMaster = masterMock('25720054M', null, { isOnline: jest.fn(() => false) });
-            const product = slicedVariantMock('013742003154M', '25720054M', 'JJG03XX', {
-                getMasterProduct: jest.fn(() => offlineMaster),
-            });
+        it('falls back to the grouping attribute preference when it is not passed in', () => {
+            global.customPreferences.Algolia_AttributeSlicedRecordModel_GroupingAttribute = 'color';
+            const product = slicedVariantMock('013742003154M', '25720054M', 'JJG03XX');
 
-            expect(utils.getAnchorRecordID(product, 'attribute-sliced', SLICED_BY_COLOR)).toBeNull();
-        });
-    });
+            expect(utils.getAnchorRecordID(product, 'attribute-sliced')).toBe('25720054M-JJG03XX');
 
-    describe('site preferences', () => {
-        it('falls back to reading the site preferences when they are not passed in', () => {
-            global.customPreferences.Algolia_IndexOutOfStock = true;
-            const product = variantMock('variant1', 'master1');
-
-            expect(utils.getAnchorRecordID(product, 'variant-level')).toBe('variant1');
-
-            delete global.customPreferences.Algolia_IndexOutOfStock;
+            delete global.customPreferences.Algolia_AttributeSlicedRecordModel_GroupingAttribute;
         });
     });
 
@@ -325,110 +256,27 @@ describe('getAnchorRecordID', () => {
         it('falls back to the product ID, matching the variant-level model', () => {
             const product = variantMock('variant1', 'master1');
 
-            expect(utils.getAnchorRecordID(product, '', INDEX_EVERYTHING)).toBe('variant1');
+            expect(utils.getAnchorRecordID(product, '')).toBe('variant1');
         });
     });
 
     describe('products that have no record to anchor on', () => {
         it('returns null for a product that no longer resolves in the catalog', () => {
-            expect(utils.getAnchorRecordID(null, 'variant-level', INDEX_EVERYTHING)).toBeNull();
+            expect(utils.getAnchorRecordID(null, 'variant-level')).toBeNull();
         });
 
-        it('returns null for a master that has no default variant', () => {
+        // getDefaultVariant() returns an arbitrary variant when the master has no default variant
+        // defined, so it only comes back null when there is no variant at all.
+        it('returns null for a master that has no variants', () => {
             const product = masterMock('master2', null);
 
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBeNull();
+            expect(utils.getAnchorRecordID(product, 'variant-level')).toBeNull();
         });
 
-        it('returns null for an offline product, which the jobs do not index', () => {
-            const product = productMock('simple1', { isOnline: jest.fn(() => false) });
+        it('returns null for a variation group whose variation model has no variants', () => {
+            const product = variationGroupMock('variationGroup1', 'master1', null);
 
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBeNull();
-        });
-
-        it('returns null for a product that is not searchable', () => {
-            const product = productMock('simple1', { isSearchable: jest.fn(() => false) });
-
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBeNull();
-        });
-
-        it('returns null for a product with no online category', () => {
-            const product = productMock('simple1', { getOnlineCategories: jest.fn(() => []) });
-
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBeNull();
-        });
-
-        it('returns null for a variant whose master has no online category', () => {
-            const product = variantMock('variant1', 'master1', {
-                getMasterProduct: jest.fn(() => ({
-                    getID: jest.fn(() => 'master1'),
-                    getOnlineCategories: jest.fn(() => []),
-                })),
-            });
-
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBeNull();
-        });
-
-        it('returns null for an offline master under the master-level model', () => {
-            const product = masterMock('master1', variantMock('variant1', 'master1'), { isOnline: jest.fn(() => false) });
-
-            expect(utils.getAnchorRecordID(product, 'master-level', INDEX_EVERYTHING)).toBeNull();
-        });
-
-        it('returns null for an out-of-stock product when out-of-stock products are not indexed', () => {
-            const product = productMock('simple1', { getAvailabilityModel: jest.fn(() => availabilityModelWithATS(0)) });
-
-            expect(utils.getAnchorRecordID(product, 'variant-level', { InStockThreshold: 1, IndexOutOfStock: false })).toBeNull();
-        });
-
-        it('anchors an out-of-stock product when out-of-stock products are indexed', () => {
-            const product = productMock('simple1', { getAvailabilityModel: jest.fn(() => availabilityModelWithATS(0)) });
-
-            expect(utils.getAnchorRecordID(product, 'variant-level', INDEX_EVERYTHING)).toBe('simple1');
-        });
-
-        it('returns null for a product below the in-stock threshold', () => {
-            const product = productMock('simple1', { getAvailabilityModel: jest.fn(() => availabilityModelWithATS(4)) });
-
-            expect(utils.getAnchorRecordID(product, 'variant-level', { InStockThreshold: 5, IndexOutOfStock: false })).toBeNull();
-        });
-
-        it('anchors a product at the in-stock threshold', () => {
-            const product = productMock('simple1', { getAvailabilityModel: jest.fn(() => availabilityModelWithATS(5)) });
-
-            expect(utils.getAnchorRecordID(product, 'variant-level', { InStockThreshold: 5, IndexOutOfStock: false })).toBe('simple1');
-        });
-
-        it('returns null for a master under the master-level model when none of its variants is in stock', () => {
-            const outOfStockVariant = variantMock('variant1', 'master1', {
-                getAvailabilityModel: jest.fn(() => availabilityModelWithATS(0)),
-            });
-            const product = masterMock('master1', outOfStockVariant);
-
-            expect(utils.getAnchorRecordID(product, 'master-level', { InStockThreshold: 1, IndexOutOfStock: false })).toBeNull();
-        });
-
-        it('anchors a master under the master-level model when one of its variants is in stock', () => {
-            const product = masterMock('master1', variantMock('variant1', 'master1'));
-
-            expect(utils.getAnchorRecordID(product, 'master-level', { InStockThreshold: 1, IndexOutOfStock: false })).toBe('master1');
-        });
-
-        // The master's `variants` array only holds variants that pass isInclude() as well, and the
-        // job writes no master record when that array comes out empty.
-        it('returns null for a master under the master-level model whose only in-stock variant is offline', () => {
-            const offlineInStockVariant = variantMock('variant1', 'master1', { isOnline: jest.fn(() => false) });
-            const inStockButOfflineOnly = masterMock('master1', offlineInStockVariant);
-
-            expect(utils.getAnchorRecordID(inStockButOfflineOnly, 'master-level', { InStockThreshold: 1, IndexOutOfStock: false })).toBeNull();
-        });
-
-        it('anchors a master under the master-level model when a later variant is indexable', () => {
-            const offlineVariant = variantMock('variant1', 'master1', { isOnline: jest.fn(() => false) });
-            const indexableVariant = variantMock('variant2', 'master1');
-            const product = masterMock('master1', offlineVariant, {}, [offlineVariant, indexableVariant]);
-
-            expect(utils.getAnchorRecordID(product, 'master-level', { InStockThreshold: 1, IndexOutOfStock: false })).toBe('master1');
+            expect(utils.getAnchorRecordID(product, 'variant-level')).toBeNull();
         });
     });
 });
@@ -438,7 +286,6 @@ describe('getAnchorProductIDs', () => {
         productMgrMock.getProduct.mockReset();
         global.session.privacy.algoliaAnchorProducts = null;
         global.customPreferences.Algolia_RecordModel = 'variant-level';
-        global.customPreferences.Algolia_IndexOutOfStock = true;
         delete global.customPreferences.Algolia_AttributeSlicedRecordModel_GroupingAttribute;
     });
 
@@ -482,16 +329,6 @@ describe('getAnchorProductIDs', () => {
             productMgrMock.getProduct.mockReturnValue(slicedVariantMock('013742003154M', '25720054M', 'JJG03XX'));
 
             expect(utils.getAnchorProductIDs(emptySlotcontent)).toBe(JSON.stringify(['25720054M-JJG03XX']));
-        });
-
-        it('drops an out-of-stock product when out-of-stock products are not indexed', () => {
-            global.customPreferences.Algolia_IndexOutOfStock = false;
-            global.session.privacy.algoliaAnchorProducts = JSON.stringify(['simple1']);
-            productMgrMock.getProduct.mockReturnValue(productMock('simple1', {
-                getAvailabilityModel: jest.fn(() => availabilityModelWithATS(0)),
-            }));
-
-            expect(utils.getAnchorProductIDs(emptySlotcontent)).toBe('');
         });
     });
 
