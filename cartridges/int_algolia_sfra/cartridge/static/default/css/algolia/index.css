@@ -148,3 +148,16 @@
 .store-facet-show-more:hover {
     text-decoration: underline;
 }
+
+/*
+ * InstantSearch renders these buttons on every page and only disables them once there is nothing
+ * left to load, which otherwise leaves a dead control under a short facet list or a complete grid.
+ * The selectors repeat the block class on purpose: the load more button also carries Bootstrap's
+ * d-block, and Bootstrap 4 declares .d-block after .d-none, so a single-class rule loses the tie.
+ */
+.ais-Menu-showMore.ais-Menu-showMore--disabled,
+.ais-RefinementList-showMore.ais-RefinementList-showMore--disabled,
+.ais-HierarchicalMenu-showMore.ais-HierarchicalMenu-showMore--disabled,
+.ais-InfiniteHits-loadMore.ais-InfiniteHits-loadMore--disabled {
+    display: none !important;
+}

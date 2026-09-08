@@ -117,8 +117,6 @@ function enableInstantSearch(config) {
             if (indexUiState.hierarchicalMenu && indexUiState.hierarchicalMenu['newArrivalsCategory.0']) {
                 route.newArrivals = compressBreadcrumb(indexUiState.hierarchicalMenu['newArrivalsCategory.0']);
             }
-            // The collections menu registers as a hierarchical facet but carries a single flat value,
-            // so it needs neither compressBreadcrumb nor expandBreadcrumb.
             if (indexUiState.menu && indexUiState.menu._collections) {
                 route.collection = indexUiState.menu._collections;
             }
@@ -454,10 +452,7 @@ function enableInstantSearch(config) {
                     root: 'col-12',
                     list: 'row product-grid',
                     item: 'col-6 col-sm-4',
-                    loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto',
-                    // The button is rendered on every page and only disabled once the last one is
-                    // reached, so hide it there rather than leaving a dead button under the grid.
-                    disabledLoadMore: 'd-none'
+                    loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto'
                 },
                 templates: {
                     showMoreText: algoliaData.strings.moreResults,
@@ -666,8 +661,7 @@ function enableInstantSearch(config) {
                             container: '#algolia-content-hits-placeholder',
                             cssClasses: {
                                 root: 'w-100',
-                                loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto',
-                                disabledLoadMore: 'd-none'
+                                loadMore: 'btn btn-outline-primary col-12 col-sm-4 my-4 d-block mx-auto'
                             },
                             templates: {
                                 item: `
@@ -725,30 +719,12 @@ function enableInstantSearch(config) {
     });
 
     /**
-     * Hides the "show more" button in the state where it does nothing. The list widgets render the
-     * button whenever "showMore" is on and only disable it once the facet holds no more values than
-     * the widget already lists, which otherwise leaves dead text under a short list.
-     * @param {Object} options Options object of a menu, hierarchical menu or refinement list
-     * @returns {Object} The options, with the hiding class merged into cssClasses
-     */
-    function hideDisabledShowMore(options) {
-        if (!options.showMore) {
-            return options;
-        }
-        var cssClasses = Object.assign({}, options.cssClasses);
-        cssClasses.disabledShowMore = cssClasses.disabledShowMore
-            ? cssClasses.disabledShowMore + ' d-none'
-            : 'd-none';
-        return Object.assign({}, options, { cssClasses: cssClasses });
-    }
-
-    /**
      * Generates a menu with the Panel widget
      * @param {Object} options Options object
      * @returns {Object} The Panel widget
      */
     function hierarchicalMenuWithPanel(options) {
-        return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(hideDisabledShowMore(options))
+        return withPanel(options.attributes[0], options.panelTitle)(instantsearch.widgets.hierarchicalMenu)(options)
     }
 
     /**
@@ -757,7 +733,7 @@ function enableInstantSearch(config) {
      * @returns {Object} The Panel widget
      */
     function menuWithPanel(options) {
-        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.menu)(hideDisabledShowMore(options))
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.menu)(options)
     }
 
     /**
@@ -766,7 +742,7 @@ function enableInstantSearch(config) {
      * @returns {Object} The Panel widget
      */
     function refinementListWithPanel(options) {
-        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(hideDisabledShowMore(options))
+        return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.refinementList)(options)
     }
 
     /**
