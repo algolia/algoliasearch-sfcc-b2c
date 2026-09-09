@@ -292,6 +292,9 @@ function enableInstantSearch(config) {
                 limit: 20,
                 showMore: true,
                 showMoreLimit: 100,
+                cssClasses: {
+                    showMore: 'store-facet-show-more'
+                },
                 templates: {
                     item(data, { html }) {
                         return html`
