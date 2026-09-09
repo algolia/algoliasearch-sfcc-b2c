@@ -80,13 +80,33 @@ describe('getAttributeSlicedModelRecordID', () => {
         };
         expect(modelHelper.getAttributeSlicedModelRecordID(simpleProduct)).toBe('SIMPLE1');
     });
+
+    test('uses the grouping attribute passed in instead of reading the preference', () => {
+        const masterProduct = new MasterProductMock({ ID: 'MASTER1' });
+        const variantProduct = new VariantMock({
+            ID: 'VAR1',
+            masterProduct,
+            variationAttributes: { color: 'JJB52A0', size: '004' },
+        });
+        expect(modelHelper.getAttributeSlicedModelRecordID(variantProduct, 'color')).toBe('MASTER1-JJB52A0');
+        expect(algoliaDataMock.getPreference).not.toHaveBeenCalled();
+    });
 });
 
 describe('getRecordIDForProduct', () => {
     const simpleProduct = {
         isMaster: () => false,
         isVariant: () => false,
+        isVariationGroup: () => false,
         getID: () => 'SIMPLE1',
+    };
+
+    const variationGroupProduct = {
+        isMaster: () => false,
+        isVariant: () => false,
+        isVariationGroup: () => true,
+        getMasterProduct: () => ({ getID: () => 'MASTER1' }),
+        getID: () => 'VG1',
     };
 
     let variantProduct;
@@ -105,9 +125,14 @@ describe('getRecordIDForProduct', () => {
         });
     });
 
-    test('attribute-sliced: a variant is reported as its variation group', () => {
+    test('attribute-sliced: a variant is reported as the slice holding its grouping attribute value', () => {
         algoliaDataMock.getPreference.mockReturnValue('color');
         expect(modelHelper.getRecordIDForProduct(variantProduct, 'attribute-sliced')).toBe('MASTER1-JJB52A0');
+    });
+
+    test('attribute-sliced: the grouping attribute can be passed in instead of read from the preference', () => {
+        expect(modelHelper.getRecordIDForProduct(variantProduct, 'attribute-sliced', 'color')).toBe('MASTER1-JJB52A0');
+        expect(algoliaDataMock.getPreference).not.toHaveBeenCalled();
     });
 
     test('attribute-sliced: a product without variants keeps its own ID', () => {
@@ -126,6 +151,10 @@ describe('getRecordIDForProduct', () => {
 
     test('master-level: a product without a master keeps its own ID', () => {
         expect(modelHelper.getRecordIDForProduct(simpleProduct, 'master-level')).toBe('SIMPLE1');
+    });
+
+    test('master-level: a variation group is reported as its master, since it is not indexed', () => {
+        expect(modelHelper.getRecordIDForProduct(variationGroupProduct, 'master-level')).toBe('MASTER1');
     });
 
     test('variant-level: the product keeps its own ID', () => {

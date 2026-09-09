@@ -36,7 +36,11 @@ server.append('Variation', function (req, res, next) {
 
         if (viewData.product) {
             session.privacy.algoliaAnchorProducts = JSON.stringify([viewData.product.id]);
-            viewData.algoliaAnchorProduct = JSON.parse(recommendUtils.getAnchorProductIDs())[0];
+
+            // An empty string means the selected variation has no record to anchor on, so there is
+            // nothing to re-render the widgets with. It is not valid JSON, so it cannot be parsed.
+            var anchorProductIDs = recommendUtils.getAnchorProductIDs();
+            viewData.algoliaAnchorProduct = anchorProductIDs ? JSON.parse(anchorProductIDs)[0] : null;
             res.setViewData(viewData);
         }
     }
