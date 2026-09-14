@@ -146,7 +146,7 @@ function enableInstantSearch(config) {
                 indexUiState.hierarchicalMenu['newArrivalsCategory.0'] = expandBreadcrumb([].concat(route.newArrivals));
             }
             if (route.collection) {
-                // The menu is single-select, so a repeated parameter keeps its first value only.
+                // Single-select, so a repeated parameter keeps its first value only.
                 indexUiState.menu = { _collections: [].concat(route.collection)[0] };
             }
             if (route.newArrival === '1') indexUiState.toggle = { newArrival: true };
@@ -237,6 +237,44 @@ function enableInstantSearch(config) {
             ]);
         }
 
+        // "collections" refinement. Algolia Collections write the "_collections"
+        // attribute onto records as they pass through the Ingestion pipeline. On an
+        // index that does not declare the attribute the facet comes back empty and the
+        // Panel hides itself, so it is registered unconditionally. Single-select,
+        // because a collection is a listing rather than a filter value.
+        //
+        // A collection listing page presents one curated assortment, so there the
+        // attribute is registered through the connector instead: it holds the refinement
+        // that routeToState read from the URL and renders no picker. A collection
+        // supplied next to a query or a category is an ordinary refinement on that page,
+        // and keeps the visible panel.
+        var collectionsWidget = config.collectionPageName
+            ? virtualMenu({ attribute: '_collections' })
+            : menuWithPanel({
+                container: '#algolia-collections-list-placeholder',
+                attribute: '_collections',
+                limit: 20,
+                showMore: true,
+                showMoreLimit: 100,
+                cssClasses: {
+                    showMore: 'store-facet-show-more'
+                },
+                templates: {
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
+                    showMoreText({ isShowingMore }) {
+                        return isShowingMore ? algoliaData.strings.showLess : algoliaData.strings.showMore;
+                    }
+                },
+                panelTitle: algoliaData.strings.collectionsPanelTitle
+            });
+
         search.addWidgets([
             instantsearch.widgets.configure({
                 distinct: true,
@@ -282,34 +320,7 @@ function enableInstantSearch(config) {
                 ]
             }),
 
-            // "collections" refinement panel. Algolia Collections write the "_collections" attribute onto
-            // records as they pass through the Ingestion pipeline. On an index that does not declare the
-            // attribute the facet comes back empty and the Panel hides itself, so the widget is registered
-            // unconditionally. Single-select, because a collection is a listing rather than a filter value.
-            menuWithPanel({
-                container: '#algolia-collections-list-placeholder',
-                attribute: '_collections',
-                limit: 20,
-                showMore: true,
-                showMoreLimit: 100,
-                cssClasses: {
-                    showMore: 'store-facet-show-more'
-                },
-                templates: {
-                    item(data, { html }) {
-                        return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
-                            </a>
-                        `
-                    },
-                    showMoreText({ isShowingMore }) {
-                        return isShowingMore ? algoliaData.strings.showLess : algoliaData.strings.showMore;
-                    }
-                },
-                panelTitle: algoliaData.strings.collectionsPanelTitle
-            }),
+            collectionsWidget,
 
             // "new arrival" refinement panel
             toggleRefinementWithPanel({
@@ -653,6 +664,20 @@ function enableInstantSearch(config) {
             })
         ]);
 
+        if (config.collectionPageName) {
+            // The banner prints the collection name straight from the URL, so hide it
+            // while the collection has no products: a renamed or deleted one should not
+            // be shown as a page title.
+            search.addWidgets([
+                instantsearch.connectors.connectStats(function (renderOptions, isFirstRendering) {
+                    var banner = document.querySelector('#algolia-collection-banner');
+                    if (!isFirstRendering && banner) {
+                        banner.style.display = renderOptions.nbHits === 0 ? 'none' : '';
+                    }
+                })({})
+            ]);
+        }
+
         if (contentResultEl && contentSearchbarTab && enableContentSearch) {
             search.addWidgets([
                 instantsearch.widgets
@@ -737,6 +762,18 @@ function enableInstantSearch(config) {
      */
     function menuWithPanel(options) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.menu)(options)
+    }
+
+    /**
+     * Builds a menu that holds a refinement without rendering anything, for a page
+     * dedicated to one facet value: the value has to be part of the InstantSearch state,
+     * but a picker for it would be noise. This is the arrangement Algolia documents for
+     * hiding the menu on a collection page.
+     * @param {Object} options Options object
+     * @returns {Object} The virtual menu widget
+     */
+    function virtualMenu(options) {
+        return instantsearch.connectors.connectMenu(function () { return null; })(options)
     }
 
     /**

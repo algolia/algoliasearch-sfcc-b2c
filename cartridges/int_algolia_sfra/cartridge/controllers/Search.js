@@ -21,6 +21,7 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
         useAlgolia = true;
         var cgid = req.querystring.cgid;
         var q = req.querystring.q;
+        var collection = req.querystring.collection;
         var category = null;
         var categoryBannerUrl;
         var categoryDisplayNamePath = '';
@@ -45,6 +46,30 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             }
         }
 
+        // A repeated parameter arrives as an array. The storefront never produces one,
+        // but keeping a single value makes sure the heading, the canonical URL and the
+        // client-side refinement all name the same collection. The query string parser
+        // walks the parameters in reverse, so the last array element is the first
+        // occurrence in the URL, which is the one the client applies.
+        if (Array.isArray(collection)) {
+            collection = collection[collection.length - 1];
+        }
+
+        // What kind of listing this request is. A collection supplied next to a query
+        // or a category refines that page, so only a collection on its own makes a
+        // collection listing. The canonical URL and the crawler request follow this
+        // precedence too.
+        var pageType = null;
+        if (!empty(cgid)) {
+            pageType = 'category';
+        } else if (!empty(q)) {
+            pageType = 'query';
+        } else if (!empty(collection)) {
+            pageType = 'collection';
+        }
+
+        var isCollectionPage = pageType === 'collection';
+
         if (useAlgolia) {
             var hits;
             var contentHits;
@@ -54,29 +79,50 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
             res.personalized = true;
 
             // Canonical URL excludes refinements and pagination so that crawlers
-            // see a single representative URL per category (or per query),
+            // see a single representative URL per category, query or collection,
             var canonicalUrl;
-            if (cgid) {
-                canonicalUrl = URLUtils.url('Search-Show', 'cgid', cgid).abs().toString();
-            } else if (q) {
-                canonicalUrl = URLUtils.url('Search-Show', 'q', q).abs().toString();
+            switch (pageType) {
+                case 'category':
+                    canonicalUrl = URLUtils.url('Search-Show', 'cgid', cgid).abs().toString();
+                    break;
+                case 'query':
+                    canonicalUrl = URLUtils.url('Search-Show', 'q', q).abs().toString();
+                    break;
+                case 'collection':
+                    canonicalUrl = URLUtils.url('Search-Show', 'collection', collection).abs().toString();
+                    break;
+                default:
+                    break;
             }
 
             // server-side rendering to improve SEO - makes a server-side request to Algolia to return CLP search results
             // only triggered when the user-agent looks like a bot, as we want it triggered only for search engines bots (DuckDuckBot, GoogleBot, BingBot, YandexBot, Baiduspider, ...)
             var searchenginesbots = /bot|crawler|spider/i;
             if (algoliaData.getPreference('EnableSSR') && searchenginesbots.test(req.httpHeaders.get('user-agent'))) {
-                // We use the 'cgid' and 'q' parameters to identify if we're on a category page or normal search.
-                var type = cgid ? 'category' : q ? 'query' : null;
+                // The term to search on depends on the kind of listing.
+                var query;
+                switch (pageType) {
+                    case 'category':
+                        query = cgid;
+                        break;
+                    case 'query':
+                        query = q;
+                        break;
+                    case 'collection':
+                        query = collection;
+                        break;
+                    default:
+                        break;
+                }
+
                 // Then, we are fetching server-side results and transform them prior to rendering according to search type.
-                if (type) {
-                    var query = type === 'category' ? cgid : q;
-                    hits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, type, 'products');
+                if (pageType) {
+                    hits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, pageType, 'products');
                     hits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(hits);
                 }
 
-                if (type === 'query' && algoliaData.getPreference('EnableContentSearch')) {
-                    contentHits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, type, 'contents');
+                if (pageType === 'query' && algoliaData.getPreference('EnableContentSearch')) {
+                    contentHits = require('*/cartridge/scripts/algoliaSearchAPI').getServerSideHits(query, pageType, 'contents');
                     contentHits = require('*/cartridge/scripts/algolia/helper/ssrHelper').transformItems(contentHits);
                 }
             }
@@ -106,6 +152,8 @@ server.replace('Show', cache.applyShortPromotionSensitiveCache, consentTracking.
                 contentHits: contentHits,
                 cgid: req.querystring.cgid,
                 q: req.querystring.q,
+                collection: collection,
+                isCollectionPage: isCollectionPage,
                 canonicalUrl: canonicalUrl,
                 activePromotions: activePromotions
             }

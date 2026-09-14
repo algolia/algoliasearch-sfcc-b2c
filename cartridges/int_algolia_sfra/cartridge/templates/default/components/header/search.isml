@@ -6,6 +6,7 @@
             data-category-display-name-path="${pdict.categoryDisplayNamePath}"
             data-category-display-name-path-separator="${pdict.categoryDisplayNamePathSeparator}"
             data-q="${empty(pdict.q) ? '' : pdict.q}"
+            data-collection-page="${pdict.isCollectionPage ? pdict.collection : ''}"
             data-search-page-root="${URLUtils.http('Search-Show')}"></div>
         <div id="aa-search-input"></div>
     </div>

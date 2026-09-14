@@ -7,6 +7,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var categoryDisplayNamePath = $suggestionsWrapper.attr('data-category-display-name-path');  // path of the current category
     var categoryDisplayNamePathSeparator = $suggestionsWrapper.attr('data-category-display-name-path-separator'); // separator used to serialize the category path (by default: '>')
     var urlQuery = $suggestionsWrapper.attr('data-q'); // onload search query - for search page - URL param: q
+    // empty unless this is a collection listing page
+    var collectionPageName = $suggestionsWrapper.attr('data-collection-page');
     var searchPageRoot = $suggestionsWrapper.attr('data-search-page-root'); // onload search query - for search page - URL param: q
 
     var searchClient = algoliasearch(algoliaData.applicationID, algoliaData.searchApiKey);
@@ -40,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
             categoryId,
             categoryDisplayNamePath,
             categoryDisplayNamePathSeparator,
+            collectionPageName,
         });
     }
 
