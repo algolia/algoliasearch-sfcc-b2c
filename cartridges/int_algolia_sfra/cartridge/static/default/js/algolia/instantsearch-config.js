@@ -195,6 +195,11 @@ function enableInstantSearch(config) {
             search.addWidgets([
                 instantsearch.widgets.clearRefinements({
                     container: '#algolia-clear-refinements-placeholder',
+                    // On a collection listing page the collection is the page rather than a
+                    // refinement the shopper chose, so Reset clears the other facets and keeps
+                    // it. Clearing it would leave the whole catalog under the collection
+                    // heading, because the heading is rendered server side.
+                    excludedAttributes: config.collectionPageName ? ['query', '_collections'] : ['query'],
                     cssClasses: {
                         root: 'secondary-bar col-12 offset-sm-4 offset-md-0 col-sm-4 col-md-12',
                         button: 'btn btn-block btn-outline-primary',
