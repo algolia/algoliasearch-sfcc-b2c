@@ -146,7 +146,7 @@ function enableInstantSearch(config) {
                 indexUiState.hierarchicalMenu['newArrivalsCategory.0'] = expandBreadcrumb([].concat(route.newArrivals));
             }
             if (route.collection) {
-                // The menu is single-select, so a repeated parameter keeps its first value only.
+                // Single-select, so a repeated parameter keeps its first value only.
                 indexUiState.menu = { _collections: [].concat(route.collection)[0] };
             }
             if (route.newArrival === '1') indexUiState.toggle = { newArrival: true };
@@ -195,6 +195,11 @@ function enableInstantSearch(config) {
             search.addWidgets([
                 instantsearch.widgets.clearRefinements({
                     container: '#algolia-clear-refinements-placeholder',
+                    // On a collection listing page the collection is the page rather than a
+                    // refinement the shopper chose, so Reset clears the other facets and keeps
+                    // it. Clearing it would leave the whole catalog under the collection
+                    // heading, because the heading is rendered server side.
+                    excludedAttributes: config.collectionPageName ? ['query', '_collections'] : ['query'],
                     cssClasses: {
                         root: 'secondary-bar col-12 offset-sm-4 offset-md-0 col-sm-4 col-md-12',
                         button: 'btn btn-block btn-outline-primary',
@@ -236,6 +241,36 @@ function enableInstantSearch(config) {
                 }),
             ]);
         }
+
+        // "collections" refinement panel. The Panel hides itself on an index with no
+        // collections, so it is registered unconditionally. On a collection listing page
+        // the menu is hidden instead, because there the collection is the page.
+        var collectionsWidget = config.collectionPageName
+            ? virtualMenu({ attribute: '_collections' })
+            : menuWithPanel({
+                container: '#algolia-collections-list-placeholder',
+                attribute: '_collections',
+                limit: 20,
+                showMore: true,
+                showMoreLimit: 100,
+                cssClasses: {
+                    showMore: 'store-facet-show-more'
+                },
+                templates: {
+                    item(data, { html }) {
+                        return html`
+                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
+                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
+                                <span class="${data.cssClasses.label}"> ${data.label}</span>
+                            </a>
+                        `
+                    },
+                    showMoreText({ isShowingMore }) {
+                        return isShowingMore ? algoliaData.strings.showLess : algoliaData.strings.showMore;
+                    }
+                },
+                panelTitle: algoliaData.strings.collectionsPanelTitle
+            });
 
         search.addWidgets([
             instantsearch.widgets.configure({
@@ -282,34 +317,7 @@ function enableInstantSearch(config) {
                 ]
             }),
 
-            // "collections" refinement panel. Algolia Collections write the "_collections" attribute onto
-            // records as they pass through the Ingestion pipeline. On an index that does not declare the
-            // attribute the facet comes back empty and the Panel hides itself, so the widget is registered
-            // unconditionally. Single-select, because a collection is a listing rather than a filter value.
-            menuWithPanel({
-                container: '#algolia-collections-list-placeholder',
-                attribute: '_collections',
-                limit: 20,
-                showMore: true,
-                showMoreLimit: 100,
-                cssClasses: {
-                    showMore: 'store-facet-show-more'
-                },
-                templates: {
-                    item(data, { html }) {
-                        return html`
-                            <a class="${data.cssClasses.link}" href="${data.url}" style="white-space: nowrap; ${data.isRefined ? 'font-weight: bold;' : ''}">
-                                <i class="fa ${data.isRefined ? 'fa-check-circle' : 'fa-circle-o'}"></i>
-                                <span class="${data.cssClasses.label}"> ${data.label}</span>
-                            </a>
-                        `
-                    },
-                    showMoreText({ isShowingMore }) {
-                        return isShowingMore ? algoliaData.strings.showLess : algoliaData.strings.showMore;
-                    }
-                },
-                panelTitle: algoliaData.strings.collectionsPanelTitle
-            }),
+            collectionsWidget,
 
             // "new arrival" refinement panel
             toggleRefinementWithPanel({
@@ -653,6 +661,26 @@ function enableInstantSearch(config) {
             })
         ]);
 
+        if (config.collectionPageName) {
+            // The heading prints the collection name from the URL, so drop it if the
+            // collection turns up empty on load: renamed, deleted or with no products,
+            // which a search response cannot tell apart. Checked once, so refining the
+            // listing to no results keeps the heading.
+            var collectionChecked = false;
+            search.addWidgets([
+                instantsearch.connectors.connectStats(function (renderOptions, isFirstRendering) {
+                    if (isFirstRendering || collectionChecked) {
+                        return;
+                    }
+                    collectionChecked = true;
+                    var heading = document.querySelector('#algolia-collection-title-placeholder');
+                    if (heading && renderOptions.nbHits === 0) {
+                        heading.style.display = 'none';
+                    }
+                })({})
+            ]);
+        }
+
         if (contentResultEl && contentSearchbarTab && enableContentSearch) {
             search.addWidgets([
                 instantsearch.widgets
@@ -737,6 +765,16 @@ function enableInstantSearch(config) {
      */
     function menuWithPanel(options) {
         return withPanel(options.attribute, options.panelTitle)(instantsearch.widgets.menu)(options)
+    }
+
+    /**
+     * Builds a menu that holds a refinement without rendering anything.
+     * @see https://www.algolia.com/doc/guides/solutions/ecommerce/browse/tutorials/collections#hide-the-menu
+     * @param {Object} options Options object
+     * @returns {Object} The virtual menu widget
+     */
+    function virtualMenu(options) {
+        return instantsearch.connectors.connectMenu(function () { return null; })(options)
     }
 
     /**

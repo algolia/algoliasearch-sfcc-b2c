@@ -4,8 +4,9 @@ var Logger = require('dw/system/Logger');
 
 /**
  * Server-side rendering of query search results: retrieves the first page of results from Algolia for the given search
- * @param {string} query search query to get the search results
- * @param {string} type search type (category or query)
+ * @param {string} query search query to get the search results: the categoryID for a
+ * category, the collection name for a collection, the search term otherwise
+ * @param {string} type search type (category, collection or query)
  * @param {string} indexType index type (products or contents)
  * @returns {Array} the array of objects containing the search result hits or an empty array in case of error
  */
@@ -13,11 +14,17 @@ function getServerSideHits(query, type, indexType) {
     var searchService = algoliaSearchService.getService(indexType);
 
     if (!empty(searchService)) {
+        var params;
         if (type === 'category') {
             var facetFiltersParamValue = require('*/cartridge/scripts/algolia/helper/ssrHelper').facetFiltersParamValueFromBreadcrumbs(query);
+            params = "facetFilters=" + encodeURIComponent(facetFiltersParamValue);
+        } else if (type === 'collection') {
+            // A collection is an ordinary facet on "_collections", so the request is
+            // the same shape as the category one
+            params = "facetFilters=" + encodeURIComponent(JSON.stringify(['_collections:' + query]));
+        } else {
+            params = "query=" + query;
         }
-
-        var params = type === 'category' ? "facetFilters=" + encodeURIComponent(facetFiltersParamValue) : "query=" + query;
 
         var additionalSSRParams = "hitsPerPage=9&analytics=false&enableABTest=false";
 
