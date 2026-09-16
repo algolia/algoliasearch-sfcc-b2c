@@ -26,7 +26,7 @@
     </div>
 <iselseif condition="${pdict.isCollectionPage}">
     <iscomment> The collection name comes from the URL, so encode it </iscomment>
-    <div class="hero slant-down search-banner" id="algolia-collection-banner">
+    <div class="hero slant-down search-banner">
         <h1 class="header page-title">
             <span id="algolia-collection-title-placeholder">
                 <isprint value="${pdict.collection}" encoding="htmlcontent" />
