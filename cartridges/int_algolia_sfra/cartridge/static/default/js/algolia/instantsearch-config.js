@@ -662,13 +662,20 @@ function enableInstantSearch(config) {
         ]);
 
         if (config.collectionPageName) {
-            // The heading prints the collection name from the URL, so leave it out when
-            // the collection has no products: a deleted one should not be a page title.
+            // The heading prints the collection name from the URL, so drop it if the
+            // collection turns up empty on load: renamed, deleted or with no products,
+            // which a search response cannot tell apart. Checked once, so refining the
+            // listing to no results keeps the heading.
+            var collectionChecked = false;
             search.addWidgets([
                 instantsearch.connectors.connectStats(function (renderOptions, isFirstRendering) {
+                    if (isFirstRendering || collectionChecked) {
+                        return;
+                    }
+                    collectionChecked = true;
                     var heading = document.querySelector('#algolia-collection-title-placeholder');
-                    if (!isFirstRendering && heading) {
-                        heading.style.display = renderOptions.nbHits === 0 ? 'none' : '';
+                    if (heading && renderOptions.nbHits === 0) {
+                        heading.style.display = 'none';
                     }
                 })({})
             ]);
