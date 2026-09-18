@@ -200,6 +200,108 @@ describe('sendGroupedIngestionAPIRecords', () => {
         });
     });
 
+    test('collects the error message of a failed push', () => {
+        mockPushByIndexName.mockReturnValue({
+            ok: false,
+            getErrorMessage: () => 'Push task not found for index index_en',
+        });
+
+        const res = requestHelper.sendGroupedIngestionAPIRecords({
+            'index_en': { 'addObject': [{ objectID: '1' }] },
+        });
+
+        expect(res.errorMessages).toEqual(['Push task not found for index index_en']);
+    });
+
+    test('deduplicates identical messages across indices and actions', () => {
+        // A missing task or a conflicting destination fails every chunk of an index with
+        // identical text, so the report should carry one line, not one per push.
+        mockPushByIndexName.mockReturnValue({
+            ok: false,
+            getErrorMessage: () => 'multiple tasks found for the Push connector',
+        });
+
+        const res = requestHelper.sendGroupedIngestionAPIRecords({
+            'index_en': { 'addObject': [{ objectID: '1' }], 'deleteObject': [{ objectID: '2' }] },
+            'index_fr': { 'addObject': [{ objectID: '1' }] },
+        });
+
+        expect(mockPushByIndexName).toHaveBeenCalledTimes(3);
+        expect(res.errorMessages).toEqual(['multiple tasks found for the Push connector']);
+    });
+
+    test('keeps distinct messages, in the order they occurred', () => {
+        mockPushByIndexName
+            .mockReturnValueOnce({ ok: false, getErrorMessage: () => 'Task not found' })
+            .mockReturnValueOnce({ ok: false, getErrorMessage: () => 'Invalid API key' });
+
+        const res = requestHelper.sendGroupedIngestionAPIRecords({
+            'index_en': { 'addObject': [{ objectID: '1' }] },
+            'index_fr': { 'addObject': [{ objectID: '1' }] },
+        });
+
+        expect(res.errorMessages).toEqual(['Task not found', 'Invalid API key']);
+    });
+
+    test('returns no messages when every push succeeds', () => {
+        mockPushByIndexName.mockReturnValue({
+            ok: true,
+            object: { body: { runID: 'run-1', eventID: 'evt-1' } },
+        });
+
+        const res = requestHelper.sendGroupedIngestionAPIRecords({
+            'index_en': { 'addObject': [{ objectID: '1' }] },
+        });
+
+        expect(res.errorMessages).toEqual([]);
+    });
+
+    test('survives a failed result that exposes no getErrorMessage', () => {
+        mockPushByIndexName.mockReturnValue({ ok: false });
+
+        const res = requestHelper.sendGroupedIngestionAPIRecords({
+            'index_en': { 'addObject': [{ objectID: '1' }] },
+        });
+
+        expect(res.errorMessages).toEqual([]);
+        expect(res.failedRecords).toBe(1);
+    });
+
+    test.each([
+        { label: '404 missing task', status: 404, permanent: true },
+        { label: '401 unauthorized', status: 401, permanent: true },
+        { label: '403 forbidden', status: 403, permanent: true },
+        { label: '400 conflicting tasks', status: 400, permanent: true },
+        { label: '408 request timeout', status: 408, permanent: false },
+        { label: '429 rate limited', status: 429, permanent: false },
+        { label: '500 server error', status: 500, permanent: false },
+    ])('reports $label as permanentFailure=$permanent', ({ status, permanent }) => {
+        mockPushByIndexName.mockReturnValue({
+            ok: false,
+            getError: () => status,
+            getErrorMessage: () => 'failure',
+        });
+
+        const res = requestHelper.sendGroupedIngestionAPIRecords({
+            'index_en': { 'addObject': [{ objectID: '1' }] },
+        });
+
+        expect(res.permanentFailure).toBe(permanent);
+    });
+
+    test('reports no permanent failure when every push succeeds', () => {
+        mockPushByIndexName.mockReturnValue({
+            ok: true,
+            object: { body: { runID: 'run-1', eventID: 'evt-1' } },
+        });
+
+        const res = requestHelper.sendGroupedIngestionAPIRecords({
+            'index_en': { 'addObject': [{ objectID: '1' }] },
+        });
+
+        expect(res.permanentFailure).toBe(false);
+    });
+
     test('forwards indexingMethod to pushByIndexName', () => {
         mockPushByIndexName.mockReturnValue({
             ok: true,

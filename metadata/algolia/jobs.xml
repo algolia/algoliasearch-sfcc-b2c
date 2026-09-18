@@ -84,7 +84,7 @@ Performs a partial update on the product objects in the Algolia index.</descript
         <description>Send product record index updates to Algolia for B2C Product objects assigned to the site that have changed since the last job run (either via BM or a product feed import, max 7 days).
 The job relies on SFCC's built-in Delta Exports feature (needs to be enabled) to calculate the delta, then enriches and transforms the products before sending them to Algolia for indexing.</description>
         <parameters>
-            <parameter name="catalogIDs">apparel-catalog, apparel-m-catalog</parameter>
+            <parameter name="catalogIDs">apparel-m-catalog, electronics-m-catalog</parameter>
             <parameter name="consumer">algolia</parameter>
             <parameter name="deltaExportJobName">productDeltaExport</parameter>
         </parameters>

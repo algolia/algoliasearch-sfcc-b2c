@@ -543,6 +543,56 @@ describe('afterStep', () => {
             expect(job.__getJobReport().errorMessage).toBe(expectedErrorMsg);
         });
     });
+    describe('Ingestion API push failures', () => {
+        test('names the cause instead of pointing at the logs', () => {
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+            job.__getJobReport().chunksFailed = 1;
+            job.__setPushErrorMessages(['cannot find task index_en', 'cannot find task index_fr']);
+
+            expect(() => job.afterStep(true)).toThrow();
+            expect(job.__getJobReport().errorMessage).toBe(
+                'Some chunks failed to be sent. cannot find task index_en | cannot find task index_fr'
+            );
+        });
+
+        test('falls back to the generic message when no push message was collected', () => {
+            // The Search API path shares this branch and never populates the accumulator
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+            job.__getJobReport().chunksFailed = 1;
+
+            expect(() => job.afterStep(true)).toThrow();
+            expect(job.__getJobReport().errorMessage).toBe('Some chunks failed to be sent, check the logs for details.');
+        });
+
+        test('reports the stop rather than a failure rate over a partial pass', () => {
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 0 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+            job.__getJobReport().recordsFailed = 10;
+            job.__getJobReport().recordsToSend = 10;
+            job.__setPushErrorMessages(['multiple tasks found for the Push connector']);
+            job.__setStoppedOnPushFailure(true);
+
+            expect(() => job.afterStep(false)).toThrow();
+            expect(job.__getJobReport().errorMessage).toBe(
+                'Indexing stopped: the Ingestion API rejected the push and would reject the rest.'
+                + ' multiple tasks found for the Push connector'
+            );
+        });
+
+        test('truncates a message longer than the persisted maximum', () => {
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+            job.__getJobReport().chunksFailed = 1;
+            job.__setPushErrorMessages([new Array(60).join('a very long api error message ')]);
+
+            expect(() => job.afterStep(true)).toThrow();
+            expect(job.__getJobReport().errorMessage.length).toBe(1003);
+            expect(job.__getJobReport().errorMessage.slice(-3)).toBe('...');
+        });
+    });
+
     describe('fullCatalogReindex', () => {
         test('failurePercentage <= failureThresholdPercentage', () => {
             job.beforeStep({ indexingMethod: 'fullCatalogReindex', failureThresholdPercentage: 5 }, stepExecution);
@@ -563,7 +613,7 @@ describe('afterStep', () => {
             job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
             job.__getJobReport().recordsFailed = 6;
             job.__getJobReport().recordsToSend = 100;
-            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Check the logs for details. Temporary indices were not moved to production.';
+            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Check the logs for details. | Temporary indices were not moved to production.';
             expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
             expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
             expect(job.__getJobReport().error).toBe(true);
@@ -573,7 +623,7 @@ describe('afterStep', () => {
             job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
             job.__getJobReport().processedItems = 1000;
             const expectedProcessedItems = ProductMgrMock.queryAllSiteProducts().count;
-            const expectedErrorMsg = `Not all products were processed: 1000 / ${expectedProcessedItems}. Check the logs for details. Temporary indices were not moved to production.`;
+            const expectedErrorMsg = `Not all products were processed: 1000 / ${expectedProcessedItems}. Check the logs for details. | Temporary indices were not moved to production.`;
             expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
             expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
             expect(job.__getJobReport().error).toBe(true);

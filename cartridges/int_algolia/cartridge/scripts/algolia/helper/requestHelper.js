@@ -141,10 +141,24 @@ function groupRecordsForIngestionAPI(recordArray) {
 }
 
 /**
+ * Checks whether a failed push will fail the same way for every remaining chunk. A 4xx
+ * other than a timeout or a rate limit is about the request or the index rather than the
+ * records: a missing task, conflicting tasks, a rejected key. Working through the rest
+ * of the catalog wouldn't change the outcome.
+ * @param {dw.svc.Result} result the result of a push call
+ * @returns {boolean} true if the condition will not clear on its own during this run
+ */
+function isPermanentFailure(result) {
+    var status = result.getError ? result.getError() : 0;
+    return status >= 400 && status < 500 && status !== 408 && status !== 429;
+}
+
+/**
  * Sends Algolia records to the Ingestion API grouped by indexName and action
  * @param {Object} groupedRecords - Records grouped by `indexName` and `action`.
  * @param {string} [indexingMethod] - the indexing method (e.g. 'fullCatalogReindex'), forwarded to pushByIndexName
- * @returns {Object} result object containing { result, failedRecords, sentRecords }
+ * @returns {Object} result object containing
+ * { result, failedRecords, sentRecords, errorMessages, permanentFailure }
  */
 function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
     let indices = Object.keys(groupedRecords);
@@ -152,6 +166,8 @@ function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
     let sentRecords = 0;
     let wasThereAnError = false;
     let indexingEvents = {};
+    let errorMessages = [];
+    let permanentFailure = false;
 
     for (let i = 0; i < indices.length; i++) {
         let indexName = indices[i];
@@ -176,6 +192,18 @@ function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
             } else {
                 wasThereAnError = true;
                 failedRecords += recordToSend.records.length;
+
+                // Keep what the API said so the job report can name the cause instead of
+                // pointing at the log. A missing task or a conflicting destination fails
+                // every chunk of an index with identical text, hence the deduplication.
+                let message = result.getErrorMessage ? result.getErrorMessage() : null;
+                if (message && errorMessages.indexOf(message) === -1) {
+                    errorMessages.push(message);
+                }
+
+                if (isPermanentFailure(result)) {
+                    permanentFailure = true;
+                }
             }
         }
     }
@@ -189,6 +217,8 @@ function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
         },
         failedRecords: failedRecords,
         sentRecords: sentRecords,
+        errorMessages: errorMessages,
+        permanentFailure: permanentFailure,
     }
 }
 
