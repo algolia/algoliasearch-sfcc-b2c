@@ -429,6 +429,62 @@ describe('send', () => {
 
     // Parity with the Search API: chunksSent++ whenever the transport accepted any records;
     // the overall pass/fail decision is driven by failureThresholdPercentage in afterStep.
+    test('Ingestion API - a permanent failure stops the job when nothing was accepted', () => {
+        job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: false },
+            failedRecords: 2,
+            sentRecords: 0,
+            errorMessages: ['cannot find task test_en'],
+            permanentFailure: true,
+        });
+
+        function makeChunk() {
+            const ops = [{ action: 'addObject', indexName: 'test_en', body: { id: '0' } }];
+            ops.toArray = function () { return ops; };
+            const chunk = [ops];
+            chunk.toArray = function () { return chunk; };
+            return chunk;
+        }
+
+        expect(() => job.send(makeChunk())).toThrow(/cannot find task test_en/);
+        expect(job.__getJobReport().chunksFailed).toBe(1);
+    });
+
+    test('Ingestion API - a permanent failure does not stop the job when part of the chunk was accepted', () => {
+        // A partially accepted chunk leaves the pass/fail decision to the threshold, so
+        // one rejected index among several must not abandon the rest of the catalog.
+        job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: false },
+            failedRecords: 1,
+            sentRecords: 1,
+            errorMessages: ['cannot find task test_fr'],
+            permanentFailure: true,
+        });
+
+        function makeChunk() {
+            const ops = [
+                { action: 'addObject', indexName: 'test_en', body: { id: '0' } },
+                { action: 'addObject', indexName: 'test_fr', body: { id: '0' } },
+            ];
+            ops.toArray = function () { return ops; };
+            const chunk = [ops];
+            chunk.toArray = function () { return chunk; };
+            return chunk;
+        }
+
+        expect(() => job.send(makeChunk())).not.toThrow();
+        expect(job.__getJobReport().chunksSent).toBe(1);
+        expect(job.__getJobReport().chunksFailed).toBe(0);
+    });
+
     test('Ingestion API - partial failure counts the chunk as sent, not failed', () => {
         job.beforeStep({}, stepExecution);
         job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);

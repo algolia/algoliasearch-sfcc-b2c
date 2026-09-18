@@ -615,14 +615,6 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
                     });
                 }
 
-                // If the error would stop the job from ever completing (a missing task,
-                // conflicting tasks, a rejected key), stop now instead of sending more chunks.
-                if (resultObj.permanentFailure) {
-                    stoppedOnPushFailure = true;
-                    jobReport.chunksFailed++;
-                    throw new Error('Stopping: the Ingestion API rejected the push. ' + pushErrorMessages.join(' | '));
-                }
-
                 if (resultObj.sentRecords > 0) {
                     jobReport.chunksSent++;
 
@@ -638,6 +630,17 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
                     }
                 } else {
                     jobReport.chunksFailed++;
+
+                    // Nothing was accepted and the error would stop the job from ever
+                    // completing (a missing task, conflicting tasks, a rejected key),
+                    // so stop now instead of building the rest of the catalog. A failed
+                    // chunk already fails the job in afterStep(), so this changes only
+                    // the time spent. A partially accepted chunk never stops the job,
+                    // leaving failureThresholdPercentage to decide as before.
+                    if (resultObj.permanentFailure) {
+                        stoppedOnPushFailure = true;
+                        throw new Error('Stopping: the Ingestion API rejected the push. ' + pushErrorMessages.join(' | '));
+                    }
                 }
             } else {
                 jobReport.recordsFailed += batch.length;
