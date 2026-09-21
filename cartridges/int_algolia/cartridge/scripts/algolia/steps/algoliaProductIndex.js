@@ -637,7 +637,7 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
                     // chunk already fails the job in afterStep(), so this changes only
                     // the time spent. A partially accepted chunk never stops the job,
                     // leaving failureThresholdPercentage to decide as before.
-                    if (resultObj.permanentFailure) {
+                    if (resultObj.unrecoverableFailure) {
                         stoppedOnPushFailure = true;
                         throw new Error('Stopping: the Ingestion API rejected the push. ' + pushErrorMessages.join(' | '));
                     }

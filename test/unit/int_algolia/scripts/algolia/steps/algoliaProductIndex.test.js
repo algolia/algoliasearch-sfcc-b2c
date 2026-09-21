@@ -439,7 +439,7 @@ describe('send', () => {
             failedRecords: 2,
             sentRecords: 0,
             errorMessages: ['cannot find task test_en'],
-            permanentFailure: true,
+            unrecoverableFailure: true,
         });
 
         function makeChunk() {
@@ -466,7 +466,7 @@ describe('send', () => {
             failedRecords: 1,
             sentRecords: 1,
             errorMessages: ['cannot find task test_fr'],
-            permanentFailure: true,
+            unrecoverableFailure: true,
         });
 
         function makeChunk() {

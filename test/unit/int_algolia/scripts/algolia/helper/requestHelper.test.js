@@ -267,29 +267,64 @@ describe('sendGroupedIngestionAPIRecords', () => {
         expect(res.failedRecords).toBe(1);
     });
 
+    // Both reproduced against a live application, see the list in requestHelper.js
+    const MISSING_TASK_ERROR = '{"error":{"code":"resource_not_found"},'
+        + '"message":"cannot find task index_en","status":404}';
+    const MULTIPLE_TASKS_ERROR = '{"error":{"code":"invalid_payload"},"message":"multiple tasks (a, b) found for the'
+        + ' Push connector with indexName index_en, please use /2/tasks/:id/push instead","status":400}';
+    // Shaped after the Search API's record-too-big response. The push endpoint reports
+    // record problems asynchronously, so this stands in for a non-conflict 400.
+    const OTHER_400_ERROR = '{"error":{"code":"invalid_payload"},"message":"Record 1 is too big:'
+        + ' size: 11072 byte(s), maximum allowed: 10000 byte(s)","status":400}';
+    // A different condition that happens to suggest the same endpoint as the remedy
+    const SAME_REMEDY_ERROR = '{"error":{"code":"invalid_payload"},"message":"the destination is'
+        + ' ambiguous, please use /2/tasks/:id/push instead","status":400}';
+
     test.each([
-        { label: '404 missing task', status: 404, permanent: true },
-        { label: '401 unauthorized', status: 401, permanent: true },
-        { label: '403 forbidden', status: 403, permanent: true },
-        { label: '400 conflicting tasks', status: 400, permanent: true },
-        { label: '408 request timeout', status: 408, permanent: false },
-        { label: '429 rate limited', status: 429, permanent: false },
-        { label: '500 server error', status: 500, permanent: false },
-    ])('reports $label as permanentFailure=$permanent', ({ status, permanent }) => {
+        // The two known cases: the status and the message both have to match
+        { label: 'a missing task', status: 404, message: MISSING_TASK_ERROR, unrecoverable: true },
+        { label: 'conflicting tasks', status: 400, message: MULTIPLE_TASKS_ERROR, unrecoverable: true },
+
+        // The same statuses carrying a different message are not recognized
+        { label: 'a 404 with an unfamiliar message', status: 404, message: 'something else', unrecoverable: false },
+        { label: 'a 400 that does not name the task conflict', status: 400, message: OTHER_400_ERROR, unrecoverable: false },
+
+        // Matching is on what went wrong, not the remedy, which other errors may suggest
+        { label: 'an unrelated 400 suggesting the same endpoint', status: 400, message: SAME_REMEDY_ERROR, unrecoverable: false },
+
+        // The known messages under a different status are not recognized either
+        { label: 'the missing-task message under a 500', status: 500, message: MISSING_TASK_ERROR, unrecoverable: false },
+
+        // Nothing else stops the job, auth included: no status for it is documented
+        // or observed
+        { label: 'a rejected key', status: 403, message: 'Invalid Application-ID or API key', unrecoverable: false },
+        { label: 'a request timeout', status: 408, message: 'timeout', unrecoverable: false },
+        { label: 'a rate limit', status: 429, message: 'rate limited', unrecoverable: false },
+    ])('reports $label as unrecoverableFailure=$unrecoverable', ({ status, message, unrecoverable }) => {
         mockPushByIndexName.mockReturnValue({
             ok: false,
             getError: () => status,
-            getErrorMessage: () => 'failure',
+            getErrorMessage: () => message,
         });
 
         const res = requestHelper.sendGroupedIngestionAPIRecords({
             'index_en': { 'addObject': [{ objectID: '1' }] },
         });
 
-        expect(res.permanentFailure).toBe(permanent);
+        expect(res.unrecoverableFailure).toBe(unrecoverable);
     });
 
-    test('reports no permanent failure when every push succeeds', () => {
+    test('treats a failure with no readable message as recoverable', () => {
+        mockPushByIndexName.mockReturnValue({ ok: false, getError: () => 404 });
+
+        const res = requestHelper.sendGroupedIngestionAPIRecords({
+            'index_en': { 'addObject': [{ objectID: '1' }] },
+        });
+
+        expect(res.unrecoverableFailure).toBe(false);
+    });
+
+    test('reports no unrecoverable failure when every push succeeds', () => {
         mockPushByIndexName.mockReturnValue({
             ok: true,
             object: { body: { runID: 'run-1', eventID: 'evt-1' } },
@@ -299,7 +334,7 @@ describe('sendGroupedIngestionAPIRecords', () => {
             'index_en': { 'addObject': [{ objectID: '1' }] },
         });
 
-        expect(res.permanentFailure).toBe(false);
+        expect(res.unrecoverableFailure).toBe(false);
     });
 
     test('forwards indexingMethod to pushByIndexName', () => {
