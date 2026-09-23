@@ -20,6 +20,12 @@ var jobReport;
 var l0_deltaExportDir, l1_processingDir;
 var changedProducts = [], changedProductsIterator;
 var deltaExportZips, siteLocales, attributesToSend;
+// Ingestion API error messages collected across chunks, written into the report by afterStep()
+var pushErrorMessages = [];
+// Set when a push failed for a reason that will not clear during this run. The job then
+// stops early, so the failure percentage would only cover the part of the catalog that
+// was attempted; afterStep() reports that the job stopped instead of that percentage.
+var stoppedOnPushFailure = false;
 var masterAttributes = [], variantAttributes = [];
 var nonLocalizedAttributes = [], nonLocalizedMasterAttributes = [];
 var attributesComputedFromBaseProduct = [];
@@ -35,6 +41,7 @@ const {
     INDEXING_APIS,
     ANALYTICS_REGIONS,
     ALGOLIA_DELTA_EXPORT_BASE_FOLDER,
+    MAX_JOB_REPORT_ERROR_MESSAGE_LENGTH,
 } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
 
 // Algolia preferences
@@ -125,6 +132,8 @@ exports.beforeStep = function(parameters, stepExecution) {
 
     /* --- initializing custom object logging --- */
     jobReport = new AlgoliaJobReport(stepExecution.getJobExecution().getJobID(), 'product');
+    pushErrorMessages = [];
+    stoppedOnPushFailure = false;
     jobReport.startTime = new Date();
 
     /* --- parameters --- */
@@ -747,8 +756,10 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
     switch (indexingAPI) {
         case INDEXING_APIS.INGESTION_API: {
-            // With the Ingestion API, an OK response only means the payload was accepted;
-            // record-level errors (e.g. "record too big") happen asynchronously — check the Algolia Dashboard.
+            // With the Ingestion API, an OK response only means the payload was
+            // accepted. The push is asynchronous unless its "watch" parameter is set,
+            // which the cartridge does not do, so record-level errors (e.g. "record
+            // too big") arrive later - check the Algolia Dashboard.
             // sentRecords/failedRecords reflect transport-level success per push call.
             let resultObj;
             try {
@@ -763,10 +774,30 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
                 // and as "failed" when nothing was accepted. `failureThresholdPercentage` (evaluated in afterStep) owns the pass/fail decision.
                 jobReport.recordsSent += resultObj.sentRecords;
                 jobReport.recordsFailed += resultObj.failedRecords;
+
+                if (resultObj.errorMessages) {
+                    resultObj.errorMessages.forEach(function (message) {
+                        if (pushErrorMessages.indexOf(message) === -1) {
+                            pushErrorMessages.push(message);
+                        }
+                    });
+                }
+
                 if (resultObj.sentRecords > 0) {
                     jobReport.chunksSent++;
                 } else {
                     jobReport.chunksFailed++;
+
+                    // Nothing was accepted and the error would stop the job from ever
+                    // completing (a missing task, conflicting tasks, a rejected key),
+                    // so stop now instead of building the rest of the catalog. A failed
+                    // chunk already fails the job in afterStep(), so this changes only
+                    // the time spent. A partially accepted chunk never stops the job,
+                    // leaving failureThresholdPercentage to decide as before.
+                    if (resultObj.unrecoverableFailure) {
+                        stoppedOnPushFailure = true;
+                        throw new Error('Stopping: the Ingestion API rejected the push. ' + pushErrorMessages.join(' | '));
+                    }
                 }
             } else {
                 jobReport.recordsFailed += batch.length;
@@ -816,13 +847,21 @@ exports.afterStep = function(success, parameters, stepExecution) {
     if (!jobReport.error) {
         const failurePercentage = +((jobReport.recordsFailed / jobReport.recordsToSend * 100).toFixed(2)) || 0;
 
-        if (failurePercentage > paramFailureThresholdPercentage) {
+        // What the Ingestion API said about the failed pushes, empty on the Search API
+        const pushErrorDetails = pushErrorMessages.length ? ' ' + pushErrorMessages.join(' | ') : '';
+
+        if (stoppedOnPushFailure) {
+            jobReport.error = true;
+            jobReport.errorMessage = 'Indexing stopped: the Ingestion API rejected the push and would reject the rest.' + pushErrorDetails;
+        } else if (failurePercentage > paramFailureThresholdPercentage) {
             jobReport.error = true;
             jobReport.errorMessage = 'The percentage of records that failed to be indexed (' + failurePercentage + '%) exceeds the failureThresholdPercentage (' +
-                paramFailureThresholdPercentage + '%). Check the logs for details.';
+                paramFailureThresholdPercentage + '%). Check the logs for details.' + pushErrorDetails;
         } else if (jobReport.chunksFailed > 0) {
             jobReport.error = true;
-            jobReport.errorMessage = 'Some chunks failed to be sent, check the logs for details.';
+            jobReport.errorMessage = pushErrorMessages.length
+                ? 'Some chunks failed to be sent.' + pushErrorDetails
+                : 'Some chunks failed to be sent, check the logs for details.';
         } else if (success) {
             jobReport.error = false;
             jobReport.errorMessage = '';
@@ -844,6 +883,11 @@ exports.afterStep = function(success, parameters, stepExecution) {
     logger.info('Number of locales configured for the site: {0}', jobReport.siteLocales);
     logger.info('Records sent: {0}; Records failed: {1}', jobReport.recordsSent, jobReport.recordsFailed);
     logger.info('Chunks sent: {0}; Chunks failed: {1}', jobReport.chunksSent, jobReport.chunksFailed);
+
+    // keep the error message within MAX_JOB_REPORT_ERROR_MESSAGE_LENGTH characters
+    if (jobReport.errorMessage.length > MAX_JOB_REPORT_ERROR_MESSAGE_LENGTH) {
+        jobReport.errorMessage = jobReport.errorMessage.substring(0, MAX_JOB_REPORT_ERROR_MESSAGE_LENGTH) + '...';
+    }
 
     jobReport.endTime = new Date();
     jobReport.writeToCustomObject();

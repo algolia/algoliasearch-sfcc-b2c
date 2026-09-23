@@ -111,6 +111,7 @@ exports[`Ingestion API payload snapshots delta index flow: mixed addObject and d
 
 exports[`Ingestion API payload snapshots delta index flow: mixed addObject and deleteObject payloads: sendGroupedIngestionAPIRecords response 1`] = `
 {
+  "errorMessages": [],
   "failedRecords": 0,
   "result": {
     "object": {
@@ -130,6 +131,7 @@ exports[`Ingestion API payload snapshots delta index flow: mixed addObject and d
     "ok": true,
   },
   "sentRecords": 4,
+  "unrecoverableFailure": false,
 }
 `;
 
@@ -300,6 +302,7 @@ exports[`Ingestion API payload snapshots full reindex flow: grouping → push pa
 
 exports[`Ingestion API payload snapshots full reindex flow: grouping → push payloads → response: sendGroupedIngestionAPIRecords response 1`] = `
 {
+  "errorMessages": [],
   "failedRecords": 0,
   "result": {
     "object": {
@@ -317,6 +320,7 @@ exports[`Ingestion API payload snapshots full reindex flow: grouping → push pa
     "ok": true,
   },
   "sentRecords": 4,
+  "unrecoverableFailure": false,
 }
 `;
 
@@ -395,6 +399,7 @@ exports[`Ingestion API payload snapshots inventory update flow: single partialUp
 
 exports[`Ingestion API payload snapshots inventory update flow: single partialUpdateObject per locale: sendGroupedIngestionAPIRecords response 1`] = `
 {
+  "errorMessages": [],
   "failedRecords": 0,
   "result": {
     "object": {
@@ -412,6 +417,7 @@ exports[`Ingestion API payload snapshots inventory update flow: single partialUp
     "ok": true,
   },
   "sentRecords": 2,
+  "unrecoverableFailure": false,
 }
 `;
 

@@ -429,6 +429,62 @@ describe('send', () => {
 
     // Parity with the Search API: chunksSent++ whenever the transport accepted any records;
     // the overall pass/fail decision is driven by failureThresholdPercentage in afterStep.
+    test('Ingestion API - a permanent failure stops the job when nothing was accepted', () => {
+        job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: false },
+            failedRecords: 2,
+            sentRecords: 0,
+            errorMessages: ['cannot find task test_en'],
+            unrecoverableFailure: true,
+        });
+
+        function makeChunk() {
+            const ops = [{ action: 'addObject', indexName: 'test_en', body: { id: '0' } }];
+            ops.toArray = function () { return ops; };
+            const chunk = [ops];
+            chunk.toArray = function () { return chunk; };
+            return chunk;
+        }
+
+        expect(() => job.send(makeChunk())).toThrow(/cannot find task test_en/);
+        expect(job.__getJobReport().chunksFailed).toBe(1);
+    });
+
+    test('Ingestion API - a permanent failure does not stop the job when part of the chunk was accepted', () => {
+        // A partially accepted chunk leaves the pass/fail decision to the threshold, so
+        // one rejected index among several must not abandon the rest of the catalog.
+        job.beforeStep({}, stepExecution);
+        job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
+
+        mockGroupRecordsForIngestionAPI.mockReturnValue({});
+        mockSendGroupedIngestionAPIRecords.mockReturnValue({
+            result: { ok: false },
+            failedRecords: 1,
+            sentRecords: 1,
+            errorMessages: ['cannot find task test_fr'],
+            unrecoverableFailure: true,
+        });
+
+        function makeChunk() {
+            const ops = [
+                { action: 'addObject', indexName: 'test_en', body: { id: '0' } },
+                { action: 'addObject', indexName: 'test_fr', body: { id: '0' } },
+            ];
+            ops.toArray = function () { return ops; };
+            const chunk = [ops];
+            chunk.toArray = function () { return chunk; };
+            return chunk;
+        }
+
+        expect(() => job.send(makeChunk())).not.toThrow();
+        expect(job.__getJobReport().chunksSent).toBe(1);
+        expect(job.__getJobReport().chunksFailed).toBe(0);
+    });
+
     test('Ingestion API - partial failure counts the chunk as sent, not failed', () => {
         job.beforeStep({}, stepExecution);
         job.__setIndexingAPI(job.__INDEXING_APIS.INGESTION_API);
@@ -543,6 +599,56 @@ describe('afterStep', () => {
             expect(job.__getJobReport().errorMessage).toBe(expectedErrorMsg);
         });
     });
+    describe('Ingestion API push failures', () => {
+        test('names the cause instead of pointing at the logs', () => {
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+            job.__getJobReport().chunksFailed = 1;
+            job.__setPushErrorMessages(['cannot find task index_en', 'cannot find task index_fr']);
+
+            expect(() => job.afterStep(true)).toThrow();
+            expect(job.__getJobReport().errorMessage).toBe(
+                'Some chunks failed to be sent. cannot find task index_en | cannot find task index_fr'
+            );
+        });
+
+        test('falls back to the generic message when no push message was collected', () => {
+            // The Search API path shares this branch and never populates the accumulator
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+            job.__getJobReport().chunksFailed = 1;
+
+            expect(() => job.afterStep(true)).toThrow();
+            expect(job.__getJobReport().errorMessage).toBe('Some chunks failed to be sent, check the logs for details.');
+        });
+
+        test('reports the stop rather than a failure rate over a partial pass', () => {
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 0 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+            job.__getJobReport().recordsFailed = 10;
+            job.__getJobReport().recordsToSend = 10;
+            job.__setPushErrorMessages(['multiple tasks found for the Push connector']);
+            job.__setStoppedOnPushFailure(true);
+
+            expect(() => job.afterStep(false)).toThrow();
+            expect(job.__getJobReport().errorMessage).toBe(
+                'Indexing stopped: the Ingestion API rejected the push and would reject the rest.'
+                + ' multiple tasks found for the Push connector'
+            );
+        });
+
+        test('truncates a message longer than the persisted maximum', () => {
+            job.beforeStep({ indexingMethod: 'partialRecordUpdate', failureThresholdPercentage: 5 }, stepExecution);
+            job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
+            job.__getJobReport().chunksFailed = 1;
+            job.__setPushErrorMessages([new Array(60).join('a very long api error message ')]);
+
+            expect(() => job.afterStep(true)).toThrow();
+            expect(job.__getJobReport().errorMessage.length).toBe(1003);
+            expect(job.__getJobReport().errorMessage.slice(-3)).toBe('...');
+        });
+    });
+
     describe('fullCatalogReindex', () => {
         test('failurePercentage <= failureThresholdPercentage', () => {
             job.beforeStep({ indexingMethod: 'fullCatalogReindex', failureThresholdPercentage: 5 }, stepExecution);
@@ -563,7 +669,7 @@ describe('afterStep', () => {
             job.__getJobReport().processedItems = ProductMgrMock.queryAllSiteProducts().count;
             job.__getJobReport().recordsFailed = 6;
             job.__getJobReport().recordsToSend = 100;
-            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Check the logs for details. Temporary indices were not moved to production.';
+            const expectedErrorMsg = 'The percentage of records that failed to be indexed (6%) exceeds the failureThresholdPercentage (5%). Check the logs for details. | Temporary indices were not moved to production.';
             expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
             expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
             expect(job.__getJobReport().error).toBe(true);
@@ -573,7 +679,7 @@ describe('afterStep', () => {
             job.beforeStep({ indexingMethod: 'fullCatalogReindex' }, stepExecution);
             job.__getJobReport().processedItems = 1000;
             const expectedProcessedItems = ProductMgrMock.queryAllSiteProducts().count;
-            const expectedErrorMsg = `Not all products were processed: 1000 / ${expectedProcessedItems}. Check the logs for details. Temporary indices were not moved to production.`;
+            const expectedErrorMsg = `Not all products were processed: 1000 / ${expectedProcessedItems}. Check the logs for details. | Temporary indices were not moved to production.`;
             expect(() => job.afterStep(true)).toThrow(new Error(expectedErrorMsg));
             expect(mockFinishAtomicReindex).not.toHaveBeenCalled();
             expect(job.__getJobReport().error).toBe(true);

@@ -32,6 +32,10 @@ const REQUIRED_ACL_BY_INDEXING_API = {};
 REQUIRED_ACL_BY_INDEXING_API[INDEXING_APIS.SEARCH_API] = ['addObject', 'deleteObject', 'deleteIndex', 'settings'];
 REQUIRED_ACL_BY_INDEXING_API[INDEXING_APIS.INGESTION_API] = ['addObject', 'deleteObject', 'deleteIndex', 'settings', 'editSettings'];
 
+// The Business Manager dashboard renders a job report's error message in a single table
+// cell, so the job steps truncate it to this length before persisting it.
+const MAX_JOB_REPORT_ERROR_MESSAGE_LENGTH = 1000;
+
 const RECORD_MODEL_TYPES = {
     MASTER_LEVEL: 'master-level',
     VARIANT_LEVEL: 'variant-level',
@@ -78,6 +82,7 @@ module.exports = {
 
     INDEXING_APIS: INDEXING_APIS,
     REQUIRED_ACL_BY_INDEXING_API: REQUIRED_ACL_BY_INDEXING_API,
+    MAX_JOB_REPORT_ERROR_MESSAGE_LENGTH: MAX_JOB_REPORT_ERROR_MESSAGE_LENGTH,
     RECORD_MODEL_TYPES: RECORD_MODEL_TYPES,
     ANALYTICS_REGIONS: ANALYTICS_REGIONS,
 

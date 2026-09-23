@@ -140,11 +140,55 @@ function groupRecordsForIngestionAPI(recordArray) {
     return groupedRecords;
 }
 
+// Push failures known to repeat for every remaining chunk, each identified by the status
+// and the message Algolia returns with it. Algolia documents no status other than 400
+// for this endpoint, so a status alone concludes nothing: both parts have to match a
+// case reproduced against a live application. Extend the list as more are found.
+// Each entry matches on what went wrong rather than on the remedy Algolia suggests,
+// since the same remedy can accompany other errors. Every fragment has to be present.
+var UNRECOVERABLE_PUSH_FAILURES = [
+    // No task resolves for the index name:
+    // {"error":{"code":"resource_not_found"}, "message":"cannot find task INDEX","status":404}
+    { status: 404, messageContains: ['cannot find task'] },
+
+    // More than one task targets the index name. The "invalid_payload" code is shared
+    // with genuine payload errors, and the task IDs and index name vary, so the two
+    // fixed halves of the sentence identify it:
+    // {"error":{"code":"invalid_payload"},
+    //  "message":"multiple tasks (ID, ID) found for the Push connector with indexName
+    //  INDEX, please use /2/tasks/:id/push instead","status":400}
+    { status: 400, messageContains: ['multiple tasks', 'found for the Push connector'] },
+];
+
+/**
+ * Checks whether a failed push matches a known unrecoverable case, meaning it is about
+ * the index or the request rather than the records, and will fail the same way for the
+ * rest of the run. Anything unrecognized counts as recoverable, so the run continues and
+ * failureThresholdPercentage decides the outcome as it did before.
+ * @param {dw.svc.Result} result the result of a push call
+ * @returns {boolean} true if the failure matches a known unrecoverable case
+ */
+function isKnownUnrecoverableFailure(result) {
+    var status = result.getError ? result.getError() : 0;
+    var message = result.getErrorMessage ? result.getErrorMessage() : '';
+
+    if (!message) {
+        return false;
+    }
+
+    return UNRECOVERABLE_PUSH_FAILURES.some(function (knownFailure) {
+        return knownFailure.status === status && knownFailure.messageContains.every(function (fragment) {
+            return message.indexOf(fragment) !== -1;
+        });
+    });
+}
+
 /**
  * Sends Algolia records to the Ingestion API grouped by indexName and action
  * @param {Object} groupedRecords - Records grouped by `indexName` and `action`.
  * @param {string} [indexingMethod] - the indexing method (e.g. 'fullCatalogReindex'), forwarded to pushByIndexName
- * @returns {Object} result object containing { result, failedRecords, sentRecords }
+ * @returns {Object} result object containing
+ * { result, failedRecords, sentRecords, errorMessages, unrecoverableFailure }
  */
 function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
     let indices = Object.keys(groupedRecords);
@@ -152,6 +196,8 @@ function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
     let sentRecords = 0;
     let wasThereAnError = false;
     let indexingEvents = {};
+    let errorMessages = [];
+    let unrecoverableFailure = false;
 
     for (let i = 0; i < indices.length; i++) {
         let indexName = indices[i];
@@ -176,6 +222,18 @@ function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
             } else {
                 wasThereAnError = true;
                 failedRecords += recordToSend.records.length;
+
+                // Keep what the API said so the job report can name the cause instead of
+                // pointing at the log. A missing task or a conflicting destination fails
+                // every chunk of an index with identical text, hence the deduplication.
+                let message = result.getErrorMessage ? result.getErrorMessage() : null;
+                if (message && errorMessages.indexOf(message) === -1) {
+                    errorMessages.push(message);
+                }
+
+                if (isKnownUnrecoverableFailure(result)) {
+                    unrecoverableFailure = true;
+                }
             }
         }
     }
@@ -189,6 +247,8 @@ function sendGroupedIngestionAPIRecords(groupedRecords, indexingMethod) {
         },
         failedRecords: failedRecords,
         sentRecords: sentRecords,
+        errorMessages: errorMessages,
+        unrecoverableFailure: unrecoverableFailure,
     }
 }
 
