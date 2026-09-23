@@ -756,8 +756,10 @@ exports.send = function(algoliaOperations, parameters, stepExecution) {
 
     switch (indexingAPI) {
         case INDEXING_APIS.INGESTION_API: {
-            // With the Ingestion API, an OK response only means the payload was accepted;
-            // record-level errors (e.g. "record too big") happen asynchronously — check the Algolia Dashboard.
+            // With the Ingestion API, an OK response only means the payload was
+            // accepted. The push is asynchronous unless its "watch" parameter is set,
+            // which the cartridge does not do, so record-level errors (e.g. "record
+            // too big") arrive later - check the Algolia Dashboard.
             // sentRecords/failedRecords reflect transport-level success per push call.
             let resultObj;
             try {

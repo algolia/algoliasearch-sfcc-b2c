@@ -273,7 +273,8 @@ describe('sendGroupedIngestionAPIRecords', () => {
     const MULTIPLE_TASKS_ERROR = '{"error":{"code":"invalid_payload"},"message":"multiple tasks (a, b) found for the'
         + ' Push connector with indexName index_en, please use /2/tasks/:id/push instead","status":400}';
     // Shaped after the Search API's record-too-big response. The push endpoint reports
-    // record problems asynchronously, so this stands in for a non-conflict 400.
+    // record problems asynchronously unless the "watch" parameter is set, which the
+    // cartridge does not use, so this stands in for a non-conflict 400.
     const OTHER_400_ERROR = '{"error":{"code":"invalid_payload"},"message":"Record 1 is too big:'
         + ' size: 11072 byte(s), maximum allowed: 10000 byte(s)","status":400}';
     // A different condition that happens to suggest the same endpoint as the remedy
