@@ -88,6 +88,8 @@ function enableInstantSearch(config) {
 
     // URL keys this mapping owns. Anything else already on the URL (lang, utm_*, ...) is
     // preserved across refinements so locale and marketing parameters are not stripped.
+    // "page" is owned but never written, so a page number left over from an older link
+    // is cleared the next time the URL is rewritten. See stateToRoute for the reason.
     const routeKeys = ['q', 'category', 'collection', 'newArrivals', 'newArrival', 'brand', 'color', 'size', 'store', 'price', 'sort', 'page'];
 
     const router = instantsearch.routers.history({
@@ -107,7 +109,10 @@ function enableInstantSearch(config) {
             var indexUiState = uiState[productsIndex] || {};
             var route = {};
             if (indexUiState.query) route.q = indexUiState.query;
-            if (indexUiState.page) route.page = indexUiState.page;
+            // The page is deliberately left out. The grid uses infiniteHits, which appends
+            // to what is loaded rather than replacing it, so a URL with a page number opens
+            // on that page alone with no control to reach the earlier ones. A build that
+            // swaps in the pagination widget should write and read it again.
             if (indexUiState.sortBy === productsIndex) route.sort = 'best';
             if (indexUiState.sortBy === productsIndexPriceAsc) route.sort = 'price-asc';
             if (indexUiState.sortBy === productsIndexPriceDesc) route.sort = 'price-desc';
@@ -133,7 +138,6 @@ function enableInstantSearch(config) {
         routeToState: function (route) {
             var indexUiState = {};
             if (route.q) indexUiState.query = route.q;
-            if (route.page) indexUiState.page = Number(route.page);
             if (route.sort === 'best') indexUiState.sortBy = productsIndex;
             if (route.sort === 'price-asc') indexUiState.sortBy = productsIndexPriceAsc;
             if (route.sort === 'price-desc') indexUiState.sortBy = productsIndexPriceDesc;
