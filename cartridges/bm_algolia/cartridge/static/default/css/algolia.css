@@ -17,7 +17,7 @@ table#algolia-bm-settings textarea {
 }
 table#algolia-bm-settings input[type=number],
 table#algolia-bm-settings select {
-    padding: 0px;
+    padding: 0 2px 0 0
 }
 table#algolia-bm-settings input[type=text],
 table#algolia-bm-settings input[type=number],
@@ -43,6 +43,16 @@ table#algolia-bm-settings input[type=number] {
 }
 table#algolia-bm-settings input[type=number]::-webkit-inner-spin-button {
     opacity: 1;
+}
+table#algolia-bm-settings td.buttonspacing {
+    text-align: right;
+}
+table#algolia-bm-settings button[type=submit] {
+    min-width: 10em;
+}
+table#algolia-bm-settings button.button {
+    border-width: 1px;
+    border-radius: 4px;
 }
 table#algolia-bm-settings select {
     width: 14em;
