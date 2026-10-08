@@ -5,11 +5,57 @@
 table#indexing-status {
     margin: 2em auto;
 }
-table#algolia-bm-settings input[type=text], input[type=number] {
-    width: 100%;
+table#algolia-bm-settings input[type=text] {
+    width: 28em;
+}
+table#algolia-bm-settings input[type=text],
+table#algolia-bm-settings select,
+table#algolia-bm-settings textarea {
+    box-sizing: border-box;
+    font: inherit;
+    padding: 2px 4px;
+}
+table#algolia-bm-settings input[type=number],
+table#algolia-bm-settings select {
+    padding: 0px;
+}
+table#algolia-bm-settings input[type=text],
+table#algolia-bm-settings input[type=number],
+table#algolia-bm-settings select {
+    height: 1.8em;
+}
+table#algolia-bm-settings input,
+table#algolia-bm-settings textarea,
+table#algolia-bm-settings select {
+    border: 1px solid #767676;
+    border-radius: 4px;
+}
+table#algolia-bm-settings textarea#AdditionalAttributes {
+    field-sizing: content;
+    min-width: 28em;
+    max-width: 28em;
+    min-height: 1lh;
+    resize: none;
+}
+table#algolia-bm-settings input[type=number] {
+    width: 5em;
+    text-align: center;
+}
+table#algolia-bm-settings input[type=number]::-webkit-inner-spin-button {
+    opacity: 1;
+}
+table#algolia-bm-settings select {
+    width: 14em;
+    text-align: left;
+}
+table#algolia-bm-settings input#AttributeSlicedRecordModel_GroupingAttribute,
+table#algolia-bm-settings input#AnalyticsRegion,
+table#algolia-bm-settings input#LocalesForIndexing {
+    width: 14em;
 }
 table#algolia-bm-settings tr > td:first-child {
-    width: 30%;
+    padding-left: 8px;
+    width: 26em;
     word-wrap: break-word;
     white-space: normal;
 }
@@ -31,6 +77,19 @@ table#algolia-report-table, table#algolia-bm-settings {
     margin: 2em auto;
     margin-bottom: 20px;
 
+}
+table#algolia-bm-settings {
+    width: 55em;
+}
+table#algolia-bm-settings td {
+    padding: 5px;
+}
+table#algolia-bm-settings input[type=checkbox] {
+    margin: 0;
+    vertical-align: middle;
+}
+table#algolia-bm-settings .active-data-checkbox-list input[type=checkbox] {
+    margin: 1.5px 0 1.5px 0;
 }
 table#algolia-report-table td {
     padding: 3px;
@@ -141,7 +200,7 @@ fieldset.active-data-checkbox-list,
     display: flex;
     flex-direction: column;
     gap: 4px;
-    min-width: 220px;
+    min-width: 18em;
     border: 1px solid #ccc;
     border-radius: 4px;
     padding: 4px 6px;
