@@ -103,9 +103,12 @@
                         <isprint value="${Resource.msg('algolia.label.preference.instock', 'algolia', null)}"/>
                         <i class="fa fa-info-circle dw-nc-text-info info-hover"></i>
                         <div class="tooltip">${Resource.msg('algolia.label.preference.instock.help', 'algolia', null)}</div>
+                        <isif condition="${!empty(pdict.errors.inStockThresholdErrorMessage)}">
+                            <div class="error-message red narrow">${pdict.errors.inStockThresholdErrorMessage}</div>
+                        </isif>
                     </td>
                     <td class="table_detail w e s">
-                        <input type="number" value="${pdict.algoliaData.getPreference('InStockThreshold')}" id="InStockThreshold" name="InStockThreshold" />
+                        <input type="number" min="1" step="1" value="<isprint value="${pdict.algoliaData.getPreference('InStockThreshold')}" formatter="0.##" />" id="InStockThreshold" name="InStockThreshold" />
                     </td>
                 </tr>
 
