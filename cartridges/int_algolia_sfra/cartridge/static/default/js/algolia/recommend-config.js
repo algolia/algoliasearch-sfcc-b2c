@@ -167,7 +167,7 @@ function itemComponent({ item, html }) {
                     <div class="pdp-link">
                         <a href="${hit.url}">${hit.name}</a>
                     </div>
-                    <div class="price">${getPriceHtml(hit, html)}</div>
+                    <div class="price">${getRecommendPriceHtml(hit, html)}</div>
                 </div>
             </div>
         </div>
@@ -277,11 +277,16 @@ function getDefaultImage() {
 
 /**
  * Get price HTML
+ *
+ * This file and `instantsearch-config.js` are loaded as classic scripts, so their top-level
+ * function declarations share the global scope and the one loaded last wins. Keep this name
+ * distinct from the `getPriceHtml()` in `instantsearch-config.js`.
+ *
  * @param {Object} item - Item object
  * @param {Function} html - Tagged template function
- * @returns {string} HTML string
+ * @returns {Object} DOM node
  */
-function getPriceHtml(item, html) {
+function getRecommendPriceHtml(item, html) {
     return html`
         ${item.promotionalDisplayPrice && html`
             <span class="strike-through list">
