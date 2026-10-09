@@ -95,6 +95,12 @@ function handleSettings() {
             pdictValues.errors.analyticsRegionErrorMessage = Resource.msg('algolia.error.analyticsregion.invalid', 'algolia', null);
         }
 
+        // validate InStockThreshold (empty means the default of 1)
+        var inStockThreshold = BMHelper.parseInStockThreshold(params.InStockThreshold.value);
+        if (inStockThreshold === null) {
+            pdictValues.errors.inStockThresholdErrorMessage = Resource.msg('algolia.error.instockthreshold.invalid', 'algolia', null);
+        }
+
         // Verify that the active data fields the user is about to save are also marked unretrievable
         // on every product index the cartridge writes to. Copy-only warning, soft-fails on missing
         // indices and on auth/network errors. Skipped entirely when the admin key validation already
@@ -147,7 +153,7 @@ function handleSettings() {
         algoliaData.setPreference('ApplicationID', applicationID);
         algoliaData.setSetOfStrings('AdditionalAttributes', params.AdditionalAttributes.value);
         algoliaData.setSetOfStringFromArray('ActiveData', selectedActiveData);
-        algoliaData.setPreference('InStockThreshold', params.InStockThreshold.value * 1);
+        algoliaData.setPreference('InStockThreshold', inStockThreshold);
         algoliaData.setPreference('SearchApiKey', searchApikey);
         algoliaData.setPreference('AdminApiKey', adminApikey);
         algoliaData.setPreference('IndexPrefix', indexPrefix);
@@ -196,6 +202,7 @@ function getDashboardPdict() {
         errors: {
             adminErrorMessage: '',
             analyticsRegionErrorMessage: '',
+            inStockThresholdErrorMessage: '',
             errorMessage: ''
         },
         warnings: {

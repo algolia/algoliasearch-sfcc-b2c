@@ -132,3 +132,22 @@ describe('getJobBMLink', () => {
         expect(BMHelper.getJobBMLink('AlgoliaProductIndex_v2')).toBe('');
     });
 });
+
+describe('parseInStockThreshold', () => {
+    it.each([
+        ['1', 1],
+        ['5', 5],
+        ['1.0', 1],
+        [' 3 ', 3],
+    ])('should accept %p as %p', (rawValue, expected) => {
+        expect(BMHelper.parseInStockThreshold(rawValue)).toBe(expected);
+    });
+
+    it.each([null, undefined, '', '   '])('should default %p to 1', (rawValue) => {
+        expect(BMHelper.parseInStockThreshold(rawValue)).toBe(1);
+    });
+
+    it.each(['0', '-1', '0.5', '2.5', 'abc', 'NaN', 'Infinity'])('should reject %p', (rawValue) => {
+        expect(BMHelper.parseInStockThreshold(rawValue)).toBeNull();
+    });
+});
