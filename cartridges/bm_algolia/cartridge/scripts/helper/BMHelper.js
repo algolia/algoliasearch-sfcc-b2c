@@ -72,7 +72,30 @@ function getJobBMLink(jobID) {
     }
 }
 
+/**
+ * Parses the submitted Algolia_InStockThreshold value.
+ * An empty value maps to the attribute definition's default (1). The indexing steps and the inventory
+ * hook read the preference as `getPreference('InStockThreshold') || 1`, so 0 and NaN must never be stored:
+ * they would be displayed on the dashboard but silently applied as 1.
+ * @param {string|null} rawValue - the submitted value (null if the parameter is missing)
+ * @returns {number|null} the threshold to store, or null if the value is invalid
+ */
+function parseInStockThreshold(rawValue) {
+    var trimmedValue = (rawValue || '').trim();
+    if (!trimmedValue) {
+        return 1;
+    }
+
+    var threshold = Number(trimmedValue);
+    if (!isFinite(threshold) || threshold < 1 || threshold % 1 !== 0) {
+        return null;
+    }
+
+    return threshold;
+}
+
 module.exports = {
     getLatestCOReportsByJob: getLatestCOReportsByJob,
     getJobBMLink: getJobBMLink,
+    parseInStockThreshold: parseInStockThreshold,
 };
