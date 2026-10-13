@@ -172,8 +172,10 @@ function getSetOfStrings(id) {
  */
 function setSetOfStrings(id, value) {
     Transaction.wrap(function () {
-        var toSave = value.replace(/ /g, ''); // remove white spaces
-        toSave = toSave.split(','); // create array
+        // commas and any whitespace (including line breaks from textareas) separate values
+        var toSave = (value || '').split(/[\s,]+/).filter(function (item) {
+            return item !== '';
+        });
         currentSite.setCustomPreferenceValue('Algolia_' + id, toSave);
     });
 }
