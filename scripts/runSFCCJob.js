@@ -33,7 +33,7 @@ async function runSFCCJob() {
                         if (err) {
                             reject(err);
                         } else {
-                            console.log('Current jobs:', JSON.stringify(result, null, 2));
+                            console.info('Current jobs:', JSON.stringify(result, null, 2));
                             // The result might be wrapped in a body property
                             const jobs = result.body || result;
                             const runningJob = jobs.find(job =>

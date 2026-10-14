@@ -43,7 +43,7 @@ function cleanup() {
                 } else {
                     fs.unlinkSync(item);
                 }
-                console.log(`[INFO] Removed: ${item}`);
+                console.info(`[INFO] Removed: ${item}`);
             }
         } catch (error) {
             console.error(`[WARN] Error cleaning up ${item}: ${error.message}`);
@@ -86,7 +86,7 @@ async function main() {
 
     for (const model of recordModels) {
 
-        console.log(`\n[INFO] === Running E2E for: ${model} ===`);
+        console.info(`\n[INFO] === Running E2E for: ${model} ===`);
         process.env.RECORD_MODEL = model;
         process.env.INDEX_PREFIX = indexPrefixes[model];
 
@@ -171,7 +171,7 @@ async function runCypressTests() {
     });
 
     if (result.status === 'failed' || (result.totalFailed && result.totalFailed > 0)) {
-        console.log(`[INFO] Cypress run summary:
+        console.info(`[INFO] Cypress run summary:
             totalFailed: ${result.totalFailed ?? 0}
             totalPassed: ${result.totalPassed ?? 0}
           `);
@@ -218,7 +218,7 @@ async function updateInventoryATS(productId, atsValue) {
         throw new Error(`Failed to update inventory record: ${response.status} ${response.statusText}. Body: ${text}`);
     }
     var res = await response.json();
-    console.log('New ATS value:', res.allocation.amount);
+    console.info('New ATS value:', res.allocation.amount);
 }
 
 main().catch((err) => {

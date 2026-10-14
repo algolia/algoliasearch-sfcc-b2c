@@ -18,7 +18,7 @@ async function getProduct(productId) {
     }
 
     const apiUrl = `https://${process.env.SANDBOX_HOST}/s/-/dw/data/v24_5/products/${productId}?site_id=RefArch&client_id=${process.env.SFCC_OAUTH_CLIENT_ID}`;
-    console.log(`[getProduct] Fetching product ${productId} from:`, apiUrl);
+    console.info(`[getProduct] Fetching product ${productId} from: ${apiUrl}`);
 
     const response = await fetch(apiUrl, {
         headers: {
