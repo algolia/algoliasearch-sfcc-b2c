@@ -399,6 +399,23 @@ describe('algoliaLocalizedProduct', function () {
         expect(new AlgoliaLocalizedProduct({ product: product, locale: 'default', attributeList: ['price', 'UPC', 'name'], baseModel: baseModel })).toEqual(expectedProductModel);
     });
 
+    test('refinementColor and refinementSize with no value are indexed as null', function () {
+        const product = new ProductMock();
+        // SFCC returns an EnumValue with a null base value for an unset Enumeration attribute
+        product.custom.refinementColor = { value: null, displayValue: '' };
+        product.custom.refinementSize = null;
+
+        expect(new AlgoliaLocalizedProduct({
+            product: product,
+            locale: 'default',
+            attributeList: ['refinementColor', 'refinementSize'],
+        })).toEqual({
+            objectID: '701644031206M',
+            refinementColor: null,
+            refinementSize: null,
+        });
+    });
+
     test('pricebooks', function () {
         const product = new ProductMock();
         const expected = {

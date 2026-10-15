@@ -59,10 +59,15 @@ function setAttributeValue(obj, attributeName, attributeValue) {
  * Safely gets a custom attribute from a System Object.
  * Since attempting to return a nonexistent custom attribute throws an error in SFCC,
  * this is the safest way to check whether an attribute exists.
- * @param {dw.object.CustomAttributes} customAttributes The CustomAttributes object, e.g. content.getCustom()
+ * An attribute with no value is not always null: a String attribute returns null, but an
+ * Enumeration attribute returns an EnumValue whose base value is null (see
+ * dw.value.EnumValue), which is truthy. Check `.value` on Enumeration attributes.
+ * @param {dw.object.CustomAttributes} customAttributes The CustomAttributes object,
+ *                                                     e.g. content.getCustom()
  * @param {string} caKey The custom attribute's key whose value we want to return
  * @returns {*} The custom attribute value if exists,
- *              null if the custom attribute is defined but it has no value for this specific SO,
+ *              null or an EnumValue with a null base value if the custom attribute is
+ *              defined but it has no value for this specific SO,
  *              undefined if the custom attribute is not defined at all in BM
  */
 function safelyGetCustomAttribute(customAttributes, caKey) {
