@@ -302,9 +302,8 @@ var aggregatedValueHandlers = {
 
     },
     refinementColor: function (product) {
-        return ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementColor')
-            ? product.custom.refinementColor.displayValue
-            : null;
+        const refinementColor = ObjectHelper.safelyGetCustomAttribute(product.custom, 'refinementColor');
+        return refinementColor && refinementColor.value ? refinementColor.displayValue : null;
     },
     colorVariations: function(product) {
         if (product.isMaster() || product.isVariationGroup()) {

@@ -17,6 +17,7 @@ class Variant extends MasterProduct {
 
         this.custom = {
             refinementColor: {
+                value: 'pink',
                 get displayValue() {
                     switch (request.getLocale()) {
                         case 'fr':
