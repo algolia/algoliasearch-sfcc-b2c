@@ -114,7 +114,7 @@ async function importPreferences() {
             const archive = archiver('zip', { zlib: { level: 9 } });
 
             output.on('close', () => {
-                console.log(`site_import.zip created (${archive.pointer()} total bytes).`);
+                console.info(`site_import.zip created (${archive.pointer()} total bytes).`);
                 resolve();
             });
 

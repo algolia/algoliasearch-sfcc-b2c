@@ -297,7 +297,7 @@ function enableInstantSearch(config) {
                         if (contentSearchbarTab) {
                             const productLength = data.nbHits;
                             const productCountEl = document.querySelector('#ai-product-count');
-                            productCountEl.innerHTML = ' (' + productLength + ')';
+                            productCountEl.textContent = ' (' + productLength + ')';
                         }
                         if (data.hasManyResults) {
                             return `${data.nbHits} ${algoliaData.strings.results}`;

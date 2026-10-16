@@ -89,7 +89,7 @@ async function notifyTestFailure() {
                 const isFailure = screenshot.includes('failed-');
                 
                 if (isFailure) {
-                    console.log(`Uploading screenshot: ${screenshot}`);
+                    console.info(`Uploading screenshot: ${screenshot}`);
                     
                     await slack.files.uploadV2({
                         channels: channel,
@@ -112,7 +112,7 @@ async function notifyTestFailure() {
                 
                 // Only upload videos smaller than 50MB
                 if (stats.size < 50 * 1024 * 1024) {
-                    console.log(`Uploading video: ${video}`);
+                    console.info(`Uploading video: ${video}`);
                     
                     await slack.files.uploadV2({
                         channels: channel,
@@ -122,7 +122,7 @@ async function notifyTestFailure() {
                         initial_comment: `Test video from run ${process.env.GITHUB_RUN_ID}`
                     });
                 } else {
-                    console.log(`Skipping video ${video} - too large (${stats.size} bytes)`);
+                    console.info(`Skipping video ${video} - too large (${stats.size} bytes)`);
                 }
             }
         }

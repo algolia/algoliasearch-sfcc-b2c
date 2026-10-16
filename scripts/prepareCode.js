@@ -14,7 +14,7 @@ const archiver = require('archiver');
         process.exit(1);
     }
 
-    console.log(`Preparing code with CODE_VERSION: ${codeVersion}`);
+    console.info(`Preparing code with CODE_VERSION: ${codeVersion}`);
 
     // Copy the contents of the "cartridges" folder directly into the codeVersion directory
     var srcDir = 'cartridges';
@@ -27,7 +27,7 @@ const archiver = require('archiver');
 
     // Zip up the directory
     const zipFileName = `${codeVersion}.zip`;
-    console.log(`Zipping ${codeVersion} into ${zipFileName}...`);
+    console.info(`Zipping ${codeVersion} into ${zipFileName}...`);
     zipDirectory(codeVersion, zipFileName);
 
     console.log('Code preparation completed.');
@@ -39,7 +39,7 @@ function zipDirectory(directory, outputFile) {
 
     return new Promise((resolve, reject) => {
         output.on('close', () => {
-            console.log(`Created ${outputFile} (${archive.pointer()} total bytes).`);
+            console.info(`Created ${outputFile} (${archive.pointer()} total bytes).`);
             resolve();
         });
         archive.on('error', (err) => reject(err));

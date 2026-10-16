@@ -36,9 +36,9 @@ function enableInsights(appId, searchApiKey, productsIndex) {
         var objectID = getUrlParameter('objectID') || lastObjectID;
         var indexName = getUrlParameter('indexName') || lastIndexName || productsIndex;
 
-        if ($(event.target).is('button.add-to-cart')) {
+        if (event.target.matches('button.add-to-cart')) {
             handleCartAction('Product Add to cart', queryID, objectID, indexName);
-        } else if ($(event.target).is('button#add-all-to-cart')) {
+        } else if (event.target.matches('button#add-all-to-cart')) {
             handleCartAction('Global Add to cart', queryID, objectID, indexName);
         }
     });
