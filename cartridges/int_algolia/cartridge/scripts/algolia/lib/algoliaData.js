@@ -5,7 +5,6 @@ var Transaction = require('dw/system/Transaction');
 var System = require('dw/system/System');
 var URLUtils = require('dw/web/URLUtils');
 var Resource = require('dw/web/Resource');
-var logHelper = require('*/cartridge/scripts/algolia/helper/logHelper');
 
 const version = require('*/algoliaconfig').version;
 
@@ -95,18 +94,6 @@ const clientSideData = {
 //   EnableRecommend                              ║ Enable/disable Algolia Recommends                        ║ boolean
 //   EnablePricingLazyLoad                        ║ If enabled, prices are fetched on search result display  ║ boolean
 //  ══════════════════════════════════════════════╩══════════════════════════════════════════════════════════╩════════════════════
-//  Preferences stored in the XML file
-//
-//             ID                ║                       description                        ║ type of preference
-//   ════════════════════════════╬══════════════════════════════════════════════════════════╬════════════════════
-//   LastCategorySyncDate        ║ Date of the last Category index sync job run (read only) ║ String
-//   LastProductSyncDate         ║ Date of the last product index sync job run (read only)  ║ String
-//   LastProductSyncLog          ║ Last product sync job log                                ║ String
-//   LastProductDeltaSyncLog     ║ Last product delta sync job log                          ║ String
-//   LastPartialPriceSyncLog     ║ Last partial price sync job log                          ║ String
-//   LastPartialInventorySyncLog ║ Last partial inventory sync job log                      ║ String
-//   LastCategorySyncLog         ║ Last category sync job log                               ║ String
-//   ════════════════════════════╩══════════════════════════════════════════════════════════╩════════════════════
 //
 //  Example:
 //    var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
@@ -195,49 +182,6 @@ function setSetOfStringFromArray(id, values) {
 }
 
 /**
- * @description Get category and product log data from log file for current Site
- * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastPartialPriceSyncLog | LastPartialInventorySyncLog | LastCategorySyncLog]
- * @returns {Object} log data
- */
-function getLogData(id) {
-    var productLog = null;
-    switch (id) {
-        case 'LastCategorySyncLog': productLog = logHelper.getLogData('category'); break;
-        case 'LastProductSyncLog': productLog = logHelper.getLogData('product'); break;
-        case 'LastProductDeltaSyncLog': productLog = logHelper.getLogData('productdelta'); break;
-        case 'LastPartialPriceSyncLog': productLog = logHelper.getLogData('partialproductprice'); break;
-        case 'LastPartialInventorySyncLog': productLog = logHelper.getLogData('partialproductinventory'); break;
-    }
-    return productLog;
-}
-
-/**
- * @description Save product and category log data to file for current Site
- * @param {string} id name of preference [LastProductSyncLog | LastProductDeltaSyncLog | LastPartialPriceSyncLog | LastPartialInventorySyncLog | LastCategorySyncLog]
- * @param {Object} productLog ploduct log Object
- * @returns {boolean} Log data write success
- */
-function setLogData(id, productLog) {
-    var result = false;
-    switch (id) {
-        case 'LastCategorySyncLog': result = logHelper.setLogData('category', productLog); break;
-        case 'LastProductSyncLog': result = logHelper.setLogData('product', productLog); break;
-        case 'LastProductDeltaSyncLog': result = logHelper.setLogData('productdelta', productLog); break;
-        case 'LastPartialPriceSyncLog': result = logHelper.setLogData('partialproductprice', productLog); break;
-        case 'LastPartialInventorySyncLog': result = logHelper.setLogData('partialproductinventory', productLog); break;
-    }
-    return result;
-}
-
-/**
- * @description Get category and product log data from log file for all Sites
- * @returns {Array} array of Sites log data
- */
-function getLogDataAllSites() {
-    return logHelper.getLogDataAllSites();
-}
-
-/**
  * Get instance hostname replacing dots with dashes and skipping
  * the general parts from the sandbox hostnames.
  * @returns {string} hostname
@@ -289,42 +233,6 @@ function getDefaultIndexPrefix() {
  */
 function calculateIndexName(type, locale) {
     return getIndexPrefix() + '__' + type + '__' + (locale || request.getLocale());
-}
-
-/**
- * @description Convert Date to local DateTime format string
- * @param {Date} date Date
- * @returns {string} local formated DateTime
- */
-function getLocalDateTime(date) {
-    return empty(date) ? '---' : date.toLocaleDateString() + ' | ' + date.toLocaleTimeString();
-}
-
-/**
- * @description Get Date preference to local DateTime format string
- * @param {string} id name of Date preference [LastCategorySyncDate, LastProductSyncDate]
- * @returns {string} local formated DateTime
- */
-function getSyncLocalDateTime(id) {
-    var productLog = null;
-    switch (id) {
-        case 'LastCategorySyncDate': productLog = logHelper.getLogData('category'); break;
-        case 'LastProductSyncDate': productLog = logHelper.getLogData('product'); break;
-        case 'LastProductDeltaSyncDate': productLog = logHelper.getLogData('productdelta'); break;
-        case 'LastPartialPriceSyncLog': productLog = logHelper.getLogData('partialproductprice'); break;
-        case 'LastPartialInventorySyncLog': productLog = logHelper.getLogData('partialproductinventory'); break;
-    }
-    return empty(productLog) ? '---' : productLog.sendDate;
-}
-
-/**
- * @description Get sites that have Algolia enabled
- * @returns {Array} array of sites that have Algolia enabled
- */
-function getAlgoliaSites() {
-    return Site.getAllSites().toArray().filter(function (site) {
-        return site.getCustomPreferenceValue('Algolia_Enable');
-    });
 }
 
 /**
@@ -405,15 +313,9 @@ module.exports = {
     getSetOfStrings: getSetOfStrings,
     setSetOfStrings: setSetOfStrings,
     setSetOfStringFromArray: setSetOfStringFromArray,
-    getLogData: getLogData,
-    setLogData: setLogData,
-    getLogDataAllSites: getLogDataAllSites,
     getInstanceHostName: getInstanceHostName,
     getIndexPrefix: getIndexPrefix,
     calculateIndexName: calculateIndexName,
-    getLocalDateTime: getLocalDateTime,
-    getSyncLocalDateTime: getSyncLocalDateTime,
-    getAlgoliaSites: getAlgoliaSites,
     getCurrentSite: getCurrentSite,
     csvStringToArray: csvStringToArray,
     CATEGORIES_SEPARATOR: CATEGORIES_SEPARATOR,

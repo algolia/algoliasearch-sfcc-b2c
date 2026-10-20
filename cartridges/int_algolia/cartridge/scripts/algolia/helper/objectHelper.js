@@ -1,8 +1,5 @@
 'use strict';
 
-var StringUtils = require('dw/util/StringUtils');
-var AlgoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
-
 /**
  * Function get value of object property by attribute name.
  * An attribute name can be complex and consist of several levels.
@@ -10,10 +7,9 @@ var AlgoliaUtils = require('*/cartridge/scripts/algolia/lib/utils');
  * Example: primaryCategory.ID
  * @param {dw.object.ExtensibleObject} extensibleObject - business object
  * @param {string} attributeName - object attribute name
- * @param {boolean} escapeEmoji - for jobs v1 only: manually escape some emojis chars which can break XML
  * @returns {string|boolean|number|null} - value
  */
-function getAttributeValue(extensibleObject, attributeName, escapeEmoji) {
+function getAttributeValue(extensibleObject, attributeName) {
     if (!extensibleObject) {
         return null;
     }
@@ -23,13 +19,7 @@ function getAttributeValue(extensibleObject, attributeName, escapeEmoji) {
             return null;
         }
 
-        var tempResult = previousValue[currentProperty];
-
-        if (escapeEmoji && typeof tempResult === 'string' && !empty(tempResult)) {
-            tempResult = StringUtils.trim(AlgoliaUtils.escapeEmoji(tempResult));
-        }
-
-        return tempResult;
+        return previousValue[currentProperty];
     }, extensibleObject);
 
     return result;

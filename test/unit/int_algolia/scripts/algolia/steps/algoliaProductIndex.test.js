@@ -8,7 +8,6 @@ const imagesMocks = require('../../../../../mocks/data/images');
 global.empty = GlobalMock.empty;
 global.request = new GlobalMock.RequestMock();
 
-jest.mock('*/cartridge/scripts/algolia/helper/logHelper', () => {}, {virtual: true});
 const mockDeleteTemporaryIndices = jest.fn();
 const mockCopySettingsFromProdIndices = jest.fn();
 const mockMoveTemporaryIndices = jest.fn();

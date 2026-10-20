@@ -1,50 +1,5 @@
 const productModelCustomizer = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/customization/productModelCustomizer');
 
-describe('customizeProductModel (jobs v1)', () => {
-    let product;
-    beforeEach(() => {
-        product = {
-            categories: [
-                [
-                    {
-                        id: 'electronics-televisions',
-                        name: { en: 'Televisions', fr: 'Télévisions' },
-                    },
-                    { id: 'electronics', name: { en: 'Electronics', fr: 'Electronique' } },
-                ],
-                [
-                    {
-                        id: 'newarrivals-electronics',
-                        name: { en: 'Electronics', fr: 'Electronique' },
-                    },
-                    { id: 'newarrivals', name: { en: 'New Arrivals', fr: 'Nouveautés' } },
-                ],
-            ],
-        };
-    });
-
-    test('newArrivalsCategory in the additional attributes list', () => {
-        productModelCustomizer.customizeProductModel(product, ['newArrivalsCategory']);
-        expect(product).toHaveProperty('newArrivalsCategory');
-        expect(product.newArrivalsCategory).toEqual({
-            0: {
-                en: 'New Arrivals',
-                fr: 'Nouveautés',
-            },
-            1: {
-                en: 'New Arrivals > Electronics',
-                fr: 'Nouveautés > Electronique',
-            },
-        });
-    });
-
-    test('newArrivalsCategory not in the additional attributes list', () => {
-        productModelCustomizer.customizeProductModel(product, []);
-        // Property is present, but won't be read by the indexing pipeline
-        expect(product).toHaveProperty('newArrivalsCategory');
-    });
-});
-
 describe('customizeLocalizedProductModel (jobs v2)', () => {
     let product;
     beforeEach(() => {
