@@ -20,9 +20,9 @@ For feedback, bug reporting, or unresolved issues with the cartridge, please con
 Include your cartridge version, Salesforce B2C version, application ID, steps to reproduce your issue and some indication of the severity.
 Add additional information like error messages, log files, screenshots, screencasts or details about customizations to help our team better troubleshoot your issues.
 
-## Sunset of versions 23.4.x and earlier
+## Sunset of the v1 jobs
 
-Cartridge versions 23.4.x and earlier ("Gen 1") were deprecated and [sunset](https://www.algolia.com/blog/algolia/sunsetting-salesforce-b2c-commerce-cartridge-gen-1/) on October 31, 2024.
-The v1 jobs used by these versions were removed from the cartridge in version 26.6.1.
-To take advantage of the improvements in the latest version, upgrade to the v2 jobs (23.5.0 and later).
+Cartridge versions 23.4.x and earlier ("v1 jobs") were deprecated and [sunset](https://www.algolia.com/blog/algolia/sunsetting-salesforce-b2c-commerce-cartridge-gen-1/) on October 31, 2024.
+The v1 jobs used by these versions were removed from the cartridge in version 26.7.0.
+To take advantage of the improvements, upgrade to the v2 jobs (introduced in 23.5.0, called just "the jobs" from 26.7.0).
 For more information, see the [release notes](https://github.com/algolia/algoliasearch-sfcc-b2c/releases) and the [migration guide](https://www.algolia.com/doc/integration/salesforce-commerce-cloud-b2c/guides/migrating-to-23-5-0/).
