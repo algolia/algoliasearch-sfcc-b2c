@@ -301,25 +301,6 @@ This preference is only used with the "Attribute-sliced" record model.</descript
                 <default-value>false</default-value>
             </attribute-definition>
 
-            <!-- Deprecated, will be removed soon -->
-            <attribute-definition attribute-id="Algolia_OCAPIClientID">
-                <display-name xml:lang="x-default">OCAPI client ID</display-name>
-                <description xml:lang="x-default">Authorization OCAPI client ID</description>
-                <type>string</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-                <min-length>0</min-length>
-            </attribute-definition>
-
-            <!-- Deprecated, will be removed soon -->
-            <attribute-definition attribute-id="Algolia_OCAPIClientPassword">
-                <display-name xml:lang="x-default">OCAPI client password</display-name>
-                <description xml:lang="x-default">Authorization OCAPI client password</description>
-                <type>password</type>
-                <mandatory-flag>false</mandatory-flag>
-                <externally-managed-flag>false</externally-managed-flag>
-            </attribute-definition>
-
             <attribute-definition attribute-id="Algolia_EnableRealTimeInventoryHook">
                 <display-name xml:lang="x-default">Enable Real Time Inventory Hook</display-name>
                 <description xml:lang="x-default">Sends inventory updates to Algolia in real-time after each order.</description>

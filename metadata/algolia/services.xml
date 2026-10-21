@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <services xmlns="http://www.demandware.com/xml/impex/services/2014-09-26">
-    <service-credential service-credential-id="algolia.http.export.cred">
-        <url>https://sfcc-stream.algolia.com</url>
-        <user-id/>
-        <password/>
-    </service-credential>
-
     <service-credential service-credential-id="algolia.http.search.cred">
         <url>https://{{applicationID}}-dsn.algolia.net/1/indexes/{{indexName}}/query</url>
         <user-id/>
@@ -18,22 +12,12 @@
         <password/>
     </service-credential>
 
-    <!-- DELETING SERVICE CREDENTIAL: renamed to "algolia.http.export.cred" -->
-    <service-credential service-credential-id="algolia.http.api.cred" mode="delete">
+    <!-- DELETING SERVICE CREDENTIAL: Stream middleware endpoint for the v1 jobs, no longer used by the cartridge -->
+    <service-credential service-credential-id="algolia.http.export.cred" mode="delete">
         <url>https://sfcc-stream.algolia.com</url>
-        <user-id>sfcc</user-id>
+        <user-id/>
         <password/>
     </service-credential>
-
-    <service-profile service-profile-id="algolia.http.export.profile">
-        <timeout-millis>50000</timeout-millis>
-        <rate-limit-enabled>false</rate-limit-enabled>
-        <rate-limit-calls>0</rate-limit-calls>
-        <rate-limit-millis>0</rate-limit-millis>
-        <cb-enabled>false</cb-enabled>
-        <cb-calls>0</cb-calls>
-        <cb-millis>0</cb-millis>
-    </service-profile>
 
     <service-profile service-profile-id="algolia.http.search.profile">
         <timeout-millis>1000</timeout-millis>
@@ -55,27 +39,16 @@
         <cb-millis>0</cb-millis>
     </service-profile>
 
-    <!-- DELETING SERVICE PROFILE: renamed to "algolia.http.export.profile" -->
-    <service-profile service-profile-id="algolia.http.api.profile" mode="delete">
+    <!-- DELETING SERVICE PROFILE: Stream middleware endpoint for the v1 jobs, no longer used by the cartridge -->
+    <service-profile service-profile-id="algolia.http.export.profile" mode="delete">
         <timeout-millis>50000</timeout-millis>
         <rate-limit-enabled>false</rate-limit-enabled>
         <rate-limit-calls>0</rate-limit-calls>
         <rate-limit-millis>0</rate-limit-millis>
         <cb-enabled>false</cb-enabled>
-        <cb-calls>10</cb-calls>
+        <cb-calls>0</cb-calls>
         <cb-millis>0</cb-millis>
     </service-profile>
-
-    <service service-id="algolia.http.export">
-        <service-type>HTTP</service-type>
-        <enabled>true</enabled>
-        <log-prefix>algoliaexport</log-prefix>
-        <comm-log-enabled>false</comm-log-enabled>
-        <force-prd-enabled>false</force-prd-enabled>
-        <mock-mode-enabled>false</mock-mode-enabled>
-        <profile-id>algolia.http.export.profile</profile-id>
-        <credential-id>algolia.http.export.cred</credential-id>
-    </service>
 
     <service service-id="algolia.http.search">
         <service-type>HTTP</service-type>
@@ -99,16 +72,16 @@
         <credential-id>algolia.http.search.write.cred</credential-id>
     </service>
 
-    <!-- DELETING SERVICE: renamed to "algolia.http.export" -->
-    <service service-id="algolia.http.api" mode="delete">
+    <!-- DELETING SERVICE: Stream middleware endpoint for the v1 jobs, no longer used by the cartridge -->
+    <service service-id="algolia.http.export" mode="delete">
         <service-type>HTTP</service-type>
         <enabled>true</enabled>
-        <log-prefix>algolia</log-prefix>
+        <log-prefix>algoliaexport</log-prefix>
         <comm-log-enabled>false</comm-log-enabled>
-        <force-prd-enabled>true</force-prd-enabled>
+        <force-prd-enabled>false</force-prd-enabled>
         <mock-mode-enabled>false</mock-mode-enabled>
-        <profile-id>algolia.http.api.profile</profile-id>
-        <credential-id>algolia.http.api.cred</credential-id>
+        <profile-id>algolia.http.export.profile</profile-id>
+        <credential-id>algolia.http.export.cred</credential-id>
     </service>
 
 </services>

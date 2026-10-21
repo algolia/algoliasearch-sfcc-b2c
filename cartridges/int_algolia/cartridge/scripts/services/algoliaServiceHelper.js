@@ -83,67 +83,6 @@ function callService(title, service, params) {
 }
 
 /**
- * Check if response type is JSON
- * @param {dw.svc.HTTPService} service - Service to obtain client from
- * @returns {boolean}                  - boolean if `Content-Type` is `application/json`
- */
-function isResponseJSON(service) {
-    var contentTypeHeader = service.getClient().getResponseHeader('Content-Type');
-    return contentTypeHeader && contentTypeHeader.split(';')[0].toLowerCase() === 'application/json';
-}
-
-/**
- *
- * @param {string} title - Name of the action or method to describe the action performed
- * @param {dw.svc.HTTPService} service - Service instance to call
- * @param {Object} params - Params to be passed to service.call function
- * @returns {dw.system.Status} - for success calls result data available via getDetail('object');
- */
-function callJsonService(title, service, params) {
-    var Status = require('dw/system/Status');
-
-    var callStatus = new Status(Status.OK);
-    var statusItem = callStatus.items.get(0);
-
-    var result = null;
-    var data = null;
-
-    try {
-        result = service.setThrowOnError().call(JSON.stringify(params));
-    } catch (error) {
-        statusItem.setStatus(Status.ERROR);
-        logger.error('HTTP Service request failed.\nMessage: {0}, Url: {1}', error.name, service.getURL());
-        return callStatus;
-    }
-
-    if (result.ok) {
-        if (isResponseJSON(service)) {
-            try {
-                data = JSON.parse(result.object.response);
-                statusItem.addDetail('object', data);
-            } catch (parseError) { // eslint-disable-line no-unused-vars
-                // response is marked as json, but it is not
-                statusItem.setStatus(Status.ERROR);
-                logger.error('JSON.parse error. Method: {0}. String: {1}', title, result.object.response);
-            }
-        } else {
-            // statusItem.setStatus(Status.ERROR);
-            statusItem.addDetail('object', {});
-            if (result.object && result.object.response) {
-                logger.warn('Response is not JSON. Method: {0}. Result: {1}', title, result.object.response);
-            }
-        }
-    } else {
-        statusItem.setStatus(Status.ERROR);
-        statusItem.addDetail('errorMessage', result.errorMessage);
-        statusItem.addDetail('errorCode', result.error);
-        logServiceError(title, service.getURL(), result);
-    }
-
-    return callStatus;
-}
-
-/**
  * Validates an Algolia API key’s permissions and index restrictions.
  * It retrieves key details from Algolia, then verifies that the key’s ACL
  * contains every entry required by the selected indexing API and that the
@@ -374,7 +313,6 @@ function validateUnretrievableAttributes(service, applicationID, indexPrefix, lo
 
 module.exports = {
     callService: callService,
-    callJsonService: callJsonService,
     validateAPIKey: validateAPIKey,
     validateUnretrievableAttributes: validateUnretrievableAttributes
 };

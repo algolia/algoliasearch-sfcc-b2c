@@ -7,7 +7,6 @@ var Logger = require('dw/system/Logger');
 var Resource = require('dw/web/Resource');
 
 var algoliaData = require('*/cartridge/scripts/algolia/lib/algoliaData');
-var algoliaExportAPI = require('*/cartridge/scripts/algoliaExportAPI');
 var algoliaIndexingService = require('*/cartridge/scripts/services/algoliaIndexingService');
 const BMHelper = require('../scripts/helper/BMHelper');
 var algoliaServiceHelper = require('*/cartridge/scripts/services/algoliaServiceHelper');
@@ -214,27 +213,7 @@ function getDashboardPdict() {
     };
 }
 
-/**
- * @description Handles indexing requests depending on the request type (get indexing status/clean queue/resume indexing)
- */
-function indexing() {
-    var requestType = request.httpParameterMap.requestType.stringValue;
-    var responseData = {};
-    var status = algoliaExportAPI.makeIndexingRequest(requestType);
-
-    if (status.error) {
-        responseData.errorMessage = status.details.errorMessage ? status.details.errorMessage : Resource.msg('algolia.error.service', 'algolia', null);
-    } else {
-        responseData = status.details.object.body;
-    }
-
-    response.setContentType('application/json'); // eslint-disable-line no-undef
-    response.writer.print(JSON.stringify(responseData)); // eslint-disable-line no-undef
-}
-
 exports.Start = start;
 exports.Start.public = true;
 exports.HandleSettings = handleSettings;
 exports.HandleSettings.public = true;
-exports.Indexing = indexing;
-exports.Indexing.public = true;

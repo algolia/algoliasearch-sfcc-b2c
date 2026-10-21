@@ -263,14 +263,6 @@ jest.mock('dw/web/URLUtils', () => {
 }, {virtual: true});
 
 // Mocked libraries, to be rewritten with `requireActual()`
-jest.mock('*/cartridge/scripts/algolia/helper/logHelper', () => {
-    return {
-        getLogData: function() {
-            return {};
-        },
-        setLogData: function() {}
-    }
-}, {virtual: true});
 jest.mock('*/cartridge/scripts/services/algoliaIndexingService', () => {}, {virtual: true});
 
 // The following are not mocks, it points SFCC relative requires to the actual files
@@ -309,9 +301,6 @@ jest.mock('*/cartridge/scripts/algolia/helper/modelHelper', () => {
 }, {virtual: true});
 jest.mock('*/cartridge/scripts/algolia/helper/objectHelper', () => {
     return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/objectHelper');
-}, {virtual: true});
-jest.mock('*/cartridge/scripts/algolia/helper/sendHelper', () => {
-    return jest.requireActual('./cartridges/int_algolia/cartridge/scripts/algolia/helper/sendHelper');
 }, {virtual: true});
 
 jest.mock('*/cartridge/scripts/algolia/lib/algoliaConstants', () => {
