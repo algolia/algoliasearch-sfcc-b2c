@@ -26,7 +26,6 @@ const mockMoveIndex = jest.fn().mockReturnValue({
     }
 });
 const mockGetIndexSettings = jest.fn();
-const mockSetIndexSettings = jest.fn();
 const mockWaitTask = jest.fn();
 const mockWaitForRunEvent = jest.fn();
 const mockSendMultiIndexBatch = jest.fn();
@@ -34,7 +33,6 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         deleteIndex: mockDeleteIndex,
         getIndexSettings: mockGetIndexSettings,
-        setIndexSettings: mockSetIndexSettings,
         copyIndexSettings: mockCopySettingsFromProdIndices,
         moveIndex: mockMoveIndex,
         waitTask: mockWaitTask,

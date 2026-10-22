@@ -301,9 +301,6 @@ exports.afterStep = function(success, parameters, stepExecution) {
 }
 
 // For testing
-exports.__setLastIndexingTasks = function(indexingTasks) {
-    lastIndexingTasks = indexingTasks;
-};
 exports.__getAttributesToSend = function() {
     return attributesToSend;
 }

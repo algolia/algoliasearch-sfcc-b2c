@@ -26,30 +26,6 @@ beforeEach(() => {
     });
 });
 
-test('sendBatch', () => {
-    const indexName = 'testIndex';
-    const algoliaRequests = [
-        {
-            action: 'addObject',
-            body: { firstname: 'Jimmie', lastname: 'Barninger' }
-        },
-        {
-            action: 'addObject',
-            body: { firstname: 'Warren', lastname: 'Speach' }
-        }
-    ];
-
-    indexingAPI.sendBatch(indexName, algoliaRequests);
-
-    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
-        method: 'POST',
-        path: '/1/indexes/' + indexName + '/batch',
-        body: {
-            requests: algoliaRequests
-        }
-    });
-});
-
 test('sendMultiIndexBatch', () => {
     const algoliaRequests = [
         {
@@ -90,17 +66,6 @@ test('getIndexSettings', () => {
     expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
         method: 'GET',
         path: '/1/indexes/testIndex/settings',
-    });
-});
-
-test('setIndexSettings', () => {
-    const settings = { 'testSetting': 'testValue' };
-    indexingAPI.setIndexSettings('testIndex', settings);
-
-    expect(mockRetryableCall).toHaveBeenCalledWith(mockService, {
-        method: 'PUT',
-        path: '/1/indexes/testIndex/settings',
-        body: settings,
     });
 });
 

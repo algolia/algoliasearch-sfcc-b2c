@@ -24,33 +24,6 @@ function setJobInfo(jobInfo) {
 /* --------------------------- Search API methods --------------------------- */
 
 /**
- * Send a batch of objects to Algolia Indexing API: https://www.algolia.com/doc/rest-api/search/#batch-write-operations
- * @param {string} indexName - name of the index to target
- * @param {Array} requestsArray - array of requests to send to Algolia
- * @returns {dw.svc.Result} - result of the call
- */
-function sendBatch(indexName, requestsArray) {
-    var indexingService = algoliaIndexingService.getService(__jobInfo);
-
-    var result = retryableCall(
-        indexingService,
-        {
-            method: 'POST',
-            path: '/1/indexes/' + indexName + '/batch',
-            body: {
-                requests: requestsArray,
-            }
-        }
-    );
-
-    if (!result.ok) {
-        logger.error(result.getErrorMessage());
-    }
-
-    return result;
-}
-
-/**
  * Send a batch of objects to Algolia Search API's `multiple-batch` endpoint
  * https://www.algolia.com/doc/rest-api/search/multiple-batch
  * @param {Array} requestsArray - array of requests to send to Algolia. Each operation must contain the `indexName` to target.
@@ -122,31 +95,6 @@ function getIndexSettings(indexName) {
         } else {
             logger.error(result.getErrorMessage());
         }
-    }
-
-    return result;
-}
-
-/**
- * Set index settings. https://www.algolia.com/doc/rest-api/search/#set-settings
- * @param {string} indexName - targeted index
- * @param {string} indexSettings - index settings to set
- * @returns {dw.svc.Result} - result of the call
- */
-function setIndexSettings(indexName, indexSettings) {
-    var indexingService = algoliaIndexingService.getService(__jobInfo);
-
-    var result = retryableCall(
-        indexingService,
-        {
-            method: 'PUT',
-            path: '/1/indexes/' + indexName + '/settings',
-            body: indexSettings,
-        }
-    );
-
-    if (!result.ok) {
-        logger.error(result.getErrorMessage());
     }
 
     return result;
@@ -336,11 +284,9 @@ function waitForRunEvent(runID, eventID) {
 }
 
 module.exports.setJobInfo = setJobInfo;
-module.exports.sendBatch = sendBatch;
 module.exports.sendMultiIndexBatch = sendMultiIndexBatch;
 module.exports.deleteIndex = deleteIndex;
 module.exports.getIndexSettings = getIndexSettings;
-module.exports.setIndexSettings = setIndexSettings;
 module.exports.copyIndexSettings = copyIndexSettings;
 module.exports.moveIndex = moveIndex;
 module.exports.waitTask = waitTask;
