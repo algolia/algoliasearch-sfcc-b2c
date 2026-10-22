@@ -8,7 +8,6 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaProductConfig', () => {
     const algoliaProductConfig = require('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/lib/algoliaProductConfig');
     return {
         attributeConfig_v2: algoliaProductConfig.attributeConfig_v2,
-        extendedProductAttributesConfig: algoliaProductConfig.extendedProductAttributesConfig,
         defaultAttributes_v2: algoliaProductConfig.defaultAttributes_v2,
         defaultVariantAttributes_v2: algoliaProductConfig.defaultVariantAttributes_v2,
         defaultMasterAttributes_v2: algoliaProductConfig.defaultMasterAttributes_v2

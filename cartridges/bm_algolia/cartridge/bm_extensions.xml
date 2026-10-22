@@ -13,7 +13,6 @@
       <exec pipeline="AlgoliaBM" node="Start"/>
       <sub-pipelines>
       	<pipeline name="AlgoliaBM-Start"/>
-      	<pipeline name="AlgoliaBM-HandleReindex"/>
       	<pipeline name="AlgoliaBM-HandleSettings"/>
       </sub-pipelines>
       <parameters>

@@ -34,7 +34,6 @@ jest.mock('*/cartridge/scripts/algolia/lib/algoliaContentConfig', () => {
 jest.mock('*/cartridge/scripts/algolia/helper/reindexHelper', () => {
     const originalModule = jest.requireActual('../../../../../../cartridges/int_algolia/cartridge/scripts/algolia/helper/reindexHelper');
     return {
-        deleteRetryableBatch: originalModule.deleteRetryableBatch,
         deleteTemporaryIndices: originalModule.deleteTemporaryIndices,
         waitForTasks: originalModule.waitForTasks,
         copySettingsFromProdIndices: originalModule.copySettingsFromProdIndices,

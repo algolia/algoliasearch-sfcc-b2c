@@ -12,38 +12,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  build:
-    runs-on: ubuntu-latest
-
-    env:
-      CODE_VERSION: ${{ vars.CODE_VERSION }}
-      ALGOLIA_APP_ID: ${{ vars.ALGOLIA_APP_ID }}
-      ALGOLIA_INDEX_NAME: ${{ vars.ALGOLIA_INDEX_NAME }}
-      SANDBOX_HOST: ${{ vars.SANDBOX_HOST }}
-      TEST_PRODUCT_ID: ${{ vars.TEST_PRODUCT_ID }}
-      TEST_MASTER_PRODUCT_ID: ${{ vars.TEST_MASTER_PRODUCT_ID }}
-      INDEX_PREFIX: ${{ vars.INDEX_PREFIX }}
-      INVENTORY_LIST_ID: ${{ vars.INVENTORY_LIST_ID }}
-      SFCC_OAUTH_CLIENT_ID: ${{ secrets.SFCC_OAUTH_CLIENT_ID }}
-      SFCC_OAUTH_CLIENT_SECRET: ${{ secrets.SFCC_OAUTH_CLIENT_SECRET }}
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install Dependencies
-        run: npm ci
-
-      - name: Compile JS and CSS
-        run: |
-          npm run compile:js
-          npm run compile:scss
-
   unit-tests-and-lints:
     runs-on: ubuntu-latest
     steps:

@@ -1,86 +1,12 @@
 'use strict';
 
 /**
- * Call REST service and handle common errors
+ * Validates the API key and index settings entered in the Algolia Business Manager module
  */
 
 const logger = require('*/cartridge/scripts/algolia/helper/jobHelper').getAlgoliaLogger();
 const Resource = require('dw/web/Resource');
-const stringUtils = require('dw/util/StringUtils');
 const { INDEXING_APIS, REQUIRED_ACL_BY_INDEXING_API } = require('*/cartridge/scripts/algolia/lib/algoliaConstants');
-
-/**
- * Formats standard error message string
- * @param {string} title        - Error title, place or function name
- * @param {string} url          - Url of the service endpoint
- * @param {number} error        - HTTP response code for an HTTPService
- * @param {string} errorMessage - Error Message
- * @returns {string}            - formatted message
- */
-function standardErrorMessage(title, url, error, errorMessage) {
-    return stringUtils.format('Error: {0},\nUrl: {1},\nErrorCode: {2},\nMessage: {3}',
-        title || 'Algolia Service',
-        url,
-        error,
-        errorMessage);
-}
-
-/**
- * Parse error message and write it to log
- * @param {string}        title  - Error title, place or function name
- * @param {string}        url    - Url of the service endpoint
- * @param {dw.svc.Result} result - result
- * @returns {null} - Null
- */
-function logServiceError(title, url, result) {
-    var logMessage = '';
-
-    switch (result.error) {
-        case 400:
-            // Response is not a JSON. Write is as plain string.
-            logMessage = standardErrorMessage(title, url, result.error, result.errorMessage);
-            break;
-        case 500:
-        case 403:
-        default:
-            logMessage = standardErrorMessage(title, url, result.error, result.errorMessage);
-    } // switch ends
-
-    logger.error(logMessage);
-
-    return null;
-}
-
-/**
- * Call service, parse errors and return data or null
- * @param {string}         title   - Name of the action or method to describe the action performed
- * @param {dw.svc.Service} service - Service instance to call
- * @param {Object}         params  - Params to be passed to service.call function
- * @returns {?{
- *              response: string,
- *              headers: dw.util.Map,
- *              statusCode: number
- *          }}                     - Response object or `null` in case of errors
- */
-function callService(title, service, params) {
-    var result;
-    var data = null;
-
-    try {
-        result = service.setThrowOnError().call(JSON.stringify(params));
-    } catch (error) {
-        logger.error('HTTP Service request failed.\nMessage: {0}, Url: {1}', error.name, service.getURL());
-        return null;
-    }
-
-    if (result.ok) {
-        data = result.object;
-    } else {
-        logServiceError(title, service.getURL(), result);
-    }
-
-    return data;
-}
 
 /**
  * Validates an Algolia API key’s permissions and index restrictions.
@@ -312,7 +238,6 @@ function validateUnretrievableAttributes(service, applicationID, indexPrefix, lo
 }
 
 module.exports = {
-    callService: callService,
     validateAPIKey: validateAPIKey,
     validateUnretrievableAttributes: validateUnretrievableAttributes
 };
