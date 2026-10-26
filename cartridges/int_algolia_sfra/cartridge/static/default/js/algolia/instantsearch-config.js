@@ -33,7 +33,7 @@ function enableInstantSearch(config) {
 
     let displaySwatches = false;
     var initialUiState = {};
-    var hierarchicalMenuValue = {};
+    var hierarchicalMenuValue;
     if (config.categoryDisplayNamePath && config.categoryDisplayNamePath.indexOf('New Arrivals') > -1) {
         hierarchicalMenuValue = {
             "newArrivalsCategory.0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),
@@ -432,9 +432,7 @@ function enableInstantSearch(config) {
                             return '';
                         }
 
-                        let storeDetails = {};
-
-                        storeDetails = storeList.find(store => store.id === data.label) || {};
+                        const storeDetails = storeList.find(store => store.id === data.label) || {};
 
                         const fullAddress = storeDetails.address ? `${storeDetails.address.address1}, ${storeDetails.address.city}, ${storeDetails.address.stateCode} ${storeDetails.address.postalCode || ''}` : '';
 

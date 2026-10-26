@@ -1,100 +1,27 @@
-require('dotenv').config();
-const sfcc = require('sfcc-ci');
-const authenticate = require('./auth');
+const { executeJob, waitForJob } = require('@salesforce/b2c-tooling-sdk/operations/jobs');
+const { getInstance } = require('./sfccInstance');
+
+const JOB_ID = 'AlgoliaProductIndex_v2';
+const POLL_INTERVAL_SECONDS = 15;
+const JOB_TIMEOUT_SECONDS = 375;
 
 async function runSFCCJob() {
     try {
-        const token = await authenticate();
+        const instance = await getInstance();
 
-        const instance = process.env.SANDBOX_HOST;
-        const jobId = 'AlgoliaProductIndex_v2';
+        // If the job is already running, executeJob waits for that execution to finish and
+        // then starts a new one, so the new run picks up the latest site preferences
+        const jobExecution = await executeJob(instance, JOB_ID);
+        console.info('Started %s (execution id: %s).', JOB_ID, jobExecution.id);
 
-        // Run Job
-        let jobExecution;
-        try {
-            jobExecution = await new Promise((resolve, reject) => {
-                sfcc.job.run(instance, jobId, {}, token, (err, result) => {
-                    if (err) {
-                        console.error('Job run error:', err);
-                        console.error('Error details:', JSON.stringify(err, null, 2));
-                        reject(err);
-                    } else {
-                        resolve(result);
-                    }
-                });
-            });
-        } catch (error) {
-            // Check if the job is already running
-            if (error.message && error.message.includes('JobAlreadyRunningException')) {
-                console.log('Job is already running. Will monitor its status...');
-                // Get the list of running jobs to find our job's execution ID
-                jobExecution = await new Promise((resolve, reject) => {
-                    sfcc.job.list(instance, token, (err, result) => {
-                        if (err) {
-                            reject(err);
-                        } else {
-                            console.info('Current jobs:', JSON.stringify(result, null, 2));
-                            // The result might be wrapped in a body property
-                            const jobs = result.body || result;
-                            const runningJob = jobs.find(job =>
-                                job.job_id === jobId &&
-                                job.status !== 'finished' &&
-                                job.status !== 'failed'
-                            );
-                            if (runningJob) {
-                                resolve({ body: { id: runningJob.job_execution_id } });
-                            } else {
-                                reject(new Error('Could not find running job'));
-                            }
-                        }
-                    });
-                });
-            } else {
-                throw error;
-            }
-        }
+        await waitForJob(instance, JOB_ID, jobExecution.id, {
+            pollIntervalSeconds: POLL_INTERVAL_SECONDS,
+            timeoutSeconds: JOB_TIMEOUT_SECONDS,
+            onPoll: (pollInfo) => console.info('Job execution status - %s (%ds)',
+                pollInfo.status, pollInfo.elapsedSeconds),
+        });
 
-        const jobExecutionId = jobExecution?.body?.id;
-        if (!jobExecutionId) {
-            console.error('Job execution details:', JSON.stringify(jobExecution, null, 2));
-            throw new Error('Failed to get job execution ID');
-        }
-
-        // Poll for Job Completion
-        let attempts = 0;
-        const maxAttempts = 25;
-        const delay = 15000; // 15 seconds
-
-        while (attempts < maxAttempts) {
-            attempts++;
-
-            const status = await new Promise((resolve, reject) => {
-                sfcc.job.status(instance, jobId, jobExecutionId, token, (err, result) => {
-                    if (err) {
-                        console.error('Job status error:', err);
-                        console.error('Error details:', JSON.stringify(err, null, 2));
-                        reject(err);
-                    } else {
-                        resolve(result);
-                    }
-                });
-            });
-
-            const execStatus = status?.status;
-            console.info('Attempt %d: Job execution status - %s', attempts, execStatus);
-
-            if (execStatus === 'OK') {
-                console.log('Job completed successfully.');
-                return;
-            } else if (execStatus === 'failed' || execStatus === 'error') {
-                throw new Error('Job execution failed.');
-            }
-
-            // Wait before next attempt
-            await new Promise(resolve => setTimeout(resolve, delay));
-        }
-
-        throw new Error('Job did not complete within the maximum number of attempts.');
+        console.log('Job completed successfully.');
     } catch (error) {
         console.error('SFCC Job error:', error);
         throw error;
@@ -109,4 +36,3 @@ if (require.main === module) {
         process.exit(1);
     });
 }
-

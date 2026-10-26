@@ -1,44 +1,28 @@
 // scripts/deployCode.js
-require('dotenv').config();
-const sfcc = require('sfcc-ci');
-const authenticate = require('./auth');
 const path = require('path');
+const { findAndDeployCartridges } = require('@salesforce/b2c-tooling-sdk/operations/code');
+const { getInstance } = require('./sfccInstance');
+
+// Listed explicitly so that local copies of other cartridges (for example SFRA) are not
+// uploaded together with the Algolia cartridges
+const ALGOLIA_CARTRIDGES = [
+    'int_algolia',
+    'int_algolia_controllers',
+    'int_algolia_sfra',
+    'algolia_sg_changes',
+    'bm_algolia',
+];
 
 async function deployCode() {
     try {
-        const token = await authenticate();
-
-        const instance = process.env.SANDBOX_HOST;
-        const codeVersion = process.env.CODE_VERSION;
-        const codeArchive = path.resolve(`${codeVersion}.zip`);
-
-        // Deploy Code
-        await new Promise((resolve, reject) => {
-            sfcc.code.deploy(instance, codeArchive, token, {}, (err) => {
-                if (err) {
-                    console.error('Code deployment error:', err);
-                    reject(err);
-                } else {
-                    console.log('Code deployed successfully.');
-                    resolve();
-                }
-            });
+        const instance = await getInstance();
+        const result = await findAndDeployCartridges(instance, path.resolve(__dirname, '../cartridges'), {
+            include: ALGOLIA_CARTRIDGES,
+            activate: true,
         });
 
-        // Activate Code
-        await new Promise((resolve, reject) => {
-            sfcc.code.activate(instance, codeVersion, token, (err) => {
-                if (err) {
-                    console.error('Code activation error:', err);
-                    reject(err);
-                } else {
-                    console.log('Code activated successfully.');
-                    resolve();
-                }
-            });
-        });
-
-        console.log('Code deployment and activation completed successfully.');
+        console.log('Deployed %d cartridges to code version %s and activated it.',
+            result.cartridges.length, result.codeVersion);
     } catch (error) {
         console.error('Deployment error:', error);
         throw error;

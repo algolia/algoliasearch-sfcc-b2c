@@ -25,7 +25,7 @@ function getCategoryDisplayNamePath(category) {
 function forEach(collection, callback, scope) {
     var iterator = collection.iterator();
     var index = 0;
-    var item = null;
+    var item;
     while (iterator.hasNext()) {
         item = iterator.next();
         if (scope) {

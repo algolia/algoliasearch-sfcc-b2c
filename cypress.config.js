@@ -1,15 +1,20 @@
 const { defineConfig } = require("cypress");
-require('dotenv').config();
+require('./scripts/loadEnv');
 
 module.exports = defineConfig({
+    // Non-sensitive values, readable in the specs with Cypress.expose()
+    expose: {
+        SANDBOX_HOST: process.env.SANDBOX_HOST,
+        TEST_PRODUCT_ID: process.env.TEST_PRODUCT_ID,
+        RECORD_MODEL: process.env.RECORD_MODEL,
+    },
+    // Sensitive values, read in the specs with cy.env() so they stay in the Node process
+    env: {
+        TEST_SHOPPER_EMAIL: process.env.TEST_SHOPPER_EMAIL,
+        TEST_SHOPPER_PASSWORD: process.env.TEST_SHOPPER_PASSWORD,
+    },
     e2e: {
         setupNodeEvents(on, config) {
-            // Copy environment variables to Cypress config
-            config.env = {
-                ...config.env,
-                ...process.env,
-            };
-
             on('task', {
                 async getProduct({ id }) {
                     const getProduct = require('./scripts/getProduct');

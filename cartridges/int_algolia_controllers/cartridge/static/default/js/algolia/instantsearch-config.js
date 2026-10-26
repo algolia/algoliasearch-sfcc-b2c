@@ -11,7 +11,7 @@ function enableInstantSearch(config) {
 
     let displaySwatches = false;
     var initialUiState = {};
-    var hierarchicalMenuValue = {};
+    var hierarchicalMenuValue;
     if (config.categoryDisplayNamePath && config.categoryDisplayNamePath.indexOf('New Arrivals') > -1) {
         hierarchicalMenuValue = {
             "newArrivalsCategory.0": (config.categoryDisplayNamePath || '').split(config.categoryDisplayNamePathSeparator),

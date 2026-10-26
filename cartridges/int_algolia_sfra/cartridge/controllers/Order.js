@@ -38,7 +38,7 @@ server.append('Confirm', function (req, res, next) {
 
             if (product) {
                 var algoliaProduct = {};
-                var recordID = null;
+                var recordID;
 
                 try {
                     recordID = modelHelper.getRecordIDForProduct(product, recordModel);
