@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata xmlns="http://www.demandware.com/xml/impex/metadata/2006-10-31">
+    <type-extension type-id="Product">
+        <custom-attribute-definitions>
+
+            <attribute-definition attribute-id="refinementColor">
+                <display-name xml:lang="x-default">Refinement Color</display-name>
+                <type>enum-of-string</type>
+                <localizable-flag>true</localizable-flag>
+                <site-specific-flag>false</site-specific-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <visible-flag>false</visible-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <order-required-flag>false</order-required-flag>
+                <externally-defined-flag>false</externally-defined-flag>
+                <value-definitions>
+                    <value-definition>
+                        <display xml:lang="x-default">Black</display>
+                        <value>black</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Blue</display>
+                        <value>blue</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Green</display>
+                        <value>green</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Red</display>
+                        <value>red</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Orange</display>
+                        <value>orange</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Pink</display>
+                        <value>pink</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Purple</display>
+                        <value>purple</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">White</display>
+                        <value>white</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Yellow</display>
+                        <value>yellow</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Grey</display>
+                        <value>grey</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Beige</display>
+                        <value>beige</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Miscellaneous</display>
+                        <value>miscellaneous</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Brown</display>
+                        <value>brown</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Navy</display>
+                        <value>navy</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="refinementSize">
+                <display-name xml:lang="x-default">Refinement Size</display-name>
+                <type>string</type>
+                <localizable-flag>true</localizable-flag>
+                <site-specific-flag>false</site-specific-flag>
+                <mandatory-flag>false</mandatory-flag>
+                <visible-flag>false</visible-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <order-required-flag>false</order-required-flag>
+                <externally-defined-flag>false</externally-defined-flag>
+                <min-length>0</min-length>
+                <field-length>6</field-length>
+            </attribute-definition>
+
+        </custom-attribute-definitions>
+        <group-definitions>
+
+            <attribute-group group-id="facetBucketing">
+                <display-name xml:lang="x-default">Facet Bucketing</display-name>
+                <attribute attribute-id="refinementColor"/>
+                <attribute attribute-id="refinementSize"/>
+            </attribute-group>
+
+        </group-definitions>
+    </type-extension>
+
+    <type-extension type-id="SitePreferences">
+        <custom-attribute-definitions>
+
+            <attribute-definition attribute-id="Algolia_ApplicationID">
+                <display-name xml:lang="x-default">Application ID</display-name>
+                <description xml:lang="x-default">This is your unique application identifier. If you haven't already, please signup to Algolia and create an Algolia application on the Algolia Dashboard.</description>
+                <type>string</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_SearchApiKey">
+                <display-name xml:lang="x-default">Search API key</display-name>
+                <description xml:lang="x-default">This is the public API key which can be safely used in your frontend code.This key is usable for search queries and it's also able to list the indices you've got access to.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_AdminApiKey">
+                <display-name xml:lang="x-default">Admin API key</display-name>
+                <description xml:lang="x-default">This is the ADMIN API key. Please keep it secret and use it ONLY from your backend: this key is used to create, update and DELETE your indices. You can also use it to manage your API keys.</description>
+                <type>password</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_InStockThreshold">
+                <display-name xml:lang="x-default">InStock Threshold</display-name>
+                <description xml:lang="x-default">Stock Threshold</description>
+                <type>double</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>1.0</default-value>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_AdditionalAttributes">
+                <display-name xml:lang="x-default">Additional Product Attributes</display-name>
+                <description xml:lang="x-default">Any additional Product attribute</description>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_ActiveData">
+                <display-name xml:lang="x-default">Active data for custom ranking</display-name>
+                <description xml:lang="x-default">Recommended dw.catalog.ProductActiveData fields exposed as flat attributes at the record root, intended for Algolia custom ranking. The selectable values are rendered by the Algolia BM module; the underlying preference is a set of strings. Active Data field IDs not listed in the BM picker can still be added through Algolia_AdditionalAttributes.</description>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_IndexPrefix">
+                <display-name xml:lang="x-default">Index prefix</display-name>
+                <description xml:lang="x-default">By default the index name generated by the system looks like this: '&lt;first part of the hostname&gt;__&lt;siteID&gt;__&lt;"product" | "category"&gt;__&lt;locale&gt;'.&#13;
+Setting this preference replaces the first two segments, the final index name becoming '&lt;Algolia_IndexPrefix&gt;__&lt;"product" | "category"&gt;__&lt;locale&gt;'.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_RecordModel">
+                <display-name xml:lang="x-default">Record model</display-name>
+                <description xml:lang="x-default">Define the model used to store products in Algolia.
+'Variation product': create one record per variation / simple product. All attributes of all products are stored at the record's root level.
+'Base product': create one record per master. Properties common to all attributes are stored at root level, variant attributes are stored inside the 'variants' array. Simple products also have a 'variants' array for consistency.
+'Attribute-sliced': create one record per custom variation group (e.g. per color), containing size variants in that group.
+The product doesn't need to be an SFCC variation group; masters with multiple variation attributes are split into multiple masters by the given variation attribute, one record per variation attribute value
+(e.g. one record for all sizes of color red, another one for all sizes of color blue), for each locale.
+Like with the Base product record type, all records (incl. simple products) have a 'variants' array for consistency and easy faceting.</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <value-definitions>
+                    <value-definition default="true">
+                        <display xml:lang="x-default">Variation product</display>
+                        <value>variant-level</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Base product</display>
+                        <value>master-level</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Attribute-sliced</display>
+                        <value>attribute-sliced</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_AttributeSlicedRecordModel_GroupingAttribute">
+                <display-name xml:lang="x-default">Variation attribute to group masters by when using the "Attribute-sliced" record model</display-name>
+                <description xml:lang="x-default">Choose the attribute that masters with multiple variation attributes are grouped by when using the Attribute-sliced record model.&#13;
+Example: if a base product has four sizes and three colors (12 variants total) and the variation attribute to group by is "color", it will be split up into three records, one for each color value (red, green, blue), with each record having four size variants.&#13;
+This preference is only used with the "Attribute-sliced" record model.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <default-value>color</default-value>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_IndexingAPI">
+                <display-name xml:lang="x-default">Indexing API</display-name>
+                <description xml:lang="x-default">The indexing API to use. The Ingestion API enables features such as Transformations and Collections, but has some performance overhead. If you're unsure, use the Search API. Default: Search API.</description>
+                <type>enum-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <value-definitions>
+                    <value-definition default="true">
+                        <display xml:lang="x-default">Search API</display>
+                        <value>search-api</value>
+                    </value-definition>
+                    <value-definition>
+                        <display xml:lang="x-default">Ingestion API</display>
+                        <value>ingestion-api</value>
+                    </value-definition>
+                </value-definitions>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_AnalyticsRegion">
+                <display-name xml:lang="x-default">Analytics region ("eu" or "us", for Ingestion API only)</display-name>
+                <description xml:lang="x-default">Your Algolia application's analytics region, required when selecting the Ingestion API for indexing. Available values: "us" and "eu". You can check your analytics region in the Infrastructure &gt; Analytics section of the Algolia dashboard.</description>
+                <type>string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <min-length>0</min-length>
+                <regex>^(us|eu)$</regex>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_IndexOutOfStock">
+                <display-name xml:lang="x-default">Index Out of Stock</display-name>
+                <description xml:lang="x-default">Index out of stock products</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>true</default-value>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_LocalesForIndexing">
+                <display-name xml:lang="x-default">Locales for indexing</display-name>
+                <description xml:lang="x-default">List of locales that will be used by the indexing jobs</description>
+                <type>set-of-string</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_Enable">
+                <display-name xml:lang="x-default">Enable Algolia frontend cartridge</display-name>
+                <description xml:lang="x-default">Enable the SFRA or SiteGenesis cartridge on your Storefront</description>
+                <type>boolean</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_EnableInsights">
+                <display-name xml:lang="x-default">Enable Insights Events</display-name>
+                <description xml:lang="x-default">When enabled, the Storefront sends insights events to Algolia: views, clicks, addToCart and purchases</description>
+                <type>boolean</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_EnablePricingLazyLoad">
+                <display-name xml:lang="x-default">Enable prices lazy loading</display-name>
+                <description xml:lang="x-default">Fetch prices from SFCC after the search results are returned from Algolia</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_EnableSSR">
+                <display-name xml:lang="x-default">Enable SSR</display-name>
+                <description xml:lang="x-default">Enables server-side rendering for CLP search results. Helps with SEO as CLP pages are no longer rendered with empty containers that are to be filled by client-side code, but increases page load times a tiny bit (which can be countered with page caching).</description>
+                <type>boolean</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_EnableContentSearch">
+                <display-name xml:lang="x-default">Enable Content Search</display-name>
+                <description xml:lang="x-default">When enabled, the content search in Storefront becomes available</description>
+                <type>boolean</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
+
+            <attribute-definition attribute-id="Algolia_EnableRecommend">
+                <display-name xml:lang="x-default">Enable Recommend</display-name>
+                <description xml:lang="x-default">When enabled, the Algolia recommendations in Storefront becomes available</description>
+                <type>boolean</type>
+                <mandatory-flag>true</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
+            <attribute-definition attribute-id="Algolia_EnableRealTimeInventoryHook">
+                <display-name xml:lang="x-default">Enable Real Time Inventory Hook</display-name>
+                <description xml:lang="x-default">Sends inventory updates to Algolia in real-time after each order.</description>
+                <type>boolean</type>
+                <mandatory-flag>false</mandatory-flag>
+                <externally-managed-flag>false</externally-managed-flag>
+                <default-value>false</default-value>
+            </attribute-definition>
+
+        </custom-attribute-definitions>
+        <group-definitions>
+            <attribute-group group-id="Algolia">
+
+                <display-name xml:lang="x-default">Algolia</display-name>
+                <attribute attribute-id="Algolia_Enable"/>
+                <attribute attribute-id="Algolia_ApplicationID"/>
+                <attribute attribute-id="Algolia_SearchApiKey"/>
+                <attribute attribute-id="Algolia_AdminApiKey"/>
+                <attribute attribute-id="Algolia_InStockThreshold"/>
+                <attribute attribute-id="Algolia_AdditionalAttributes"/>
+                <attribute attribute-id="Algolia_ActiveData"/>
+                <attribute attribute-id="Algolia_IndexPrefix"/>
+                <attribute attribute-id="Algolia_RecordModel"/>
+                <attribute attribute-id="Algolia_AttributeSlicedRecordModel_GroupingAttribute"/>
+                <attribute attribute-id="Algolia_IndexingAPI"/>
+                <attribute attribute-id="Algolia_AnalyticsRegion"/>
+                <attribute attribute-id="Algolia_LocalesForIndexing"/>
+                <attribute attribute-id="Algolia_EnableInsights"/>
+                <attribute attribute-id="Algolia_EnableSSR"/>
+                <attribute attribute-id="Algolia_EnableContentSearch"/>
+                <attribute attribute-id="Algolia_EnableRecommend"/>
+                <attribute attribute-id="Algolia_EnablePricingLazyLoad"/>
+                <attribute attribute-id="Algolia_IndexOutOfStock"/>
+                <attribute attribute-id="Algolia_EnableRealTimeInventoryHook"/>
+            </attribute-group>
+        </group-definitions>
+
+    </type-extension>
+</metadata>

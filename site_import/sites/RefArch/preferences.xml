@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<preferences xmlns="http://www.demandware.com/xml/impex/preferences/2007-03-31">
+    <custom-preferences>
+      <all-instances>
+        <preference preference-id="Algolia_RecordModel">variant-level</preference>
+        <preference preference-id="Algolia_IndexPrefix">harness</preference>
+        <preference preference-id="Algolia_AdditionalAttributes"><value>color</value><value>size</value><value>colorVariations</value><value>masterID</value><value>short_description</value><value>brand</value><value>name</value><value>pricebooks</value><value>newArrival</value><value>storeAvailability</value></preference>
+        <preference preference-id="Algolia_EnableRealTimeInventoryHook">true</preference>
+      </all-instances>
+    </custom-preferences>
+</preferences>
