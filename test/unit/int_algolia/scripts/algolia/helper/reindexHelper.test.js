@@ -46,8 +46,8 @@ const reindexHelper = require('../../../../../../cartridges/int_algolia/cartridg
 
 test('deleteTemporaryIndices', () => {
     const res = reindexHelper.deleteTemporaryIndices('products', ['fr', 'en']);
-    expect(mockDeleteIndex).toHaveBeenNthCalledWith(1, 'test_index___products__fr.tmp');
-    expect(mockDeleteIndex).toHaveBeenNthCalledWith(2, 'test_index___products__en.tmp');
+    expect(mockDeleteIndex).nthCalledWith(1, 'test_index___products__fr.tmp');
+    expect(mockDeleteIndex).nthCalledWith(2, 'test_index___products__en.tmp');
     expect(res).toEqual({
         "test_index___products__en.tmp": 42,
         "test_index___products__fr.tmp": 42,
@@ -67,10 +67,10 @@ test('copyIndexSettings', () => {
     });
 
     var res = reindexHelper.copySettingsFromProdIndices('products', ['fr', 'en']);
-    expect(mockGetIndexSettings).toHaveBeenNthCalledWith(1, 'test_index___products__fr');
-    expect(mockGetIndexSettings).toHaveBeenNthCalledWith(2, 'test_index___products__en');
-    expect(mockCopySettingsFromProdIndices).toHaveBeenNthCalledWith(1, 'test_index___products__fr', 'test_index___products__fr.tmp');
-    expect(mockCopySettingsFromProdIndices).toHaveBeenNthCalledWith(2, 'test_index___products__en', 'test_index___products__en.tmp');
+    expect(mockGetIndexSettings).nthCalledWith(1, 'test_index___products__fr');
+    expect(mockGetIndexSettings).nthCalledWith(2, 'test_index___products__en');
+    expect(mockCopySettingsFromProdIndices).nthCalledWith(1, 'test_index___products__fr', 'test_index___products__fr.tmp');
+    expect(mockCopySettingsFromProdIndices).nthCalledWith(2, 'test_index___products__en', 'test_index___products__en.tmp');
     expect(res).toEqual({
         "test_index___products__fr.tmp": 43,
         "test_index___products__en.tmp": 43,
@@ -79,8 +79,8 @@ test('copyIndexSettings', () => {
 
 test('moveTemporaryIndices', () => {
     reindexHelper.moveTemporaryIndices('products', ['fr', 'en']);
-    expect(mockMoveIndex).toHaveBeenNthCalledWith(1, 'test_index___products__fr.tmp', 'test_index___products__fr');
-    expect(mockMoveIndex).toHaveBeenNthCalledWith(2, 'test_index___products__en.tmp', 'test_index___products__en');
+    expect(mockMoveIndex).nthCalledWith(1, 'test_index___products__fr.tmp', 'test_index___products__fr');
+    expect(mockMoveIndex).nthCalledWith(2, 'test_index___products__en.tmp', 'test_index___products__en');
 });
 
 test('waitForTasks', () => {

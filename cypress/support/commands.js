@@ -26,7 +26,7 @@
 
 // Close cookie consent pop-up (visits a page and dismisses the modal)
 Cypress.Commands.add('closeCookieConsent', () => {
-    const host = Cypress.expose('SANDBOX_HOST');
+    const host = Cypress.env('SANDBOX_HOST');
     cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site`);
     cy.get('body').then(($body) => {
         if ($body.find('#consent-tracking').length) {
@@ -38,7 +38,7 @@ Cypress.Commands.add('closeCookieConsent', () => {
 
 // Login command (storefront)
 Cypress.Commands.add('loginSFRA', (email, password) => {
-    const host = Cypress.expose('SANDBOX_HOST');
+    const host = Cypress.env('SANDBOX_HOST');
     cy.visit(`https://${host}/on/demandware.store/Sites-RefArch-Site/en_US/Login-Show`);
 
     cy.get('input#login-form-email').type(email);

@@ -1,4 +1,5 @@
 /// <reference types="cypress" />
+require('dotenv').config();
 
 describe('Algolia Search', () => {
     beforeEach(() => {
@@ -8,7 +9,7 @@ describe('Algolia Search', () => {
 
     const testSearchScenarios = [];
 
-    if (Cypress.expose('RECORD_MODEL') === 'master-level') {
+    if (process.env.RECORD_MODEL === 'master-level') {
         testSearchScenarios.push({
             name: 'master product search',
             query: 'Roll Up',
@@ -25,7 +26,7 @@ describe('Algolia Search', () => {
     testSearchScenarios.forEach(scenario => {
         it(`performs a ${scenario.name} and displays results`, () => {
             // Ensure we're on the homepage
-            const host = Cypress.expose('SANDBOX_HOST');
+            const host = Cypress.env('SANDBOX_HOST');
             cy.visit(`https://${host}/s/RefArch/home`);
 
             // Wait for search input to be available

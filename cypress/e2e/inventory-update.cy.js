@@ -1,5 +1,8 @@
 /// <reference types="cypress" />
+require('dotenv').config();
 
+let email;
+let password;
 let productName;
 
 /**
@@ -10,13 +13,17 @@ context('Inventory real-time update', () => {
     before(() => {
         cy.closeCookieConsent();
 
-        cy.task('getProduct', { id: Cypress.expose('TEST_PRODUCT_ID') }).then((product) => {
-            productName = product.name.default;
-        });
+        email = Cypress.env('TEST_SHOPPER_EMAIL');
+        password = Cypress.env('TEST_SHOPPER_PASSWORD');
 
-        // Login after we have the product name
-        cy.env(['TEST_SHOPPER_EMAIL', 'TEST_SHOPPER_PASSWORD']).then((shopperCredentials) => {
-            cy.loginSFRA(shopperCredentials.TEST_SHOPPER_EMAIL, shopperCredentials.TEST_SHOPPER_PASSWORD);
+        const idFromEnv = Cypress.env('TEST_PRODUCT_ID');
+
+        cy.task('getProduct', { id: idFromEnv }).then((product) => {
+            productName = product.name.default;
+            Cypress.env('TEST_PRODUCT_NAME', productName);
+        }).then(() => {
+            // Login after we have the product name
+            cy.loginSFRA(email, password);
         });
     });
 
@@ -25,7 +32,7 @@ context('Inventory real-time update', () => {
     });
 
     it('Places order and ensures product removed from Algolia (out of stock)', () => {
-        const host = Cypress.expose('SANDBOX_HOST');
+        const host = Cypress.env('SANDBOX_HOST');
 
         // Navigate to homepage first
         cy.visit(`https://${host}/s/RefArch/home`);

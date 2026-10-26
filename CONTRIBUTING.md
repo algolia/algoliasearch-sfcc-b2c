@@ -8,16 +8,7 @@ Before you start, make sure you:
 
 - Access to a **Salesforce B2C Commerce sandbox** that contains the *RefArch* storefront
 - Have an **Algolia application** with an Admin API key.
-- Have **Node.js 26** installed. Node.js 24.15.0 or later also works, but CI runs on the version in `.nvmrc`. With [nvm](https://github.com/nvm-sh/nvm), run `nvm install` once and `nvm use` afterwards.
-
-Then install the dependencies:
-
-```sh
-nvm use
-npm install
-```
-
-`npm install` also downloads the Cypress binary. If Cypress reports that the binary is missing, run `npx cypress install`.
+- Use **Node.js 26**, the version in `.nvmrc` that CI runs on. With [nvm](https://github.com/nvm-sh/nvm), run `nvm install` once and `nvm use` afterwards.
 
 ## 2. Project layout (quick tour)
 
@@ -48,11 +39,9 @@ In the "Payment Methods" section, add a credit card. With the SFCC demo data you
 ## 5. Useful npm scripts
 
 - `npm run lint:js` – ESLint checks.
-- `npm run test:unit` – Jest unit tests.
-- `npm run test:frontend` – run Cypress tests headlessly in Chrome.
-- `npm run test:e2e` – run the full E2E flow (deploy, preference import, indexing job, Jest and Cypress tests) against the sandbox set in `.env`.
-- `npm run uploadCartridge` – upload the Algolia cartridges with the [Salesforce B2C CLI](https://github.com/SalesforceCommerceCloud/b2c-developer-tooling). The CLI reads the instance and credentials from `dw.json`.
-- `npm run watch` – upload the Algolia cartridges with the B2C CLI whenever a file changes.
+- `npm test:unit` – Jest unit tests.
+- `npm run test:frontend` – run Cypress tests headlessly (CI default).
+- `npm run test:e2e` - run E2E tests
 
 ## 6. Commit messages
 

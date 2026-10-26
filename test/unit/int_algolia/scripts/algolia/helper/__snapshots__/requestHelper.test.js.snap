@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Ingestion API payload snapshots delta index flow: mixed addObject and deleteObject payloads: grouped records for delta index 1`] = `
 {

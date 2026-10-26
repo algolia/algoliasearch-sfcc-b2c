@@ -1,13 +1,63 @@
+require('dotenv').config();
+const sfcc = require('sfcc-ci');
+const authenticate = require('./auth');
 const path = require('path');
 const fs = require('fs');
-const { siteArchiveImport } = require('@salesforce/b2c-tooling-sdk/operations/jobs');
-const { getInstance } = require('./sfccInstance');
+const archiver = require('archiver');
 
-const IMPORT_TIMEOUT_SECONDS = 300;
+/**
+ * Polls an SFCC job execution until it completes.
+ * @param {string} instance - The SFCC instance host.
+ * @param {string} jobId - The job ID to poll.
+ * @param {string} executionId - The job execution ID to poll.
+ * @param {string} token - The OAuth token to use for authentication.
+ * @returns {Promise<void>} Resolves when the execution status is 'OK', rejects on error or timeout.
+ */
+function waitForJobCompletion(instance, jobId, executionId, token) {
+    const maxAttempts = 60;
+    const delay = 5000; // 5 seconds
+
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+
+        function poll() {
+            attempts++;
+            sfcc.job.status(instance, jobId, executionId, token, (err, status) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                const execStatus = status && status.status;
+                console.info('Attempt %d: %s execution status - %s', attempts, jobId, execStatus);
+
+                if (execStatus === 'OK') {
+                    resolve();
+                    return;
+                }
+
+                if (execStatus === 'ERROR' || execStatus === 'error' || execStatus === 'failed') {
+                    reject(new Error(`${jobId} (execution ${executionId}) finished with status ${execStatus}.`));
+                    return;
+                }
+
+                if (attempts >= maxAttempts) {
+                    reject(new Error(`${jobId} (execution ${executionId}) did not complete within ${maxAttempts} attempts.`));
+                    return;
+                }
+
+                setTimeout(poll, delay);
+            });
+        }
+
+        poll();
+    });
+}
 
 async function importPreferences() {
     try {
-        const instance = await getInstance();
+        const token = await authenticate();
+        const instance = process.env.SANDBOX_HOST;
 
         // "site_import" directory
         const siteImportDir = path.resolve(__dirname, '../site_import');
@@ -57,24 +107,68 @@ async function importPreferences() {
 
         console.log('preferences.xml created successfully.');
 
-        // Zips the directory, uploads it, runs the sfcc-site-archive-import job and waits for
-        // it to finish. The caller runs the indexing job next, so the preferences (for
-        // example Algolia_RecordModel, Algolia_IndexPrefix) must be applied by then.
-        console.log('Importing site preferences...');
-        const importResult = await siteArchiveImport(instance, siteImportDir, {
-            archiveName: 'site_import',
-            waitOptions: {
-                timeoutSeconds: IMPORT_TIMEOUT_SECONDS,
-                onPoll: (pollInfo) => console.info('%s execution status - %s (%ds)',
-                    pollInfo.jobId, pollInfo.status, pollInfo.elapsedSeconds),
-            },
+        const siteArchive = path.resolve(__dirname, '../site_import.zip');
+        console.log('Creating site_import.zip...');
+        await new Promise((resolve, reject) => {
+            const output = fs.createWriteStream(siteArchive);
+            const archive = archiver('zip', { zlib: { level: 9 } });
+
+            output.on('close', () => {
+                console.info(`site_import.zip created (${archive.pointer()} total bytes).`);
+                resolve();
+            });
+
+            archive.on('error', (err) => {
+                reject(err);
+            });
+
+            archive.pipe(output);
+            archive.directory(siteImportDir, 'site_import');
+            archive.finalize();
         });
 
-        console.log('Site preferences import completed successfully (execution id: %s).',
-            importResult.execution.id);
+        console.log('Uploading site_import.zip...');
+        await new Promise((resolve, reject) => {
+            sfcc.instance.upload(instance, siteArchive, token, {}, (err) => {
+                if (err) {
+                    console.error('Upload error:', err);
+                    reject(err);
+                } else {
+                    console.log('Site preferences uploaded successfully.');
+                    resolve();
+                }
+            });
+        });
+
+        console.log('Importing site preferences...');
+        const importExecutionId = await new Promise((resolve, reject) => {
+            sfcc.instance.import(instance, 'site_import.zip', token, (err, result) => {
+                if (err) {
+                    console.error('Import error:', err);
+                    reject(err);
+                    return;
+                }
+                // `sfcc.instance.import` resolves as soon as the `sfcc-site-archive-import` job is
+                // accepted, not when it finishes. Capture the execution id so we can poll for completion.
+                const executionId = result && result.id;
+                if (!executionId) {
+                    reject(new Error('Site import was started but no execution id was returned: ' + JSON.stringify(result)));
+                    return;
+                }
+                console.info('Site preferences import started (execution id: %s).', executionId);
+                resolve(executionId);
+            });
+        });
+
+        // Wait for the import to actually finish before returning. Without this, the caller can run the
+        // indexing job while the preferences (e.g. Algolia_RecordModel, Algolia_IndexPrefix) are still
+        // being applied, which produces records in the wrong shape/index.
+        await waitForJobCompletion(instance, 'sfcc-site-archive-import', importExecutionId, token);
+
+        console.log('Site preferences import completed successfully.');
     } catch (error) {
-        console.error('Site preferences import error:', error);
-        throw error;
+        console.error('Error:', error);
+        process.exit(1);
     }
 }
 

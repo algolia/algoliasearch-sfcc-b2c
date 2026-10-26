@@ -1,7 +1,8 @@
 const globals = require('globals');
 const js = require('@eslint/js');
+const jquery = require('eslint-plugin-jquery');
 const jsdoc = require('eslint-plugin-jsdoc');
-const pluginCypress = require('eslint-plugin-cypress');
+const pluginCypress = require('eslint-plugin-cypress/flat');
 
 
 module.exports = [
@@ -23,6 +24,7 @@ module.exports = [
     },
     {
         plugins: {
+            jquery,
             jsdoc,
         },
 
@@ -43,6 +45,8 @@ module.exports = [
         },
 
         rules: {
+            'import/no-unresolved': 'off',
+
             indent: [
                 'error',
                 4,
@@ -91,6 +95,7 @@ module.exports = [
         rules: {
             'jsdoc/require-jsdoc': 'off',
             'func-names': 'off',
+            'import/no-unresolved': 'off',
         },
     },
 ];

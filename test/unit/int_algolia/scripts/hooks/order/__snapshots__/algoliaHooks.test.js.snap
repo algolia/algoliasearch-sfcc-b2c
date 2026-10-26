@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
+// Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Algolia Hooks - In Stock Tests (InStockThreshold: 1, IndexOutOfStock: false) handleInStorePickupShipment should generate correct operations for master-level record model - in stock - BOPIS Shipment 1`] = `[]`;
 

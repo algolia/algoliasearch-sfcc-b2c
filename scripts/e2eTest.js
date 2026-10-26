@@ -1,7 +1,7 @@
 /**
  * Orchestrates all steps in the end-to-end flow:
  * 1. Checks required environment variables
- * 2. Deploys the cartridges to the CODE_VERSION code version and activates it
+ * 2. Deploys code (already zipped and prepared by "npm run prepare:code")
  * 3. For each record model (master-level, variant-level):
  *    a) Import site preferences
  *    b) Run the SFCC job
@@ -9,24 +9,23 @@
  *    d) Run Cypress frontend tests
  *
  * Also handles cleanup of leftover artifacts on normal or error exit.
- *
- * Run it with `node --experimental-vm-modules` (see the test:e2e npm script): the Jest
- * tests load the ESM-only @salesforce/b2c-tooling-sdk, and Jest supports require() of ES
- * modules only with that flag.
  */
 
-require('./loadEnv');
+require('dotenv').config();
 const fs = require('fs');
 const { runCLI } = require('jest');
 const cypress = require('cypress');
 const deployCode = require('./deployCode');
 const importPreferences = require('./importPreferences');
 const runSFCCJob = require('./runSFCCJob');
-const { getInstance } = require('./sfccInstance');
+const authenticate = require('./auth');
 
 // List of paths to clean up
 const cleanupPaths = [
-    'site_import'
+    'site_import.zip',
+    'site_import',
+    process.env.CODE_VERSION,
+    `${process.env.CODE_VERSION}.zip`
 ];
 
 /**
@@ -94,6 +93,9 @@ async function main() {
         console.log('[INFO] Importing site preferences...');
         await importPreferences();
 
+        // Ensure token exists before OCAPI call
+        await ensureAccessToken();
+
         // Pre‑set ATS to 2 so first job picks it up
         console.log('[INFO] Updating inventory ATS to 2 before indexing job...');
         await updateInventoryATS(process.env.TEST_PRODUCT_ID, 2);
@@ -145,7 +147,7 @@ async function runVariationIndexTests() {
     // We can specify more advanced config if needed:
     const config = {
         runInBand: true,        // run tests sequentially
-        testPathPatterns: ['test/e2e/algolia_index.test.js']
+        testPathPattern: ['test/e2e/algolia_index.test.js']
     };
     const { results } = await runCLI(config, [process.cwd()]);
     if (results.numFailedTests || results.numFailedTestSuites) {
@@ -157,9 +159,13 @@ async function runVariationIndexTests() {
  * Runs the Cypress End-to-End Tests via the Cypress module API.
  */
 async function runCypressTests() {
-    // cypress.config.js exposes RECORD_MODEL to the specs from process.env
+    const cypressEnv = {
+        RECORD_MODEL: process.env.RECORD_MODEL,
+    };
+
     const result = await cypress.run({
         spec: 'cypress/e2e/*.cy.js',
+        env: cypressEnv,
         browser: 'chrome',
         headless: true
     });
@@ -178,28 +184,41 @@ async function runCypressTests() {
 }
 
 /**
+ * Ensures ACCESS_TOKEN is available in env, otherwise authenticates and sets it.
+ */
+async function ensureAccessToken() {
+    if (process.env.ACCESS_TOKEN) {
+        return;
+    }
+    const token = await authenticate();
+    process.env.ACCESS_TOKEN = token;
+}
+
+/**
  * Updates the inventory ATS for a given product.
  * @param {string} productId - The ID of the product to update.
  * @param {number} atsValue - The new ATS value to set.
  */
 async function updateInventoryATS(productId, atsValue) {
     const inventoryListId = process.env.INVENTORY_LIST_ID || 'inventory_m';
-    const instance = await getInstance();
+    const apiUrl = `https://${process.env.SANDBOX_HOST}/s/-/dw/data/v24_5/inventory_lists/${inventoryListId}/product_inventory_records/${productId}`;
+    const body = { allocation: { amount: atsValue } };
 
-    const { data, error, response } = await instance.ocapi.PATCH(
-        '/inventory_lists/{inventory_list_id}/product_inventory_records/{product_id}',
-        {
-            params: {
-                path: { inventory_list_id: inventoryListId, product_id: productId },
-            },
-            body: { allocation: { amount: atsValue } },
-        }
-    );
+    const response = await fetch(apiUrl, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.ACCESS_TOKEN}`
+        },
+        body: JSON.stringify(body)
+    });
 
-    if (error) {
-        throw new Error(`Failed to update inventory record: ${response.status} ${response.statusText}. Body: ${JSON.stringify(error)}`);
+    if (!response.ok) {
+        const text = await response.text();
+        throw new Error(`Failed to update inventory record: ${response.status} ${response.statusText}. Body: ${text}`);
     }
-    console.info('New ATS value:', data.allocation.amount);
+    var res = await response.json();
+    console.info('New ATS value:', res.allocation.amount);
 }
 
 main().catch((err) => {
