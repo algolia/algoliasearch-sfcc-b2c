@@ -4,7 +4,6 @@ jest.mock('*/cartridge/scripts/algoliaIndexingAPI', () => {
     return {
         deleteIndex: jest.fn(),
         getIndexSettings: jest.fn(),
-        setIndexSettings: jest.fn(),
         copyIndexSettings: jest.fn(),
         moveIndex: jest.fn(),
         waitTask: jest.fn(),

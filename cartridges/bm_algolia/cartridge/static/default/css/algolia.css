@@ -69,12 +69,6 @@ table#algolia-bm-settings tr > td:first-child {
 table#algolia-bm-settings td.right {
     width: 70%;
 }
-.nowrap {
-    white-space: nowrap;
-}
-.normal-wrap {
-    white-space: normal;
-}
 pre {
     margin: 0;
 }

@@ -5,11 +5,8 @@
     "scripts": {
         "test": "npm run test:unit",
         "test:unit": "jest --testPathPattern='test/unit'",
-        "test:integration": "sgmf-scripts --integration 'test/integration/**/*.js'",
+        "test:e2e": "npm run prepare:code && node scripts/e2eTest.js",
         "copy-scripts": "copy-files-from-to",
-        "compile:scss": "sgmf-scripts --compile css",
-        "compile:js": "sgmf-scripts --compile js",
-        "compile:fonts": "node bin/Makefile compileFonts",
         "lint:js": "sgmf-scripts --lint js",
         "upload": "sgmf-scripts --upload",
         "uploadCartridge": "sgmf-scripts --uploadCartridge int_algolia && sgmf-scripts --uploadCartridge int_algolia_controllers && sgmf-scripts --uploadCartridge int_algolia_sfra && sgmf-scripts --uploadCartridge algolia_sg_changes && sgmf-scripts --uploadCartridge bm_algolia",
@@ -19,8 +16,7 @@
         "deploy:code": "node scripts/deployCode.js",
         "import:preferences": "node scripts/importPreferences.js",
         "run:sfcc-job": "node scripts/runSFCCJob.js",
-        "prepare:code": "node scripts/prepareCode.js",
-        "test:e2e": "npm run compile:js && npm run compile:scss && npm run prepare:code && node scripts/e2eTest.js"
+        "prepare:code": "node scripts/prepareCode.js"
     },
     "repository": {
         "type": "git",
@@ -41,11 +37,9 @@
         "cypress": "^13.15.0",
         "dotenv": "^16.4.5",
         "eslint": "9.12.0",
-        "eslint-config-prettier": "9.1.0",
         "eslint-plugin-cypress": "^4.1.0",
         "eslint-plugin-jquery": "1.5.1",
         "eslint-plugin-jsdoc": "50.3.2",
-        "eslint-plugin-prettier": "5.2.1",
         "globals": "15.11.0",
         "instantsearch.css": "8.5.1",
         "instantsearch.js": "4.77.1",

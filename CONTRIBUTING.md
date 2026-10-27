@@ -37,7 +37,7 @@ In the "Payment Methods" section, add a credit card. With the SFCC demo data you
 
 ## 5. Useful npm scripts
 
-- `npm run lint:js` – ESLint, Stylelint, and Prettier checks.
+- `npm run lint:js` – ESLint checks.
 - `npm test:unit` – Jest unit tests.
 - `npm run test:frontend` – run Cypress tests headlessly (CI default).
 - `npm run test:e2e` - run E2E tests
