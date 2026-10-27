@@ -23,7 +23,7 @@
         "url": "https://github.com/algolia/algoliasearch-sfcc-b2c.git"
     },
     "engines": {
-        "node": ">=18"
+        "node": ">=22"
     },
     "devDependencies": {
         "@algolia/autocomplete-js": "1.17.9",
