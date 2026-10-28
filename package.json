@@ -1,6 +1,6 @@
 {
     "name": "int_algolia_sfra",
-    "version": "26.6.0",
+    "version": "26.7.0",
     "description": "Algolia SFRA Link Cartridge",
     "scripts": {
         "test": "npm run test:unit",
