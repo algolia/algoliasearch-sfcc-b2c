@@ -23,15 +23,16 @@
         "url": "https://github.com/algolia/algoliasearch-sfcc-b2c.git"
     },
     "engines": {
-        "node": "18"
+        "node": ">=22"
     },
     "devDependencies": {
         "@algolia/autocomplete-js": "1.17.9",
         "@algolia/autocomplete-theme-classic": "1.17.9",
+        "@algolia/recommend": "4.24.0",
         "@algolia/recommend-js": "1.14.0",
         "@eslint/js": "9.12.0",
         "@slack/web-api": "^7.9.3",
-        "algoliasearch": "^5.19.0",
+        "algoliasearch": "5.19.0",
         "archiver": "5.3.1",
         "copy-files-from-to": "^3.8.0",
         "cypress": "^13.15.0",
@@ -56,5 +57,9 @@
     "packageName": "int_algolia_sfra",
     "paths": {
         "base": "../storefront-reference-architecture/cartridges/app_storefront_base/"
+    },
+    "allowScripts": {
+        "cypress": true,
+        "fsevents": false
     }
 }

@@ -167,11 +167,10 @@ exports.process = function(content, parameters, stepExecution) {
         var locale = siteLocales.get(l);
         var indexName = jobHelper.toTmp(algoliaData.calculateIndexName('contents', locale));
         let localizedContent = new AlgoliaLocalizedContent({ content: content, locale: locale, attributeList: attributesToSend, baseModel: baseModel, includedContent: includedContent });
-        let splits = [];
         let splittingTag = parameters.splittingTag;
         if (attributesToSend.indexOf('body') >= 0 && localizedContent.body) {
             let maxRecordBytes = algoliaSplitter.getMaxBodySize(localizedContent);
-            splits = algoliaSplitter.splitHtmlContent(localizedContent.body, maxRecordBytes, splittingTag);
+            let splits = algoliaSplitter.splitHtmlContent(localizedContent.body, maxRecordBytes, splittingTag);
             for (let i = 0; i < splits.length; i++) {
                 var splittedContent = {};
                 for (var key in localizedContent) {

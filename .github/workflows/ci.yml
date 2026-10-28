@@ -16,12 +16,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: '18'
+          node-version-file: '.nvmrc'
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
@@ -52,12 +53,13 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v7
         with:
-          node-version: '18'
+          node-version-file: '.nvmrc'
+          cache: 'npm'
 
       - name: Install Dependencies
         run: |
@@ -71,7 +73,7 @@ jobs:
 
       - name: Upload Cypress Screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cypress-screenshots
           path: cypress/screenshots
@@ -79,7 +81,7 @@ jobs:
 
       - name: Upload Cypress Videos
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cypress-videos
           path: cypress/videos

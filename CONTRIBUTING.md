@@ -8,6 +8,7 @@ Before you start, make sure you:
 
 - Access to a **Salesforce B2C Commerce sandbox** that contains the *RefArch* storefront
 - Have an **Algolia application** with an Admin API key.
+- Use **Node.js 26**, the version in `.nvmrc` that CI runs on. With [nvm](https://github.com/nvm-sh/nvm), run `nvm install` once and `nvm use` afterwards.
 
 ## 2. Project layout (quick tour)
 

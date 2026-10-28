@@ -66,7 +66,7 @@ server.append('AddProduct', function (req, res, next) {
             return next();
         }
 
-        var recordID = null;
+        var recordID;
 
         try {
             recordID = modelHelper.getRecordIDForProduct(product, recordModel);

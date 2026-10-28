@@ -33,8 +33,8 @@ function handleSettings() {
     var indexingAPI = params.IndexingAPI.value || INDEXING_APIS.SEARCH_API;
     var analyticsRegion = (params.AnalyticsRegion.value || '').trim().toLowerCase();
 
-    var adminValidation = {};
-    var unretrievableValidation = {};
+    var adminValidation;
+    var unretrievableValidation;
     var pdictValues = getDashboardPdict();
 
     // Multi-value httpParameter (checkbox group sharing the name "ActiveData"): convert the

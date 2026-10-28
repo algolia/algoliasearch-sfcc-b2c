@@ -269,7 +269,7 @@ var aggregatedValueHandlers = {
         return res;
     },
     primary_category_id: function (product) {
-        var result = null;
+        var result;
         if (empty(product.getPrimaryCategory())) {
             var primaryCategory = product.isVariant() ? product.getMasterProduct().getPrimaryCategory() : null;
             result = empty(primaryCategory) ? null : primaryCategory.getID();
